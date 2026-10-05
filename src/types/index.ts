@@ -123,6 +123,8 @@ export interface VocabWord {
   lastReviewedAt?: string;
   reviewHistory: ReviewRecord[];
   tags?: string[];
+  /** The full explanation as it was when the word was saved, so the entry stands on its own. */
+  analysis?: WordAnalysis;
 }
 
 export interface Article {

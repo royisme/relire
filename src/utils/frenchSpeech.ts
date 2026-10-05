@@ -11,10 +11,9 @@ export interface SpeechOptions {
 }
 
 import { synthesizeSpeech } from '../services/gemini';
+import { base64ToBlob, getAudio, putAudio } from '../storage/audio';
 import { getAppSettings } from './appSettings';
 
-// Client-side cache for instant playback on repeated words/sentences
-const clientTtsCache = new Map<string, string>();
 let currentAudio: HTMLAudioElement | null = null;
 let currentVoice: 'Kore' | 'Charon' | 'Zephyr' | 'Puck' = 'Kore';
 let globalRate = 0.85;
@@ -49,30 +48,49 @@ export function stopSpeech() {
   }
 }
 
-// Fetch TTS audio from server with configured model and voice
-async function fetchTtsAudio(text: string, voice?: string): Promise<string> {
+// Clips being synthesized right now, so two requests for the same text cost one call.
+const synthesizing = new Map<string, Promise<Blob>>();
+
+/** Returns the clip from storage when we have it, otherwise synthesizes and keeps it. */
+async function loadSpeech(text: string, voice?: string): Promise<Blob> {
   const settings = getAppSettings();
   const effectiveVoice = voice || settings.ttsVoice || currentVoice || 'Kore';
   const effectiveModel = settings.ttsModel || 'gemini-3.8-flash-lite-tts';
-  const cacheKey = `${effectiveModel}_${effectiveVoice}_${text.trim()}`;
+  const trimmed = text.trim();
 
-  if (clientTtsCache.has(cacheKey)) {
-    return clientTtsCache.get(cacheKey)!;
+  const stored = await getAudio(effectiveModel, effectiveVoice, trimmed);
+  if (stored) return stored;
+
+  const flightKey = `${effectiveModel}|${effectiveVoice}|${trimmed}`;
+  const pending = synthesizing.get(flightKey);
+  if (pending) return pending;
+
+  const request = synthesizeSpeech({ text: trimmed, voice: effectiveVoice, model: effectiveModel }, settings.customApiKey)
+    .then(async (base64) => {
+      const blob = base64ToBlob(base64);
+      await putAudio(effectiveModel, effectiveVoice, trimmed, blob);
+      return blob;
+    })
+    .finally(() => synthesizing.delete(flightKey));
+  synthesizing.set(flightKey, request);
+  return request;
+}
+
+/**
+ * Makes sure the clips for these texts are stored (used when a word is saved,
+ * so its pronunciation is kept with it). Quiet: no key, offline or an error
+ * just means nothing is stored.
+ */
+export async function prefetchSpeech(texts: string[]): Promise<void> {
+  if (!getAppSettings().customApiKey?.trim()) return;
+  for (const text of texts) {
+    if (!text.trim()) continue;
+    try {
+      await loadSpeech(text);
+    } catch {
+      return;
+    }
   }
-
-  const audioBase64 = await synthesizeSpeech(
-    { text: text.trim(), voice: effectiveVoice, model: effectiveModel },
-    settings.customApiKey
-  );
-
-  // Cache up to 300 entries in client memory
-  if (clientTtsCache.size > 300) {
-    const firstKey = clientTtsCache.keys().next().value;
-    if (firstKey) clientTtsCache.delete(firstKey);
-  }
-  clientTtsCache.set(cacheKey, audioBase64);
-
-  return audioBase64;
 }
 
 // Play French speech using high-fidelity native Gemini TTS
@@ -88,9 +106,11 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
   try {
     if (options.onStart) options.onStart();
 
-    const audioBase64 = await fetchTtsAudio(cleanText, voiceName);
-    const audioUrl = `data:audio/wav;base64,${audioBase64}`;
+    const clip = await loadSpeech(cleanText, voiceName);
+    const audioUrl = URL.createObjectURL(clip);
     const audio = new Audio(audioUrl);
+    audio.addEventListener('ended', () => URL.revokeObjectURL(audioUrl), { once: true });
+    audio.addEventListener('error', () => URL.revokeObjectURL(audioUrl), { once: true });
     currentAudio = audio;
 
     const effectiveRate = options.rate ?? globalRate;

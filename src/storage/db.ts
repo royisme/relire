@@ -13,11 +13,23 @@ interface RelireDB extends DBSchema {
   meta: { key: string; value: unknown };
   /** AI answers kept to save tokens. Derivable, so never part of a backup. */
   cache: { key: string; value: CacheEntry; indexes: { kind: string } };
+  /** Synthesized speech. Clips for vocabulary words are kept for good; the rest are trimmed by use. */
+  audio: { key: string; value: AudioEntry; indexes: { text: string; lastUsed: number } };
+}
+
+export interface AudioEntry {
+  key: string;
+  text: string; // normalized
+  voice: string;
+  model: string;
+  blob: Blob;
+  bytes: number;
+  lastUsed: number;
 }
 
 export interface CacheEntry {
   key: string;
-  kind: 'word' | 'sentence';
+  kind: 'word' | 'sentence' | 'drills';
   value: unknown;
   createdAt: number;
 }
@@ -39,7 +51,7 @@ let dbPromise: Promise<IDBPDatabase<RelireDB>> | null = null;
 
 export function db() {
   if (!dbPromise) {
-    dbPromise = openDB<RelireDB>('relire', 2, {
+    dbPromise = openDB<RelireDB>('relire', 3, {
       upgrade(d, oldVersion) {
         if (oldVersion < 1) {
           d.createObjectStore('articles', { keyPath: 'id' });
@@ -48,6 +60,11 @@ export function db() {
         }
         if (oldVersion < 2) {
           d.createObjectStore('cache', { keyPath: 'key' }).createIndex('kind', 'kind');
+        }
+        if (oldVersion < 3) {
+          const audio = d.createObjectStore('audio', { keyPath: 'key' });
+          audio.createIndex('text', 'text');
+          audio.createIndex('lastUsed', 'lastUsed');
         }
       },
     });

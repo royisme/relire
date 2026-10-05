@@ -18,7 +18,7 @@ import { EMPTY_STATS, loadData, saveArticles, saveStats, saveVocab } from './sto
 import { usePersist } from './storage/usePersist';
 import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
 import { isDueToday, formatDate } from './utils/srs';
-import { setGlobalVoice } from './utils/frenchSpeech';
+import { prefetchSpeech, setGlobalVoice } from './utils/frenchSpeech';
 import { getAppSettings } from './utils/appSettings';
 
 const ONBOARDING_KEY = 'relire_onboarded';
@@ -194,6 +194,7 @@ export default function App() {
         partOfSpeech: data.partOfSpeech,
         contextSentence: contextSentence || '',
         contextTense: data.contextTense,
+        analysis: data,
         phoneticsGuide: data.phoneticsGuide,
         addedAt: formatDate(new Date()),
         repetitions: 0,
@@ -205,6 +206,8 @@ export default function App() {
       };
 
       setVocabList((prev) => [newWord, ...prev]);
+      // Keep the pronunciation with the word: fetch the clips in the background.
+      void prefetchSpeech([data.word, contextSentence]);
     }
   };
 

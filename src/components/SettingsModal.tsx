@@ -13,6 +13,7 @@ import {
 import { speakFrench } from '../utils/frenchSpeech';
 import { synthesizeSpeech } from '../services/gemini';
 import { cacheCounts, clearCache } from '../storage/cache';
+import { audioStats, clearUnprotectedAudio, exportProtectedAudio, importAudio, type AudioStats } from '../storage/audio';
 import { exportData, getStorageInfo, importData, requestPersistence, type StorageInfo } from '../storage/db';
 
 interface SettingsModalProps {
@@ -36,7 +37,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
   const [storageInfo, setStorageInfo] = useState<StorageInfo>({});
-  const [cacheInfo, setCacheInfo] = useState({ words: 0, sentences: 0 });
+  const [cacheInfo, setCacheInfo] = useState({ words: 0, sentences: 0, drills: 0 });
+  const [audioInfo, setAudioInfo] = useState<AudioStats>({ clips: 0, bytes: 0, keptClips: 0, keptBytes: 0 });
+  const [includeAudio, setIncludeAudio] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Stats on local data storage
@@ -63,6 +66,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         .catch((e) => console.error('Failed to read local stats', e));
       getStorageInfo().then(setStorageInfo);
       cacheCounts().then(setCacheInfo);
+      audioStats().then(setAudioInfo);
     }
   }, [isOpen]);
 
@@ -85,6 +89,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         exportedAt: new Date().toISOString(),
         settings: settingsWithoutKey,
         ...(await exportData()),
+        ...(includeAudio ? { audio: await exportProtectedAudio() } : {}),
       };
 
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -118,6 +123,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           vocab: Array.isArray(data.vocab) ? data.vocab : undefined,
           stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
         });
+        if (Array.isArray(data.audio)) await importAudio(data.audio);
         if (data.settings && typeof data.settings === 'object') {
           // A backup never carries the API key, so keep the one already saved.
           saveAppSettings({ ...data.settings, customApiKey: getAppSettings().customApiKey });
@@ -358,11 +364,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Saved AI answers */}
               <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
                 <span className="text-ink-600">
-                  {t('settings.cacheSummary', { words: cacheInfo.words, sentences: cacheInfo.sentences })}
+                  {t('settings.cacheSummary', { words: cacheInfo.words, sentences: cacheInfo.sentences, drills: cacheInfo.drills })}
                 </span>
                 <button
                   type="button"
-                  disabled={cacheInfo.words + cacheInfo.sentences === 0}
+                  disabled={cacheInfo.words + cacheInfo.sentences + cacheInfo.drills === 0}
                   onClick={async () => {
                     await clearCache();
                     setCacheInfo(await cacheCounts());
@@ -374,6 +380,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               </div>
               <p className="text-xs text-ink-500 leading-relaxed">{t('settings.cacheDesc')}</p>
+
+              {/* Pronunciation audio */}
+              <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
+                <span className="text-ink-600 tnum">
+                  {t('settings.audioSummary', {
+                    clips: audioInfo.clips,
+                    mb: (audioInfo.bytes / 1024 / 1024).toFixed(1),
+                    kept: audioInfo.keptClips,
+                  })}
+                </span>
+                <button
+                  type="button"
+                  disabled={audioInfo.clips === audioInfo.keptClips}
+                  onClick={async () => {
+                    await clearUnprotectedAudio();
+                    setAudioInfo(await audioStats());
+                    setStorageInfo(await getStorageInfo());
+                  }}
+                  className="h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-default"
+                >
+                  {t('settings.clearAudio')}
+                </button>
+              </div>
+              <p className="text-xs text-ink-500 leading-relaxed">{t('settings.audioDesc')}</p>
 
               {/* Storage protection */}
               <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
@@ -396,6 +426,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </button>
                 )}
               </div>
+
+              <label className="flex items-start gap-2 text-xs text-ink-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={includeAudio}
+                  onChange={(e) => setIncludeAudio(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-accent-700"
+                />
+                <span>
+                  {t('settings.backupAudio')}{' '}
+                  <span className="text-ink-500 tnum">
+                    {t('settings.backupAudioSize', { mb: ((audioInfo.keptBytes * 4) / 3 / 1024 / 1024).toFixed(1) })}
+                  </span>
+                </span>
+              </label>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3 pt-1 flex-wrap">

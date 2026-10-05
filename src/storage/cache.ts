@@ -15,14 +15,29 @@ const POLICY = {
   word: { ttl: Infinity, max: 5000 },
   // Sentence analyses are kept for 30 days.
   sentence: { ttl: 30 * DAY, max: 1000 },
+  // Practice drills for an article stay until the learner asks for new ones.
+  drills: { ttl: 30 * DAY, max: 300 },
 } as const;
 
 export type CacheKind = keyof typeof POLICY;
+
+/** Small stable hash for long inputs such as article text. */
+export function hashText(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
+}
 
 const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
 
 export const wordKey = (lang: string, word: string, sentence: string) =>
   `v${PROMPT_VERSION}|${lang}|${normalize(word)}|${normalize(sentence)}`;
+
+export const drillsKey = (lang: string, type: string, articleText: string) =>
+  `v${PROMPT_VERSION}|${lang}|${type}|${hashText(articleText.slice(0, 1500))}`;
 
 export const sentenceKey = (lang: string, sentence: string) => `v${PROMPT_VERSION}|${lang}|${normalize(sentence)}`;
 
@@ -59,16 +74,17 @@ export async function putCached(kind: CacheKind, key: string, value: unknown): P
   }
 }
 
-export async function cacheCounts(): Promise<{ words: number; sentences: number }> {
+export async function cacheCounts(): Promise<{ words: number; sentences: number; drills: number }> {
   try {
     const d = await db();
-    const [words, sentences] = await Promise.all([
+    const [words, sentences, drills] = await Promise.all([
       d.countFromIndex('cache', 'kind', 'word'),
       d.countFromIndex('cache', 'kind', 'sentence'),
+      d.countFromIndex('cache', 'kind', 'drills'),
     ]);
-    return { words, sentences };
+    return { words, sentences, drills };
   } catch {
-    return { words: 0, sentences: 0 };
+    return { words: 0, sentences: 0, drills: 0 };
   }
 }
 

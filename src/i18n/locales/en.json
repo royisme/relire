@@ -132,7 +132,8 @@
     "assessError": "An error occurred while evaluating pronunciation. Please try again.",
     "noArticleTitle": "Open an article first",
     "noArticleDesc": "Drills are generated from the article you are reading.",
-    "openLibrary": "Go to library"
+    "openLibrary": "Go to library",
+    "newDrills": "New questions"
   },
   "analytics": {
     "title": "Progress",
@@ -183,9 +184,14 @@
     "protectStorage": "Protect my data",
     "exportFailed": "Export failed: {{msg}}",
     "restoreFailed": "Restore failed: {{msg}}",
-    "cacheSummary": "Saved answers: {{words}} words, {{sentences}} sentences",
+    "cacheSummary": "Saved answers: {{words}} words, {{sentences}} sentences, {{drills}} drill sets",
     "clearCache": "Clear saved answers",
-    "cacheDesc": "Word and sentence explanations are saved on this device so you never pay for the same answer twice. Words are kept until you clear them, sentences for 30 days. They are not part of backups."
+    "cacheDesc": "Explanations and drills are saved on this device so you never pay for the same answer twice. Words are kept until you clear them, sentences and drills for 30 days. They are not part of backups.",
+    "audioSummary": "Pronunciation audio: {{clips}} clips, {{mb}} MB; {{kept}} kept for your vocabulary",
+    "clearAudio": "Clear other audio",
+    "audioDesc": "Every clip is saved so it plays offline and is never generated twice. Audio for words in your vocabulary, their sentences and examples is always kept; the rest is trimmed when it grows past 200 MB.",
+    "backupAudio": "Include pronunciation audio for my vocabulary (larger file)",
+    "backupAudioSize": "about {{mb}} MB"
   },
   "importer": {
     "articleTitle": "Article Title",

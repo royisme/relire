@@ -132,7 +132,8 @@
     "assessError": "评估发音时出现错误，请重试。",
     "noArticleTitle": "请先打开一篇文章",
     "noArticleDesc": "练习是根据你正在读的文章生成的。",
-    "openLibrary": "去文章库"
+    "openLibrary": "去文章库",
+    "newDrills": "换一批新题"
   },
   "analytics": {
     "title": "进度",
@@ -183,9 +184,14 @@
     "protectStorage": "保护我的数据",
     "exportFailed": "导出失败：{{msg}}",
     "restoreFailed": "恢复失败：{{msg}}",
-    "cacheSummary": "已保存的解析：{{words}} 个单词，{{sentences}} 个句子",
+    "cacheSummary": "已保存的解析：{{words}} 个单词，{{sentences}} 个句子，{{drills}} 套练习",
     "clearCache": "清除已保存的解析",
-    "cacheDesc": "单词和句子的解析会保存在这台设备上，相同的内容不会重复消耗额度。单词一直保留到你清除，句子保留 30 天。它们不会包含在备份里。"
+    "cacheDesc": "解析和练习题会保存在这台设备上，相同的内容不会重复消耗额度。单词一直保留到你清除，句子和练习保留 30 天。它们不会包含在备份里。",
+    "audioSummary": "发音音频：{{clips}} 段，{{mb}} MB；其中 {{kept}} 段因属于生词本而永久保留",
+    "clearAudio": "清除其他音频",
+    "audioDesc": "每段音频都会保存下来，离线也能播放，也不会重复生成。生词本里的单词、它们的语境句和例句的音频始终保留，其余音频超过 200 MB 后会按最近使用情况清理。",
+    "backupAudio": "备份时包含生词本的发音音频（文件会更大）",
+    "backupAudioSize": "约 {{mb}} MB"
   },
   "importer": {
     "articleTitle": "文章标题",

@@ -2,7 +2,7 @@ import { WordAnalysis, SentenceAnalysis, PronunciationAssessment, PracticeDeck }
 import { getAppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as gemini from './gemini';
-import { getCached, putCached, sentenceKey, wordKey, type CacheKind } from '../storage/cache';
+import { drillsKey, getCached, putCached, sentenceKey, wordKey, type CacheKind } from '../storage/cache';
 
 export { MissingApiKeyError } from './gemini';
 
@@ -22,8 +22,8 @@ const inFlight = new Map<string, Promise<unknown>>();
  * Looks in the persistent cache first and only then asks Gemini, so a repeated
  * word or sentence costs nothing (and cached answers work without a key).
  */
-async function cached<T>(kind: CacheKind, key: string, fetchFresh: () => Promise<T>): Promise<T> {
-  const hit = await getCached<T>(kind, key);
+async function cached<T>(kind: CacheKind, key: string, fetchFresh: () => Promise<T>, skipCache = false): Promise<T> {
+  const hit = skipCache ? undefined : await getCached<T>(kind, key);
   if (hit) return hit;
 
   const flightKey = `${kind}:${key}`;
@@ -67,6 +67,12 @@ export function assessPronunciation(params: {
   return gemini.assessPronunciation(params, options());
 }
 
-export function generatePracticeDrills(articleText: string, type: string = 'syntax'): Promise<PracticeDeck> {
-  return gemini.generateDrills({ articleText, type }, options());
+/** Drills are kept per article and type; `fresh` asks for a new set and replaces the saved one. */
+export function generatePracticeDrills(
+  articleText: string,
+  type: string = 'syntax',
+  fresh = false
+): Promise<PracticeDeck> {
+  const opts = options();
+  return cached('drills', drillsKey(opts.lang, type, articleText), () => gemini.generateDrills({ articleText, type }, opts), fresh);
 }

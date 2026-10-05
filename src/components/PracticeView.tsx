@@ -51,7 +51,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   const timerRef = React.useRef<any>(null);
 
   // Load drills on type or article change
-  const handleLoadDrills = async (type: 'syntax' | 'oral' | 'cloze') => {
+  const handleLoadDrills = async (type: 'syntax' | 'oral' | 'cloze', fresh = false) => {
     setActivePracticeType(type);
     setIsLoadingDeck(true);
     setDeckError(null);
@@ -60,7 +60,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     resetQuestionState();
 
     try {
-      const result = await generatePracticeDrills(currentArticle!.content, type);
+      const result = await generatePracticeDrills(currentArticle!.content, type, fresh);
       setDeck(result);
     } catch (err) {
       if (err instanceof MissingApiKeyError) {
@@ -615,11 +615,11 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               </button>
             ) : (
               <button
-                onClick={() => handleLoadDrills(activePracticeType)}
+                onClick={() => handleLoadDrills(activePracticeType, true)}
                 className="flex items-center gap-1.5 h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>{t('practice.generateDrills')}</span>
+                <span>{t('practice.newDrills')}</span>
               </button>
             )}
           </div>
