@@ -38,4 +38,5 @@ There is no server. Relire is a static PWA; `dist/` can be hosted anywhere.
 - Prefer the `ui/` primitives and design tokens over ad-hoc Tailwind colour classes. No new gradients, glass/blur, emoji icons, bounce/pulse animations, uppercase eyebrow labels, or invented fallback numbers.
 - Icons: lucide-react only, one stroke weight.
 - Comments are English; UI copy is zh/en via i18n.
+- Update `CHANGELOG.md` (under Unreleased, Added / Changed / Fixed / Removed) in the same commit as any change a user could notice.
 - Develop on the designated feature branch; do not open PRs unless asked.
