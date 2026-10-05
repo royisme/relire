@@ -13,6 +13,7 @@ import {
 import { setAppLanguage } from '../i18n';
 import { speakFrench } from '../utils/frenchSpeech';
 import { synthesizeSpeech } from '../services/gemini';
+import { exportData, getStorageInfo, importData, requestPersistence, type StorageInfo } from '../storage/db';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -34,6 +35,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
+  const [storageInfo, setStorageInfo] = useState<StorageInfo>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Stats on local data storage
@@ -49,19 +51,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       setTestResult(null);
       setBackupStatus(null);
 
-      // Calculate local data size
-      try {
-        const rawArticles = localStorage.getItem('relire_articles_v1');
-        const rawVocab = localStorage.getItem('relire_vocab_v1');
-        const rawStats = localStorage.getItem('relire_stats_v1');
-        setLocalStats({
-          articlesCount: rawArticles ? JSON.parse(rawArticles).length : 0,
-          vocabCount: rawVocab ? JSON.parse(rawVocab).length : 0,
-          statsHistoryCount: rawStats ? (JSON.parse(rawStats).pronunciationHistory?.length || 0) : 0,
-        });
-      } catch (e) {
-        console.error('Failed to read local stats', e);
-      }
+      exportData()
+        .then((d) =>
+          setLocalStats({
+            articlesCount: d.articles.length,
+            vocabCount: d.vocab.length,
+            statsHistoryCount: d.stats.pronunciationHistory?.length || 0,
+          })
+        )
+        .catch((e) => console.error('Failed to read local stats', e));
+      getStorageInfo().then(setStorageInfo);
     }
   }, [isOpen]);
 
@@ -75,16 +74,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onClose();
   };
 
-  // Export all application data into a single JSON file
-  const handleExportData = () => {
+  // Export all application data into a single JSON file. The API key is left out on purpose.
+  const handleExportData = async () => {
     try {
+      const { customApiKey: _key, ...settingsWithoutKey } = getAppSettings();
       const backupData = {
         version: '1.0',
         exportedAt: new Date().toISOString(),
-        settings: getAppSettings(),
-        articles: JSON.parse(localStorage.getItem('relire_articles_v1') || '[]'),
-        vocab: JSON.parse(localStorage.getItem('relire_vocab_v1') || '[]'),
-        stats: JSON.parse(localStorage.getItem('relire_stats_v1') || '{}'),
+        settings: settingsWithoutKey,
+        ...(await exportData()),
       };
 
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -109,22 +107,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
-        const text = event.target?.result as string;
-        const data = JSON.parse(text);
+        const data = JSON.parse(event.target?.result as string);
 
-        if (data.articles && Array.isArray(data.articles)) {
-          localStorage.setItem('relire_articles_v1', JSON.stringify(data.articles));
-        }
-        if (data.vocab && Array.isArray(data.vocab)) {
-          localStorage.setItem('relire_vocab_v1', JSON.stringify(data.vocab));
-        }
-        if (data.stats && typeof data.stats === 'object') {
-          localStorage.setItem('relire_stats_v1', JSON.stringify(data.stats));
-        }
+        await importData({
+          articles: Array.isArray(data.articles) ? data.articles : undefined,
+          vocab: Array.isArray(data.vocab) ? data.vocab : undefined,
+          stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
+        });
         if (data.settings && typeof data.settings === 'object') {
-          saveAppSettings(data.settings);
+          // A backup never carries the API key, so keep the one already saved.
+          saveAppSettings({ ...data.settings, customApiKey: getAppSettings().customApiKey });
           setSettings(getAppSettings());
         }
 
@@ -366,6 +360,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <p className="text-xs text-ink-500 leading-relaxed">
                 {t('settings.offlineDesc')}
               </p>
+
+              {/* Storage protection */}
+              <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
+                <span className="text-ink-600">
+                  {storageInfo.usage !== undefined && (
+                    <span className="tnum">{(storageInfo.usage / 1024 / 1024).toFixed(1)} MB · </span>
+                  )}
+                  {storageInfo.persisted ? t('settings.storageProtected') : t('settings.storageNotProtected')}
+                </span>
+                {storageInfo.persisted === false && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await requestPersistence();
+                      setStorageInfo(await getStorageInfo());
+                    }}
+                    className="h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium cursor-pointer"
+                  >
+                    {t('settings.protectStorage')}
+                  </button>
+                )}
+              </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3 pt-1 flex-wrap">

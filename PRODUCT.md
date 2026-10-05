@@ -49,4 +49,4 @@ Duolingo-style gamification (streak flames, confetti, mascots), generic AI-dashb
 
 ## Constraints
 
-React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh), Bun. Fully client-side: Gemini is called from the browser with the user's own key (`src/services/gemini.ts`). Client-only persistence in localStorage keys `relire_*`.
+React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh), Bun. Fully client-side: Gemini is called from the browser with the user's own key (`src/services/gemini.ts`). Client-only persistence: user data in IndexedDB (`src/storage`), settings and API key in localStorage (`relire_*`). Never invent data to fill an empty state.

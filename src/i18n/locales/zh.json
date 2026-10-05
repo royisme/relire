@@ -206,7 +206,7 @@
     "articlesCount": "{{count}} 篇文章",
     "vocabCount": "{{count}} 个生词与SRS算法状态",
     "historyCount": "{{count}} 次跟读评测",
-    "offlineDesc": "作为 PWA 安装在 Mac 桌面后，无需任何后端服务器支撑，所有数据已自动加密持久保存在您本地的沙箱中（关机、关闭窗口均不丢失）。您可以随时导出单文件 JSON 离线备份，在任何设备间无损同步恢复。",
+    "offlineDesc": "文章、生词和进度保存在这个浏览器里（IndexedDB）。请定期导出备份，清理网站数据或换设备之前尤其要导出。备份文件不包含你的 API Key。",
     "exportBackup": "导出全部数据备份 (.json)",
     "importBackup": "导入恢复备份文件",
     "exportSuccess": "✅ 全部数据已成功导出为本地 JSON 备份文件！",
@@ -223,7 +223,10 @@
     "keyMissing": "尚未设置 Key",
     "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 Google。没有应用服务器。",
     "getKey": "到 Google AI Studio 免费获取 Key",
-    "needsKeyNotice": "请先填写你的 Gemini API Key，才能使用单词和句子解析、朗读和发音反馈。"
+    "needsKeyNotice": "请先填写你的 Gemini API Key，才能使用单词和句子解析、朗读和发音反馈。",
+    "storageProtected": "已受保护，浏览器不会自动清理",
+    "storageNotProtected": "空间不足或长期不使用时，浏览器可能会清掉这些数据",
+    "protectStorage": "保护我的数据"
   },
   "importer": {
     "title": "导入或粘贴私有法语文章",
@@ -252,5 +255,9 @@
     "noServerWhy": "可以离线使用",
     "noServerDesc": "文章、生词和设置都保存在这个浏览器里。阅读和生词复习可以离线使用；单词和句子解析、朗读、发音反馈需要联网和你的 Gemini Key。",
     "gotIt": "知道了"
+  },
+  "storage": {
+    "saveFailed": "最新的修改没能保存到这个浏览器里。",
+    "openBackup": "打开设置导出备份"
   }
 }

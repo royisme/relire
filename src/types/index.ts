@@ -155,9 +155,6 @@ export interface PracticeDeck {
 }
 
 export interface UserStats {
-  streak: number;
-  lastActiveDate: string;
-  totalWordsLearned: number;
   sentencesAnalyzed: number;
   shadowingSessionsCompleted: number;
   averagePronunciationScore: number;

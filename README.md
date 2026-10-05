@@ -44,7 +44,7 @@ Reading, your saved words and vocabulary review work offline. Anything that call
 
 ### Privacy
 
-Your articles, vocabulary, stats and API key are stored in this browser's local storage; you can export and restore a backup from Settings. When you use an AI feature, the word, sentence or recording is sent from your browser straight to Google's Gemini API using your key. Nothing goes through any other server. Anyone with access to your browser profile can read the stored key, so use a key you can revoke.
+Your articles, vocabulary and stats are stored in this browser's IndexedDB, and your API key and settings in its local storage. You can export and restore a backup from Settings (backups never include the key). Browsers can clear site data when space runs low or after long inactivity, particularly Safari for sites that are not installed, so install the app, use **Protect my data** in Settings, and export a backup now and then. When you use an AI feature, the word, sentence or recording is sent from your browser straight to Google's Gemini API using your key. Nothing goes through any other server. Anyone with access to your browser profile can read the stored key, so use a key you can revoke.
 
 ## How it is built
 

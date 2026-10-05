@@ -90,7 +90,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
       </div>
 
       {/* Summary */}
-      <dl className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-ink-200 rounded-lg border border-ink-200 bg-white">
+      <dl className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-ink-200 rounded-lg border border-ink-200 bg-white">
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.wordsLearned')}</dt>
           <dd className="text-2xl font-serif font-semibold text-ink-900">{vocabList.length}</dd>
@@ -99,21 +99,14 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.avgScore')}</dt>
           <dd className="text-2xl font-serif font-semibold text-ink-900">
-            {stats.averagePronunciationScore ?? '—'}
-            {stats.averagePronunciationScore != null && <span className="text-sm font-normal text-ink-400">/100</span>}
+            {stats.pronunciationHistory?.length ? stats.averagePronunciationScore : '—'}
+            {!!stats.pronunciationHistory?.length && <span className="text-sm font-normal text-ink-400">/100</span>}
           </dd>
         </div>
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.oralSessions')}</dt>
           <dd className="text-2xl font-serif font-semibold text-ink-900">{stats.shadowingSessionsCompleted ?? 0}</dd>
           <dd className="text-xs text-ink-500">{stats.sentencesAnalyzed ?? 0} {t('analytics.sentencesAnalyzed')}</dd>
-        </div>
-        <div className="p-4 space-y-1">
-          <dt className="text-xs text-ink-500">{t('analytics.streakDays')}</dt>
-          <dd className="text-2xl font-serif font-semibold text-ink-900">
-            {stats.streak ?? 0}
-            <span className="text-sm font-normal text-ink-400"> {t('analytics.days')}</span>
-          </dd>
         </div>
       </dl>
 

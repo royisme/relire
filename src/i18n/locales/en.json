@@ -206,7 +206,7 @@
     "articlesCount": "{{count}} Articles",
     "vocabCount": "{{count}} Words & SRS state",
     "historyCount": "{{count}} Shadowing records",
-    "offlineDesc": "Running as a PWA on Mac, all data is safely persisted in your local sandbox. You can export a JSON backup anytime.",
+    "offlineDesc": "Articles, vocabulary and progress are stored in this browser (IndexedDB). Export a backup now and then, especially before clearing site data or switching devices. Backups do not include your API key.",
     "exportBackup": "Export Full Backup (.json)",
     "importBackup": "Import Backup File",
     "exportSuccess": "Data exported successfully to local JSON file!",
@@ -223,7 +223,10 @@
     "keyMissing": "No key yet",
     "keyPrivacy": "The key is stored only in this browser and sent only to Google when you use an AI feature. There is no app server.",
     "getKey": "Get a free key from Google AI Studio",
-    "needsKeyNotice": "Add your Gemini API key to use word and sentence analysis, audio and pronunciation feedback."
+    "needsKeyNotice": "Add your Gemini API key to use word and sentence analysis, audio and pronunciation feedback.",
+    "storageProtected": "Protected from automatic clearing",
+    "storageNotProtected": "Browser may clear this data if it runs low on space or you stay away for a while",
+    "protectStorage": "Protect my data"
   },
   "importer": {
     "title": "Import / Paste French Article",
@@ -252,5 +255,9 @@
     "noServerWhy": "Works offline",
     "noServerDesc": "Your articles, vocabulary and settings are stored in this browser. Reading and vocabulary review work offline. Word and sentence analysis, audio and pronunciation feedback need a connection and your Gemini key.",
     "gotIt": "Got it"
+  },
+  "storage": {
+    "saveFailed": "Your latest changes could not be saved in this browser.",
+    "openBackup": "Open Settings to export a backup"
   }
 }

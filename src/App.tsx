@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Navbar } from './components/Navbar';
 import { ReaderView } from './components/ReaderView';
 import { WordDetailModal } from './components/WordDetailModal';
@@ -10,16 +11,16 @@ import { ArticleImporterModal } from './components/ArticleImporterModal';
 import { SettingsModal } from './components/SettingsModal';
 
 import { Article, VocabWord, WordAnalysis, SentenceAnalysis, UserStats, PronunciationAssessment } from './types';
-import { SAMPLE_ARTICLES, INITIAL_VOCAB } from './data/sampleArticles';
+import { SAMPLE_ARTICLES } from './data/sampleArticles';
+import { EMPTY_STATS, loadData, saveArticles, saveStats, saveVocab } from './storage/db';
+import { usePersist } from './storage/usePersist';
 import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
 import { isDueToday, formatDate } from './utils/srs';
 import { setGlobalVoice } from './utils/frenchSpeech';
 
-const LOCAL_STORAGE_ARTICLES = 'relire_articles_v1';
-const LOCAL_STORAGE_VOCAB = 'relire_vocab_v1';
-const LOCAL_STORAGE_STATS = 'relire_stats_v1';
 
 export default function App() {
+  const { t } = useTranslation();
   // Navigation tab
   const [currentTab, setCurrentTab] = useState<'reader' | 'vocab' | 'practice' | 'analytics'>('reader');
   const [selectedVoice, setSelectedVoice] = useState<'Kore' | 'Charon'>('Kore');
@@ -29,66 +30,45 @@ export default function App() {
     setGlobalVoice(voice);
   };
 
-  // Articles state
-  const [articles, setArticles] = useState<Article[]>(() => {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_ARTICLES);
-      return saved ? JSON.parse(saved) : SAMPLE_ARTICLES;
-    } catch {
-      return SAMPLE_ARTICLES;
-    }
-  });
-
-  const [currentArticle, setCurrentArticle] = useState<Article>(() => articles[0] || SAMPLE_ARTICLES[0]);
+  // Data lives in IndexedDB (see src/storage). It loads once, then every change is saved.
+  const [ready, setReady] = useState(false);
+  const [failedSaves, setFailedSaves] = useState<string[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [currentArticle, setCurrentArticle] = useState<Article>(SAMPLE_ARTICLES[0]);
+  const [vocabList, setVocabList] = useState<VocabWord[]>([]);
+  const [stats, setStats] = useState<UserStats>(EMPTY_STATS);
   const [isImporterOpen, setIsImporterOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Vocabulary state
-  const [vocabList, setVocabList] = useState<VocabWord[]>(() => {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_VOCAB);
-      return saved ? JSON.parse(saved) : INITIAL_VOCAB;
-    } catch {
-      return INITIAL_VOCAB;
-    }
-  });
+  const reportSave = (name: string, error: unknown | null) => {
+    if (error) console.error(`Saving ${name} failed`, error);
+    setFailedSaves((prev) => (error ? [...new Set([...prev, name])] : prev.filter((n) => n !== name)));
+  };
 
-  // User Stats state
-  const [stats, setStats] = useState<UserStats>(() => {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_STATS);
-      return saved ? JSON.parse(saved) : {
-        streak: 3,
-        lastActiveDate: formatDate(new Date()),
-        totalWordsLearned: 15,
-        sentencesAnalyzed: 8,
-        shadowingSessionsCompleted: 6,
-        averagePronunciationScore: 88,
-        pronunciationHistory: [
-          {
-            date: '2026-10-02',
-            text: "On ne voit bien qu'avec le cœur.",
-            score: 91,
-          },
-          {
-            date: '2026-10-03',
-            text: "C'est un véritable théâtre à ciel ouvert.",
-            score: 86,
-          },
-        ],
-      };
-    } catch {
-      return {
-        streak: 3,
-        lastActiveDate: formatDate(new Date()),
-        totalWordsLearned: 15,
-        sentencesAnalyzed: 8,
-        shadowingSessionsCompleted: 6,
-        averagePronunciationScore: 88,
-        pronunciationHistory: [],
-      };
-    }
-  });
+  useEffect(() => {
+    let cancelled = false;
+    loadData()
+      .catch((err) => {
+        reportSave('load', err);
+        return null;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const first = data ?? { articles: SAMPLE_ARTICLES, vocab: [], stats: EMPTY_STATS };
+        setArticles(first.articles);
+        setVocabList(first.vocab);
+        setStats(first.stats);
+        setCurrentArticle(first.articles[0] ?? SAMPLE_ARTICLES[0]);
+        setReady(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  usePersist('articles', articles, saveArticles, ready, reportSave);
+  usePersist('vocabulary', vocabList, saveVocab, ready, reportSave);
+  usePersist('stats', stats, saveStats, ready, reportSave);
 
   // Word Detail Modal state
   const [isWordModalOpen, setIsWordModalOpen] = useState(false);
@@ -102,31 +82,6 @@ export default function App() {
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const [sentenceData, setSentenceData] = useState<SentenceAnalysis | null>(null);
   const [isSentenceLoading, setIsSentenceLoading] = useState(false);
-
-  // Save changes to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_ARTICLES, JSON.stringify(articles));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [articles]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_VOCAB, JSON.stringify(vocabList));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [vocabList]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_STATS, JSON.stringify(stats));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [stats]);
 
   // AI failures: a missing key sends the user to Settings, anything else is shown in the sheet.
   const [aiError, setAiError] = useState<string | null>(null);
@@ -283,6 +238,9 @@ export default function App() {
 
   const dueCount = vocabList.filter(isDueToday).length;
 
+  // IndexedDB answers in a few milliseconds; render nothing until then so saved data never flashes as samples.
+  if (!ready) return <div className="min-h-screen bg-ink-50" aria-busy="true" />;
+
   return (
     <div className="min-h-screen bg-ink-50 text-ink-900 flex flex-col font-sans">
       {/* Top Navbar */}
@@ -296,6 +254,17 @@ export default function App() {
         selectedVoice={selectedVoice}
         onSelectVoice={handleSelectVoice}
       />
+
+      {failedSaves.length > 0 && (
+        <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
+          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{t('storage.saveFailed')}</span>
+            <button className="underline underline-offset-2 cursor-pointer" onClick={() => setIsSettingsOpen(true)}>
+              {t('storage.openBackup')}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main View Area */}
       <main className="flex-1 pb-16">

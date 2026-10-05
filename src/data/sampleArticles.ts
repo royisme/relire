@@ -1,4 +1,4 @@
-import { Article, VocabWord } from '../types';
+import { Article } from '../types';
 
 export const SAMPLE_ARTICLES: Article[] = [
   {
@@ -57,65 +57,5 @@ D'une part, les algorithmes prédictifs permettent désormais d'optimiser la ges
 Toutefois, ce progrès technologique s'accompagne d'une empreinte environnementale non négligeable. L'entraînement des modèles de langage de grande envergure et le fonctionnement ininterrompu des centres de données requièrent une consommation astronomique d'électricité et d'eau de refroidissement.
 Il est donc primordial que la communauté scientifique et les décideurs politiques s'accordent sur un cadre éthique et écologique rigoureux. Pour que cette révolution numérique soit véritablement salutaire, il faudra veiller à ce que l'innovation serve la préservation du vivant, plutôt qu'elle ne précipite l'épuisement des ressources terrestres.`,
     createdAt: '2026-10-03',
-  },
-];
-
-export const INITIAL_VOCAB: VocabWord[] = [
-  {
-    id: 'v-apprivoiser',
-    word: 'apprivoiser',
-    lemma: 'apprivoiser',
-    ipa: '/a.pʁi.vwa.ze/',
-    translation: '驯化；使驯服；使亲近',
-    translationEn: 'To tame; to domesticate; to bond with',
-    partOfSpeech: 'Verbe transitif (1er groupe)',
-    contextSentence: 'Mais, si tu m\'apprivoises, nous aurons besoin l\'un de l\'autre.',
-    contextTense: 'Présent de l\'indicatif, 2e personne du singulier',
-    phoneticsGuide: '注意开头的双写p不送气，中间为小舌音[ʁ]，oi发作开音双元音[wa]，词尾-er发闭元音[e]。',
-    phoneticsGuideEn: 'Unaspirated [p], uvular fricative [ʁ], open diphthong [wa], and closed final [e].',
-    addedAt: '2026-10-01',
-    repetitions: 1,
-    intervalDays: 1,
-    easeFactor: 2.5,
-    nextReviewDate: '2026-10-04',
-    reviewHistory: [],
-  },
-  {
-    id: 'v-essentiel',
-    word: 'essentiel',
-    lemma: 'essentiel',
-    ipa: '/e.sɑ̃.sjɛl/',
-    translation: '实质；本质；至关重要的事物',
-    translationEn: 'Essential; essence; what matters most',
-    partOfSpeech: 'Nom masculin & Adjectif',
-    contextSentence: 'L\'essentiel est invisible pour les yeux.',
-    contextTense: 'Nom masculin singulier',
-    phoneticsGuide: '注意鼻化元音[ɑ̃]：后部低元音，软腭下垂，气流同时通过口腔与鼻腔，切勿在末尾发出/n/辅音；-tiel发[sjɛl]。',
-    phoneticsGuideEn: 'Nasal vowel [ɑ̃]: air flows simultaneously through mouth and nose; do not add an English /n/.',
-    addedAt: '2026-10-01',
-    repetitions: 2,
-    intervalDays: 6,
-    easeFactor: 2.6,
-    nextReviewDate: '2026-10-04',
-    reviewHistory: [],
-  },
-  {
-    id: 'v-monotone',
-    word: 'monotone',
-    lemma: 'monotone',
-    ipa: '/mɔ.nɔ.tɔn/',
-    translation: '单调的；千篇一律的',
-    translationEn: 'Monotonous; repetitive; dull',
-    partOfSpeech: 'Adjectif',
-    contextSentence: 'Ma vie est monotone. Je chasse les poules, les hommes me chassent.',
-    contextTense: 'Adjectif féminin singulier',
-    phoneticsGuide: '包含两个开口中元音[ɔ]，末尾为开音节中鼻辅音[n]，结尾不发音字母e弱化脱落。',
-    phoneticsGuideEn: 'Contains open mid-vowels [ɔ], ending in nasal [n] with silent terminal -e.',
-    addedAt: '2026-10-02',
-    repetitions: 0,
-    intervalDays: 0,
-    easeFactor: 2.5,
-    nextReviewDate: '2026-10-04',
-    reviewHistory: [],
   },
 ];
