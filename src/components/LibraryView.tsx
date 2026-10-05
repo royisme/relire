@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, FilePlus2, Pencil, Search, Trash2 } from 'lucide-re
 import { Article } from '../types';
 import { Button } from './ui/button';
 import { Dialog, OverlayHeader } from './ui/overlay';
-import { cleanArticleTitle, formatArticleSource, formatLevel } from '../utils/i18nHelpers';
+import { cleanArticleTitle, formatLevel } from '../utils/i18nHelpers';
 
 interface LibraryViewProps {
   articles: Article[];
@@ -170,7 +170,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       </span>
                       <span className="block text-xs text-ink-500 mt-0.5">
                         <span className="sm:hidden">{formatLevel(a.level, i18n.language)} · </span>
-                        {[a.category, a.source && formatArticleSource(a.source, i18n.language)].filter(Boolean).join(' · ')}
+                        {[a.category, a.source].filter(Boolean).join(' · ')}
                       </span>
                     </button>
                   </td>

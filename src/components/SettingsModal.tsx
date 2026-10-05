@@ -4,13 +4,12 @@ import { Dialog, OverlayHeader } from './ui/overlay';
 import {
   X, Settings, Key, Cpu, Volume2, ShieldCheck, CheckCircle2,
   AlertCircle, HelpCircle, RefreshCw, Sparkles,
-  Download, Upload, Database, HardDrive, Trash2, Globe
+  Download, Upload, Database, HardDrive, Trash2
 } from 'lucide-react';
 import {
   AppSettings, getAppSettings, saveAppSettings,
   AVAILABLE_ANALYSIS_MODELS, AVAILABLE_TTS_MODELS, AVAILABLE_VOICES
 } from '../utils/appSettings';
-import { setAppLanguage } from '../i18n';
 import { speakFrench } from '../utils/frenchSpeech';
 import { synthesizeSpeech } from '../services/gemini';
 import { exportData, getStorageInfo, importData, requestPersistence, type StorageInfo } from '../storage/db';
@@ -97,7 +96,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
       setBackupStatus(t('settings.exportSuccess'));
     } catch (err: any) {
-      setBackupStatus(`Export failed: ${err.message || err}`);
+      setBackupStatus(t('settings.exportFailed', { msg: err.message || err }));
     }
   };
 
@@ -127,7 +126,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           window.location.reload();
         }, 1200);
       } catch (err: any) {
-        setBackupStatus(`Restore failed: (${err.message || err})`);
+        setBackupStatus(t('settings.restoreFailed', { msg: err.message || err }));
       }
     };
     reader.readAsText(file);
@@ -251,16 +250,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   {AVAILABLE_ANALYSIS_MODELS.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {isEn ? (m.nameEn || m.name) : m.name}
+                      {t(`models.${m.id.replace(/\./g, '_')}.name`)}
                     </option>
                   ))}
                 </select>
 
                 <p className="text-xs text-accent-900 bg-accent-50 p-2 rounded-md border border-accent-200/60 leading-relaxed">
-                  {(() => {
-                    const found = AVAILABLE_ANALYSIS_MODELS.find((m) => m.id === settings.analysisModel);
-                    return isEn ? (found?.descEn || found?.desc) : found?.desc;
-                  })()}
+                  {t(`models.${settings.analysisModel.replace(/\./g, '_')}.desc`, { defaultValue: '' })}
                 </p>
               </div>
 
@@ -281,16 +277,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   {AVAILABLE_TTS_MODELS.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {isEn ? (m.nameEn || m.name) : m.name}
+                      {t(`models.${m.id.replace(/\./g, '_')}.name`)}
                     </option>
                   ))}
                 </select>
 
                 <p className="text-xs text-ok-950 bg-ok-50 p-2 rounded-md border border-ok-200/60 leading-relaxed">
-                  {(() => {
-                    const found = AVAILABLE_TTS_MODELS.find((m) => m.id === settings.ttsModel);
-                    return isEn ? (found?.descEn || found?.desc) : found?.desc;
-                  })()}
+                  {t(`models.${settings.ttsModel.replace(/\./g, '_')}.desc`, { defaultValue: '' })}
                 </p>
               </div>
             </div>
@@ -306,8 +299,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {AVAILABLE_VOICES.map((v) => {
                 const isSelected = settings.ttsVoice === v.id;
-                const voiceName = isEn ? (v.nameEn || v.name) : v.name;
-                const voiceSubtitle = voiceName.split('·')[1]?.replace(')', '') || (isEn ? 'Standard French' : '标准母语法语');
                 return (
                   <button
                     key={v.id}
@@ -326,7 +317,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       </span>
                     </div>
                     <span className="text-xs text-ink-500 block truncate">
-                      {voiceSubtitle}
+                      {t(`voices.${v.id}`)}
                     </span>
                   </button>
                 );
@@ -417,42 +408,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   {backupStatus}
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* SECTION 5: Language Selection (i18n) */}
-          <div className="space-y-3.5">
-            <h4 className="text-xs font-semibold text-ink-900 flex items-center gap-1.5">
-              <Globe className="w-4 h-4 text-ink-700" />
-              <span>{t('settings.languageSection')}</span>
-            </h4>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setAppLanguage('en')}
-                className={`p-3 rounded-lg border text-left transition-all ${
-                  i18n.language === 'en'
-                    ? 'border-ink-700 bg-ink-100 ring-2 ring-ink-700/20 '
-                    : 'border-ink-200 bg-white hover:border-ink-300'
-                }`}
-              >
-                <div className="font-semibold text-xs text-ink-900">English</div>
-                <div className="text-xs text-ink-500">{t('settings.langEn')}</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAppLanguage('zh')}
-                className={`p-3 rounded-lg border text-left transition-all ${
-                  i18n.language === 'zh'
-                    ? 'border-ink-700 bg-ink-100 ring-2 ring-ink-700/20 '
-                    : 'border-ink-200 bg-white hover:border-ink-300'
-                }`}
-              >
-                <div className="font-semibold text-xs text-ink-900">简体中文</div>
-                <div className="text-xs text-ink-500">{t('settings.langZh')}</div>
-              </button>
             </div>
           </div>
 

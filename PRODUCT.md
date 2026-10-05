@@ -31,7 +31,7 @@ First run: a three-step guide (welcome, connect Gemini with a checked key, try a
 - **Sentence drawer**: translation, syntax, grammar points, collocations, shadowing record and score.
 - **Vocabulary**: list plus flashcard quiz with SRS ratings.
 - **Practice**: AI-generated drills and oral assessment.
-- **Analytics**: summary figures, phoneme profile, coach synthesis.
+- **Progress**: three plain figures (words saved, average pronunciation score, shadowing sessions), recent scores, and a tap-to-hear chart of the French sounds in IPA. No coaching text or invented scores; an AI coach summary is a possible later feature.
 - **Settings**: Gemini key and models, voice, backup/restore JSON. Language is a single icon in the header.
 
 ## Tone and personality

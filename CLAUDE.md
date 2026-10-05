@@ -9,7 +9,8 @@ Bun is the only supported package manager.
 - `bun install`
 - `bun run dev`: Vite dev server on `:5173`
 - `bun run build`: static site in `dist/` (includes the PWA service worker); `bun run preview` serves it
-- `bun run lint`: `tsc --noEmit` (the only check; there are no tests)
+- `bun run lint`: `tsc --noEmit`
+- `bun run i18n:check`: keys used in code exist in both locales, the locales match, no Chinese text hard-coded in components (CI runs it). There are no automated tests.
 - Detector for UI anti-patterns: `impeccable detect --json src index.html` (from pbakaus/impeccable). Keep it at zero findings.
 
 ## Architecture
@@ -28,7 +29,7 @@ There is no server. Relire is a static PWA; `dist/` can be hosted anywhere.
 
 ## Conventions
 
-- Every user-visible string goes through `t()`; add keys to **both** locale files. Some legacy inline `isEn ? … : …` strings exist; do not add more.
+- Every user-visible string goes through `t()`, including `aria-label`, `title`, `placeholder`, alert and error text; add keys to **both** locale files. Never write `isEn ? … : …` for UI text. Model, voice and level display names are keys too (`models.*`, `voices.*`, `levels.*`). Run `bun run i18n:check` before committing.
 - The app is not released yet, so stored shapes may still change freely. After the first release, keep them backwards compatible and bump the IndexedDB version in `db.ts` with an `upgrade` step.
 - Gemini calls go through `src/services/gemini.ts` only. Never fabricate fallback AI content when a call fails; surface the error.
 - Never commit API keys. The user's key lives only in their browser.

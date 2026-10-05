@@ -170,7 +170,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1.5 flex-1">
                     <span className="text-xs font-semibold text-accent-800 bg-accent-100/80 px-2 py-0.5 rounded-sm">
-                      Original Français
+                      {t('sentenceDrawer.original')}
                     </span>
                     <p className="font-serif text-xl sm:text-2xl font-semibold text-ink-900 leading-relaxed">
                       « {sentenceData.sentence} »

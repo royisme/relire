@@ -14,6 +14,7 @@ It runs entirely in your browser. There is no app server and no account. You bri
 - **Tap any word.** You get the lemma, meaning in context, IPA, the verb tense, a conjugation table and example sentences. Save it to your vocabulary in one click.
 - **Break down a hard sentence.** Translation, syntax segments, grammar points, common collocations and a shadowing guide (rhythm groups, liaisons, intonation).
 - **Shadow and get feedback.** Record yourself reading a sentence and receive an overall score, plus feedback on individual sounds, liaisons and intonation.
+- **Look up any French sound.** A chart of the sounds of French in IPA, each with an example word you can tap to hear.
 - **Review vocabulary with spaced repetition.** An SM-2 schedule decides what is due today.
 - **Drill from the article you are reading.** Sentence scramble, oral shadowing and grammar cloze, generated from the current text.
 - **Use it in English or Chinese.** The interface and the explanations switch between the two.

@@ -14,5 +14,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Typecheck
         run: bun run lint
+      - name: Translations
+        run: bun run i18n:check
       - name: Build
         run: bun run build

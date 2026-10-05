@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { Article, WordAnalysis, SentenceAnalysis } from '../types';
 import { speakFrench, stopSpeech, setGlobalRate, getGlobalRate } from '../utils/frenchSpeech';
-import { formatLevel, formatArticleSource, cleanArticleTitle } from '../utils/i18nHelpers';
+import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {
   currentArticle: Article;
@@ -211,7 +211,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           ))}
         </div>
 
-        <div className="flex items-center rounded-md border border-ink-200 bg-white p-0.5" role="group" aria-label="Aa">
+        <div className="flex items-center rounded-md border border-ink-200 bg-white p-0.5" role="group" aria-label={t('reader.textSize')}>
           {(['sm', 'base', 'lg', 'xl'] as const).map((sz, i) => (
             <button
               key={sz}
@@ -296,7 +296,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           <p className="text-xs text-ink-500 font-sans mb-2">
             {formatLevel(currentArticle.level, i18n.language)}
             {currentArticle.category ? ` · ${currentArticle.category}` : ''}
-            {currentArticle.source ? ` · ${formatArticleSource(currentArticle.source, i18n.language)}` : ''}
+            {currentArticle.source ? ` · ${currentArticle.source}` : ''}
           </p>
           <h1 className="reading-title font-serif font-semibold text-3xl sm:text-4xl leading-tight">
             {cleanArticleTitle(currentArticle.title)}

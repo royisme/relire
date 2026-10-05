@@ -29,11 +29,19 @@ export const LANGUAGES = [
   { code: 'zh', label: '简体中文' },
 ] as const;
 
+function applyDocumentLanguage(lang: string) {
+  if (typeof document === 'undefined') return;
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.title = i18n.t('common.documentTitle');
+}
+i18n.on('languageChanged', applyDocumentLanguage);
+if (i18n.isInitialized) applyDocumentLanguage(initialLang);
+else i18n.on('initialized', () => applyDocumentLanguage(initialLang));
+
 export function setAppLanguage(lang: 'en' | 'zh') {
   i18n.changeLanguage(lang);
   if (typeof window !== 'undefined') {
     localStorage.setItem(STORAGE_KEY, lang);
-    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   }
 }
 

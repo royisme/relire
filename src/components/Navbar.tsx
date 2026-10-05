@@ -67,7 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {brand}
 
         {/* md and up: flat tabs */}
-        <nav className="hidden md:flex items-stretch h-full ml-4" aria-label="Main">
+        <nav className="hidden md:flex items-stretch h-full ml-4" aria-label={t('nav.main')}>
           {tabs.map(({ id, icon: Icon, label }) => {
             const active = currentTab === id;
             return (
@@ -106,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClose={() => setDrawerOpen(false)}
             closeLabel={t('common.close')}
           />
-          <nav className="flex-1 overflow-y-auto py-2" aria-label="Main">
+          <nav className="flex-1 overflow-y-auto py-2" aria-label={t('nav.main')}>
             {tabs.map(({ id, icon: Icon, label }) => {
               const active = currentTab === id;
               return (

@@ -362,6 +362,10 @@ export default function App() {
         {currentTab === 'practice' && (
           <PracticeView
             currentArticle={currentArticle}
+            onNeedsKey={() => {
+              setSettingsNeedKey(true);
+              setIsSettingsOpen(true);
+            }}
             onOpenLibrary={() => {
               setIsReading(false);
               setCurrentTab('reader');

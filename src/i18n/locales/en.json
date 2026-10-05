@@ -1,81 +1,49 @@
 {
   "common": {
     "appName": "Relire",
-    "appTagline": "French Deep Reading & AI Oral Coach",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
-    "delete": "Delete",
-    "confirm": "Confirm",
-    "edit": "Edit",
     "loading": "Loading...",
     "retry": "Retry",
     "success": "Success",
     "error": "Error",
-    "back": "Back",
-    "all": "All",
-    "copy": "Copy",
-    "copied": "Copied",
-    "test": "Test",
-    "testing": "Testing..."
+    "documentTitle": "Relire - French close reading",
+    "done": "Done"
   },
   "nav": {
     "reader": "Read",
     "vocab": "Vocabulary",
     "practice": "Drills",
     "analytics": "Progress",
-    "importArticle": "Import Article",
-    "importShort": "Add article",
-    "installMac": "Install app",
     "installApp": "Install app",
-    "installedDesktop": "Installed",
     "settings": "Settings",
-    "geminiTts": "Gemini TTS",
-    "dueCount": "{{count}} due",
     "menu": "Menu",
-    "language": "Language"
+    "language": "Language",
+    "main": "Main navigation"
   },
   "reader": {
-    "ttsConsole": "Gemini Native Audio",
-    "playingSentence": "Playing",
     "stop": "Stop",
     "tempo": "Speed",
     "slowPace": "(Slow)",
     "shadowingPace": "(Shadowing)",
     "normalPace": "(Original)",
     "challengePace": "(Fast)",
-    "collapse": "Collapse",
     "speedSlider": "Speed Control",
     "shadowingSpeedRange": "Continuous Shadowing Speed (0.5x - 1.5x):",
     "quickPresets": "Quick Presets:",
-    "fontSize": "Font Size",
-    "theme": "Theme",
     "themeParchment": "Parchment",
     "themeWhite": "White",
     "themeSepia": "Warm Sepia",
     "themeDark": "Dark",
-    "guideTipTitle": "Deep Reading Guide:",
-    "guideTipDesc": "Click any word for instantaneous morphology & phonetics. Hover near a sentence to reveal speech & syntax analysis tools!",
     "playSentence": "Play",
     "analyzeSentence": "Analyze Syntax",
     "readSelectedSentence": "Play Sentence",
-    "articleSelectPlaceholder": "Select reading article",
-    "sentenceCount": "{{count}} sentences",
     "wordCount": "{{count}} words",
-    "source": "Source",
-    "userClipboard": "User / Clipboard",
-    "levelBeginner": "Beginner",
-    "levelElementary": "Elementary",
-    "levelIntermediate": "Intermediate",
-    "levelUpperIntermediate": "Upper Intermediate",
-    "levelAdvanced": "Advanced",
-    "levelMastery": "Mastery"
+    "textSize": "Text size"
   },
   "wordModal": {
-    "title": "Word Morphology & Phonetics",
     "lemma": "Lemma",
-    "coreCefr": "CEFR Core",
-    "contextDefinition": "Contextual Meaning",
     "otherMeanings": "Other Meanings:",
     "phoneticsGuide": "Phonetics & Pronunciation Guide (A1-B2)",
     "contextTense": "Form & Tense in Context",
@@ -88,7 +56,8 @@
     "addToVocab": "Add to Vocabulary",
     "removeFromVocab": "Remove from Vocab",
     "analyzing": "Analyzing word with Gemini...",
-    "failed": "Analysis failed, please try again."
+    "failed": "Analysis failed, please try again.",
+    "listen": "Listen"
   },
   "sentenceDrawer": {
     "title": "Sentence Syntax & Shadowing",
@@ -104,32 +73,26 @@
     "shadowingCoach": "AI Shadowing Coach & Pronunciation Evaluation",
     "rhythmGroups": "Rhythm & Thought Groups (Pauses):",
     "liaisons": "Liaison & Elision Guide:",
-    "speedAdvice": "Shadowing Speed Tip:",
     "intonation": "Intonation Contour:",
     "recordShadowing": "Record Shadowing",
     "listeningCoach": "AI Coach is evaluating your pronunciation...",
-    "pressToRecord": "Press to record your shadowing",
-    "recording": "Recording in progress... Click to finish and evaluate",
     "overallScore": "Overall Score",
     "accuracy": "Accuracy",
     "fluency": "Fluency",
     "rhythm": "Rhythm",
-    "transcription": "Recognized French Speech:",
     "coachFeedback": "Coach's Notes",
-    "strengths": "Highlights",
     "done": "Done",
     "micError": "Unable to access microphone. Please check browser microphone permissions.",
-    "assessmentError": "An error occurred while evaluating pronunciation. Please try again."
+    "assessmentError": "An error occurred while evaluating pronunciation. Please try again.",
+    "original": "Original French"
   },
   "vocab": {
     "title": "SRS Vocabulary Deck (Spaced Repetition)",
     "subtitle": "SuperMemo SM-2 algorithm scheduling reviews according to Ebbinghaus forgetting curve",
     "startReview": "Start Today's Review ({{count}} due)",
     "allReviewed": "All caught up today!",
-    "totalWords": "Total Words",
     "dueToday": "Due Today",
     "mastered": "Mastered (4+ rep)",
-    "learning": "In Progress",
     "searchPlaceholder": "Search word, translation, or sentence...",
     "filterAll": "All",
     "filterDue": "Due Today",
@@ -137,7 +100,6 @@
     "filterMastered": "Mastered",
     "nextReview": "Next review:",
     "interval": "Interval: {{days}} days",
-    "streak": "Streak: {{count}}",
     "reps": "Reps: {{count}}",
     "deleteConfirm": "Remove this word from your vocabulary?",
     "empty": "No vocabulary found. Click words in articles to add them!",
@@ -146,7 +108,9 @@
     "rateHard": "Hard (1d)",
     "rateGood": "Good",
     "rateEasy": "Easy",
-    "finishReview": "Session Complete!"
+    "finishReview": "Session Complete!",
+    "reviewedCount": "{{count}} reviewed",
+    "exportJson": "Export vocabulary as JSON"
   },
   "practice": {
     "title": "Interactive Reinforcement Drills",
@@ -159,18 +123,11 @@
     "checkAnswer": "Check Answer",
     "nextQuestion": "Next Drill",
     "showExplanation": "Grammar Hint",
-    "score": "Score",
-    "completed": "Practice Complete!",
-    "scrambleInstruction": "Drag or click chunks to reconstruct the sentence:",
     "questionProgress": "Question {{current}} of {{total}}",
     "realTTS": "Native TTS Audio",
     "scramblePrompt": "Click chunks below to reconstruct the sentence in correct syntactic order...",
     "removeChunk": "Click to remove",
     "chunksToOrder": "Available syntactic chunks:",
-    "syntaxDrillTitle": "Sentence Scramble Drill",
-    "oralDrillTitle": "Oral Shadowing Drill",
-    "clozeDrillTitle": "Tense & Cloze Drill",
-    "drillSubtitle": "Targeted drill based on key complex sentences from the article",
     "micError": "Unable to access microphone. Please check browser microphone permissions.",
     "assessError": "An error occurred while evaluating pronunciation. Please try again.",
     "noArticleTitle": "Open an article first",
@@ -178,20 +135,17 @@
     "openLibrary": "Go to library"
   },
   "analytics": {
-    "title": "Learning Progress & Analytics",
-    "subtitle": "Track your French reading volume, vocabulary retention, and oral accuracy",
-    "streakDays": "Study Streak",
-    "days": "Days",
+    "title": "Progress",
+    "subtitle": "Your reading, vocabulary and pronunciation practice at a glance",
     "wordsLearned": "Words Saved",
     "sentencesAnalyzed": "Sentences Analyzed",
     "oralSessions": "Shadowing Sessions",
     "avgScore": "Avg. Pronunciation Score",
-    "scoreHistory": "Pronunciation Score History",
-    "retentionOverview": "SRS Memory Retention Overview"
+    "scoreHistory": "Pronunciation Score History"
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Gemini key, AI models, voice, language and backup",
+    "subtitle": "Gemini key, AI models, voice and backup",
     "apiKeySection": "1. Gemini API key",
     "customKeyLabel": "Your Gemini API key",
     "customKeyPlaceholder": "Paste your key here",
@@ -204,7 +158,7 @@
     "voiceSection": "3. Default French Voice",
     "female": "Female",
     "male": "Male",
-    "offlineSection": "4. Mac Local Data Persistence & Backup",
+    "offlineSection": "4. Local data & backup",
     "offlineSummary": "Local Sandbox Data:",
     "articlesCount": "{{count}} Articles",
     "vocabCount": "{{count}} Words & SRS state",
@@ -219,9 +173,6 @@
     "testSuccess": "Success! Model connection verified and TTS audio received.",
     "testFailed": "Connection test failed: {{msg}}",
     "savedNotice": "Settings saved to local storage and active immediately",
-    "languageSection": "5. Interface & Explanation Language",
-    "langEn": "English (Default)",
-    "langZh": "简体中文 (Simplified Chinese)",
     "keySet": "Key saved in this browser",
     "keyMissing": "No key yet",
     "keyPrivacy": "The key is stored only in this browser and sent only to Google when you use an AI feature. There is no app server.",
@@ -229,25 +180,17 @@
     "needsKeyNotice": "Add your Gemini API key to use word and sentence analysis, audio and pronunciation feedback.",
     "storageProtected": "Protected from automatic clearing",
     "storageNotProtected": "Browser may clear this data if it runs low on space or you stay away for a while",
-    "protectStorage": "Protect my data"
+    "protectStorage": "Protect my data",
+    "exportFailed": "Export failed: {{msg}}",
+    "restoreFailed": "Restore failed: {{msg}}"
   },
   "importer": {
-    "title": "Import / Paste French Article",
-    "subtitle": "Add any French article, dialogue, or news to your personal library",
     "articleTitle": "Article Title",
     "articleTitlePlaceholder": "e.g., Une promenade dans Paris",
     "category": "Category",
-    "categoryCulture": "Culture & Daily Life",
-    "categoryNews": "News & Society",
-    "categoryLiterature": "Literature & Philosophy",
-    "categoryTech": "Science & Tech",
-    "categoryCustom": "Custom",
     "cefrLevel": "Target CEFR Level",
     "content": "French Article Content",
-    "contentPlaceholder": "Paste French text here (paragraphs will be auto-formatted)...",
-    "sampleBtn": "Load Sample Story",
-    "importSubmit": "Import & Start Reading",
-    "validationError": "Please provide both title and article content"
+    "contentPlaceholder": "Paste French text here (paragraphs will be auto-formatted)..."
   },
   "pwa": {
     "title": "Install as an app",
@@ -319,5 +262,55 @@
   "keyBanner": {
     "text": "Add your Gemini key to turn on word and sentence analysis, audio and pronunciation feedback.",
     "action": "Add key"
+  },
+  "ipa": {
+    "title": "French sounds",
+    "subtitle": "The sounds of French in the International Phonetic Alphabet. Tap one to hear an example word.",
+    "vowels": "Vowels",
+    "nasals": "Nasal vowels",
+    "semivowels": "Semi-vowels",
+    "consonants": "Consonants",
+    "play": "Play {{word}}, sound {{symbol}}"
+  },
+  "levels": {
+    "A1": "A1 · Beginner",
+    "A2": "A2 · Elementary",
+    "B1": "B1 · Intermediate",
+    "B2": "B2 · Upper Intermediate",
+    "C1": "C1 · Advanced",
+    "C2": "C2 · Mastery"
+  },
+  "voices": {
+    "Kore": "Clear & elegant",
+    "Charon": "Warm & deep",
+    "Zephyr": "Friendly & warm",
+    "Puck": "Natural & radiant"
+  },
+  "errors": {
+    "badResponse": "The AI returned a response that could not be read. Please try again.",
+    "noAudio": "Could not generate speech audio.",
+    "allModelsFailed": "Every model failed. Please try again."
+  },
+  "models": {
+    "gemini-2_5-flash": {
+      "name": "Gemini 2.5 Flash (Recommended)",
+      "desc": "Fast and responsive, ideal for A1-B2 morphology and pronunciation feedback"
+    },
+    "gemini-2_5-pro": {
+      "name": "Gemini 2.5 Pro (Deep Analysis)",
+      "desc": "Advanced complex sentence parsing and deep linguistic reasoning"
+    },
+    "gemini-3_8-flash": {
+      "name": "Gemini 3.8 Flash (Next-Gen Multimodal)",
+      "desc": "Balances thinking speed with accurate oral evaluation"
+    },
+    "gemini-3_1-flash-lite": {
+      "name": "Gemini 3.1 Flash-Lite (Low Latency)",
+      "desc": "Lightweight and low-latency, great for fast browsing"
+    },
+    "gemini-3_8-flash-lite-tts": {
+      "name": "Gemini 3.8 Flash-Lite TTS (Recommended)",
+      "desc": "24kHz studio-quality native French synthesis with natural liaisons"
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { GoogleGenAI, ThinkingLevel } from '@google/genai';
+import i18n from '../i18n';
 import { PracticeDeck, PronunciationAssessment, SentenceAnalysis, WordAnalysis } from '../types';
 
 /**
@@ -46,7 +47,7 @@ function parseJson<T>(rawText: string): T {
   try {
     return JSON.parse(cleaned.trim()) as T;
   } catch {
-    throw new Error('The AI returned a response that could not be read. Please try again.');
+    throw new Error(i18n.t('errors.badResponse'));
   }
 }
 
@@ -77,7 +78,7 @@ async function generateJson<T>(contents: any, opts: GeminiOptions): Promise<T> {
       }
     }
   }
-  throw new Error(lastError ? readableError(lastError) : 'All models failed');
+  throw new Error(lastError ? readableError(lastError) : i18n.t('errors.allModelsFailed'));
 }
 
 /** Makes one tiny request so a pasted key can be checked before it is saved. */
@@ -595,7 +596,7 @@ export async function synthesizeSpeech(
     throw new Error(readableError(err));
   }
   const inline = response.candidates?.[0]?.content?.parts?.[0]?.inlineData;
-  if (!inline?.data) throw new Error('Failed to generate speech audio');
+  if (!inline?.data) throw new Error(i18n.t('errors.noAudio'));
   if (inline.mimeType?.includes('wav')) return inline.data;
   const rate = Number(/rate=(\d+)/.exec(inline.mimeType || '')?.[1]) || 24000;
   return pcmToWavBase64(inline.data, rate);

@@ -128,7 +128,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                       title={t('wordModal.clickToListen')}
                     >
                       <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-accent-200' : ''}`} />
-                      <span>{isSpeaking ? t('common.loading') : 'TTS'}</span>
+                      <span>{isSpeaking ? t('common.loading') : t('wordModal.listen')}</span>
                     </button>
                     {/* Speed toggle */}
                     <div className="flex items-center gap-1 text-xs text-ink-500 bg-white/50 px-2 py-0.5 rounded-md">

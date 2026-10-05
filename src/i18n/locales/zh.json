@@ -1,81 +1,49 @@
 {
   "common": {
     "appName": "Relire",
-    "appTagline": "法语深度精读与AI口语私教",
     "save": "保存",
     "cancel": "取消",
     "close": "关闭",
-    "delete": "删除",
-    "confirm": "确认",
-    "edit": "编辑",
     "loading": "加载中...",
     "retry": "重试",
     "success": "成功",
     "error": "错误",
-    "back": "返回",
-    "all": "全部",
-    "copy": "复制",
-    "copied": "已复制",
-    "test": "测试",
-    "testing": "测试中..."
+    "documentTitle": "Relire - 法语精读",
+    "done": "完成"
   },
   "nav": {
     "reader": "精读",
     "vocab": "生词本",
     "practice": "练习",
     "analytics": "进度",
-    "importArticle": "导入/粘贴文章",
-    "importShort": "添加文章",
-    "installMac": "安装应用",
     "installApp": "安装应用",
-    "installedDesktop": "已安装",
     "settings": "设置",
-    "geminiTts": "Gemini 真人TTS",
-    "dueCount": "{{count}} 待复习",
     "menu": "菜单",
-    "language": "语言"
+    "language": "语言",
+    "main": "主导航"
   },
   "reader": {
-    "ttsConsole": "Gemini 真人朗读",
-    "playingSentence": "正在播放",
     "stop": "停止",
     "tempo": "配速",
     "slowPace": "(慢速精嚼)",
     "shadowingPace": "(跟读推荐)",
     "normalPace": "(原速)",
     "challengePace": "(挑战提速)",
-    "collapse": "收起设定",
     "speedSlider": "语速滑块",
     "shadowingSpeedRange": "影子跟读连续调速 (0.5x - 1.5x):",
     "quickPresets": "快速挡位选择:",
-    "fontSize": "字号",
-    "theme": "主题",
     "themeParchment": "羊皮纸",
     "themeWhite": "纯白",
     "themeSepia": "暖黄",
     "themeDark": "夜间",
-    "guideTipTitle": "沉浸精读指南:",
-    "guideTipDesc": "直接点击文中的任意单词即时查阅时态变位与发音音素；鼠标移至任意句子时，将在句尾轻量浮现 tip 学习浮层，供您随时整句朗读或深入剖析句法！",
     "playSentence": "朗读",
     "analyzeSentence": "句法剖析",
     "readSelectedSentence": "朗读本句",
-    "articleSelectPlaceholder": "选择精读文章",
-    "sentenceCount": "{{count}} 个句子",
     "wordCount": "{{count}} 词",
-    "source": "来源",
-    "userClipboard": "用户自拟 / 剪贴板",
-    "levelBeginner": "入门",
-    "levelElementary": "初级",
-    "levelIntermediate": "进阶中级",
-    "levelUpperIntermediate": "高级中等",
-    "levelAdvanced": "高阶专业",
-    "levelMastery": "精通母语"
+    "textSize": "字号"
   },
   "wordModal": {
-    "title": "单词形态与音素解析",
     "lemma": "原型",
-    "coreCefr": "A1-B2 核心精读",
-    "contextDefinition": "当前语境释义",
     "otherMeanings": "其他义项:",
     "phoneticsGuide": "💡 实用发音避坑口诀 (Guide Phonétique A1-B2)",
     "contextTense": "语境词形与时态解析 (Forme & Temps en contexte)",
@@ -88,7 +56,8 @@
     "addToVocab": "加入生词本",
     "removeFromVocab": "移出生词本",
     "analyzing": "Gemini 正在分析单词...",
-    "failed": "解析失败，请重试。"
+    "failed": "解析失败，请重试。",
+    "listen": "朗读"
   },
   "sentenceDrawer": {
     "title": "法语句子结构与影子跟读",
@@ -100,36 +69,30 @@
     "syntaxStructure": "句子主干与成分拆解 (Structure S-V-O)",
     "grammarPoints": "初中级核心语法与规律 (Règles Utiles A1-B2)",
     "ruleFormula": "规律公式:",
-    "patterns": "高频实用句型与仿写 (Modèles & Exemples pratiques)",
+    "patterns": "高频句型与仿写",
     "shadowingCoach": "AI 影子跟读教练与发音评测",
     "rhythmGroups": "呼吸意群与节奏停顿:",
     "liaisons": "联诵与省音提示:",
-    "speedAdvice": "初学者跟读配速建议:",
     "intonation": "语调升降规律:",
     "recordShadowing": "录音跟读",
-    "listeningCoach": "AI 语音教练正在深度听辨您的发音...",
-    "pressToRecord": "点击开始录音跟读当前句子",
-    "recording": "录音中... 点击完成并提交 AI 听辨纠音",
+    "listeningCoach": "AI 教练正在听你的发音…",
     "overallScore": "综合发音评分",
     "accuracy": "准确度",
     "fluency": "流畅度",
     "rhythm": "节奏感",
-    "transcription": "AI 听辨转写结果:",
     "coachFeedback": "教练专业点评",
-    "strengths": "发音亮点",
     "done": "完成精读",
     "micError": "无法访问麦克风，请检查浏览器麦克风权限。",
-    "assessmentError": "评估发音时出错，请稍后重试。"
+    "assessmentError": "评估发音时出错，请稍后重试。",
+    "original": "法语原句"
   },
   "vocab": {
     "title": "智能间隔记忆生词本 (SRS Carnet de Vocabulaire)",
     "subtitle": "基于 SuperMemo SM-2 间隔重复算法，根据艾宾浩斯遗忘曲线精准调度复习周期",
     "startReview": "开始今日复习 ({{count}} 词待复习)",
     "allReviewed": "太棒了，今日生词已全部复习完毕！",
-    "totalWords": "已收录词汇",
     "dueToday": "今日待复习",
     "mastered": "已牢记 (4+轮)",
-    "learning": "巩固中",
     "searchPlaceholder": "搜索生词、释义或例句...",
     "filterAll": "全部词汇",
     "filterDue": "今日待复习",
@@ -137,7 +100,6 @@
     "filterMastered": "已牢记",
     "nextReview": "下次复习:",
     "interval": "间隔: {{days}} 天",
-    "streak": "连续正确: {{count}}",
     "reps": "复习轮次: {{count}}",
     "deleteConfirm": "确定要从生词本中移除该词吗？",
     "empty": "生词本为空。在精读文章时点击任意单词即可添加！",
@@ -146,7 +108,9 @@
     "rateHard": "困难 (1天后复习)",
     "rateGood": "良好 (正常加权)",
     "rateEasy": "轻松 (熟练掌握)",
-    "finishReview": "本次复习完成！"
+    "finishReview": "本次复习完成！",
+    "reviewedCount": "已复习 {{count}} 个",
+    "exportJson": "导出生词本（JSON）"
   },
   "practice": {
     "title": "沉浸式强化互动练习 (Exercices Interactifs)",
@@ -159,18 +123,11 @@
     "checkAnswer": "提交答案",
     "nextQuestion": "下一题",
     "showExplanation": "查看语法解析",
-    "score": "得分",
-    "completed": "练习完成！",
-    "scrambleInstruction": "点击或拖拽词块，按正确的法语语序重新组装句子:",
     "questionProgress": "第 {{current}} 题 / 共 {{total}} 题",
     "realTTS": "真人TTS发音",
     "scramblePrompt": "点击下方打乱的法语意群，按正确的从属从句与主干语序重组...",
     "removeChunk": "点击移出",
     "chunksToOrder": "待排列的语法意群片段:",
-    "syntaxDrillTitle": "长难句重组训练",
-    "oralDrillTitle": "影子跟读口语强化",
-    "clozeDrillTitle": "时态填空专练",
-    "drillSubtitle": "基于当前文章核心长难句定制的专项强化模块",
     "micError": "无法访问麦克风，请检查浏览器权限。",
     "assessError": "评估发音时出现错误，请重试。",
     "noArticleTitle": "请先打开一篇文章",
@@ -178,34 +135,31 @@
     "openLibrary": "去文章库"
   },
   "analytics": {
-    "title": "法语学习进展与成长看板 (Tableau de Bord)",
-    "subtitle": "记录您的法语阅读量、生词吸收曲线与 AI 发音纠错成长轨迹",
-    "streakDays": "连续学习天数",
-    "days": "天",
+    "title": "进度",
+    "subtitle": "你的阅读量、生词和发音练习记录",
     "wordsLearned": "已积累生词",
     "sentencesAnalyzed": "深度剖析句子",
     "oralSessions": "影子跟读练习",
     "avgScore": "平均发音评分",
-    "scoreHistory": "历史发音评分趋势",
-    "retentionOverview": "SRS 记忆曲线掌握分布"
+    "scoreHistory": "历史发音评分趋势"
   },
   "settings": {
     "title": "设置",
-    "subtitle": "Gemini Key、AI 模型、音色、语言与备份",
+    "subtitle": "Gemini Key、AI 模型、音色与备份",
     "apiKeySection": "1. Gemini API Key",
     "customKeyLabel": "你的 Gemini API Key",
     "customKeyPlaceholder": "在这里粘贴你的 Key",
     "customKeyDesc": "单词和句子解析、朗读音频、发音反馈都需要它。",
-    "modelsSection": "2. 核心大模型独立选择 (Modèles IA)",
-    "analysisModelTitle": "语言学解析与纠音模型 (Analyse)",
+    "modelsSection": "2. AI 模型",
+    "analysisModelTitle": "解析与评估模型",
     "analysisModelDesc": "负责词汇变位、长难句结构拆解与发音打分评测。",
-    "ttsModelTitle": "真人语音合成模型 (TTS Audio)",
+    "ttsModelTitle": "语音合成模型",
     "ttsModelDesc": "负责生成标准母语级 24kHz 高采样率法语语音。",
-    "voiceSection": "3. 默认母语发音音色 (Voix par défaut)",
+    "voiceSection": "3. 默认音色",
     "female": "女声",
     "male": "男声",
-    "offlineSection": "4. Mac 本地数据持久化与防丢备份 (Sauvegarde Hors-Ligne)",
-    "offlineSummary": "当前 Mac 独立沙箱已持久保存：",
+    "offlineSection": "4. 本地数据与备份",
+    "offlineSummary": "本机已保存：",
     "articlesCount": "{{count}} 篇文章",
     "vocabCount": "{{count}} 个生词与SRS算法状态",
     "historyCount": "{{count}} 次跟读评测",
@@ -219,9 +173,6 @@
     "testSuccess": "测试成功！模型连接通畅，真人 TTS 语音流正常响应。",
     "testFailed": "连接失败: {{msg}}。请检查 API Key 或网络配置。",
     "savedNotice": "配置保存于本地缓存，重启或刷新页面自动保持生效",
-    "languageSection": "5. 界面与教学解析语言 (Langue)",
-    "langEn": "English (英文 · 默认)",
-    "langZh": "简体中文 (Simplified Chinese)",
     "keySet": "Key 已保存在此浏览器",
     "keyMissing": "尚未设置 Key",
     "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 Google。没有应用服务器。",
@@ -229,25 +180,17 @@
     "needsKeyNotice": "请先填写你的 Gemini API Key，才能使用单词和句子解析、朗读和发音反馈。",
     "storageProtected": "已受保护，浏览器不会自动清理",
     "storageNotProtected": "空间不足或长期不使用时，浏览器可能会清掉这些数据",
-    "protectStorage": "保护我的数据"
+    "protectStorage": "保护我的数据",
+    "exportFailed": "导出失败：{{msg}}",
+    "restoreFailed": "恢复失败：{{msg}}"
   },
   "importer": {
-    "title": "导入或粘贴私有法语文章",
-    "subtitle": "添加您感兴趣的法国新闻、文学选段、对话或听力文本进入精读系统",
     "articleTitle": "文章标题",
     "articleTitlePlaceholder": "例如：Une promenade dans Paris",
     "category": "文章分类",
-    "categoryCulture": "文化与生活 (Culture)",
-    "categoryNews": "时事与社会 (Actualités)",
-    "categoryLiterature": "经典文学与哲学 (Littérature)",
-    "categoryTech": "科技与未来 (Technologies)",
-    "categoryCustom": "自定义分类",
     "cefrLevel": "目标难度级别 (CEFR)",
     "content": "法语法文正文",
-    "contentPlaceholder": "请粘贴或输入法语文章内容（支持多段落，系统将自动识别意群与句子）...",
-    "sampleBtn": "载入一篇示例文本",
-    "importSubmit": "确认导入并开始精读",
-    "validationError": "请完整填写文章标题与正文内容"
+    "contentPlaceholder": "请粘贴或输入法语文章内容（支持多段落，系统将自动识别意群与句子）..."
   },
   "pwa": {
     "title": "安装为应用",
@@ -318,5 +261,55 @@
   "keyBanner": {
     "text": "添加你的 Gemini Key，才能使用单词和句子解析、朗读和发音反馈。",
     "action": "添加 Key"
+  },
+  "ipa": {
+    "title": "法语音标",
+    "subtitle": "用国际音标列出法语的全部发音。点一下可以听示例单词。",
+    "vowels": "元音",
+    "nasals": "鼻化元音",
+    "semivowels": "半元音",
+    "consonants": "辅音",
+    "play": "播放 {{word}}，音标 {{symbol}}"
+  },
+  "levels": {
+    "A1": "A1 · 入门",
+    "A2": "A2 · 初级",
+    "B1": "B1 · 进阶中级",
+    "B2": "B2 · 高级中等",
+    "C1": "C1 · 高阶专业",
+    "C2": "C2 · 精通母语"
+  },
+  "voices": {
+    "Kore": "清亮优雅",
+    "Charon": "醇厚沉稳",
+    "Zephyr": "亲和温和",
+    "Puck": "阳光自然"
+  },
+  "errors": {
+    "badResponse": "AI 返回的内容无法解析，请重试。",
+    "noAudio": "没能生成语音。",
+    "allModelsFailed": "所有模型都失败了，请重试。"
+  },
+  "models": {
+    "gemini-2_5-flash": {
+      "name": "Gemini 2.5 Flash（推荐）",
+      "desc": "响应迅速，适合初学至 B2 语法拆解与即时纠音"
+    },
+    "gemini-2_5-pro": {
+      "name": "Gemini 2.5 Pro (深度分析)",
+      "desc": "高阶复杂长难句剖析与深度多模态能力"
+    },
+    "gemini-3_8-flash": {
+      "name": "Gemini 3.8 Flash (新一代多模态)",
+      "desc": "兼顾深度思维与极佳口语纠音评测"
+    },
+    "gemini-3_1-flash-lite": {
+      "name": "Gemini 3.1 Flash-Lite (超低延迟)",
+      "desc": "极简轻量级模型，适合低配网络快速浏览"
+    },
+    "gemini-3_8-flash-lite-tts": {
+      "name": "Gemini 3.8 Flash-Lite TTS（推荐）",
+      "desc": "24kHz 高采样率纯正母语法语发音合成，带自然连音与语调"
+    }
   }
 }
