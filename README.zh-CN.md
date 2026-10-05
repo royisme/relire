@@ -1,60 +1,64 @@
-# Éclair Français
+# Relire
 
 [English](README.md) · **简体中文**
 
-像考试里遇到的那样读法语，读不懂的地方点一下就能查，而且不会丢掉上下文；读完还能开口练。Éclair Français 是一个自己部署的网页应用，面向备考 **TCF Canada** 的学习者，专注两项技能：**阅读**和**发音**。
+*Relire* 在法语里是“再读一遍”。这是一个法语精读助手：读一篇真实的文章，点任何一个单词或句子就能看到它在上下文里的意思，再把句子读出来，得到发音反馈。它面向备考 **TCF Canada** 的学习者，专注两项技能：**阅读**和**发音**。
+
+它完全在浏览器里运行，没有应用服务器，也不用注册账号。你自带 Gemini API Key，还可以把它安装成电脑或手机上的应用。
 
 > **它不是什么。** 它不覆盖听力和写作，没有 TCF 模考题，打分是 AI 的估计而不是官方成绩。它与 France Éducation international、IRCC 没有任何关联，也未获其认可。请把它和真题、老师配合使用。
 
 ## 能做什么
 
-- **读 B1、B2、C1 的文章。** 内置三篇示例，也可以粘贴或导入自己的文章。字号和主题可调，朗读速度最低可到 0.5 倍。
+- **管理自己的文章库。** 内置三篇 B1 到 C1 的示例，也可以粘贴自己的文章，并在列表里搜索、按等级筛选、排序、编辑和删除。字号和主题可调，朗读速度最低可到 0.5 倍。
 - **点任何一个单词。** 查看词元、语境中的释义、IPA、动词时态、变位表和例句，一键加入生词本。
 - **拆解难句。** 译文、句法成分、语法点、常见搭配，以及影子跟读指南（节奏群、联诵、语调）。
 - **跟读并获得反馈。** 录下自己读句子的声音，得到总分，以及单个音素、联诵和语调的反馈。
+- **随时查法语发音。** 用国际音标列出法语的全部发音，每个音配一个示例单词，点一下就能听。
 - **用间隔重复复习生词。** 按 SM-2 算法安排今天该复习的词。
 - **从当前文章生成练习。** 句子重组、口语跟读、语法填空。
 - **中英文界面。** 界面和讲解可以在中文和英文之间切换。
 
-你保存的所有内容（文章、生词、统计）都留在浏览器的本地存储里，可以在设置中导出和恢复备份。
-
 ## 快速开始
 
-需要 Node 20.19 及以上（或 22.12 及以上），以及一个 [Gemini API key](https://aistudio.google.com/apikey)。
+需要 [Bun](https://bun.sh) 和一个免费的 [Gemini API Key](https://aistudio.google.com/apikey)。
 
 ```bash
 git clone https://github.com/royisme/relire.git
 cd relire
-npm install --legacy-peer-deps   # 或：bun install
-cp .env.example .env             # 然后填写 GEMINI_API_KEY
-npm run dev                      # http://localhost:3000
+bun install
+bun run dev        # http://localhost:5173
 ```
 
-生产构建：
+第一次打开时会有一个简短的引导，帮你创建并检查 Key，之后也可以在**设置**里添加。单词和句子解析、朗读音频、发音反馈都要用到它。
+
+### 作为应用安装
 
 ```bash
-npm run build
-npm start
+bun run build      # 静态文件输出到 dist/
+bun run preview    # 在本地预览
 ```
 
-也可以不设置 `GEMINI_API_KEY`，直接在应用的**设置**里填入 key，之后每次请求会由浏览器带上它。应用可以从浏览器菜单安装为 PWA。
+`dist/` 就是普通的静态网站，也可以放到任何地方（GitHub Pages、Netlify、S3 等）。用 Chrome、Edge 或 Safari 打开后，选择浏览器的“安装”选项，它就会在独立窗口里运行。安装需要 `localhost` 或 HTTPS。
+
+阅读、已保存的生词和生词复习可以离线使用。凡是要调用 Gemini 的功能都需要联网。
 
 ### 隐私
 
-单词、句子和你的录音会经由应用自己的服务器发送到 Gemini API，用来生成讲解、语音和评分。除此之外没有数据离开你的浏览器。如果你把它部署给别人用，他们的用量会计在你服务器上的 key 名下。
+文章、生词和统计数据保存在这个浏览器的 IndexedDB 里，API Key 和设置保存在本地存储里。可以在设置中导出和恢复备份（备份文件不包含 Key）。浏览器在空间不足或长期不使用时可能清掉网站数据，Safari 对没有安装的网站尤其如此，所以请安装成应用、在设置里点“保护我的数据”，并定期导出备份。使用 AI 功能时，单词、句子或录音会用你的 Key 从浏览器直接发给 Google 的 Gemini API，不经过任何其他服务器。能访问你浏览器配置的人可以读到保存的 Key，所以请使用可以随时撤销的 Key。
 
 ## 技术栈
 
-React 19、Vite、Tailwind CSS 4、代理 Gemini 的 Express 服务器、i18next。`PRODUCT.md` 说明产品面向谁以及设计原则，`DESIGN.md` 是视觉规范，`CLAUDE.md` 是给贡献者的代码地图。
+React 19、Vite、Tailwind CSS 4、i18next，以及在浏览器里直接调用的 `@google/genai`。`PRODUCT.md` 说明产品面向谁以及设计原则，`DESIGN.md` 是视觉规范，`CLAUDE.md` 是给贡献者的代码地图。
 
 ```
-server.ts          Express 服务器，所有 Gemini 调用都在这里
-src/App.tsx        应用状态和 localStorage 持久化
-src/components/    每个页面或浮层一个文件
-src/utils/srs.ts   SM-2 调度
+src/services/gemini.ts   所有 Gemini 调用（解析、评估、练习、语音）
+src/App.tsx              应用状态和 localStorage 持久化
+src/components/          每个页面或浮层一个文件
+src/utils/srs.ts         SM-2 调度
 ```
 
-`npm run lint` 运行 TypeScript 检查。目前还没有自动化测试。
+`bun run lint` 运行 TypeScript 检查。目前还没有自动化测试。
 
 ## 参与贡献
 

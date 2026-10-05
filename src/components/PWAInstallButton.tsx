@@ -1,57 +1,46 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, OverlayHeader } from './ui/overlay';
-import { Download, Monitor, CheckCircle2, X, Laptop } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
 
-export const PWAInstallButton: React.FC = () => {
+export const PWAInstallButton: React.FC<{ variant?: 'icon' | 'row'; onDone?: () => void }> = ({
+  variant = 'icon',
+  onDone,
+}) => {
   const { t } = useTranslation();
   const { isInstallable, isInstalled, install } = usePWAInstall();
   const [showMacGuide, setShowMacGuide] = useState(false);
 
-  // If already running in standalone PWA window, don't show the prompt
-  if (isInstalled) {
-    return (
-      <Badge variant="ok" className="hidden lg:inline-flex">
-        <CheckCircle2 className="w-3.5 h-3.5 mr-0.5 text-ok-600" />
-        <span>{t('nav.installedDesktop')}</span>
-      </Badge>
-    );
-  }
+  // Already running as an installed app: nothing to offer.
+  if (isInstalled) return null;
 
-  // 1-Click Install Flow (Chrome / Edge / Chromium on Mac/Windows)
-  if (isInstallable) {
-    return (
-      <Button
-        onClick={install}
-        variant="outline"
-        size="sm"
-        className="font-medium whitespace-nowrap cursor-pointer"
-        title={t('nav.installMac')}
-      >
-        <Download className="w-3.5 h-3.5" />
-        <span className="hidden lg:inline">{t('nav.installMac')} (PWA)</span>
-        <span className="lg:hidden">{t('nav.installApp')}</span>
-      </Button>
-    );
-  }
+  const label = t('nav.installApp');
+  const onClick = () => {
+    if (isInstallable) {
+      install();
+      onDone?.();
+    } else {
+      setShowMacGuide(true);
+    }
+  };
 
-  // Fallback / Safari on Mac or manual install guide
   return (
     <>
-      <Button
-        onClick={() => setShowMacGuide(true)}
-        variant="outline"
-        size="sm"
-        className="text-ink-700 whitespace-nowrap cursor-pointer"
-        title={t('nav.installMac')}
-      >
-        <Laptop className="w-3.5 h-3.5 text-ink-600" />
-        <span className="hidden lg:inline">{t('nav.installMac')}</span>
-        <span className="lg:hidden">{t('nav.installApp')}</span>
-      </Button>
+      {variant === 'row' ? (
+        <button
+          onClick={onClick}
+          className="flex w-full items-center gap-3 px-4 h-12 text-sm text-ink-800 hover:bg-ink-100 cursor-pointer"
+        >
+          <Download className="w-4 h-4 text-ink-600" />
+          <span>{label}</span>
+        </button>
+      ) : (
+        <Button variant="ghost" size="icon" onClick={onClick} aria-label={label} title={label}>
+          <Download className="w-5 h-5" />
+        </Button>
+      )}
 
       {showMacGuide && (
         <Dialog onClose={() => setShowMacGuide(false)} label={t('pwa.title')} className="max-w-md">

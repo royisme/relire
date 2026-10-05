@@ -6,7 +6,7 @@
 
 ## What it is
 
-Éclair Français is a French deep-reading and speaking-practice app for Chinese-speaking learners (UI also in English). The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It runs as a PWA (installable on Mac/iOS) backed by a small Express server that proxies Gemini; all user data lives in the browser's localStorage.
+Relire (French for "to read again") is a close-reading assistant for French learners preparing for TCF Canada, with a Chinese and English interface. The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It is a static PWA: no app server, no account. The learner supplies their own Gemini API key, which is stored in the browser and used for direct calls to Google. All user data lives in localStorage.
 
 ## Users
 
@@ -22,13 +22,17 @@ Intermediate learners (roughly A2–C1) preparing for TCF/DELF/DALF or reading F
 
 ## Screens
 
-- **Reader**: article picker/importer, reading settings (font size, theme: parchment / white / sepia / dark, playback speed), tap-to-analyse words, sentence toolbar (play, analyse).
+First run: a three-step guide (welcome, connect Gemini with a checked key, try a sample article). Skipping is allowed and leaves a persistent banner until a key is set.
+
+
+- **Library** (the Read tab's home): a table of all articles with search, level filter, sortable columns, add, edit and delete. Opening a row opens the reader.
+- **Reader**: one article, back to the library, reading settings (font size, theme: parchment / white / sepia / dark, playback speed), tap-to-analyse words, sentence toolbar (play, analyse).
 - **Word detail**: translation, IPA, tense, conjugation table, usage examples, save to vocabulary.
 - **Sentence drawer**: translation, syntax, grammar points, collocations, shadowing record and score.
 - **Vocabulary**: list plus flashcard quiz with SRS ratings.
 - **Practice**: AI-generated drills and oral assessment.
-- **Analytics**: summary figures, phoneme profile, coach synthesis.
-- **Settings**: API key and model, voice, language, backup/restore JSON.
+- **Progress**: three plain figures (words saved, average pronunciation score, shadowing sessions), recent scores, and a tap-to-hear chart of the French sounds in IPA. No coaching text or invented scores; an AI coach summary is a possible later feature.
+- **Settings**: Gemini key and models, voice, backup/restore JSON. Language is a single icon in the header.
 
 ## Tone and personality
 
@@ -49,4 +53,4 @@ Duolingo-style gamification (streak flames, confetti, mascots), generic AI-dashb
 
 ## Constraints
 
-React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh). Client-only persistence in localStorage keys `eclair_*_v1`; keep stored shapes backwards compatible. Gemini is called only from `server.ts`.
+React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh), Bun. Fully client-side: Gemini is called from the browser with the user's own key (`src/services/gemini.ts`). Client-only persistence: user data in IndexedDB (`src/storage`), settings and API key in localStorage (`relire_*`). Never invent data to fill an empty state.

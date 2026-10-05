@@ -3,35 +3,38 @@ import { useTranslation } from 'react-i18next';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import {
   X, Settings, Key, Cpu, Volume2, ShieldCheck, CheckCircle2,
-  AlertCircle, HelpCircle, RefreshCw, Sparkles, Server, Terminal, Copy, Check,
-  Download, Upload, Database, HardDrive, Trash2, Globe
+  AlertCircle, HelpCircle, RefreshCw, Sparkles,
+  Download, Upload, Database, HardDrive, Trash2
 } from 'lucide-react';
 import {
   AppSettings, getAppSettings, saveAppSettings,
   AVAILABLE_ANALYSIS_MODELS, AVAILABLE_TTS_MODELS, AVAILABLE_VOICES
 } from '../utils/appSettings';
-import { setAppLanguage } from '../i18n';
 import { speakFrench } from '../utils/frenchSpeech';
+import { synthesizeSpeech } from '../services/gemini';
+import { exportData, getStorageInfo, importData, requestPersistence, type StorageInfo } from '../storage/db';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSettingsSaved?: (newSettings: AppSettings) => void;
+  /** Shown when the dialog was opened because an AI feature needs a key. */
+  needsKey?: boolean;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
   onSettingsSaved,
+  needsKey,
 }) => {
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
   const [settings, setSettings] = useState<AppSettings>(getAppSettings());
-  const [serverHasKey, setServerHasKey] = useState<boolean | null>(null);
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
-  const [copiedEnv, setCopiedEnv] = useState(false);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
+  const [storageInfo, setStorageInfo] = useState<StorageInfo>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Stats on local data storage
@@ -47,25 +50,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       setTestResult(null);
       setBackupStatus(null);
 
-      // Check server env key status
-      fetch('/api/config')
-        .then((r) => r.json())
-        .then((d) => setServerHasKey(!!d.hasEnvKey))
-        .catch(() => setServerHasKey(false));
-
-      // Calculate local data size
-      try {
-        const rawArticles = localStorage.getItem('eclair_articles_v1');
-        const rawVocab = localStorage.getItem('eclair_vocab_v1');
-        const rawStats = localStorage.getItem('eclair_stats_v1');
-        setLocalStats({
-          articlesCount: rawArticles ? JSON.parse(rawArticles).length : 0,
-          vocabCount: rawVocab ? JSON.parse(rawVocab).length : 0,
-          statsHistoryCount: rawStats ? (JSON.parse(rawStats).pronunciationHistory?.length || 0) : 0,
-        });
-      } catch (e) {
-        console.error('Failed to read local stats', e);
-      }
+      exportData()
+        .then((d) =>
+          setLocalStats({
+            articlesCount: d.articles.length,
+            vocabCount: d.vocab.length,
+            statsHistoryCount: d.stats.pronunciationHistory?.length || 0,
+          })
+        )
+        .catch((e) => console.error('Failed to read local stats', e));
+      getStorageInfo().then(setStorageInfo);
     }
   }, [isOpen]);
 
@@ -79,23 +73,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onClose();
   };
 
-  // Export all application data into a single JSON file
-  const handleExportData = () => {
+  // Export all application data into a single JSON file. The API key is left out on purpose.
+  const handleExportData = async () => {
     try {
+      const { customApiKey: _key, ...settingsWithoutKey } = getAppSettings();
       const backupData = {
         version: '1.0',
         exportedAt: new Date().toISOString(),
-        settings: getAppSettings(),
-        articles: JSON.parse(localStorage.getItem('eclair_articles_v1') || '[]'),
-        vocab: JSON.parse(localStorage.getItem('eclair_vocab_v1') || '[]'),
-        stats: JSON.parse(localStorage.getItem('eclair_stats_v1') || '{}'),
+        settings: settingsWithoutKey,
+        ...(await exportData()),
       };
 
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `eclair-francais-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `relire-backup-${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -103,7 +96,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
       setBackupStatus(t('settings.exportSuccess'));
     } catch (err: any) {
-      setBackupStatus(`Export failed: ${err.message || err}`);
+      setBackupStatus(t('settings.exportFailed', { msg: err.message || err }));
     }
   };
 
@@ -113,22 +106,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
-        const text = event.target?.result as string;
-        const data = JSON.parse(text);
+        const data = JSON.parse(event.target?.result as string);
 
-        if (data.articles && Array.isArray(data.articles)) {
-          localStorage.setItem('eclair_articles_v1', JSON.stringify(data.articles));
-        }
-        if (data.vocab && Array.isArray(data.vocab)) {
-          localStorage.setItem('eclair_vocab_v1', JSON.stringify(data.vocab));
-        }
-        if (data.stats && typeof data.stats === 'object') {
-          localStorage.setItem('eclair_stats_v1', JSON.stringify(data.stats));
-        }
+        await importData({
+          articles: Array.isArray(data.articles) ? data.articles : undefined,
+          vocab: Array.isArray(data.vocab) ? data.vocab : undefined,
+          stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
+        });
         if (data.settings && typeof data.settings === 'object') {
-          saveAppSettings(data.settings);
+          // A backup never carries the API key, so keep the one already saved.
+          saveAppSettings({ ...data.settings, customApiKey: getAppSettings().customApiKey });
           setSettings(getAppSettings());
         }
 
@@ -137,7 +126,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           window.location.reload();
         }, 1200);
       } catch (err: any) {
-        setBackupStatus(`Restore failed: (${err.message || err})`);
+        setBackupStatus(t('settings.restoreFailed', { msg: err.message || err }));
       }
     };
     reader.readAsText(file);
@@ -148,34 +137,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setIsTesting(true);
     setTestResult(null);
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (settings.customApiKey?.trim()) {
-        headers['x-gemini-api-key'] = settings.customApiKey.trim();
-      }
-
-      // Test TTS audio generation
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          text: 'Bonjour ! Bienvenue sur Éclair Français.',
-          voice: settings.ttsVoice,
-          model: settings.ttsModel,
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'HTTP ' + res.status }));
-        throw new Error(err.error || 'Test failed');
-      }
+      await synthesizeSpeech(
+        { text: 'Bonjour !', voice: settings.ttsVoice, model: settings.ttsModel },
+        settings.customApiKey
+      );
 
       setTestResult({
         success: true,
         msg: t('settings.testSuccess'),
       });
 
-      // Play test speech
-      speakFrench('Bonjour ! Bienvenue sur Éclair Français.', {
+      speakFrench('Bonjour ! Bienvenue sur Relire.', {
         voice: settings.ttsVoice,
       });
     } catch (err: any) {
@@ -188,19 +160,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
-  const copyEnvSnippet = () => {
-    navigator.clipboard.writeText('GEMINI_API_KEY="your_api_key_here"\nPORT=3000');
-    setCopiedEnv(true);
-    setTimeout(() => setCopiedEnv(false), 2000);
-  };
-
   return (
     <Dialog onClose={onClose} label={t('settings.title')}>
         <OverlayHeader title={t('settings.title')} subtitle={t('settings.subtitle')} onClose={onClose} closeLabel={t('common.close')} />
 
         {/* Modal Body */}
         <div className="p-5 sm:p-6 space-y-6 max-h-[72vh] overflow-y-auto">
-          
+          {needsKey && (
+            <p className="rounded-md border border-accent-200 bg-accent-50 px-3 py-2 text-sm text-accent-900">
+              {t('settings.needsKeyNotice')}
+            </p>
+          )}
+
           {/* SECTION 1: LLM Key & Deployment */}
           <div className="space-y-3.5">
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -208,22 +179,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Key className="w-4 h-4 text-ink-600" />
                 <span>{t('settings.apiKeySection')}</span>
               </h4>
-              {/* Server Key Status Badge */}
-              <div className="flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium border">
-                {serverHasKey === null ? (
-                  <span className="text-ink-400">{t('common.loading')}</span>
-                ) : serverHasKey ? (
-                  <span className="text-ok-700 bg-ok-50 border-ok-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-ok-600" />
-                    <span>{t('settings.envKeyReady')}</span>
-                  </span>
-                ) : (
-                  <span className="text-accent-800 bg-accent-50 border-accent-200 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5 text-accent-600" />
-                    <span>{t('settings.envKeyMissing')}</span>
-                  </span>
-                )}
-              </div>
+              {settings.customApiKey.trim() ? (
+                <span className="text-ok-800 bg-ok-50 border border-ok-200 flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{t('settings.keySet')}</span>
+                </span>
+              ) : (
+                <span className="text-accent-800 bg-accent-50 border border-accent-200 flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{t('settings.keyMissing')}</span>
+                </span>
+              )}
             </div>
 
             <div className="p-4 rounded-lg bg-white border border-ink-200 space-y-3 ">
@@ -245,28 +211,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </p>
               </div>
 
-              {/* Deployment hint */}
-              <div className="p-3 rounded-md bg-ink-50 border border-ink-200 text-xs space-y-1.5">
-                <div className="flex items-center justify-between text-ink-700 font-medium">
-                  <span className="flex items-center gap-1.5">
-                    <Server className="w-3.5 h-3.5 text-ink-600" />
-                    <span>{t('settings.deployGuideTitle')}</span>
-                  </span>
-                  <button
-                    onClick={copyEnvSnippet}
-                    className="flex items-center gap-1 text-xs text-accent-800 hover:text-accent-950 font-mono"
-                  >
-                    {copiedEnv ? <Check className="w-3 h-3 text-ok-600" /> : <Copy className="w-3 h-3" />}
-                    <span>{copiedEnv ? t('settings.copiedEnv') : t('settings.copyEnv')}</span>
-                  </button>
-                </div>
-                <code className="block p-2 rounded-md bg-ink-900 text-ok-300 font-mono text-xs">
-                  GEMINI_API_KEY="AIzaSy..."
-                </code>
-                <p className="text-xs text-ink-500 leading-relaxed">
-                  {t('settings.deployGuideDesc')}
-                </p>
-              </div>
+              <p className="text-xs text-ink-500 leading-relaxed">
+                {t('settings.keyPrivacy')}{' '}
+                <a
+                  href="https://aistudio.google.com/apikey"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-accent-700 underline underline-offset-2 hover:text-accent-900"
+                >
+                  {t('settings.getKey')}
+                </a>
+              </p>
             </div>
           </div>
 
@@ -295,16 +250,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   {AVAILABLE_ANALYSIS_MODELS.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {isEn ? (m.nameEn || m.name) : m.name}
+                      {t(`models.${m.id.replace(/\./g, '_')}.name`)}
                     </option>
                   ))}
                 </select>
 
                 <p className="text-xs text-accent-900 bg-accent-50 p-2 rounded-md border border-accent-200/60 leading-relaxed">
-                  {(() => {
-                    const found = AVAILABLE_ANALYSIS_MODELS.find((m) => m.id === settings.analysisModel);
-                    return isEn ? (found?.descEn || found?.desc) : found?.desc;
-                  })()}
+                  {t(`models.${settings.analysisModel.replace(/\./g, '_')}.desc`, { defaultValue: '' })}
                 </p>
               </div>
 
@@ -325,16 +277,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 >
                   {AVAILABLE_TTS_MODELS.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {isEn ? (m.nameEn || m.name) : m.name}
+                      {t(`models.${m.id.replace(/\./g, '_')}.name`)}
                     </option>
                   ))}
                 </select>
 
                 <p className="text-xs text-ok-950 bg-ok-50 p-2 rounded-md border border-ok-200/60 leading-relaxed">
-                  {(() => {
-                    const found = AVAILABLE_TTS_MODELS.find((m) => m.id === settings.ttsModel);
-                    return isEn ? (found?.descEn || found?.desc) : found?.desc;
-                  })()}
+                  {t(`models.${settings.ttsModel.replace(/\./g, '_')}.desc`, { defaultValue: '' })}
                 </p>
               </div>
             </div>
@@ -350,8 +299,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {AVAILABLE_VOICES.map((v) => {
                 const isSelected = settings.ttsVoice === v.id;
-                const voiceName = isEn ? (v.nameEn || v.name) : v.name;
-                const voiceSubtitle = voiceName.split('·')[1]?.replace(')', '') || (isEn ? 'Standard French' : '标准母语法语');
                 return (
                   <button
                     key={v.id}
@@ -370,7 +317,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       </span>
                     </div>
                     <span className="text-xs text-ink-500 block truncate">
-                      {voiceSubtitle}
+                      {t(`voices.${v.id}`)}
                     </span>
                   </button>
                 );
@@ -404,6 +351,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <p className="text-xs text-ink-500 leading-relaxed">
                 {t('settings.offlineDesc')}
               </p>
+
+              {/* Storage protection */}
+              <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
+                <span className="text-ink-600">
+                  {storageInfo.usage !== undefined && (
+                    <span className="tnum">{(storageInfo.usage / 1024 / 1024).toFixed(1)} MB · </span>
+                  )}
+                  {storageInfo.persisted ? t('settings.storageProtected') : t('settings.storageNotProtected')}
+                </span>
+                {storageInfo.persisted === false && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await requestPersistence();
+                      setStorageInfo(await getStorageInfo());
+                    }}
+                    className="h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium cursor-pointer"
+                  >
+                    {t('settings.protectStorage')}
+                  </button>
+                )}
+              </div>
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3 pt-1 flex-wrap">
@@ -439,42 +408,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   {backupStatus}
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* SECTION 5: Language Selection (i18n) */}
-          <div className="space-y-3.5">
-            <h4 className="text-xs font-semibold text-ink-900 flex items-center gap-1.5">
-              <Globe className="w-4 h-4 text-ink-700" />
-              <span>{t('settings.languageSection')}</span>
-            </h4>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setAppLanguage('en')}
-                className={`p-3 rounded-lg border text-left transition-all ${
-                  i18n.language === 'en'
-                    ? 'border-ink-700 bg-ink-100 ring-2 ring-ink-700/20 '
-                    : 'border-ink-200 bg-white hover:border-ink-300'
-                }`}
-              >
-                <div className="font-semibold text-xs text-ink-900">English</div>
-                <div className="text-xs text-ink-500">{t('settings.langEn')}</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAppLanguage('zh')}
-                className={`p-3 rounded-lg border text-left transition-all ${
-                  i18n.language === 'zh'
-                    ? 'border-ink-700 bg-ink-100 ring-2 ring-ink-700/20 '
-                    : 'border-ink-200 bg-white hover:border-ink-300'
-                }`}
-              >
-                <div className="font-semibold text-xs text-ink-900">简体中文</div>
-                <div className="text-xs text-ink-500">{t('settings.langZh')}</div>
-              </button>
             </div>
           </div>
 

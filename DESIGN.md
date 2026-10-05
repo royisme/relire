@@ -1,6 +1,6 @@
 # Design
 
-The visual system for Éclair Français. Product intent lives in `PRODUCT.md`. Tokens live in `src/index.css` (`@theme`); use them, not raw hex.
+The visual system for Relire. Product intent lives in `PRODUCT.md`. Tokens live in `src/index.css` (`@theme`); use them, not raw hex.
 
 ## Direction: a quiet reading room
 
@@ -37,11 +37,12 @@ No amber, indigo, gradients or per-feature colours. Text on a tinted surface use
 |---|---|---|
 | Look up a word or sentence while reading | Side sheet on md+, bottom sheet on phones, light scrim so text stays visible | `Sheet` |
 | Task that needs focus (settings, import, install) | Centred dialog | `Dialog` |
-| Switch area | Underlined top tabs, icon-only below `sm` | `Navbar` |
+| Switch area | Flat underlined tabs from `md` up; below `md` a menu button opens a left drawer holding the tabs, install and settings | `Navbar`, `Drawer` |
+| Change interface language | One language icon in the header opening a short menu (extensible via `LANGUAGES`) | `LanguageSwitcher` |
 | Sentence actions | Appear on hover **or tap**; never hover-only | `ReaderView` |
 
 Rules: Esc closes any overlay; close buttons are ≥40px on touch; focus ring is global (`:focus-visible`); motion is 160–200ms ease-out and disabled under `prefers-reduced-motion`; no bounce, pulse or decorative animation. Recording state is the only exception that may pulse.
 
 ## Components
 
-Use `ui/button` (default, secondary, outline, ghost, destructive; sizes sm 36px, default 40px), `ui/badge` (default, secondary, outline, accent, ok, bad), `ui/card`, `ui/overlay` (`Sheet`, `Dialog`, `OverlayHeader`). Icons: lucide, 16px in controls, 1.5–2 stroke, one weight.
+Use `ui/button` (default, secondary, outline, ghost, destructive; sizes sm 36px, default 40px), `ui/badge` (default, secondary, outline, accent, ok, bad), `ui/card`, `ui/overlay` (`Sheet`, `Dialog`, `Drawer`, `OverlayHeader`). Icons: lucide, 16px in controls, 1.5–2 stroke, one weight.

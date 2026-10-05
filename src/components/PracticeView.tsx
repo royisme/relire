@@ -5,22 +5,27 @@ import {
   ArrowRight, Square, Award, BookOpen, Layers, MessageSquare, Loader2
 } from 'lucide-react';
 import { Article, PracticeDeck, PracticeQuestion, PronunciationAssessment } from '../types';
-import { generatePracticeDrills, assessPronunciation } from '../services/api';
+import { generatePracticeDrills, assessPronunciation, MissingApiKeyError } from '../services/api';
 import { speakFrench, stopSpeech, FrenchAudioRecorder } from '../utils/frenchSpeech';
 
 interface PracticeViewProps {
-  currentArticle: Article;
+  currentArticle: Article | null;
+  onOpenLibrary: () => void;
+  onNeedsKey: () => void;
   onRecordAssessmentComplete: (assessment: PronunciationAssessment, sentence: string) => void;
 }
 
 export const PracticeView: React.FC<PracticeViewProps> = ({
   currentArticle,
+  onOpenLibrary,
+  onNeedsKey,
   onRecordAssessmentComplete,
 }) => {
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
   const [activePracticeType, setActivePracticeType] = useState<'syntax' | 'oral' | 'cloze'>('syntax');
   const [isLoadingDeck, setIsLoadingDeck] = useState(false);
+  const [deckError, setDeckError] = useState<string | null>(null);
   const [deck, setDeck] = useState<PracticeDeck | null>(null);
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
 
@@ -49,71 +54,20 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   const handleLoadDrills = async (type: 'syntax' | 'oral' | 'cloze') => {
     setActivePracticeType(type);
     setIsLoadingDeck(true);
+    setDeckError(null);
     setDeck(null);
     setActiveQuestionIdx(0);
     resetQuestionState();
 
     try {
-      const result = await generatePracticeDrills(currentArticle.content, type);
+      const result = await generatePracticeDrills(currentArticle!.content, type);
       setDeck(result);
     } catch (err) {
-      console.error('Failed to load practice deck:', err);
-      // Fallback local drill deck if API has temporary issue
-      setDeck({
-        title: type === 'syntax'
-          ? (isEn ? 'Sentence Scramble Drill' : '长难句重组训练')
-          : type === 'oral'
-          ? (isEn ? 'Oral Shadowing Drill' : '影子跟读口语强化')
-          : (isEn ? 'Tense & Cloze Drill' : '时态填空专练'),
-        description: isEn
-          ? 'Targeted drill based on key complex sentences from the article'
-          : '基于当前文章核心长难句定制的专项强化模块',
-        questions: [
-          {
-            id: 1,
-            type: type === 'syntax' ? 'scramble' : type === 'oral' ? 'oral_prompt' : 'cloze',
-            targetSentence: "On ne voit bien qu'avec le cœur, l'essentiel est invisible pour les yeux.",
-            prompt: isEn
-              ? "Reconstruct the scrambled thought groups into the classic restrictive negative sentence (ne... que):"
-              : '请将以下乱序语法意群重组成经典的复合否定限制句（ne... que）:',
-            scrambledChunks: [
-              "On ne voit bien",
-              "qu'avec le cœur,",
-              "l'essentiel est invisible",
-              "pour les yeux."
-            ],
-            clozeText: "On ne voit bien ____ avec le cœur, l'essentiel est invisible pour les yeux.",
-            options: ["qu'", "que", "dont", "sans"],
-            correctOptionIndex: 0,
-            grammarHint: isEn
-              ? "ne... que is a restrictive negation (meaning 'only/just'), eliding to qu' before a vowel."
-              : "ne... que 为限制性否定（表示'只，仅'），辅音或元音前缩合为 qu'。",
-            shadowingAudioPrompt: "On ne voit bien qu'avec le cœur, l'essentiel est invisible pour les yeux."
-          },
-          {
-            id: 2,
-            type: type === 'syntax' ? 'scramble' : type === 'oral' ? 'oral_prompt' : 'cloze',
-            targetSentence: "Bien que le rythme de la capitale se soit considérablement accéléré, cette tradition demeure inébranlable.",
-            prompt: isEn
-              ? "Reconstruct the complex sentence featuring a concessive clause (Bien que + subjunctive):"
-              : '请重组带有让步从句（Bien que + 虚拟式）的长难句:',
-            scrambledChunks: [
-              "Bien que le rythme",
-              "de la capitale",
-              "se soit considérablement accéléré,",
-              "cette tradition",
-              "demeure inébranlable."
-            ],
-            clozeText: "Bien que le rythme de la capitale se ____ considérablement accéléré, cette tradition demeure inébranlable.",
-            options: ["soit", "est", "serait", "fut"],
-            correctOptionIndex: 0,
-            grammarHint: isEn
-              ? "The conjunction phrase Bien que must be followed by the subjunctive mood (se soit accéléré)."
-              : "连词短语 Bien que 之后必须接从属虚拟式（se soit accéléré）。",
-            shadowingAudioPrompt: "Bien que le rythme de la capitale se soit considérablement accéléré, cette tradition demeure inébranlable."
-          }
-        ]
-      });
+      if (err instanceof MissingApiKeyError) {
+        onNeedsKey();
+      } else {
+        setDeckError(err instanceof Error ? err.message : String(err));
+      }
     } finally {
       setIsLoadingDeck(false);
     }
@@ -229,6 +183,21 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     }
   };
 
+  if (!currentArticle) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center space-y-4">
+        <p className="font-serif text-lg text-ink-900">{t('practice.noArticleTitle')}</p>
+        <p className="text-sm text-ink-500">{t('practice.noArticleDesc')}</p>
+        <button
+          onClick={onOpenLibrary}
+          className="h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium cursor-pointer"
+        >
+          {t('practice.openLibrary')}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
@@ -301,6 +270,11 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           <p className="text-xs text-ink-500 max-w-md mx-auto">
             {t('practice.subtitle')}
           </p>
+          {deckError && (
+            <p role="alert" className="text-sm text-bad-700 max-w-md mx-auto break-words">
+              {deckError}
+            </p>
+          )}
           <button
             onClick={() => handleLoadDrills(activePracticeType)}
             className="h-10 px-4 rounded-md bg-accent-700 text-ink-100 text-sm font-medium hover:bg-ink-800 transition-all cursor-pointer"

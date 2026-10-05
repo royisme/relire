@@ -79,7 +79,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `eclair-vocab-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `relire-vocab-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
   };
 
@@ -152,7 +152,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                 <span>
                   {currentIndex + 1} / {dueWords.length}
                 </span>
-                <span>{t('vocab.dueCount', { count: reviewedCount })}</span>
+                <span>{t('vocab.reviewedCount', { count: reviewedCount })}</span>
               </div>
               <div className="w-full bg-ink-200 h-1.5 rounded-full overflow-hidden">
                 <div
@@ -170,9 +170,11 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
               >
                 {/* Card Front */}
                 <div className="space-y-4 text-center">
-                  <span className="text-xs font-semibold text-accent-800 bg-accent-100 px-2.5 py-0.5 rounded-full">
-                    {currentQuizWord.partOfSpeech || 'Mot Français'}
-                  </span>
+                  {currentQuizWord.partOfSpeech && (
+                    <span className="text-xs font-semibold text-accent-800 bg-accent-100 px-2.5 py-0.5 rounded-full">
+                      {currentQuizWord.partOfSpeech}
+                    </span>
+                  )}
 
                   <h3 className="font-serif font-semibold text-4xl sm:text-5xl text-ink-900 tracking-tight">
                     {currentQuizWord.word}
@@ -336,7 +338,8 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
               <button
                 onClick={handleExportJSON}
                 className="p-2 rounded-md border border-ink-200 text-ink-600 hover:text-ink-900 hover:bg-ink-50 cursor-pointer"
-                title="JSON"
+                title={t('vocab.exportJson')}
+                aria-label={t('vocab.exportJson')}
               >
                 <Download className="w-4 h-4" />
               </button>

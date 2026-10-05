@@ -1,262 +1,99 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Award, CheckCircle,
-  AlertTriangle, Sparkles, Volume2
-} from 'lucide-react';
-import { VocabWord, UserStats, PronunciationAssessment } from '../types';
+import { Volume2 } from 'lucide-react';
+import { VocabWord, UserStats } from '../types';
 import { speakFrench } from '../utils/frenchSpeech';
+import { FRENCH_IPA, IpaGroup } from '../data/frenchIpa';
 
 interface AnalyticsDashboardProps {
   stats: UserStats;
   vocabList: VocabWord[];
 }
 
-export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
-  stats,
-  vocabList,
-}) => {
-  const { t, i18n } = useTranslation();
+const GROUPS: IpaGroup[] = ['vowels', 'nasals', 'semivowels', 'consonants'];
+
+export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, vocabList }) => {
+  const { t } = useTranslation();
   const masteredCount = vocabList.filter((w) => w.repetitions >= 4).length;
-  const learningCount = vocabList.filter((w) => w.repetitions > 0 && w.repetitions < 4).length;
-  const newCount = vocabList.filter((w) => w.repetitions === 0).length;
-
-  const isEn = i18n.language !== 'zh';
-
-  const phonemeChecklist = [
-    {
-      phoneme: '[ʁ]',
-      name: isEn ? 'Uvular Fricative R' : '小舌颤音/擦音',
-      examples: 'Paris, regarder, apprendre',
-      difficulty: isEn ? 'Characteristic French sound' : '中国学习者最高频难点',
-      status: 'good',
-      tip: isEn ? 'Keep tongue tip down behind lower teeth, slight vibration at soft palate.' : '舌尖抵住下齿背，舌根稍向软腭抬起，让气流经小舌间隙摩擦发出轻微振动，切忌发出喉咙呼噜水声。',
-    },
-    {
-      phoneme: '[y]',
-      name: isEn ? 'Close Front Rounded Vowel' : '闭前圆唇元音',
-      examples: 'tu, lune, musique',
-      difficulty: isEn ? 'Distinct from /u/ and /i/' : '易误读为拼音 u 或 iou',
-      status: 'needs_work',
-      tip: isEn ? 'Position tongue as for [i], but firmly round lips forward into a small circle.' : '舌位完全如同发汉语的“衣”[i]，但嘴唇要极端向前收缩成紧致的小圆圈，保持圆唇固定。',
-    },
-    {
-      phoneme: '[ɑ̃]',
-      name: 'Nasal [ɑ̃]',
-      examples: 'enfant, temps, champ',
-      difficulty: isEn ? 'Open back nasal vowel' : '易带有末尾辅音 /n/',
-      status: 'good',
-      tip: isEn ? 'Drop soft palate with tongue low in back; do not close lips into an "n".' : '口腔张大至类似发[a]，同时软腭自然下垂，气流均匀由口鼻同时逸出，千万不要在结尾闭口形成辅音n。',
-    },
-    {
-      phoneme: '[ɛ̃]',
-      name: 'Nasal [ɛ̃]',
-      examples: 'matin, plein, vin',
-      difficulty: isEn ? 'Front unrounded nasal' : '易误读成拼音 en',
-      status: 'needs_work',
-      tip: isEn ? 'Slightly spread corners of mouth as in [ɛ], resonating air through nasal cavity.' : '嘴角向两旁微微咧开，发类似[ɛ]的口腔姿态，软腭下垂通气，声音在鼻腔产生清亮共鸣。',
-    },
-    {
-      phoneme: '[ɔ̃]',
-      name: 'Nasal [ɔ̃]',
-      examples: 'bonbon, monde, ombre',
-      difficulty: isEn ? 'Rounded back nasal' : '易与 [ɑ̃] 混淆',
-      status: 'mastered',
-      tip: isEn ? 'Lips rounded tightly, tongue drawn back, resonance in both oral and nasal passages.' : '双唇收成圆小孔，舌身向后退缩，声音浑厚圆润，口鼻同时出气。',
-    },
-    {
-      phoneme: 'Liaison',
-      name: isEn ? 'Obligatory Liaison' : '法定联诵与连音',
-      examples: 'les_amis [z], un_homme [n]',
-      difficulty: isEn ? 'Liaison rules' : '必须联诵 vs 禁止联诵',
-      status: 'good',
-      tip: isEn ? 'Pronounce normally silent final consonant before vowel: article + noun, pronoun + verb.' : '冠词+名词、主格人称代词+动词必须联诵；连词 et 以及某些特定副词之后绝对禁止联诵。',
-    },
-  ];
+  const history = stats.pronunciationHistory ?? [];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      
-      {/* Top Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-serif font-semibold text-2xl text-ink-900 flex items-center gap-2">
-            <span>{t('analytics.title')}</span>
-          </h2>
-          <p className="text-xs text-ink-500 mt-1">
-            {t('analytics.subtitle')}
-          </p>
-        </div>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-8">
+      <div>
+        <h2 className="font-serif font-semibold text-2xl text-ink-900">{t('analytics.title')}</h2>
+        <p className="text-sm text-ink-500 mt-1">{t('analytics.subtitle')}</p>
       </div>
 
-      {/* Summary */}
-      <dl className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-ink-200 rounded-lg border border-ink-200 bg-white">
+      <dl className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-ink-200 rounded-lg border border-ink-200 bg-white">
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.wordsLearned')}</dt>
-          <dd className="text-2xl font-serif font-semibold text-ink-900">{vocabList.length}</dd>
-          <dd className="text-xs text-ink-500">{t('vocab.mastered')}: {masteredCount}</dd>
+          <dd className="text-2xl font-serif font-semibold text-ink-900 tnum">{vocabList.length}</dd>
+          <dd className="text-xs text-ink-500">{t('vocab.mastered')}: <span className="tnum">{masteredCount}</span></dd>
         </div>
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.avgScore')}</dt>
-          <dd className="text-2xl font-serif font-semibold text-ink-900">
-            {stats.averagePronunciationScore ?? '—'}
-            {stats.averagePronunciationScore != null && <span className="text-sm font-normal text-ink-400">/100</span>}
+          <dd className="text-2xl font-serif font-semibold text-ink-900 tnum">
+            {history.length ? stats.averagePronunciationScore : '—'}
+            {history.length > 0 && <span className="text-sm font-normal text-ink-400">/100</span>}
           </dd>
         </div>
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.oralSessions')}</dt>
-          <dd className="text-2xl font-serif font-semibold text-ink-900">{stats.shadowingSessionsCompleted ?? 0}</dd>
-          <dd className="text-xs text-ink-500">{stats.sentencesAnalyzed ?? 0} {t('analytics.sentencesAnalyzed')}</dd>
-        </div>
-        <div className="p-4 space-y-1">
-          <dt className="text-xs text-ink-500">{t('analytics.streakDays')}</dt>
-          <dd className="text-2xl font-serif font-semibold text-ink-900">
-            {stats.streak ?? 0}
-            <span className="text-sm font-normal text-ink-400"> {t('analytics.days')}</span>
+          <dd className="text-2xl font-serif font-semibold text-ink-900 tnum">{stats.shadowingSessionsCompleted ?? 0}</dd>
+          <dd className="text-xs text-ink-500">
+            <span className="tnum">{stats.sentencesAnalyzed ?? 0}</span> {t('analytics.sentencesAnalyzed')}
           </dd>
         </div>
       </dl>
 
-      {/* Main Grid: Phoneme Radar & Recent Voice History */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left 2 Cols: Phoneme Mastery Checklist */}
-        <div className="lg:col-span-2 p-6 rounded-lg bg-white border border-ink-200 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-serif font-semibold text-lg text-ink-900 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-ink-600" />
-                <span>{isEn ? 'Phonetic Profile & Diagnostic' : '核心法语音素发音画像 (Diagnostic Phonétique)'}</span>
-              </h3>
-              <p className="text-xs text-ink-500">
-                {isEn ? 'Continuous monitoring and feedback on essential French phonemes' : '针对核心偏误音素进行持续监测与矫正建议'}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            {phonemeChecklist.map((item, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-lg border border-ink-200 bg-ink-50/60 hover:bg-white hover:border-accent-300 transition-all space-y-1.5"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-base font-semibold text-ink-900 bg-white px-2 py-0.5 rounded-md border border-ink-200 ">
-                      {item.phoneme}
-                    </span>
-                    <span className="text-xs font-semibold text-ink-700">
-                      {item.name}
-                    </span>
-                  </div>
-
-                  <span
-                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      item.status === 'mastered'
-                        ? 'bg-ok-100 text-ok-800'
-                        : item.status === 'good'
-                        ? 'bg-accent-100 text-accent-800'
-                        : 'bg-bad-100 text-bad-800'
-                    }`}
-                  >
-                    {item.status === 'mastered'
-                      ? (isEn ? 'Mastered' : '已熟练')
-                      : item.status === 'good'
-                      ? (isEn ? 'Good' : '良好')
-                      : (isEn ? 'Focus' : '需注意')}
-                  </span>
+      {history.length > 0 && (
+        <section className="space-y-3">
+          <h3 className="font-serif font-semibold text-lg text-ink-900">{t('analytics.scoreHistory')}</h3>
+          <ul className="rounded-lg border border-ink-200 bg-white divide-y divide-ink-200">
+            {history.slice(-5).reverse().map((rec, idx) => (
+              <li key={idx} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="font-serif text-ink-900 truncate">« {rec.text} »</p>
+                  <p className="text-xs text-ink-500 mt-0.5">{rec.date}</p>
                 </div>
-
-                <div className="text-xs text-ink-500">
-                  {isEn ? 'Examples:' : '典型词:'} <span className="font-medium text-ink-700">{item.examples}</span>
-                </div>
-
-                <p className="text-xs text-ink-600 font-sans leading-relaxed pt-1 border-t border-ink-200">
-                  {item.tip}
-                </p>
-              </div>
+                <span className="font-serif text-lg font-semibold text-ink-900 tnum shrink-0">
+                  {rec.score}
+                  <span className="text-xs font-normal text-ink-400"> / 100</span>
+                </span>
+              </li>
             ))}
-          </div>
-        </div>
-
-        {/* Right 1 Col: AI Coach Overall Diagnosis */}
-        <div className="p-6 rounded-lg bg-ink-50 text-ink-900 border border-ink-200 flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-lg bg-accent-100 text-accent-800 flex items-center justify-center">
-                <Award className="w-6 h-6" />
-              </div>
-              <div>
-                <h4 className="font-serif font-semibold text-lg text-ink-900">
-                  {isEn ? 'AI Coach Synthesis' : '法语AI教练综合诊断'}
-                </h4>
-                <p className="text-xs text-ink-500">{isEn ? 'Professeur Pierre\'s feedback' : 'Professeur Pierre 的学习寄语'}</p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-lg bg-white border border-ink-200 space-y-2 text-xs">
-              <div className="font-semibold text-accent-800">
-                {isEn ? 'Key Strengths (Points Forts):' : '显著优势 (Points Forts):'}
-              </div>
-              <ul className="list-disc list-inside space-y-1 text-ink-700">
-                <li>{isEn ? 'High syntax reconstruction accuracy; strong grasp of subjunctive triggers.' : '长难句的主干意群重组准确度极高，对虚拟式触发词敏感度好'}</li>
-                <li>{isEn ? 'Smooth intonation contour with natural final-syllable descent.' : '整体语调平稳自然，具有标准的法语陈述句句末微降调'}</li>
-              </ul>
-            </div>
-
-            <div className="p-3.5 rounded-lg bg-white border border-ink-200 space-y-2 text-xs">
-              <div className="font-semibold text-bad-700">
-                {isEn ? 'Next Milestone (Objectifs):' : '优先进阶目标 (Objectifs):'}
-              </div>
-              <ul className="list-disc list-inside space-y-1 text-ink-700">
-                <li>{isEn ? 'Reinforce rounded front vowel [y]: purse lips tight into a small circle.' : '强化圆唇前元音 [y]：录音时保持嘴唇收束成小孔，避免混淆'}</li>
-                <li>{isEn ? 'Moderate aspiration on p/t/k before vowels for authentic French phonetics.' : '注意 p/t/k 在元音前不要过度送气，体会法语的清不送气特点'}</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-lg bg-white border border-ink-200 text-xs text-ink-700 italic font-serif">
-            « Petit à petit, l'oiseau fait son nid. »
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Pronunciation Assessments History */}
-      {stats.pronunciationHistory && stats.pronunciationHistory.length > 0 && (
-        <div className="p-6 rounded-lg bg-white border border-ink-200 space-y-4">
-          <h3 className="font-serif font-semibold text-lg text-ink-900">
-            {t('analytics.scoreHistory')}
-          </h3>
-          <div className="space-y-2.5">
-            {stats.pronunciationHistory.slice(-5).reverse().map((rec, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-lg bg-ink-50 border border-ink-200 flex items-center justify-between gap-3"
-              >
-                <div className="space-y-0.5 flex-1">
-                  <p className="font-serif text-sm font-semibold text-ink-800">
-                    « {rec.text} »
-                  </p>
-                  <span className="text-xs text-ink-400">{rec.date}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-serif text-lg font-semibold text-accent-700">
-                    {rec.score} / 100
-                  </span>
-                  <button
-                    onClick={() => speakFrench(rec.text)}
-                    className="p-1.5 rounded-md text-ink-400 hover:text-accent-800 hover:bg-ink-200 cursor-pointer"
-                    title={t('reader.playSentence')}
-                  >
-                    <Volume2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+          </ul>
+        </section>
       )}
+
+      <section className="space-y-4">
+        <div>
+          <h3 className="font-serif font-semibold text-lg text-ink-900">{t('ipa.title')}</h3>
+          <p className="text-sm text-ink-500 mt-0.5">{t('ipa.subtitle')}</p>
+        </div>
+        {GROUPS.map((group) => (
+          <div key={group} className="space-y-2">
+            <h4 className="text-sm font-medium text-ink-700">{t(`ipa.${group}`)}</h4>
+            <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+              {FRENCH_IPA[group].map((s) => (
+                <li key={s.symbol}>
+                  <button
+                    onClick={() => speakFrench(s.word)}
+                    aria-label={t('ipa.play', { word: s.word, symbol: s.symbol })}
+                    className="group w-full h-16 rounded-md border border-ink-200 bg-white hover:border-accent-300 hover:bg-accent-50 flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <span className="text-xl leading-none text-ink-900">[{s.symbol}]</span>
+                    <span className="mt-1.5 inline-flex items-center gap-1 font-serif text-sm text-ink-600">
+                      {s.word}
+                      <Volume2 className="w-3 h-3 text-ink-400 group-hover:text-accent-700" />
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </section>
     </div>
   );
 };
-

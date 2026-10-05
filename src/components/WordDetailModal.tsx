@@ -15,6 +15,7 @@ interface WordDetailModalProps {
   onToggleVocab: (wordData: WordAnalysis, contextSentence: string) => void;
   onRetry?: () => void;
   activeWord?: string | null;
+  errorMessage?: string | null;
 }
 
 export const WordDetailModal: React.FC<WordDetailModalProps> = ({
@@ -27,6 +28,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
   onToggleVocab,
   onRetry,
   activeWord,
+  errorMessage,
 }) => {
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
@@ -46,15 +48,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
 
   return (
     <Sheet onClose={onClose} label={wordData?.word || activeWord || t('wordModal.analyzing')}>
-      <div className="relative flex-1 overflow-y-auto">
-        <button
-          onClick={onClose}
-          aria-label={t('common.close')}
-          className="absolute right-3 top-3 z-10 h-10 w-10 sm:h-8 sm:w-8 inline-flex items-center justify-center rounded-md text-ink-500 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-        </button>
-        
+      <div className="flex-1 min-h-0 flex flex-col">
         {/* Loading state */}
         {isLoading ? (
           <div className="p-12 text-center">
@@ -74,6 +68,9 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
             <p className="text-xs text-ink-500 max-w-xs mx-auto">
               {t('wordModal.failed')}
             </p>
+            {errorMessage && (
+              <p className="text-xs text-bad-700 max-w-sm mx-auto break-words">{errorMessage}</p>
+            )}
             <div className="flex items-center justify-center gap-3 pt-2">
               {onRetry && (
                 <button
@@ -93,7 +90,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
           </div>
         ) : (
 
-          <div>
+          <div className="flex-1 min-h-0 flex flex-col">
             {/* Header */}
             <div className="p-6 bg-ink-100 border-b border-ink-200">
               <div className="flex items-start justify-between gap-4">
@@ -131,7 +128,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                       title={t('wordModal.clickToListen')}
                     >
                       <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-accent-200' : ''}`} />
-                      <span>{isSpeaking ? t('common.loading') : 'TTS'}</span>
+                      <span>{isSpeaking ? t('common.loading') : t('wordModal.listen')}</span>
                     </button>
                     {/* Speed toggle */}
                     <div className="flex items-center gap-1 text-xs text-ink-500 bg-white/50 px-2 py-0.5 rounded-md">
@@ -169,7 +166,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
             </div>
 
             {/* Scrollable details body */}
-            <div className="p-6 space-y-5 max-h-[62vh] overflow-y-auto">
+            <div className="p-6 space-y-5 flex-1 overflow-y-auto">
               
               {/* Phonetics & Sound breakdown */}
               {wordData.phoneticsGuide && (
@@ -286,7 +283,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
             </div>
 
             {/* Bottom actions */}
-            <div className="p-4 bg-[#F5EFE6] border-t border-ink-200 flex items-center justify-between">
+            <div className="p-4 bg-ink-50 border-t border-ink-200 flex items-center justify-between">
               <button
                 onClick={() => onToggleVocab(wordData, contextSentence)}
                 className={`flex items-center gap-2 h-10 px-4 rounded-md text-sm font-medium transition-all active:scale-95 ${
