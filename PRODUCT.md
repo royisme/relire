@@ -6,7 +6,7 @@
 
 ## What it is
 
-Éclair Français is a French deep-reading and speaking-practice app for Chinese-speaking learners (UI also in English). The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It runs as a PWA (installable on Mac/iOS) backed by a small Express server that proxies Gemini; all user data lives in the browser's localStorage.
+Relire (French for "to read again") is a close-reading assistant for French learners preparing for TCF Canada, with a Chinese and English interface. The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It is a static PWA: no app server, no account. The learner supplies their own Gemini API key, which is stored in the browser and used for direct calls to Google. All user data lives in localStorage.
 
 ## Users
 
@@ -28,7 +28,7 @@ Intermediate learners (roughly A2–C1) preparing for TCF/DELF/DALF or reading F
 - **Vocabulary**: list plus flashcard quiz with SRS ratings.
 - **Practice**: AI-generated drills and oral assessment.
 - **Analytics**: summary figures, phoneme profile, coach synthesis.
-- **Settings**: API key and model, voice, language, backup/restore JSON.
+- **Settings**: Gemini key and models, voice, backup/restore JSON. Language is a single icon in the header.
 
 ## Tone and personality
 
@@ -49,4 +49,4 @@ Duolingo-style gamification (streak flames, confetti, mascots), generic AI-dashb
 
 ## Constraints
 
-React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh). Client-only persistence in localStorage keys `eclair_*_v1`; keep stored shapes backwards compatible. Gemini is called only from `server.ts`.
+React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh), Bun. Fully client-side: Gemini is called from the browser with the user's own key (`src/services/gemini.ts`). Client-only persistence in localStorage keys `eclair_*_v1` (legacy prefix from the project's first name; do not rename without a migration); keep stored shapes backwards compatible. Reading and vocabulary review must keep working offline.

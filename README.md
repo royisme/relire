@@ -1,8 +1,10 @@
-# Éclair Français
+# Relire
 
 **English** · [简体中文](README.zh-CN.md)
 
-Read French the way you will meet it on the exam, look up what you do not understand without losing your place, and practise saying it out loud. Éclair Français is a self-hosted web app for learners preparing for **TCF Canada**, focused on two skills: **reading** and **pronunciation**.
+*Relire* is French for "to read again". It is a close-reading assistant for French learners: read a real article, tap any word or sentence to see what it means in context, then read it aloud and get feedback on your pronunciation. It is built for people preparing for **TCF Canada**, and it focuses on two skills: **reading** and **pronunciation**.
+
+It runs entirely in your browser. There is no app server and no account. You bring your own Gemini API key, and you can install it as an app on your computer or phone.
 
 > **What it is not.** It does not cover the listening or writing tests, it has no TCF mock exams, and its scores are AI estimates, not official ones. It is not affiliated with or endorsed by France Éducation international or IRCC. Use it alongside real past papers and a teacher.
 
@@ -16,45 +18,46 @@ Read French the way you will meet it on the exam, look up what you do not unders
 - **Drill from the article you are reading.** Sentence scramble, oral shadowing and grammar cloze, generated from the current text.
 - **Use it in English or Chinese.** The interface and the explanations switch between the two.
 
-Everything you save (articles, vocabulary, stats) stays in your browser's local storage. You can export and restore a backup from Settings.
-
 ## Quick start
 
-You need Node 20.19 or newer (or 22.12+) and a [Gemini API key](https://aistudio.google.com/apikey).
+You need [Bun](https://bun.sh) and a free [Gemini API key](https://aistudio.google.com/apikey).
 
 ```bash
 git clone https://github.com/royisme/relire.git
 cd relire
-npm install --legacy-peer-deps   # or: bun install
-cp .env.example .env             # then set GEMINI_API_KEY
-npm run dev                      # http://localhost:3000
+bun install
+bun run dev        # http://localhost:5173
 ```
 
-Production build:
+Open the app, go to **Settings**, and paste your key. Word and sentence analysis, audio and pronunciation feedback all need it.
+
+### Run it as an installed app
 
 ```bash
-npm run build
-npm start
+bun run build      # static files in dist/
+bun run preview    # serve them locally
 ```
 
-You can also leave `GEMINI_API_KEY` unset and paste a key into **Settings** in the app; it is then sent with each request from your browser. The app installs as a PWA from the browser menu.
+`dist/` is a plain static site, so you can also host it anywhere (GitHub Pages, Netlify, an S3 bucket). Open it in Chrome, Edge or Safari and use the browser's install option; it then opens in its own window. Installing needs `localhost` or HTTPS.
+
+Reading, your saved words and vocabulary review work offline. Anything that calls Gemini needs a connection.
 
 ### Privacy
 
-Words, sentences and your recordings are sent to the Gemini API through the app's own server to produce explanations, audio and scores. Nothing else leaves your browser. If you host it for other people, their usage is billed to the key on your server.
+Your articles, vocabulary, stats and API key are stored in this browser's local storage; you can export and restore a backup from Settings. When you use an AI feature, the word, sentence or recording is sent from your browser straight to Google's Gemini API using your key. Nothing goes through any other server. Anyone with access to your browser profile can read the stored key, so use a key you can revoke.
 
 ## How it is built
 
-React 19, Vite, Tailwind CSS 4, an Express server that proxies Gemini, and i18next. `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, and `CLAUDE.md` is a map of the code for contributors.
+React 19, Vite, Tailwind CSS 4, i18next, and the `@google/genai` SDK called directly from the browser. `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, and `CLAUDE.md` is a map of the code for contributors.
 
 ```
-server.ts          Express server, all Gemini calls
-src/App.tsx        app state and localStorage persistence
-src/components/    one file per screen or overlay
-src/utils/srs.ts   SM-2 scheduling
+src/services/gemini.ts   every Gemini call (analysis, assessment, drills, speech)
+src/App.tsx              app state and localStorage persistence
+src/components/          one file per screen or overlay
+src/utils/srs.ts         SM-2 scheduling
 ```
 
-`npm run lint` runs the TypeScript check. There are no automated tests yet.
+`bun run lint` runs the TypeScript check. There are no automated tests yet.
 
 ## Contributing
 
