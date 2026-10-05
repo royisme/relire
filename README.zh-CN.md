@@ -34,7 +34,7 @@ npm run dev                      # http://localhost:3000
 
 ```bash
 npm run build
-NODE_ENV=production npm start
+npm start
 ```
 
 也可以不设置 `GEMINI_API_KEY`，直接在应用的**设置**里填入 key，之后每次请求会由浏览器带上它。应用可以从浏览器菜单安装为 PWA。

@@ -5,7 +5,7 @@ Guidance for working in this repo. Product intent is in `PRODUCT.md`; the visual
 ## Commands
 
 - `bun install` (or `npm install --legacy-peer-deps`; plain `npm install` hits a peer-dep conflict)
-- `npm run dev`: Express + Vite middleware on `:3000` (`tsx server.ts`)
+- `npm run dev`: Express + Vite middleware on `:3000` (`tsx server.ts`); `npm start` serves the built `dist/` with `NODE_ENV=production`
 - `npm run build`: Vite build to `dist/` (also generates the PWA service worker)
 - `npm run lint`: `tsc --noEmit` (the only check; there are no tests)
 - Detector for UI anti-patterns: `impeccable detect --json src index.html` (from pbakaus/impeccable). Keep it at zero findings.

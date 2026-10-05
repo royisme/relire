@@ -34,7 +34,7 @@ Production build:
 
 ```bash
 npm run build
-NODE_ENV=production npm start
+npm start
 ```
 
 You can also leave `GEMINI_API_KEY` unset and paste a key into **Settings** in the app; it is then sent with each request from your browser. The app installs as a PWA from the browser menu.
