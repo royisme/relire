@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, BookmarkCheck, BookOpen, Dumbbell, Menu, PlusCircle, Settings } from 'lucide-react';
+import { BarChart3, BookmarkCheck, BookOpen, Dumbbell, Menu, Settings } from 'lucide-react';
 import { Button } from './ui/button';
 import { Drawer, OverlayHeader } from './ui/overlay';
 import { PWAInstallButton } from './PWAInstallButton';
@@ -11,7 +11,6 @@ type Tab = 'reader' | 'vocab' | 'practice' | 'analytics';
 interface NavbarProps {
   currentTab: Tab;
   onSelectTab: (tab: Tab) => void;
-  onOpenImporter: () => void;
   onOpenSettings: () => void;
   dueCount: number;
   totalVocabCount: number;
@@ -22,7 +21,6 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   currentTab,
   onSelectTab,
-  onOpenImporter,
   onOpenSettings,
   dueCount,
 }) => {
@@ -91,11 +89,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
-          <Button onClick={onOpenImporter} size="sm" className="whitespace-nowrap">
-            <PlusCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('nav.importShort')}</span>
-            <span className="sr-only sm:hidden">{t('nav.importShort')}</span>
-          </Button>
           <LanguageSwitcher />
           <div className="hidden md:flex items-center gap-1">
             <PWAInstallButton />

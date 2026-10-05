@@ -25,7 +25,7 @@
     "practice": "Drills",
     "analytics": "Progress",
     "importArticle": "Import Article",
-    "importShort": "Import",
+    "importShort": "Add article",
     "installMac": "Install app",
     "installApp": "Install app",
     "installedDesktop": "Installed",
@@ -172,7 +172,10 @@
     "clozeDrillTitle": "Tense & Cloze Drill",
     "drillSubtitle": "Targeted drill based on key complex sentences from the article",
     "micError": "Unable to access microphone. Please check browser microphone permissions.",
-    "assessError": "An error occurred while evaluating pronunciation. Please try again."
+    "assessError": "An error occurred while evaluating pronunciation. Please try again.",
+    "noArticleTitle": "Open an article first",
+    "noArticleDesc": "Drills are generated from the article you are reading.",
+    "openLibrary": "Go to library"
   },
   "analytics": {
     "title": "Learning Progress & Analytics",
@@ -259,5 +262,62 @@
   "storage": {
     "saveFailed": "Your latest changes could not be saved in this browser.",
     "openBackup": "Open Settings to export a backup"
+  },
+  "library": {
+    "title": "Library",
+    "back": "Library",
+    "add": "Add article",
+    "addTitle": "Add an article",
+    "addSubtitle": "Paste any French text: an article, a dialogue, a news story",
+    "addSubmit": "Add to library",
+    "editTitle": "Edit article",
+    "saveChanges": "Save changes",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete this article?",
+    "deleteDesc": "“{{title}}” will be removed from your library. Words you saved from it stay in your vocabulary.",
+    "search": "Search title, source or text",
+    "allLevels": "All",
+    "colTitle": "Title",
+    "colLevel": "Level",
+    "colWords": "Words",
+    "colAdded": "Added",
+    "actions": "Actions",
+    "source": "Source",
+    "sourcePlaceholder": "e.g. Le Monde, a book, a friend",
+    "emptyTitle": "Your library is empty",
+    "emptyDesc": "Add a French text you want to read closely, or bring back the sample articles.",
+    "restoreSamples": "Restore sample articles",
+    "noMatch": "No article matches your search.",
+    "clearFilters": "Clear filters",
+    "count_one": "{{count}} article",
+    "count_other": "{{count}} articles"
+  },
+  "onboarding": {
+    "label": "Getting started",
+    "stepOf": "Step {{n}} of {{total}}",
+    "skip": "Skip for now",
+    "next": "Next",
+    "welcomeTitle": "Read French closely",
+    "welcomeBody": "Open an article, tap any word or sentence to see what it means in context, then read it aloud and get feedback on your pronunciation.",
+    "welcomeNeed": "The explanations come from Google's Gemini. You need a free API key from Google; it stays in this browser and is only sent to Google.",
+    "keyTitle": "Connect Gemini",
+    "keyStep1": "Create a free key in Google AI Studio.",
+    "openStudio": "Open Google AI Studio",
+    "keyStep2": "Paste the key here.",
+    "checking": "Checking…",
+    "checkSave": "Check and save",
+    "keyInvalid": "That key did not work.",
+    "keySaved": "Key saved in this browser.",
+    "tryTitle": "Try it on a sample article",
+    "tipWord": "Tap a word to see its meaning in context, how to pronounce it, and how the verb is conjugated.",
+    "tipSentence": "Tap a sentence, then Analyze, to see its structure and grammar and to practise reading it aloud.",
+    "tipSpeak": "Save words you want to remember; they come back for review on a schedule.",
+    "toLibrary": "Go to my library",
+    "openSample": "Open a sample article"
+  },
+  "keyBanner": {
+    "text": "Add your Gemini key to turn on word and sentence analysis, audio and pronunciation feedback.",
+    "action": "Add key"
   }
 }

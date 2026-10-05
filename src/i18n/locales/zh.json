@@ -25,7 +25,7 @@
     "practice": "练习",
     "analytics": "进度",
     "importArticle": "导入/粘贴文章",
-    "importShort": "导入",
+    "importShort": "添加文章",
     "installMac": "安装应用",
     "installApp": "安装应用",
     "installedDesktop": "已安装",
@@ -172,7 +172,10 @@
     "clozeDrillTitle": "时态填空专练",
     "drillSubtitle": "基于当前文章核心长难句定制的专项强化模块",
     "micError": "无法访问麦克风，请检查浏览器权限。",
-    "assessError": "评估发音时出现错误，请重试。"
+    "assessError": "评估发音时出现错误，请重试。",
+    "noArticleTitle": "请先打开一篇文章",
+    "noArticleDesc": "练习是根据你正在读的文章生成的。",
+    "openLibrary": "去文章库"
   },
   "analytics": {
     "title": "法语学习进展与成长看板 (Tableau de Bord)",
@@ -259,5 +262,61 @@
   "storage": {
     "saveFailed": "最新的修改没能保存到这个浏览器里。",
     "openBackup": "打开设置导出备份"
+  },
+  "library": {
+    "title": "文章库",
+    "back": "文章库",
+    "add": "添加文章",
+    "addTitle": "添加文章",
+    "addSubtitle": "粘贴任何法语文本：文章、对话或新闻",
+    "addSubmit": "加入文章库",
+    "editTitle": "编辑文章",
+    "saveChanges": "保存修改",
+    "edit": "编辑",
+    "delete": "删除",
+    "deleteTitle": "删除这篇文章？",
+    "deleteDesc": "「{{title}}」会从文章库中移除。你从中保存的生词仍保留在生词本里。",
+    "search": "搜索标题、来源或正文",
+    "allLevels": "全部",
+    "colTitle": "标题",
+    "colLevel": "等级",
+    "colWords": "词数",
+    "colAdded": "添加时间",
+    "actions": "操作",
+    "source": "来源",
+    "sourcePlaceholder": "例如：Le Monde、某本书、朋友",
+    "emptyTitle": "文章库是空的",
+    "emptyDesc": "添加一篇想精读的法语文本，或者恢复示例文章。",
+    "restoreSamples": "恢复示例文章",
+    "noMatch": "没有符合搜索条件的文章。",
+    "clearFilters": "清除筛选",
+    "count_other": "共 {{count}} 篇"
+  },
+  "onboarding": {
+    "label": "新手引导",
+    "stepOf": "第 {{n}} 步，共 {{total}} 步",
+    "skip": "先跳过",
+    "next": "下一步",
+    "welcomeTitle": "精读法语",
+    "welcomeBody": "打开一篇文章，点任何一个单词或句子，就能看到它在上下文里的意思；再把它读出来，得到发音反馈。",
+    "welcomeNeed": "讲解由 Google 的 Gemini 生成。你需要一个免费的 Google API Key，它只保存在这个浏览器里，只会发给 Google。",
+    "keyTitle": "连接 Gemini",
+    "keyStep1": "在 Google AI Studio 免费创建一个 Key。",
+    "openStudio": "打开 Google AI Studio",
+    "keyStep2": "把 Key 粘贴到这里。",
+    "checking": "正在检查…",
+    "checkSave": "检查并保存",
+    "keyInvalid": "这个 Key 不能用。",
+    "keySaved": "Key 已保存在这个浏览器里。",
+    "tryTitle": "在示例文章上试一试",
+    "tipWord": "点一个单词，查看它在语境中的意思、发音和动词变位。",
+    "tipSentence": "点一个句子，再选“分析”，查看句子结构和语法，并练习朗读。",
+    "tipSpeak": "把想记住的词保存下来，它们会按计划回来复习。",
+    "toLibrary": "去文章库",
+    "openSample": "打开示例文章"
+  },
+  "keyBanner": {
+    "text": "添加你的 Gemini Key，才能使用单词和句子解析、朗读和发音反馈。",
+    "action": "添加 Key"
   }
 }

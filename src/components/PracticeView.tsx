@@ -9,12 +9,14 @@ import { generatePracticeDrills, assessPronunciation } from '../services/api';
 import { speakFrench, stopSpeech, FrenchAudioRecorder } from '../utils/frenchSpeech';
 
 interface PracticeViewProps {
-  currentArticle: Article;
+  currentArticle: Article | null;
+  onOpenLibrary: () => void;
   onRecordAssessmentComplete: (assessment: PronunciationAssessment, sentence: string) => void;
 }
 
 export const PracticeView: React.FC<PracticeViewProps> = ({
   currentArticle,
+  onOpenLibrary,
   onRecordAssessmentComplete,
 }) => {
   const { t, i18n } = useTranslation();
@@ -54,7 +56,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     resetQuestionState();
 
     try {
-      const result = await generatePracticeDrills(currentArticle.content, type);
+      const result = await generatePracticeDrills(currentArticle!.content, type);
       setDeck(result);
     } catch (err) {
       console.error('Failed to load practice deck:', err);
@@ -228,6 +230,21 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       resetQuestionState();
     }
   };
+
+  if (!currentArticle) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center space-y-4">
+        <p className="font-serif text-lg text-ink-900">{t('practice.noArticleTitle')}</p>
+        <p className="text-sm text-ink-500">{t('practice.noArticleDesc')}</p>
+        <button
+          onClick={onOpenLibrary}
+          className="h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium cursor-pointer"
+        >
+          {t('practice.openLibrary')}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">

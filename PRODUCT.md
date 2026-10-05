@@ -22,7 +22,11 @@ Intermediate learners (roughly A2–C1) preparing for TCF/DELF/DALF or reading F
 
 ## Screens
 
-- **Reader**: article picker/importer, reading settings (font size, theme: parchment / white / sepia / dark, playback speed), tap-to-analyse words, sentence toolbar (play, analyse).
+First run: a three-step guide (welcome, connect Gemini with a checked key, try a sample article). Skipping is allowed and leaves a persistent banner until a key is set.
+
+
+- **Library** (the Read tab's home): a table of all articles with search, level filter, sortable columns, add, edit and delete. Opening a row opens the reader.
+- **Reader**: one article, back to the library, reading settings (font size, theme: parchment / white / sepia / dark, playback speed), tap-to-analyse words, sentence toolbar (play, analyse).
 - **Word detail**: translation, IPA, tense, conjugation table, usage examples, save to vocabulary.
 - **Sentence drawer**: translation, syntax, grammar points, collocations, shadowing record and score.
 - **Vocabulary**: list plus flashcard quiz with SRS ratings.

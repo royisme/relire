@@ -2,17 +2,15 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Volume2, BookOpen, Sparkles, SlidersHorizontal, Eye,
-  ChevronDown, Type, Bookmark, Layers, MessageSquare, PlusCircle, Square, Gauge
+  ArrowLeft, ChevronDown, Type, Bookmark, Layers, MessageSquare, PlusCircle, Square, Gauge
 } from 'lucide-react';
 import { Article, WordAnalysis, SentenceAnalysis } from '../types';
 import { speakFrench, stopSpeech, setGlobalRate, getGlobalRate } from '../utils/frenchSpeech';
 import { formatLevel, formatArticleSource, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {
-  articles: Article[];
   currentArticle: Article;
-  onSelectArticle: (article: Article) => void;
-  onOpenImporter: () => void;
+  onBack: () => void;
   onWordClick: (word: string, sentence: string) => void;
   onSentenceClick: (sentence: string) => void;
   activeWord: string | null;
@@ -20,10 +18,8 @@ interface ReaderViewProps {
 }
 
 export const ReaderView: React.FC<ReaderViewProps> = ({
-  articles,
   currentArticle,
-  onSelectArticle,
-  onOpenImporter,
+  onBack,
   onWordClick,
   onSentenceClick,
   activeWord,
@@ -193,24 +189,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
       {/* Reading toolbar: one row, article on the left, preferences on the right */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <div className="relative min-w-0 flex-1 basis-56">
-          <select
-            value={currentArticle.id}
-            onChange={(e) => {
-              const found = articles.find((a) => a.id === e.target.value);
-              if (found) onSelectArticle(found);
-            }}
-            aria-label={t('reader.source')}
-            className="w-full appearance-none bg-white border border-ink-300 text-ink-900 font-serif text-base h-10 pl-3 pr-9 rounded-md cursor-pointer"
-          >
-            {articles.map((a) => (
-              <option key={a.id} value={a.id}>
-                {cleanArticleTitle(a.title)} ({formatLevel(a.level, i18n.language)})
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="w-4 h-4 text-ink-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
+        <button
+          onClick={onBack}
+          className="mr-auto -ml-2 h-10 inline-flex items-center gap-1.5 px-2 rounded-md text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>{t('library.back')}</span>
+        </button>
 
         <div role="group" aria-label={t('reader.themeParchment')} className="flex items-center gap-1">
           {themeOptions.map((o) => (

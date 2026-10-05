@@ -10,7 +10,7 @@ It runs entirely in your browser. There is no app server and no account. You bri
 
 ## What you can do
 
-- **Read articles at B1, B2 and C1.** Three sample texts are included, and you can paste or import your own. Choose text size and theme, and slow the audio down to 0.5×.
+- **Keep a library of articles.** Three B1 to C1 samples are included. Paste your own, then search, filter by level, sort, edit or delete them from a simple list. Choose text size and theme, and slow the audio down to 0.5×.
 - **Tap any word.** You get the lemma, meaning in context, IPA, the verb tense, a conjugation table and example sentences. Save it to your vocabulary in one click.
 - **Break down a hard sentence.** Translation, syntax segments, grammar points, common collocations and a shadowing guide (rhythm groups, liaisons, intonation).
 - **Shadow and get feedback.** Record yourself reading a sentence and receive an overall score, plus feedback on individual sounds, liaisons and intonation.
@@ -29,7 +29,7 @@ bun install
 bun run dev        # http://localhost:5173
 ```
 
-Open the app, go to **Settings**, and paste your key. Word and sentence analysis, audio and pronunciation feedback all need it.
+On first launch a short guide helps you create and check your key. You can also add it later in **Settings**. Word and sentence analysis, audio and pronunciation feedback all need it.
 
 ### Run it as an installed app
 

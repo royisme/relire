@@ -7,7 +7,9 @@ import { SentenceDrawer } from './components/SentenceDrawer';
 import { VocabularyView } from './components/VocabularyView';
 import { PracticeView } from './components/PracticeView';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
-import { ArticleImporterModal } from './components/ArticleImporterModal';
+import { ArticleEditorDialog } from './components/ArticleEditorDialog';
+import { LibraryView } from './components/LibraryView';
+import { OnboardingDialog } from './components/OnboardingDialog';
 import { SettingsModal } from './components/SettingsModal';
 
 import { Article, VocabWord, WordAnalysis, SentenceAnalysis, UserStats, PronunciationAssessment } from './types';
@@ -17,6 +19,16 @@ import { usePersist } from './storage/usePersist';
 import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
 import { isDueToday, formatDate } from './utils/srs';
 import { setGlobalVoice } from './utils/frenchSpeech';
+import { getAppSettings } from './utils/appSettings';
+
+const ONBOARDING_KEY = 'relire_onboarded';
+const storedFlag = (key: string) => {
+  try {
+    return localStorage.getItem(key) === '1';
+  } catch {
+    return false;
+  }
+};
 
 
 export default function App() {
@@ -34,10 +46,15 @@ export default function App() {
   const [ready, setReady] = useState(false);
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [currentArticle, setCurrentArticle] = useState<Article>(SAMPLE_ARTICLES[0]);
+  // The Read tab is a library list; opening an article switches it to the reader.
+  const [currentArticleId, setCurrentArticleId] = useState<string | null>(null);
+  const [isReading, setIsReading] = useState(false);
+  const currentArticle = articles.find((a) => a.id === currentArticleId) ?? null;
+  const [editor, setEditor] = useState<{ article: Article | null } | null>(null);
+  const [hasKey, setHasKey] = useState(() => !!getAppSettings().customApiKey?.trim());
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [vocabList, setVocabList] = useState<VocabWord[]>([]);
   const [stats, setStats] = useState<UserStats>(EMPTY_STATS);
-  const [isImporterOpen, setIsImporterOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const reportSave = (name: string, error: unknown | null) => {
@@ -58,8 +75,9 @@ export default function App() {
         setArticles(first.articles);
         setVocabList(first.vocab);
         setStats(first.stats);
-        setCurrentArticle(first.articles[0] ?? SAMPLE_ARTICLES[0]);
         setReady(true);
+        // First visit with no key: walk the user through setup.
+        if (!storedFlag(ONBOARDING_KEY) && !getAppSettings().customApiKey?.trim()) setOnboardingOpen(true);
       });
     return () => {
       cancelled = true;
@@ -111,7 +129,7 @@ export default function App() {
     setAiError(null);
 
     try {
-      const data = await fetchWordAnalysis(cleanWord, sentence, currentArticle.content);
+      const data = await fetchWordAnalysis(cleanWord, sentence, currentArticle?.content);
       if (data && data.word) {
         setWordData(data);
       } else {
@@ -147,7 +165,7 @@ export default function App() {
     }));
 
     try {
-      const data = await fetchSentenceAnalysis(sentence, currentArticle.content);
+      const data = await fetchSentenceAnalysis(sentence, currentArticle?.content);
       setSentenceData(data);
     } catch (err) {
       handleAiError(err, () => setIsSentenceDrawerOpen(false));
@@ -183,7 +201,7 @@ export default function App() {
         easeFactor: 2.5,
         nextReviewDate: formatDate(new Date()), // due immediately or tomorrow
         reviewHistory: [],
-        tags: [currentArticle.category || '阅读生词'],
+        tags: [currentArticle?.category || 'Reading'],
       };
 
       setVocabList((prev) => [newWord, ...prev]);
@@ -200,10 +218,37 @@ export default function App() {
     setVocabList((prev) => prev.filter((w) => w.id !== wordId));
   };
 
-  const handleImportArticle = (newArticle: Article) => {
-    setArticles((prev) => [newArticle, ...prev]);
-    setCurrentArticle(newArticle);
+  const openArticle = (article: Article) => {
+    setCurrentArticleId(article.id);
+    setIsReading(true);
     setCurrentTab('reader');
+  };
+
+  // Add or edit. A new article opens straight away; an edit stays where it is.
+  const handleSaveArticle = (article: Article) => {
+    const exists = articles.some((a) => a.id === article.id);
+    setArticles((prev) => (exists ? prev.map((a) => (a.id === article.id ? article : a)) : [article, ...prev]));
+    if (!exists) openArticle(article);
+  };
+
+  const handleDeleteArticle = (article: Article) => {
+    setArticles((prev) => prev.filter((a) => a.id !== article.id));
+    if (article.id === currentArticleId) {
+      setCurrentArticleId(null);
+      setIsReading(false);
+    }
+  };
+
+  const missingSamples = SAMPLE_ARTICLES.filter((sample) => !articles.some((a) => a.id === sample.id));
+  const handleRestoreSamples = () => setArticles((prev) => [...prev, ...missingSamples]);
+
+  const finishOnboarding = () => {
+    try {
+      localStorage.setItem(ONBOARDING_KEY, '1');
+    } catch {
+      // Private mode: the guide will simply show again next time.
+    }
+    setOnboardingOpen(false);
   };
 
   const handleRecordAssessmentComplete = (
@@ -247,7 +292,6 @@ export default function App() {
       <Navbar
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
-        onOpenImporter={() => setIsImporterOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         dueCount={dueCount}
         totalVocabCount={vocabList.length}
@@ -266,20 +310,46 @@ export default function App() {
         </div>
       )}
 
+      {!hasKey && !onboardingOpen && (
+        <div className="bg-accent-50 border-b border-accent-200 text-accent-900 text-sm">
+          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{t('keyBanner.text')}</span>
+            <button
+              className="font-medium underline underline-offset-2 cursor-pointer"
+              onClick={() => {
+                setSettingsNeedKey(true);
+                setIsSettingsOpen(true);
+              }}
+            >
+              {t('keyBanner.action')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main View Area */}
       <main className="flex-1 pb-16">
-        {currentTab === 'reader' && (
-          <ReaderView
-            articles={articles}
-            currentArticle={currentArticle}
-            onSelectArticle={setCurrentArticle}
-            onOpenImporter={() => setIsImporterOpen(true)}
-            onWordClick={handleWordClick}
-            onSentenceClick={handleSentenceClick}
-            activeWord={activeWord}
-            activeSentence={activeSentence}
-          />
-        )}
+        {currentTab === 'reader' &&
+          (isReading && currentArticle ? (
+            <ReaderView
+              currentArticle={currentArticle}
+              onBack={() => setIsReading(false)}
+              onWordClick={handleWordClick}
+              onSentenceClick={handleSentenceClick}
+              activeWord={activeWord}
+              activeSentence={activeSentence}
+            />
+          ) : (
+            <LibraryView
+              articles={articles}
+              missingSamples={missingSamples.length}
+              onOpen={openArticle}
+              onAdd={() => setEditor({ article: null })}
+              onEdit={(article) => setEditor({ article })}
+              onDelete={handleDeleteArticle}
+              onRestoreSamples={handleRestoreSamples}
+            />
+          ))}
 
         {currentTab === 'vocab' && (
           <VocabularyView
@@ -292,6 +362,10 @@ export default function App() {
         {currentTab === 'practice' && (
           <PracticeView
             currentArticle={currentArticle}
+            onOpenLibrary={() => {
+              setIsReading(false);
+              setCurrentTab('reader');
+            }}
             onRecordAssessmentComplete={handleRecordAssessmentComplete}
           />
         )}
@@ -336,12 +410,17 @@ export default function App() {
       />
 
       {/* Article Importer / Pasting Modal */}
-      <ArticleImporterModal
-        isOpen={isImporterOpen}
-        onClose={() => setIsImporterOpen(false)}
-        onImport={handleImportArticle}
-        articles={articles}
-      />
+      {editor && (
+        <ArticleEditorDialog article={editor.article} onClose={() => setEditor(null)} onSave={handleSaveArticle} />
+      )}
+
+      {onboardingOpen && (
+        <OnboardingDialog
+          onClose={finishOnboarding}
+          onKeySaved={() => setHasKey(true)}
+          onOpenSample={articles[0] ? () => openArticle(articles[0]) : undefined}
+        />
+      )}
 
       {/* Settings */}
       <SettingsModal
@@ -352,6 +431,7 @@ export default function App() {
         }}
         needsKey={settingsNeedKey}
         onSettingsSaved={(newSettings) => {
+          setHasKey(!!newSettings.customApiKey?.trim());
           if (newSettings.ttsVoice) {
             handleSelectVoice(newSettings.ttsVoice as any);
           }

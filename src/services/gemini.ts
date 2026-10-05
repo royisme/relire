@@ -80,6 +80,16 @@ async function generateJson<T>(contents: any, opts: GeminiOptions): Promise<T> {
   throw new Error(lastError ? readableError(lastError) : 'All models failed');
 }
 
+/** Makes one tiny request so a pasted key can be checked before it is saved. */
+export async function checkApiKey(apiKey: string, model = 'gemini-2.5-flash'): Promise<void> {
+  const ai = client(apiKey);
+  try {
+    await ai.models.generateContent({ model, contents: 'Reply with OK.' });
+  } catch (err) {
+    throw new Error(readableError(err));
+  }
+}
+
 export async function analyzeWord(
   p: { word: string; sentenceContext?: string; articleContext?: string },
   opts: GeminiOptions
