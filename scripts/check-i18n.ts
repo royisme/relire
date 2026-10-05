@@ -38,8 +38,6 @@ for (const file of files) {
   src.split('\n').forEach((line, i) => {
     const code = line.trim();
     if (code.startsWith('//') || code.startsWith('*') || code.startsWith('/*') || code.startsWith('{/*')) return;
-    // Prompts sent to the model are allowed to contain Chinese.
-    if (file.endsWith('services/gemini.ts')) return;
     if (/[一-鿿]/.test(code)) problems.push(`${file}:${i + 1}: hard-coded Chinese text`);
   });
 }

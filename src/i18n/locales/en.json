@@ -38,7 +38,6 @@
     "themeDark": "Dark",
     "playSentence": "Play",
     "analyzeSentence": "Analyze Syntax",
-    "readSelectedSentence": "Play Sentence",
     "wordCount": "{{count}} words",
     "textSize": "Text size"
   },
@@ -132,7 +131,8 @@
     "assessError": "An error occurred while evaluating pronunciation. Please try again.",
     "noArticleTitle": "Open an article first",
     "noArticleDesc": "Drills are generated from the article you are reading.",
-    "openLibrary": "Go to library"
+    "openLibrary": "Go to library",
+    "newDrills": "New questions"
   },
   "analytics": {
     "title": "Progress",
@@ -145,17 +145,9 @@
   },
   "settings": {
     "title": "Settings",
-    "subtitle": "Gemini key, AI models, voice and backup",
-    "apiKeySection": "1. Gemini API key",
-    "customKeyLabel": "Your Gemini API key",
+    "subtitle": "AI providers and models, prompts, voice and backup",
     "customKeyPlaceholder": "Paste your key here",
-    "customKeyDesc": "Needed for word and sentence analysis, audio and pronunciation feedback.",
-    "modelsSection": "2. AI Model Selection",
-    "analysisModelTitle": "Analysis & Coaching Model",
-    "analysisModelDesc": "Handles morphology, S-V-O syntax, and oral scoring.",
-    "ttsModelTitle": "TTS Speech Synthesis Model",
-    "ttsModelDesc": "Generates 24kHz native French speech.",
-    "voiceSection": "3. Default French Voice",
+    "voiceSection": "Voice",
     "female": "Female",
     "male": "Male",
     "offlineSection": "4. Local data & backup",
@@ -175,14 +167,44 @@
     "savedNotice": "Settings saved to local storage and active immediately",
     "keySet": "Key saved in this browser",
     "keyMissing": "No key yet",
-    "keyPrivacy": "The key is stored only in this browser and sent only to Google when you use an AI feature. There is no app server.",
-    "getKey": "Get a free key from Google AI Studio",
-    "needsKeyNotice": "Add your Gemini API key to use word and sentence analysis, audio and pronunciation feedback.",
+    "keyPrivacy": "The key is stored only in this browser and sent only to {{provider}} when you use an AI feature. There is no app server.",
+    "getKey": "Get a key from {{provider}}",
+    "needsKeyNotice": "Add your API key to use word and sentence analysis, audio and pronunciation feedback.",
     "storageProtected": "Protected from automatic clearing",
     "storageNotProtected": "Browser may clear this data if it runs low on space or you stay away for a while",
     "protectStorage": "Protect my data",
     "exportFailed": "Export failed: {{msg}}",
-    "restoreFailed": "Restore failed: {{msg}}"
+    "restoreFailed": "Restore failed: {{msg}}",
+    "cacheSummary": "Saved answers: {{words}} words, {{sentences}} sentences, {{drills}} drill sets",
+    "clearCache": "Clear saved answers",
+    "cacheDesc": "Explanations and drills are saved on this device so you never pay for the same answer twice. Words are kept until you clear them, sentences and drills for 30 days. They are not part of backups.",
+    "audioSummary": "Pronunciation audio: {{clips}} clips, {{mb}} MB; {{kept}} kept for your vocabulary",
+    "clearAudio": "Clear other audio",
+    "audioDesc": "Every clip is saved so it plays offline and is never generated twice. Audio for words in your vocabulary, their sentences and examples is always kept; the rest is trimmed when it grows past 200 MB.",
+    "backupAudio": "Include pronunciation audio for my vocabulary (larger file)",
+    "backupAudioSize": "about {{mb}} MB",
+    "importAudioPartial": "Backup restored, but {{failed}} audio clips could not be saved on this device (storage may be full). Playing those words will generate them again.",
+    "textSection": "1. AI for explanations",
+    "textSectionDesc": "Writes word and sentence analyses, practice drills and pronunciation feedback.",
+    "speechSection": "2. AI for speech",
+    "speechSectionDesc": "Reads French aloud. It can be a different provider from the one above.",
+    "providerLabel": "Provider",
+    "modelLabel": "Model",
+    "keyLabel": "{{provider}} API key",
+    "sameKeyNote": "Uses the same {{provider}} key as above.",
+    "promptsSection": "3. Prompts",
+    "show": "Show",
+    "hide": "Hide",
+    "promptsDesc": "The instructions sent to the AI, as plain text. Edit them to change how answers are written; reset any prompt to go back to the original. Answers already saved on this device stay as they are; edited prompts get fresh answers.",
+    "promptTask": "Prompt",
+    "promptLanguage": "Prompt language",
+    "promptEdit": "Edit",
+    "promptPreview": "Preview",
+    "promptReset": "Reset to default",
+    "promptVariables": "Variables:",
+    "promptSyntax": "Write {{open}}name{{close}} for a variable and {{open}}#if name{{close}}…{{open}}/if{{close}} for text that appears only when it has a value; {{open}}#if name=value{{close}} compares it to a value.",
+    "promptUnknown": "Unknown variables will be empty: {{names}}",
+    "promptMissing": "This prompt does not use: {{names}}"
   },
   "importer": {
     "articleTitle": "Article Title",
@@ -243,10 +265,10 @@
     "next": "Next",
     "welcomeTitle": "Read French closely",
     "welcomeBody": "Open an article, tap any word or sentence to see what it means in context, then read it aloud and get feedback on your pronunciation.",
-    "welcomeNeed": "The explanations come from Google's Gemini. You need a free API key from Google; it stays in this browser and is only sent to Google.",
-    "keyTitle": "Connect Gemini",
-    "keyStep1": "Create a free key in Google AI Studio.",
-    "openStudio": "Open Google AI Studio",
+    "welcomeNeed": "The explanations come from an AI service ({{provider}} by default). You need a free API key; it stays in this browser and is only sent to that service.",
+    "keyTitle": "Connect {{provider}}",
+    "keyStep1": "Create a free key at {{provider}}.",
+    "openStudio": "Open {{provider}}",
     "keyStep2": "Paste the key here.",
     "checking": "Checking…",
     "checkSave": "Check and save",
@@ -260,7 +282,7 @@
     "openSample": "Open a sample article"
   },
   "keyBanner": {
-    "text": "Add your Gemini key to turn on word and sentence analysis, audio and pronunciation feedback.",
+    "text": "Add your API key to turn on word and sentence analysis, audio and pronunciation feedback.",
     "action": "Add key"
   },
   "ipa": {
@@ -312,5 +334,15 @@
       "name": "Gemini 3.8 Flash-Lite TTS (Recommended)",
       "desc": "24kHz studio-quality native French synthesis with natural liaisons"
     }
+  },
+  "providers": {
+    "gemini": "Google Gemini"
+  },
+  "prompts": {
+    "word": "Word analysis",
+    "sentence": "Sentence analysis",
+    "drills": "Practice drills",
+    "pronunciationAudio": "Pronunciation scoring (with recording)",
+    "pronunciationText": "Pronunciation scoring (transcript only)"
   }
 }

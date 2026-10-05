@@ -4,7 +4,7 @@
 
 *Relire* is French for "to read again". It is a close-reading assistant for French learners: read a real article, tap any word or sentence to see what it means in context, then read it aloud and get feedback on your pronunciation. It is built for people preparing for **TCF Canada**, and it focuses on two skills: **reading** and **pronunciation**.
 
-It runs entirely in your browser. There is no app server and no account. You bring your own Gemini API key, and you can install it as an app on your computer or phone.
+It runs entirely in your browser. There is no app server and no account. You bring your own API key (Google Gemini today), and you can install it as an app on your computer or phone.
 
 > **What it is not.** It does not cover the listening or writing tests, it has no TCF mock exams, and its scores are AI estimates, not official ones. It is not affiliated with or endorsed by France Éducation international or IRCC. Use it alongside real past papers and a teacher.
 
@@ -17,6 +17,8 @@ It runs entirely in your browser. There is no app server and no account. You bri
 - **Look up any French sound.** A chart of the sounds of French in IPA, each with an example word you can tap to hear.
 - **Review vocabulary with spaced repetition.** An SM-2 schedule decides what is due today.
 - **Drill from the article you are reading.** Sentence scramble, oral shadowing and grammar cloze, generated from the current text.
+- **Choose your AI.** The AI that writes explanations and the AI that reads aloud are separate settings, each with its own provider, model and key, and the code is built so more providers can be added.
+- **Edit the prompts.** The instructions sent to the AI are plain-text templates you can view, change and reset in Settings.
 - **Use it in English or Chinese.** The interface and the explanations switch between the two.
 
 ## Quick start
@@ -45,14 +47,14 @@ Reading, your saved words and vocabulary review work offline. Anything that call
 
 ### Privacy
 
-Your articles, vocabulary and stats are stored in this browser's IndexedDB, and your API key and settings in its local storage. You can export and restore a backup from Settings (backups never include the key). Browsers can clear site data when space runs low or after long inactivity, particularly Safari for sites that are not installed, so install the app, use **Protect my data** in Settings, and export a backup now and then. When you use an AI feature, the word, sentence or recording is sent from your browser straight to Google's Gemini API using your key. Nothing goes through any other server. Anyone with access to your browser profile can read the stored key, so use a key you can revoke.
+Your articles, vocabulary and stats are stored in this browser's IndexedDB, and your API key and settings in its local storage. You can export and restore a backup from Settings (backups never include the key). Browsers can clear site data when space runs low or after long inactivity, particularly Safari for sites that are not installed, so install the app, use **Protect my data** in Settings, and export a backup now and then. When you use an AI feature, the word, sentence or recording is sent from your browser straight to Google's Gemini API using your key. Nothing goes through any other server. Explanations, drills and pronunciation audio you have already paid for are saved on your device, so looking up or playing the same thing again costs nothing and audio works offline. Words, sentences and drills are kept for as long as you leave them (sentences and drills 30 days); audio for words in your vocabulary is kept for good, the rest is trimmed past 200 MB. Settings shows what is saved and can clear it, and a backup can optionally include your vocabulary's audio. Anyone with access to your browser profile can read the stored key, so use a key you can revoke.
 
 ## How it is built
 
-React 19, Vite, Tailwind CSS 4, i18next, and the `@google/genai` SDK called directly from the browser. `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, and `CLAUDE.md` is a map of the code for contributors.
+React 19, Vite, Tailwind CSS 4, i18next, and AI providers called directly from the browser (Gemini through `@google/genai`). `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, and `CLAUDE.md` is a map of the code for contributors.
 
 ```
-src/services/gemini.ts   every Gemini call (analysis, assessment, drills, speech)
+src/services/ai/         providers, prompt templates and tasks; the UI calls src/services/api.ts
 src/App.tsx              app state and localStorage persistence
 src/components/          one file per screen or overlay
 src/utils/srs.ts         SM-2 scheduling

@@ -1,0 +1,28 @@
+You are an expert French instructor specializing in CEFR A1-B2 level pedagogy.
+Based on the following French text:
+"""
+{{articleText}}
+"""
+
+Generate a focused set of interactive practice drills for {{#if type=syntax}}sentence reconstruction and syntax ordering{{/if}}{{#if type=cloze}}high-frequency grammar and tense cloze{{/if}}{{#if type=oral}}spoken expression & shadowing challenge{{/if}}{{#if type=other}}comprehensive practice{{/if}}.
+Target level: CEFR A1 - B2. Prompts, descriptions, and grammar hints must be in English.
+
+Output strictly in JSON:
+{
+"title": "Drill Title in English",
+"description": "Drill description in English",
+"questions": [
+  {
+    "id": 1,
+    "type": "scramble | cloze | translation | oral_prompt",
+    "targetSentence": "Full standard French sentence",
+    "prompt": "Clear task instruction in English",
+    "scrambledChunks": ["Syntactic", "chunks", "for scramble"],
+    "clozeText": "French sentence with ____ fill-in-the-blank",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctOptionIndex": 0,
+    "grammarHint": "Intuitive grammar explanation in English",
+    "shadowingAudioPrompt": "Standard French text for shadowing"
+  }
+]
+}

@@ -6,7 +6,7 @@ import {
   BookOpen, CheckCircle2, AlertCircle, Award, ChevronRight, Loader2, Info
 } from 'lucide-react';
 import { SentenceAnalysis, PronunciationAssessment } from '../types';
-import { speakFrench, stopSpeech, FrenchAudioRecorder, setGlobalRate } from '../utils/frenchSpeech';
+import { speakFrench, stopSpeech, FrenchAudioRecorder, setGlobalRate } from '../utils/speech';
 import { assessPronunciation } from '../services/api';
 
 interface SentenceDrawerProps {

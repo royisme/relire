@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Volume2, BookOpen, Sparkles, SlidersHorizontal, Eye,
-  ArrowLeft, ChevronDown, Type, Bookmark, Layers, MessageSquare, PlusCircle, Square, Gauge
+  ArrowLeft, ChevronDown, Type, Bookmark, MessageSquare, PlusCircle, Square, Gauge, TextSearch
 } from 'lucide-react';
 import { Article, WordAnalysis, SentenceAnalysis } from '../types';
-import { speakFrench, stopSpeech, setGlobalRate, getGlobalRate } from '../utils/frenchSpeech';
+import { speakFrench, stopSpeech, setGlobalRate, getGlobalRate } from '../utils/speech';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {
@@ -29,7 +29,27 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   // Reading preferences
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('lg');
   const [theme, setTheme] = useState<'parchment' | 'white' | 'sepia' | 'dark'>('parchment');
-  const [hoveredSentence, setHoveredSentence] = useState<string | null>(null);
+  // Sentences are identified by position, not text, because the same sentence can repeat ("Oui.").
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [anchorId, setAnchorId] = useState<string | null>(null);
+
+  // The sentence actions float over the text; they are positioned from the sentence's
+  // first line so they never take part in text layout.
+  const articleRef = useRef<HTMLElement>(null);
+  const sentenceEls = useRef(new Map<string, { el: HTMLElement; text: string }>());
+  const clearTimer = useRef<number | undefined>(undefined);
+  const [toolbar, setToolbar] = useState<{ text: string; top: number; left: number } | null>(null);
+
+  const cancelClear = () => window.clearTimeout(clearTimer.current);
+  const scheduleClear = () => {
+    cancelClear();
+    clearTimer.current = window.setTimeout(() => setHoveredId(null), 160);
+  };
+  const focusSentence = (id: string) => {
+    cancelClear();
+    setHoveredId(id);
+    setAnchorId(id);
+  };
 
   // Audio Playback & Speed Controller (0.5x to 1.5x)
   const [playbackRate, setPlaybackRate] = useState<number>(0.85);
@@ -57,7 +77,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   };
 
   // Helper to tokenize sentence into clickable words
-  const renderSentenceWords = (sentenceText: string) => {
+  // Tapping a word also keeps that sentence's actions visible once the lookup sheet is closed (touch has no hover).
+  const clickWord = (word: string, sentenceText: string, id: string) => {
+    focusSentence(id);
+    onWordClick(word, sentenceText);
+  };
+
+  const renderSentenceWords = (sentenceText: string, id: string) => {
     // Normalize typographical quotes and apostrophes to standard ASCII
     const normalizedText = sentenceText.replace(/[’‘`]/g, "'");
     
@@ -85,7 +111,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             <span
               onClick={(e) => {
                 e.stopPropagation();
-                onWordClick(root, sentenceText);
+                clickWord(root, sentenceText, id);
               }}
               className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
                 activeWord && activeWord.toLowerCase() === root.toLowerCase()
@@ -108,7 +134,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             <span
               onClick={(e) => {
                 e.stopPropagation();
-                onWordClick(root, sentenceText);
+                clickWord(root, sentenceText, id);
               }}
               className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
                 activeWord && activeWord.toLowerCase() === root.toLowerCase()
@@ -127,7 +153,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           key={idx}
           onClick={(e) => {
             e.stopPropagation();
-            onWordClick(cleanWord, sentenceText);
+            clickWord(cleanWord, sentenceText, id);
           }}
           className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
             activeWord && activeWord.toLowerCase() === cleanWord.toLowerCase()
@@ -172,6 +198,62 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         return 'bg-ink-900 text-ink-100 border-ink-800';
     }
   };
+
+  const activeText = playingSentence ?? activeSentence;
+
+  useLayoutEffect(() => {
+    const NAV = 56; // sticky header
+    const TOOLBAR = 44;
+    let frame = 0;
+
+    const place = () => {
+      // Which sentence the actions belong to: the hovered one, else the one playing or open in the drawer.
+      let id = hoveredId;
+      if (!id && activeText) {
+        const entries = [...sentenceEls.current.entries()];
+        id =
+          (anchorId && sentenceEls.current.get(anchorId)?.text === activeText ? anchorId : null) ??
+          entries.find(([, v]) => v.text === activeText)?.[0] ??
+          null;
+      }
+      const target = id ? sentenceEls.current.get(id) : undefined;
+      const article = articleRef.current;
+      const vh = window.innerHeight;
+      // Only lines that are on screen can carry the toolbar.
+      const lines = target ? [...target.el.getClientRects()].filter((r) => r.bottom > NAV && r.top < vh) : [];
+      if (!target || !article || !lines.length) {
+        setToolbar((prev) => (prev ? null : prev));
+        return;
+      }
+      // Prefer the first visible line with room above it, so the pill covers the end of the previous line
+      // rather than the sentence being read; otherwise pin it inside the viewport.
+      const line = lines.find((r) => r.top >= NAV + TOOLBAR) ?? lines[0];
+      const top = Math.min(Math.max(line.top, NAV + TOOLBAR + 4), vh - 8);
+      const box = article.getBoundingClientRect();
+      const next = {
+        text: target.text,
+        top: top - box.top,
+        left: Math.min(Math.max(line.left - box.left - 4, 4), box.width - 96),
+      };
+      setToolbar((prev) =>
+        prev && prev.text === next.text && Math.abs(prev.top - next.top) < 0.5 && Math.abs(prev.left - next.left) < 0.5 ? prev : next
+      );
+    };
+
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(place);
+    };
+
+    place();
+    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', schedule, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule);
+    };
+  }, [hoveredId, anchorId, activeText, fontSize, theme, currentArticle.id]);
 
   const themeOptions = [
     { id: 'parchment', label: t('reader.themeParchment'), swatch: 'bg-ink-50' },
@@ -290,7 +372,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       )}
 
       {/* Main Reading Surface */}
-      <article className={`px-5 py-8 sm:px-12 sm:py-12 rounded-lg border ${getThemeClass()}`}>
+      <article
+        ref={articleRef}
+        onClick={(e) => {
+          if (!(e.target as HTMLElement).closest('[data-sentence],[data-sentence-actions]')) setHoveredId(null);
+        }}
+        className={`relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border ${getThemeClass()}`}
+      >
         <div className={`reading ${getFontSizeClass()}`}>
         <header className="mb-8">
           <p className="text-xs text-ink-500 font-sans mb-2">
@@ -314,55 +402,31 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               <p key={pIdx}>
                 {sentences.map((sent, sIdx) => {
                   const cleanSentence = sent.trim();
-                  const isHovered = hoveredSentence === cleanSentence;
+                  const id = `${pIdx}-${sIdx}`;
+                  const isHovered = hoveredId === id;
                   const isActive = activeSentence === cleanSentence;
                   const isPlaying = playingSentence === cleanSentence;
 
                   return (
                     <span
                       key={sIdx}
-                      onMouseEnter={() => setHoveredSentence(cleanSentence)}
-                      onMouseLeave={() => setHoveredSentence(null)}
-                      onClick={() => setHoveredSentence(cleanSentence)}
-                      className={`relative inline rounded-md py-0.5 px-0.5 transition-colors ${
+                      data-sentence
+                      ref={(el) => {
+                        if (el) sentenceEls.current.set(id, { el, text: cleanSentence });
+                        else sentenceEls.current.delete(id);
+                      }}
+                      onPointerEnter={(e) => {
+                        if (e.pointerType !== 'mouse') return;
+                        focusSentence(id);
+                      }}
+                      onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
+                      onClick={() => focusSentence(id)}
+                      className={`rounded-md py-0.5 px-0.5 transition-colors ${
                         isActive ? 'bg-accent-100' : isHovered ? 'bg-accent-50' : ''
                       }`}
                     >
-                      {/* Words in sentence */}
-                      {renderSentenceWords(sent)}
-
-                      {/* Sentence actions: shown on hover or tap */}
-                      {(isHovered || isActive || isPlaying) && (
-                        <span
-                          className="inline-flex items-center gap-0.5 ml-1.5 p-0.5 rounded-md bg-white border border-ink-300 align-middle select-none font-sans text-xs text-ink-900 anim-fade"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePlaySentence(cleanSentence);
-                            }}
-                            className={`h-8 inline-flex items-center gap-1 px-2 rounded-md cursor-pointer ${
-                              isPlaying ? 'bg-accent-700 text-white' : 'text-ink-700 hover:bg-ink-100'
-                            }`}
-                            title={isPlaying ? t('reader.stop') : t('reader.readSelectedSentence')}
-                          >
-                            <Volume2 className="w-3.5 h-3.5" />
-                            <span>{isPlaying ? t('reader.stop') : t('reader.playSentence')}</span>
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onSentenceClick(cleanSentence);
-                            }}
-                            className="h-8 inline-flex items-center gap-1 px-2 rounded-md text-ink-700 hover:bg-ink-100 cursor-pointer"
-                            title={t('reader.analyzeSentence')}
-                          >
-                            <Layers className="w-3.5 h-3.5" />
-                            <span>{t('reader.analyzeSentence')}</span>
-                          </button>
-                        </span>
-                      )}{' '}
+                      {renderSentenceWords(sent, id)}
+                      {' '}
                     </span>
                   );
                 })}
@@ -371,6 +435,38 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           })}
         </div>
         </div>
+
+        {/* Floating sentence actions: icons only, outside the text flow */}
+        {toolbar && (
+          <div
+            data-sentence-actions
+            onPointerEnter={(e) => e.pointerType === 'mouse' && cancelClear()}
+            onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
+            style={{ top: toolbar.top, left: toolbar.left }}
+            className="absolute z-10 -translate-y-full pb-1.5 anim-fade"
+          >
+            <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-white border border-ink-300 shadow-lg font-sans text-ink-900">
+              <button
+                onClick={() => handlePlaySentence(toolbar.text)}
+                aria-label={playingSentence === toolbar.text ? t('reader.stop') : t('reader.playSentence')}
+                title={playingSentence === toolbar.text ? t('reader.stop') : t('reader.playSentence')}
+                className={`h-10 w-10 sm:h-9 sm:w-9 inline-flex items-center justify-center rounded-md cursor-pointer ${
+                  playingSentence === toolbar.text ? 'bg-accent-700 text-white' : 'text-ink-700 hover:bg-ink-100'
+                }`}
+              >
+                {playingSentence === toolbar.text ? <Square className="w-4 h-4 fill-current" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => onSentenceClick(toolbar.text)}
+                aria-label={t('reader.analyzeSentence')}
+                title={t('reader.analyzeSentence')}
+                className="h-10 w-10 sm:h-9 sm:w-9 inline-flex items-center justify-center rounded-md text-ink-700 hover:bg-ink-100 cursor-pointer"
+              >
+                <TextSearch className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </article>
     </div>
   );

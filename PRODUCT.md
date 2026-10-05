@@ -6,7 +6,7 @@
 
 ## What it is
 
-Relire (French for "to read again") is a close-reading assistant for French learners preparing for TCF Canada, with a Chinese and English interface. The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It is a static PWA: no app server, no account. The learner supplies their own Gemini API key, which is stored in the browser and used for direct calls to Google. All user data lives in localStorage.
+Relire (French for "to read again") is a close-reading assistant for French learners preparing for TCF Canada, with a Chinese and English interface. The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It is a static PWA: no app server, no account. The learner supplies their own API key (Gemini today), stored in the browser and used for direct calls to the provider; explanations and speech can use different providers. All user data lives in localStorage.
 
 ## Users
 
@@ -53,4 +53,4 @@ Duolingo-style gamification (streak flames, confetti, mascots), generic AI-dashb
 
 ## Constraints
 
-React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh), Bun. Fully client-side: Gemini is called from the browser with the user's own key (`src/services/gemini.ts`). Client-only persistence: user data in IndexedDB (`src/storage`), settings and API key in localStorage (`relire_*`). Never invent data to fill an empty state.
+React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh), Bun. Fully client-side: AI providers are called from the browser with the user's own keys (`src/services/ai`); prompts are editable templates, not code. Client-only persistence: user data in IndexedDB (`src/storage`), settings and API key in localStorage (`relire_*`). Never invent data to fill an empty state.

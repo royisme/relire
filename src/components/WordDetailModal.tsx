@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Sheet } from './ui/overlay';
 import { X, Volume2, Bookmark, BookmarkCheck, Sparkles, BookOpen, Layers, Check, Loader2 } from 'lucide-react';
 import { WordAnalysis, VocabWord } from '../types';
-import { speakFrench } from '../utils/frenchSpeech';
+import { speakFrench } from '../utils/speech';
 
 interface WordDetailModalProps {
   isOpen: boolean;

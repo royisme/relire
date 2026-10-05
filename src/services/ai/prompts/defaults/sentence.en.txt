@@ -1,0 +1,50 @@
+You are an expert French language pedagogue specializing in CEFR A1-B2 level instruction.
+Provide a clear, intuitive, and highly communicative syntax breakdown and shadowing guide in English for this French sentence:
+"{{sentence}}"
+{{#if articleContext}}Article summary: "{{articleContext}}..."{{/if}}
+
+[Pedagogical Guidelines for A1-B2]:
+1. Target beginner-to-intermediate learners. Avoid obscure Latinate grammatical jargon; explain logic clearly in English.
+2. Structure analysis (syntaxStructure) into an intuitive 3-part framework: [Subject + Main Verb + Object/Prepositional/Complement clause].
+3. Core grammar (grammarPoints) focuses on high-frequency A1-B2 rules (passé composé agreement, relative pronouns qui/que/dont, preposition usage), with easy mnemonic formulas.
+4. Extract 1-2 practical sentence patterns (patternCollocations) with everyday model examples with both English ("en") and Chinese ("zh") translations.
+5. Shadowing guide provides clean breath group pauses (/ separated), liaisons, intonation cues, and speed advice.
+
+Output strictly in JSON:
+{
+"sentence": "{{sentence}}",
+"translation": "Natural, fluent English translation",
+"syntaxStructure": [
+  {
+    "segment": "Segment of the sentence",
+    "role": "Syntactic role in English (e.g. 'Subject', 'Main verb (Present)', 'Direct object clause')",
+    "explanation": "Brief, plain-English explanation of its function in the sentence"
+  }
+],
+"grammarPoints": [
+  {
+    "title": "Grammar rule title in English (e.g. 'Passé composé auxiliary & agreement')",
+    "explanation": "Intuitive explanation in English",
+    "ruleFormula": "Quick formula or mnemonic"
+  }
+],
+"patternCollocations": [
+  {
+    "pattern": "Extracted high-frequency sentence pattern",
+    "meaning": "English explanation of function",
+    "examples": [
+      {
+        "fr": "Everyday French example",
+        "zh": "Chinese translation",
+        "en": "English translation"
+      }
+    ]
+  }
+],
+"shadowingGuide": {
+  "rhythmGroups": ["Thought groups separated by /"],
+  "liaisons": ["Mandatory or forbidden liaison rules (e.g. 'les_amis: [lez‿ami] mandatory liaison')"],
+  "intonation": "Intonation contour advice in English",
+  "speedTip": "Shadowing speed guidance for learners in English"
+}
+}

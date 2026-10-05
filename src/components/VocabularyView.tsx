@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { VocabWord } from '../types';
 import { isDueToday, calculateNextReview } from '../utils/srs';
-import { speakFrench } from '../utils/frenchSpeech';
+import { speakFrench } from '../utils/speech';
 
 interface VocabularyViewProps {
   vocabList: VocabWord[];

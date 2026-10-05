@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Volume2 } from 'lucide-react';
 import { VocabWord, UserStats } from '../types';
-import { speakFrench } from '../utils/frenchSpeech';
+import { speakFrench } from '../utils/speech';
 import { FRENCH_IPA, IpaGroup } from '../data/frenchIpa';
 
 interface AnalyticsDashboardProps {

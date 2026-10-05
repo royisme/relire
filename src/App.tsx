@@ -18,8 +18,8 @@ import { EMPTY_STATS, loadData, saveArticles, saveStats, saveVocab } from './sto
 import { usePersist } from './storage/usePersist';
 import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
 import { isDueToday, formatDate } from './utils/srs';
-import { setGlobalVoice } from './utils/frenchSpeech';
-import { getAppSettings } from './utils/appSettings';
+import { prefetchSpeech } from './utils/speech';
+import { hasTextKey } from './utils/appSettings';
 
 const ONBOARDING_KEY = 'relire_onboarded';
 const storedFlag = (key: string) => {
@@ -35,13 +35,6 @@ export default function App() {
   const { t } = useTranslation();
   // Navigation tab
   const [currentTab, setCurrentTab] = useState<'reader' | 'vocab' | 'practice' | 'analytics'>('reader');
-  const [selectedVoice, setSelectedVoice] = useState<'Kore' | 'Charon'>('Kore');
-
-  const handleSelectVoice = (voice: 'Kore' | 'Charon') => {
-    setSelectedVoice(voice);
-    setGlobalVoice(voice);
-  };
-
   // Data lives in IndexedDB (see src/storage). It loads once, then every change is saved.
   const [ready, setReady] = useState(false);
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
@@ -51,7 +44,7 @@ export default function App() {
   const [isReading, setIsReading] = useState(false);
   const currentArticle = articles.find((a) => a.id === currentArticleId) ?? null;
   const [editor, setEditor] = useState<{ article: Article | null } | null>(null);
-  const [hasKey, setHasKey] = useState(() => !!getAppSettings().customApiKey?.trim());
+  const [hasKey, setHasKey] = useState(() => hasTextKey());
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [vocabList, setVocabList] = useState<VocabWord[]>([]);
   const [stats, setStats] = useState<UserStats>(EMPTY_STATS);
@@ -77,7 +70,7 @@ export default function App() {
         setStats(first.stats);
         setReady(true);
         // First visit with no key: walk the user through setup.
-        if (!storedFlag(ONBOARDING_KEY) && !getAppSettings().customApiKey?.trim()) setOnboardingOpen(true);
+        if (!storedFlag(ONBOARDING_KEY) && !hasTextKey()) setOnboardingOpen(true);
       });
     return () => {
       cancelled = true;
@@ -194,6 +187,7 @@ export default function App() {
         partOfSpeech: data.partOfSpeech,
         contextSentence: contextSentence || '',
         contextTense: data.contextTense,
+        analysis: data,
         phoneticsGuide: data.phoneticsGuide,
         addedAt: formatDate(new Date()),
         repetitions: 0,
@@ -205,6 +199,8 @@ export default function App() {
       };
 
       setVocabList((prev) => [newWord, ...prev]);
+      // Keep the pronunciation with the word: fetch the clips in the background.
+      void prefetchSpeech([data.word, contextSentence]);
     }
   };
 
@@ -295,8 +291,6 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         dueCount={dueCount}
         totalVocabCount={vocabList.length}
-        selectedVoice={selectedVoice}
-        onSelectVoice={handleSelectVoice}
       />
 
       {failedSaves.length > 0 && (
@@ -435,10 +429,7 @@ export default function App() {
         }}
         needsKey={settingsNeedKey}
         onSettingsSaved={(newSettings) => {
-          setHasKey(!!newSettings.customApiKey?.trim());
-          if (newSettings.ttsVoice) {
-            handleSelectVoice(newSettings.ttsVoice as any);
-          }
+          setHasKey(hasTextKey(newSettings));
         }}
       />
     </div>
