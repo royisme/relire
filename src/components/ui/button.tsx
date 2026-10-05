@@ -3,30 +3,25 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
+  'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-sm font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
   {
     variants: {
       variant: {
-        default: 'bg-stone-900 text-stone-50 hover:bg-stone-800 shadow-2xs',
-        destructive: 'bg-rose-600 text-white hover:bg-rose-700 shadow-2xs',
-        outline: 'border border-stone-200 bg-white hover:bg-stone-100 text-stone-800',
-        secondary: 'bg-stone-100 text-stone-900 hover:bg-stone-200/80',
-        ghost: 'hover:bg-stone-100 hover:text-stone-900 text-stone-600',
-        amber: 'bg-amber-700 text-white hover:bg-amber-800 shadow-2xs',
-        amberLight: 'bg-amber-100 text-amber-900 hover:bg-amber-200/80',
+        default: 'bg-accent-700 text-white hover:bg-accent-800',
+        secondary: 'bg-ink-100 text-ink-900 hover:bg-ink-200',
+        outline: 'border border-ink-300 bg-white text-ink-800 hover:bg-ink-100',
+        ghost: 'text-ink-600 hover:bg-ink-100 hover:text-ink-900',
+        destructive: 'bg-bad-600 text-white hover:bg-bad-700',
       },
       size: {
-        default: 'h-8 px-3 py-1.5',
-        sm: 'h-7 rounded-md px-2.5 text-[11px]',
-        lg: 'h-9 rounded-lg px-4 text-sm',
-        icon: 'h-8 w-8',
-        iconSm: 'h-7 w-7',
+        default: 'h-10 px-4',
+        sm: 'h-9 px-3 text-xs',
+        lg: 'h-11 px-5',
+        icon: 'h-10 w-10',
+        iconSm: 'h-9 w-9',
       },
     },
-    defaultVariants: {
-      variant: 'default',
-      size: 'default',
-    },
+    defaultVariants: { variant: 'default', size: 'default' },
   }
 );
 

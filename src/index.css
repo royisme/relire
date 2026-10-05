@@ -1,36 +1,104 @@
 @import "tailwindcss";
 
+@theme {
+  --font-serif: 'Source Serif 4', Georgia, 'Songti SC', serif;
+  --font-sans: 'Public Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, monospace;
+
+  /* Neutral: warm ink on paper. Page = ink-50, surfaces = white, lines = ink-200. */
+  --color-ink-50: #F7F6F3;
+  --color-ink-100: #EFEDE8;
+  --color-ink-200: #E2DFD8;
+  --color-ink-300: #CFCBC2;
+  --color-ink-400: #A39F95;
+  --color-ink-500: #7A766D;
+  --color-ink-600: #5C5851;
+  --color-ink-700: #433F3A;
+  --color-ink-800: #2D2A27;
+  --color-ink-900: #1E1C1A;
+  --color-ink-950: #121110;
+  /* Accent: ink blue. Actions and the current selection only. */
+  --color-accent-50: #EEF3FA;
+  --color-accent-100: #DCE6F5;
+  --color-accent-200: #BDD0EA;
+  --color-accent-300: #92B0DA;
+  --color-accent-400: #5F89C4;
+  --color-accent-500: #3E69A8;
+  --color-accent-600: #2F5490;
+  --color-accent-700: #264676;
+  --color-accent-800: #213A5F;
+  --color-accent-900: #1D3150;
+  --color-accent-950: #121F34;
+  /* Semantic: success and error only. */
+  --color-ok-50: #EEF6F0;
+  --color-ok-100: #D8EADD;
+  --color-ok-200: #B3D5BD;
+  --color-ok-300: #86BC97;
+  --color-ok-400: #55A06F;
+  --color-ok-500: #3A8656;
+  --color-ok-600: #2F7A4B;
+  --color-ok-700: #26633D;
+  --color-ok-800: #1F4F32;
+  --color-ok-900: #1A402A;
+  --color-ok-950: #0E2418;
+  --color-bad-50: #FBEFEE;
+  --color-bad-100: #F5D9D6;
+  --color-bad-200: #EBB5AF;
+  --color-bad-300: #DE8A82;
+  --color-bad-400: #D0645A;
+  --color-bad-500: #C2453A;
+  --color-bad-600: #AB3A30;
+  --color-bad-700: #8E2F27;
+  --color-bad-800: #702520;
+  --color-bad-900: #5B1F1B;
+  --color-bad-950: #330F0D;
+
+  --radius-md: 6px;  /* controls */
+  --radius-lg: 10px; /* surfaces, overlays */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @layer base {
-  :root {
-    --font-serif: 'Cormorant Garamond', Georgia, serif;
-    --font-sans: 'Public Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-  
+  *, ::after, ::before, ::backdrop { border-color: var(--color-ink-200); }
+  html { -webkit-text-size-adjust: 100%; }
   body {
     font-family: var(--font-sans);
+    background: var(--color-ink-50);
+    color: var(--color-ink-900);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  ::selection { background: var(--color-accent-200); color: var(--color-ink-950); }
+  :focus-visible { outline: 2px solid var(--color-accent-600); outline-offset: 2px; }
+  button, [role='button'] { touch-action: manipulation; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
 }
 
-.font-french-serif {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+/* Reading column: the article is the page. */
+.reading {
+  font-family: var(--font-serif);
+  max-width: 68ch;
+  margin-inline: auto;
+  line-height: 1.8;
+  font-feature-settings: 'liga', 'kern';
+  hyphens: manual;
 }
+.reading-title { text-wrap: balance; }
 
-.font-french-sans {
-  font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-}
+/* Tabular numerals for scores, counts and intervals. */
+.tnum { font-variant-numeric: tabular-nums; }
 
-/* Custom scrollbar for vocabulary lists and modals */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.35);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.6);
-}
+/* Overlay motion */
+@keyframes sheet-in-right { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes sheet-in-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.anim-sheet { animation: sheet-in-up 200ms var(--ease-out); }
+@media (min-width: 768px) { .anim-sheet { animation-name: sheet-in-right; } }
+.anim-fade { animation: fade-in 160ms var(--ease-out); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-ink-300); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-ink-400); }

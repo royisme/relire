@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Sheet } from './ui/overlay';
 import { X, Volume2, Bookmark, BookmarkCheck, Sparkles, BookOpen, Layers, Check, Loader2 } from 'lucide-react';
 import { WordAnalysis, VocabWord } from '../types';
 import { speakFrench } from '../utils/frenchSpeech';
@@ -44,40 +45,47 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-[#FAF8F5] border border-amber-950/20 rounded-xl max-w-xl w-full shadow-lg overflow-hidden transition-all my-8 animate-in fade-in zoom-in-95 duration-200">
+    <Sheet onClose={onClose} label={wordData?.word || activeWord || t('wordModal.analyzing')}>
+      <div className="relative flex-1 overflow-y-auto">
+        <button
+          onClick={onClose}
+          aria-label={t('common.close')}
+          className="absolute right-3 top-3 z-10 h-10 w-10 sm:h-8 sm:w-8 inline-flex items-center justify-center rounded-md text-ink-500 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
         
         {/* Loading state */}
         {isLoading ? (
           <div className="p-12 text-center">
-            <Loader2 className="w-9 h-9 text-amber-700 animate-spin mx-auto mb-3" />
-            <h4 className="font-french-serif font-bold text-lg text-stone-800">
+            <Loader2 className="w-9 h-9 text-accent-700 animate-spin mx-auto mb-3" />
+            <h4 className="font-serif font-semibold text-lg text-ink-800">
               {t('wordModal.analyzing')}
             </h4>
           </div>
         ) : !wordData ? (
           <div className="p-8 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-accent-100 text-accent-700 flex items-center justify-center mx-auto">
               <BookOpen className="w-6 h-6" />
             </div>
-            <h4 className="font-french-serif font-bold text-lg text-stone-800">
+            <h4 className="font-serif font-semibold text-lg text-ink-800">
               {activeWord ? `« ${activeWord} »` : t('common.error')}
             </h4>
-            <p className="text-xs text-stone-500 max-w-xs mx-auto">
+            <p className="text-xs text-ink-500 max-w-xs mx-auto">
               {t('wordModal.failed')}
             </p>
             <div className="flex items-center justify-center gap-3 pt-2">
               {onRetry && (
                 <button
                   onClick={onRetry}
-                  className="px-5 py-2 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-semibold shadow-xs"
+                  className="h-10 px-4 bg-accent-700 hover:bg-accent-800 text-white rounded-md text-sm font-medium "
                 >
                   {t('common.retry')}
                 </button>
               )}
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-stone-200 text-stone-700 rounded-xl text-xs font-medium"
+                className="px-4 py-2 bg-ink-200 text-ink-700 rounded-lg text-xs font-medium"
               >
                 {t('common.close')}
               </button>
@@ -87,25 +95,25 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
 
           <div>
             {/* Header */}
-            <div className="p-6 bg-[#F3EDE3] border-b border-amber-900/10">
+            <div className="p-6 bg-ink-100 border-b border-ink-200">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <h2 className="font-french-serif text-3xl font-bold text-stone-900 tracking-tight">
+                    <h2 className="font-serif text-3xl font-semibold text-ink-900 tracking-tight">
                       {wordData.word}
                     </h2>
                     {wordData.lemma && wordData.lemma.toLowerCase() !== wordData.word.toLowerCase() && (
-                      <span className="text-xs text-stone-500 font-french-sans">
-                        ({t('wordModal.lemma')}: <span className="font-medium text-amber-900">{wordData.lemma}</span>)
+                      <span className="text-xs text-ink-500 font-sans">
+                        ({t('wordModal.lemma')}: <span className="font-medium text-accent-900">{wordData.lemma}</span>)
                       </span>
                     )}
                     {wordData.cefrLevel && (
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-200 text-amber-950">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-accent-200 text-accent-950">
                         {wordData.cefrLevel}
                       </span>
                     )}
                     {wordData.partOfSpeech && (
-                      <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-stone-200 text-stone-800">
+                      <span className="px-2 py-0.5 rounded-md text-xs font-medium bg-ink-200 text-ink-800">
                         {wordData.partOfSpeech}
                       </span>
                     )}
@@ -113,24 +121,24 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
 
                   {/* Phonetics & IPA */}
                   <div className="flex items-center gap-3 pt-1">
-                    <span className="font-mono text-base font-semibold text-amber-900 bg-white/70 px-2.5 py-0.5 rounded-md border border-amber-900/10">
+                    <span className="font-mono text-base font-semibold text-accent-900 bg-white/70 px-2.5 py-0.5 rounded-md border border-ink-200">
                       {wordData.ipa || `[${wordData.word}]`}
                     </span>
                     <button
                       onClick={() => handleSpeak(wordData.word)}
                       disabled={isSpeaking}
-                      className="flex items-center gap-1.5 px-3 py-1 bg-amber-700 hover:bg-amber-800 disabled:opacity-75 text-white rounded-lg text-xs font-semibold shadow-xs active:scale-95 transition-all"
+                      className="flex items-center gap-1.5 h-10 px-4 bg-accent-700 hover:bg-accent-800 disabled:opacity-75 text-white rounded-md text-sm font-medium active:scale-95 transition-all"
                       title={t('wordModal.clickToListen')}
                     >
-                      <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-amber-200' : ''}`} />
+                      <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-accent-200' : ''}`} />
                       <span>{isSpeaking ? t('common.loading') : 'TTS'}</span>
                     </button>
                     {/* Speed toggle */}
-                    <div className="flex items-center gap-1 text-[11px] text-stone-500 bg-white/50 px-2 py-0.5 rounded-md">
+                    <div className="flex items-center gap-1 text-xs text-ink-500 bg-white/50 px-2 py-0.5 rounded-md">
                       <span>{t('reader.tempo')}:</span>
                       <button
                         onClick={() => setSpeechSpeed(speechSpeed === 0.75 ? 1.0 : 0.75)}
-                        className="font-mono font-medium hover:text-amber-800 underline decoration-dotted"
+                        className="font-mono font-medium hover:text-accent-800 underline decoration-dotted"
                       >
                         {speechSpeed}x
                       </button>
@@ -141,19 +149,19 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                 {/* Close button */}
                 <button
                   onClick={onClose}
-                  className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/60"
+                  className="p-1 rounded-md text-ink-400 hover:text-ink-700 hover:bg-ink-200/60"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Translation in this context */}
-              <div className="mt-4 pt-3 border-t border-amber-900/10">
-                <div className="text-base font-bold text-stone-900">
+              <div className="mt-4 pt-3 border-t border-ink-200">
+                <div className="text-base font-semibold text-ink-900">
                   {(isEn && wordData.translationEn) ? wordData.translationEn : wordData.translation}
                 </div>
                 {wordData.otherMeanings && wordData.otherMeanings.length > 0 && (
-                  <div className="text-xs text-stone-600 mt-0.5">
+                  <div className="text-xs text-ink-600 mt-0.5">
                     {t('wordModal.otherMeanings')} {wordData.otherMeanings.join('； ')}
                   </div>
                 )}
@@ -165,12 +173,12 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
               
               {/* Phonetics & Sound breakdown */}
               {wordData.phoneticsGuide && (
-                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200/80">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 mb-1">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                <div className="p-3.5 rounded-lg bg-accent-50 border border-accent-200/80">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-accent-900 mb-1">
+                    <Sparkles className="w-3.5 h-3.5 text-ink-600" />
                     <span>{t('wordModal.phoneticsGuide')}</span>
                   </div>
-                  <p className="text-xs leading-relaxed text-amber-950 font-french-sans">
+                  <p className="text-xs leading-relaxed text-accent-950 font-sans">
                     {wordData.phoneticsGuide}
                   </p>
                 </div>
@@ -178,16 +186,16 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
 
               {/* Context Tense & Morphology Analysis */}
               {wordData.contextTense && (
-                <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-blue-900 mb-1">
-                    <Layers className="w-3.5 h-3.5 text-blue-700" />
+                <div className="p-4 rounded-lg bg-accent-50/70 border border-accent-200/80">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-accent-900 mb-1">
+                    <Layers className="w-3.5 h-3.5 text-ink-600" />
                     <span>{t('wordModal.contextTense')}</span>
                   </div>
-                  <p className="text-xs font-medium text-blue-950 mb-2 leading-relaxed">
+                  <p className="text-xs font-medium text-accent-950 mb-2 leading-relaxed">
                     {wordData.contextTense}
                   </p>
                   {contextSentence && (
-                    <div className="text-[11px] p-2 bg-white/80 rounded-md text-stone-600 border border-blue-100 italic font-french-serif">
+                    <div className="text-xs p-2 bg-white/80 rounded-md text-ink-600 border border-accent-100 italic font-serif">
                       {t('wordModal.originalSentence')} “{contextSentence}”
                     </div>
                   )}
@@ -198,20 +206,20 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
               {wordData.conjugationTable && wordData.conjugationTable.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-xs font-bold text-stone-800 flex items-center gap-1.5">
-                      <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+                    <h4 className="text-xs font-semibold text-ink-800 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-ink-600" />
                       <span>{t('wordModal.conjugation')}</span>
                     </h4>
-                    <span className="text-[10px] text-stone-400">{t('wordModal.clickToListen')}</span>
+                    <span className="text-xs text-ink-400">{t('wordModal.clickToListen')}</span>
                   </div>
 
                   <div className="space-y-2.5">
                     {wordData.conjugationTable.map((tenseBlock, idx) => (
                       <div
                         key={idx}
-                        className="rounded-xl border border-stone-200 bg-white p-3 shadow-2xs"
+                        className="rounded-lg border border-ink-200 bg-white p-3 "
                       >
-                        <div className="text-xs font-semibold text-amber-950 pb-1.5 border-b border-stone-100 flex items-center justify-between">
+                        <div className="text-xs font-semibold text-accent-950 pb-1.5 border-b border-ink-100 flex items-center justify-between">
                           <span>{tenseBlock.tense}</span>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
@@ -219,13 +227,13 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                             <div
                               key={fIdx}
                               onClick={() => handleSpeak(`${item.person} ${item.form}`)}
-                              className="p-1.5 rounded-lg bg-stone-50 hover:bg-amber-50 cursor-pointer flex items-center justify-between text-xs transition-colors group"
+                              className="p-1.5 rounded-md bg-ink-50 hover:bg-accent-50 cursor-pointer flex items-center justify-between text-xs transition-colors group"
                             >
-                              <span className="text-stone-400 text-[11px]">{item.person}</span>
-                              <span className="font-semibold text-stone-800 group-hover:text-amber-900">
+                              <span className="text-ink-400 text-xs">{item.person}</span>
+                              <span className="font-semibold text-ink-800 group-hover:text-accent-900">
                                 {item.form}
                               </span>
-                              <Volume2 className="w-3 h-3 text-stone-300 group-hover:text-amber-700" />
+                              <Volume2 className="w-3 h-3 text-ink-300 group-hover:text-ink-600" />
                             </div>
                           ))}
                         </div>
@@ -238,28 +246,28 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
               {/* Usage Examples in Diverse Contexts */}
               {wordData.usageExamples && wordData.usageExamples.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-bold text-stone-800 mb-2">
+                  <h4 className="text-xs font-semibold text-ink-800 mb-2">
                     {t('wordModal.examples')}
                   </h4>
                   <div className="space-y-2">
                     {wordData.usageExamples.map((ex, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-xl bg-white border border-stone-200 text-xs space-y-1 hover:border-amber-300 transition-colors"
+                        className="p-3 rounded-lg bg-white border border-ink-200 text-xs space-y-1 hover:border-accent-300 transition-colors"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <p className="font-french-serif text-sm font-semibold text-stone-900 leading-snug">
+                          <p className="font-serif text-sm font-semibold text-ink-900 leading-snug">
                             {ex.fr}
                           </p>
                           <button
                             onClick={() => handleSpeak(ex.fr)}
-                            className="p-1 rounded-md text-stone-400 hover:text-amber-800 hover:bg-amber-100/50"
+                            className="p-1 rounded-md text-ink-400 hover:text-accent-800 hover:bg-accent-100/50"
                             title={t('wordModal.listenExample')}
                           >
                             <Volume2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <p className="text-stone-600 font-french-sans text-xs">
+                        <p className="text-ink-600 font-sans text-xs">
                           {(isEn && ex.en) ? ex.en : ex.zh}
                         </p>
                       </div>
@@ -270,31 +278,31 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
 
               {/* Memory Trick / Etymology */}
               {wordData.memoryTrick && (
-                <div className="p-3 rounded-xl bg-stone-100/80 border border-stone-200 text-xs">
-                  <span className="font-semibold text-stone-800">{t('wordModal.memoryTrick')} </span>
-                  <span className="text-stone-600">{wordData.memoryTrick}</span>
+                <div className="p-3 rounded-lg bg-ink-100/80 border border-ink-200 text-xs">
+                  <span className="font-semibold text-ink-800">{t('wordModal.memoryTrick')} </span>
+                  <span className="text-ink-600">{wordData.memoryTrick}</span>
                 </div>
               )}
             </div>
 
             {/* Bottom actions */}
-            <div className="p-4 bg-[#F5EFE6] border-t border-amber-900/10 flex items-center justify-between">
+            <div className="p-4 bg-[#F5EFE6] border-t border-ink-200 flex items-center justify-between">
               <button
                 onClick={() => onToggleVocab(wordData, contextSentence)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all active:scale-95 ${
+                className={`flex items-center gap-2 h-10 px-4 rounded-md text-sm font-medium transition-all active:scale-95 ${
                   isSavedInVocab
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-stone-900 hover:bg-stone-800 text-amber-300 shadow-sm'
+                    ? 'bg-ok-700 text-white'
+                    : 'bg-accent-700 hover:bg-accent-800 text-white'
                 }`}
               >
                 {isSavedInVocab ? (
                   <>
-                    <BookmarkCheck className="w-4 h-4 text-emerald-200" />
+                    <BookmarkCheck className="w-4 h-4 text-white" />
                     <span>{t('wordModal.removeFromVocab')}</span>
                   </>
                 ) : (
                   <>
-                    <Bookmark className="w-4 h-4 text-amber-400" />
+                    <Bookmark className="w-4 h-4 text-ink-600" />
                     <span>{t('wordModal.addToVocab')}</span>
                   </>
                 )}
@@ -302,7 +310,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
 
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-sm text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-200/50"
+                className="px-4 py-2 text-sm text-ink-600 hover:text-ink-900 rounded-md hover:bg-ink-200/50"
               >
                 {t('common.close')}
               </button>
@@ -310,6 +318,6 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </Sheet>
   );
 };

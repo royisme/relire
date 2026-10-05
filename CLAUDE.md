@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for working in this repo. Product intent is in `PRODUCT.md`; the visual system is in `DESIGN.md` once it exists. Read both before touching UI.
+Guidance for working in this repo. Product intent is in `PRODUCT.md`; the visual system is in `DESIGN.md` (tokens in `src/index.css`, overlays in `src/components/ui/overlay.tsx`). Read both before touching UI.
 
 ## Commands
 
