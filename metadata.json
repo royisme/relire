@@ -1,0 +1,7 @@
+{
+  "name": "Éclair Français - 法语深度精读与AI口语私教",
+  "description": "专业的法语沉浸式阅读与口语跟读平台：文章精读、点词解析时态与音素、长难句语法剖析、影子跟读、智能间隔重复生词本与AI发音精准纠错。",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
