@@ -15,6 +15,7 @@ interface SentenceDrawerProps {
   sentence: string;
   sentenceData: SentenceAnalysis | null;
   isLoading: boolean;
+  errorMessage?: string | null;
   onRecordAssessmentComplete?: (assessment: PronunciationAssessment, sentence: string) => void;
 }
 
@@ -24,6 +25,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
   sentence,
   sentenceData,
   isLoading,
+  errorMessage,
   onRecordAssessmentComplete,
 }) => {
   const { t } = useTranslation();
@@ -157,8 +159,9 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
               </h4>
             </div>
           ) : !sentenceData ? (
-            <div className="text-center py-12 text-ink-500">
-              {t('common.error')}
+            <div className="text-center py-12 space-y-2">
+              <p className="text-ink-500">{t('common.error')}</p>
+              {errorMessage && <p className="text-xs text-bad-700 break-words">{errorMessage}</p>}
             </div>
           ) : (
             <>

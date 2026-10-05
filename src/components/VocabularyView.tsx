@@ -79,7 +79,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `eclair-vocab-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `relire-vocab-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
   };
 

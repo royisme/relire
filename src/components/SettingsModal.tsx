@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import {
   X, Settings, Key, Cpu, Volume2, ShieldCheck, CheckCircle2,
-  AlertCircle, HelpCircle, RefreshCw, Sparkles, Server, Terminal, Copy, Check,
+  AlertCircle, HelpCircle, RefreshCw, Sparkles,
   Download, Upload, Database, HardDrive, Trash2, Globe
 } from 'lucide-react';
 import {
@@ -12,25 +12,27 @@ import {
 } from '../utils/appSettings';
 import { setAppLanguage } from '../i18n';
 import { speakFrench } from '../utils/frenchSpeech';
+import { synthesizeSpeech } from '../services/gemini';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSettingsSaved?: (newSettings: AppSettings) => void;
+  /** Shown when the dialog was opened because an AI feature needs a key. */
+  needsKey?: boolean;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
   onClose,
   onSettingsSaved,
+  needsKey,
 }) => {
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
   const [settings, setSettings] = useState<AppSettings>(getAppSettings());
-  const [serverHasKey, setServerHasKey] = useState<boolean | null>(null);
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
-  const [copiedEnv, setCopiedEnv] = useState(false);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,12 +48,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       setSettings(getAppSettings());
       setTestResult(null);
       setBackupStatus(null);
-
-      // Check server env key status
-      fetch('/api/config')
-        .then((r) => r.json())
-        .then((d) => setServerHasKey(!!d.hasEnvKey))
-        .catch(() => setServerHasKey(false));
 
       // Calculate local data size
       try {
@@ -95,7 +91,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `eclair-francais-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `relire-backup-${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -148,34 +144,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setIsTesting(true);
     setTestResult(null);
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (settings.customApiKey?.trim()) {
-        headers['x-gemini-api-key'] = settings.customApiKey.trim();
-      }
-
-      // Test TTS audio generation
-      const res = await fetch('/api/tts', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          text: 'Bonjour ! Bienvenue sur Éclair Français.',
-          voice: settings.ttsVoice,
-          model: settings.ttsModel,
-        }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'HTTP ' + res.status }));
-        throw new Error(err.error || 'Test failed');
-      }
+      await synthesizeSpeech(
+        { text: 'Bonjour !', voice: settings.ttsVoice, model: settings.ttsModel },
+        settings.customApiKey
+      );
 
       setTestResult({
         success: true,
         msg: t('settings.testSuccess'),
       });
 
-      // Play test speech
-      speakFrench('Bonjour ! Bienvenue sur Éclair Français.', {
+      speakFrench('Bonjour ! Bienvenue sur Relire.', {
         voice: settings.ttsVoice,
       });
     } catch (err: any) {
@@ -188,19 +167,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
-  const copyEnvSnippet = () => {
-    navigator.clipboard.writeText('GEMINI_API_KEY="your_api_key_here"\nPORT=3000');
-    setCopiedEnv(true);
-    setTimeout(() => setCopiedEnv(false), 2000);
-  };
-
   return (
     <Dialog onClose={onClose} label={t('settings.title')}>
         <OverlayHeader title={t('settings.title')} subtitle={t('settings.subtitle')} onClose={onClose} closeLabel={t('common.close')} />
 
         {/* Modal Body */}
         <div className="p-5 sm:p-6 space-y-6 max-h-[72vh] overflow-y-auto">
-          
+          {needsKey && (
+            <p className="rounded-md border border-accent-200 bg-accent-50 px-3 py-2 text-sm text-accent-900">
+              {t('settings.needsKeyNotice')}
+            </p>
+          )}
+
           {/* SECTION 1: LLM Key & Deployment */}
           <div className="space-y-3.5">
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -208,22 +186,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Key className="w-4 h-4 text-ink-600" />
                 <span>{t('settings.apiKeySection')}</span>
               </h4>
-              {/* Server Key Status Badge */}
-              <div className="flex items-center gap-1.5 text-xs px-2.5 py-0.5 rounded-full font-medium border">
-                {serverHasKey === null ? (
-                  <span className="text-ink-400">{t('common.loading')}</span>
-                ) : serverHasKey ? (
-                  <span className="text-ok-700 bg-ok-50 border-ok-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-ok-600" />
-                    <span>{t('settings.envKeyReady')}</span>
-                  </span>
-                ) : (
-                  <span className="text-accent-800 bg-accent-50 border-accent-200 flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5 text-accent-600" />
-                    <span>{t('settings.envKeyMissing')}</span>
-                  </span>
-                )}
-              </div>
+              {settings.customApiKey.trim() ? (
+                <span className="text-ok-800 bg-ok-50 border border-ok-200 flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{t('settings.keySet')}</span>
+                </span>
+              ) : (
+                <span className="text-accent-800 bg-accent-50 border border-accent-200 flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{t('settings.keyMissing')}</span>
+                </span>
+              )}
             </div>
 
             <div className="p-4 rounded-lg bg-white border border-ink-200 space-y-3 ">
@@ -245,28 +218,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </p>
               </div>
 
-              {/* Deployment hint */}
-              <div className="p-3 rounded-md bg-ink-50 border border-ink-200 text-xs space-y-1.5">
-                <div className="flex items-center justify-between text-ink-700 font-medium">
-                  <span className="flex items-center gap-1.5">
-                    <Server className="w-3.5 h-3.5 text-ink-600" />
-                    <span>{t('settings.deployGuideTitle')}</span>
-                  </span>
-                  <button
-                    onClick={copyEnvSnippet}
-                    className="flex items-center gap-1 text-xs text-accent-800 hover:text-accent-950 font-mono"
-                  >
-                    {copiedEnv ? <Check className="w-3 h-3 text-ok-600" /> : <Copy className="w-3 h-3" />}
-                    <span>{copiedEnv ? t('settings.copiedEnv') : t('settings.copyEnv')}</span>
-                  </button>
-                </div>
-                <code className="block p-2 rounded-md bg-ink-900 text-ok-300 font-mono text-xs">
-                  GEMINI_API_KEY="AIzaSy..."
-                </code>
-                <p className="text-xs text-ink-500 leading-relaxed">
-                  {t('settings.deployGuideDesc')}
-                </p>
-              </div>
+              <p className="text-xs text-ink-500 leading-relaxed">
+                {t('settings.keyPrivacy')}{' '}
+                <a
+                  href="https://aistudio.google.com/apikey"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-accent-700 underline underline-offset-2 hover:text-accent-900"
+                >
+                  {t('settings.getKey')}
+                </a>
+              </p>
             </div>
           </div>
 

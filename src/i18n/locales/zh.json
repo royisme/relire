@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Éclair Français",
+    "appName": "Relire",
     "appTagline": "法语深度精读与AI口语私教",
     "save": "保存",
     "cancel": "取消",
@@ -20,18 +20,20 @@
     "testing": "测试中..."
   },
   "nav": {
-    "reader": "文章精读",
+    "reader": "精读",
     "vocab": "生词本",
-    "practice": "强化练习",
-    "analytics": "进度看板",
+    "practice": "练习",
+    "analytics": "进度",
     "importArticle": "导入/粘贴文章",
     "importShort": "导入",
-    "installMac": "安装到 Mac",
-    "installApp": "桌面App",
-    "installedDesktop": "已安装桌面端",
-    "settings": "配置大模型与音色",
+    "installMac": "安装应用",
+    "installApp": "安装应用",
+    "installedDesktop": "已安装",
+    "settings": "设置",
     "geminiTts": "Gemini 真人TTS",
-    "dueCount": "{{count}} 待复习"
+    "dueCount": "{{count}} 待复习",
+    "menu": "菜单",
+    "language": "语言"
   },
   "reader": {
     "ttsConsole": "Gemini 真人朗读",
@@ -185,18 +187,12 @@
     "retentionOverview": "SRS 记忆曲线掌握分布"
   },
   "settings": {
-    "title": "模型与部署独立配置 (Configuration des Modèles)",
-    "subtitle": "配置 LLM Key、区分语言学解析模型与语音合成 (TTS) 模型",
-    "apiKeySection": "1. Gemini API Key 与部署配置",
-    "envKeyReady": "服务端环境变量已就绪 (process.env.GEMINI_API_KEY)",
-    "envKeyMissing": "服务端未检测到默认 Key",
-    "customKeyLabel": "自定义 API Key (可选覆写 / 自托管部署):",
-    "customKeyPlaceholder": "留空则自动使用服务端环境变量 GEMINI_API_KEY",
-    "customKeyDesc": "若您自行部署或自建私有服务器，可在环境配置或此处填入 Google Gemini API Key。",
-    "deployGuideTitle": "生产环境一键部署方式:",
-    "copyEnv": "复制 .env",
-    "copiedEnv": "已复制",
-    "deployGuideDesc": "在 Cloud Run、Docker 或服务器根目录下创建 .env 文件注入环境变量即可真正独立上线。",
+    "title": "设置",
+    "subtitle": "Gemini Key、AI 模型、音色、语言与备份",
+    "apiKeySection": "1. Gemini API Key",
+    "customKeyLabel": "你的 Gemini API Key",
+    "customKeyPlaceholder": "在这里粘贴你的 Key",
+    "customKeyDesc": "单词和句子解析、朗读音频、发音反馈都需要它。",
     "modelsSection": "2. 核心大模型独立选择 (Modèles IA)",
     "analysisModelTitle": "语言学解析与纠音模型 (Analyse)",
     "analysisModelDesc": "负责词汇变位、长难句结构拆解与发音打分评测。",
@@ -222,7 +218,12 @@
     "savedNotice": "配置保存于本地缓存，重启或刷新页面自动保持生效",
     "languageSection": "5. 界面与教学解析语言 (Langue)",
     "langEn": "English (英文 · 默认)",
-    "langZh": "简体中文 (Simplified Chinese)"
+    "langZh": "简体中文 (Simplified Chinese)",
+    "keySet": "Key 已保存在此浏览器",
+    "keyMissing": "尚未设置 Key",
+    "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 Google。没有应用服务器。",
+    "getKey": "到 Google AI Studio 免费获取 Key",
+    "needsKeyNotice": "请先填写你的 Gemini API Key，才能使用单词和句子解析、朗读和发音反馈。"
   },
   "importer": {
     "title": "导入或粘贴私有法语文章",
@@ -243,13 +244,13 @@
     "validationError": "请完整填写文章标题与正文内容"
   },
   "pwa": {
-    "title": "安装到 Mac 作为独立 App 运行",
-    "chromeWay": "🌟 方式一：在 Google Chrome / Edge 浏览器中（最推荐）",
-    "chromeDesc": "点击浏览器地址栏右侧的「安装应用 (Install App)」按钮图标，或点击右上角菜单「保存并分享」→「安装 Éclair Français...」即可直接成为 Mac 独立软件。",
-    "safariWay": "🍎 方式二：在 Safari 浏览器中 (macOS 14 Sonoma+)",
-    "safariDesc": "点击 Mac 顶部菜单栏「文件 (File) → 添加到程序坞 (Add to Dock)」，应用图标将直接常驻 Mac 程序坞，双击即开！",
-    "noServerWhy": "💡 为什么这样运行完全不需要服务器？",
-    "noServerDesc": "安装后作为本地 PWA 独立沙箱运行，所有文章、生词本（SRS算法进度）、历史跟读得分和自定义设置均自动保存在您的 Mac 本地浏览器存储中，离线可用，永不丢失！",
-    "gotIt": "我知道了，开始阅读"
+    "title": "安装为应用",
+    "chromeWay": "Chrome 或 Edge",
+    "chromeDesc": "点击地址栏里的安装图标，或打开浏览器菜单选择「安装 Relire」。",
+    "safariWay": "Safari（macOS 14 及以上）",
+    "safariDesc": "选择「文件 → 添加到程序坞」。iPhone 和 iPad 上用「分享 → 添加到主屏幕」。",
+    "noServerWhy": "可以离线使用",
+    "noServerDesc": "文章、生词和设置都保存在这个浏览器里。阅读和生词复习可以离线使用；单词和句子解析、朗读、发音反馈需要联网和你的 Gemini Key。",
+    "gotIt": "知道了"
   }
 }

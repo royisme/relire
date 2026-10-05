@@ -11,7 +11,7 @@ import { SettingsModal } from './components/SettingsModal';
 
 import { Article, VocabWord, WordAnalysis, SentenceAnalysis, UserStats, PronunciationAssessment } from './types';
 import { SAMPLE_ARTICLES, INITIAL_VOCAB } from './data/sampleArticles';
-import { fetchWordAnalysis, fetchSentenceAnalysis } from './services/api';
+import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
 import { isDueToday, formatDate } from './utils/srs';
 import { setGlobalVoice } from './utils/frenchSpeech';
 
@@ -128,6 +128,20 @@ export default function App() {
     }
   }, [stats]);
 
+  // AI failures: a missing key sends the user to Settings, anything else is shown in the sheet.
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [settingsNeedKey, setSettingsNeedKey] = useState(false);
+
+  const handleAiError = (err: unknown, closeSheet: () => void) => {
+    if (err instanceof MissingApiKeyError) {
+      closeSheet();
+      setSettingsNeedKey(true);
+      setIsSettingsOpen(true);
+      return;
+    }
+    setAiError(err instanceof Error ? err.message : String(err));
+  };
+
   // Word Click Handler
   const handleWordClick = async (word: string, sentence: string) => {
     // Strip leading/trailing punctuation while preserving French accents
@@ -139,6 +153,7 @@ export default function App() {
     setIsWordModalOpen(true);
     setIsWordLoading(true);
     setWordData(null);
+    setAiError(null);
 
     try {
       const data = await fetchWordAnalysis(cleanWord, sentence, currentArticle.content);
@@ -148,43 +163,7 @@ export default function App() {
         throw new Error('Empty word analysis returned');
       }
     } catch (err) {
-      console.warn('Network or AI service busy, using client fallback:', err);
-      // Instant client-side fallback to prevent user blockage
-      const lower = cleanWord.toLowerCase();
-      const isVerb = lower.endsWith('er') || lower.endsWith('ir') || lower.endsWith('re') || lower.endsWith('é') || lower.endsWith('ais') || lower.endsWith('ait');
-
-      setWordData({
-        word: cleanWord,
-        lemma: cleanWord,
-        partOfSpeech: isVerb ? "Verbe en contexte" : "Nom / Mot français",
-        ipa: `/${cleanWord}/`,
-        phoneticsGuide: "注意小舌颤音[ʁ]轻微摩擦，鼻化元音口鼻齐鸣，元音饱满圆唇。",
-        translation: `${cleanWord}（原句核心表达）`,
-        otherMeanings: ["在上下文中的具体词义"],
-        contextTense: isVerb ? "对应语境动词形态" : "名词/形容词修饰",
-        conjugationTable: [
-          {
-            tense: "Présent de l'indicatif (直陈式现在时)",
-            forms: [
-              { person: "je", form: cleanWord },
-              { person: "tu", form: cleanWord + "s" },
-              { person: "il/elle", form: cleanWord },
-              { person: "nous", form: cleanWord + "ons" },
-              { person: "vous", form: cleanWord + "ez" },
-              { person: "ils/elles", form: cleanWord + "ent" }
-            ]
-          }
-        ],
-        usageExamples: [
-          {
-            fr: sentence || `C'est une phrase contenant le mot ${cleanWord}.`,
-            zh: "原句上下文例句",
-            highlight: cleanWord
-          }
-        ],
-        cefrLevel: "B1",
-        memoryTrick: "结合句子整体意群多加朗读跟读。"
-      });
+      handleAiError(err, () => setIsWordModalOpen(false));
     } finally {
       setIsWordLoading(false);
     }
@@ -204,6 +183,7 @@ export default function App() {
     setIsSentenceDrawerOpen(true);
     setIsSentenceLoading(true);
     setSentenceData(null);
+    setAiError(null);
 
     // Increment sentence analysis stat
     setStats((prev) => ({
@@ -215,7 +195,7 @@ export default function App() {
       const data = await fetchSentenceAnalysis(sentence, currentArticle.content);
       setSentenceData(data);
     } catch (err) {
-      console.error('Failed to analyze sentence:', err);
+      handleAiError(err, () => setIsSentenceDrawerOpen(false));
     } finally {
       setIsSentenceLoading(false);
     }
@@ -304,7 +284,7 @@ export default function App() {
   const dueCount = vocabList.filter(isDueToday).length;
 
   return (
-    <div className="min-h-screen bg-[#FBF9F5] text-ink-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-ink-50 text-ink-900 flex flex-col font-sans">
       {/* Top Navbar */}
       <Navbar
         currentTab={currentTab}
@@ -369,6 +349,7 @@ export default function App() {
         onToggleVocab={handleToggleVocab}
         onRetry={handleRetryWord}
         activeWord={activeWord}
+        errorMessage={aiError}
       />
 
       {/* Sentence Breakdown & Shadowing Drawer */}
@@ -381,6 +362,7 @@ export default function App() {
         sentence={activeSentence || ''}
         sentenceData={sentenceData}
         isLoading={isSentenceLoading}
+        errorMessage={aiError}
         onRecordAssessmentComplete={handleRecordAssessmentComplete}
       />
 
@@ -392,10 +374,14 @@ export default function App() {
         articles={articles}
       />
 
-      {/* Model & Deployment Settings Modal */}
+      {/* Settings */}
       <SettingsModal
         isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        onClose={() => {
+          setIsSettingsOpen(false);
+          setSettingsNeedKey(false);
+        }}
+        needsKey={settingsNeedKey}
         onSettingsSaved={(newSettings) => {
           if (newSettings.ttsVoice) {
             handleSelectVoice(newSettings.ttsVoice as any);

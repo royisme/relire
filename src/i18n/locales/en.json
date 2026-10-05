@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Éclair Français",
+    "appName": "Relire",
     "appTagline": "French Deep Reading & AI Oral Coach",
     "save": "Save",
     "cancel": "Cancel",
@@ -20,18 +20,20 @@
     "testing": "Testing..."
   },
   "nav": {
-    "reader": "Deep Reading",
+    "reader": "Read",
     "vocab": "Vocabulary",
     "practice": "Drills",
-    "analytics": "Dashboard",
+    "analytics": "Progress",
     "importArticle": "Import Article",
     "importShort": "Import",
-    "installMac": "Install to Mac",
-    "installApp": "Install App",
+    "installMac": "Install app",
+    "installApp": "Install app",
     "installedDesktop": "Installed",
-    "settings": "Model & Deployment Settings",
+    "settings": "Settings",
     "geminiTts": "Gemini TTS",
-    "dueCount": "{{count}} due"
+    "dueCount": "{{count}} due",
+    "menu": "Menu",
+    "language": "Language"
   },
   "reader": {
     "ttsConsole": "Gemini Native Audio",
@@ -185,18 +187,12 @@
     "retentionOverview": "SRS Memory Retention Overview"
   },
   "settings": {
-    "title": "Model & Deployment Settings",
-    "subtitle": "Configure LLM Key, linguistic analysis model, and TTS voice",
-    "apiKeySection": "1. Gemini API Key & Deployment",
-    "envKeyReady": "Server env ready (GEMINI_API_KEY)",
-    "envKeyMissing": "No server key detected",
-    "customKeyLabel": "Custom API Key (optional override / self-hosted):",
-    "customKeyPlaceholder": "Leave blank to use server environment key",
-    "customKeyDesc": "Enter your Google Gemini API Key for client-side direct calling or self-hosting.",
-    "deployGuideTitle": "Production Deployment Snippet:",
-    "copyEnv": "Copy .env",
-    "copiedEnv": "Copied",
-    "deployGuideDesc": "Place .env in Cloud Run, Docker, or project root to deploy your own instance.",
+    "title": "Settings",
+    "subtitle": "Gemini key, AI models, voice, language and backup",
+    "apiKeySection": "1. Gemini API key",
+    "customKeyLabel": "Your Gemini API key",
+    "customKeyPlaceholder": "Paste your key here",
+    "customKeyDesc": "Needed for word and sentence analysis, audio and pronunciation feedback.",
     "modelsSection": "2. AI Model Selection",
     "analysisModelTitle": "Analysis & Coaching Model",
     "analysisModelDesc": "Handles morphology, S-V-O syntax, and oral scoring.",
@@ -222,7 +218,12 @@
     "savedNotice": "Settings saved to local storage and active immediately",
     "languageSection": "5. Interface & Explanation Language",
     "langEn": "English (Default)",
-    "langZh": "简体中文 (Simplified Chinese)"
+    "langZh": "简体中文 (Simplified Chinese)",
+    "keySet": "Key saved in this browser",
+    "keyMissing": "No key yet",
+    "keyPrivacy": "The key is stored only in this browser and sent only to Google when you use an AI feature. There is no app server.",
+    "getKey": "Get a free key from Google AI Studio",
+    "needsKeyNotice": "Add your Gemini API key to use word and sentence analysis, audio and pronunciation feedback."
   },
   "importer": {
     "title": "Import / Paste French Article",
@@ -243,13 +244,13 @@
     "validationError": "Please provide both title and article content"
   },
   "pwa": {
-    "title": "Install to Mac as Standalone App",
-    "chromeWay": "Method 1: In Chrome / Edge (Recommended)",
-    "chromeDesc": "Click the 'Install App' icon in the address bar, or menu 'Save & share' → 'Install Éclair Français...'.",
-    "safariWay": "Method 2: In Safari (macOS 14 Sonoma+)",
-    "safariDesc": "In Safari top menu, click File → Add to Dock to place the app directly on your Mac Dock!",
-    "noServerWhy": "Why no server needed?",
-    "noServerDesc": "Runs in an isolated PWA sandbox. Articles, SRS memory intervals, and settings remain permanently stored on your Mac.",
-    "gotIt": "Got it, continue reading"
+    "title": "Install as an app",
+    "chromeWay": "Chrome or Edge",
+    "chromeDesc": "Click the install icon in the address bar, or open the browser menu and choose Install Relire.",
+    "safariWay": "Safari (macOS 14 or later)",
+    "safariDesc": "Choose File → Add to Dock. On iPhone or iPad, use Share → Add to Home Screen.",
+    "noServerWhy": "Works offline",
+    "noServerDesc": "Your articles, vocabulary and settings are stored in this browser. Reading and vocabulary review work offline. Word and sentence analysis, audio and pronunciation feedback need a connection and your Gemini key.",
+    "gotIt": "Got it"
   }
 }

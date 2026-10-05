@@ -10,6 +10,7 @@ export interface SpeechOptions {
   onError?: (err: any) => void;
 }
 
+import { synthesizeSpeech } from '../services/gemini';
 import { getAppSettings } from './appSettings';
 
 // Client-side cache for instant playback on repeated words/sentences
@@ -59,40 +60,19 @@ async function fetchTtsAudio(text: string, voice?: string): Promise<string> {
     return clientTtsCache.get(cacheKey)!;
   }
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  if (settings.customApiKey?.trim()) {
-    headers['x-gemini-api-key'] = settings.customApiKey.trim();
-  }
-
-  const res = await fetch('/api/tts', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      text: text.trim(),
-      voice: effectiveVoice,
-      model: effectiveModel,
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`TTS server responded with ${res.status}`);
-  }
-
-  const data = await res.json();
-  if (!data.audioBase64) {
-    throw new Error('No audio data received');
-  }
+  const audioBase64 = await synthesizeSpeech(
+    { text: text.trim(), voice: effectiveVoice, model: effectiveModel },
+    settings.customApiKey
+  );
 
   // Cache up to 300 entries in client memory
   if (clientTtsCache.size > 300) {
     const firstKey = clientTtsCache.keys().next().value;
     if (firstKey) clientTtsCache.delete(firstKey);
   }
-  clientTtsCache.set(cacheKey, data.audioBase64);
+  clientTtsCache.set(cacheKey, audioBase64);
 
-  return data.audioBase64;
+  return audioBase64;
 }
 
 // Play French speech using high-fidelity native Gemini TTS
