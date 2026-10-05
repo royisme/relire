@@ -15,6 +15,15 @@ import { base64ToBlob, getAudio, putAudio } from '../storage/audio';
 import { getAppSettings } from './appSettings';
 
 let currentAudio: HTMLAudioElement | null = null;
+let currentUrl: string | null = null;
+
+/** Frees the object URL of the clip that is playing or was playing. */
+function releaseUrl() {
+  if (currentUrl) {
+    URL.revokeObjectURL(currentUrl);
+    currentUrl = null;
+  }
+}
 let currentVoice: 'Kore' | 'Charon' | 'Zephyr' | 'Puck' = 'Kore';
 let globalRate = 0.85;
 
@@ -43,6 +52,7 @@ export function stopSpeech() {
     currentAudio.currentTime = 0;
     currentAudio = null;
   }
+  releaseUrl();
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
@@ -102,16 +112,24 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
   stopSpeech();
 
   const voiceName = options.voice || currentVoice;
+  let audioUrl: string | null = null;
 
   try {
     if (options.onStart) options.onStart();
 
     const clip = await loadSpeech(cleanText, voiceName);
-    const audioUrl = URL.createObjectURL(clip);
-    const audio = new Audio(audioUrl);
-    audio.addEventListener('ended', () => URL.revokeObjectURL(audioUrl), { once: true });
-    audio.addEventListener('error', () => URL.revokeObjectURL(audioUrl), { once: true });
+    audioUrl = URL.createObjectURL(clip);
+    const url = audioUrl;
+    const audio = new Audio(url);
+    // Revoke only if this clip is still the current one (a newer clip has its own URL).
+    const release = () => {
+      if (currentUrl === url) releaseUrl();
+      else URL.revokeObjectURL(url);
+    };
+    audio.addEventListener('ended', release, { once: true });
+    audio.addEventListener('error', release, { once: true });
     currentAudio = audio;
+    currentUrl = url;
 
     const effectiveRate = options.rate ?? globalRate;
     if (effectiveRate && effectiveRate > 0) {
@@ -132,6 +150,12 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
     await audio.play();
   } catch (err) {
     console.warn('Gemini TTS failed, falling back to browser speech:', err);
+    // play() can reject after the URL was created; do not leak it.
+    if (audioUrl) {
+      if (currentUrl === audioUrl) releaseUrl();
+      else URL.revokeObjectURL(audioUrl);
+      currentAudio = null;
+    }
     fallbackBrowserSpeech(cleanText, options);
   }
 }

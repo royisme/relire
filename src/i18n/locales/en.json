@@ -191,7 +191,8 @@
     "clearAudio": "Clear other audio",
     "audioDesc": "Every clip is saved so it plays offline and is never generated twice. Audio for words in your vocabulary, their sentences and examples is always kept; the rest is trimmed when it grows past 200 MB.",
     "backupAudio": "Include pronunciation audio for my vocabulary (larger file)",
-    "backupAudioSize": "about {{mb}} MB"
+    "backupAudioSize": "about {{mb}} MB",
+    "importAudioPartial": "Backup restored, but {{failed}} audio clips could not be saved on this device (storage may be full). Playing those words will generate them again."
   },
   "importer": {
     "articleTitle": "Article Title",

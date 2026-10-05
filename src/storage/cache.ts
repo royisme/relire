@@ -12,7 +12,7 @@ const DAY = 24 * 60 * 60 * 1000;
 
 const POLICY = {
   // A word in a given sentence has one right answer, so it is kept until cleared.
-  word: { ttl: Infinity, max: 5000 },
+  word: { ttl: Infinity, max: Infinity },
   // Sentence analyses are kept for 30 days.
   sentence: { ttl: 30 * DAY, max: 1000 },
   // Practice drills for an article stay until the learner asks for new ones.
@@ -62,12 +62,14 @@ export async function putCached(kind: CacheKind, key: string, value: unknown): P
     const d = await db();
     const entry: CacheEntry = { key: `${kind}:${key}`, kind, value, createdAt: Date.now() };
     await d.put('cache', entry);
-    // Keep the newest `max` entries of this kind.
-    const all = await d.getAllFromIndex('cache', 'kind', kind);
-    const excess = all.length - POLICY[kind].max;
-    if (excess > 0) {
-      all.sort((a, b) => a.createdAt - b.createdAt);
-      await Promise.all(all.slice(0, excess).map((e) => d.delete('cache', e.key)));
+    // Keep the newest `max` entries of kinds that have a limit (words never do).
+    if (Number.isFinite(POLICY[kind].max)) {
+      const all = await d.getAllFromIndex('cache', 'kind', kind);
+      const excess = all.length - POLICY[kind].max;
+      if (excess > 0) {
+        all.sort((a, b) => a.createdAt - b.createdAt);
+        await Promise.all(all.slice(0, excess).map((e) => d.delete('cache', e.key)));
+      }
     }
   } catch {
     // Quota or private mode: skip caching.

@@ -7,9 +7,9 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
-- **Saved pronunciation audio.** Every synthesized clip is stored on the device and played from there, so it is generated once and works offline. Audio for words in the vocabulary (the word, its context sentence, its example sentences) is kept for good; other clips are trimmed least-recently-used past 200 MB. Settings shows the amount and can clear the rest. Backups can optionally include the vocabulary's audio.
+- **Saved pronunciation audio.** Every synthesized clip is stored on the device and played from there, so it is generated once and works offline. Audio for words in the vocabulary (the word, its context sentence, its example sentences) is kept for good; other clips are trimmed least-recently-used past 200 MB. Settings shows the amount and can clear the rest. Backups can optionally include the vocabulary's audio; if some clips cannot be saved while restoring, Settings says how many.
 - **Saved explanations with the word.** Saving a word stores its full explanation (conjugation, examples) on the vocabulary entry and fetches its audio in the background.
-- **Saved AI answers.** Word analyses are kept until cleared, sentence analyses and practice drills for 30 days, so repeating them costs nothing and cached answers work without a key. Identical requests in flight are shared. Settings shows the counts and can clear them.
+- **Saved AI answers.** Word analyses are kept until cleared (no entry limit), sentence analyses and practice drills for 30 days, so repeating them costs nothing and cached answers work without a key. Identical requests in flight are shared. Settings shows the counts and can clear them.
 - **Practice drills keep their set** per article and type; the last question offers "New questions" to replace it.
 - **Progress page: French sounds in IPA.** A tap-to-hear chart of vowels, nasal vowels, semi-vowels and consonants with an example word each.
 - **Article library.** The Read tab opens a table of articles with search, level filter, sortable columns, add, edit and delete (with confirmation) and a way to restore the sample articles. Opening an article shows the reader with a back link.

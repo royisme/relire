@@ -191,7 +191,8 @@
     "clearAudio": "清除其他音频",
     "audioDesc": "每段音频都会保存下来，离线也能播放，也不会重复生成。生词本里的单词、它们的语境句和例句的音频始终保留，其余音频超过 200 MB 后会按最近使用情况清理。",
     "backupAudio": "备份时包含生词本的发音音频（文件会更大）",
-    "backupAudioSize": "约 {{mb}} MB"
+    "backupAudioSize": "约 {{mb}} MB",
+    "importAudioPartial": "备份已恢复，但有 {{failed}} 段音频没能保存到这台设备（可能存储空间已满）。播放这些单词时会重新生成。"
   },
   "importer": {
     "articleTitle": "文章标题",

@@ -49,7 +49,8 @@ export async function getAudio(model: string, voice: string, text: string): Prom
     const entry = await d.get('audio', audioKey(model, voice, text));
     if (!entry) return undefined;
     // Record use at most once a day so playing a clip is not a write every time.
-    if (Date.now() - entry.lastUsed > DAY) await d.put('audio', { ...entry, lastUsed: Date.now() });
+    // A failed write must not turn a clip we did read into a miss.
+    if (Date.now() - entry.lastUsed > DAY) await d.put('audio', { ...entry, lastUsed: Date.now() }).catch(() => undefined);
     return entry.blob;
   } catch {
     return undefined;
@@ -58,25 +59,35 @@ export async function getAudio(model: string, voice: string, text: string): Prom
 
 let approxBytes: number | null = null;
 
-export async function putAudio(model: string, voice: string, text: string, blob: Blob): Promise<void> {
+/** Stores a clip and throws if the write fails. Trimming afterwards is best-effort. */
+async function storeAudio(model: string, voice: string, text: string, blob: Blob): Promise<void> {
+  const d = await db();
+  const entry: AudioEntry = {
+    key: audioKey(model, voice, text),
+    text: normalizeText(text),
+    voice,
+    model,
+    blob,
+    bytes: blob.size,
+    lastUsed: Date.now(),
+  };
+  await d.put('audio', entry);
   try {
-    const d = await db();
-    const entry: AudioEntry = {
-      key: audioKey(model, voice, text),
-      text: normalizeText(text),
-      voice,
-      model,
-      blob,
-      bytes: blob.size,
-      lastUsed: Date.now(),
-    };
-    await d.put('audio', entry);
     // The first time, count what is stored (including this clip); afterwards just add.
     if (approxBytes === null) approxBytes = (await audioStats()).bytes;
     else approxBytes += blob.size;
     if (approxBytes > AUDIO_CAP_BYTES) await trimAudio();
   } catch {
-    // Quota or private mode: playback still works, the clip just is not kept.
+    // The clip is stored; trimming will be retried on a later write.
+  }
+}
+
+/** Best-effort for playback: if the clip cannot be kept (quota, private mode) it still plays. */
+export async function putAudio(model: string, voice: string, text: string, blob: Blob): Promise<void> {
+  try {
+    await storeAudio(model, voice, text, blob);
+  } catch {
+    // not kept
   }
 }
 
@@ -156,9 +167,18 @@ export async function exportProtectedAudio(): Promise<AudioBackup[]> {
   return out;
 }
 
-export async function importAudio(items: AudioBackup[]): Promise<void> {
+/** Restores clips from a backup. Unlike playback, a failed write is counted so the caller can report it. */
+export async function importAudio(items: AudioBackup[]): Promise<{ imported: number; failed: number }> {
+  let imported = 0;
+  let failed = 0;
   for (const item of items) {
     if (!item?.text || !item.data) continue;
-    await putAudio(item.model, item.voice, item.text, base64ToBlob(item.data));
+    try {
+      await storeAudio(item.model, item.voice, item.text, base64ToBlob(item.data));
+      imported++;
+    } catch {
+      failed++;
+    }
   }
+  return { imported, failed };
 }

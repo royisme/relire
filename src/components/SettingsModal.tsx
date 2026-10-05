@@ -123,17 +123,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           vocab: Array.isArray(data.vocab) ? data.vocab : undefined,
           stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
         });
-        if (Array.isArray(data.audio)) await importAudio(data.audio);
+        const audioResult = Array.isArray(data.audio) ? await importAudio(data.audio) : { imported: 0, failed: 0 };
         if (data.settings && typeof data.settings === 'object') {
           // A backup never carries the API key, so keep the one already saved.
           saveAppSettings({ ...data.settings, customApiKey: getAppSettings().customApiKey });
           setSettings(getAppSettings());
         }
 
-        setBackupStatus(t('settings.importSuccess'));
+        // Give a partial audio restore time to be read before the page reloads.
+        setBackupStatus(
+          audioResult.failed > 0
+            ? t('settings.importAudioPartial', { failed: audioResult.failed })
+            : t('settings.importSuccess')
+        );
         setTimeout(() => {
           window.location.reload();
-        }, 1200);
+        }, audioResult.failed > 0 ? 5000 : 1200);
       } catch (err: any) {
         setBackupStatus(t('settings.restoreFailed', { msg: err.message || err }));
       }

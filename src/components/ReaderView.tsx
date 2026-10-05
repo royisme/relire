@@ -29,19 +29,26 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   // Reading preferences
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('lg');
   const [theme, setTheme] = useState<'parchment' | 'white' | 'sepia' | 'dark'>('parchment');
-  const [hoveredSentence, setHoveredSentence] = useState<string | null>(null);
+  // Sentences are identified by position, not text, because the same sentence can repeat ("Oui.").
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [anchorId, setAnchorId] = useState<string | null>(null);
 
   // The sentence actions float over the text; they are positioned from the sentence's
   // first line so they never take part in text layout.
   const articleRef = useRef<HTMLElement>(null);
-  const sentenceEls = useRef(new Map<string, HTMLElement>());
+  const sentenceEls = useRef(new Map<string, { el: HTMLElement; text: string }>());
   const clearTimer = useRef<number | undefined>(undefined);
   const [toolbar, setToolbar] = useState<{ text: string; top: number; left: number } | null>(null);
 
   const cancelClear = () => window.clearTimeout(clearTimer.current);
   const scheduleClear = () => {
     cancelClear();
-    clearTimer.current = window.setTimeout(() => setHoveredSentence(null), 160);
+    clearTimer.current = window.setTimeout(() => setHoveredId(null), 160);
+  };
+  const focusSentence = (id: string) => {
+    cancelClear();
+    setHoveredId(id);
+    setAnchorId(id);
   };
 
   // Audio Playback & Speed Controller (0.5x to 1.5x)
@@ -71,13 +78,12 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
   // Helper to tokenize sentence into clickable words
   // Tapping a word also keeps that sentence's actions visible once the lookup sheet is closed (touch has no hover).
-  const clickWord = (word: string, sentenceText: string) => {
-    cancelClear();
-    setHoveredSentence(sentenceText.trim());
+  const clickWord = (word: string, sentenceText: string, id: string) => {
+    focusSentence(id);
     onWordClick(word, sentenceText);
   };
 
-  const renderSentenceWords = (sentenceText: string) => {
+  const renderSentenceWords = (sentenceText: string, id: string) => {
     // Normalize typographical quotes and apostrophes to standard ASCII
     const normalizedText = sentenceText.replace(/[’‘`]/g, "'");
     
@@ -105,7 +111,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             <span
               onClick={(e) => {
                 e.stopPropagation();
-                clickWord(root, sentenceText);
+                clickWord(root, sentenceText, id);
               }}
               className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
                 activeWord && activeWord.toLowerCase() === root.toLowerCase()
@@ -128,7 +134,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             <span
               onClick={(e) => {
                 e.stopPropagation();
-                clickWord(root, sentenceText);
+                clickWord(root, sentenceText, id);
               }}
               className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
                 activeWord && activeWord.toLowerCase() === root.toLowerCase()
@@ -147,7 +153,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           key={idx}
           onClick={(e) => {
             e.stopPropagation();
-            clickWord(cleanWord, sentenceText);
+            clickWord(cleanWord, sentenceText, id);
           }}
           className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
             activeWord && activeWord.toLowerCase() === cleanWord.toLowerCase()
@@ -193,30 +199,61 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     }
   };
 
-  const toolbarFor = hoveredSentence ?? playingSentence ?? activeSentence;
+  const activeText = playingSentence ?? activeSentence;
 
   useLayoutEffect(() => {
+    const NAV = 56; // sticky header
+    const TOOLBAR = 44;
+    let frame = 0;
+
     const place = () => {
-      const el = toolbarFor ? sentenceEls.current.get(toolbarFor) : undefined;
+      // Which sentence the actions belong to: the hovered one, else the one playing or open in the drawer.
+      let id = hoveredId;
+      if (!id && activeText) {
+        const entries = [...sentenceEls.current.entries()];
+        id =
+          (anchorId && sentenceEls.current.get(anchorId)?.text === activeText ? anchorId : null) ??
+          entries.find(([, v]) => v.text === activeText)?.[0] ??
+          null;
+      }
+      const target = id ? sentenceEls.current.get(id) : undefined;
       const article = articleRef.current;
-      const rects = el?.getClientRects();
-      if (!toolbarFor || !el || !article || !rects?.length) {
-        setToolbar(null);
+      const vh = window.innerHeight;
+      // Only lines that are on screen can carry the toolbar.
+      const lines = target ? [...target.el.getClientRects()].filter((r) => r.bottom > NAV && r.top < vh) : [];
+      if (!target || !article || !lines.length) {
+        setToolbar((prev) => (prev ? null : prev));
         return;
       }
-      // Anchor above the sentence's first line so the pill covers the end of the previous line, not the sentence being read.
-      const first = rects[0];
+      // Prefer the first visible line with room above it, so the pill covers the end of the previous line
+      // rather than the sentence being read; otherwise pin it inside the viewport.
+      const line = lines.find((r) => r.top >= NAV + TOOLBAR) ?? lines[0];
+      const top = Math.min(Math.max(line.top, NAV + TOOLBAR + 4), vh - 8);
       const box = article.getBoundingClientRect();
-      setToolbar({
-        text: toolbarFor,
-        top: first.top - box.top,
-        left: Math.min(Math.max(first.left - box.left - 4, 4), box.width - 96),
-      });
+      const next = {
+        text: target.text,
+        top: top - box.top,
+        left: Math.min(Math.max(line.left - box.left - 4, 4), box.width - 96),
+      };
+      setToolbar((prev) =>
+        prev && prev.text === next.text && Math.abs(prev.top - next.top) < 0.5 && Math.abs(prev.left - next.left) < 0.5 ? prev : next
+      );
     };
+
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(place);
+    };
+
     place();
-    window.addEventListener('resize', place);
-    return () => window.removeEventListener('resize', place);
-  }, [toolbarFor, fontSize, theme, currentArticle.id]);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', schedule, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule);
+    };
+  }, [hoveredId, anchorId, activeText, fontSize, theme, currentArticle.id]);
 
   const themeOptions = [
     { id: 'parchment', label: t('reader.themeParchment'), swatch: 'bg-ink-50' },
@@ -338,7 +375,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       <article
         ref={articleRef}
         onClick={(e) => {
-          if (!(e.target as HTMLElement).closest('[data-sentence],[data-sentence-actions]')) setHoveredSentence(null);
+          if (!(e.target as HTMLElement).closest('[data-sentence],[data-sentence-actions]')) setHoveredId(null);
         }}
         className={`relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border ${getThemeClass()}`}
       >
@@ -365,7 +402,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               <p key={pIdx}>
                 {sentences.map((sent, sIdx) => {
                   const cleanSentence = sent.trim();
-                  const isHovered = hoveredSentence === cleanSentence;
+                  const id = `${pIdx}-${sIdx}`;
+                  const isHovered = hoveredId === id;
                   const isActive = activeSentence === cleanSentence;
                   const isPlaying = playingSentence === cleanSentence;
 
@@ -374,24 +412,20 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       key={sIdx}
                       data-sentence
                       ref={(el) => {
-                        if (el) sentenceEls.current.set(cleanSentence, el);
-                        else sentenceEls.current.delete(cleanSentence);
+                        if (el) sentenceEls.current.set(id, { el, text: cleanSentence });
+                        else sentenceEls.current.delete(id);
                       }}
                       onPointerEnter={(e) => {
                         if (e.pointerType !== 'mouse') return;
-                        cancelClear();
-                        setHoveredSentence(cleanSentence);
+                        focusSentence(id);
                       }}
                       onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
-                      onClick={() => {
-                        cancelClear();
-                        setHoveredSentence(cleanSentence);
-                      }}
+                      onClick={() => focusSentence(id)}
                       className={`rounded-md py-0.5 px-0.5 transition-colors ${
                         isActive ? 'bg-accent-100' : isHovered ? 'bg-accent-50' : ''
                       }`}
                     >
-                      {renderSentenceWords(sent)}
+                      {renderSentenceWords(sent, id)}
                       {' '}
                     </span>
                   );
