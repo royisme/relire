@@ -445,7 +445,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
 
                     {/* Coach Notes */}
                     {assessment.coachingNotes && (
-                      <div className="p-2.5 rounded-md bg-accent-100 border border-accent-500/20 text-xs text-accent-200 italic">
+                      <div className="p-2.5 rounded-md bg-ink-50 border border-ink-200 text-xs text-ink-700 italic">
                         {assessment.coachingNotes}
                       </div>
                     )}
