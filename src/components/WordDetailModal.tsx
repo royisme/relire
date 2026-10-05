@@ -44,8 +44,8 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-[#FAF8F5] border border-amber-950/20 rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden transition-all my-8 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-[#FAF8F5] border border-amber-950/20 rounded-xl max-w-xl w-full shadow-lg overflow-hidden transition-all my-8 animate-in fade-in zoom-in-95 duration-200">
         
         {/* Loading state */}
         {isLoading ? (
@@ -87,7 +87,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
 
           <div>
             {/* Header */}
-            <div className="p-6 bg-gradient-to-br from-[#F5EFE6] to-[#EFE7DC] border-b border-amber-900/10">
+            <div className="p-6 bg-[#F3EDE3] border-b border-amber-900/10">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-3 flex-wrap">
@@ -122,7 +122,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                       className="flex items-center gap-1.5 px-3 py-1 bg-amber-700 hover:bg-amber-800 disabled:opacity-75 text-white rounded-lg text-xs font-semibold shadow-xs active:scale-95 transition-all"
                       title={t('wordModal.clickToListen')}
                     >
-                      <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'animate-bounce text-amber-200' : ''}`} />
+                      <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-amber-200' : ''}`} />
                       <span>{isSpeaking ? t('common.loading') : 'TTS'}</span>
                     </button>
                     {/* Speed toggle */}

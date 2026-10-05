@@ -181,7 +181,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
       {/* Top Header & Article Selector Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-stone-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-white border border-stone-200 shadow-xs">
         <div className="flex items-center gap-3">
           <div className="relative">
             <select
@@ -259,12 +259,12 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       </div>
 
       {/* Collapsible TTS Playback & Speed Adjustment Bar (0.5x - 1.5x) */}
-      <div className="rounded-2xl bg-white border border-stone-200/90 shadow-2xs overflow-hidden transition-all">
+      <div className="rounded-xl bg-white border border-stone-200/90 shadow-2xs overflow-hidden transition-all">
         {/* Compact summary bar (always visible) */}
         <div className="p-3 sm:px-4 sm:py-2.5 flex items-center justify-between flex-wrap gap-2 text-xs">
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-900 font-semibold border border-emerald-200/70">
-              <Volume2 className={`w-3.5 h-3.5 text-emerald-700 ${playingSentence ? 'animate-bounce' : ''}`} />
+              <Volume2 className={`w-3.5 h-3.5 text-emerald-700 ${playingSentence ? '' : ''}`} />
               <span>{t('reader.ttsConsole')}</span>
             </div>
 
@@ -340,7 +340,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
             {/* Continuous Slider */}
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono font-medium text-stone-500 whitespace-nowrap">0.5x 🐢</span>
+              <span className="text-xs font-mono font-medium text-stone-500 whitespace-nowrap">0.5×</span>
               <input
                 type="range"
                 min="0.5"
@@ -350,7 +350,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                 onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
                 className="flex-1 h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-amber-700 focus:outline-none"
               />
-              <span className="text-xs font-mono font-medium text-stone-500 whitespace-nowrap">🐇 1.5x</span>
+              <span className="text-xs font-mono font-medium text-stone-500 whitespace-nowrap">1.5×</span>
             </div>
 
             {/* Quick Presets */}
@@ -390,7 +390,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
       {/* Main Reading Surface */}
       <article
-        className={`p-6 sm:p-10 rounded-3xl border transition-all ${getThemeClass()}`}
+        className={`p-6 sm:p-10 rounded-xl border transition-all ${getThemeClass()}`}
       >
         {/* Article Meta */}
         <header className="mb-8 pb-6 border-b border-stone-200/50">
@@ -443,7 +443,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       {/* Hover Tip Floating Pill at sentence end (appears only when hovering/active) */}
                       {(isHovered || isActive || isPlaying) && (
                         <span
-                          className="inline-flex items-center gap-1.5 ml-1.5 px-2.5 py-0.5 rounded-full bg-stone-900 text-white shadow-md border border-stone-700/70 align-middle select-none transition-all animate-in fade-in zoom-in-95 duration-150 cursor-pointer"
+                          className="inline-flex items-center gap-1.5 ml-1.5 px-2.5 py-0.5 rounded-full bg-stone-900 text-white border border-stone-700/70 align-middle select-none transition-all animate-in fade-in zoom-in-95 duration-150 cursor-pointer"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {/* Audio TTS Speak button */}
@@ -459,7 +459,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                             }`}
                             title={isPlaying ? t('reader.stop') : t('reader.readSelectedSentence')}
                           >
-                            <Volume2 className={`w-3.5 h-3.5 ${isPlaying ? 'animate-bounce text-amber-200' : 'text-amber-400'}`} />
+                            <Volume2 className={`w-3.5 h-3.5 ${isPlaying ? 'text-amber-200' : 'text-amber-400'}`} />
                             <span>{isPlaying ? t('reader.stop') : t('reader.playSentence')}</span>
                           </button>
 

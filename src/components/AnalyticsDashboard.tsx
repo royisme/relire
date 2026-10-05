@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  BarChart3, Award, Flame, BookOpen, Mic, TrendingUp, CheckCircle,
+  Award, CheckCircle,
   AlertTriangle, Sparkles, Volume2
 } from 'lucide-react';
 import { VocabWord, UserStats, PronunciationAssessment } from '../types';
@@ -78,85 +78,50 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
       {/* Top Header */}
-      <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-xs flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="font-french-serif font-bold text-2xl text-stone-900 flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-emerald-700" />
             <span>{t('analytics.title')}</span>
           </h2>
           <p className="text-xs text-stone-500 mt-1">
             {t('analytics.subtitle')}
           </p>
         </div>
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold">
-          <Flame className="w-4 h-4 text-amber-600 fill-amber-500" />
-          <span>{t('analytics.streakDays')}: {stats.streak || 3} {t('analytics.days')}</span>
-        </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-stone-400">
-            <span className="text-xs font-medium">{t('analytics.wordsLearned')}</span>
-            <BookOpen className="w-4 h-4 text-blue-600" />
-          </div>
-          <div className="text-3xl font-french-serif font-bold text-stone-900">
-            {vocabList.length}
-          </div>
-          <div className="text-[11px] text-stone-500 flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>{t('vocab.mastered')}: {masteredCount}</span>
-          </div>
+      {/* Summary */}
+      <dl className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-stone-200 rounded-xl border border-stone-200 bg-white">
+        <div className="p-4 space-y-1">
+          <dt className="text-xs text-stone-500">{t('analytics.wordsLearned')}</dt>
+          <dd className="text-2xl font-french-serif font-semibold text-stone-900">{vocabList.length}</dd>
+          <dd className="text-[11px] text-stone-500">{t('vocab.mastered')}: {masteredCount}</dd>
         </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-stone-400">
-            <span className="text-xs font-medium">{t('analytics.avgScore')}</span>
-            <Award className="w-4 h-4 text-amber-600" />
-          </div>
-          <div className="text-3xl font-french-serif font-bold text-amber-700">
-            {stats.averagePronunciationScore || 87}
-            <span className="text-sm font-normal text-stone-400">/100</span>
-          </div>
-          <div className="text-[11px] text-emerald-700 font-medium">
-            ↑ CEFR B2
-          </div>
+        <div className="p-4 space-y-1">
+          <dt className="text-xs text-stone-500">{t('analytics.avgScore')}</dt>
+          <dd className="text-2xl font-french-serif font-semibold text-stone-900">
+            {stats.averagePronunciationScore ?? '—'}
+            {stats.averagePronunciationScore != null && <span className="text-sm font-normal text-stone-400">/100</span>}
+          </dd>
         </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-stone-400">
-            <span className="text-xs font-medium">{t('analytics.oralSessions')}</span>
-            <Mic className="w-4 h-4 text-rose-600" />
-          </div>
-          <div className="text-3xl font-french-serif font-bold text-stone-900">
-            {stats.shadowingSessionsCompleted || 12}
-          </div>
-          <div className="text-[11px] text-stone-500">
-            {stats.sentencesAnalyzed || 18} {t('analytics.sentencesAnalyzed')}
-          </div>
+        <div className="p-4 space-y-1">
+          <dt className="text-xs text-stone-500">{t('analytics.oralSessions')}</dt>
+          <dd className="text-2xl font-french-serif font-semibold text-stone-900">{stats.shadowingSessionsCompleted ?? 0}</dd>
+          <dd className="text-[11px] text-stone-500">{stats.sentencesAnalyzed ?? 0} {t('analytics.sentencesAnalyzed')}</dd>
         </div>
-
-        <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-2xs space-y-2">
-          <div className="flex items-center justify-between text-stone-400">
-            <span className="text-xs font-medium">{t('analytics.streakDays')}</span>
-            <Flame className="w-4 h-4 text-amber-500" />
-          </div>
-          <div className="text-3xl font-french-serif font-bold text-stone-900">
-            {stats.streak || 3}
+        <div className="p-4 space-y-1">
+          <dt className="text-xs text-stone-500">{t('analytics.streakDays')}</dt>
+          <dd className="text-2xl font-french-serif font-semibold text-stone-900">
+            {stats.streak ?? 0}
             <span className="text-sm font-normal text-stone-400"> {t('analytics.days')}</span>
-          </div>
-          <div className="text-[11px] text-amber-800 font-medium">
-            🔥 {t('analytics.streakDays')}
-          </div>
+          </dd>
         </div>
-      </div>
+      </dl>
 
       {/* Main Grid: Phoneme Radar & Recent Voice History */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Left 2 Cols: Phoneme Mastery Checklist */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-white border border-stone-200 shadow-xs space-y-4">
+        <div className="lg:col-span-2 p-6 rounded-xl bg-white border border-stone-200 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-french-serif font-bold text-lg text-stone-900 flex items-center gap-2">
@@ -173,7 +138,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             {phonemeChecklist.map((item, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-2xl border border-stone-200 bg-stone-50/60 hover:bg-white hover:border-amber-300 transition-all space-y-1.5"
+                className="p-3.5 rounded-xl border border-stone-200 bg-stone-50/60 hover:bg-white hover:border-amber-300 transition-all space-y-1.5"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -215,7 +180,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
 
         {/* Right 1 Col: AI Coach Overall Diagnosis */}
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-stone-900 via-slate-900 to-indigo-950 text-white shadow-md flex flex-col justify-between space-y-6">
+        <div className="p-6 rounded-xl bg-stone-900 text-white flex flex-col justify-between space-y-6">
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
@@ -231,7 +196,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
             <div className="p-3.5 rounded-xl bg-white/10 border border-white/15 space-y-2 text-xs">
               <div className="font-bold text-amber-300">
-                ⭐ {isEn ? 'Key Strengths (Points Forts):' : '显著优势 (Points Forts):'}
+                {isEn ? 'Key Strengths (Points Forts):' : '显著优势 (Points Forts):'}
               </div>
               <ul className="list-disc list-inside space-y-1 text-stone-300">
                 <li>{isEn ? 'High syntax reconstruction accuracy; strong grasp of subjunctive triggers.' : '长难句的主干意群重组准确度极高，对虚拟式触发词敏感度好'}</li>
@@ -258,7 +223,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
       {/* Recent Pronunciation Assessments History */}
       {stats.pronunciationHistory && stats.pronunciationHistory.length > 0 && (
-        <div className="p-6 rounded-3xl bg-white border border-stone-200 shadow-xs space-y-4">
+        <div className="p-6 rounded-xl bg-white border border-stone-200 shadow-xs space-y-4">
           <h3 className="font-french-serif font-bold text-lg text-stone-900">
             {t('analytics.scoreHistory')}
           </h3>

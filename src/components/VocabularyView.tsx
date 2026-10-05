@@ -87,7 +87,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
       {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-stone-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl bg-white border border-stone-200 shadow-xs">
         <div>
           <h2 className="font-french-serif font-bold text-2xl text-stone-900 flex items-center gap-2">
             <BookmarkCheck className="w-6 h-6 text-blue-700" />
@@ -103,7 +103,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
           {dueWords.length > 0 ? (
             <button
               onClick={handleStartReview}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm shadow-md transition-all active:scale-95 animate-pulse cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm transition-all active:scale-95 animate-pulse cursor-pointer"
             >
               <RotateCw className="w-4 h-4" />
               <span>{t('vocab.startReview', { count: dueWords.length })}</span>
@@ -128,7 +128,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
       {viewMode === 'quiz' && (
         <div className="max-w-xl mx-auto space-y-4">
           {dueWords.length === 0 || currentIndex >= dueWords.length ? (
-            <div className="p-10 rounded-3xl bg-white border border-stone-200 shadow-sm text-center space-y-4">
+            <div className="p-10 rounded-xl bg-white border border-stone-200 shadow-sm text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                 <Award className="w-8 h-8" />
               </div>
@@ -166,11 +166,11 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
               {/* Flashcard */}
               <div
                 onClick={() => setIsFlipped(!isFlipped)}
-                className="p-8 rounded-3xl bg-white border-2 border-amber-900/10 shadow-lg cursor-pointer transition-all hover:border-amber-400 min-h-[320px] flex flex-col justify-between"
+                className="p-8 rounded-xl bg-white border-2 border-amber-900/10 shadow-lg cursor-pointer transition-all hover:border-amber-400 min-h-[320px] flex flex-col justify-between"
               >
                 {/* Card Front */}
                 <div className="space-y-4 text-center">
-                  <span className="text-xs uppercase font-bold tracking-wider text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
+                  <span className="text-xs font-semibold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full">
                     {currentQuizWord.partOfSpeech || 'Mot Français'}
                   </span>
 
@@ -345,7 +345,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
 
           {/* Word List Table */}
           {filteredWords.length === 0 ? (
-            <div className="p-12 text-center rounded-2xl bg-white border border-stone-200">
+            <div className="p-12 text-center rounded-xl bg-white border border-stone-200">
               <p className="text-stone-500 text-sm">{t('vocab.empty')}</p>
             </div>
           ) : (
@@ -356,7 +356,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                 return (
                   <div
                     key={item.id}
-                    className={`p-4 rounded-2xl bg-white border transition-all hover:shadow-md ${
+                    className={`p-4 rounded-xl bg-white border transition-all hover:shadow-sm ${
                       isDue ? 'border-amber-400/80 bg-amber-50/15' : 'border-stone-200'
                     }`}
                   >
@@ -388,7 +388,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                         </button>
                         <button
                           onClick={() => onDeleteWord(item.id)}
-                          className="p-1.5 rounded-lg text-stone-300 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                          className="p-1.5 rounded-lg text-stone-400 hover:text-rose-700 hover:bg-stone-100 cursor-pointer"
                           title={t('vocab.deleteConfirm')}
                         >
                           <Trash2 className="w-4 h-4" />

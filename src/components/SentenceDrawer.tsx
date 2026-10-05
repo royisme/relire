@@ -143,11 +143,11 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex justify-end">
-      <div className="bg-[#FAF8F5] w-full max-w-2xl h-full min-h-screen shadow-2xl flex flex-col border-l border-amber-950/20 animate-in slide-in-from-right duration-300">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 flex justify-end">
+      <div className="bg-[#FAF8F5] w-full max-w-2xl h-full min-h-screen shadow-lg flex flex-col border-l border-amber-950/20 animate-in slide-in-from-right duration-300">
         
         {/* Drawer Header */}
-        <div className="p-5 bg-[#F4EFEA] border-b border-amber-900/10 flex items-center justify-between sticky top-0 z-10 backdrop-blur-md">
+        <div className="p-5 bg-[#F4EFEA] border-b border-amber-900/10 flex items-center justify-between sticky top-0 z-10">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-amber-700/15 text-amber-900 flex items-center justify-center">
               <BookOpen className="w-4 h-4 text-amber-800" />
@@ -193,10 +193,10 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
           ) : (
             <>
               {/* Sentence Showcase & Audio */}
-              <div className="p-5 rounded-2xl bg-white border border-amber-900/15 shadow-sm space-y-3">
+              <div className="p-5 rounded-xl bg-white border border-amber-900/15 shadow-sm space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1.5 flex-1">
-                    <span className="text-[10px] font-bold tracking-wider uppercase text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-sm">
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-sm">
                       Original Français
                     </span>
                     <p className="font-french-serif text-xl sm:text-2xl font-bold text-stone-900 leading-relaxed">
@@ -221,7 +221,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                           disabled={isPlayingNative}
                           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-75 text-white text-xs font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
                         >
-                          <Volume2 className={`w-4 h-4 ${isPlayingNative ? 'animate-bounce text-amber-200' : ''}`} />
+                          <Volume2 className={`w-4 h-4 ${isPlayingNative ? 'text-amber-200' : ''}`} />
                           <span>{isPlayingNative ? t('common.loading') : t('sentenceDrawer.listenAudio')}</span>
                         </button>
 
@@ -248,7 +248,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                     {/* Speed Slider with Range 0.5x to 1.5x */}
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-3">
-                        <span className="text-[11px] font-mono font-medium text-stone-500">0.5x 🐢</span>
+                        <span className="text-[11px] font-mono font-medium text-stone-500">0.5×</span>
                         <input
                           type="range"
                           min="0.5"
@@ -262,7 +262,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                           }}
                           className="flex-1 h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-amber-700 focus:outline-none"
                         />
-                        <span className="text-[11px] font-mono font-medium text-stone-500">🐇 1.5x</span>
+                        <span className="text-[11px] font-mono font-medium text-stone-500">1.5×</span>
                       </div>
 
                       {/* Quick Presets */}
@@ -293,10 +293,10 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
               </div>
 
               {/* Shadowing & AI Pronunciation Coach Card */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-900 to-stone-900 text-white shadow-md space-y-4">
+              <div className="p-5 rounded-xl bg-stone-900 text-white space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
                       <Mic className="w-4 h-4 text-amber-400" />
                     </div>
                     <div>
@@ -346,7 +346,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                   {!isRecording ? (
                     <button
                       onClick={handleStartRecording}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-all active:scale-95 cursor-pointer"
                     >
                       <Mic className="w-4 h-4 text-white animate-pulse" />
                       <span>{recordedAudioUrl ? t('sentenceDrawer.recordShadowing') : t('sentenceDrawer.recordShadowing')}</span>
@@ -354,9 +354,9 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                   ) : (
                     <button
                       onClick={handleStopRecording}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs shadow-md transition-all active:scale-95 animate-bounce cursor-pointer"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-semibold text-xs transition-all active:scale-95 cursor-pointer"
                     >
-                      <Square className="w-4 h-4 fill-stone-950" />
+                      <Square className="w-4 h-4 fill-amber-950" />
                       <span>{t('common.done')} ({recordingSeconds}s)</span>
                     </button>
                   )}
@@ -367,7 +367,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                       <button
                         onClick={handleAssessPronunciation}
                         disabled={isEvaluating}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold text-xs transition-all active:scale-95 cursor-pointer"
                       >
                         {isEvaluating ? (
                           <>

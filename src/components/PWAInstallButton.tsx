@@ -53,8 +53,8 @@ export const PWAInstallButton: React.FC = () => {
       </Button>
 
       {showMacGuide && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="bg-[#FAF8F5] border border-amber-900/20 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 p-4 animate-in fade-in duration-150">
+          <div className="bg-[#FAF8F5] border border-amber-900/20 w-full max-w-md rounded-xl p-6 shadow-lg space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-stone-200">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-amber-700 text-white flex items-center justify-center">

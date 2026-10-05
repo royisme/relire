@@ -54,8 +54,8 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-[#FAF8F5] border border-amber-950/15 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden transition-all">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 flex items-center justify-center p-4">
+      <div className="bg-[#FAF8F5] border border-amber-950/15 rounded-xl max-w-2xl w-full shadow-lg overflow-hidden transition-all">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-amber-900/10 bg-[#F4EFEA]">
           <div className="flex items-center gap-2.5">
@@ -198,7 +198,7 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
                 <div
                   key={article.id}
                   onClick={() => handleSelectPreset(article)}
-                  className="p-4 rounded-xl border border-amber-900/10 bg-white hover:border-amber-500 hover:shadow-md cursor-pointer transition-all group"
+                  className="p-4 rounded-xl border border-amber-900/10 bg-white hover:border-amber-500 hover:shadow-sm cursor-pointer transition-all group"
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <h4 className="font-french-serif font-bold text-base text-stone-900 group-hover:text-amber-800">

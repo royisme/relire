@@ -233,7 +233,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
       {/* Header */}
-      <div className="p-5 rounded-2xl bg-white border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-5 rounded-xl bg-white border border-stone-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-french-serif font-bold text-2xl text-stone-900 flex items-center gap-2">
             <Dumbbell className="w-6 h-6 text-rose-600" />
@@ -286,14 +286,14 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
       {/* Loading Deck State */}
       {isLoadingDeck ? (
-        <div className="py-20 text-center rounded-3xl bg-white border border-stone-200">
+        <div className="py-20 text-center rounded-xl bg-white border border-stone-200">
           <Loader2 className="w-10 h-10 text-amber-700 animate-spin mx-auto mb-3" />
           <h3 className="font-french-serif font-bold text-lg text-stone-800">
             {t('practice.generating')}
           </h3>
         </div>
       ) : !deck ? (
-        <div className="p-12 text-center rounded-3xl bg-white border border-stone-200 space-y-3">
+        <div className="p-12 text-center rounded-xl bg-white border border-stone-200 space-y-3">
           <Sparkles className="w-10 h-10 text-amber-600 mx-auto" />
           <h3 className="font-french-serif font-bold text-xl text-stone-900">
             {t('practice.title')}
@@ -309,7 +309,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           </button>
         </div>
       ) : currentQ ? (
-        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-stone-200 shadow-sm space-y-6">
+        <div className="p-6 sm:p-8 rounded-xl bg-white border border-stone-200 shadow-sm space-y-6">
           
           {/* Question Header & Counter */}
           <div className="flex items-center justify-between border-b border-stone-100 pb-3">
@@ -341,7 +341,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           {activePracticeType === 'syntax' && currentQ.scrambledChunks && (
             <div className="space-y-5">
               {/* Target Drop/Assembly Area */}
-              <div className="min-h-[72px] p-4 rounded-2xl bg-stone-50 border-2 border-dashed border-stone-300 flex flex-wrap items-center gap-2">
+              <div className="min-h-[72px] p-4 rounded-xl bg-stone-50 border-2 border-dashed border-stone-300 flex flex-wrap items-center gap-2">
                 {selectedChunks.length === 0 ? (
                   <span className="text-xs text-stone-400">
                     {t('practice.scramblePrompt')}
@@ -374,7 +374,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                         className={`px-4 py-2 rounded-xl text-sm font-french-serif font-semibold border transition-all ${
                           isUsed
                             ? 'opacity-30 bg-stone-100 text-stone-400 border-stone-200'
-                            : 'bg-white hover:bg-amber-50 text-stone-800 border-stone-300 shadow-2xs hover:border-amber-400 active:scale-95'
+                            : 'bg-white hover:bg-amber-50 text-amber-950 border-stone-300 hover:border-amber-400 active:scale-95'
                         }`}
                       >
                         {chunk}
@@ -406,7 +406,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
               {/* Verification Feedback */}
               {scrambleStatus === 'correct' && (
-                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-2 animate-in fade-in duration-200">
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2 animate-in fade-in duration-200">
                   <div className="flex items-center gap-2 text-emerald-800 font-bold text-sm">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                     <span>{t('common.success')}</span>
@@ -418,7 +418,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               )}
 
               {scrambleStatus === 'incorrect' && (
-                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in duration-200">
+                <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 space-y-2 animate-in fade-in duration-200">
                   <div className="flex items-center gap-2 text-rose-800 font-bold text-sm">
                     <XCircle className="w-5 h-5 text-rose-600" />
                     <span>{t('practice.showExplanation')}</span>
@@ -434,8 +434,8 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           {/* MODE 2: ORAL SHADOWING CHALLENGE */}
           {activePracticeType === 'oral' && (
             <div className="space-y-6">
-              <div className="p-5 rounded-2xl bg-stone-900 text-white space-y-3">
-                <div className="text-xs text-amber-400 font-semibold tracking-wider uppercase">
+              <div className="p-5 rounded-xl bg-stone-900 text-white space-y-3">
+                <div className="text-xs text-amber-400 font-semibold">
                   {t('sentenceDrawer.shadowingCoach')}
                 </div>
                 <p className="font-french-serif text-2xl font-bold text-stone-100 leading-relaxed">
@@ -457,12 +457,12 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               </div>
 
               {/* Recorder Controls */}
-              <div className="p-4 rounded-2xl border border-stone-200 bg-stone-50 flex items-center justify-between flex-wrap gap-3">
+              <div className="p-4 rounded-xl border border-stone-200 bg-stone-50 flex items-center justify-between flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                   {!isRecording ? (
                     <button
                       onClick={handleStartOralRecording}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-all active:scale-95 cursor-pointer"
                     >
                       <Mic className="w-4 h-4 text-white" />
                       <span>{t('sentenceDrawer.recordShadowing')}</span>
@@ -470,9 +470,9 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                   ) : (
                     <button
                       onClick={handleStopOralRecording}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold text-xs shadow-md transition-all active:scale-95 animate-pulse cursor-pointer"
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-semibold text-xs transition-all active:scale-95 cursor-pointer"
                     >
-                      <Square className="w-4 h-4 fill-stone-950" />
+                      <Square className="w-4 h-4 fill-amber-950" />
                       <span>{t('common.done')} ({recordingSeconds}s)</span>
                     </button>
                   )}
@@ -483,7 +483,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                       <button
                         onClick={handleAssessOral}
                         disabled={isEvaluating}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold text-xs transition-all active:scale-95 cursor-pointer"
                       >
                         {isEvaluating ? (
                           <>
@@ -504,36 +504,36 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
               {/* Oral Assessment Output */}
               {oralAssessment && (
-                <div className="p-5 rounded-2xl bg-indigo-50 border border-indigo-200 space-y-4 animate-in fade-in duration-300">
+                <div className="p-5 rounded-xl bg-stone-100 border border-stone-200 space-y-4 animate-in fade-in duration-300">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Award className="w-5 h-5 text-indigo-700" />
-                      <span className="font-bold text-sm text-indigo-950">
+                      <Award className="w-5 h-5 text-stone-700" />
+                      <span className="font-bold text-sm text-stone-900">
                         {t('sentenceDrawer.overallScore')}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="font-french-serif text-3xl font-bold text-indigo-900">
+                      <span className="font-french-serif text-3xl font-bold text-stone-800">
                         {oralAssessment.overallScore}
                       </span>
-                      <span className="text-xs text-indigo-600">/ 100</span>
+                      <span className="text-xs text-stone-600">/ 100</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2 rounded-xl bg-white border border-indigo-100">
+                    <div className="p-2 rounded-xl bg-white border border-stone-200">
                       <div className="text-[10px] text-stone-500">{t('sentenceDrawer.accuracy')}</div>
                       <div className="text-sm font-bold text-emerald-700">
                         {oralAssessment.accuracyScore}
                       </div>
                     </div>
-                    <div className="p-2 rounded-xl bg-white border border-indigo-100">
+                    <div className="p-2 rounded-xl bg-white border border-stone-200">
                       <div className="text-[10px] text-stone-500">{t('sentenceDrawer.fluency')}</div>
                       <div className="text-sm font-bold text-blue-700">
                         {oralAssessment.fluencyScore}
                       </div>
                     </div>
-                    <div className="p-2 rounded-xl bg-white border border-indigo-100">
+                    <div className="p-2 rounded-xl bg-white border border-stone-200">
                       <div className="text-[10px] text-stone-500">{t('sentenceDrawer.rhythm')}</div>
                       <div className="text-sm font-bold text-purple-700">
                         {oralAssessment.rhythmScore}
@@ -543,10 +543,10 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
                   {oralAssessment.phonemeFeedback && (
                     <div className="space-y-1">
-                      <div className="text-xs font-bold text-indigo-950">{t('sentenceDrawer.coachFeedback')}:</div>
+                      <div className="text-xs font-bold text-stone-900">{t('sentenceDrawer.coachFeedback')}:</div>
                       {oralAssessment.phonemeFeedback.map((pf, pIdx) => (
-                        <div key={pIdx} className="text-xs text-stone-700 bg-white p-2 rounded-lg border border-indigo-100">
-                          <span className="font-mono font-bold text-indigo-800 mr-1.5">{pf.phoneme}</span>
+                        <div key={pIdx} className="text-xs text-stone-700 bg-white p-2 rounded-lg border border-stone-200">
+                          <span className="font-mono font-bold text-stone-800 mr-1.5">{pf.phoneme}</span>
                           <span className="text-stone-600">{pf.tip}</span>
                         </div>
                       ))}
@@ -554,7 +554,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                   )}
 
                   {oralAssessment.coachingNotes && (
-                    <div className="text-xs text-indigo-900 bg-indigo-100/70 p-3 rounded-xl italic">
+                    <div className="text-xs text-stone-800 bg-stone-100 p-3 rounded-xl italic">
                       {oralAssessment.coachingNotes}
                     </div>
                   )}
@@ -566,7 +566,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           {/* MODE 3: CLOZE GRAMMAR & TENSE DRILL */}
           {activePracticeType === 'cloze' && (
             <div className="space-y-5">
-              <div className="p-5 rounded-2xl bg-stone-50 border border-stone-200">
+              <div className="p-5 rounded-xl bg-stone-50 border border-stone-200">
                 <p className="font-french-serif text-xl sm:text-2xl font-bold text-stone-900 leading-relaxed">
                   {currentQ.clozeText}
                 </p>
@@ -614,7 +614,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               </div>
 
               {isAnswerRevealed && (
-                <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 space-y-1.5 animate-in fade-in duration-200">
+                <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 space-y-1.5 animate-in fade-in duration-200">
                   <div className="text-xs font-bold text-blue-900">
                     {t('practice.showExplanation')}:
                   </div>

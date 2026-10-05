@@ -102,7 +102,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
       setBackupStatus(t('settings.exportSuccess'));
     } catch (err: any) {
-      setBackupStatus(`❌ Export failed: ${err.message || err}`);
+      setBackupStatus(`Export failed: ${err.message || err}`);
     }
   };
 
@@ -136,7 +136,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           window.location.reload();
         }, 1200);
       } catch (err: any) {
-        setBackupStatus(`❌ Restore failed: (${err.message || err})`);
+        setBackupStatus(`Restore failed: (${err.message || err})`);
       }
     };
     reader.readAsText(file);
@@ -194,8 +194,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-[#FAF8F5] border border-amber-950/20 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="bg-[#FAF8F5] border border-amber-950/20 rounded-xl max-w-2xl w-full shadow-lg overflow-hidden my-8">
         
         {/* Modal Header */}
         <div className="p-5 bg-[#F4EFEA] border-b border-amber-900/10 flex items-center justify-between">
@@ -226,7 +226,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* SECTION 1: LLM Key & Deployment */}
           <div className="space-y-3.5">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5 tracking-wider uppercase">
+              <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
                 <Key className="w-4 h-4 text-amber-700" />
                 <span>{t('settings.apiKeySection')}</span>
               </h4>
@@ -294,7 +294,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* SECTION 2: Model Configuration */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5 tracking-wider uppercase">
+            <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
               <Cpu className="w-4 h-4 text-blue-700" />
               <span>{t('settings.modelsSection')}</span>
             </h4>
@@ -364,7 +364,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* SECTION 3: Default Voice Selection */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5 tracking-wider uppercase">
+            <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
               <Volume2 className="w-4 h-4 text-amber-700" />
               <span>{t('settings.voiceSection')}</span>
             </h4>
@@ -402,7 +402,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* SECTION 4: Local Offline Data Persistence & Backup */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5 tracking-wider uppercase">
+            <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
               <Database className="w-4 h-4 text-emerald-700" />
               <span>{t('settings.offlineSection')}</span>
             </h4>
@@ -466,8 +466,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* SECTION 5: Language Selection (i18n) */}
           <div className="space-y-3.5">
-            <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5 tracking-wider uppercase">
-              <Globe className="w-4 h-4 text-indigo-700" />
+            <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+              <Globe className="w-4 h-4 text-stone-700" />
               <span>{t('settings.languageSection')}</span>
             </h4>
 
@@ -477,7 +477,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={() => setAppLanguage('en')}
                 className={`p-3 rounded-xl border text-left transition-all ${
                   i18n.language === 'en'
-                    ? 'border-indigo-700 bg-indigo-50/80 ring-2 ring-indigo-700/20 shadow-xs'
+                    ? 'border-stone-700 bg-stone-100 ring-2 ring-stone-700/20 shadow-xs'
                     : 'border-stone-200 bg-white hover:border-stone-300'
                 }`}
               >
@@ -490,7 +490,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={() => setAppLanguage('zh')}
                 className={`p-3 rounded-xl border text-left transition-all ${
                   i18n.language === 'zh'
-                    ? 'border-indigo-700 bg-indigo-50/80 ring-2 ring-indigo-700/20 shadow-xs'
+                    ? 'border-stone-700 bg-stone-100 ring-2 ring-stone-700/20 shadow-xs'
                     : 'border-stone-200 bg-white hover:border-stone-300'
                 }`}
               >

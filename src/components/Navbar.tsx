@@ -28,7 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-stone-200/90 shadow-2xs">
+    <header className="sticky top-0 z-30 bg-[#FDFBF7]/95 border-b border-stone-200/90 shadow-2xs">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         <div className="flex items-center justify-between min-h-[56px] py-1.5 gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
           
@@ -37,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-2.5 cursor-pointer shrink-0 select-none py-1"
             onClick={() => onSelectTab('reader')}
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-indigo-700 via-blue-600 to-amber-600 flex items-center justify-center text-white shadow-xs">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-stone-900 flex items-center justify-center text-white shadow-xs">
               <span className="font-french-serif text-xl sm:text-2xl font-bold italic tracking-tighter">É</span>
             </div>
             <div className="flex flex-col">
@@ -46,7 +46,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   {t('common.appName')}
                 </span>
                 <Badge variant="emerald" className="hidden sm:inline-flex text-[10px] px-1.5 py-0.2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse mr-0.5"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-0.5"></span>
                   {t('nav.geminiTts')}
                 </Badge>
               </div>
@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
               }`}
             >
-              <BookOpen className="w-3.5 h-3.5 text-amber-700" />
+              <BookOpen className="w-3.5 h-3.5" />
               <span>{t('nav.reader')}</span>
             </button>
 
@@ -75,10 +75,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
               }`}
             >
-              <BookmarkCheck className="w-3.5 h-3.5 text-blue-700" />
+              <BookmarkCheck className="w-3.5 h-3.5" />
               <span>{t('nav.vocab')}</span>
               {dueCount > 0 ? (
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-500 text-white animate-pulse">
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-amber-700 text-white">
                   {dueCount}
                 </span>
               ) : totalVocabCount > 0 ? (
@@ -96,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
               }`}
             >
-              <Dumbbell className="w-3.5 h-3.5 text-rose-600" />
+              <Dumbbell className="w-3.5 h-3.5" />
               <span>{t('nav.practice')}</span>
             </button>
 
@@ -108,7 +108,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
               }`}
             >
-              <BarChart3 className="w-3.5 h-3.5 text-emerald-700" />
+              <BarChart3 className="w-3.5 h-3.5" />
               <span>{t('nav.analytics')}</span>
             </button>
           </nav>
