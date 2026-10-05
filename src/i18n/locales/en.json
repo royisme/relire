@@ -182,7 +182,10 @@
     "storageNotProtected": "Browser may clear this data if it runs low on space or you stay away for a while",
     "protectStorage": "Protect my data",
     "exportFailed": "Export failed: {{msg}}",
-    "restoreFailed": "Restore failed: {{msg}}"
+    "restoreFailed": "Restore failed: {{msg}}",
+    "cacheSummary": "Saved answers: {{words}} words, {{sentences}} sentences",
+    "clearCache": "Clear saved answers",
+    "cacheDesc": "Word and sentence explanations are saved on this device so you never pay for the same answer twice. Words are kept until you clear them, sentences for 30 days. They are not part of backups."
   },
   "importer": {
     "articleTitle": "Article Title",

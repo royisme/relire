@@ -2,11 +2,9 @@ import { WordAnalysis, SentenceAnalysis, PronunciationAssessment, PracticeDeck }
 import { getAppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as gemini from './gemini';
+import { getCached, putCached, sentenceKey, wordKey, type CacheKind } from '../storage/cache';
 
 export { MissingApiKeyError } from './gemini';
-
-const wordCache = new Map<string, WordAnalysis>();
-const sentenceCache = new Map<string, SentenceAnalysis>();
 
 function options(): gemini.GeminiOptions {
   const settings = getAppSettings();
@@ -17,33 +15,47 @@ function options(): gemini.GeminiOptions {
   };
 }
 
-export async function fetchWordAnalysis(
+// Requests currently in flight, so two quick taps on the same word cost one call.
+const inFlight = new Map<string, Promise<unknown>>();
+
+/**
+ * Looks in the persistent cache first and only then asks Gemini, so a repeated
+ * word or sentence costs nothing (and cached answers work without a key).
+ */
+async function cached<T>(kind: CacheKind, key: string, fetchFresh: () => Promise<T>): Promise<T> {
+  const hit = await getCached<T>(kind, key);
+  if (hit) return hit;
+
+  const flightKey = `${kind}:${key}`;
+  const pending = inFlight.get(flightKey) as Promise<T> | undefined;
+  if (pending) return pending;
+
+  const request = fetchFresh()
+    .then(async (value) => {
+      await putCached(kind, key, value);
+      return value;
+    })
+    .finally(() => inFlight.delete(flightKey));
+  inFlight.set(flightKey, request);
+  return request;
+}
+
+export function fetchWordAnalysis(
   word: string,
   sentenceContext: string,
   articleContext?: string
 ): Promise<WordAnalysis> {
   const opts = options();
-  const cacheKey = `${opts.model}_${opts.lang}_${word.toLowerCase().trim()}_${sentenceContext.slice(0, 30)}`;
-  const cached = wordCache.get(cacheKey);
-  if (cached) return cached;
-
-  const data = await gemini.analyzeWord({ word, sentenceContext, articleContext }, opts);
-  wordCache.set(cacheKey, data);
-  return data;
+  return cached('word', wordKey(opts.lang, word, sentenceContext), () =>
+    gemini.analyzeWord({ word, sentenceContext, articleContext }, opts)
+  );
 }
 
-export async function fetchSentenceAnalysis(
-  sentence: string,
-  articleContext?: string
-): Promise<SentenceAnalysis> {
+export function fetchSentenceAnalysis(sentence: string, articleContext?: string): Promise<SentenceAnalysis> {
   const opts = options();
-  const cacheKey = `${opts.model}_${opts.lang}_${sentence.trim()}`;
-  const cached = sentenceCache.get(cacheKey);
-  if (cached) return cached;
-
-  const data = await gemini.analyzeSentence({ sentence, articleContext }, opts);
-  sentenceCache.set(cacheKey, data);
-  return data;
+  return cached('sentence', sentenceKey(opts.lang, sentence), () =>
+    gemini.analyzeSentence({ sentence, articleContext }, opts)
+  );
 }
 
 export function assessPronunciation(params: {

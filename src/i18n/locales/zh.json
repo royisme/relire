@@ -182,7 +182,10 @@
     "storageNotProtected": "空间不足或长期不使用时，浏览器可能会清掉这些数据",
     "protectStorage": "保护我的数据",
     "exportFailed": "导出失败：{{msg}}",
-    "restoreFailed": "恢复失败：{{msg}}"
+    "restoreFailed": "恢复失败：{{msg}}",
+    "cacheSummary": "已保存的解析：{{words}} 个单词，{{sentences}} 个句子",
+    "clearCache": "清除已保存的解析",
+    "cacheDesc": "单词和句子的解析会保存在这台设备上，相同的内容不会重复消耗额度。单词一直保留到你清除，句子保留 30 天。它们不会包含在备份里。"
   },
   "importer": {
     "articleTitle": "文章标题",

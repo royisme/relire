@@ -11,6 +11,15 @@ interface RelireDB extends DBSchema {
   articles: { key: string; value: Article };
   vocab: { key: string; value: VocabWord };
   meta: { key: string; value: unknown };
+  /** AI answers kept to save tokens. Derivable, so never part of a backup. */
+  cache: { key: string; value: CacheEntry; indexes: { kind: string } };
+}
+
+export interface CacheEntry {
+  key: string;
+  kind: 'word' | 'sentence';
+  value: unknown;
+  createdAt: number;
 }
 
 export interface AppData {
@@ -28,13 +37,18 @@ export const EMPTY_STATS: UserStats = {
 
 let dbPromise: Promise<IDBPDatabase<RelireDB>> | null = null;
 
-function db() {
+export function db() {
   if (!dbPromise) {
-    dbPromise = openDB<RelireDB>('relire', 1, {
-      upgrade(d) {
-        d.createObjectStore('articles', { keyPath: 'id' });
-        d.createObjectStore('vocab', { keyPath: 'id' });
-        d.createObjectStore('meta');
+    dbPromise = openDB<RelireDB>('relire', 2, {
+      upgrade(d, oldVersion) {
+        if (oldVersion < 1) {
+          d.createObjectStore('articles', { keyPath: 'id' });
+          d.createObjectStore('vocab', { keyPath: 'id' });
+          d.createObjectStore('meta');
+        }
+        if (oldVersion < 2) {
+          d.createObjectStore('cache', { keyPath: 'key' }).createIndex('kind', 'kind');
+        }
       },
     });
     dbPromise.catch(() => {

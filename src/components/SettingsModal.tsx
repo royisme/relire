@@ -12,6 +12,7 @@ import {
 } from '../utils/appSettings';
 import { speakFrench } from '../utils/frenchSpeech';
 import { synthesizeSpeech } from '../services/gemini';
+import { cacheCounts, clearCache } from '../storage/cache';
 import { exportData, getStorageInfo, importData, requestPersistence, type StorageInfo } from '../storage/db';
 
 interface SettingsModalProps {
@@ -35,6 +36,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
   const [storageInfo, setStorageInfo] = useState<StorageInfo>({});
+  const [cacheInfo, setCacheInfo] = useState({ words: 0, sentences: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Stats on local data storage
@@ -60,6 +62,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         )
         .catch((e) => console.error('Failed to read local stats', e));
       getStorageInfo().then(setStorageInfo);
+      cacheCounts().then(setCacheInfo);
     }
   }, [isOpen]);
 
@@ -351,6 +354,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <p className="text-xs text-ink-500 leading-relaxed">
                 {t('settings.offlineDesc')}
               </p>
+
+              {/* Saved AI answers */}
+              <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
+                <span className="text-ink-600">
+                  {t('settings.cacheSummary', { words: cacheInfo.words, sentences: cacheInfo.sentences })}
+                </span>
+                <button
+                  type="button"
+                  disabled={cacheInfo.words + cacheInfo.sentences === 0}
+                  onClick={async () => {
+                    await clearCache();
+                    setCacheInfo(await cacheCounts());
+                    setStorageInfo(await getStorageInfo());
+                  }}
+                  className="h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-default"
+                >
+                  {t('settings.clearCache')}
+                </button>
+              </div>
+              <p className="text-xs text-ink-500 leading-relaxed">{t('settings.cacheDesc')}</p>
 
               {/* Storage protection */}
               <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
