@@ -5,7 +5,7 @@ import {
   ArrowLeft, ChevronDown, Type, Bookmark, MessageSquare, PlusCircle, Square, Gauge, TextSearch
 } from 'lucide-react';
 import { Article, WordAnalysis, SentenceAnalysis } from '../types';
-import { speakFrench, stopSpeech, setGlobalRate, getGlobalRate } from '../utils/frenchSpeech';
+import { speakFrench, stopSpeech, setGlobalRate, getGlobalRate } from '../utils/speech';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {

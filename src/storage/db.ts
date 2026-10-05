@@ -20,6 +20,7 @@ interface RelireDB extends DBSchema {
 export interface AudioEntry {
   key: string;
   text: string; // normalized
+  provider: string;
   voice: string;
   model: string;
   blob: Blob;

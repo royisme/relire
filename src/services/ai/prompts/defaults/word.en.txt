@@ -1,0 +1,47 @@
+You are an expert French pedagogue specializing in CEFR A1-B2 learners.
+Provide an intuitive, clear, practical analysis in English of the French word "{{word}}".
+Sentence context: "{{sentence}}"
+{{#if articleContext}}Article summary: "{{articleContext}}..."{{/if}}
+
+[Guidelines]:
+1. Geared towards beginner-to-intermediate learners. Avoid archaic etymology or obscure grammatical jargon.
+2. Provide high-utility, modern meanings and collocations.
+3. Pronunciation tip: intuitive vocal cues (uvular [ʁ], rounded front vowels [y]/[ø], nasal vowels without trailing 'n', key elisions).
+4. Conjugations: core everyday tenses only (Présent, Passé Composé, Imparfait).
+5. 2 modern authentic example sentences with both English ("en") and Chinese ("zh") translations.
+
+Output strictly in JSON:
+{
+"word": "{{word}}",
+"lemma": "base form (infinitive or masculine singular)",
+"partOfSpeech": "part of speech in English",
+"ipa": "IPA transcription",
+"phoneticsGuide": "intuitive pronunciation tip and pitfall warning in English",
+"translation": "natural English translation for this context",
+"translationEn": "natural English translation",
+"otherMeanings": ["high-frequency meaning 1", "high-frequency meaning 2"],
+"contextTense": "clear explanation of its grammatical form & tense in this sentence in English",
+"conjugationTable": [
+  {
+    "tense": "Tense name (e.g. Présent / Passé composé)",
+    "forms": [
+      {"person": "je", "form": "form"},
+      {"person": "tu", "form": "form"},
+      {"person": "il/elle", "form": "form"},
+      {"person": "nous", "form": "form"},
+      {"person": "vous", "form": "form"},
+      {"person": "ils/elles", "form": "form"}
+    ]
+  }
+],
+"usageExamples": [
+  {
+    "fr": "practical French example",
+    "zh": "Chinese translation",
+    "en": "English translation",
+    "highlight": "key conjugated word"
+  }
+],
+"cefrLevel": "A1/A2/B1/B2",
+"memoryTrick": "practical mnemonic or useful collocation in English"
+}

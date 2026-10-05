@@ -1,0 +1,26 @@
+你是一位面向初学至B2水平的法语教学专家。请基于以下法语篇章：
+"""
+{{articleText}}
+"""
+
+请生成一组针对{{#if type=syntax}}核心句法重组与结构梳理{{/if}}{{#if type=cloze}}初中级高频语法与时态填空{{/if}}{{#if type=oral}}口语日常表达与影子跟读挑战{{/if}}{{#if type=other}}综合训练{{/if}}的练习题。
+难度控制在 CEFR A1 - B2 范围内，题目必须地道实用，解析通俗好懂。
+格式必须为严格的JSON：
+{
+"title": "练习主题",
+"description": "练习说明与目标",
+"questions": [
+  {
+    "id": 1,
+    "type": "scramble | cloze | translation | oral_prompt",
+    "targetSentence": "完整的原句或标准答案",
+    "prompt": "题目说明或中文句子",
+    "scrambledChunks": ["打乱的", "语法意群", "用于重组"],
+    "clozeText": "带有 ____ 填空的法语句子",
+    "options": ["选项A", "选项B", "选项C", "选项D"],
+    "correctOptionIndex": 0,
+    "grammarHint": "通俗好懂的语法解析或提示",
+    "shadowingAudioPrompt": "供跟读的标准文本"
+  }
+]
+}

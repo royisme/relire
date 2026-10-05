@@ -5,9 +5,6 @@ import { db, type CacheEntry } from './db';
  * for twice. Failures here are never fatal: a broken cache is just a miss.
  */
 
-/** Bump when the prompts change so old answers are not reused. */
-const PROMPT_VERSION = 1;
-
 const DAY = 24 * 60 * 60 * 1000;
 
 const POLICY = {
@@ -33,13 +30,15 @@ export function hashText(s: string): string {
 
 const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
 
-export const wordKey = (lang: string, word: string, sentence: string) =>
-  `v${PROMPT_VERSION}|${lang}|${normalize(word)}|${normalize(sentence)}`;
+// Keys carry a fingerprint of the prompt in use, so editing a prompt starts a fresh set of answers.
+export const wordKey = (lang: string, fingerprint: string, word: string, sentence: string) =>
+  `${fingerprint}|${lang}|${normalize(word)}|${normalize(sentence)}`;
 
-export const drillsKey = (lang: string, type: string, articleText: string) =>
-  `v${PROMPT_VERSION}|${lang}|${type}|${hashText(articleText.slice(0, 1500))}`;
+export const drillsKey = (lang: string, fingerprint: string, type: string, articleText: string) =>
+  `${fingerprint}|${lang}|${type}|${hashText(articleText.slice(0, 1500))}`;
 
-export const sentenceKey = (lang: string, sentence: string) => `v${PROMPT_VERSION}|${lang}|${normalize(sentence)}`;
+export const sentenceKey = (lang: string, fingerprint: string, sentence: string) =>
+  `${fingerprint}|${lang}|${normalize(sentence)}`;
 
 export async function getCached<T>(kind: CacheKind, key: string): Promise<T | undefined> {
   try {

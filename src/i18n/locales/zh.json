@@ -38,7 +38,6 @@
     "themeDark": "夜间",
     "playSentence": "朗读",
     "analyzeSentence": "句法剖析",
-    "readSelectedSentence": "朗读本句",
     "wordCount": "{{count}} 词",
     "textSize": "字号"
   },
@@ -146,17 +145,9 @@
   },
   "settings": {
     "title": "设置",
-    "subtitle": "Gemini Key、AI 模型、音色与备份",
-    "apiKeySection": "1. Gemini API Key",
-    "customKeyLabel": "你的 Gemini API Key",
+    "subtitle": "AI 提供方和模型、提示词、音色与备份",
     "customKeyPlaceholder": "在这里粘贴你的 Key",
-    "customKeyDesc": "单词和句子解析、朗读音频、发音反馈都需要它。",
-    "modelsSection": "2. AI 模型",
-    "analysisModelTitle": "解析与评估模型",
-    "analysisModelDesc": "负责词汇变位、长难句结构拆解与发音打分评测。",
-    "ttsModelTitle": "语音合成模型",
-    "ttsModelDesc": "负责生成标准母语级 24kHz 高采样率法语语音。",
-    "voiceSection": "3. 默认音色",
+    "voiceSection": "音色",
     "female": "女声",
     "male": "男声",
     "offlineSection": "4. 本地数据与备份",
@@ -176,9 +167,9 @@
     "savedNotice": "配置保存于本地缓存，重启或刷新页面自动保持生效",
     "keySet": "Key 已保存在此浏览器",
     "keyMissing": "尚未设置 Key",
-    "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 Google。没有应用服务器。",
-    "getKey": "到 Google AI Studio 免费获取 Key",
-    "needsKeyNotice": "请先填写你的 Gemini API Key，才能使用单词和句子解析、朗读和发音反馈。",
+    "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 {{provider}}。没有应用服务器。",
+    "getKey": "到 {{provider}} 获取 Key",
+    "needsKeyNotice": "请先填写 API Key，才能使用单词和句子解析、朗读和发音反馈。",
     "storageProtected": "已受保护，浏览器不会自动清理",
     "storageNotProtected": "空间不足或长期不使用时，浏览器可能会清掉这些数据",
     "protectStorage": "保护我的数据",
@@ -192,7 +183,28 @@
     "audioDesc": "每段音频都会保存下来，离线也能播放，也不会重复生成。生词本里的单词、它们的语境句和例句的音频始终保留，其余音频超过 200 MB 后会按最近使用情况清理。",
     "backupAudio": "备份时包含生词本的发音音频（文件会更大）",
     "backupAudioSize": "约 {{mb}} MB",
-    "importAudioPartial": "备份已恢复，但有 {{failed}} 段音频没能保存到这台设备（可能存储空间已满）。播放这些单词时会重新生成。"
+    "importAudioPartial": "备份已恢复，但有 {{failed}} 段音频没能保存到这台设备（可能存储空间已满）。播放这些单词时会重新生成。",
+    "textSection": "1. 讲解用的 AI",
+    "textSectionDesc": "负责单词和句子解析、练习题和发音反馈。",
+    "speechSection": "2. 朗读用的 AI",
+    "speechSectionDesc": "负责朗读法语，可以和上面选不同的提供方。",
+    "providerLabel": "提供方",
+    "modelLabel": "模型",
+    "keyLabel": "{{provider}} API Key",
+    "sameKeyNote": "与上面使用同一个 {{provider}} Key。",
+    "promptsSection": "3. 提示词",
+    "show": "展开",
+    "hide": "收起",
+    "promptsDesc": "发给 AI 的指令，是纯文本。修改它们就能改变回答的写法；任何一条都可以恢复默认。已经保存在这台设备上的解析不会变，改过的提示词会得到新的解析。",
+    "promptTask": "提示词",
+    "promptLanguage": "提示词语言",
+    "promptEdit": "编辑",
+    "promptPreview": "预览",
+    "promptReset": "恢复默认",
+    "promptVariables": "可用变量：",
+    "promptSyntax": "用 {{open}}name{{close}} 表示变量，用 {{open}}#if name{{close}}…{{open}}/if{{close}} 表示变量有值时才出现的内容；{{open}}#if name=value{{close}} 用来和某个值比较。",
+    "promptUnknown": "未知变量会显示为空：{{names}}",
+    "promptMissing": "这条提示词没有用到：{{names}}"
   },
   "importer": {
     "articleTitle": "文章标题",
@@ -252,10 +264,10 @@
     "next": "下一步",
     "welcomeTitle": "精读法语",
     "welcomeBody": "打开一篇文章，点任何一个单词或句子，就能看到它在上下文里的意思；再把它读出来，得到发音反馈。",
-    "welcomeNeed": "讲解由 Google 的 Gemini 生成。你需要一个免费的 Google API Key，它只保存在这个浏览器里，只会发给 Google。",
-    "keyTitle": "连接 Gemini",
-    "keyStep1": "在 Google AI Studio 免费创建一个 Key。",
-    "openStudio": "打开 Google AI Studio",
+    "welcomeNeed": "讲解由 AI 服务生成（默认是 {{provider}}）。你需要一个免费的 API Key，它只保存在这个浏览器里，只会发给该服务。",
+    "keyTitle": "连接 {{provider}}",
+    "keyStep1": "在 {{provider}} 免费创建一个 Key。",
+    "openStudio": "打开 {{provider}}",
     "keyStep2": "把 Key 粘贴到这里。",
     "checking": "正在检查…",
     "checkSave": "检查并保存",
@@ -269,7 +281,7 @@
     "openSample": "打开示例文章"
   },
   "keyBanner": {
-    "text": "添加你的 Gemini Key，才能使用单词和句子解析、朗读和发音反馈。",
+    "text": "添加你的 API Key，才能使用单词和句子解析、朗读和发音反馈。",
     "action": "添加 Key"
   },
   "ipa": {
@@ -321,5 +333,15 @@
       "name": "Gemini 3.8 Flash-Lite TTS（推荐）",
       "desc": "24kHz 高采样率纯正母语法语发音合成，带自然连音与语调"
     }
+  },
+  "providers": {
+    "gemini": "Google Gemini"
+  },
+  "prompts": {
+    "word": "单词解析",
+    "sentence": "句子解析",
+    "drills": "练习题",
+    "pronunciationAudio": "发音评分（带录音）",
+    "pronunciationText": "发音评分（仅文字转写）"
   }
 }

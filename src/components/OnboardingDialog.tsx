@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, CheckCircle2, Loader2 } from 'lucide-react';
 import { Dialog } from './ui/overlay';
 import { Button } from './ui/button';
-import { checkApiKey } from '../services/gemini';
+import { checkTextKey } from '../services/api';
+import { getProvider } from '../services/ai/providers';
 import { getAppSettings, saveAppSettings } from '../utils/appSettings';
 
 interface OnboardingDialogProps {
@@ -18,6 +19,8 @@ const STEPS = 3;
 
 export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onKeySaved, onOpenSample }) => {
   const { t } = useTranslation();
+  const providerId = getAppSettings().textProvider;
+  const providerName = t(`providers.${providerId}`, { defaultValue: providerId });
   const [step, setStep] = useState(0);
   const [key, setKey] = useState('');
   const [checking, setChecking] = useState(false);
@@ -29,8 +32,8 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
     setError(null);
     try {
       const settings = getAppSettings();
-      await checkApiKey(key, settings.analysisModel);
-      saveAppSettings({ ...settings, customApiKey: key.trim() });
+      await checkTextKey(key.trim());
+      saveAppSettings({ apiKeys: { ...settings.apiKeys, [settings.textProvider]: key.trim() } });
       setSaved(true);
       onKeySaved();
       setStep(2);
@@ -61,7 +64,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
             <p className="text-xs text-ink-500 tnum">{t('onboarding.stepOf', { n: 1, total: STEPS })}</p>
             <h2 className="font-serif text-2xl font-semibold text-ink-900">{t('onboarding.welcomeTitle')}</h2>
             <p className="text-sm text-ink-700 leading-relaxed">{t('onboarding.welcomeBody')}</p>
-            <p className="text-sm text-ink-700 leading-relaxed">{t('onboarding.welcomeNeed')}</p>
+            <p className="text-sm text-ink-700 leading-relaxed">{t('onboarding.welcomeNeed', { provider: providerName })}</p>
             <div className="flex items-center justify-between pt-2">
               {skip}
               <Button onClick={() => setStep(1)}>{t('onboarding.next')}</Button>
@@ -72,17 +75,17 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
         {step === 1 && (
           <div className="space-y-4">
             <p className="text-xs text-ink-500 tnum">{t('onboarding.stepOf', { n: 2, total: STEPS })}</p>
-            <h2 className="font-serif text-2xl font-semibold text-ink-900">{t('onboarding.keyTitle')}</h2>
+            <h2 className="font-serif text-2xl font-semibold text-ink-900">{t('onboarding.keyTitle', { provider: providerName })}</h2>
             <ol className="space-y-4 text-sm text-ink-700">
               <li className="space-y-2">
-                <p>{t('onboarding.keyStep1')}</p>
+                <p>{t('onboarding.keyStep1', { provider: providerName })}</p>
                 <a
-                  href="https://aistudio.google.com/apikey"
+                  href={getProvider(providerId).info.keyUrl}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium"
                 >
-                  {t('onboarding.openStudio')}
+                  {t('onboarding.openStudio', { provider: providerName })}
                   <ArrowUpRight className="w-4 h-4" />
                 </a>
               </li>
@@ -105,7 +108,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
                     {t('onboarding.keyInvalid')} {error}
                   </p>
                 )}
-                <p className="text-xs text-ink-500">{t('settings.keyPrivacy')}</p>
+                <p className="text-xs text-ink-500">{t('settings.keyPrivacy', { provider: providerName })}</p>
               </li>
             </ol>
             <div className="flex items-center justify-between pt-2">

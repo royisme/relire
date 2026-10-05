@@ -14,8 +14,6 @@ interface NavbarProps {
   onOpenSettings: () => void;
   dueCount: number;
   totalVocabCount: number;
-  selectedVoice: 'Kore' | 'Charon';
-  onSelectVoice: (voice: 'Kore' | 'Charon') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({

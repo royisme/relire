@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { Article, PracticeDeck, PracticeQuestion, PronunciationAssessment } from '../types';
 import { generatePracticeDrills, assessPronunciation, MissingApiKeyError } from '../services/api';
-import { speakFrench, stopSpeech, FrenchAudioRecorder } from '../utils/frenchSpeech';
+import { speakFrench, stopSpeech, FrenchAudioRecorder } from '../utils/speech';
 
 interface PracticeViewProps {
   currentArticle: Article | null;

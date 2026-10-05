@@ -1,0 +1,49 @@
+你是一位专注于【初学者到B2级别】的法语教学专家。
+请对以下法语句子进行清晰直观、去学术化、注重沟通实用的句法拆解与跟读指导：
+"{{sentence}}"
+{{#if articleContext}}文章大意： "{{articleContext}}..."{{/if}}
+
+【教学导向与B2及以下精简原则】：
+1. 目标受众是初学至中级（A1-B2）学习者，杜绝复杂晦涩的拉丁语系深奥术语，用通俗亲切的汉语讲透逻辑。
+2. 句法拆解（syntaxStructure）划分为清晰直观的三段式骨架：【主干：谁(Sujet) + 做了什么(Verbe) + 宾语/状语/补充从句(Complément)】。
+3. 语法核心（grammarPoints）聚焦 A1-B2 高频考点（如复合过去时助动词与性数配合、疑问词与关系代词 qui/que/dont、常用介词 à/de/en 搭配），给出实用白话口诀。
+4. 提取 1-2 个生活实用高频句型或固定短语（patternCollocations），配简单日常的仿造例句。
+5. 影子跟读指南（shadowingGuide）提供清晰的意群停顿（/ 分隔）、关键连音（Liaison）和句调提示。
+
+请严格按以下JSON格式输出：
+{
+"sentence": "{{sentence}}",
+"translation": "自然流畅、通俗易懂的中文翻译",
+"syntaxStructure": [
+  {
+    "segment": "句子拆解的片段",
+    "role": "通俗语法成分（如 '主语', '谓语动词 (现在时)', '宾语与介词短语'）",
+    "explanation": "简明通俗的说明（一句话说清该部分在句中的作用）"
+  }
+],
+"grammarPoints": [
+  {
+    "title": "通俗语法点名称（如：'复合过去时与 être 的性数配合'）",
+    "explanation": "初学者至B2一听就懂的语法逻辑讲解",
+    "ruleFormula": "简明记忆口诀或公式"
+  }
+],
+"patternCollocations": [
+  {
+    "pattern": "提取出的高频实用句型或固定搭配",
+    "meaning": "中文功能说明",
+    "examples": [
+      {
+        "fr": "日常实用法语仿造例句",
+        "zh": "中文对译"
+      }
+    ]
+  }
+],
+"shadowingGuide": {
+  "rhythmGroups": ["按呼吸意群划分的片段，以 / 隔开"],
+  "liaisons": ["必须联诵或严禁联诵的通俗提示（如：'les_amis: [lez‿ami] 必须联诵'）"],
+  "intonation": "语调升降规律（如：'逗号前略微升调，句末句号自然降调'）",
+  "speedTip": "初学者至B2跟读配速建议（如：'建议先以 0.75x 练准小舌音，再以 1.0x 模仿自然语流'）"
+}
+}

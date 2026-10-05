@@ -1,3 +1,4 @@
+import { base64ToBlob, blobToBase64 } from '../utils/binary';
 import { db, type AudioEntry } from './db';
 
 /**
@@ -13,23 +14,8 @@ export const AUDIO_CAP_BYTES = 200 * 1024 * 1024;
 const DAY = 24 * 60 * 60 * 1000;
 
 export const normalizeText = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
-export const audioKey = (model: string, voice: string, text: string) => `${model}|${voice}|${normalizeText(text)}`;
-
-export function base64ToBlob(base64: string, type = 'audio/wav'): Blob {
-  const bin = atob(base64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new Blob([bytes], { type });
-}
-
-export function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(blob);
-  });
-}
+export const audioKey = (provider: string, model: string, voice: string, text: string) =>
+  `${provider}|${model}|${voice}|${normalizeText(text)}`;
 
 /** Texts whose audio belongs to the vocabulary and must be kept. */
 export async function protectedTexts(): Promise<Set<string>> {
@@ -43,10 +29,10 @@ export async function protectedTexts(): Promise<Set<string>> {
   return texts;
 }
 
-export async function getAudio(model: string, voice: string, text: string): Promise<Blob | undefined> {
+export async function getAudio(provider: string, model: string, voice: string, text: string): Promise<Blob | undefined> {
   try {
     const d = await db();
-    const entry = await d.get('audio', audioKey(model, voice, text));
+    const entry = await d.get('audio', audioKey(provider, model, voice, text));
     if (!entry) return undefined;
     // Record use at most once a day so playing a clip is not a write every time.
     // A failed write must not turn a clip we did read into a miss.
@@ -60,11 +46,12 @@ export async function getAudio(model: string, voice: string, text: string): Prom
 let approxBytes: number | null = null;
 
 /** Stores a clip and throws if the write fails. Trimming afterwards is best-effort. */
-async function storeAudio(model: string, voice: string, text: string, blob: Blob): Promise<void> {
+async function storeAudio(provider: string, model: string, voice: string, text: string, blob: Blob): Promise<void> {
   const d = await db();
   const entry: AudioEntry = {
-    key: audioKey(model, voice, text),
+    key: audioKey(provider, model, voice, text),
     text: normalizeText(text),
+    provider,
     voice,
     model,
     blob,
@@ -83,9 +70,9 @@ async function storeAudio(model: string, voice: string, text: string, blob: Blob
 }
 
 /** Best-effort for playback: if the clip cannot be kept (quota, private mode) it still plays. */
-export async function putAudio(model: string, voice: string, text: string, blob: Blob): Promise<void> {
+export async function putAudio(provider: string, model: string, voice: string, text: string, blob: Blob): Promise<void> {
   try {
-    await storeAudio(model, voice, text, blob);
+    await storeAudio(provider, model, voice, text, blob);
   } catch {
     // not kept
   }
@@ -151,6 +138,8 @@ export async function clearUnprotectedAudio(): Promise<void> {
 
 export interface AudioBackup {
   text: string;
+  /** Absent in older backups, which were all Gemini. */
+  provider?: string;
   voice: string;
   model: string;
   data: string; // base64 WAV
@@ -162,7 +151,7 @@ export async function exportProtectedAudio(): Promise<AudioBackup[]> {
   const keep = await protectedTexts();
   const out: AudioBackup[] = [];
   for (const e of await d.getAll('audio')) {
-    if (keep.has(e.text)) out.push({ text: e.text, voice: e.voice, model: e.model, data: await blobToBase64(e.blob) });
+    if (keep.has(e.text)) out.push({ text: e.text, provider: e.provider, voice: e.voice, model: e.model, data: await blobToBase64(e.blob) });
   }
   return out;
 }
@@ -174,7 +163,7 @@ export async function importAudio(items: AudioBackup[]): Promise<{ imported: num
   for (const item of items) {
     if (!item?.text || !item.data) continue;
     try {
-      await storeAudio(item.model, item.voice, item.text, base64ToBlob(item.data));
+      await storeAudio(item.provider ?? 'gemini', item.model, item.voice, item.text, base64ToBlob(item.data));
       imported++;
     } catch {
       failed++;

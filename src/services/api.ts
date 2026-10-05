@@ -1,43 +1,30 @@
 import { WordAnalysis, SentenceAnalysis, PronunciationAssessment, PracticeDeck } from '../types';
-import { getAppSettings } from '../utils/appSettings';
+import { getApiKey, getAppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
-import * as gemini from './gemini';
-import { drillsKey, getCached, putCached, sentenceKey, wordKey, type CacheKind } from '../storage/cache';
-
-export { MissingApiKeyError } from './gemini';
-
-function options(): gemini.GeminiOptions {
-  const settings = getAppSettings();
-  return {
-    apiKey: settings.customApiKey,
-    model: settings.analysisModel,
-    lang: i18n.language === 'zh' ? 'zh' : 'en',
-  };
-}
-
-// Requests currently in flight, so two quick taps on the same word cost one call.
-const inFlight = new Map<string, Promise<unknown>>();
+import * as ai from './ai/tasks';
+import { getTextProvider } from './ai/providers';
+import { promptFingerprint } from './ai/prompts';
+import type { Lang } from './ai/types';
+import { cachedRequest } from './cachedRequest';
+import { drillsKey, sentenceKey, wordKey } from '../storage/cache';
 
 /**
- * Looks in the persistent cache first and only then asks Gemini, so a repeated
- * word or sentence costs nothing (and cached answers work without a key).
+ * What the UI calls: reads the user's settings and language, decides what is
+ * cached and under which key, and delegates the request to the AI layer.
+ * Cache keys carry a fingerprint of the prompt but deliberately ignore the
+ * provider, model and article context, so switching models or meeting the same
+ * sentence in another article never re-spends tokens.
  */
-async function cached<T>(kind: CacheKind, key: string, fetchFresh: () => Promise<T>, skipCache = false): Promise<T> {
-  const hit = skipCache ? undefined : await getCached<T>(kind, key);
-  if (hit) return hit;
 
-  const flightKey = `${kind}:${key}`;
-  const pending = inFlight.get(flightKey) as Promise<T> | undefined;
-  if (pending) return pending;
+export { MissingApiKeyError } from './ai/errors';
 
-  const request = fetchFresh()
-    .then(async (value) => {
-      await putCached(kind, key, value);
-      return value;
-    })
-    .finally(() => inFlight.delete(flightKey));
-  inFlight.set(flightKey, request);
-  return request;
+function context(): ai.TextContext & { lang: Lang } {
+  const settings = getAppSettings();
+  return {
+    provider: getTextProvider(settings.textProvider),
+    config: { apiKey: getApiKey(settings, settings.textProvider), model: settings.textModel },
+    lang: i18n.language === 'zh' ? 'zh' : 'en',
+  };
 }
 
 export function fetchWordAnalysis(
@@ -45,26 +32,31 @@ export function fetchWordAnalysis(
   sentenceContext: string,
   articleContext?: string
 ): Promise<WordAnalysis> {
-  const opts = options();
-  return cached('word', wordKey(opts.lang, word, sentenceContext), () =>
-    gemini.analyzeWord({ word, sentenceContext, articleContext }, opts)
+  const ctx = context();
+  return cachedRequest('word', wordKey(ctx.lang, promptFingerprint('word', ctx.lang), word, sentenceContext), () =>
+    ai.analyzeWord({ word, sentenceContext, articleContext }, ctx)
   );
 }
 
 export function fetchSentenceAnalysis(sentence: string, articleContext?: string): Promise<SentenceAnalysis> {
-  const opts = options();
-  return cached('sentence', sentenceKey(opts.lang, sentence), () =>
-    gemini.analyzeSentence({ sentence, articleContext }, opts)
+  const ctx = context();
+  return cachedRequest('sentence', sentenceKey(ctx.lang, promptFingerprint('sentence', ctx.lang), sentence), () =>
+    ai.analyzeSentence({ sentence, articleContext }, ctx)
   );
 }
 
+/** Not cached: every recording is different. */
 export function assessPronunciation(params: {
   referenceText: string;
   audioBase64?: string;
   mimeType?: string;
   userTranscript?: string;
 }): Promise<PronunciationAssessment> {
-  return gemini.assessPronunciation(params, options());
+  const { audioBase64, mimeType, ...rest } = params;
+  return ai.assessPronunciation(
+    { ...rest, audio: audioBase64 ? { base64: audioBase64, mimeType: mimeType || 'audio/webm' } : undefined },
+    context()
+  );
 }
 
 /** Drills are kept per article and type; `fresh` asks for a new set and replaces the saved one. */
@@ -73,6 +65,17 @@ export function generatePracticeDrills(
   type: string = 'syntax',
   fresh = false
 ): Promise<PracticeDeck> {
-  const opts = options();
-  return cached('drills', drillsKey(opts.lang, type, articleText), () => gemini.generateDrills({ articleText, type }, opts), fresh);
+  const ctx = context();
+  return cachedRequest(
+    'drills',
+    drillsKey(ctx.lang, promptFingerprint('drills', ctx.lang), type, articleText),
+    () => ai.generateDrills({ articleText, type }, ctx),
+    fresh
+  );
+}
+
+/** Checks a pasted key against the text provider before it is saved. */
+export function checkTextKey(apiKey: string): Promise<void> {
+  const settings = getAppSettings();
+  return getTextProvider(settings.textProvider).checkKey({ apiKey, model: settings.textModel });
 }
