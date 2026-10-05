@@ -49,4 +49,4 @@ Duolingo-style gamification (streak flames, confetti, mascots), generic AI-dashb
 
 ## Constraints
 
-React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh), Bun. Fully client-side: Gemini is called from the browser with the user's own key (`src/services/gemini.ts`). Client-only persistence in localStorage keys `eclair_*_v1` (legacy prefix from the project's first name; do not rename without a migration); keep stored shapes backwards compatible. Reading and vocabulary review must keep working offline.
+React 19, Vite, Tailwind v4, lucide-react icons, i18next (en/zh), Bun. Fully client-side: Gemini is called from the browser with the user's own key (`src/services/gemini.ts`). Client-only persistence in localStorage keys `relire_*`.

@@ -10,7 +10,7 @@ export interface AppSettings {
   ttsVoice: 'Kore' | 'Charon' | 'Zephyr' | 'Puck';
 }
 
-const SETTINGS_KEY = 'eclair_app_settings_v1';
+const SETTINGS_KEY = 'relire_app_settings_v1';
 
 export const AVAILABLE_ANALYSIS_MODELS = [
   {

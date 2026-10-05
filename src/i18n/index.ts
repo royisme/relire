@@ -3,7 +3,7 @@ import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import zh from './locales/zh.json';
 
-const STORAGE_KEY = 'eclair_lang';
+const STORAGE_KEY = 'relire_lang';
 
 // Default to English as requested, or load user's previously saved preference
 const savedLang = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : 'en';

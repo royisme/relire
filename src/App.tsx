@@ -15,9 +15,9 @@ import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './
 import { isDueToday, formatDate } from './utils/srs';
 import { setGlobalVoice } from './utils/frenchSpeech';
 
-const LOCAL_STORAGE_ARTICLES = 'eclair_articles_v1';
-const LOCAL_STORAGE_VOCAB = 'eclair_vocab_v1';
-const LOCAL_STORAGE_STATS = 'eclair_stats_v1';
+const LOCAL_STORAGE_ARTICLES = 'relire_articles_v1';
+const LOCAL_STORAGE_VOCAB = 'relire_vocab_v1';
+const LOCAL_STORAGE_STATS = 'relire_stats_v1';
 
 export default function App() {
   // Navigation tab

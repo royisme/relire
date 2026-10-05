@@ -51,9 +51,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
       // Calculate local data size
       try {
-        const rawArticles = localStorage.getItem('eclair_articles_v1');
-        const rawVocab = localStorage.getItem('eclair_vocab_v1');
-        const rawStats = localStorage.getItem('eclair_stats_v1');
+        const rawArticles = localStorage.getItem('relire_articles_v1');
+        const rawVocab = localStorage.getItem('relire_vocab_v1');
+        const rawStats = localStorage.getItem('relire_stats_v1');
         setLocalStats({
           articlesCount: rawArticles ? JSON.parse(rawArticles).length : 0,
           vocabCount: rawVocab ? JSON.parse(rawVocab).length : 0,
@@ -82,9 +82,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         version: '1.0',
         exportedAt: new Date().toISOString(),
         settings: getAppSettings(),
-        articles: JSON.parse(localStorage.getItem('eclair_articles_v1') || '[]'),
-        vocab: JSON.parse(localStorage.getItem('eclair_vocab_v1') || '[]'),
-        stats: JSON.parse(localStorage.getItem('eclair_stats_v1') || '{}'),
+        articles: JSON.parse(localStorage.getItem('relire_articles_v1') || '[]'),
+        vocab: JSON.parse(localStorage.getItem('relire_vocab_v1') || '[]'),
+        stats: JSON.parse(localStorage.getItem('relire_stats_v1') || '{}'),
       };
 
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -115,13 +115,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         const data = JSON.parse(text);
 
         if (data.articles && Array.isArray(data.articles)) {
-          localStorage.setItem('eclair_articles_v1', JSON.stringify(data.articles));
+          localStorage.setItem('relire_articles_v1', JSON.stringify(data.articles));
         }
         if (data.vocab && Array.isArray(data.vocab)) {
-          localStorage.setItem('eclair_vocab_v1', JSON.stringify(data.vocab));
+          localStorage.setItem('relire_vocab_v1', JSON.stringify(data.vocab));
         }
         if (data.stats && typeof data.stats === 'object') {
-          localStorage.setItem('eclair_stats_v1', JSON.stringify(data.stats));
+          localStorage.setItem('relire_stats_v1', JSON.stringify(data.stats));
         }
         if (data.settings && typeof data.settings === 'object') {
           saveAppSettings(data.settings);
