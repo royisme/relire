@@ -1,8 +1,29 @@
+# Dependencies
 node_modules/
-build/
+
+# Build output and generated files
 dist/
+dev-dist/
+build/
 coverage/
-.DS_Store
-*.log
-.env*
+*.tsbuildinfo
+.vite/
+
+# Environment (keep the example)
+.env
+.env.*
 !.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Local tooling state
+.claude/settings.local.json

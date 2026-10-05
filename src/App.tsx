@@ -304,7 +304,7 @@ export default function App() {
   const dueCount = vocabList.filter(isDueToday).length;
 
   return (
-    <div className="min-h-screen bg-[#FBF9F5] text-stone-900 flex flex-col font-french-sans">
+    <div className="min-h-screen bg-[#FBF9F5] text-ink-900 flex flex-col font-sans">
       {/* Top Navbar */}
       <Navbar
         currentTab={currentTab}

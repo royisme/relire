@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Dialog, OverlayHeader } from './ui/overlay';
 import { X, Sparkles, BookOpen, FileText, CheckCircle2 } from 'lucide-react';
 import { Article } from '../types';
 import { SAMPLE_ARTICLES } from '../data/sampleArticles';
@@ -54,39 +55,17 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-[#FAF8F5] border border-amber-950/15 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden transition-all">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-amber-900/10 bg-[#F4EFEA]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-600/15 text-amber-900 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-amber-800" />
-            </div>
-            <div>
-              <h3 className="font-french-serif text-lg font-bold text-stone-900">
-                {t('importer.title')}
-              </h3>
-              <p className="text-xs text-stone-500">
-                {t('importer.subtitle')}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <Dialog onClose={onClose} label={t('importer.title')}>
+        <OverlayHeader title={t('importer.title')} subtitle={t('importer.subtitle')} onClose={onClose} closeLabel={t('common.close')} />
 
         {/* Tab Selection */}
-        <div className="flex border-b border-stone-200 px-6 pt-2 gap-4 bg-white/50">
+        <div className="flex border-b border-ink-200 px-6 pt-2 gap-4 bg-white/50">
           <button
             onClick={() => setActiveTab('paste')}
             className={`pb-2.5 text-sm font-medium border-b-2 transition-all cursor-pointer ${
               activeTab === 'paste'
-                ? 'border-amber-700 text-amber-950 font-semibold'
-                : 'border-transparent text-stone-500 hover:text-stone-800'
+                ? 'border-accent-700 text-accent-950 font-semibold'
+                : 'border-transparent text-ink-500 hover:text-ink-800'
             }`}
           >
             {t('importer.content')}
@@ -95,8 +74,8 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
             onClick={() => setActiveTab('presets')}
             className={`pb-2.5 text-sm font-medium border-b-2 transition-all cursor-pointer ${
               activeTab === 'presets'
-                ? 'border-amber-700 text-amber-950 font-semibold'
-                : 'border-transparent text-stone-500 hover:text-stone-800'
+                ? 'border-accent-700 text-accent-950 font-semibold'
+                : 'border-transparent text-ink-500 hover:text-ink-800'
             }`}
           >
             {t('importer.sampleBtn')}
@@ -109,7 +88,7 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
             <form onSubmit={handlePasteSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-stone-700 mb-1">
+                  <label className="block text-xs font-semibold text-ink-700 mb-1">
                     {t('importer.articleTitle')}
                   </label>
                   <input
@@ -117,18 +96,18 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder={t('importer.articleTitlePlaceholder')}
-                    className="w-full px-3 py-2 text-sm bg-white rounded-lg border border-stone-300 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+                    className="w-full px-3 py-2 text-sm bg-white rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    <label className="block text-xs font-semibold text-ink-700 mb-1">
                       {t('importer.cefrLevel')}
                     </label>
                     <select
                       value={level}
                       onChange={(e) => setLevel(e.target.value)}
-                      className="w-full px-3 py-2 text-sm bg-white rounded-lg border border-stone-300 focus:outline-none focus:border-amber-600 cursor-pointer"
+                      className="w-full px-3 py-2 text-sm bg-white rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 cursor-pointer"
                     >
                       <option value="A1">A1 ({formatLevel('A1', i18n.language)})</option>
                       <option value="A2">A2 ({formatLevel('A2', i18n.language)})</option>
@@ -138,13 +117,13 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-stone-700 mb-1">
+                    <label className="block text-xs font-semibold text-ink-700 mb-1">
                       {t('importer.category')}
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-3 py-2 text-sm bg-white rounded-lg border border-stone-300 focus:outline-none focus:border-amber-600"
+                      className="w-full px-3 py-2 text-sm bg-white rounded-md border border-ink-300 focus:outline-none focus:border-accent-600"
                     >
                       <option value="Littérature">{t('importer.categoryLiterature')}</option>
                       <option value="Actualités">{t('importer.categoryNews')}</option>
@@ -158,10 +137,10 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs font-semibold text-stone-700">
+                  <label className="block text-xs font-semibold text-ink-700">
                     {t('importer.content')} <span className="text-red-500">*</span>
                   </label>
-                  <span className="text-[11px] text-stone-400">
+                  <span className="text-xs text-ink-400">
                     {content.length} {t('reader.wordCount', { count: content.split(/\s+/).filter(Boolean).length })}
                   </span>
                 </div>
@@ -171,7 +150,7 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder={t('importer.contentPlaceholder')}
-                  className="w-full px-3.5 py-3 text-sm font-french-sans leading-relaxed bg-white rounded-xl border border-stone-300 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600"
+                  className="w-full px-3.5 py-3 text-sm font-sans leading-relaxed bg-white rounded-lg border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
                 />
               </div>
 
@@ -179,14 +158,14 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm text-stone-600 hover:text-stone-900 rounded-lg hover:bg-stone-200/50 cursor-pointer"
+                  className="px-4 py-2 text-sm text-ink-600 hover:text-ink-900 rounded-md hover:bg-ink-200/50 cursor-pointer"
                 >
                   {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={!content.trim()}
-                  className="px-5 py-2 text-sm font-semibold rounded-lg bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white shadow-sm transition-all cursor-pointer"
+                  className="h-10 px-4 text-sm font-semibold rounded-md bg-accent-700 hover:bg-accent-800 disabled:opacity-50 text-white transition-all cursor-pointer"
                 >
                   {t('importer.importSubmit')}
                 </button>
@@ -198,22 +177,22 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
                 <div
                   key={article.id}
                   onClick={() => handleSelectPreset(article)}
-                  className="p-4 rounded-xl border border-amber-900/10 bg-white hover:border-amber-500 hover:shadow-md cursor-pointer transition-all group"
+                  className="p-4 rounded-lg border border-ink-200 bg-white hover:border-accent-500 hover:cursor-pointer transition-all group"
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <h4 className="font-french-serif font-bold text-base text-stone-900 group-hover:text-amber-800">
+                    <h4 className="font-serif font-semibold text-base text-ink-900 group-hover:text-accent-800">
                       {cleanArticleTitle(article.title)}
                     </h4>
-                    <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-amber-100/80 text-amber-900">
+                    <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-accent-100/80 text-accent-900">
                       {formatLevel(article.level, i18n.language)}
                     </span>
                   </div>
-                  <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-ink-500 line-clamp-2 leading-relaxed">
                     {article.content.slice(0, 140)}...
                   </p>
-                  <div className="mt-2.5 flex items-center justify-between text-[11px] text-stone-400">
+                  <div className="mt-2.5 flex items-center justify-between text-xs text-ink-400">
                     <span>{formatArticleSource(article.source, i18n.language)}</span>
-                    <span className="text-amber-700 font-medium group-hover:underline">
+                    <span className="text-accent-700 font-medium group-hover:underline">
                       {t('importer.importSubmit')} →
                     </span>
                   </div>
@@ -222,7 +201,6 @@ export const ArticleImporterModal: React.FC<ArticleImporterModalProps> = ({
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </Dialog>
   );
 };

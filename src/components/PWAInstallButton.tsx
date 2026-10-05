@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Dialog, OverlayHeader } from './ui/overlay';
 import { Download, Monitor, CheckCircle2, X, Laptop } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { Button } from './ui/button';
@@ -13,8 +14,8 @@ export const PWAInstallButton: React.FC = () => {
   // If already running in standalone PWA window, don't show the prompt
   if (isInstalled) {
     return (
-      <Badge variant="emerald" className="hidden lg:inline-flex text-[11px] px-2 py-1">
-        <CheckCircle2 className="w-3.5 h-3.5 mr-0.5 text-emerald-600" />
+      <Badge variant="ok" className="hidden lg:inline-flex">
+        <CheckCircle2 className="w-3.5 h-3.5 mr-0.5 text-ok-600" />
         <span>{t('nav.installedDesktop')}</span>
       </Badge>
     );
@@ -25,9 +26,9 @@ export const PWAInstallButton: React.FC = () => {
     return (
       <Button
         onClick={install}
-        variant="amber"
+        variant="outline"
         size="sm"
-        className="font-medium whitespace-nowrap shadow-2xs cursor-pointer"
+        className="font-medium whitespace-nowrap cursor-pointer"
         title={t('nav.installMac')}
       >
         <Download className="w-3.5 h-3.5" />
@@ -44,37 +45,22 @@ export const PWAInstallButton: React.FC = () => {
         onClick={() => setShowMacGuide(true)}
         variant="outline"
         size="sm"
-        className="text-stone-700 whitespace-nowrap cursor-pointer"
+        className="text-ink-700 whitespace-nowrap cursor-pointer"
         title={t('nav.installMac')}
       >
-        <Laptop className="w-3.5 h-3.5 text-amber-700" />
+        <Laptop className="w-3.5 h-3.5 text-ink-600" />
         <span className="hidden lg:inline">{t('nav.installMac')}</span>
         <span className="lg:hidden">{t('nav.installApp')}</span>
       </Button>
 
       {showMacGuide && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-          <div className="bg-[#FAF8F5] border border-amber-900/20 w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-700 text-white flex items-center justify-center">
-                  <Monitor className="w-4 h-4" />
-                </div>
-                <h3 className="font-french-serif text-base font-bold text-stone-900">
-                  {t('pwa.title')}
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowMacGuide(false)}
-                className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+        <Dialog onClose={() => setShowMacGuide(false)} label={t('pwa.title')} className="max-w-md">
+          <OverlayHeader title={t('pwa.title')} onClose={() => setShowMacGuide(false)} closeLabel={t('common.close')} />
+          <div className="p-5 space-y-4">
 
-            <div className="space-y-3 text-xs text-stone-700 leading-relaxed font-french-sans">
-              <div className="p-3 rounded-xl bg-white border border-stone-200 space-y-1.5">
-                <span className="font-bold text-stone-900 block">
+            <div className="space-y-3 text-xs text-ink-700 leading-relaxed font-sans">
+              <div className="p-3 rounded-lg bg-white border border-ink-200 space-y-1.5">
+                <span className="font-semibold text-ink-900 block">
                   {t('pwa.chromeWay')}
                 </span>
                 <p>
@@ -82,8 +68,8 @@ export const PWAInstallButton: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-white border border-stone-200 space-y-1.5">
-                <span className="font-bold text-stone-900 block">
+              <div className="p-3 rounded-lg bg-white border border-ink-200 space-y-1.5">
+                <span className="font-semibold text-ink-900 block">
                   {t('pwa.safariWay')}
                 </span>
                 <p>
@@ -91,7 +77,7 @@ export const PWAInstallButton: React.FC = () => {
                 </p>
               </div>
 
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-[11px] space-y-1">
+              <div className="p-3 rounded-lg bg-ok-50 border border-ok-200 text-ok-950 text-xs space-y-1">
                 <strong>{t('pwa.noServerWhy')}</strong>
                 <p>
                   {t('pwa.noServerDesc')}
@@ -107,7 +93,7 @@ export const PWAInstallButton: React.FC = () => {
               {t('pwa.gotIt')}
             </Button>
           </div>
-        </div>
+        </Dialog>
       )}
     </>
   );

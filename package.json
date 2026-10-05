@@ -1,12 +1,14 @@
 {
-  "name": "react-example",
+  "name": "eclair-francais",
+  "description": "French reading and pronunciation practice with AI feedback, for learners preparing for TCF Canada.",
+  "license": "MIT",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
-    "start": "tsx server.ts",
+    "start": "NODE_ENV=production tsx server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"
@@ -39,5 +41,12 @@
     "tsx": "^4.21.0",
     "typescript": "^7.0.2",
     "vite-plugin-pwa": "^2.0.0"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/royisme/relire.git"
   }
 }
