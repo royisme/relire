@@ -23,6 +23,12 @@ i18n
     },
   });
 
+/** Interface languages. Add an entry here (plus a locale file) to offer another one. */
+export const LANGUAGES = [
+  { code: 'en', label: 'English' },
+  { code: 'zh', label: '简体中文' },
+] as const;
+
 export function setAppLanguage(lang: 'en' | 'zh') {
   i18n.changeLanguage(lang);
   if (typeof window !== 'undefined') {

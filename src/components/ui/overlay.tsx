@@ -43,6 +43,24 @@ export function Sheet({ onClose, label, className, children }: OverlayProps) {
   );
 }
 
+/** Drawer: navigation on small screens. Slides in from the left. */
+export function Drawer({ onClose, label, className, children }: OverlayProps) {
+  useEscape(onClose);
+  return (
+    <div className="fixed inset-0 z-50 bg-ink-950/30 anim-fade" onClick={onClose}>
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label={label}
+        onClick={(e) => e.stopPropagation()}
+        className={cn('h-full w-72 max-w-[85vw] bg-white border-r border-ink-200 shadow-lg flex flex-col', className)}
+      >
+        {children}
+      </aside>
+    </div>
+  );
+}
+
 /** Dialog: tasks that need focus (settings, import, install). */
 export function Dialog({ onClose, label, className, children }: OverlayProps) {
   useEscape(onClose);
