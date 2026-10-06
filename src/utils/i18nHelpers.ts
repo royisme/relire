@@ -14,6 +14,6 @@ export function formatLevel(level: string | undefined, lang: string): string {
 
 export function cleanArticleTitle(title: string | undefined): string {
   if (!title) return '';
-  // Strip trailing redundant level badges in parentheses like " (A1 入门)" or " (B1 经典文学)"
+  // Strip trailing redundant level badges in parentheses, e.g. " (A1 Beginner)" or " (B1 Intermediate)", in either language
   return title.replace(/\s*\((?:A1|A2|B1|B2|C1|C2)[^)]*\)$/i, '').trim();
 }

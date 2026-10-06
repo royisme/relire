@@ -21,6 +21,7 @@ Bun is the only package manager.
 - Never invent data (sample stats, fake scores, fallback AI answers). Empty means empty; failures show the real error.
 - AI calls go through `src/services/ai`; prompt wording lives in template files, never in TypeScript.
 - Controls never move the page: transient states show on the control itself or in an overlay.
+- Technical documentation, code comments, commit messages and PR text are in English. Chinese lives only in `locales/zh.json`, the `*.zh.txt` prompts, `README.zh-CN.md` and `marketing/zh/`.
 - Every change a user could notice gets a line in `CHANGELOG.md` (Unreleased) in the same commit.
 
 ## How to work here

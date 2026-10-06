@@ -39,6 +39,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- The list separator in a word's other meanings no longer depends on a language check in code; it is a translated string.
 - Progress said "1 Sentences Analyzed"; counts now use proper plurals. Settings showed its data counts with stray spacing.
 - The reader's own four colour themes (with hard-coded colours) are replaced by the app themes, so the toolbar, sheets and article always match.
 - In the English interface, the pattern-example translations in a sentence lookup showed Chinese; they now follow the interface language (English when the analysis has it, falling back to Chinese for older saved answers).

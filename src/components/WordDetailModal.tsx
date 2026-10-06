@@ -139,7 +139,7 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                   <p className="text-lg font-medium text-ink-900 break-words">{isEn && wordData.translationEn ? wordData.translationEn : wordData.translation}</p>
                   {wordData.otherMeanings && wordData.otherMeanings.length > 0 && (
                     <p className="text-sm text-ink-600 mt-0.5 break-words">
-                      {t('wordModal.otherMeanings')} {wordData.otherMeanings.join(isEn ? '; ' : '；')}
+                      {t('wordModal.otherMeanings')} {wordData.otherMeanings.join(t('common.listSeparator'))}
                     </p>
                   )}
                 </div>
