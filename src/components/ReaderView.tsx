@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Volume2, ArrowLeft, ChevronDown, TextSearch } from 'lucide-react';
 import { Article, WordAnalysis, SentenceAnalysis } from '../types';
 import { stopSpeech, setGlobalRate, speechKey } from '../utils/speech';
-import { SpeakButton, useSpeechState } from './ui/speak-button';
+import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {
@@ -41,7 +41,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   const cancelClear = () => window.clearTimeout(clearTimer.current);
   const scheduleClear = () => {
     cancelClear();
-    clearTimer.current = window.setTimeout(() => setHoveredId(null), 160);
+    clearTimer.current = window.setTimeout(() => setHoveredId(null), 200);
   };
   const focusSentence = (id: string) => {
     cancelClear();
@@ -210,12 +210,48 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     }
   };
 
+  const getToolbarThemeClass = () => {
+    switch (theme) {
+      case 'white':
+        return 'bg-white text-ink-900 border-ink-300/80 shadow-[0_6px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.06)] ring-1 ring-black/5';
+      case 'parchment':
+        return 'bg-white text-ink-900 border-ink-300/80 shadow-[0_6px_20px_rgba(45,42,39,0.12),0_2px_6px_rgba(45,42,39,0.06)] ring-1 ring-ink-900/5';
+      case 'sepia':
+        return 'bg-[#FFFDF9] text-[#433422] border-[#CDBE9F] shadow-[0_6px_20px_rgba(67,52,34,0.18)] ring-1 ring-[#8C6D37]/10';
+      case 'dark':
+        return 'bg-ink-800 text-ink-100 border-ink-600 shadow-[0_8px_24px_rgba(0,0,0,0.7),0_2px_8px_rgba(0,0,0,0.5)] ring-1 ring-white/10';
+    }
+  };
+
+  const getToolbarButtonClass = (isActive: boolean) => {
+    if (isActive) {
+      return 'bg-accent-700 text-white shadow-xs';
+    }
+    if (theme === 'dark') {
+      return 'text-ink-300 hover:text-white hover:bg-ink-700';
+    }
+    if (theme === 'sepia') {
+      return 'text-[#433422] hover:text-[#2A1F13] hover:bg-[#EFE5CD]';
+    }
+    return 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
+  };
+
+  const getDividerClass = () => {
+    if (theme === 'dark') return 'w-px h-3.5 bg-ink-700';
+    if (theme === 'sepia') return 'w-px h-3.5 bg-[#E2D2B0]';
+    return 'w-px h-3.5 bg-ink-200';
+  };
+
   // Which sentence the actions belong to when nothing is hovered: the one playing, else the one open in the drawer.
   const activeKey = playingKey ?? (activeSentence ? speechKey(activeSentence) : null);
+  // Phase of the sentence the pill is showing, so its own button can theme itself (hooks cannot be conditional).
+  const toolbarPhase = useSpeechPhase(toolbar?.text ?? '');
 
   useLayoutEffect(() => {
     const NAV = 56; // sticky header
-    const TOOLBAR = 44;
+    // Measured pill size: h-7 buttons + p-1 padding + border (+ pt-1 on the wrapper) = 71 x 42.
+    const TOOLBAR_WIDTH = 71;
+    const TOOLBAR_HEIGHT = 42;
     let frame = 0;
 
     const place = () => {
@@ -237,15 +273,28 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         setToolbar((prev) => (prev ? null : prev));
         return;
       }
-      // Prefer the first visible line with room above it, so the pill covers the end of the previous line
-      // rather than the sentence being read; otherwise pin it inside the viewport.
-      const line = lines.find((r) => r.top >= NAV + TOOLBAR) ?? lines[0];
-      const top = Math.min(Math.max(line.top, NAV + TOOLBAR + 4), vh - 8);
+      // Anchor the pill to the end of the sentence: the last visible line of the sentence
+      const lastLine = lines[lines.length - 1];
       const box = article.getBoundingClientRect();
+
+      // Vertical: appear directly below the sentence end, covering subsequent text as expected.
+      // If near the bottom of the viewport, flip above the line.
+      let top = lastLine.bottom + 2 - box.top;
+      if (lastLine.bottom + 2 + TOOLBAR_HEIGHT > vh - 8) {
+        top = Math.max(lastLine.top - TOOLBAR_HEIGHT - 4 - box.top, 8);
+      }
+
+      // Horizontal: start near the end of the sentence (lastLine.right)
+      const endX = lastLine.right - box.left;
+      const left = Math.min(
+        Math.max(endX - 4, 8),
+        box.width - TOOLBAR_WIDTH - 8
+      );
+
       const next = {
         text: target.text,
-        top: top - box.top,
-        left: Math.min(Math.max(line.left - box.left - 4, 4), box.width - 96),
+        top,
+        left,
       };
       setToolbar((prev) =>
         prev && prev.text === next.text && Math.abs(prev.top - next.top) < 0.5 && Math.abs(prev.left - next.left) < 0.5 ? prev : next
@@ -433,31 +482,38 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         </div>
         </div>
 
-        {/* Floating sentence actions: icons only, outside the text flow */}
+        {/* Floating sentence actions: compact pill at the end of the sentence */}
         {toolbar && (
           <div
             data-sentence-actions
             onPointerEnter={(e) => e.pointerType === 'mouse' && cancelClear()}
             onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
             style={{ top: toolbar.top, left: toolbar.left }}
-            className="absolute z-10 -translate-y-full pb-1.5 anim-fade"
+            className="absolute z-20 pt-1 anim-fade select-none"
           >
-            <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-white border border-ink-300 shadow-lg font-sans text-ink-900">
+            <div
+              className={`flex items-center gap-0.5 p-1 rounded-lg border font-sans text-xs ${getToolbarThemeClass()}`}
+            >
               <SpeakButton
                 text={toolbar.text}
                 label={t('reader.playSentence')}
                 stopLabel={t('reader.stop')}
                 variant="ghost"
                 size="icon"
-                className="sm:h-9 sm:w-9 text-ink-700"
+                className={`h-7 w-7 transition-colors ${getToolbarButtonClass(
+                  toolbarPhase !== 'idle'
+                )}`}
               />
+              <div className={getDividerClass()} />
               <button
                 onClick={() => onSentenceClick(toolbar.text)}
                 aria-label={t('reader.analyzeSentence')}
                 title={t('reader.analyzeSentence')}
-                className="h-10 w-10 sm:h-9 sm:w-9 inline-flex items-center justify-center rounded-md text-ink-700 hover:bg-ink-100 cursor-pointer"
+                className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors ${getToolbarButtonClass(
+                  false
+                )}`}
               >
-                <TextSearch className="w-4 h-4" />
+                <TextSearch className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
