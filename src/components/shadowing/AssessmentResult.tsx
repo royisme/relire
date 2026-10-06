@@ -6,7 +6,7 @@ import { PronunciationAssessment, PhonemeFeedback } from '../../types';
 /** The score and feedback for one read-aloud attempt. Every text block wraps; nothing here has a fixed width. */
 
 const STATUS_ICON: Record<PhonemeFeedback['status'], { Icon: typeof CircleCheck; tone: string }> = {
-  excellent: { Icon: CircleCheck, tone: 'text-ok-700' },
+  excellent: { Icon: CircleCheck, tone: 'text-ok-800' },
   acceptable: { Icon: CircleDot, tone: 'text-ink-500' },
   needs_work: { Icon: CircleAlert, tone: 'text-bad-700' },
 };
@@ -37,7 +37,7 @@ export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }>
 
       <dl className="grid grid-cols-3 gap-2">
         {metrics.map((m) => (
-          <div key={m.label} className="min-w-0 rounded-md bg-white border border-ink-200 px-2 py-2 text-center">
+          <div key={m.label} className="min-w-0 rounded-md bg-surface border border-ink-200 px-2 py-2 text-center">
             <dt className="text-xs text-ink-500 truncate">{m.label}</dt>
             <dd className="mt-0.5 text-lg font-semibold text-ink-900 tnum">{m.value}</dd>
           </div>
@@ -55,7 +55,7 @@ export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }>
                   <Icon className={`mt-0.5 w-4 h-4 shrink-0 ${tone}`} aria-hidden="true" />
                   <span className="sr-only">{t(`shadowing.status.${item.status}`)}</span>
                   <p className="min-w-0 break-words">
-                    <span className="mr-1.5 rounded-md bg-white border border-ink-200 px-1.5 py-0.5 font-mono text-xs text-ink-900">
+                    <span className="mr-1.5 rounded-md bg-surface border border-ink-200 px-1.5 py-0.5 font-mono text-xs text-ink-900">
                       {item.phoneme}
                     </span>
                     <span className="font-medium text-ink-900">{item.targetWord}</span>

@@ -5,6 +5,8 @@ import { Article, WordAnalysis, SentenceAnalysis } from '../types';
 import { stopSpeech, setGlobalRate, speechKey } from '../utils/speech';
 import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
+import { useTheme } from '../theme/useTheme';
+import { ThemeSwatch } from './ui/theme-swatch';
 
 interface ReaderViewProps {
   currentArticle: Article;
@@ -24,9 +26,9 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   activeSentence,
 }) => {
   const { t, i18n } = useTranslation();
+  const { preference: themePref, setPreference: setThemePref } = useTheme();
   // Reading preferences
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('lg');
-  const [theme, setTheme] = useState<'parchment' | 'white' | 'sepia' | 'dark'>('parchment');
   // Sentences are identified by position, not text, because the same sentence can repeat ("Oui.").
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [anchorId, setAnchorId] = useState<string | null>(null);
@@ -197,51 +199,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     }
   };
 
-  const getThemeClass = () => {
-    switch (theme) {
-      case 'parchment':
-        return 'bg-ink-50 text-ink-900 border-ink-200';
-      case 'white':
-        return 'bg-white text-ink-900 border-ink-200';
-      case 'sepia':
-        return 'bg-[#F4ECD8] text-[#433422] border-[#E2D2B0]';
-      case 'dark':
-        return 'bg-ink-900 text-ink-100 border-ink-800';
-    }
-  };
-
-  const getToolbarThemeClass = () => {
-    switch (theme) {
-      case 'white':
-        return 'bg-white text-ink-900 border-ink-300/80 shadow-[0_6px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.06)] ring-1 ring-black/5';
-      case 'parchment':
-        return 'bg-white text-ink-900 border-ink-300/80 shadow-[0_6px_20px_rgba(45,42,39,0.12),0_2px_6px_rgba(45,42,39,0.06)] ring-1 ring-ink-900/5';
-      case 'sepia':
-        return 'bg-[#FFFDF9] text-[#433422] border-[#CDBE9F] shadow-[0_6px_20px_rgba(67,52,34,0.18)] ring-1 ring-[#8C6D37]/10';
-      case 'dark':
-        return 'bg-ink-800 text-ink-100 border-ink-600 shadow-[0_8px_24px_rgba(0,0,0,0.7),0_2px_8px_rgba(0,0,0,0.5)] ring-1 ring-white/10';
-    }
-  };
-
-  const getToolbarButtonClass = (isActive: boolean) => {
-    if (isActive) {
-      return 'bg-accent-700 text-white shadow-xs';
-    }
-    if (theme === 'dark') {
-      return 'text-ink-300 hover:text-white hover:bg-ink-700';
-    }
-    if (theme === 'sepia') {
-      return 'text-[#433422] hover:text-[#2A1F13] hover:bg-[#EFE5CD]';
-    }
-    return 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
-  };
-
-  const getDividerClass = () => {
-    if (theme === 'dark') return 'w-px h-3.5 bg-ink-700';
-    if (theme === 'sepia') return 'w-px h-3.5 bg-[#E2D2B0]';
-    return 'w-px h-3.5 bg-ink-200';
-  };
-
   // Which sentence the actions belong to when nothing is hovered: the one playing, else the one open in the drawer.
   const activeKey = playingKey ?? (activeSentence ? speechKey(activeSentence) : null);
   // Phase of the sentence the pill is showing, so its own button can theme itself (hooks cannot be conditional).
@@ -314,18 +271,17 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule);
     };
-  }, [hoveredId, anchorId, activeKey, fontSize, theme, currentArticle.id]);
+  }, [hoveredId, anchorId, activeKey, fontSize, currentArticle.id]);
 
-  const themeOptions = [
-    { id: 'parchment', label: t('reader.themeParchment'), swatch: 'bg-ink-50' },
-    { id: 'white', label: t('reader.themeWhite'), swatch: 'bg-white' },
-    { id: 'sepia', label: t('reader.themeSepia'), swatch: 'bg-[#F4ECD8]' },
-    { id: 'dark', label: t('reader.themeDark'), swatch: 'bg-ink-900' },
-  ] as const;
+  // The reader's swatches set the app theme; the article follows it like every other surface.
+  const readerThemes = ['light', 'sepia', 'dark'] as const;
+
+  const toolbarButton = (active: boolean) =>
+    active ? 'bg-accent-700 text-on-fill hover:bg-accent-800' : 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
 
   const rateButton = (active: boolean) =>
     `h-8 px-2.5 rounded-md text-xs tnum cursor-pointer ${
-      active ? 'bg-accent-700 text-white font-medium' : 'text-ink-700 hover:bg-ink-100'
+      active ? 'bg-accent-700 text-on-fill font-medium' : 'text-ink-700 hover:bg-ink-100'
     }`;
 
   return (
@@ -340,21 +296,25 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           <span>{t('library.back')}</span>
         </button>
 
-        <div role="group" aria-label={t('reader.themeParchment')} className="flex items-center gap-1">
-          {themeOptions.map((o) => (
-            <button
-              key={o.id}
-              onClick={() => setTheme(o.id)}
-              aria-pressed={theme === o.id}
-              title={o.label}
-              className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-ink-100 cursor-pointer"
-            >
-              <span className={`h-4 w-4 rounded-full border ${o.swatch} ${theme === o.id ? 'border-accent-600 ring-2 ring-accent-600/30' : 'border-ink-300'}`} />
-            </button>
-          ))}
+        <div role="group" aria-label={t('theme.label')} className="flex items-center gap-1">
+          {readerThemes.map((id) => {
+            const active = themePref === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setThemePref(id)}
+                aria-pressed={active}
+                aria-label={t(`theme.${id}`)}
+                title={t(`theme.${id}`)}
+                className={`h-8 w-8 inline-flex items-center justify-center rounded-md cursor-pointer ${active ? 'bg-ink-100' : 'hover:bg-ink-100'}`}
+              >
+                <ThemeSwatch theme={id} />
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex items-center rounded-md border border-ink-200 bg-white p-0.5" role="group" aria-label={t('reader.textSize')}>
+        <div className="flex items-center rounded-md border border-ink-200 bg-surface p-0.5" role="group" aria-label={t('reader.textSize')}>
           {(['sm', 'base', 'lg', 'xl'] as const).map((sz, i) => (
             <button
               key={sz}
@@ -362,7 +322,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               aria-pressed={fontSize === sz}
               aria-label={sz}
               className={`h-8 w-8 rounded-md font-serif cursor-pointer ${
-                fontSize === sz ? 'bg-ink-900 text-white' : 'text-ink-600 hover:bg-ink-100'
+                fontSize === sz ? 'bg-ink-100 text-ink-950' : 'text-ink-600 hover:bg-ink-100'
               }`}
               style={{ fontSize: 12 + i * 2.5 }}
             >
@@ -374,7 +334,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         <button
           onClick={() => setIsSpeedControlOpen(!isSpeedControlOpen)}
           aria-expanded={isSpeedControlOpen}
-          className="h-10 inline-flex items-center gap-1.5 px-3 rounded-md border border-ink-200 bg-white text-ink-700 hover:bg-ink-100 text-xs cursor-pointer"
+          className="h-10 inline-flex items-center gap-1.5 px-3 rounded-md border border-ink-200 bg-surface text-ink-700 hover:bg-ink-100 text-xs cursor-pointer"
           title={t('reader.speedSlider')}
         >
           <Volume2 className="w-4 h-4" />
@@ -384,7 +344,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
         {/* Floats over the article so opening it never moves the text */}
         {isSpeedControlOpen && (
-        <div className="absolute inset-x-0 top-full z-20 mt-2 rounded-lg border border-ink-200 bg-white p-4 space-y-3 shadow-lg anim-fade">
+        <div className="absolute inset-x-0 top-full z-20 mt-2 rounded-lg border border-ink-200 bg-surface p-4 space-y-3 shadow-lg anim-fade">
           <div className="flex items-center justify-between text-xs text-ink-600">
             <span className="font-medium text-ink-800">{t('reader.shadowingSpeedRange')}</span>
             <span className="text-ink-500">
@@ -422,7 +382,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         onClick={(e) => {
           if (!(e.target as HTMLElement).closest('[data-sentence],[data-sentence-actions]')) setHoveredId(null);
         }}
-        className={`relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border ${getThemeClass()}`}
+        className="relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border border-ink-200 bg-surface text-ink-900"
       >
         <div className={`reading ${getFontSizeClass()}`}>
         <header className="mb-8">
@@ -492,7 +452,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             className="absolute z-20 pt-1 anim-fade select-none"
           >
             <div
-              className={`flex items-center gap-0.5 p-1 rounded-lg border font-sans text-xs ${getToolbarThemeClass()}`}
+              className="flex items-center gap-0.5 p-1 rounded-lg border border-ink-300 bg-surface text-ink-900 shadow-lg font-sans text-xs"
             >
               <SpeakButton
                 text={toolbar.text}
@@ -500,18 +460,14 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                 stopLabel={t('reader.stop')}
                 variant="ghost"
                 size="icon"
-                className={`h-7 w-7 transition-colors ${getToolbarButtonClass(
-                  toolbarPhase !== 'idle'
-                )}`}
+                className={`h-7 w-7 transition-colors ${toolbarButton(toolbarPhase !== 'idle')}`}
               />
-              <div className={getDividerClass()} />
+              <div className="w-px h-3.5 bg-ink-200" />
               <button
                 onClick={() => onSentenceClick(toolbar.text)}
                 aria-label={t('reader.analyzeSentence')}
                 title={t('reader.analyzeSentence')}
-                className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors ${getToolbarButtonClass(
-                  false
-                )}`}
+                className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors ${toolbarButton(false)}`}
               >
                 <TextSearch className="w-3.5 h-3.5" />
               </button>

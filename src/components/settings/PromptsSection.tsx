@@ -33,7 +33,7 @@ export const PromptsSection: React.FC<PromptsSectionProps> = ({ drafts, onChange
   };
 
   const tab = (active: boolean) =>
-    `h-8 px-3 rounded-md text-xs cursor-pointer ${active ? 'bg-ink-900 text-white' : 'text-ink-700 hover:bg-ink-100'}`;
+    `h-8 px-3 rounded-md text-xs cursor-pointer ${active ? 'bg-accent-100 text-accent-950 font-medium' : 'text-ink-700 hover:bg-ink-100'}`;
 
   return (
     <section className="space-y-3.5">
@@ -41,17 +41,14 @@ export const PromptsSection: React.FC<PromptsSectionProps> = ({ drafts, onChange
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="w-full flex items-center justify-between text-xs font-semibold text-ink-900 cursor-pointer"
+        className="w-full flex items-center justify-between cursor-pointer"
       >
-        <span className="flex items-center gap-1.5">
-          <FileText className="w-4 h-4 text-ink-600" />
-          {t('settings.promptsSection')}
-        </span>
-        <span className="text-ink-500 font-normal">{open ? t('settings.hide') : t('settings.show')}</span>
+        <span className="font-serif text-base font-semibold text-ink-900">{t('settings.promptsSection')}</span>
+        <span className="text-sm text-ink-500">{open ? t('settings.hide') : t('settings.show')}</span>
       </button>
 
       {open && (
-        <div className="p-4 rounded-lg bg-white border border-ink-200 space-y-3">
+        <div className="p-4 rounded-lg bg-surface border border-ink-200 space-y-3">
           <p className="text-xs text-ink-500 leading-relaxed">{t('settings.promptsDesc')}</p>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -59,7 +56,7 @@ export const PromptsSection: React.FC<PromptsSectionProps> = ({ drafts, onChange
               value={id}
               onChange={(e) => setId(e.target.value as PromptId)}
               aria-label={t('settings.promptTask')}
-              className="px-3 py-2 rounded-md bg-ink-50 border border-ink-300 text-xs font-semibold text-ink-900 cursor-pointer"
+              className="h-10 px-3 rounded-md bg-surface border border-ink-300 text-sm text-ink-900 cursor-pointer"
             >
               {PROMPTS.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -104,7 +101,7 @@ export const PromptsSection: React.FC<PromptsSectionProps> = ({ drafts, onChange
               rows={14}
               spellCheck={false}
               aria-label={t(`prompts.${id}`)}
-              className="w-full rounded-md border border-ink-300 bg-white p-3 text-xs leading-relaxed font-mono text-ink-900 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
+              className="w-full rounded-md border border-ink-300 bg-surface p-3 text-xs leading-relaxed font-mono text-ink-900 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
             />
           )}
 

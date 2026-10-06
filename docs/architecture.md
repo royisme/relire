@@ -24,7 +24,7 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 | `src/components/` | One file per screen or overlay: `LibraryView`, `ReaderView`, `VocabularyView`, `PracticeView`, `AnalyticsDashboard`, `WordDetailModal`, `SentenceDrawer`, `SettingsModal`, `ArticleEditorDialog`, `OnboardingDialog`, `Navbar`, `LanguageSwitcher`. |
 | `src/components/settings/` | Sections of the Settings shell: `AiSection` (providers, models, voices, keys), `PromptsSection` (prompt editor), `DataSection` (backup, saved answers, audio). |
 | `src/components/shadowing/` | The read-aloud flow shared by the sentence sheet and Practice: `ShadowingGuide`, `ShadowingRecorder`, `AssessmentResult`. |
-| `src/components/ui/` | Primitives: `button`, `badge`, `card`, `overlay` (`Sheet`, `Dialog`, `Drawer`), `speak-button` (`SpeakButton`, `SpeakIcon`, `useSpeechPhase`). |
+| `src/components/ui/` | Primitives: `button`, `badge`, `card`, `overlay` (`Sheet`, `Dialog`, `Drawer`), `speak-button` (`SpeakButton`, `SpeakIcon`, `useSpeechPhase`), `page-header`, `segmented`, `menu-button`, `theme-swatch`. |
 | `src/hooks/` | `useShadowingRecorder` (microphone, recording, scoring), `usePWAInstall`. |
 | `src/services/api.ts` | What the UI calls. Reads settings and language, builds the provider context, decides what is cached. |
 | `src/services/cachedRequest.ts` | Generic persistent cache plus in-flight request sharing. |
@@ -32,6 +32,7 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 | `src/storage/` | `db.ts` (IndexedDB schema, backup import/export, storage persistence), `cache.ts`, `audio.ts`, `usePersist.ts`. The only code that touches IndexedDB. |
 | `src/utils/speech/` | `state.ts` (shared playback state), `clips.ts` (stored clip first, else synthesize and store), `playback.ts` (play, stop, rate, browser-voice fallback), `recorder.ts` (microphone). |
 | `src/utils/` | `appSettings.ts` (settings in localStorage), `srs.ts` (SM-2 scheduling), `i18nHelpers.ts`, `binary.ts`. |
+| `src/theme/` | `theme.ts` (theme preference, resolving "system", applying `data-theme` and the browser chrome colour), `useTheme`. `index.html` repeats the resolution inline before first paint. |
 | `src/i18n/` | i18next setup, `LANGUAGES`, `locales/en.json`, `locales/zh.json`. |
 | `src/types/index.ts` | Shared shapes for AI responses and stored data. |
 | `src/data/` | Static content (sample articles, French IPA chart). |
@@ -57,7 +58,7 @@ Split so each part has one job:
 | Word analyses | IndexedDB `cache` | Until cleared |
 | Sentence analyses, practice drills | IndexedDB `cache` | 30 days |
 | Synthesized speech | IndexedDB `audio` (WAV Blobs) | Vocabulary clips (word, context sentence, examples) kept for good; the rest trimmed least-recently-used past 200 MB |
-| Settings and API keys, prompt overrides, UI language | localStorage `relire_app_settings_v1`, `relire_prompts_v1`, `relire_lang` | Needed synchronously at startup |
+| Settings and API keys, prompt overrides, UI language, theme | localStorage `relire_app_settings_v1`, `relire_prompts_v1`, `relire_lang`, `relire_theme` | Needed synchronously at startup |
 
 Cache keys are language + prompt fingerprint + normalized text, deliberately not provider, model or article context, so switching models never re-spends tokens. Pronunciation assessments are never cached. The cache is never backed up; vocabulary audio optionally is.
 

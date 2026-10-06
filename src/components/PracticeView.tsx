@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dumbbell, Sparkles, Mic, CheckCircle2, XCircle, RotateCcw, ArrowRight, BookOpen, Layers, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle, RotateCcw, ArrowRight, Loader2 } from 'lucide-react';
 import { Article, PracticeDeck, PracticeQuestion, PronunciationAssessment } from '../types';
 import { generatePracticeDrills, MissingApiKeyError } from '../services/api';
 import { stopSpeech } from '../utils/speech';
 import { SpeakButton } from './ui/speak-button';
+import { Button } from './ui/button';
+import { PageHeader } from './ui/page-header';
+import { Segmented } from './ui/segmented';
+import { cleanArticleTitle } from '../utils/i18nHelpers';
 import { ShadowingRecorder } from './shadowing/ShadowingRecorder';
 
 interface PracticeViewProps {
@@ -105,7 +109,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
         <p className="text-sm text-ink-500">{t('practice.noArticleDesc')}</p>
         <button
           onClick={onOpenLibrary}
-          className="h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium cursor-pointer"
+          className="h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-on-fill text-sm font-medium cursor-pointer"
         >
           {t('practice.openLibrary')}
         </button>
@@ -116,100 +120,43 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       
-      {/* Header */}
-      <div className="p-5 rounded-lg bg-white border border-ink-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="font-serif font-semibold text-2xl text-ink-900 flex items-center gap-2">
-            <Dumbbell className="w-6 h-6 text-ink-600" />
-            <span>{t('practice.title')}</span>
-          </h2>
-          <p className="text-xs text-ink-500 mt-1">
-            {t('practice.subtitle')} — 《{currentArticle.title}》
-          </p>
-        </div>
+      <PageHeader title={t('practice.title')} subtitle={cleanArticleTitle(currentArticle.title)} />
 
-        {/* Practice Mode Selector Tabs */}
-        <div className="flex items-center bg-ink-100 p-1 rounded-lg border border-ink-200 text-xs font-semibold">
-          <button
-            onClick={() => handleLoadDrills('syntax')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              activePracticeType === 'syntax'
-                ? 'bg-white text-ink-900 font-semibold'
-                : 'text-ink-600 hover:text-ink-900'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5 text-ink-600" />
-            <span>{t('practice.tabSyntax')}</span>
-          </button>
-
-          <button
-            onClick={() => handleLoadDrills('oral')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              activePracticeType === 'oral'
-                ? 'bg-white text-ink-900 font-semibold'
-                : 'text-ink-600 hover:text-ink-900'
-            }`}
-          >
-            <Mic className="w-3.5 h-3.5 text-ink-600" />
-            <span>{t('practice.tabOral')}</span>
-          </button>
-
-          <button
-            onClick={() => handleLoadDrills('cloze')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all cursor-pointer ${
-              activePracticeType === 'cloze'
-                ? 'bg-white text-ink-900 font-semibold'
-                : 'text-ink-600 hover:text-ink-900'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5 text-ink-600" />
-            <span>{t('practice.tabCloze')}</span>
-          </button>
-        </div>
-      </div>
+      <Segmented
+        label={t('practice.title')}
+        value={activePracticeType}
+        onChange={(type) => handleLoadDrills(type)}
+        options={[
+          { value: 'syntax', label: t('practice.tabSyntax') },
+          { value: 'cloze', label: t('practice.tabCloze') },
+          { value: 'oral', label: t('practice.tabOral') },
+        ]}
+      />
 
       {/* Loading Deck State */}
       {isLoadingDeck ? (
-        <div className="py-20 text-center rounded-lg bg-white border border-ink-200">
-          <Loader2 className="w-10 h-10 text-accent-700 animate-spin mx-auto mb-3" />
-          <h3 className="font-serif font-semibold text-lg text-ink-800">
-            {t('practice.generating')}
-          </h3>
+        <div className="py-20 text-center rounded-lg bg-surface border border-ink-200">
+          <Loader2 className="w-6 h-6 text-ink-500 animate-spin mx-auto mb-3" aria-hidden="true" />
+          <p className="text-sm text-ink-600">{t('practice.generating')}</p>
         </div>
       ) : !deck ? (
-        <div className="p-12 text-center rounded-lg bg-white border border-ink-200 space-y-3">
-          <Sparkles className="w-10 h-10 text-ink-600 mx-auto" />
-          <h3 className="font-serif font-semibold text-xl text-ink-900">
-            {t('practice.title')}
-          </h3>
-          <p className="text-xs text-ink-500 max-w-md mx-auto">
-            {t('practice.subtitle')}
-          </p>
+        <div className="px-6 py-12 text-center rounded-lg bg-surface border border-ink-200 space-y-3">
+          <p className="text-sm text-ink-600 max-w-md mx-auto">{t('practice.subtitle')}</p>
           {deckError && (
             <p role="alert" className="text-sm text-bad-700 max-w-md mx-auto break-words">
               {deckError}
             </p>
           )}
-          <button
-            onClick={() => handleLoadDrills(activePracticeType)}
-            className="h-10 px-4 rounded-md bg-accent-700 text-ink-100 text-sm font-medium hover:bg-ink-800 transition-all cursor-pointer"
-          >
-            {t('practice.generateDrills')}
-          </button>
+          <Button onClick={() => handleLoadDrills(activePracticeType)}>{t('practice.generateDrills')}</Button>
         </div>
       ) : currentQ ? (
-        <div className="p-6 sm:p-8 rounded-lg bg-white border border-ink-200 space-y-6">
+        <div className="p-6 sm:p-8 rounded-lg bg-surface border border-ink-200 space-y-6">
           
           {/* Question Header & Counter */}
-          <div className="flex items-center justify-between border-b border-ink-100 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-accent-100 text-accent-900">
-                {t('practice.questionProgress', { current: activeQuestionIdx + 1, total: deck.questions.length })}
-              </span>
-              <span className="text-xs text-ink-500 font-medium">
-                {deck.title}
-              </span>
-            </div>
+          <div className="flex items-center justify-between gap-3 border-b border-ink-200 pb-3">
+            <p className="min-w-0 text-sm text-ink-500 tnum">
+              {t('practice.questionProgress', { current: activeQuestionIdx + 1, total: deck.questions.length })}
+            </p>
             <SpeakButton
               text={currentQ.targetSentence}
               label={t('practice.realTTS')}
@@ -222,7 +169,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
           {/* Question Prompt */}
           <div className="space-y-1">
-            <h3 className="text-sm font-semibold text-ink-800">
+            <h3 className="text-base font-medium text-ink-900">
               {currentQ.prompt}
             </h3>
           </div>
@@ -231,7 +178,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           {activePracticeType === 'syntax' && currentQ.scrambledChunks && (
             <div className="space-y-5">
               {/* Target Drop/Assembly Area */}
-              <div className="min-h-[72px] p-4 rounded-lg bg-ink-50 border-2 border-dashed border-ink-300 flex flex-wrap items-center gap-2">
+              <div className="min-h-[72px] p-3 rounded-lg bg-ink-50 border border-dashed border-ink-300 flex flex-wrap items-center gap-2">
                 {selectedChunks.length === 0 ? (
                   <span className="text-xs text-ink-400">
                     {t('practice.scramblePrompt')}
@@ -241,7 +188,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                     <span
                       key={idx}
                       onClick={() => handleChunkClick(chunk)}
-                      className="h-10 px-4 rounded-md bg-accent-700 text-white font-serif font-semibold text-base cursor-pointer hover:bg-bad-600 transition-colors"
+                      className="inline-flex items-center h-10 px-4 rounded-md bg-accent-700 text-on-fill font-serif text-base cursor-pointer hover:bg-accent-800 transition-colors"
                       title={t('practice.removeChunk')}
                     >
                       {chunk}
@@ -261,10 +208,10 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                         key={idx}
                         disabled={isUsed}
                         onClick={() => handleChunkClick(chunk)}
-                        className={`px-4 py-2 rounded-lg text-sm font-serif font-semibold border transition-all ${
+                        className={`h-10 px-4 rounded-md text-base font-serif border transition-colors ${
                           isUsed
-                            ? 'opacity-30 bg-ink-100 text-ink-400 border-ink-200'
-                            : 'bg-white hover:bg-accent-50 text-accent-950 border-ink-300 hover:border-accent-400 active:scale-95'
+                            ? 'opacity-40 bg-ink-100 text-ink-500 border-ink-200'
+                            : 'bg-surface hover:bg-accent-50 text-ink-900 border-ink-300 hover:border-accent-400 cursor-pointer'
                         }`}
                       >
                         {chunk}
@@ -276,32 +223,28 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
               {/* Scramble Actions */}
               <div className="flex items-center gap-3 pt-2">
-                <button
-                  onClick={handleCheckScramble}
-                  disabled={selectedChunks.length === 0}
-                  className="h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium hover:bg-ink-800 disabled:opacity-50 transition-all active:scale-95 cursor-pointer"
-                >
+                <Button onClick={handleCheckScramble} disabled={selectedChunks.length === 0}>
                   {t('practice.checkAnswer')}
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setSelectedChunks([]);
                     setScrambleStatus('idle');
                   }}
-                  className="px-3.5 py-2.5 rounded-lg border border-ink-300 text-ink-600 hover:bg-ink-50 text-xs font-medium cursor-pointer"
                 >
                   {t('common.retry')}
-                </button>
+                </Button>
               </div>
 
               {/* Verification Feedback */}
               {scrambleStatus === 'correct' && (
                 <div className="p-4 rounded-lg bg-ok-50 border border-ok-200 space-y-2">
                   <div className="flex items-center gap-2 text-ok-800 font-semibold text-sm">
-                    <CheckCircle2 className="w-5 h-5 text-ok-600" />
+                    <CheckCircle2 className="w-5 h-5 text-ok-800" />
                     <span>{t('common.success')}</span>
                   </div>
-                  <p className="text-xs text-ink-700 leading-relaxed font-sans">
+                  <p className="text-sm text-ink-800 leading-relaxed">
                     {currentQ.grammarHint}
                   </p>
                 </div>
@@ -310,12 +253,12 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               {scrambleStatus === 'incorrect' && (
                 <div className="p-4 rounded-lg bg-bad-50 border border-bad-200 space-y-2">
                   <div className="flex items-center gap-2 text-bad-800 font-semibold text-sm">
-                    <XCircle className="w-5 h-5 text-bad-600" />
+                    <XCircle className="w-5 h-5 text-bad-700" />
                     <span>{t('practice.showExplanation')}</span>
                   </div>
-                  <div className="text-xs text-ink-600">
+                  <p className="text-sm text-ink-800 leading-relaxed">
                     {currentQ.grammarHint}
-                  </div>
+                  </p>
                 </div>
               )}
             </div>
@@ -357,15 +300,15 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                     const isSelected = selectedOption === idx;
                     const isCorrect = idx === currentQ.correctOptionIndex;
 
-                    let btnClass = 'bg-white hover:bg-ink-50 border-ink-200 text-ink-800';
+                    let btnClass = 'bg-surface hover:bg-ink-50 border-ink-300 text-ink-900';
                     if (isAnswerRevealed) {
                       if (isCorrect) {
-                        btnClass = 'bg-ok-50 border-ok-400 text-ok-900 font-semibold';
+                        btnClass = 'bg-ok-50 border-ok-400 text-ok-900';
                       } else if (isSelected) {
                         btnClass = 'bg-bad-50 border-bad-300 text-bad-800';
                       }
                     } else if (isSelected) {
-                      btnClass = 'bg-accent-100 border-accent-500 text-accent-950 font-semibold';
+                      btnClass = 'bg-accent-100 border-accent-600 text-accent-950';
                     }
 
                     return (
@@ -373,7 +316,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                         key={idx}
                         disabled={isAnswerRevealed}
                         onClick={() => setSelectedOption(idx)}
-                        className={`p-3.5 rounded-lg border text-sm font-semibold transition-all cursor-pointer ${btnClass}`}
+                        className={`min-h-12 px-3.5 py-2.5 rounded-md border font-serif text-base transition-colors cursor-pointer break-words ${btnClass}`}
                       >
                         {opt}
                       </button>
@@ -383,21 +326,15 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               )}
 
               <div className="pt-2 flex items-center gap-3">
-                <button
-                  onClick={() => setIsAnswerRevealed(true)}
-                  disabled={selectedOption === null || isAnswerRevealed}
-                  className="h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium hover:bg-ink-800 disabled:opacity-50 cursor-pointer"
-                >
+                <Button onClick={() => setIsAnswerRevealed(true)} disabled={selectedOption === null || isAnswerRevealed}>
                   {t('practice.checkAnswer')}
-                </button>
+                </Button>
               </div>
 
               {isAnswerRevealed && (
-                <div className="p-4 rounded-lg bg-accent-50 border border-accent-200 space-y-1.5">
-                  <div className="text-xs font-semibold text-accent-900">
-                    {t('practice.showExplanation')}:
-                  </div>
-                  <p className="text-xs text-ink-700 leading-relaxed">
+                <div className="p-4 rounded-lg bg-ink-50 border border-ink-200 space-y-1">
+                  <div className="text-xs font-medium text-ink-500">{t('practice.showExplanation')}</div>
+                  <p className="text-sm text-ink-800 leading-relaxed">
                     {currentQ.grammarHint}
                   </p>
                 </div>
@@ -406,26 +343,17 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
           )}
 
           {/* Next question button */}
-          <div className="pt-4 border-t border-ink-100 flex items-center justify-between">
-            <span className="text-xs text-ink-400">
-              {activeQuestionIdx + 1} / {deck.questions.length}
-            </span>
+          <div className="pt-4 border-t border-ink-200 flex justify-end">
             {activeQuestionIdx + 1 < deck.questions.length ? (
-              <button
-                onClick={handleNextQuestion}
-                className="flex items-center gap-1.5 h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium cursor-pointer"
-              >
+              <Button variant="outline" onClick={handleNextQuestion}>
                 <span>{t('practice.nextQuestion')}</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Button>
             ) : (
-              <button
-                onClick={() => handleLoadDrills(activePracticeType, true)}
-                className="flex items-center gap-1.5 h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium cursor-pointer"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
+              <Button variant="outline" onClick={() => handleLoadDrills(activePracticeType, true)}>
+                <RotateCcw className="w-4 h-4" aria-hidden="true" />
                 <span>{t('practice.newDrills')}</span>
-              </button>
+              </Button>
             )}
           </div>
         </div>

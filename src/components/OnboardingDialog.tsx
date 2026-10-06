@@ -83,7 +83,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
                   href={getProvider(providerId).info.keyUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium"
+                  className="inline-flex items-center gap-1 h-9 px-3 rounded-md border border-ink-300 bg-surface text-ink-800 hover:bg-ink-100 font-medium"
                 >
                   {t('onboarding.openStudio', { provider: providerName })}
                   <ArrowUpRight className="w-4 h-4" />
@@ -101,7 +101,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
                     setError(null);
                   }}
                   placeholder={t('settings.customKeyPlaceholder')}
-                  className="w-full h-10 px-3 text-sm font-mono bg-white rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
+                  className="w-full h-10 px-3 text-sm font-mono bg-surface rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
                 />
                 {error && (
                   <p role="alert" className="text-xs text-bad-700 break-words">

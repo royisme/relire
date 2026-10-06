@@ -16,7 +16,7 @@ const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const CATEGORIES = ['Littérature', 'Actualités', 'Culture', 'Science', 'Société'];
 
 const field =
-  'w-full h-10 px-3 text-sm bg-white rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600';
+  'w-full h-10 px-3 text-sm bg-surface rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600';
 
 export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ article, onClose, onSave }) => {
   const { t, i18n } = useTranslation();
@@ -119,7 +119,7 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('importer.contentPlaceholder')}
-            className="w-full px-3 py-2.5 text-sm font-serif leading-relaxed bg-white rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
+            className="w-full px-3 py-2.5 text-sm font-serif leading-relaxed bg-surface rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
           />
         </label>
 

@@ -33,6 +33,7 @@ Task detection reads the English prompts. Keep the UI in English for checks (the
 ## What to check for a typical change
 
 - At 360×740 (touch) and 1280×900: no horizontal overflow on the screens you touched, with long content.
+- In each theme: set `localStorage.relire_theme` to `light`, `sepia` or `dark` and reload, then look at the screenshots.
 - Transient states (loading, playing, recording, errors) do not change page height or move the content above and below.
 - The flow end to end: the happy path, a failed AI call (error shown inline with the real reason), and repeating or cancelling the action.
 - Take screenshots of the states you changed (`page.screenshot`) and look at them before reporting.

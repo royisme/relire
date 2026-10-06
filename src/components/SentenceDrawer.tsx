@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet, OverlayHeader } from './ui/overlay';
-import { Mic, Sparkles, BookOpen, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { SentenceAnalysis, PronunciationAssessment } from '../types';
 import { stopSpeech, setGlobalRate } from '../utils/speech';
 import { SpeakButton } from './ui/speak-button';
+import { Button } from './ui/button';
 import { ShadowingGuide } from './shadowing/ShadowingGuide';
 import { ShadowingRecorder } from './shadowing/ShadowingRecorder';
 
@@ -45,20 +46,18 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
         <div className="p-6 space-y-6 flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="py-20 text-center">
-              <Loader2 className="w-10 h-10 text-accent-700 animate-spin mx-auto mb-3" />
-              <h4 className="font-serif font-semibold text-lg text-ink-800">
-                {t('sentenceDrawer.analyzing')}
-              </h4>
+              <Loader2 className="w-6 h-6 text-ink-500 animate-spin mx-auto mb-3" aria-hidden="true" />
+              <p className="text-sm text-ink-600">{t('sentenceDrawer.analyzing')}</p>
             </div>
           ) : !sentenceData ? (
             <div className="text-center py-12 space-y-2">
-              <p className="text-ink-500">{t('common.error')}</p>
-              {errorMessage && <p className="text-xs text-bad-700 break-words">{errorMessage}</p>}
+              <p className="text-sm text-ink-600">{t('common.error')}</p>
+              {errorMessage && <p role="alert" className="text-sm text-bad-700 break-words">{errorMessage}</p>}
             </div>
           ) : (
             <>
               {/* The sentence, its translation, and listening at a chosen speed */}
-              <section className="p-5 rounded-lg bg-white border border-ink-200 space-y-4">
+              <section className="space-y-4">
                 <div className="space-y-1.5">
                   <p className="text-xs font-medium text-ink-500">{t('sentenceDrawer.original')}</p>
                   <p className="font-serif text-xl sm:text-2xl font-semibold text-ink-900 leading-relaxed break-words">
@@ -77,6 +76,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                       rate={speechRate}
                       label={t('sentenceDrawer.listenAudio')}
                       stopLabel={t('reader.stop')}
+                      variant="outline"
                       showLabel
                     />
                     <p className="text-sm text-ink-600">
@@ -111,8 +111,8 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                           aria-pressed={active}
                           className={`h-9 min-w-0 rounded-md text-xs tnum cursor-pointer ${
                             active
-                              ? 'bg-accent-700 text-white font-medium'
-                              : 'border border-ink-200 bg-white text-ink-700 hover:bg-ink-100'
+                              ? 'bg-accent-700 text-on-fill font-medium'
+                              : 'border border-ink-200 bg-surface text-ink-700 hover:bg-ink-100'
                           }`}
                         >
                           {rate}×
@@ -124,145 +124,108 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
               </section>
 
               {/* Shadowing: how to say it, then record and check */}
-              <section className="p-5 rounded-lg bg-white border border-ink-200 space-y-5" aria-labelledby="shadowing-title">
-                <h4 id="shadowing-title" className="font-serif font-semibold text-base text-ink-900 flex items-center gap-2">
-                  <Mic className="w-4 h-4 text-ink-600" aria-hidden="true" />
-                  <span>{t('shadowing.title')}</span>
+              <section className="pt-6 border-t border-ink-200 space-y-5" aria-labelledby="shadowing-title">
+                <h4 id="shadowing-title" className="font-serif font-semibold text-lg text-ink-900">
+                  {t('shadowing.title')}
                 </h4>
                 {sentenceData.shadowingGuide && <ShadowingGuide guide={sentenceData.shadowingGuide} />}
                 <ShadowingRecorder referenceText={sentenceData.sentence} onAssessed={onRecordAssessmentComplete} />
               </section>
 
-              {/* Syntactic Decomposition */}
+              {/* Structure: each segment with its role */}
               {sentenceData.syntaxStructure && sentenceData.syntaxStructure.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="font-serif font-semibold text-base text-ink-900 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-ink-600" />
-                    <span>{t('sentenceDrawer.syntaxStructure')}</span>
-                  </h4>
-                  <div className="space-y-2">
+                <section className="pt-6 border-t border-ink-200 space-y-2">
+                  <h4 className="font-serif font-semibold text-lg text-ink-900">{t('sentenceDrawer.syntaxStructure')}</h4>
+                  <dl className="divide-y divide-ink-200 border-y border-ink-200">
                     {sentenceData.syntaxStructure.map((syn, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3.5 rounded-lg bg-white border border-ink-200 space-y-1 hover:border-accent-300 transition-colors "
-                      >
-                        <div className="flex items-center justify-between flex-wrap gap-1.5">
-                          <span className="font-serif text-base font-semibold text-ink-900">
-                            {syn.segment}
-                          </span>
-                          <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-accent-100 text-accent-900 border border-accent-200">
-                            {syn.role}
-                          </span>
-                        </div>
-                        <p className="text-xs text-ink-600 leading-relaxed font-sans">
-                          {syn.explanation}
-                        </p>
+                      <div key={idx} className="py-3 space-y-1">
+                        <dt className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                          <span className="font-serif text-base text-ink-900 break-words">{syn.segment}</span>
+                          <span className="text-xs text-ink-500">{syn.role}</span>
+                        </dt>
+                        <dd className="text-sm text-ink-700 leading-relaxed break-words">{syn.explanation}</dd>
                       </div>
                     ))}
-                  </div>
-                </div>
+                  </dl>
+                </section>
               )}
 
-              {/* Grammar Points & Rules */}
+              {/* Grammar points */}
               {sentenceData.grammarPoints && sentenceData.grammarPoints.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="font-serif font-semibold text-base text-ink-900 flex items-center gap-1.5">
-                    <BookOpen className="w-4 h-4 text-ink-600" />
-                    <span>{t('sentenceDrawer.grammarPoints')}</span>
-                  </h4>
-                  <div className="space-y-2.5">
+                <section className="pt-6 border-t border-ink-200 space-y-2">
+                  <h4 className="font-serif font-semibold text-lg text-ink-900">{t('sentenceDrawer.grammarPoints')}</h4>
+                  <ol className="space-y-4">
                     {sentenceData.grammarPoints.map((gp, idx) => (
-                      <div
-                        key={idx}
-                        className="p-4 rounded-lg bg-accent-50/50 border border-accent-200/80 space-y-2"
-                      >
-                        <div className="font-semibold text-xs text-accent-950 flex items-center gap-2">
-                          <span className="w-5 h-5 rounded-full bg-accent-200 text-accent-900 flex items-center justify-center text-xs">
-                            {idx + 1}
-                          </span>
-                          <span>{gp.title}</span>
-                        </div>
-                        <p className="text-xs text-ink-700 leading-relaxed">
-                          {gp.explanation}
+                      <li key={idx} className="space-y-1">
+                        <p className="text-sm font-medium text-ink-900 break-words">
+                          <span className="tnum text-ink-500 mr-1.5">{idx + 1}.</span>
+                          {gp.title}
                         </p>
+                        <p className="text-sm text-ink-700 leading-relaxed break-words">{gp.explanation}</p>
                         {gp.ruleFormula && (
-                          <div className="p-2 rounded-md bg-white border border-accent-200/60 font-mono text-xs text-accent-900">
-                            {t('sentenceDrawer.ruleFormula')} {gp.ruleFormula}
-                          </div>
+                          <p className="text-sm text-ink-700 break-words">
+                            <span className="text-xs text-ink-500 mr-1.5">{t('sentenceDrawer.ruleFormula')}</span>
+                            <span className="font-mono text-xs text-ink-900 bg-ink-100 rounded-md px-1.5 py-0.5">{gp.ruleFormula}</span>
+                          </p>
                         )}
-                      </div>
+                      </li>
                     ))}
-                  </div>
-                </div>
+                  </ol>
+                </section>
               )}
 
-              {/* Pattern Collocations & Combination Examples */}
+              {/* Patterns to reuse, with examples */}
               {sentenceData.patternCollocations && sentenceData.patternCollocations.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="font-serif font-semibold text-base text-ink-900 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-ink-600" />
-                    <span>{t('sentenceDrawer.patterns')}</span>
-                  </h4>
-                  <div className="space-y-3">
+                <section className="pt-6 border-t border-ink-200 space-y-2">
+                  <h4 className="font-serif font-semibold text-lg text-ink-900">{t('sentenceDrawer.patterns')}</h4>
+                  <div className="space-y-4">
                     {sentenceData.patternCollocations.map((pat, idx) => (
-                      <div
-                        key={idx}
-                        className="p-4 rounded-lg bg-white border border-ink-200 space-y-2.5 "
-                      >
-                        <div className="flex items-center justify-between pb-1.5 border-b border-ink-100">
-                          <span className="font-mono text-xs font-semibold text-ok-800 bg-ok-50 px-2 py-0.5 rounded-md border border-ok-200">
-                            {pat.pattern}
-                          </span>
-                          <span className="text-xs text-ink-500">{pat.meaning}</span>
-                        </div>
+                      <div key={idx} className="space-y-1.5">
+                        <p className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                          <span className="font-serif text-base font-semibold text-ink-900 break-words">{pat.pattern}</span>
+                          <span className="text-sm text-ink-500 break-words">{pat.meaning}</span>
+                        </p>
                         {pat.examples && (
-                          <div className="space-y-2">
+                          <ul className="border-l-2 border-ink-200 pl-3 space-y-2">
                             {pat.examples.map((ex, exIdx) => (
-                              <div
-                                key={exIdx}
-                                className="p-2.5 rounded-md bg-ink-50 text-xs space-y-0.5 group hover:bg-accent-50/50 transition-colors"
-                              >
-                                <div className="flex items-center justify-between gap-2">
-                                  <span className="font-serif text-sm font-semibold text-ink-900">
-                                    {ex.fr}
-                                  </span>
-                                  <SpeakButton
-                                    text={ex.fr}
-                                    rate={speechRate}
-                                    label={t('reader.playSentence')}
-                                    stopLabel={t('reader.stop')}
-                                    variant="ghost"
-                                    size="iconSm"
-                                    className="h-7 w-7 shrink-0 text-ink-500 hover:text-accent-800"
-                                  />
+                              <li key={exIdx} className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className="font-serif text-base text-ink-900 break-words">{ex.fr}</p>
+                                  <p className="text-sm text-ink-600 break-words">{isEn && ex.en ? ex.en : ex.zh}</p>
                                 </div>
-                                <div className="text-ink-600 font-sans">
-                                  {(isEn && ex.en) ? ex.en : ex.zh}
-                                </div>
-                              </div>
+                                <SpeakButton
+                                  text={ex.fr}
+                                  rate={speechRate}
+                                  label={t('reader.playSentence')}
+                                  stopLabel={t('reader.stop')}
+                                  variant="ghost"
+                                  size="iconSm"
+                                  className="shrink-0 -mt-1"
+                                />
+                              </li>
                             ))}
-                          </div>
+                          </ul>
                         )}
                       </div>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
             </>
           )}
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-ink-100 border-t border-ink-200 flex items-center justify-end">
-          <button
+        <div className="px-4 py-3 bg-surface border-t border-ink-200 flex items-center justify-end">
+          <Button
+            variant="outline"
             onClick={() => {
               stopSpeech();
               onClose();
             }}
-            className="h-10 px-4 text-sm font-medium rounded-md bg-accent-700 text-white hover:bg-accent-800 cursor-pointer"
           >
             {t('sentenceDrawer.done')}
-          </button>
+          </Button>
         </div>
     </Sheet>
   );

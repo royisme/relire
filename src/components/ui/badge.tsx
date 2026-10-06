@@ -7,7 +7,7 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-ink-900 text-white',
+        default: 'bg-ink-800 text-ink-50',
         secondary: 'bg-ink-100 text-ink-700',
         outline: 'border border-ink-300 text-ink-700',
         accent: 'bg-accent-100 text-accent-900',

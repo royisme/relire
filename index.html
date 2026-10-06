@@ -4,6 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#F7F6F3" />
+    <!-- Theme before first paint (same rules as src/theme/theme.ts) -->
+    <script>
+      (function () {
+        var p = 'system';
+        try { p = localStorage.getItem('relire_theme') || 'system'; } catch (e) {}
+        if (p !== 'light' && p !== 'sepia' && p !== 'dark') p = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = p;
+      })();
+    </script>
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
