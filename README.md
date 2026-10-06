@@ -1,12 +1,23 @@
-# Relire
+# Relire — French Reading & Pronunciation Trainer
 
-**English** · [简体中文](README.zh-CN.md)
+**Open-source French close-reading, shadowing and pronunciation practice for TCF Canada.**
 
-*Relire* is French for "to read again". It is a close-reading assistant for French learners: read a real article, tap any word or sentence to see what it means in context, then read it aloud and get feedback on your pronunciation. It is built for people preparing for **TCF Canada**, and it focuses on two skills: **reading** and **pronunciation**.
+[Try Relire online](https://royisme.github.io/relire/) · **English** · [简体中文](README.zh-CN.md)
 
-It runs entirely in your browser. There is no app server and no account. You bring your own API key (Google Gemini today), and you can install it as an app on your computer or phone.
+Read real French → tap a word or sentence → understand it in context → shadow the sentence → get AI pronunciation feedback.
 
-> **What it is not.** It does not cover the listening or writing tests, it has no TCF mock exams, and its scores are AI estimates, not official ones. It is not affiliated with or endorsed by France Éducation international or IRCC. Use it alongside real past papers and a teacher.
+Relire runs entirely in your browser. There is no application server and no account. Bring your own Gemini API key, keep your learning data on your device, and install it as a PWA on desktop or mobile.
+
+**Why Relire**
+
+- Context-aware word explanations with IPA, verb tense and conjugation.
+- Sentence translation, grammar breakdown, collocations and shadowing guidance.
+- Pronunciation feedback on sounds, liaisons and intonation.
+- Spaced-repetition vocabulary review with SM-2.
+- Local-first storage and cached audio/AI results.
+- English and Simplified Chinese interfaces.
+
+> Relire focuses on reading and pronunciation practice. It is not a TCF mock-exam platform, its AI scores are estimates rather than official results, and it is not affiliated with France Éducation international or IRCC.
 
 ## A look inside
 
@@ -47,6 +58,10 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 - **Choose your AI.** The AI that writes explanations and the AI that reads aloud are separate settings, each with its own provider, model and key, and the code is built so more providers can be added.
 - **Edit the prompts.** The instructions sent to the AI are plain-text templates you can view, change and reset in Settings.
 - **Use it in English or Chinese.** The interface and the explanations switch between the two.
+
+## Try it online
+
+Open **https://royisme.github.io/relire/**. You can browse the included sample articles immediately. AI analysis, speech generation and pronunciation feedback require your own Gemini API key.
 
 ## Quick start
 
