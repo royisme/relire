@@ -8,7 +8,7 @@
     "retry": "Retry",
     "success": "Success",
     "error": "Error",
-    "documentTitle": "Relire — French Reading & Pronunciation Trainer for TCF Canada",
+    "documentTitle": "Relire - French close reading",
     "done": "Done"
   },
   "nav": {
@@ -20,8 +20,7 @@
     "settings": "Settings",
     "menu": "Menu",
     "language": "Language",
-    "main": "Main navigation",
-    "github": "GitHub"
+    "main": "Main navigation"
   },
   "reader": {
     "stop": "Stop",
@@ -355,12 +354,5 @@
     "drills": "Practice drills",
     "pronunciationAudio": "Pronunciation scoring (with recording)",
     "pronunciationText": "Pronunciation scoring (transcript only)"
-  },
-  "footer": {
-    "openSource": "Open source · Your data stays in your browser",
-    "links": "Project links",
-    "github": "GitHub",
-    "feedback": "Feedback & issues",
-    "license": "MIT License"
   }
 }
