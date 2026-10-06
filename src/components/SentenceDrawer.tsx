@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet, OverlayHeader } from './ui/overlay';
 import {
-  X, Volume2, Mic, Square, Play, RotateCcw, Sparkles,
+  X, Mic, Square, Play, RotateCcw, Sparkles,
   BookOpen, CheckCircle2, AlertCircle, Award, ChevronRight, Loader2, Info
 } from 'lucide-react';
 import { SentenceAnalysis, PronunciationAssessment } from '../types';
-import { speakFrench, stopSpeech, FrenchAudioRecorder, setGlobalRate } from '../utils/speech';
+import { stopSpeech, FrenchAudioRecorder, setGlobalRate } from '../utils/speech';
+import { SpeakButton } from './ui/speak-button';
 import { assessPronunciation } from '../services/api';
 
 interface SentenceDrawerProps {
@@ -30,7 +31,6 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
 }) => {
   const { t } = useTranslation();
   const [speechRate, setSpeechRate] = useState<number>(0.85);
-  const [isPlayingNative, setIsPlayingNative] = useState<boolean>(false);
 
   // Shadowing & Recording state
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -61,18 +61,8 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
 
   if (!isOpen) return null;
 
-  const handlePlayNative = (textToPlay: string) => {
-    setIsPlayingNative(true);
-    speakFrench(textToPlay, {
-      rate: speechRate,
-      onEnd: () => setIsPlayingNative(false),
-      onError: () => setIsPlayingNative(false),
-    });
-  };
-
   const handleStartRecording = async () => {
     stopSpeech();
-    setIsPlayingNative(false);
     setAssessment(null);
 
     const recorder = new FrenchAudioRecorder();
@@ -188,28 +178,13 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                   {/* Playback & Speed Slider Controller */}
                   <div className="p-3.5 rounded-lg bg-ink-50 border border-ink-200 space-y-3">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handlePlayNative(sentenceData.sentence)}
-                          disabled={isPlayingNative}
-                          className="flex items-center gap-2 h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 disabled:opacity-75 text-white text-sm font-medium transition-all active:scale-95 cursor-pointer"
-                        >
-                          <Volume2 className={`w-4 h-4 ${isPlayingNative ? 'text-accent-200' : ''}`} />
-                          <span>{isPlayingNative ? t('common.loading') : t('sentenceDrawer.listenAudio')}</span>
-                        </button>
-
-                        {isPlayingNative && (
-                          <button
-                            onClick={() => {
-                              stopSpeech();
-                              setIsPlayingNative(false);
-                            }}
-                            className="px-3 py-2 rounded-lg bg-ink-200 hover:bg-ink-300 text-ink-700 text-xs font-semibold transition-all cursor-pointer"
-                          >
-                            {t('reader.stop')}
-                          </button>
-                        )}
-                      </div>
+                      <SpeakButton
+                        text={sentenceData.sentence}
+                        rate={speechRate}
+                        label={t('sentenceDrawer.listenAudio')}
+                        stopLabel={t('reader.stop')}
+                        showLabel
+                      />
 
                       {/* Speed Display Badge */}
                       <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-ink-200 text-xs font-semibold text-accent-950">
@@ -549,13 +524,15 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                                   <span className="font-serif text-sm font-semibold text-ink-900">
                                     {ex.fr}
                                   </span>
-                                  <button
-                                    onClick={() => handlePlayNative(ex.fr)}
-                                    className="p-1 rounded-md text-ink-400 hover:text-accent-800 cursor-pointer"
-                                    title={t('reader.playSentence')}
-                                  >
-                                    <Volume2 className="w-3.5 h-3.5" />
-                                  </button>
+                                  <SpeakButton
+                                    text={ex.fr}
+                                    rate={speechRate}
+                                    label={t('reader.playSentence')}
+                                    stopLabel={t('reader.stop')}
+                                    variant="ghost"
+                                    size="iconSm"
+                                    className="h-7 w-7 shrink-0 text-ink-500 hover:text-accent-800"
+                                  />
                                 </div>
                                 <div className="text-ink-600 font-sans">
                                   {ex.zh}

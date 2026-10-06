@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Dumbbell, Sparkles, Mic, Volume2, CheckCircle2, XCircle, RotateCcw,
+  Dumbbell, Sparkles, Mic, CheckCircle2, XCircle, RotateCcw,
   ArrowRight, Square, Award, BookOpen, Layers, MessageSquare, Loader2
 } from 'lucide-react';
 import { Article, PracticeDeck, PracticeQuestion, PronunciationAssessment } from '../types';
 import { generatePracticeDrills, assessPronunciation, MissingApiKeyError } from '../services/api';
-import { speakFrench, stopSpeech, FrenchAudioRecorder } from '../utils/speech';
+import { stopSpeech, FrenchAudioRecorder } from '../utils/speech';
+import { SpeakButton } from './ui/speak-button';
 
 interface PracticeViewProps {
   currentArticle: Article | null;
@@ -295,13 +296,14 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                 {deck.title}
               </span>
             </div>
-            <button
-              onClick={() => speakFrench(currentQ.targetSentence)}
-              className="flex items-center gap-1 text-xs text-accent-800 hover:text-accent-900 font-medium cursor-pointer"
-            >
-              <Volume2 className="w-4 h-4 text-ink-600" />
-              <span>{t('practice.realTTS')}</span>
-            </button>
+            <SpeakButton
+              text={currentQ.targetSentence}
+              label={t('practice.realTTS')}
+              stopLabel={t('reader.stop')}
+              variant="ghost"
+              size="sm"
+              showLabel
+            />
           </div>
 
           {/* Question Prompt */}
@@ -417,13 +419,13 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                 </p>
 
                 <div className="pt-2 flex items-center justify-between border-t border-ink-800">
-                  <button
-                    onClick={() => speakFrench(currentQ.targetSentence, { rate: 0.85 })}
-                    className="flex items-center gap-2 h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium cursor-pointer"
-                  >
-                    <Volume2 className="w-4 h-4 text-ink-600" />
-                    <span>{t('sentenceDrawer.listenAudio')} (0.85x)</span>
-                  </button>
+                  <SpeakButton
+                    text={currentQ.targetSentence}
+                    rate={0.85}
+                    label={`${t('sentenceDrawer.listenAudio')} (0.85x)`}
+                    stopLabel={t('reader.stop')}
+                    showLabel
+                  />
                   <span className="text-xs text-ink-500">
                     {t('sentenceDrawer.badge')}
                   </span>

@@ -1,19 +1,23 @@
 import type { AppSettings } from '../appSettings';
 import { loadSpeech } from './clips';
+import { getSpeechState, setSpeechState, speechKey } from './state';
 
-/** Playback of French speech (stored or synthesized clips, browser voice as a fallback) and its shared voice/rate settings. */
+/**
+ * Playback of French speech (stored or synthesized clips, browser voice as a fallback) and its shared rate.
+ * Progress is published through `state.ts`; callers do not pass callbacks to track it.
+ */
 
 export interface SpeechOptions {
-  rate?: number; // 0.7 - 1.3
+  rate?: number; // 0.5 - 1.5
   /** Defaults to the voice in Settings. */
   voice?: string;
-  onStart?: () => void;
-  onEnd?: () => void;
-  onError?: (err: any) => void;
 }
 
 let currentAudio: HTMLAudioElement | null = null;
 let currentUrl: string | null = null;
+let globalRate = 0.85;
+/** Bumped by every start and stop, so a clip that finishes loading after being stopped or replaced stays silent. */
+let requestId = 0;
 
 /** Frees the object URL of the clip that is playing or was playing. */
 function releaseUrl() {
@@ -22,7 +26,6 @@ function releaseUrl() {
     currentUrl = null;
   }
 }
-let globalRate = 0.85;
 
 export function setGlobalRate(rate: number) {
   globalRate = rate;
@@ -35,7 +38,9 @@ export function getGlobalRate(): number {
   return globalRate;
 }
 
-export function stopSpeech() {
+/** Stops whatever plays or loads, without publishing a state (callers do that). */
+function halt() {
+  requestId++;
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
@@ -47,20 +52,28 @@ export function stopSpeech() {
   }
 }
 
-// Play French speech using high-fidelity native Gemini TTS
+export function stopSpeech() {
+  halt();
+  setSpeechState('idle');
+}
+
+/** Plays French speech: a stored clip if there is one, else the speech provider, else the browser voice. */
 export async function speakFrench(text: string, options: SpeechOptions = {}) {
   const cleanText = text.trim();
   if (!cleanText) return;
 
-  // Stop any currently playing audio
-  stopSpeech();
+  halt();
+  const id = requestId;
+  const isCurrent = () => id === requestId;
+  const key = speechKey(cleanText);
+  setSpeechState('loading', key);
 
   let audioUrl: string | null = null;
 
   try {
-    if (options.onStart) options.onStart();
-
     const clip = await loadSpeech(cleanText, options.voice);
+    if (!isCurrent()) return; // stopped or replaced while loading; the clip is already stored for next time
+
     audioUrl = URL.createObjectURL(clip);
     const url = audioUrl;
     const audio = new Audio(url);
@@ -80,33 +93,47 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
     }
 
     audio.onended = () => {
+      if (!isCurrent()) return;
       currentAudio = null;
-      if (options.onEnd) options.onEnd();
+      setSpeechState('idle');
     };
 
     audio.onerror = (e) => {
+      if (!isCurrent()) return;
       console.warn('Audio playback error, falling back to browser speech:', e);
       currentAudio = null;
-      fallbackBrowserSpeech(cleanText, options);
+      fallbackBrowserSpeech(cleanText, key, options, isCurrent);
     };
 
     await audio.play();
+    if (isCurrent()) setSpeechState('playing', key);
   } catch (err) {
-    console.warn('Gemini TTS failed, falling back to browser speech:', err);
+    if (!isCurrent()) {
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      return;
+    }
+    console.warn('Speech provider failed, falling back to browser speech:', err);
     // play() can reject after the URL was created; do not leak it.
     if (audioUrl) {
       if (currentUrl === audioUrl) releaseUrl();
       else URL.revokeObjectURL(audioUrl);
       currentAudio = null;
     }
-    fallbackBrowserSpeech(cleanText, options);
+    fallbackBrowserSpeech(cleanText, key, options, isCurrent);
   }
 }
 
-// Fallback browser speech synthesis if remote TTS fails
-function fallbackBrowserSpeech(text: string, options: SpeechOptions = {}) {
+/** What a speak button does: stop if this text is loading or playing, otherwise play it. */
+export function toggleSpeech(text: string, options: SpeechOptions = {}) {
+  const { phase, key } = getSpeechState();
+  if (phase !== 'idle' && key === speechKey(text)) stopSpeech();
+  else void speakFrench(text, options);
+}
+
+// Fallback browser speech synthesis if the speech provider fails
+function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions, isCurrent: () => boolean) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-    if (options.onError) options.onError(new Error('Speech unsupported'));
+    setSpeechState('idle');
     return;
   }
 
@@ -121,13 +148,14 @@ function fallbackBrowserSpeech(text: string, options: SpeechOptions = {}) {
 
   if (frVoice) utterance.voice = frVoice;
 
-  utterance.onend = () => {
-    if (options.onEnd) options.onEnd();
+  // cancel() reports the old utterance as an error; only the current request may change the state.
+  const finish = () => {
+    if (isCurrent()) setSpeechState('idle');
   };
-  utterance.onerror = (err) => {
-    if (options.onError) options.onError(err);
-  };
+  utterance.onend = finish;
+  utterance.onerror = finish;
 
+  setSpeechState('playing', key);
   window.speechSynthesis.speak(utterance);
 }
 

@@ -1,11 +1,9 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Volume2, BookOpen, Sparkles, SlidersHorizontal, Eye,
-  ArrowLeft, ChevronDown, Type, Bookmark, MessageSquare, PlusCircle, Square, Gauge, TextSearch
-} from 'lucide-react';
+import { Volume2, ArrowLeft, ChevronDown, TextSearch } from 'lucide-react';
 import { Article, WordAnalysis, SentenceAnalysis } from '../types';
-import { speakFrench, stopSpeech, setGlobalRate, getGlobalRate } from '../utils/speech';
+import { stopSpeech, setGlobalRate, speechKey } from '../utils/speech';
+import { SpeakButton, useSpeechState } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {
@@ -36,7 +34,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   // The sentence actions float over the text; they are positioned from the sentence's
   // first line so they never take part in text layout.
   const articleRef = useRef<HTMLElement>(null);
-  const sentenceEls = useRef(new Map<string, { el: HTMLElement; text: string }>());
+  const sentenceEls = useRef(new Map<string, { el: HTMLElement; text: string; key: string }>());
   const clearTimer = useRef<number | undefined>(undefined);
   const [toolbar, setToolbar] = useState<{ text: string; top: number; left: number } | null>(null);
 
@@ -51,29 +49,42 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     setAnchorId(id);
   };
 
-  // Audio Playback & Speed Controller (0.5x to 1.5x)
+  // Playback rate (0.5x to 1.5x), shared with every speak button.
   const [playbackRate, setPlaybackRate] = useState<number>(0.85);
-  const [playingSentence, setPlayingSentence] = useState<string | null>(null);
   const [isSpeedControlOpen, setIsSpeedControlOpen] = useState<boolean>(false);
+  const controlsRef = useRef<HTMLDivElement>(null);
+
+  // Playback is shown on the sentence itself (highlight) and on its toolbar button, never in a bar that
+  // would push the article down. Escape stops it, and leaving the article does too.
+  const speech = useSpeechState();
+  const playingKey = speech.phase !== 'idle' ? speech.key : null;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      stopSpeech();
+      setIsSpeedControlOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      stopSpeech();
+    };
+  }, []);
+
+  // The speed panel floats over the article; a tap outside it closes it.
+  useEffect(() => {
+    if (!isSpeedControlOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (!controlsRef.current?.contains(e.target as Node)) setIsSpeedControlOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown);
+    return () => document.removeEventListener('pointerdown', onDown);
+  }, [isSpeedControlOpen]);
 
   const handlePlaybackRateChange = (newRate: number) => {
     setPlaybackRate(newRate);
     setGlobalRate(newRate);
-  };
-
-  const handlePlaySentence = (sentenceText: string) => {
-    if (playingSentence === sentenceText) {
-      stopSpeech();
-      setPlayingSentence(null);
-      return;
-    }
-
-    setPlayingSentence(sentenceText);
-    speakFrench(sentenceText, {
-      rate: playbackRate,
-      onEnd: () => setPlayingSentence(null),
-      onError: () => setPlayingSentence(null),
-    });
   };
 
   // Helper to tokenize sentence into clickable words
@@ -199,7 +210,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     }
   };
 
-  const activeText = playingSentence ?? activeSentence;
+  // Which sentence the actions belong to when nothing is hovered: the one playing, else the one open in the drawer.
+  const activeKey = playingKey ?? (activeSentence ? speechKey(activeSentence) : null);
 
   useLayoutEffect(() => {
     const NAV = 56; // sticky header
@@ -207,13 +219,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     let frame = 0;
 
     const place = () => {
-      // Which sentence the actions belong to: the hovered one, else the one playing or open in the drawer.
+      // Which sentence the actions belong to: the hovered one, else the active one.
       let id = hoveredId;
-      if (!id && activeText) {
+      if (!id && activeKey) {
         const entries = [...sentenceEls.current.entries()];
         id =
-          (anchorId && sentenceEls.current.get(anchorId)?.text === activeText ? anchorId : null) ??
-          entries.find(([, v]) => v.text === activeText)?.[0] ??
+          (anchorId && sentenceEls.current.get(anchorId)?.key === activeKey ? anchorId : null) ??
+          entries.find(([, v]) => v.key === activeKey)?.[0] ??
           null;
       }
       const target = id ? sentenceEls.current.get(id) : undefined;
@@ -253,7 +265,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule);
     };
-  }, [hoveredId, anchorId, activeText, fontSize, theme, currentArticle.id]);
+  }, [hoveredId, anchorId, activeKey, fontSize, theme, currentArticle.id]);
 
   const themeOptions = [
     { id: 'parchment', label: t('reader.themeParchment'), swatch: 'bg-ink-50' },
@@ -270,7 +282,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
       {/* Reading toolbar: one row, article on the left, preferences on the right */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div ref={controlsRef} className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
         <button
           onClick={onBack}
           className="mr-auto -ml-2 h-10 inline-flex items-center gap-1.5 px-2 rounded-md text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
@@ -320,10 +332,10 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           <span className="tnum">{playbackRate.toFixed(2)}×</span>
           <ChevronDown className={`w-3.5 h-3.5 text-ink-400 transition-transform ${isSpeedControlOpen ? 'rotate-180' : ''}`} />
         </button>
-      </div>
 
-      {isSpeedControlOpen && (
-        <div className="rounded-lg border border-ink-200 bg-white p-4 space-y-3 anim-fade">
+        {/* Floats over the article so opening it never moves the text */}
+        {isSpeedControlOpen && (
+        <div className="absolute inset-x-0 top-full z-20 mt-2 rounded-lg border border-ink-200 bg-white p-4 space-y-3 shadow-lg anim-fade">
           <div className="flex items-center justify-between text-xs text-ink-600">
             <span className="font-medium text-ink-800">{t('reader.shadowingSpeedRange')}</span>
             <span className="text-ink-500">
@@ -352,24 +364,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             ))}
           </div>
         </div>
-      )}
-
-      {playingSentence && (
-        <div className="flex items-center gap-3 rounded-lg border border-ink-200 bg-white px-3 py-2 text-xs anim-fade">
-          <Volume2 className="w-4 h-4 text-ink-600 shrink-0" />
-          <span className="font-serif italic text-ink-700 truncate flex-1">« {playingSentence} »</span>
-          <button
-            onClick={() => {
-              stopSpeech();
-              setPlayingSentence(null);
-            }}
-            className="h-8 inline-flex items-center gap-1 px-2.5 rounded-md bg-accent-700 text-white hover:bg-accent-800 cursor-pointer"
-          >
-            <Square className="w-2.5 h-2.5 fill-white" />
-            <span>{t('reader.stop')}</span>
-          </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Main Reading Surface */}
       <article
@@ -404,15 +400,16 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                   const cleanSentence = sent.trim();
                   const id = `${pIdx}-${sIdx}`;
                   const isHovered = hoveredId === id;
+                  const key = speechKey(cleanSentence);
                   const isActive = activeSentence === cleanSentence;
-                  const isPlaying = playingSentence === cleanSentence;
+                  const isPlaying = playingKey === key;
 
                   return (
                     <span
                       key={sIdx}
                       data-sentence
                       ref={(el) => {
-                        if (el) sentenceEls.current.set(id, { el, text: cleanSentence });
+                        if (el) sentenceEls.current.set(id, { el, text: cleanSentence, key });
                         else sentenceEls.current.delete(id);
                       }}
                       onPointerEnter={(e) => {
@@ -422,7 +419,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
                       onClick={() => focusSentence(id)}
                       className={`rounded-md py-0.5 px-0.5 transition-colors ${
-                        isActive ? 'bg-accent-100' : isHovered ? 'bg-accent-50' : ''
+                        isActive || isPlaying ? 'bg-accent-100' : isHovered ? 'bg-accent-50' : ''
                       }`}
                     >
                       {renderSentenceWords(sent, id)}
@@ -446,16 +443,14 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             className="absolute z-10 -translate-y-full pb-1.5 anim-fade"
           >
             <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-white border border-ink-300 shadow-lg font-sans text-ink-900">
-              <button
-                onClick={() => handlePlaySentence(toolbar.text)}
-                aria-label={playingSentence === toolbar.text ? t('reader.stop') : t('reader.playSentence')}
-                title={playingSentence === toolbar.text ? t('reader.stop') : t('reader.playSentence')}
-                className={`h-10 w-10 sm:h-9 sm:w-9 inline-flex items-center justify-center rounded-md cursor-pointer ${
-                  playingSentence === toolbar.text ? 'bg-accent-700 text-white' : 'text-ink-700 hover:bg-ink-100'
-                }`}
-              >
-                {playingSentence === toolbar.text ? <Square className="w-4 h-4 fill-current" /> : <Volume2 className="w-4 h-4" />}
-              </button>
+              <SpeakButton
+                text={toolbar.text}
+                label={t('reader.playSentence')}
+                stopLabel={t('reader.stop')}
+                variant="ghost"
+                size="icon"
+                className="sm:h-9 sm:w-9 text-ink-700"
+              />
               <button
                 onClick={() => onSentenceClick(toolbar.text)}
                 aria-label={t('reader.analyzeSentence')}

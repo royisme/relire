@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  BookmarkCheck, Volume2, Sparkles, RotateCw, CheckCircle2,
+  BookmarkCheck, Sparkles, RotateCw, CheckCircle2,
   Clock, Search, Trash2, ArrowRight, Layers, Award, Download, Upload, Filter
 } from 'lucide-react';
 import { VocabWord } from '../types';
 import { isDueToday, calculateNextReview } from '../utils/srs';
-import { speakFrench } from '../utils/speech';
+import { SpeakButton } from './ui/speak-button';
 
 interface VocabularyViewProps {
   vocabList: VocabWord[];
@@ -184,16 +184,15 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                     <span className="font-mono text-sm font-semibold text-ink-600 bg-ink-100 px-3 py-1 rounded-md">
                       {currentQuizWord.ipa}
                     </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        speakFrench(currentQuizWord.word);
-                      }}
-                      className="p-1.5 rounded-full bg-accent-100 text-accent-900 hover:bg-accent-200 cursor-pointer"
-                      title={t('wordModal.clickToListen')}
-                    >
-                      <Volume2 className="w-4 h-4" />
-                    </button>
+                    <SpeakButton
+                      text={currentQuizWord.word}
+                      label={t('wordModal.clickToListen')}
+                      stopLabel={t('reader.stop')}
+                      variant="secondary"
+                      size="iconSm"
+                      className="rounded-full"
+                      onClick={(e) => e.stopPropagation()}
+                    />
                   </div>
 
                   {currentQuizWord.contextSentence && (
@@ -382,13 +381,14 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                       </div>
 
                       <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => speakFrench(item.word)}
-                          className="p-1.5 rounded-md text-ink-400 hover:text-accent-800 hover:bg-accent-100/50 cursor-pointer"
-                          title={t('wordModal.clickToListen')}
-                        >
-                          <Volume2 className="w-4 h-4" />
-                        </button>
+                        <SpeakButton
+                          text={item.word}
+                          label={t('wordModal.clickToListen')}
+                          stopLabel={t('reader.stop')}
+                          variant="ghost"
+                          size="iconSm"
+                          className="h-8 w-8 text-ink-500 hover:text-accent-800"
+                        />
                         <button
                           onClick={() => onDeleteWord(item.id)}
                           className="p-1.5 rounded-md text-ink-400 hover:text-bad-700 hover:bg-ink-100 cursor-pointer"
