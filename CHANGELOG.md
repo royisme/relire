@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Marketing site on GitHub Pages.** The Pages root is now an English and 简体中文 landing page (positioning, screenshots, FAQ, CTAs) with the live app unchanged under `/relire/app/`; a one-time root service worker retires the old root-scoped cache so returning visitors move over cleanly, and the app page asks search engines not to index it in favour of the landing pages.
 - **Search and sharing metadata.** The app page now carries a proper title, description, canonical URL, robots directives, social-share images and Schema.org structured data, plus `robots.txt` and `sitemap.xml`, so search engines and shared links describe Relire correctly.
 - **Live demo on GitHub Pages.** Pushing to main deploys https://royisme.github.io/relire/ (after the type, translation and build checks pass); the READMEs now lead with the demo and what Relire does, and a launch checklist with copy for communities lives in `docs/LAUNCH.md`.
 - **Separate AI for explanations and for speech.** Settings has a provider, model and key for each, so they can differ; Gemini is the only provider today and the app is structured so others are added by implementing one interface and registering it. Each provider keeps its own key; unknown or invalid saved choices fall back to defaults.
