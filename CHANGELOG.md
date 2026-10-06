@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Search and sharing metadata.** The app page now carries a proper title, description, canonical URL, robots directives, social-share images and Schema.org structured data, plus `robots.txt` and `sitemap.xml`, so search engines and shared links describe Relire correctly.
 - **Live demo on GitHub Pages.** Pushing to main deploys https://royisme.github.io/relire/ (after the type, translation and build checks pass); the READMEs now lead with the demo and what Relire does, and a launch checklist with copy for communities lives in `docs/LAUNCH.md`.
 - **Separate AI for explanations and for speech.** Settings has a provider, model and key for each, so they can differ; Gemini is the only provider today and the app is structured so others are added by implementing one interface and registering it. Each provider keeps its own key; unknown or invalid saved choices fall back to defaults.
 - **Editable prompts.** Every prompt is now a plain-text template (English and Chinese) with variables and simple conditions. Settings shows them, previews them with sample values, warns about unknown variables, and resets any prompt to the original; edits are included in backups. Cached answers are keyed by the prompt in use, so an edited prompt gets fresh answers and resetting brings the old ones back.
