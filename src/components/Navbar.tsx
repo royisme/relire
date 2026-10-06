@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, BookmarkCheck, BookOpen, Dumbbell, Menu, Settings } from 'lucide-react';
+import { BarChart3, BookmarkCheck, BookOpen, Dumbbell, Github, Menu, Settings } from 'lucide-react';
 import { Button } from './ui/button';
 import { Drawer, OverlayHeader } from './ui/overlay';
 import { PWAInstallButton } from './PWAInstallButton';
@@ -89,6 +89,17 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="ml-auto flex items-center gap-1">
           <LanguageSwitcher />
           <div className="hidden md:flex items-center gap-1">
+            <a
+              href="https://github.com/royisme/relire"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900"
+              aria-label={t('nav.github')}
+              title={t('nav.github')}
+            >
+              <Github className="w-4 h-4" />
+              <span>{t('nav.github')}</span>
+            </a>
             <PWAInstallButton />
             <Button variant="ghost" size="icon" onClick={onOpenSettings} aria-label={t('nav.settings')} title={t('nav.settings')}>
               <Settings className="w-5 h-5" />
@@ -127,6 +138,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
           <div className="border-t border-ink-200 py-2">
+            <a
+              href="https://github.com/royisme/relire"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => setDrawerOpen(false)}
+              className="flex w-full items-center gap-3 px-4 h-12 text-sm text-ink-800 hover:bg-ink-100"
+            >
+              <Github className="w-4 h-4 text-ink-600" />
+              <span>{t('nav.github')}</span>
+            </a>
             <PWAInstallButton variant="row" onDone={() => setDrawerOpen(false)} />
             <button
               onClick={() => {
