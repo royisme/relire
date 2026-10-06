@@ -8,7 +8,7 @@
     "retry": "重试",
     "success": "成功",
     "error": "错误",
-    "documentTitle": "Relire - 法语精读",
+    "documentTitle": "Relire — TCF Canada 法语精读与发音训练",
     "done": "完成"
   },
   "nav": {
@@ -20,7 +20,8 @@
     "settings": "设置",
     "menu": "菜单",
     "language": "语言",
-    "main": "主导航"
+    "main": "主导航",
+    "github": "GitHub"
   },
   "reader": {
     "stop": "停止",
@@ -353,5 +354,12 @@
     "drills": "练习题",
     "pronunciationAudio": "发音评分（带录音）",
     "pronunciationText": "发音评分（仅文字转写）"
+  },
+  "footer": {
+    "openSource": "开源项目 · 学习数据保存在你的浏览器中",
+    "links": "项目链接",
+    "github": "GitHub",
+    "feedback": "反馈与 Issues",
+    "license": "MIT 许可证"
   }
 }
