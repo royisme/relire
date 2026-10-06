@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Drawer, OverlayHeader } from './ui/overlay';
 import { PWAInstallButton } from './PWAInstallButton';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 type Tab = 'reader' | 'vocab' | 'practice' | 'analytics';
 
@@ -33,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   ] as const;
 
   const dueBadge = (
-    <span className="tnum min-w-5 px-1.5 rounded-full text-xs font-medium bg-accent-700 text-white text-center">
+    <span className="tnum min-w-5 px-1.5 rounded-full text-xs font-medium bg-accent-700 text-on-fill text-center">
       {dueCount}
     </span>
   );
@@ -87,6 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
+          <ThemeSwitcher />
           <LanguageSwitcher />
           <div className="hidden md:flex items-center gap-1">
             <PWAInstallButton />

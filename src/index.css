@@ -10,8 +10,8 @@
   --color-ink-100: #EFEDE8;
   --color-ink-200: #E2DFD8;
   --color-ink-300: #CFCBC2;
-  --color-ink-400: #A39F95;
-  --color-ink-500: #7A766D;
+  --color-ink-400: #949087;
+  --color-ink-500: #6F6B63;
   --color-ink-600: #5C5851;
   --color-ink-700: #433F3A;
   --color-ink-800: #2D2A27;
@@ -53,9 +53,87 @@
   --color-bad-900: #5B1F1B;
   --color-bad-950: #330F0D;
 
+  /* Roles that are not a step on a scale. Surface: cards, sheets, inputs. On-fill: text and icons on a
+     filled accent, ok or bad button. Scrim: the dimming layer behind overlays (never inverts). */
+  --color-surface: #FFFFFF;
+  --color-on-fill: #FFFFFF;
+  --color-scrim: #121110;
+
   --radius-md: 6px;  /* controls */
   --radius-lg: 10px; /* surfaces, overlays */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * Themes. Light is the default above; each theme redefines the same scales, so components use one
+ * set of classes everywhere. Dark inverts the scales (50 = darkest tint, 900 = lightest text) except
+ * the fill steps (accent 700/800, ok 600/700, bad 600), which stay mid-tone so `on-fill` text stays white.
+ * Text in a hue therefore uses 800-950 (`text-accent-900`, `text-ok-800`, `text-bad-700`), never a fill step.
+ * index.html sets data-theme before paint.
+ */
+:root[data-theme='sepia'] {
+  --color-ink-50: #F3EBD9;
+  --color-ink-100: #EADFC8;
+  --color-ink-200: #DED0B4;
+  --color-ink-300: #CBB996;
+  --color-ink-400: #968566;
+  --color-ink-500: #74654E;
+  --color-ink-600: #625440;
+  --color-ink-700: #4B4030;
+  --color-ink-800: #382F23;
+  --color-ink-900: #2B241A;
+  --color-ink-950: #1C1711;
+  --color-surface: #FBF6EA;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-ink-50: #161513;
+  --color-ink-100: #272420;
+  --color-ink-200: #35312C;
+  --color-ink-300: #48443D;
+  --color-ink-400: #6E685F;
+  --color-ink-500: #948E84;
+  --color-ink-600: #AFA99F;
+  --color-ink-700: #C7C1B7;
+  --color-ink-800: #D9D4CB;
+  --color-ink-900: #E7E2D9;
+  --color-ink-950: #F4F0E8;
+  --color-accent-50: #172133;
+  --color-accent-100: #1D2B44;
+  --color-accent-200: #283C60;
+  --color-accent-300: #37548A;
+  --color-accent-400: #4C71AE;
+  --color-accent-500: #6589C6;
+  --color-accent-600: #7EA1D9;
+  --color-accent-700: #3D65A5;
+  --color-accent-800: #4A73B4;
+  --color-accent-900: #C4D6F1;
+  --color-accent-950: #DDE8F7;
+  --color-ok-50: #12231A;
+  --color-ok-100: #173024;
+  --color-ok-200: #204431;
+  --color-ok-300: #2D6045;
+  --color-ok-400: #3F7F58;
+  --color-ok-500: #56A06F;
+  --color-ok-600: #3C8A5A;
+  --color-ok-700: #2E7049;
+  --color-ok-800: #A4D7B5;
+  --color-ok-900: #C0E5CC;
+  --color-ok-950: #DCF1E3;
+  --color-bad-50: #2A1513;
+  --color-bad-100: #3A1B18;
+  --color-bad-200: #562622;
+  --color-bad-300: #7B352F;
+  --color-bad-400: #A8473E;
+  --color-bad-500: #CF6257;
+  --color-bad-600: #B4473D;
+  --color-bad-700: #E9978E;
+  --color-bad-800: #F0B3AC;
+  --color-bad-900: #F5CCC7;
+  --color-bad-950: #FAE4E1;
+  --color-surface: #1E1C19;
+  --color-scrim: #000000;
 }
 
 @layer base {
@@ -65,6 +143,7 @@
     font-family: var(--font-sans);
     background: var(--color-ink-50);
     color: var(--color-ink-900);
+    transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out);
     font-size: 14px;
     line-height: 1.5;
   }

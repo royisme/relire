@@ -48,7 +48,7 @@ export const PWAInstallButton: React.FC<{ variant?: 'icon' | 'row'; onDone?: () 
           <div className="p-5 space-y-4">
 
             <div className="space-y-3 text-xs text-ink-700 leading-relaxed font-sans">
-              <div className="p-3 rounded-lg bg-white border border-ink-200 space-y-1.5">
+              <div className="p-3 rounded-lg bg-surface border border-ink-200 space-y-1.5">
                 <span className="font-semibold text-ink-900 block">
                   {t('pwa.chromeWay')}
                 </span>
@@ -57,7 +57,7 @@ export const PWAInstallButton: React.FC<{ variant?: 'icon' | 'row'; onDone?: () 
                 </p>
               </div>
 
-              <div className="p-3 rounded-lg bg-white border border-ink-200 space-y-1.5">
+              <div className="p-3 rounded-lg bg-surface border border-ink-200 space-y-1.5">
                 <span className="font-semibold text-ink-900 block">
                   {t('pwa.safariWay')}
                 </span>
@@ -66,7 +66,7 @@ export const PWAInstallButton: React.FC<{ variant?: 'icon' | 'row'; onDone?: () 
                 </p>
               </div>
 
-              <div className="p-3 rounded-lg bg-ok-50 border border-ok-200 text-ok-950 text-xs space-y-1">
+              <div className="p-3 rounded-lg bg-ink-50 border border-ink-200 text-ink-800 text-xs space-y-1">
                 <strong>{t('pwa.noServerWhy')}</strong>
                 <p>
                   {t('pwa.noServerDesc')}

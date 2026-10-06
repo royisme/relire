@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowUp, FilePlus2, Pencil, Search, Trash2 } from 'lucide-react';
 import { Article } from '../types';
 import { Button } from './ui/button';
+import { PageHeader } from './ui/page-header';
+import { Segmented } from './ui/segmented';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import { cleanArticleTitle, formatLevel } from '../utils/i18nHelpers';
 
@@ -80,16 +82,16 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-4">
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <h2 className="font-serif text-2xl font-semibold text-ink-900">{t('library.title')}</h2>
-          <p className="text-sm text-ink-500 mt-0.5 tnum">{t('library.count', { count: articles.length })}</p>
-        </div>
-        <Button onClick={onAdd}>
-          <FilePlus2 className="w-4 h-4" />
-          <span>{t('library.add')}</span>
-        </Button>
-      </div>
+      <PageHeader
+        title={t('library.title')}
+        subtitle={<span className="tnum">{t('library.count', { count: articles.length })}</span>}
+        actions={
+          <Button onClick={onAdd}>
+            <FilePlus2 className="w-4 h-4" />
+            <span>{t('library.add')}</span>
+          </Button>
+        }
+      />
 
       {articles.length > 0 && (
         <div className="flex flex-wrap items-center gap-3">
@@ -101,26 +103,20 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('library.search')}
-              className="w-full h-10 pl-9 pr-3 text-sm bg-white rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
+              className="w-full h-10 pl-9 pr-3 text-sm bg-surface rounded-md border border-ink-300 focus:outline-none focus:border-accent-600 focus:ring-1 focus:ring-accent-600"
             />
           </label>
-          <div role="group" aria-label={t('importer.cefrLevel')} className="flex items-center rounded-md border border-ink-200 bg-white p-0.5">
-            {['all', ...levels].map((l) => (
-              <button
-                key={l}
-                onClick={() => setLevel(l)}
-                aria-pressed={level === l}
-                className={`h-9 px-3 rounded-md text-sm cursor-pointer ${level === l ? 'bg-ink-900 text-white' : 'text-ink-600 hover:bg-ink-100'}`}
-              >
-                {l === 'all' ? t('library.allLevels') : l}
-              </button>
-            ))}
-          </div>
+          <Segmented
+            label={t('importer.cefrLevel')}
+            value={level}
+            onChange={setLevel}
+            options={['all', ...levels].map((l) => ({ value: l, label: l === 'all' ? t('library.allLevels') : l }))}
+          />
         </div>
       )}
 
       {articles.length === 0 ? (
-        <div className="rounded-lg border border-ink-200 bg-white px-6 py-14 text-center space-y-4">
+        <div className="rounded-lg border border-ink-200 bg-surface px-6 py-14 text-center space-y-4">
           <p className="font-serif text-lg text-ink-900">{t('library.emptyTitle')}</p>
           <p className="text-sm text-ink-500 max-w-md mx-auto">{t('library.emptyDesc')}</p>
           <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -133,7 +129,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           </div>
         </div>
       ) : rows.length === 0 ? (
-        <div className="rounded-lg border border-ink-200 bg-white px-6 py-12 text-center space-y-3">
+        <div className="rounded-lg border border-ink-200 bg-surface px-6 py-12 text-center space-y-3">
           <p className="text-sm text-ink-600">{t('library.noMatch')}</p>
           <Button
             variant="outline"
@@ -147,7 +143,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           </Button>
         </div>
       ) : (
-        <div className="rounded-lg border border-ink-200 bg-white overflow-hidden">
+        <div className="rounded-lg border border-ink-200 bg-surface overflow-hidden">
           <table className="w-full text-sm">
             <thead className="border-b border-ink-200 bg-ink-50 text-xs">
               <tr className="text-left">
@@ -165,7 +161,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 <tr key={a.id} className="hover:bg-ink-50">
                   <td className="pl-4 pr-2 py-3 align-top">
                     <button onClick={() => onOpen(a)} className="block text-left cursor-pointer max-w-full">
-                      <span className="block font-serif text-base font-semibold text-ink-900 hover:text-accent-800">
+                      <span className="block font-serif text-base font-semibold text-ink-900 hover:text-accent-900">
                         {cleanArticleTitle(a.title)}
                       </span>
                       <span className="block text-xs text-ink-500 mt-0.5">

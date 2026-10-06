@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Themes: light, sepia and dark**, plus "Match system", which follows the device and switches live. Pick one from the new theme icon in the header or the reader's swatches; the choice is remembered and applied before the page draws, so it never flashes. The whole app follows the theme, not only the article, and every text colour meets WCAG AA contrast in each theme.
 - **Marketing site on GitHub Pages.** The Pages root is now an English and 简体中文 landing page (positioning, screenshots, FAQ, CTAs) with the live app unchanged under `/relire/app/`; a one-time root service worker retires the old root-scoped cache so returning visitors move over cleanly, and the app page asks search engines not to index it in favour of the landing pages.
 - **Search and sharing metadata.** The app page now carries a proper title, description, canonical URL, robots directives, social-share images and Schema.org structured data, plus `robots.txt` and `sitemap.xml`, so search engines and shared links describe Relire correctly.
 - **Live demo on GitHub Pages.** Pushing to main deploys https://royisme.github.io/relire/ (after the type, translation and build checks pass); the READMEs now lead with the demo and what Relire does, and a launch checklist with copy for communities lives in `docs/LAUNCH.md`.
@@ -25,6 +26,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- **Calmer, plainer interface.** Rewrote titles and labels in both languages without hype, jargon, emoji or exclamation marks (for example "Vocabulary" instead of "SRS Vocabulary Deck (Spaced Repetition)", "Drills" instead of "Interactive Reinforcement Drills"). The word and sentence sheets read like a dictionary entry: headings and rules instead of tinted cards and sparkle icons. Every tab uses the same header; filters and modes use one segmented control; one filled button per view. Settings lost its numbered titles, decorative icons and coloured info boxes. Model and voice descriptions are now plain.
 - **Shadowing section redesigned.** In the sentence sheet, "Shadowing" is now one clear block: how to say it (pace, phrasing as chips, liaisons, intonation, each label above its text), then Record, play back your recording, and Check pronunciation, then the result (overall score, accuracy / fluency / rhythm, sounds to work on with a status icon, words to fix, notes). The long "AI Shadowing Coach & Pronunciation Evaluation" title, its repeated subtitle and the off-palette colours are gone, and the record button is readable again. Practice's speaking drill uses the same component, so the two behave alike. Mic and scoring errors show inline with the real reason instead of an alert, a new recording clears the old result, and closing the sheet releases the microphone. Starting a new question clears the previous recording and score even when two questions use the same sentence, and a microphone that fails to start is released at once.
 - **Code structure:** the AI layer is split into providers, prompt templates and tasks; the speech code into stored clips, playback and recording; Settings into a shell plus AI, prompts and data sections. Behaviour is unchanged (the default prompts are word-for-word the previous ones).
 - **Renamed to Relire** ("to read again"), with a new icon.
@@ -37,6 +39,9 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- The list separator in a word's other meanings no longer depends on a language check in code; it is a translated string.
+- Progress said "1 Sentences Analyzed"; counts now use proper plurals. Settings showed its data counts with stray spacing.
+- The reader's own four colour themes (with hard-coded colours) are replaced by the app themes, so the toolbar, sheets and article always match.
 - In the English interface, the pattern-example translations in a sentence lookup showed Chinese; they now follow the interface language (English when the analysis has it, falling back to Chinese for older saved answers).
 - The sentence sheet's shadowing card squeezed its title, subtitle and tip into one row and overflowed on narrow screens; the speed presets overflowed a 360 px phone too (now five equal columns).
 - Vocabulary cards had black borders and an invalid hover class.

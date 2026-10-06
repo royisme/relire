@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from './ui/button';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import { AiSection } from './settings/AiSection';
 import { PromptsSection } from './settings/PromptsSection';
@@ -41,27 +42,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
     <Dialog onClose={onClose} label={t('settings.title')}>
       <OverlayHeader title={t('settings.title')} subtitle={t('settings.subtitle')} onClose={onClose} closeLabel={t('common.close')} />
 
-      <div className="p-5 sm:p-6 space-y-6 max-h-[72vh] overflow-y-auto">
+      <div className="p-5 sm:p-6 space-y-8 max-h-[72vh] overflow-y-auto">
         <AiSection settings={settings} onChange={setSettings} needsKey={needsKey} />
         <PromptsSection drafts={promptDrafts} onChange={setPromptDrafts} />
         <DataSection />
       </div>
 
-      <div className="p-4 bg-ink-100 border-t border-ink-200 flex items-center justify-between">
+      <div className="px-4 py-3 bg-surface border-t border-ink-200 flex items-center justify-between gap-3">
         <span className="text-xs text-ink-500">{t('settings.savedNotice')}</span>
         <div className="flex items-center gap-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-ink-600 hover:text-ink-900 hover:bg-ink-200/60 rounded-lg transition-colors cursor-pointer"
-          >
+          <Button variant="ghost" onClick={onClose}>
             {t('common.cancel')}
-          </button>
-          <button
-            onClick={handleSave}
-            className="h-10 px-4 text-sm font-medium bg-accent-700 hover:bg-accent-800 text-white rounded-md transition-all active:scale-95 cursor-pointer"
-          >
-            {t('common.save')}
-          </button>
+          </Button>
+          <Button onClick={handleSave}>{t('common.save')}</Button>
         </div>
       </div>
     </Dialog>

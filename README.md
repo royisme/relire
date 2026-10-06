@@ -93,7 +93,7 @@ Your articles, vocabulary and stats are stored in this browser's IndexedDB, and 
 
 ## How it is built
 
-React 19, Vite, Tailwind CSS 4, i18next, and AI providers called directly from the browser (Gemini through `@google/genai`). `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, and `CLAUDE.md` is a map of the code for contributors.
+React 19, Vite, Tailwind CSS 4, i18next, and AI providers called directly from the browser (Gemini through `@google/genai`). `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, `docs/architecture.md` is a map of the code, and `CLAUDE.md` plus `.claude/` hold the guidance for AI coding agents.
 
 ```
 src/services/ai/         providers, prompt templates and tasks; the UI calls src/services/api.ts

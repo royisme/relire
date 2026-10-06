@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Database, Download, Upload } from 'lucide-react';
+import { Download, Upload } from 'lucide-react';
 import { getApiKey, getAppSettings, saveAppSettings } from '../../utils/appSettings';
 import { cacheCounts, clearCache } from '../../storage/cache';
 import { audioStats, clearUnprotectedAudio, exportProtectedAudio, importAudio, type AudioStats } from '../../storage/audio';
@@ -102,25 +102,15 @@ export const DataSection: React.FC = () => {
 
   return (
     <div className="space-y-3.5">
-      <h4 className="text-xs font-semibold text-ink-900 flex items-center gap-1.5">
-        <Database className="w-4 h-4 text-ink-600" />
-        <span>{t('settings.offlineSection')}</span>
-      </h4>
+      <h4 className="font-serif text-base font-semibold text-ink-900">{t('settings.offlineSection')}</h4>
 
-      <div className="p-4 rounded-lg bg-white border border-ink-200 space-y-3 ">
-        <div className="flex items-center justify-between text-xs pb-2 border-b border-ink-100 flex-wrap gap-2">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between text-xs pb-2 border-b border-ink-200 flex-wrap gap-2">
           <span className="text-ink-600">{t('settings.offlineSummary')}</span>
-          <div className="flex items-center gap-2 sm:gap-3 font-medium text-ink-800 flex-wrap">
-            <span className="bg-ink-100 px-2 py-0.5 rounded-md text-xs">
-              <strong>{localStats.articlesCount}</strong> {t('settings.articlesCount', { count: '' })}
-            </span>
-            <span className="bg-ink-100 px-2 py-0.5 rounded-md text-xs">
-              <strong>{localStats.vocabCount}</strong> {t('settings.vocabCount', { count: '' })}
-            </span>
-            <span className="bg-ink-100 px-2 py-0.5 rounded-md text-xs">
-              <strong>{localStats.statsHistoryCount}</strong> {t('settings.historyCount', { count: '' })}
-            </span>
-          </div>
+          <span className="text-ink-800 tnum">
+            {t('settings.articlesCount', { count: localStats.articlesCount })} · {t('settings.vocabCount', { count: localStats.vocabCount })} ·{' '}
+            {t('settings.historyCount', { count: localStats.statsHistoryCount })}
+          </span>
         </div>
 
         <p className="text-xs text-ink-500 leading-relaxed">
@@ -140,7 +130,7 @@ export const DataSection: React.FC = () => {
               setCacheInfo(await cacheCounts());
               setStorageInfo(await getStorageInfo());
             }}
-            className="h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            className="h-9 px-3 rounded-md border border-ink-300 bg-surface text-ink-800 hover:bg-ink-100 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-default"
           >
             {t('settings.clearCache')}
           </button>
@@ -164,7 +154,7 @@ export const DataSection: React.FC = () => {
               setAudioInfo(await audioStats());
               setStorageInfo(await getStorageInfo());
             }}
-            className="h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            className="h-9 px-3 rounded-md border border-ink-300 bg-surface text-ink-800 hover:bg-ink-100 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-default"
           >
             {t('settings.clearAudio')}
           </button>
@@ -186,7 +176,7 @@ export const DataSection: React.FC = () => {
                 await requestPersistence();
                 setStorageInfo(await getStorageInfo());
               }}
-              className="h-9 px-3 rounded-md border border-ink-300 bg-white text-ink-800 hover:bg-ink-100 font-medium cursor-pointer"
+              className="h-9 px-3 rounded-md border border-ink-300 bg-surface text-ink-800 hover:bg-ink-100 font-medium cursor-pointer"
             >
               {t('settings.protectStorage')}
             </button>
@@ -213,18 +203,18 @@ export const DataSection: React.FC = () => {
           <button
             type="button"
             onClick={handleExportData}
-            className="flex items-center gap-1.5 h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium transition-all active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-on-fill text-sm font-medium cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-white" />
+            <Download className="w-4 h-4" aria-hidden="true" />
             <span>{t('settings.exportBackup')}</span>
           </button>
 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-ink-100 hover:bg-ink-200 text-ink-800 text-xs font-semibold border border-ink-300 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 h-10 px-4 rounded-md border border-ink-300 bg-surface hover:bg-ink-100 text-ink-800 text-sm cursor-pointer"
           >
-            <Upload className="w-3.5 h-3.5 text-ink-600" />
+            <Upload className="w-4 h-4" aria-hidden="true" />
             <span>{t('settings.importBackup')}</span>
           </button>
 

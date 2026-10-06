@@ -25,14 +25,14 @@ function useEscape(onClose: () => void) {
 export function Sheet({ onClose, label, className, children }: OverlayProps) {
   useEscape(onClose);
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end bg-ink-950/25 anim-fade" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end bg-scrim/25 anim-fade" onClick={onClose}>
       <aside
         role="dialog"
         aria-modal="true"
         aria-label={label}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          'anim-sheet flex flex-col bg-white border-ink-200 shadow-lg w-full max-h-[88vh] rounded-t-lg border-t',
+          'anim-sheet flex flex-col bg-surface border-ink-200 shadow-lg w-full max-h-[88vh] rounded-t-lg border-t',
           'md:max-h-none md:h-full md:max-w-lg md:rounded-none md:border-t-0 md:border-l',
           className
         )}
@@ -47,13 +47,13 @@ export function Sheet({ onClose, label, className, children }: OverlayProps) {
 export function Drawer({ onClose, label, className, children }: OverlayProps) {
   useEscape(onClose);
   return (
-    <div className="fixed inset-0 z-50 bg-ink-950/30 anim-fade" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-scrim/30 anim-fade" onClick={onClose}>
       <aside
         role="dialog"
         aria-modal="true"
         aria-label={label}
         onClick={(e) => e.stopPropagation()}
-        className={cn('h-full w-72 max-w-[85vw] bg-white border-r border-ink-200 shadow-lg flex flex-col', className)}
+        className={cn('h-full w-72 max-w-[85vw] bg-surface border-r border-ink-200 shadow-lg flex flex-col', className)}
       >
         {children}
       </aside>
@@ -65,14 +65,14 @@ export function Drawer({ onClose, label, className, children }: OverlayProps) {
 export function Dialog({ onClose, label, className, children }: OverlayProps) {
   useEscape(onClose);
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink-950/40 anim-fade" onClick={onClose}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-scrim/40 anim-fade" onClick={onClose}>
       <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
         <div
           role="dialog"
           aria-modal="true"
           aria-label={label}
           onClick={(e) => e.stopPropagation()}
-          className={cn('w-full max-w-2xl rounded-lg border border-ink-200 bg-white shadow-lg overflow-hidden', className)}
+          className={cn('w-full max-w-2xl rounded-lg border border-ink-200 bg-surface shadow-lg overflow-hidden', className)}
         >
           {children}
         </div>
