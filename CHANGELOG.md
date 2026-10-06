@@ -34,6 +34,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- In the English interface, the pattern-example translations in a sentence lookup showed Chinese; they now follow the interface language (English when the analysis has it, falling back to Chinese for older saved answers).
 - The sentence sheet's shadowing card squeezed its title, subtitle and tip into one row and overflowed on narrow screens; the speed presets overflowed a 360 px phone too (now five equal columns).
 - Vocabulary cards had black borders and an invalid hover class.
 - The phone header overflowed sideways.

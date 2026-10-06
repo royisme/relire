@@ -27,7 +27,8 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
   errorMessage,
   onRecordAssessmentComplete,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
   const [speechRate, setSpeechRate] = useState<number>(0.85);
   const changeRate = (rate: number) => {
     setSpeechRate(rate);
@@ -236,7 +237,7 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
                                   />
                                 </div>
                                 <div className="text-ink-600 font-sans">
-                                  {ex.zh}
+                                  {(isEn && ex.en) ? ex.en : ex.zh}
                                 </div>
                               </div>
                             ))}

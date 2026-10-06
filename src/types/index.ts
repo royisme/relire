@@ -46,7 +46,7 @@ export interface GrammarPoint {
 export interface PatternCollocation {
   pattern: string;
   meaning: string;
-  examples: Array<{ fr: string; zh: string }>;
+  examples: Array<{ fr: string; zh: string; en?: string }>;
 }
 
 export interface ShadowingGuide {
