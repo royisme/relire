@@ -338,7 +338,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                 />
               </div>
 
-              <ShadowingRecorder referenceText={currentQ.targetSentence} onAssessed={onRecordAssessmentComplete} />
+              <ShadowingRecorder key={activeQuestionIdx} referenceText={currentQ.targetSentence} onAssessed={onRecordAssessmentComplete} />
             </div>
           )}
 
