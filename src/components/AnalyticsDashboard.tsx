@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2 } from 'lucide-react';
 import { VocabWord, UserStats } from '../types';
-import { speakFrench } from '../utils/speech';
+import { toggleSpeech } from '../utils/speech';
+import { SpeakIcon, useSpeechPhase } from './ui/speak-button';
 import { FRENCH_IPA, IpaGroup } from '../data/frenchIpa';
 
 interface AnalyticsDashboardProps {
@@ -11,6 +11,25 @@ interface AnalyticsDashboardProps {
 }
 
 const GROUPS: IpaGroup[] = ['vowels', 'nasals', 'semivowels', 'consonants'];
+
+/** One sound with an example word; pressing it speaks the word and its icon shows loading / playing in place. */
+const IpaTile: React.FC<{ symbol: string; word: string; label: string }> = ({ symbol, word, label }) => {
+  const phase = useSpeechPhase(word);
+  return (
+    <button
+      type="button"
+      onClick={() => toggleSpeech(word)}
+      aria-label={label}
+      className="group w-full h-16 rounded-md border border-ink-200 bg-white hover:border-accent-300 hover:bg-accent-50 flex flex-col items-center justify-center cursor-pointer"
+    >
+      <span className="text-xl leading-none text-ink-900">[{symbol}]</span>
+      <span className="mt-1.5 inline-flex items-center gap-1 font-serif text-sm text-ink-600">
+        {word}
+        <SpeakIcon phase={phase} className="w-3 h-3 text-ink-400 group-hover:text-accent-700" />
+      </span>
+    </button>
+  );
+};
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, vocabList }) => {
   const { t } = useTranslation();
@@ -77,17 +96,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, v
             <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
               {FRENCH_IPA[group].map((s) => (
                 <li key={s.symbol}>
-                  <button
-                    onClick={() => speakFrench(s.word)}
-                    aria-label={t('ipa.play', { word: s.word, symbol: s.symbol })}
-                    className="group w-full h-16 rounded-md border border-ink-200 bg-white hover:border-accent-300 hover:bg-accent-50 flex flex-col items-center justify-center cursor-pointer"
-                  >
-                    <span className="text-xl leading-none text-ink-900">[{s.symbol}]</span>
-                    <span className="mt-1.5 inline-flex items-center gap-1 font-serif text-sm text-ink-600">
-                      {s.word}
-                      <Volume2 className="w-3 h-3 text-ink-400 group-hover:text-accent-700" />
-                    </span>
-                  </button>
+                  <IpaTile symbol={s.symbol} word={s.word} label={t('ipa.play', { word: s.word, symbol: s.symbol })} />
                 </li>
               ))}
             </ul>

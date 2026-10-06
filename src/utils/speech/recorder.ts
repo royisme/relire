@@ -40,6 +40,9 @@ export class FrenchAudioRecorder {
       return true;
     } catch (err) {
       console.error('Microphone access failed:', err);
+      // The stream may already be live when a later setup step throws; release it or the mic stays engaged.
+      this.stream?.getTracks().forEach((track) => track.stop());
+      this.stream = null;
       return false;
     }
   }

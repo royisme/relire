@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './ui/overlay';
-import { X, Volume2, Bookmark, BookmarkCheck, Sparkles, BookOpen, Layers, Check, Loader2 } from 'lucide-react';
+import { X, Bookmark, BookmarkCheck, Sparkles, BookOpen, Layers, Check, Loader2 } from 'lucide-react';
 import { WordAnalysis, VocabWord } from '../types';
-import { speakFrench } from '../utils/speech';
+import { toggleSpeech } from '../utils/speech';
+import { SpeakButton, SpeakIcon, useSpeechPhase } from './ui/speak-button';
 
 interface WordDetailModalProps {
   isOpen: boolean;
@@ -17,6 +18,24 @@ interface WordDetailModalProps {
   activeWord?: string | null;
   errorMessage?: string | null;
 }
+
+/** One conjugated form; pressing it speaks the form, and its icon shows loading / playing in place. */
+const FormTile: React.FC<{ person: string; form: string; rate: number; label: string }> = ({ person, form, rate, label }) => {
+  const text = `${person} ${form}`;
+  const phase = useSpeechPhase(text);
+  return (
+    <button
+      type="button"
+      onClick={() => toggleSpeech(text, { rate })}
+      aria-label={`${label}: ${text}`}
+      className="p-1.5 rounded-md bg-ink-50 hover:bg-accent-50 cursor-pointer flex items-center justify-between gap-1 text-xs transition-colors group text-left"
+    >
+      <span className="text-ink-400 text-xs">{person}</span>
+      <span className="font-semibold text-ink-800 group-hover:text-accent-900">{form}</span>
+      <SpeakIcon phase={phase} className="w-3 h-3 shrink-0 text-ink-400 group-hover:text-ink-700" />
+    </button>
+  );
+};
 
 export const WordDetailModal: React.FC<WordDetailModalProps> = ({
   isOpen,
@@ -33,18 +52,8 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
   const [speechSpeed, setSpeechSpeed] = useState<number>(0.85);
-  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
 
   if (!isOpen) return null;
-
-  const handleSpeak = (textToSpeak: string) => {
-    setIsSpeaking(true);
-    speakFrench(textToSpeak, {
-      rate: speechSpeed,
-      onEnd: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false),
-    });
-  };
 
   return (
     <Sheet onClose={onClose} label={wordData?.word || activeWord || t('wordModal.analyzing')}>
@@ -121,15 +130,13 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                     <span className="font-mono text-base font-semibold text-accent-900 bg-white/70 px-2.5 py-0.5 rounded-md border border-ink-200">
                       {wordData.ipa || `[${wordData.word}]`}
                     </span>
-                    <button
-                      onClick={() => handleSpeak(wordData.word)}
-                      disabled={isSpeaking}
-                      className="flex items-center gap-1.5 h-10 px-4 bg-accent-700 hover:bg-accent-800 disabled:opacity-75 text-white rounded-md text-sm font-medium active:scale-95 transition-all"
-                      title={t('wordModal.clickToListen')}
-                    >
-                      <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-accent-200' : ''}`} />
-                      <span>{isSpeaking ? t('common.loading') : t('wordModal.listen')}</span>
-                    </button>
+                    <SpeakButton
+                      text={wordData.word}
+                      rate={speechSpeed}
+                      label={t('wordModal.listen')}
+                      stopLabel={t('reader.stop')}
+                      showLabel
+                    />
                     {/* Speed toggle */}
                     <div className="flex items-center gap-1 text-xs text-ink-500 bg-white/50 px-2 py-0.5 rounded-md">
                       <span>{t('reader.tempo')}:</span>
@@ -221,17 +228,13 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                           {tenseBlock.forms.map((item, fIdx) => (
-                            <div
+                            <FormTile
                               key={fIdx}
-                              onClick={() => handleSpeak(`${item.person} ${item.form}`)}
-                              className="p-1.5 rounded-md bg-ink-50 hover:bg-accent-50 cursor-pointer flex items-center justify-between text-xs transition-colors group"
-                            >
-                              <span className="text-ink-400 text-xs">{item.person}</span>
-                              <span className="font-semibold text-ink-800 group-hover:text-accent-900">
-                                {item.form}
-                              </span>
-                              <Volume2 className="w-3 h-3 text-ink-300 group-hover:text-ink-600" />
-                            </div>
+                              person={item.person}
+                              form={item.form}
+                              rate={speechSpeed}
+                              label={t('wordModal.clickToListen')}
+                            />
                           ))}
                         </div>
                       </div>
@@ -256,13 +259,15 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                           <p className="font-serif text-sm font-semibold text-ink-900 leading-snug">
                             {ex.fr}
                           </p>
-                          <button
-                            onClick={() => handleSpeak(ex.fr)}
-                            className="p-1 rounded-md text-ink-400 hover:text-accent-800 hover:bg-accent-100/50"
-                            title={t('wordModal.listenExample')}
-                          >
-                            <Volume2 className="w-3.5 h-3.5" />
-                          </button>
+                          <SpeakButton
+                            text={ex.fr}
+                            rate={speechSpeed}
+                            label={t('wordModal.listenExample')}
+                            stopLabel={t('reader.stop')}
+                            variant="ghost"
+                            size="iconSm"
+                            className="h-7 w-7 shrink-0 text-ink-500 hover:text-accent-800"
+                          />
                         </div>
                         <p className="text-ink-600 font-sans text-xs">
                           {(isEn && ex.en) ? ex.en : ex.zh}

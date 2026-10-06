@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Dumbbell, Sparkles, Mic, Volume2, CheckCircle2, XCircle, RotateCcw,
-  ArrowRight, Square, Award, BookOpen, Layers, MessageSquare, Loader2
-} from 'lucide-react';
+import { Dumbbell, Sparkles, Mic, CheckCircle2, XCircle, RotateCcw, ArrowRight, BookOpen, Layers, Loader2 } from 'lucide-react';
 import { Article, PracticeDeck, PracticeQuestion, PronunciationAssessment } from '../types';
-import { generatePracticeDrills, assessPronunciation, MissingApiKeyError } from '../services/api';
-import { speakFrench, stopSpeech, FrenchAudioRecorder } from '../utils/speech';
+import { generatePracticeDrills, MissingApiKeyError } from '../services/api';
+import { stopSpeech } from '../utils/speech';
+import { SpeakButton } from './ui/speak-button';
+import { ShadowingRecorder } from './shadowing/ShadowingRecorder';
 
 interface PracticeViewProps {
   currentArticle: Article | null;
@@ -21,8 +20,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   onNeedsKey,
   onRecordAssessmentComplete,
 }) => {
-  const { t, i18n } = useTranslation();
-  const isEn = i18n.language === 'en';
+  const { t } = useTranslation();
   const [activePracticeType, setActivePracticeType] = useState<'syntax' | 'oral' | 'cloze'>('syntax');
   const [isLoadingDeck, setIsLoadingDeck] = useState(false);
   const [deckError, setDeckError] = useState<string | null>(null);
@@ -36,19 +34,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   // Cloze mode state
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
-
-  // Oral Shadowing mode state
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
-  const [recordedBase64, setRecordedBase64] = useState<string | null>(null);
-  const [recordedMimeType, setRecordedMimeType] = useState('audio/webm');
-  const [isEvaluating, setIsEvaluating] = useState(false);
-  const [oralAssessment, setOralAssessment] = useState<PronunciationAssessment | null>(null);
-  const [userTranscript, setUserTranscript] = useState('');
-
-  const recorderRef = React.useRef<FrenchAudioRecorder | null>(null);
-  const timerRef = React.useRef<any>(null);
 
   // Load drills on type or article change
   const handleLoadDrills = async (type: 'syntax' | 'oral' | 'cloze', fresh = false) => {
@@ -78,12 +63,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     setScrambleStatus('idle');
     setSelectedOption(null);
     setIsAnswerRevealed(false);
-    setRecordedAudioUrl(null);
-    setRecordedBase64(null);
-    setOralAssessment(null);
-    setUserTranscript('');
-    setIsRecording(false);
-    clearInterval(timerRef.current);
   };
 
   const currentQ: PracticeQuestion | undefined = deck?.questions[activeQuestionIdx];
@@ -109,70 +88,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       setScrambleStatus('correct');
     } else {
       setScrambleStatus('incorrect');
-    }
-  };
-
-  const handleStartOralRecording = async () => {
-    stopSpeech();
-    setOralAssessment(null);
-
-    const recorder = new FrenchAudioRecorder();
-    recorderRef.current = recorder;
-    const ok = await recorder.start();
-    if (!ok) {
-      alert(t('practice.micError'));
-      return;
-    }
-
-    setIsRecording(true);
-    setRecordingSeconds(0);
-    timerRef.current = setInterval(() => {
-      setRecordingSeconds((prev) => prev + 1);
-    }, 1000);
-
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      try {
-        const SpeechRec = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-        const rec = new SpeechRec();
-        rec.lang = 'fr-FR';
-        rec.onresult = (evt: any) => {
-          setUserTranscript(evt.results[0][0].transcript);
-        };
-        rec.start();
-      } catch (e) {}
-    }
-  };
-
-  const handleStopOralRecording = async () => {
-    if (!recorderRef.current || !isRecording) return;
-    clearInterval(timerRef.current);
-    setIsRecording(false);
-
-    const result = await recorderRef.current.stop();
-    if (result) {
-      setRecordedAudioUrl(URL.createObjectURL(result.blob));
-      setRecordedBase64(result.base64);
-      setRecordedMimeType(result.mimeType);
-    }
-  };
-
-  const handleAssessOral = async () => {
-    if (!currentQ) return;
-    setIsEvaluating(true);
-    try {
-      const res = await assessPronunciation({
-        referenceText: currentQ.targetSentence,
-        audioBase64: recordedBase64 || undefined,
-        mimeType: recordedMimeType,
-        userTranscript: userTranscript || undefined,
-      });
-      setOralAssessment(res);
-      onRecordAssessmentComplete(res, currentQ.targetSentence);
-    } catch (err) {
-      console.error('Failed to assess oral:', err);
-      alert(t('practice.assessError'));
-    } finally {
-      setIsEvaluating(false);
     }
   };
 
@@ -295,13 +210,14 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                 {deck.title}
               </span>
             </div>
-            <button
-              onClick={() => speakFrench(currentQ.targetSentence)}
-              className="flex items-center gap-1 text-xs text-accent-800 hover:text-accent-900 font-medium cursor-pointer"
-            >
-              <Volume2 className="w-4 h-4 text-ink-600" />
-              <span>{t('practice.realTTS')}</span>
-            </button>
+            <SpeakButton
+              text={currentQ.targetSentence}
+              label={t('practice.realTTS')}
+              stopLabel={t('reader.stop')}
+              variant="ghost"
+              size="sm"
+              showLabel
+            />
           </div>
 
           {/* Question Prompt */}
@@ -407,133 +323,22 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
           {/* MODE 2: ORAL SHADOWING CHALLENGE */}
           {activePracticeType === 'oral' && (
-            <div className="space-y-6">
-              <div className="p-5 rounded-lg bg-ink-50 text-ink-900 border border-ink-200 space-y-3">
-                <div className="text-xs text-accent-800 font-semibold">
-                  {t('sentenceDrawer.shadowingCoach')}
-                </div>
-                <p className="font-serif text-2xl font-semibold text-ink-900 leading-relaxed">
+            <div className="space-y-5">
+              <div className="p-5 rounded-lg bg-ink-50 border border-ink-200 space-y-4">
+                <p className="font-serif text-xl sm:text-2xl font-semibold text-ink-900 leading-relaxed break-words">
                   « {currentQ.targetSentence} »
                 </p>
-
-                <div className="pt-2 flex items-center justify-between border-t border-ink-800">
-                  <button
-                    onClick={() => speakFrench(currentQ.targetSentence, { rate: 0.85 })}
-                    className="flex items-center gap-2 h-10 px-4 rounded-md bg-accent-700 hover:bg-accent-800 text-white text-sm font-medium cursor-pointer"
-                  >
-                    <Volume2 className="w-4 h-4 text-ink-600" />
-                    <span>{t('sentenceDrawer.listenAudio')} (0.85x)</span>
-                  </button>
-                  <span className="text-xs text-ink-500">
-                    {t('sentenceDrawer.badge')}
-                  </span>
-                </div>
+                <SpeakButton
+                  text={currentQ.targetSentence}
+                  rate={0.85}
+                  label={`${t('sentenceDrawer.listenAudio')} (0.85x)`}
+                  stopLabel={t('reader.stop')}
+                  variant="outline"
+                  showLabel
+                />
               </div>
 
-              {/* Recorder Controls */}
-              <div className="p-4 rounded-lg border border-ink-200 bg-ink-50 flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-3">
-                  {!isRecording ? (
-                    <button
-                      onClick={handleStartOralRecording}
-                      className="flex items-center gap-2 h-10 px-4 rounded-md bg-bad-600 hover:bg-bad-700 text-white text-sm font-medium transition-all active:scale-95 cursor-pointer"
-                    >
-                      <Mic className="w-4 h-4 text-white" />
-                      <span>{t('sentenceDrawer.recordShadowing')}</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleStopOralRecording}
-                      className="flex items-center gap-2 h-10 px-4 rounded-md bg-accent-500 hover:bg-accent-600 text-accent-950 text-sm font-medium transition-all active:scale-95 cursor-pointer"
-                    >
-                      <Square className="w-4 h-4 fill-accent-950" />
-                      <span>{t('common.done')} ({recordingSeconds}s)</span>
-                    </button>
-                  )}
-
-                  {recordedAudioUrl && !isRecording && (
-                    <div className="flex items-center gap-2">
-                      <audio controls src={recordedAudioUrl} className="h-8 max-w-[200px]" />
-                      <button
-                        onClick={handleAssessOral}
-                        disabled={isEvaluating}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-ok-600 hover:bg-ok-700 disabled:opacity-50 text-white font-semibold text-xs transition-all active:scale-95 cursor-pointer"
-                      >
-                        {isEvaluating ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>{t('sentenceDrawer.listeningCoach')}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-3.5 h-3.5 text-ink-600" />
-                            <span>{t('sentenceDrawer.shadowingCoach')}</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Oral Assessment Output */}
-              {oralAssessment && (
-                <div className="p-5 rounded-lg bg-ink-100 border border-ink-200 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Award className="w-5 h-5 text-ink-700" />
-                      <span className="font-semibold text-sm text-ink-900">
-                        {t('sentenceDrawer.overallScore')}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-serif text-3xl font-semibold text-ink-800">
-                        {oralAssessment.overallScore}
-                      </span>
-                      <span className="text-xs text-ink-600">/ 100</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2 rounded-lg bg-white border border-ink-200">
-                      <div className="text-xs text-ink-500">{t('sentenceDrawer.accuracy')}</div>
-                      <div className="text-sm font-semibold text-ok-700">
-                        {oralAssessment.accuracyScore}
-                      </div>
-                    </div>
-                    <div className="p-2 rounded-lg bg-white border border-ink-200">
-                      <div className="text-xs text-ink-500">{t('sentenceDrawer.fluency')}</div>
-                      <div className="text-sm font-semibold text-accent-700">
-                        {oralAssessment.fluencyScore}
-                      </div>
-                    </div>
-                    <div className="p-2 rounded-lg bg-white border border-ink-200">
-                      <div className="text-xs text-ink-500">{t('sentenceDrawer.rhythm')}</div>
-                      <div className="text-sm font-semibold text-purple-700">
-                        {oralAssessment.rhythmScore}
-                      </div>
-                    </div>
-                  </div>
-
-                  {oralAssessment.phonemeFeedback && (
-                    <div className="space-y-1">
-                      <div className="text-xs font-semibold text-ink-900">{t('sentenceDrawer.coachFeedback')}:</div>
-                      {oralAssessment.phonemeFeedback.map((pf, pIdx) => (
-                        <div key={pIdx} className="text-xs text-ink-700 bg-white p-2 rounded-md border border-ink-200">
-                          <span className="font-mono font-semibold text-ink-800 mr-1.5">{pf.phoneme}</span>
-                          <span className="text-ink-600">{pf.tip}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {oralAssessment.coachingNotes && (
-                    <div className="text-xs text-ink-800 bg-ink-100 p-3 rounded-lg italic">
-                      {oralAssessment.coachingNotes}
-                    </div>
-                  )}
-                </div>
-              )}
+              <ShadowingRecorder key={activeQuestionIdx} referenceText={currentQ.targetSentence} onAssessed={onRecordAssessmentComplete} />
             </div>
           )}
 

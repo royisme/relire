@@ -22,16 +22,20 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- **Shadowing section redesigned.** In the sentence sheet, "Shadowing" is now one clear block: how to say it (pace, phrasing as chips, liaisons, intonation, each label above its text), then Record, play back your recording, and Check pronunciation, then the result (overall score, accuracy / fluency / rhythm, sounds to work on with a status icon, words to fix, notes). The long "AI Shadowing Coach & Pronunciation Evaluation" title, its repeated subtitle and the off-palette colours are gone, and the record button is readable again. Practice's speaking drill uses the same component, so the two behave alike. Mic and scoring errors show inline with the real reason instead of an alert, a new recording clears the old result, and closing the sheet releases the microphone. Starting a new question clears the previous recording and score even when two questions use the same sentence, and a microphone that fails to start is released at once.
 - **Code structure:** the AI layer is split into providers, prompt templates and tasks; the speech code into stored clips, playback and recording; Settings into a shell plus AI, prompts and data sections. Behaviour is unchanged (the default prompts are word-for-word the previous ones).
 - **Renamed to Relire** ("to read again"), with a new icon.
 - **Runs entirely in the browser.** The Express server is gone; Gemini is called directly with the user's own key, which stays in the browser. The build is a static PWA that can be hosted anywhere and installed. Bun is the only package manager.
-- **Sentence actions float over the text** as an icon-only pill anchored above the sentence, so reading no longer shifts while hovering. On touch, tapping a word keeps the sentence's actions visible after the lookup sheet closes.
+- **Playing audio no longer moves the page.** The "now playing" bar that pushed the article down on every play is gone. Loading and playing show on the button you pressed (speaker, spinner, stop square) at a fixed size, and in the reader the playing sentence is highlighted. Escape, or leaving the article, stops the clip; stopping while a clip is still loading now really cancels it, and starting another clip replaces it. The reader's speed panel floats over the article instead of pushing it down. This covers the reader, word and sentence sheets, practice, vocabulary and the IPA chart.
+- **Sentence actions float over the text** as a compact pill that follows the reading theme (white, parchment, sepia, dark) and sits at the end of the sentence — directly below its last line, flipping above it near the bottom of the screen — so reading no longer shifts while hovering. On touch, tapping a word keeps the sentence's actions visible after the lookup sheet closes.
 - **Design language unified:** one ink-blue accent, warm neutral paper, Source Serif 4 for reading and Public Sans for the interface, a 68-character reading column, one radius and elevation scheme. Word and sentence lookups open in a side sheet (bottom sheet on phones); tasks that need focus use a dialog.
 - Practice shows the real error, or opens Settings when there is no key, instead of substituting canned drills.
 - Backups never include the API key.
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- In the English interface, the pattern-example translations in a sentence lookup showed Chinese; they now follow the interface language (English when the analysis has it, falling back to Chinese for older saved answers).
+- The sentence sheet's shadowing card squeezed its title, subtitle and tip into one row and overflowed on narrow screens; the speed presets overflowed a 360 px phone too (now five equal columns).
 - Vocabulary cards had black borders and an invalid hover class.
 - The phone header overflowed sideways.
 - Prose containing the word "rounded" had been rewritten by a find-and-replace.
