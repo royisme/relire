@@ -22,6 +22,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- **Shadowing section redesigned.** In the sentence sheet, "Shadowing" is now one clear block: how to say it (pace, phrasing as chips, liaisons, intonation, each label above its text), then Record, play back your recording, and Check pronunciation, then the result (overall score, accuracy / fluency / rhythm, sounds to work on with a status icon, words to fix, notes). The long "AI Shadowing Coach & Pronunciation Evaluation" title, its repeated subtitle and the off-palette colours are gone, and the record button is readable again. Practice's speaking drill uses the same component, so the two behave alike. Mic and scoring errors show inline with the real reason instead of an alert, a new recording clears the old result, and closing the sheet releases the microphone.
 - **Code structure:** the AI layer is split into providers, prompt templates and tasks; the speech code into stored clips, playback and recording; Settings into a shell plus AI, prompts and data sections. Behaviour is unchanged (the default prompts are word-for-word the previous ones).
 - **Renamed to Relire** ("to read again"), with a new icon.
 - **Runs entirely in the browser.** The Express server is gone; Gemini is called directly with the user's own key, which stays in the browser. The build is a static PWA that can be hosted anywhere and installed. Bun is the only package manager.
@@ -33,6 +34,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- The sentence sheet's shadowing card squeezed its title, subtitle and tip into one row and overflowed on narrow screens; the speed presets overflowed a 360 px phone too (now five equal columns).
 - Vocabulary cards had black borders and an invalid hover class.
 - The phone header overflowed sideways.
 - Prose containing the word "rounded" had been rewritten by a find-and-replace.

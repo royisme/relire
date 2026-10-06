@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet, OverlayHeader } from './ui/overlay';
-import {
-  X, Mic, Square, Play, RotateCcw, Sparkles,
-  BookOpen, CheckCircle2, AlertCircle, Award, ChevronRight, Loader2, Info
-} from 'lucide-react';
+import { Mic, Sparkles, BookOpen, Loader2 } from 'lucide-react';
 import { SentenceAnalysis, PronunciationAssessment } from '../types';
-import { stopSpeech, FrenchAudioRecorder, setGlobalRate } from '../utils/speech';
+import { stopSpeech, setGlobalRate } from '../utils/speech';
 import { SpeakButton } from './ui/speak-button';
-import { assessPronunciation } from '../services/api';
+import { ShadowingGuide } from './shadowing/ShadowingGuide';
+import { ShadowingRecorder } from './shadowing/ShadowingRecorder';
 
 interface SentenceDrawerProps {
   isOpen: boolean;
@@ -31,109 +29,12 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
 }) => {
   const { t } = useTranslation();
   const [speechRate, setSpeechRate] = useState<number>(0.85);
-
-  // Shadowing & Recording state
-  const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [recordingSeconds, setRecordingSeconds] = useState<number>(0);
-  const [recordedAudioUrl, setRecordedAudioUrl] = useState<string | null>(null);
-  const [recordedBase64, setRecordedBase64] = useState<string | null>(null);
-  const [recordedMimeType, setRecordedMimeType] = useState<string>('audio/webm');
-  
-  // AI Pronunciation Assessment state
-  const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
-  const [assessment, setAssessment] = useState<PronunciationAssessment | null>(null);
-  const [userTranscript, setUserTranscript] = useState<string>('');
-
-  const recorderRef = useRef<FrenchAudioRecorder | null>(null);
-  const timerRef = useRef<any>(null);
-
-  useEffect(() => {
-    // Reset state on sentence change
-    if (sentence) {
-      setRecordedAudioUrl(null);
-      setRecordedBase64(null);
-      setAssessment(null);
-      setUserTranscript('');
-      setIsRecording(false);
-      clearInterval(timerRef.current);
-    }
-  }, [sentence]);
+  const changeRate = (rate: number) => {
+    setSpeechRate(rate);
+    setGlobalRate(rate);
+  };
 
   if (!isOpen) return null;
-
-  const handleStartRecording = async () => {
-    stopSpeech();
-    setAssessment(null);
-
-    const recorder = new FrenchAudioRecorder();
-    recorderRef.current = recorder;
-    const ok = await recorder.start();
-    if (!ok) {
-      alert(t('sentenceDrawer.micError'));
-      return;
-    }
-
-    setIsRecording(true);
-    setRecordingSeconds(0);
-    timerRef.current = setInterval(() => {
-      setRecordingSeconds((prev) => prev + 1);
-    }, 1000);
-
-    // Optional: client-side SpeechRecognition to assist轉寫
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      try {
-        const SpeechRec = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-        const rec = new SpeechRec();
-        rec.lang = 'fr-FR';
-        rec.interimResults = false;
-        rec.onresult = (evt: any) => {
-          const transcript = evt.results[0][0].transcript;
-          setUserTranscript(transcript);
-        };
-        rec.start();
-      } catch (e) {
-        // Ignore SpeechRec errors if unsupported
-      }
-    }
-  };
-
-  const handleStopRecording = async () => {
-    if (!recorderRef.current || !isRecording) return;
-
-    clearInterval(timerRef.current);
-    setIsRecording(false);
-
-    const result = await recorderRef.current.stop();
-    if (result) {
-      const url = URL.createObjectURL(result.blob);
-      setRecordedAudioUrl(url);
-      setRecordedBase64(result.base64);
-      setRecordedMimeType(result.mimeType);
-    }
-  };
-
-  const handleAssessPronunciation = async () => {
-    if (!sentence) return;
-    setIsEvaluating(true);
-
-    try {
-      const res = await assessPronunciation({
-        referenceText: sentence,
-        audioBase64: recordedBase64 || undefined,
-        mimeType: recordedMimeType,
-        userTranscript: userTranscript || undefined,
-      });
-      setAssessment(res);
-      if (onRecordAssessmentComplete) {
-        onRecordAssessmentComplete(res, sentence);
-      }
-    } catch (err: any) {
-      console.error('Assessment failed:', err);
-      alert(t('sentenceDrawer.assessmentError'));
-    } finally {
-      setIsEvaluating(false);
-    }
-  };
 
   return (
     <Sheet onClose={() => { stopSpeech(); onClose(); }} label={t('sentenceDrawer.title')} className="md:max-w-2xl">
@@ -155,281 +56,81 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
             </div>
           ) : (
             <>
-              {/* Sentence Showcase & Audio */}
-              <div className="p-5 rounded-lg bg-white border border-ink-200 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1.5 flex-1">
-                    <span className="text-xs font-semibold text-accent-800 bg-accent-100/80 px-2 py-0.5 rounded-sm">
-                      {t('sentenceDrawer.original')}
-                    </span>
-                    <p className="font-serif text-xl sm:text-2xl font-semibold text-ink-900 leading-relaxed">
-                      « {sentenceData.sentence} »
+              {/* The sentence, its translation, and listening at a chosen speed */}
+              <section className="p-5 rounded-lg bg-white border border-ink-200 space-y-4">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-medium text-ink-500">{t('sentenceDrawer.original')}</p>
+                  <p className="font-serif text-xl sm:text-2xl font-semibold text-ink-900 leading-relaxed break-words">
+                    « {sentenceData.sentence} »
+                  </p>
+                </div>
+                <p className="text-sm text-ink-700 break-words">
+                  <span className="text-xs text-ink-500 mr-1.5">{t('sentenceDrawer.translation')}:</span>
+                  {sentenceData.translation}
+                </p>
+
+                <div className="pt-4 border-t border-ink-100 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <SpeakButton
+                      text={sentenceData.sentence}
+                      rate={speechRate}
+                      label={t('sentenceDrawer.listenAudio')}
+                      stopLabel={t('reader.stop')}
+                      showLabel
+                    />
+                    <p className="text-sm text-ink-600">
+                      {t('reader.tempo')} <span className="font-medium text-ink-900 tnum">{speechRate.toFixed(2)}×</span>
                     </p>
                   </div>
-                </div>
 
-                {/* Playback & Speed Control Section */}
-                <div className="pt-3 border-t border-ink-100 space-y-3">
-                  <div className="text-sm font-medium text-ink-700">
-                    <span className="text-ink-400 text-xs mr-1.5">{t('sentenceDrawer.translation')}:</span>
-                    {sentenceData.translation}
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-ink-500 tnum">0.5×</span>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="1.5"
+                      step="0.05"
+                      value={speechRate}
+                      onChange={(e) => changeRate(parseFloat(e.target.value))}
+                      aria-label={t('reader.tempo')}
+                      className="flex-1 min-w-0 h-2 cursor-pointer accent-accent-700"
+                    />
+                    <span className="text-xs text-ink-500 tnum">1.5×</span>
                   </div>
 
-                  {/* Playback & Speed Slider Controller */}
-                  <div className="p-3.5 rounded-lg bg-ink-50 border border-ink-200 space-y-3">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <SpeakButton
-                        text={sentenceData.sentence}
-                        rate={speechRate}
-                        label={t('sentenceDrawer.listenAudio')}
-                        stopLabel={t('reader.stop')}
-                        showLabel
-                      />
-
-                      {/* Speed Display Badge */}
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-ink-200 text-xs font-semibold text-accent-950">
-                        <span>{t('reader.tempo')}:</span>
-                        <span className="font-mono text-accent-700 text-sm font-semibold">{speechRate.toFixed(2)}x</span>
-                      </div>
-                    </div>
-
-                    {/* Speed Slider with Range 0.5x to 1.5x */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-mono font-medium text-ink-500">0.5×</span>
-                        <input
-                          type="range"
-                          min="0.5"
-                          max="1.5"
-                          step="0.05"
-                          value={speechRate}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            setSpeechRate(val);
-                            setGlobalRate(val);
-                          }}
-                          className="flex-1 h-2 bg-ink-200 rounded-md appearance-none cursor-pointer accent-accent-700 focus:outline-none"
-                        />
-                        <span className="text-xs font-mono font-medium text-ink-500">1.5×</span>
-                      </div>
-
-                      {/* Quick Presets */}
-                      <div className="flex items-center justify-between text-xs text-ink-500 pt-1">
-                        <span className="text-ink-400">{t('reader.quickPresets')}</span>
-                        <div className="flex items-center gap-1.5">
-                          {[0.5, 0.75, 1.0, 1.25, 1.5].map((rate) => (
-                            <button
-                              key={rate}
-                              onClick={() => {
-                                setSpeechRate(rate);
-                                setGlobalRate(rate);
-                              }}
-                              className={`px-2 py-0.5 rounded-md font-mono transition-all ${
-                                Math.abs(speechRate - rate) < 0.01
-                                  ? 'bg-accent-700 text-white font-semibold '
-                                  : 'bg-white hover:bg-ink-200/70 border border-ink-200 text-ink-600'
-                              }`}
-                            >
-                              {rate.toFixed( rate === 1.0 || rate === 0.5 || rate === 1.5 ? 1 : 2 )}x
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                  {/* Five equal columns, so the presets fit any width instead of overflowing */}
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {[0.5, 0.75, 1.0, 1.25, 1.5].map((rate) => {
+                      const active = Math.abs(speechRate - rate) < 0.01;
+                      return (
+                        <button
+                          key={rate}
+                          type="button"
+                          onClick={() => changeRate(rate)}
+                          aria-pressed={active}
+                          className={`h-9 min-w-0 rounded-md text-xs tnum cursor-pointer ${
+                            active
+                              ? 'bg-accent-700 text-white font-medium'
+                              : 'border border-ink-200 bg-white text-ink-700 hover:bg-ink-100'
+                          }`}
+                        >
+                          {rate}×
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
+              </section>
 
-              {/* Shadowing & AI Pronunciation Coach Card */}
-              <div className="p-5 rounded-lg bg-ink-50 text-ink-900 border border-ink-200 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-md bg-accent-100 text-accent-800 flex items-center justify-center">
-                      <Mic className="w-4 h-4 text-ink-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-ink-900">
-                        {t('sentenceDrawer.shadowingCoach')}
-                      </h4>
-                      <p className="text-xs text-ink-500">
-                        {t('sentenceDrawer.sub')}
-                      </p>
-                    </div>
-                  </div>
-                  {sentenceData.shadowingGuide?.speedTip && (
-                    <span className="text-xs text-accent-900 bg-accent-100 px-2 py-0.5 rounded-md hidden sm:inline">
-                      {sentenceData.shadowingGuide.speedTip}
-                    </span>
-                  )}
-                </div>
-
-                {/* Shadowing rhythm & liaisons tips */}
-                {sentenceData.shadowingGuide && (
-                  <div className="p-3 rounded-lg bg-white border border-ink-200 text-xs space-y-1.5">
-                    {sentenceData.shadowingGuide.rhythmGroups && sentenceData.shadowingGuide.rhythmGroups.length > 0 && (
-                      <div className="text-ink-700">
-                        <span className="text-accent-800 font-semibold">{t('sentenceDrawer.rhythmGroups')} </span>
-                        <span className="font-mono text-ink-800">
-                          {sentenceData.shadowingGuide.rhythmGroups.join(' // ')}
-                        </span>
-                      </div>
-                    )}
-                    {sentenceData.shadowingGuide.liaisons && sentenceData.shadowingGuide.liaisons.length > 0 && (
-                      <div className="text-ink-700">
-                        <span className="text-accent-800 font-semibold">{t('sentenceDrawer.liaisons')} </span>
-                        <span>{sentenceData.shadowingGuide.liaisons.join('； ')}</span>
-                      </div>
-                    )}
-                    {sentenceData.shadowingGuide.intonation && (
-                      <div className="text-ink-700">
-                        <span className="text-accent-800 font-semibold">{t('sentenceDrawer.intonation')} </span>
-                        <span>{sentenceData.shadowingGuide.intonation}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Recorder Buttons */}
-                <div className="flex items-center gap-3 flex-wrap">
-                  {!isRecording ? (
-                    <button
-                      onClick={handleStartRecording}
-                      className="flex items-center gap-2 h-10 px-4 rounded-md bg-bad-600 hover:bg-bad-700 text-ink-900 text-sm font-medium transition-all active:scale-95 cursor-pointer"
-                    >
-                      <Mic className="w-4 h-4 text-ink-900 animate-pulse" />
-                      <span>{recordedAudioUrl ? t('sentenceDrawer.recordShadowing') : t('sentenceDrawer.recordShadowing')}</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleStopRecording}
-                      className="flex items-center gap-2 h-10 px-4 rounded-md bg-accent-500 hover:bg-accent-600 text-accent-950 text-sm font-medium transition-all active:scale-95 cursor-pointer"
-                    >
-                      <Square className="w-4 h-4 fill-accent-950" />
-                      <span>{t('common.done')} ({recordingSeconds}s)</span>
-                    </button>
-                  )}
-
-                  {recordedAudioUrl && !isRecording && (
-                    <div className="flex items-center gap-2">
-                      <audio controls src={recordedAudioUrl} className="h-8 max-w-[200px]" />
-                      <button
-                        onClick={handleAssessPronunciation}
-                        disabled={isEvaluating}
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-ok-600 hover:bg-ok-700 disabled:opacity-50 text-ink-900 font-semibold text-xs transition-all active:scale-95 cursor-pointer"
-                      >
-                        {isEvaluating ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>{t('sentenceDrawer.listeningCoach')}</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-3.5 h-3.5 text-ink-600" />
-                            <span>{t('sentenceDrawer.shadowingCoach')}</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* AI Pronunciation Evaluation Results */}
-                {assessment && (
-                  <div className="p-4 rounded-lg bg-white border border-ink-200 space-y-3 mt-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Award className="w-5 h-5 text-ink-600" />
-                        <span className="font-semibold text-sm text-ink-900">
-                          {t('sentenceDrawer.overallScore')}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-2xl font-serif font-semibold text-accent-800">
-                          {assessment.overallScore}
-                        </span>
-                        <span className="text-xs text-ink-500">/ 100</span>
-                      </div>
-                    </div>
-
-                    {/* Sub-scores */}
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="p-2 rounded-md bg-white border border-ink-200">
-                        <div className="text-xs text-ink-500">{t('sentenceDrawer.accuracy')}</div>
-                        <div className="text-sm font-semibold text-ok-700">
-                          {assessment.accuracyScore}
-                        </div>
-                      </div>
-                      <div className="p-2 rounded-md bg-white border border-ink-200">
-                        <div className="text-xs text-ink-500">{t('sentenceDrawer.fluency')}</div>
-                        <div className="text-sm font-semibold text-accent-800">
-                          {assessment.fluencyScore}
-                        </div>
-                      </div>
-                      <div className="p-2 rounded-md bg-white border border-ink-200">
-                        <div className="text-xs text-ink-500">{t('sentenceDrawer.rhythm')}</div>
-                        <div className="text-sm font-semibold text-purple-400">
-                          {assessment.rhythmScore}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Phoneme Feedback */}
-                    {assessment.phonemeFeedback && assessment.phonemeFeedback.length > 0 && (
-                      <div className="space-y-1.5 pt-1">
-                        <span className="text-xs font-semibold text-accent-800">
-                          {t('sentenceDrawer.coachFeedback')}:
-                        </span>
-                        <div className="space-y-1">
-                          {assessment.phonemeFeedback.map((item, pIdx) => (
-                            <div
-                              key={pIdx}
-                              className={`p-2 rounded-md text-xs flex items-start gap-2 ${
-                                item.status === 'excellent'
-                                  ? 'bg-ok-50 border border-ok-200 text-ok-900'
-                                  : item.status === 'acceptable'
-                                  ? 'bg-accent-50 border border-accent-200 text-accent-900'
-                                  : 'bg-bad-50 border border-bad-200 text-bad-900'
-                              }`}
-                            >
-                              <span className="font-mono font-semibold px-1.5 py-0.5 rounded-sm bg-black/40 text-accent-800">
-                                {item.phoneme}
-                              </span>
-                              <div className="flex-1">
-                                <span className="font-semibold">{item.targetWord}: </span>
-                                <span>{item.tip}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Corrections & Advice */}
-                    {assessment.corrections && assessment.corrections.length > 0 && (
-                      <div className="space-y-1.5">
-                        <span className="text-xs font-semibold text-accent-800">
-                          {t('sentenceDrawer.coachFeedback')}:
-                        </span>
-                        {assessment.corrections.map((corr, cIdx) => (
-                          <div key={cIdx} className="p-2 rounded-md bg-white text-xs text-ink-700 space-y-0.5">
-                            <div className="font-semibold text-accent-800">
-                              « {corr.word} » {corr.expectedIPA}
-                            </div>
-                            <div className="text-ink-500 text-xs">{corr.advice}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Coach Notes */}
-                    {assessment.coachingNotes && (
-                      <div className="p-2.5 rounded-md bg-ink-50 border border-ink-200 text-xs text-ink-700 italic">
-                        {assessment.coachingNotes}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              {/* Shadowing: how to say it, then record and check */}
+              <section className="p-5 rounded-lg bg-white border border-ink-200 space-y-5" aria-labelledby="shadowing-title">
+                <h4 id="shadowing-title" className="font-serif font-semibold text-base text-ink-900 flex items-center gap-2">
+                  <Mic className="w-4 h-4 text-ink-600" aria-hidden="true" />
+                  <span>{t('shadowing.title')}</span>
+                </h4>
+                {sentenceData.shadowingGuide && <ShadowingGuide guide={sentenceData.shadowingGuide} />}
+                <ShadowingRecorder referenceText={sentenceData.sentence} onAssessed={onRecordAssessmentComplete} />
+              </section>
 
               {/* Syntactic Decomposition */}
               {sentenceData.syntaxStructure && sentenceData.syntaxStructure.length > 0 && (
