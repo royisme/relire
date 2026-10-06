@@ -22,6 +22,7 @@ Recommended social preview: use a clean crop of `docs/media/reader.jpg` or a pur
 
 Before posting publicly:
 
+- In Settings → Pages, set the source to **GitHub Actions** (the deploy workflow needs this once, before it can publish).
 - Merge the discovery/Pages PR and verify the live demo.
 - Create a GitHub release named `v0.1.0`.
 - Add the website URL, description and topics in repository settings.
