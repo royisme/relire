@@ -8,6 +8,33 @@ It runs entirely in your browser. There is no app server and no account. You bri
 
 > **What it is not.** It does not cover the listening or writing tests, it has no TCF mock exams, and its scores are AI estimates, not official ones. It is not affiliated with or endorsed by France Éducation international or IRCC. Use it alongside real past papers and a teacher.
 
+## A look inside
+
+Read a French article with adjustable text size and playback speed.
+
+![French article in the Relire reader](docs/media/reader.jpg)
+
+Tap a word to see its meaning in context, IPA, pronunciation guidance and verb conjugations beside the article.
+
+![Contextual analysis of affronter, with IPA and verb conjugations](docs/media/word-analysis.jpg)
+
+Break down a sentence into grammatical parts while keeping the original text in view.
+
+![Sentence syntax split into labelled grammatical segments](docs/media/sentence-syntax.jpg)
+
+<details>
+<summary>Article library and shadowing guide</summary>
+
+Search and filter articles by CEFR level.
+
+![Article library with search and CEFR level filters](docs/media/library.jpg)
+
+Follow the sentence translation and shadowing guide, and adjust playback speed as you practise.
+
+![Sentence translation and shadowing guide](docs/media/sentence-shadowing.jpg)
+
+</details>
+
 ## What you can do
 
 - **Keep a library of articles.** Three B1 to C1 samples are included. Paste your own, then search, filter by level, sort, edit or delete them from a simple list. Choose text size and theme, and slow the audio down to 0.5×.
@@ -47,7 +74,7 @@ Reading, your saved words and vocabulary review work offline. Anything that call
 
 ### Privacy
 
-Your articles, vocabulary and stats are stored in this browser's IndexedDB, and your API key and settings in its local storage. You can export and restore a backup from Settings (backups never include the key). Browsers can clear site data when space runs low or after long inactivity, particularly Safari for sites that are not installed, so install the app, use **Protect my data** in Settings, and export a backup now and then. When you use an AI feature, the word, sentence or recording is sent from your browser straight to Google's Gemini API using your key. Nothing goes through any other server. Explanations, drills and pronunciation audio you have already paid for are saved on your device, so looking up or playing the same thing again costs nothing and audio works offline. Words, sentences and drills are kept for as long as you leave them (sentences and drills 30 days); audio for words in your vocabulary is kept for good, the rest is trimmed past 200 MB. Settings shows what is saved and can clear it, and a backup can optionally include your vocabulary's audio. Anyone with access to your browser profile can read the stored key, so use a key you can revoke.
+Your articles, vocabulary and stats are stored in this browser's IndexedDB, and your API key and settings in its local storage. You can export and restore a backup from Settings (backups never include the key). Browsers can clear site data when space runs low or after long inactivity, particularly Safari for sites that are not installed, so install the app, use **Protect my data** in Settings, and export a backup now and then. When you use an AI feature, the word, sentence or recording is sent from your browser straight to Google's Gemini API using your key. Nothing goes through any other server. Generated explanations, drills and pronunciation audio are cached on your device. Reusing a cached result or audio clip needs no further API call, and cached audio works offline. Word analyses have no expiry; sentence analyses and drills expire after 30 days. Audio for saved vocabulary is protected from automatic cleanup; other clips may be removed when the audio store exceeds 200 MB. Settings shows what is saved and can clear it, and a backup can optionally include your vocabulary's audio. Anyone with access to your browser profile can read the stored key, so use a key you can revoke.
 
 ## How it is built
 
@@ -55,7 +82,8 @@ React 19, Vite, Tailwind CSS 4, i18next, and AI providers called directly from t
 
 ```
 src/services/ai/         providers, prompt templates and tasks; the UI calls src/services/api.ts
-src/App.tsx              app state and localStorage persistence
+src/App.tsx              app state and screen navigation
+src/storage/             IndexedDB persistence, answer cache and audio storage
 src/components/          one file per screen or overlay
 src/utils/srs.ts         SM-2 scheduling
 ```
