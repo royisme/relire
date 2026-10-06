@@ -20,8 +20,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
   onNeedsKey,
   onRecordAssessmentComplete,
 }) => {
-  const { t, i18n } = useTranslation();
-  const isEn = i18n.language === 'en';
+  const { t } = useTranslation();
   const [activePracticeType, setActivePracticeType] = useState<'syntax' | 'oral' | 'cloze'>('syntax');
   const [isLoadingDeck, setIsLoadingDeck] = useState(false);
   const [deckError, setDeckError] = useState<string | null>(null);
