@@ -25,12 +25,58 @@ jobs:
         run: bun run lint
       - name: Translations
         run: bun run i18n:check
-      - name: Build
+      - name: Build application
         run: bun run build
+
+      - name: Assemble Pages site
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf site
+          mkdir -p site/app site/assets site/zh
+
+          # Existing Relire application: unchanged build, deployed under /app/.
+          cp -R dist/. site/app/
+
+          # Static marketing/SEO layer at the Pages root.
+          cp marketing/index.html site/index.html
+          cp marketing/styles.css site/styles.css
+          cp marketing/robots.txt site/robots.txt
+          cp marketing/sitemap.xml site/sitemap.xml
+          cp marketing/sw.js site/sw.js
+          cp marketing/zh/index.html site/zh/index.html
+
+          # Reuse existing product screenshots and app icons as marketing assets.
+          cp -R docs/media/. site/assets/
+          cp public/icon.svg site/icon.svg
+          cp public/pwa-512x512.png site/pwa-512x512.png
+
+          # The app is a product surface, not a competing search landing page.
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("site/app/index.html")
+          html = path.read_text(encoding="utf-8")
+
+          old_robots = '<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />'
+          if old_robots in html:
+              html = html.replace(old_robots, '<meta name="robots" content="noindex,follow" />')
+          elif 'name="robots"' not in html:
+              html = html.replace("<head>", '<head>\n    <meta name="robots" content="noindex,follow" />', 1)
+
+          old_canonical = '<link rel="canonical" href="https://royisme.github.io/relire/" />'
+          if old_canonical in html:
+              html = html.replace(old_canonical, '<link rel="canonical" href="https://royisme.github.io/relire/app/" />')
+
+          path.write_text(html, encoding="utf-8")
+          PY
+
+          touch site/.nojekyll
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
     environment:

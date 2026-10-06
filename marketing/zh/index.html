@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relire — TCF Canada 法语精读与发音训练</title>
+  <meta name="description" content="面向 TCF Canada 学习者的开源法语精读与发音训练工具：真实文章精读、语境词义、IPA、语法拆解、影子跟读、AI 发音反馈和间隔重复。" />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+  <link rel="canonical" href="https://royisme.github.io/relire/zh/" />
+  <link rel="alternate" hreflang="en" href="https://royisme.github.io/relire/" />
+  <link rel="alternate" hreflang="zh-CN" href="https://royisme.github.io/relire/zh/" />
+  <link rel="alternate" hreflang="x-default" href="https://royisme.github.io/relire/" />
+  <meta property="og:title" content="Relire — 从真实法语文本中学习" />
+  <meta property="og:description" content="读文章、理解语境、影子跟读、改善发音。面向 TCF Canada 学习者的开源法语训练工具。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://royisme.github.io/relire/zh/" />
+  <meta property="og:site_name" content="Relire" />
+  <meta property="og:image" content="https://royisme.github.io/relire/assets/reader.zh-CN.jpg" />
+  <meta property="og:image:alt" content="Relire 法语精读界面" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="../icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="../styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;0,8..60,700;1,8..60,600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="../">Relire</a>
+      <nav class="nav-links" aria-label="主导航">
+        <a href="#how">学习流程</a>
+        <a href="#features">功能</a>
+        <a href="#faq">常见问题</a>
+        <a href="../">English</a>
+        <a class="button small" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">GitHub</a>
+        <a class="button small primary" href="../app/">打开 Relire</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">法语学习 · TCF Canada · 开源</div>
+          <h1>从真实法语文本中学习。</h1>
+          <p class="lede">读一篇文章，点开不熟悉的词，拆解难句，跟着原句影子跟读，再获得发音反馈——整个过程不离开当前阅读语境。</p>
+          <div class="hero-actions">
+            <a class="button primary" href="../app/">开始练习</a>
+            <a class="button" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">★ 在 GitHub Star</a>
+          </div>
+          <p class="micro">纯浏览器运行 · 无需账号 · 本地优先 · 使用自己的 Gemini API Key</p>
+        </div>
+        <div class="hero-shot">
+          <img src="../assets/reader.zh-CN.jpg" alt="Relire 法语文章精读界面" />
+        </div>
+      </div>
+    </section>
+
+    <section class="trust-strip">
+      <div class="container trust-list">
+        <div class="trust-item"><strong>开源</strong><span>MIT License，代码公开在 GitHub</span></div>
+        <div class="trust-item"><strong>本地优先</strong><span>学习数据保存在你的浏览器</span></div>
+        <div class="trust-item"><strong>无需账号</strong><span>打开应用即可开始阅读</span></div>
+        <div class="trust-item"><strong>自带 AI Key</strong><span>使用自己的 Gemini API Key</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <div class="container">
+        <div class="section-head">
+          <h2>把学习变成一条连续链路。</h2>
+          <p>Relire 围绕“精读”设计：在同一篇文章中，把词汇、语法、发音和复习串起来，而不是在多个工具之间反复切换。</p>
+        </div>
+        <div class="steps">
+          <article class="card"><div class="step-no">01 · 阅读</div><h3>读真实法语</h3><p>粘贴自己的文章，或者从带 CEFR 难度的示例开始，按自己的节奏阅读。</p></article>
+          <article class="card"><div class="step-no">02 · 理解</div><h3>点开卡住你的地方</h3><p>看单词在当前语境中的含义，或者把长难句拆成语法成分、搭配和句型。</p></article>
+          <article class="card"><div class="step-no">03 · 跟读</div><h3>把句子说出来</h3><p>按照意群、联诵和语调提示进行影子跟读，再录下自己的发音。</p></article>
+          <article class="card"><div class="step-no">04 · 记住</div><h3>复习真正遇到的词</h3><p>把有价值的词放进生词本，用 SM-2 间隔重复安排复习。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-head">
+          <h2>重点做好阅读与发音。</h2>
+          <p>Relire 不试图取代一整套法语课程，而是把真实文本阅读过程中最常连在一起的两个任务——理解与发音——做深。</p>
+        </div>
+        <div class="showcase">
+          <figure class="shot-card">
+            <img src="../assets/word-analysis.zh-CN.jpg" alt="Relire 法语单词语境释义、IPA 与动词变位" />
+            <figcaption class="shot-copy"><h3>语境里的词汇</h3><p>不离开文章就能看到当前语境中的释义、IPA、发音提示、时态和动词变位。</p></figcaption>
+          </figure>
+          <figure class="shot-card">
+            <img src="../assets/sentence-syntax.zh-CN.jpg" alt="Relire 法语长句语法和句法拆解" />
+            <figcaption class="shot-copy"><h3>句子级理解</h3><p>把长难句拆成语法角色、常见搭配和适合跟读的自然意群。</p></figcaption>
+          </figure>
+        </div>
+
+        <div class="features" style="margin-top:24px">
+          <article class="card feature"><div class="feature-kicker">发音</div><h3>影子跟读反馈</h3><p>录下整句朗读，针对音素、联诵、语调和整体表现获得反馈。</p></article>
+          <article class="card feature"><div class="feature-kicker">词汇</div><h3>间隔重复</h3><p>把你真实读到的词变成个人生词卡，并按 SM-2 安排复习。</p></article>
+          <article class="card feature"><div class="feature-kicker">发音参考</div><h3>法语 IPA 音表</h3><p>遇到不确定的发音规则时，可以直接查看 IPA 并听示例单词。</p></article>
+          <article class="card feature"><div class="feature-kicker">练习</div><h3>基于当前文章出题</h3><p>从正在精读的内容生成句子重组、语法填空和口语跟读练习。</p></article>
+          <article class="card feature"><div class="feature-kicker">隐私</div><h3>浏览器本地存储</h3><p>文章、生词和学习进度保存在本机，需要换设备时再主动备份。</p></article>
+          <article class="card feature"><div class="feature-kicker">可控</div><h3>AI 提示词可编辑</h3><p>可以查看和修改生成讲解时使用的提示词，而不是把 AI 当成黑盒。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container split">
+        <div>
+          <div class="eyebrow">TCF Canada 日常学习</div>
+          <h2>适合放在课程与模考之间。</h2>
+          <p class="lede">Relire 不是模考系统，而是每天把“不熟悉的法语”逐步变成“能理解、能读出来”的训练层。</p>
+          <div class="checks">
+            <div class="check">用真实法语文章建立阅读流畅度。</div>
+            <div class="check">在语境中识别语法、搭配和句型。</div>
+            <div class="check">把书面法语连接到节奏、联诵与语调。</div>
+            <div class="check">把真正有价值的词放进持续复习循环。</div>
+          </div>
+          <p class="note">Relire 是独立开源项目，与 France Éducation international、IRCC 没有隶属或背书关系。AI 发音评分仅供练习参考，不是 TCF 官方成绩。</p>
+        </div>
+        <div class="shot-card">
+          <img src="../assets/sentence-shadowing.jpg" alt="Relire 法语影子跟读提示与播放控制" />
+          <div class="shot-copy"><h3>从理解走到开口</h3><p>句子理解之后，直接练它的节奏和发音，同时保留原文语境，不需要切换工具。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="container split">
+        <div>
+          <div class="eyebrow">常见问题</div>
+          <h2>开始之前。</h2>
+          <p class="lede">Relire 尽量保持简单：一个浏览器、需要 AI 功能时配置自己的 Key，再加上你真正想读的法语文本。</p>
+        </div>
+        <div class="faq">
+          <details><summary>Relire 免费吗？</summary><p>是。项目采用 MIT License 开源。AI 功能使用你自己的 Gemini API Key，因此相关额度与费用由你自己的提供方账号决定。</p></details>
+          <details><summary>需要注册账号吗？</summary><p>不需要 Relire 账号。文章、生词和进度保存在你的浏览器中。</p></details>
+          <details><summary>没有 API Key 可以做什么？</summary><p>仍然可以打开应用、阅读示例或自己导入的文本，并使用已经保存在本地的学习数据。AI 解析、语音生成和发音评测需要配置 Key。</p></details>
+          <details><summary>这是官方 TCF Canada 备考工具吗？</summary><p>不是。Relire 是独立的法语阅读与发音学习工具。备考时仍应结合官方考试信息、模考题和教师指导。</p></details>
+          <details><summary>可以看源码或者反馈问题吗？</summary><p>可以。完整源码、架构说明和 Issue tracker 都在 GitHub。</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="container">
+        <div class="eyebrow">阅读 · 理解 · 跟读 · 改进</div>
+        <h2>直接用你正在读的法语来学习。</h2>
+        <p>打开 Relire，先用示例文章试一遍完整流程，再决定这种精读方式是否适合你。</p>
+        <div class="hero-actions">
+          <a class="button primary" href="../app/">打开 Relire</a>
+          <a class="button" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">查看 GitHub 源码</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-row">
+      <span>Relire · 开源法语学习工具</span>
+      <div class="footer-links">
+        <a href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://github.com/royisme/relire/issues" target="_blank" rel="noreferrer">Issues</a>
+        <a href="https://github.com/royisme/relire/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
+        <a href="https://x.com/royzhu655858" target="_blank" rel="noreferrer">X</a>
+        <a href="../">English</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
