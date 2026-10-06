@@ -376,23 +376,6 @@ export default function App() {
         )}
       </main>
 
-      <footer className="border-t border-ink-200 bg-ink-50">
-        <div className="max-w-5xl mx-auto px-3 sm:px-6 py-5 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between text-sm text-ink-600">
-          <span>{t('footer.openSource')}</span>
-          <nav className="flex flex-wrap items-center gap-x-4 gap-y-2" aria-label={t('footer.links')}>
-            <a className="hover:text-ink-900 underline-offset-4 hover:underline" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">
-              {t('footer.github')}
-            </a>
-            <a className="hover:text-ink-900 underline-offset-4 hover:underline" href="https://github.com/royisme/relire/issues" target="_blank" rel="noreferrer">
-              {t('footer.feedback')}
-            </a>
-            <a className="hover:text-ink-900 underline-offset-4 hover:underline" href="https://github.com/royisme/relire/blob/main/LICENSE" target="_blank" rel="noreferrer">
-              {t('footer.license')}
-            </a>
-          </nav>
-        </div>
-      </footer>
-
       {/* Word Detail Floating Modal */}
       <WordDetailModal
         isOpen={isWordModalOpen}
