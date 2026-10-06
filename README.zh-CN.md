@@ -89,7 +89,7 @@ bun run preview    # 在本地预览
 
 ## 技术栈
 
-React 19、Vite、Tailwind CSS 4、i18next，以及在浏览器里直接调用的 AI 提供方（Gemini 通过 `@google/genai`）。`PRODUCT.md` 说明产品面向谁以及设计原则，`DESIGN.md` 是视觉规范，`CLAUDE.md` 是给贡献者的代码地图。
+React 19、Vite、Tailwind CSS 4、i18next，以及在浏览器里直接调用的 AI 提供方（Gemini 通过 `@google/genai`）。`PRODUCT.md` 说明产品面向谁以及设计原则，`DESIGN.md` 是视觉规范，`docs/architecture.md` 是代码地图，`CLAUDE.md` 和 `.claude/` 是给 AI 编码助手的指引。
 
 ```
 src/services/ai/         提供方、提示词模板和任务；界面调用 src/services/api.ts
