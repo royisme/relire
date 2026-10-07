@@ -8,7 +8,7 @@ Warm-neutral paper, ink-coloured type, one blue accent. The article column is th
 
 ## Themes
 
-Four choices, set from the header (or the reader's swatches): **Match system** (light or dark, following the OS, live), **Light** (warm paper), **Sepia** (cream paper, brown ink) and **Dark** (warm charcoal, never pure black). `src/theme/theme.ts` stores the choice (`relire_theme`) and sets `<html data-theme>`; an inline script in `index.html` does the same before first paint, so there is no flash. Every theme redefines the same tokens in `src/index.css`, so components use one set of classes.
+Four choices, set from the theme menu in the header: **Match system** (light or dark, following the OS, live), **Light** (warm paper), **Sepia** (cream paper, brown ink) and **Dark** (warm charcoal, never pure black). `src/theme/theme.ts` stores the choice (`relire_theme`) and sets `<html data-theme>`; an inline script in `index.html` does the same before first paint, so there is no flash. Every theme redefines the same tokens in `src/index.css`, so components use one set of classes.
 
 ## Colour
 

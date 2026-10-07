@@ -1,12 +1,16 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, ArrowLeft, ChevronDown, TextSearch } from 'lucide-react';
+import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, Pause, Play } from 'lucide-react';
 import { Article, WordAnalysis, SentenceAnalysis } from '../types';
-import { stopSpeech, setGlobalRate, speechKey } from '../utils/speech';
+import {
+  stopSpeech, setGlobalRate, speechKey,
+  startSequence, toggleSequence, stepSequence, stopSequence, getSequenceState, subscribeSequence,
+} from '../utils/speech';
+import { splitArticle } from '../utils/sentences';
+import { Button } from './ui/button';
+import { ArticlePlayer } from './ArticlePlayer';
 import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
-import { useTheme } from '../theme/useTheme';
-import { ThemeSwatch } from './ui/theme-swatch';
 
 interface ReaderViewProps {
   currentArticle: Article;
@@ -26,7 +30,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   activeSentence,
 }) => {
   const { t, i18n } = useTranslation();
-  const { preference: themePref, setPreference: setThemePref } = useTheme();
   // Reading preferences
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('lg');
   // Sentences are identified by position, not text, because the same sentence can repeat ("Oui.").
@@ -180,11 +183,34 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     });
   };
 
-  // Split article content into paragraphs and sentences
-  const paragraphs = currentArticle.content
-    .split(/\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  // Paragraphs and sentences, cut the same way for reading and for listening.
+  const paragraphs = useMemo(() => splitArticle(currentArticle.content), [currentArticle.content]);
+  const flatSentences = useMemo(() => paragraphs.flat(), [paragraphs]);
+
+  // Listening to the whole article: one sentence after another, the current one highlighted.
+  const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
+  const listening = sequence.id === currentArticle.id;
+  const listeningId = listening ? flatSentences[sequence.index]?.id ?? null : null;
+
+  const toggleListening = () => {
+    if (listening) toggleSequence();
+    else startSequence(currentArticle.id, flatSentences.map((s) => s.text));
+  };
+
+  // Keep the sentence being read on screen, clear of the header and the player.
+  useEffect(() => {
+    if (!listeningId) return;
+    const el = sentenceEls.current.get(listeningId)?.el;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 72 || r.bottom > window.innerHeight - 112) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+    }
+  }, [listeningId]);
+
+  // A different article, or leaving the reader, ends listening.
+  useEffect(() => () => stopSequence(), [currentArticle.id]);
 
   const getFontSizeClass = () => {
     switch (fontSize) {
@@ -200,15 +226,17 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   };
 
   // Which sentence the actions belong to when nothing is hovered: the one playing, else the one open in the drawer.
-  const activeKey = playingKey ?? (activeSentence ? speechKey(activeSentence) : null);
+  // While listening the pill does not chase the voice; it stays with what the reader points at.
+  const activeKey = (listening ? null : playingKey) ?? (activeSentence ? speechKey(activeSentence) : null);
   // Phase of the sentence the pill is showing, so its own button can theme itself (hooks cannot be conditional).
   const toolbarPhase = useSpeechPhase(toolbar?.text ?? '');
 
   useLayoutEffect(() => {
     const NAV = 56; // sticky header
-    // Measured pill size: h-7 buttons + p-1 padding + border (+ pt-1 on the wrapper) = 71 x 42.
+    // Measured pill size: h-7 buttons + p-1 padding + border = 71 x 38, plus an 8px invisible lead-in on its left.
     const TOOLBAR_WIDTH = 71;
-    const TOOLBAR_HEIGHT = 42;
+    const TOOLBAR_HEIGHT = 38;
+    const LEAD = 8;
     let frame = 0;
 
     const place = () => {
@@ -230,23 +258,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         setToolbar((prev) => (prev ? null : prev));
         return;
       }
-      // Anchor the pill to the end of the sentence: the last visible line of the sentence
+      // The pill sits on the sentence's last visible line, right after its final character, so the pointer
+      // reaches it by moving along that line and never crosses another sentence (which would retarget the
+      // pill). It is centred on the line and no taller than the line pitch, so it covers no other line.
       const lastLine = lines[lines.length - 1];
       const box = article.getBoundingClientRect();
-
-      // Vertical: appear directly below the sentence end, covering subsequent text as expected.
-      // If near the bottom of the viewport, flip above the line.
-      let top = lastLine.bottom + 2 - box.top;
-      if (lastLine.bottom + 2 + TOOLBAR_HEIGHT > vh - 8) {
-        top = Math.max(lastLine.top - TOOLBAR_HEIGHT - 4 - box.top, 8);
-      }
-
-      // Horizontal: start near the end of the sentence (lastLine.right)
-      const endX = lastLine.right - box.left;
-      const left = Math.min(
-        Math.max(endX - 4, 8),
-        box.width - TOOLBAR_WIDTH - 8
-      );
+      const top = (lastLine.top + lastLine.bottom) / 2 - TOOLBAR_HEIGHT / 2 - box.top;
+      // The invisible lead-in overlaps the sentence end, so there is no gap to cross; when the sentence ends
+      // too near the column edge, the pill moves left over the sentence's own last words instead.
+      const left = Math.min(lastLine.right - box.left - LEAD + 2, box.width - TOOLBAR_WIDTH - LEAD - 6);
 
       const next = {
         text: target.text,
@@ -273,9 +293,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     };
   }, [hoveredId, anchorId, activeKey, fontSize, currentArticle.id]);
 
-  // The reader's swatches set the app theme; the article follows it like every other surface.
-  const readerThemes = ['light', 'sepia', 'dark'] as const;
-
   const toolbarButton = (active: boolean) =>
     active ? 'bg-accent-700 text-on-fill hover:bg-accent-800' : 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
 
@@ -285,7 +302,9 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     }`;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+    <>
+    {/* Bottom padding leaves room for the player, so the last lines can be read above it. */}
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-28 space-y-4">
       {/* Reading toolbar: one row, article on the left, preferences on the right */}
       <div ref={controlsRef} className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
         <button
@@ -295,24 +314,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           <ArrowLeft className="w-4 h-4" />
           <span>{t('library.back')}</span>
         </button>
-
-        <div role="group" aria-label={t('theme.label')} className="flex items-center gap-1">
-          {readerThemes.map((id) => {
-            const active = themePref === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setThemePref(id)}
-                aria-pressed={active}
-                aria-label={t(`theme.${id}`)}
-                title={t(`theme.${id}`)}
-                className={`h-8 w-8 inline-flex items-center justify-center rounded-md cursor-pointer ${active ? 'bg-ink-100' : 'hover:bg-ink-100'}`}
-              >
-                <ThemeSwatch theme={id} />
-              </button>
-            );
-          })}
-        </div>
 
         <div className="flex items-center rounded-md border border-ink-200 bg-surface p-0.5" role="group" aria-label={t('reader.textSize')}>
           {(['sm', 'base', 'lg', 'xl'] as const).map((sz, i) => (
@@ -330,6 +331,22 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             </button>
           ))}
         </div>
+
+        <Button
+          variant="outline"
+          onClick={toggleListening}
+          aria-pressed={listening}
+          title={t('reader.listenAll')}
+        >
+          {listening && (speech.phase === 'playing' || speech.phase === 'loading') ? (
+            <Pause className="w-4 h-4" aria-hidden="true" />
+          ) : listening ? (
+            <Play className="w-4 h-4" aria-hidden="true" />
+          ) : (
+            <Headphones className="w-4 h-4" aria-hidden="true" />
+          )}
+          <span>{t('reader.listenAll')}</span>
+        </Button>
 
         <button
           onClick={() => setIsSpeedControlOpen(!isSpeedControlOpen)}
@@ -398,24 +415,19 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
         {/* Article Paragraphs */}
         <div className="space-y-5">
-          {paragraphs.map((p, pIdx) => {
-            // Split paragraph into sentences by punctuation (. ! ? « » :)
-            const sentences = p
-              .match(/[^.!?:]+[.!?:]+/g) || [p];
-
+          {paragraphs.map((sentences, pIdx) => {
             return (
               <p key={pIdx}>
-                {sentences.map((sent, sIdx) => {
-                  const cleanSentence = sent.trim();
-                  const id = `${pIdx}-${sIdx}`;
+                {sentences.map(({ id, raw: sent, text: cleanSentence }) => {
                   const isHovered = hoveredId === id;
                   const key = speechKey(cleanSentence);
                   const isActive = activeSentence === cleanSentence;
-                  const isPlaying = playingKey === key;
+                  // While listening, the position decides (the same sentence can repeat); otherwise the text.
+                  const isPlaying = listening ? listeningId === id : playingKey === key;
 
                   return (
                     <span
-                      key={sIdx}
+                      key={id}
                       data-sentence
                       ref={(el) => {
                         if (el) sentenceEls.current.set(id, { el, text: cleanSentence, key });
@@ -449,7 +461,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             onPointerEnter={(e) => e.pointerType === 'mouse' && cancelClear()}
             onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
             style={{ top: toolbar.top, left: toolbar.left }}
-            className="absolute z-20 pt-1 anim-fade select-none"
+            className="absolute z-20 pl-2 anim-fade select-none"
           >
             <div
               className="flex items-center gap-0.5 p-1 rounded-lg border border-ink-300 bg-surface text-ink-900 shadow-lg font-sans text-xs"
@@ -476,5 +488,19 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         )}
       </article>
     </div>
+
+      {/* Outside the spaced column: as its last child it would add a margin to the article. */}
+      {listening && (
+        <ArticlePlayer
+          index={sequence.index}
+          total={sequence.total}
+          phase={speech.phase}
+          failed={sequence.failed}
+          onToggle={toggleSequence}
+          onStep={stepSequence}
+          onStop={stopSequence}
+        />
+      )}
+    </>
   );
 };

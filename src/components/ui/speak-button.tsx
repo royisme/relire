@@ -30,7 +30,7 @@ export function useSpeechPhase(text: string): SpeechPhase {
 export function SpeakIcon({ phase, className }: { phase: SpeechPhase; className?: string }) {
   const cls = cn('w-4 h-4', className);
   if (phase === 'loading') return <Loader2 className={cn(cls, 'animate-spin')} aria-hidden="true" />;
-  if (phase === 'playing') return <Square className={cn(cls, 'fill-current')} aria-hidden="true" />;
+  if (phase === 'playing' || phase === 'paused') return <Square className={cn(cls, 'fill-current')} aria-hidden="true" />;
   return <Volume2 className={cls} aria-hidden="true" />;
 }
 

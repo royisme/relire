@@ -30,8 +30,8 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 | `src/services/cachedRequest.ts` | Generic persistent cache plus in-flight request sharing. |
 | `src/services/ai/` | Everything that talks to an AI service; see below. |
 | `src/storage/` | `db.ts` (IndexedDB schema, backup import/export, storage persistence), `cache.ts`, `audio.ts`, `usePersist.ts`. The only code that touches IndexedDB. |
-| `src/utils/speech/` | `state.ts` (shared playback state), `clips.ts` (stored clip first, else synthesize and store), `playback.ts` (play, stop, rate, browser-voice fallback), `recorder.ts` (microphone). |
-| `src/utils/` | `appSettings.ts` (settings in localStorage), `srs.ts` (SM-2 scheduling), `i18nHelpers.ts`, `binary.ts`. |
+| `src/utils/speech/` | `state.ts` (shared playback state), `clips.ts` (stored clip first, else synthesize and store), `playback.ts` (play, pause, resume, stop, rate, browser-voice fallback), `sequence.ts` (listening to a whole article: a queue of sentences played one after another), `recorder.ts` (microphone). |
+| `src/utils/` | `appSettings.ts` (settings in localStorage), `srs.ts` (SM-2 scheduling), `i18nHelpers.ts`, `binary.ts`, `sentences.ts` (cuts an article into paragraphs and sentences; the reader and the listener share it). |
 | `src/theme/` | `theme.ts` (theme preference, resolving "system", applying `data-theme` and the browser chrome colour), `useTheme`. `index.html` repeats the resolution inline before first paint. |
 | `src/i18n/` | i18next setup, `LANGUAGES`, `locales/en.json`, `locales/zh.json`. |
 | `src/types/index.ts` | Shared shapes for AI responses and stored data. |
@@ -65,6 +65,7 @@ Cache keys are language + prompt fingerprint + normalized text, deliberately not
 ## Key flows
 
 - **Look up a word or sentence:** reader → `App` sets the active word/sentence → `api.fetchWordAnalysis` / `fetchSentenceAnalysis` → cache hit or `tasks` → provider → cache → sheet renders.
+- **Listen to an article:** the reader's Listen button → `startSequence` with the article's sentences (`splitArticle`) → each sentence plays through `speakFrench`, whose `onSettled` starts the next; the current clip is loaded first, then the next two are prefetched. Pausing or stopping synthesizes nothing more. `ArticlePlayer` (a fixed overlay) shows play/pause, previous/next and stop; Escape, another speak button or leaving the article ends it.
 - **Hear text:** `SpeakButton` → `toggleSpeech` → `clips.loadSpeech` (stored clip, else provider, then store) → `playback` publishes loading/playing through `state.ts`; every button with the same text reflects it.
 - **Save a word:** `App` stores the word with its analysis, then prefetches word and sentence audio so it is protected and offline.
 - **Shadowing:** `ShadowingRecorder` → `useShadowingRecorder` (record, stop, play back) → `api.assessPronunciation` → `onAssessed` adds the score to stats.
