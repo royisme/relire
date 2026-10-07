@@ -36,13 +36,15 @@ export async function loadSpeech(text: string, voice?: string, settings: AppSett
 }
 
 /**
- * Makes sure the clips for these texts are stored (used when a word is saved,
- * so its pronunciation is kept with it). Quiet: no key, offline or an error
- * just means nothing is stored.
+ * Makes sure the clips for these texts are stored (used when a word is saved, so its pronunciation is kept
+ * with it, and by `sequence.ts` to fetch the next sentences ahead). Quiet: no key, offline or an error just
+ * means nothing is stored. `shouldContinue`, checked before each request, stops the run when it turns false
+ * (the listener paused or moved on), without cancelling a request already in flight.
  */
-export async function prefetchSpeech(texts: string[]): Promise<void> {
+export async function prefetchSpeech(texts: string[], shouldContinue: () => boolean = () => true): Promise<void> {
   if (!hasSpeechKey()) return;
   for (const text of texts) {
+    if (!shouldContinue()) return;
     if (!text.trim()) continue;
     try {
       await loadSpeech(text);

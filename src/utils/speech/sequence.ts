@@ -55,9 +55,7 @@ function playAt(index: number, t: number) {
   // The current sentence first; the next ones are fetched once it is ready, so they never delay it.
   void loadSpeech(items[index])
     .catch(() => undefined)
-    .then(() => {
-      if (t === token) void prefetchSpeech(items.slice(index + 1, index + 1 + PREFETCH_AHEAD));
-    });
+    .then(() => prefetchAhead(index, t));
   void speakFrench(items[index], {
     onSettled: (outcome) => {
       if (t !== token) return;
@@ -81,12 +79,22 @@ export function startSequence(id: string, texts: string[], from = 0) {
   playAt(state.index, t);
 }
 
+/** Fetches the next clips ahead — unless paused (resuming restarts it) or the sequence has moved on. */
+function prefetchAhead(index: number, t: number) {
+  const current = () => t === token && getSpeechState().phase !== 'paused';
+  if (!current()) return;
+  void prefetchSpeech(items.slice(index + 1, index + 1 + PREFETCH_AHEAD), current);
+}
+
 /** Play/pause for the player: pauses the current sentence, resumes it, or retries it after a failure. */
 export function toggleSequence() {
   if (!state.id) return;
   const { phase } = getSpeechState();
-  if (phase === 'paused') resumeSpeech();
-  else if (phase === 'loading' || phase === 'playing') pauseSpeech();
+  if (phase === 'paused') {
+    resumeSpeech();
+    // Whatever prefetch was skipped (or cut short) while paused continues with playback.
+    prefetchAhead(state.index, token);
+  } else if (phase === 'loading' || phase === 'playing') pauseSpeech();
   else playAt(state.index, ++token);
 }
 
