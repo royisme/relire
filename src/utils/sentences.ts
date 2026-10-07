@@ -11,8 +11,10 @@ export interface SentencePiece {
   text: string;
 }
 
-// A sentence ends at . ! ? or :; text after the last mark (a paragraph without final punctuation) is kept too.
-const SENTENCE = /[^.!?:]+[.!?:]+|[^.!?:]+$/g;
+// A sentence ends at . ! ? or :. In the first piece, leading punctuation (a paragraph that starts with
+// "...") belongs to it; in the last one, text after the final mark (a paragraph without final punctuation)
+// is kept too.
+const SENTENCE = /^[.!?:]*[^.!?:]+(?:[.!?:]+|$)|[^.!?:]+[.!?:]+|[^.!?:]+$/g;
 
 export function splitArticle(content: string): SentencePiece[][] {
   return content
