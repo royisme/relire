@@ -5,8 +5,6 @@ import { Article, WordAnalysis, SentenceAnalysis } from '../types';
 import { stopSpeech, setGlobalRate, speechKey } from '../utils/speech';
 import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
-import { useTheme } from '../theme/useTheme';
-import { ThemeSwatch } from './ui/theme-swatch';
 
 interface ReaderViewProps {
   currentArticle: Article;
@@ -26,7 +24,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   activeSentence,
 }) => {
   const { t, i18n } = useTranslation();
-  const { preference: themePref, setPreference: setThemePref } = useTheme();
   // Reading preferences
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('lg');
   // Sentences are identified by position, not text, because the same sentence can repeat ("Oui.").
@@ -206,9 +203,10 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
   useLayoutEffect(() => {
     const NAV = 56; // sticky header
-    // Measured pill size: h-7 buttons + p-1 padding + border (+ pt-1 on the wrapper) = 71 x 42.
+    // Measured pill size: h-7 buttons + p-1 padding + border = 71 x 38, plus an 8px invisible lead-in on its left.
     const TOOLBAR_WIDTH = 71;
-    const TOOLBAR_HEIGHT = 42;
+    const TOOLBAR_HEIGHT = 38;
+    const LEAD = 8;
     let frame = 0;
 
     const place = () => {
@@ -230,23 +228,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         setToolbar((prev) => (prev ? null : prev));
         return;
       }
-      // Anchor the pill to the end of the sentence: the last visible line of the sentence
+      // The pill sits on the sentence's last visible line, right after its final character, so the pointer
+      // reaches it by moving along that line and never crosses another sentence (which would retarget the
+      // pill). It is centred on the line and no taller than the line pitch, so it covers no other line.
       const lastLine = lines[lines.length - 1];
       const box = article.getBoundingClientRect();
-
-      // Vertical: appear directly below the sentence end, covering subsequent text as expected.
-      // If near the bottom of the viewport, flip above the line.
-      let top = lastLine.bottom + 2 - box.top;
-      if (lastLine.bottom + 2 + TOOLBAR_HEIGHT > vh - 8) {
-        top = Math.max(lastLine.top - TOOLBAR_HEIGHT - 4 - box.top, 8);
-      }
-
-      // Horizontal: start near the end of the sentence (lastLine.right)
-      const endX = lastLine.right - box.left;
-      const left = Math.min(
-        Math.max(endX - 4, 8),
-        box.width - TOOLBAR_WIDTH - 8
-      );
+      const top = (lastLine.top + lastLine.bottom) / 2 - TOOLBAR_HEIGHT / 2 - box.top;
+      // The invisible lead-in overlaps the sentence end, so there is no gap to cross; when the sentence ends
+      // too near the column edge, the pill moves left over the sentence's own last words instead.
+      const left = Math.min(lastLine.right - box.left - LEAD + 2, box.width - TOOLBAR_WIDTH - LEAD - 6);
 
       const next = {
         text: target.text,
@@ -273,9 +263,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     };
   }, [hoveredId, anchorId, activeKey, fontSize, currentArticle.id]);
 
-  // The reader's swatches set the app theme; the article follows it like every other surface.
-  const readerThemes = ['light', 'sepia', 'dark'] as const;
-
   const toolbarButton = (active: boolean) =>
     active ? 'bg-accent-700 text-on-fill hover:bg-accent-800' : 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
 
@@ -295,24 +282,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           <ArrowLeft className="w-4 h-4" />
           <span>{t('library.back')}</span>
         </button>
-
-        <div role="group" aria-label={t('theme.label')} className="flex items-center gap-1">
-          {readerThemes.map((id) => {
-            const active = themePref === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setThemePref(id)}
-                aria-pressed={active}
-                aria-label={t(`theme.${id}`)}
-                title={t(`theme.${id}`)}
-                className={`h-8 w-8 inline-flex items-center justify-center rounded-md cursor-pointer ${active ? 'bg-ink-100' : 'hover:bg-ink-100'}`}
-              >
-                <ThemeSwatch theme={id} />
-              </button>
-            );
-          })}
-        </div>
 
         <div className="flex items-center rounded-md border border-ink-200 bg-surface p-0.5" role="group" aria-label={t('reader.textSize')}>
           {(['sm', 'base', 'lg', 'xl'] as const).map((sz, i) => (
@@ -449,7 +418,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             onPointerEnter={(e) => e.pointerType === 'mouse' && cancelClear()}
             onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
             style={{ top: toolbar.top, left: toolbar.left }}
-            className="absolute z-20 pt-1 anim-fade select-none"
+            className="absolute z-20 pl-2 anim-fade select-none"
           >
             <div
               className="flex items-center gap-0.5 p-1 rounded-lg border border-ink-300 bg-surface text-ink-900 shadow-lg font-sans text-xs"

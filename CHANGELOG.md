@@ -7,7 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
-- **Themes: light, sepia and dark**, plus "Match system", which follows the device and switches live. Pick one from the new theme icon in the header or the reader's swatches; the choice is remembered and applied before the page draws, so it never flashes. The whole app follows the theme, not only the article, and every text colour meets WCAG AA contrast in each theme.
+- **Themes: light, sepia and dark**, plus "Match system", which follows the device and switches live. Pick one from the new theme icon in the header; the choice is remembered and applied before the page draws, so it never flashes. The whole app follows the theme, not only the article, and every text colour meets WCAG AA contrast in each theme.
 - **Marketing site on GitHub Pages.** The Pages root is now an English and 简体中文 landing page (positioning, screenshots, FAQ, CTAs) with the live app unchanged under `/relire/app/`; a one-time root service worker retires the old root-scoped cache so returning visitors move over cleanly, and the app page asks search engines not to index it in favour of the landing pages.
 - **Search and sharing metadata.** The app page now carries a proper title, description, canonical URL, robots directives, social-share images and Schema.org structured data, plus `robots.txt` and `sitemap.xml`, so search engines and shared links describe Relire correctly.
 - **Live demo on GitHub Pages.** Pushing to main deploys https://royisme.github.io/relire/ (after the type, translation and build checks pass); the READMEs now lead with the demo and what Relire does, and a launch checklist with copy for communities lives in `docs/LAUNCH.md`.
@@ -39,6 +39,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- The sentence actions pill now sits on the hovered sentence's last line, right after its final word, instead of below it. Reaching it no longer crosses the next sentence, which used to retarget the pill. The reader's three identical-looking colour swatches (indistinguishable in dark) are gone; the header's theme menu, with labels, does that job.
 - The list separator in a word's other meanings no longer depends on a language check in code; it is a translated string.
 - Progress said "1 Sentences Analyzed"; counts now use proper plurals. Settings showed its data counts with stray spacing.
 - The reader's own four colour themes (with hard-coded colours) are replaced by the app themes, so the toolbar, sheets and article always match.
