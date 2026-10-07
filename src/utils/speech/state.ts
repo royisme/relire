@@ -4,11 +4,11 @@
  * their own text and show loading / playing in place instead of the screen adding a player.
  */
 
-export type SpeechPhase = 'idle' | 'loading' | 'playing';
+export type SpeechPhase = 'idle' | 'loading' | 'playing' | 'paused';
 
 export interface SpeechState {
   phase: SpeechPhase;
-  /** Normalized text being loaded or played; null when idle. */
+  /** Normalized text being loaded, played or paused; null when idle. */
   key: string | null;
 }
 

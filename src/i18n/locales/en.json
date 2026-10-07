@@ -42,7 +42,18 @@
     "playSentence": "Play",
     "analyzeSentence": "Explain sentence",
     "wordCount": "{{count}} words",
-    "textSize": "Text size"
+    "textSize": "Text size",
+    "listenAll": "Listen"
+  },
+  "player": {
+    "label": "Article player",
+    "play": "Play",
+    "pause": "Pause",
+    "previous": "Previous sentence",
+    "next": "Next sentence",
+    "stop": "Stop listening",
+    "progress": "Sentence {{current}} of {{total}}",
+    "failed": "This sentence could not be played. Press play to try again."
   },
   "wordModal": {
     "lemma": "Lemma",

@@ -1,8 +1,14 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, ArrowLeft, ChevronDown, TextSearch } from 'lucide-react';
+import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, Pause, Play } from 'lucide-react';
 import { Article, WordAnalysis, SentenceAnalysis } from '../types';
-import { stopSpeech, setGlobalRate, speechKey } from '../utils/speech';
+import {
+  stopSpeech, setGlobalRate, speechKey,
+  startSequence, toggleSequence, stepSequence, stopSequence, getSequenceState, subscribeSequence,
+} from '../utils/speech';
+import { splitArticle } from '../utils/sentences';
+import { Button } from './ui/button';
+import { ArticlePlayer } from './ArticlePlayer';
 import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
@@ -177,11 +183,34 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     });
   };
 
-  // Split article content into paragraphs and sentences
-  const paragraphs = currentArticle.content
-    .split(/\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  // Paragraphs and sentences, cut the same way for reading and for listening.
+  const paragraphs = useMemo(() => splitArticle(currentArticle.content), [currentArticle.content]);
+  const flatSentences = useMemo(() => paragraphs.flat(), [paragraphs]);
+
+  // Listening to the whole article: one sentence after another, the current one highlighted.
+  const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
+  const listening = sequence.id === currentArticle.id;
+  const listeningId = listening ? flatSentences[sequence.index]?.id ?? null : null;
+
+  const toggleListening = () => {
+    if (listening) toggleSequence();
+    else startSequence(currentArticle.id, flatSentences.map((s) => s.text));
+  };
+
+  // Keep the sentence being read on screen, clear of the header and the player.
+  useEffect(() => {
+    if (!listeningId) return;
+    const el = sentenceEls.current.get(listeningId)?.el;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 72 || r.bottom > window.innerHeight - 112) {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      el.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+    }
+  }, [listeningId]);
+
+  // A different article, or leaving the reader, ends listening.
+  useEffect(() => () => stopSequence(), [currentArticle.id]);
 
   const getFontSizeClass = () => {
     switch (fontSize) {
@@ -197,7 +226,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   };
 
   // Which sentence the actions belong to when nothing is hovered: the one playing, else the one open in the drawer.
-  const activeKey = playingKey ?? (activeSentence ? speechKey(activeSentence) : null);
+  // While listening the pill does not chase the voice; it stays with what the reader points at.
+  const activeKey = (listening ? null : playingKey) ?? (activeSentence ? speechKey(activeSentence) : null);
   // Phase of the sentence the pill is showing, so its own button can theme itself (hooks cannot be conditional).
   const toolbarPhase = useSpeechPhase(toolbar?.text ?? '');
 
@@ -272,7 +302,9 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     }`;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+    <>
+    {/* Bottom padding leaves room for the player, so the last lines can be read above it. */}
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-28 space-y-4">
       {/* Reading toolbar: one row, article on the left, preferences on the right */}
       <div ref={controlsRef} className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
         <button
@@ -299,6 +331,22 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             </button>
           ))}
         </div>
+
+        <Button
+          variant="outline"
+          onClick={toggleListening}
+          aria-pressed={listening}
+          title={t('reader.listenAll')}
+        >
+          {listening && (speech.phase === 'playing' || speech.phase === 'loading') ? (
+            <Pause className="w-4 h-4" aria-hidden="true" />
+          ) : listening ? (
+            <Play className="w-4 h-4" aria-hidden="true" />
+          ) : (
+            <Headphones className="w-4 h-4" aria-hidden="true" />
+          )}
+          <span>{t('reader.listenAll')}</span>
+        </Button>
 
         <button
           onClick={() => setIsSpeedControlOpen(!isSpeedControlOpen)}
@@ -367,24 +415,19 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
         {/* Article Paragraphs */}
         <div className="space-y-5">
-          {paragraphs.map((p, pIdx) => {
-            // Split paragraph into sentences by punctuation (. ! ? « » :)
-            const sentences = p
-              .match(/[^.!?:]+[.!?:]+/g) || [p];
-
+          {paragraphs.map((sentences, pIdx) => {
             return (
               <p key={pIdx}>
-                {sentences.map((sent, sIdx) => {
-                  const cleanSentence = sent.trim();
-                  const id = `${pIdx}-${sIdx}`;
+                {sentences.map(({ id, raw: sent, text: cleanSentence }) => {
                   const isHovered = hoveredId === id;
                   const key = speechKey(cleanSentence);
                   const isActive = activeSentence === cleanSentence;
-                  const isPlaying = playingKey === key;
+                  // While listening, the position decides (the same sentence can repeat); otherwise the text.
+                  const isPlaying = listening ? listeningId === id : playingKey === key;
 
                   return (
                     <span
-                      key={sIdx}
+                      key={id}
                       data-sentence
                       ref={(el) => {
                         if (el) sentenceEls.current.set(id, { el, text: cleanSentence, key });
@@ -445,5 +488,19 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         )}
       </article>
     </div>
+
+      {/* Outside the spaced column: as its last child it would add a margin to the article. */}
+      {listening && (
+        <ArticlePlayer
+          index={sequence.index}
+          total={sequence.total}
+          phase={speech.phase}
+          failed={sequence.failed}
+          onToggle={toggleSequence}
+          onStep={stepSequence}
+          onStop={stopSequence}
+        />
+      )}
+    </>
   );
 };

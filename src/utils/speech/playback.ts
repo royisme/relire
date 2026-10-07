@@ -4,13 +4,21 @@ import { getSpeechState, setSpeechState, speechKey } from './state';
 
 /**
  * Playback of French speech (stored or synthesized clips, browser voice as a fallback) and its shared rate.
- * Progress is published through `state.ts`; callers do not pass callbacks to track it.
+ * Progress (loading, playing, paused) is published through `state.ts`; UI reads it from there. Only
+ * `sequence.ts` passes `onSettled`, to chain one clip after another.
  */
+
+export type SpeechOutcome = 'ended' | 'interrupted' | 'failed';
 
 export interface SpeechOptions {
   rate?: number; // 0.5 - 1.5
   /** Defaults to the voice in Settings. */
   voice?: string;
+  /**
+   * Called once when this clip is done: it played to the end, it was stopped or replaced by another clip,
+   * or neither the provider nor the browser voice could play it. Used to chain clips (`sequence.ts`).
+   */
+  onSettled?: (outcome: SpeechOutcome) => void;
 }
 
 let currentAudio: HTMLAudioElement | null = null;
@@ -18,6 +26,16 @@ let currentUrl: string | null = null;
 let globalRate = 0.85;
 /** Bumped by every start and stop, so a clip that finishes loading after being stopped or replaced stays silent. */
 let requestId = 0;
+/** The current clip's onSettled, cleared once called. */
+let settle: ((outcome: SpeechOutcome) => void) | null = null;
+/** Paused by the user; a clip that finishes loading while paused waits instead of playing. */
+let paused = false;
+
+function settleWith(outcome: SpeechOutcome) {
+  const fn = settle;
+  settle = null;
+  fn?.(outcome);
+}
 
 /** Frees the object URL of the clip that is playing or was playing. */
 function releaseUrl() {
@@ -41,6 +59,7 @@ export function getGlobalRate(): number {
 /** Stops whatever plays or loads, without publishing a state (callers do that). */
 function halt() {
   requestId++;
+  paused = false;
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
@@ -50,6 +69,7 @@ function halt() {
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.cancel();
   }
+  settleWith('interrupted');
 }
 
 export function stopSpeech() {
@@ -66,6 +86,7 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
   const id = requestId;
   const isCurrent = () => id === requestId;
   const key = speechKey(cleanText);
+  settle = options.onSettled ?? null;
   setSpeechState('loading', key);
 
   let audioUrl: string | null = null;
@@ -96,6 +117,7 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
       if (!isCurrent()) return;
       currentAudio = null;
       setSpeechState('idle');
+      settleWith('ended');
     };
 
     audio.onerror = (e) => {
@@ -105,13 +127,20 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
       fallbackBrowserSpeech(cleanText, key, options, isCurrent);
     };
 
+    // Paused while loading: keep the clip ready; resumeSpeech starts it.
+    if (paused) {
+      setSpeechState('paused', key);
+      return;
+    }
     await audio.play();
-    if (isCurrent()) setSpeechState('playing', key);
+    if (isCurrent() && !paused) setSpeechState('playing', key);
   } catch (err) {
     if (!isCurrent()) {
       if (audioUrl) URL.revokeObjectURL(audioUrl);
       return;
     }
+    // play() rejects when it is paused before it starts; that is a pause, not a failure.
+    if (paused && currentAudio) return;
     console.warn('Speech provider failed, falling back to browser speech:', err);
     // play() can reject after the URL was created; do not leak it.
     if (audioUrl) {
@@ -120,6 +149,39 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
       currentAudio = null;
     }
     fallbackBrowserSpeech(cleanText, key, options, isCurrent);
+  }
+}
+
+/** Pauses the clip that is playing (or holds one that is still loading); resumeSpeech continues it. */
+export function pauseSpeech() {
+  const { phase, key } = getSpeechState();
+  if (phase === 'idle' || phase === 'paused') return;
+  paused = true;
+  if (currentAudio && !currentAudio.paused) currentAudio.pause();
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking) {
+    window.speechSynthesis.pause();
+  }
+  setSpeechState('paused', key);
+}
+
+export function resumeSpeech() {
+  const { phase, key } = getSpeechState();
+  if (phase !== 'paused') return;
+  paused = false;
+  if (currentAudio) {
+    const audio = currentAudio;
+    setSpeechState('playing', key);
+    audio.play().catch((err) => {
+      if (currentAudio !== audio || paused) return;
+      console.warn('Could not resume audio:', err);
+      stopSpeech();
+    });
+  } else if (typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+    setSpeechState('playing', key);
+  } else {
+    // Still loading: it starts as soon as the clip arrives.
+    setSpeechState('loading', key);
   }
 }
 
@@ -134,6 +196,7 @@ export function toggleSpeech(text: string, options: SpeechOptions = {}) {
 function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions, isCurrent: () => boolean) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     setSpeechState('idle');
+    settleWith('failed');
     return;
   }
 
@@ -149,14 +212,22 @@ function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions
   if (frVoice) utterance.voice = frVoice;
 
   // cancel() reports the old utterance as an error; only the current request may change the state.
-  const finish = () => {
-    if (isCurrent()) setSpeechState('idle');
+  const finish = (outcome: SpeechOutcome) => {
+    if (!isCurrent()) return;
+    setSpeechState('idle');
+    settleWith(outcome);
   };
-  utterance.onend = finish;
-  utterance.onerror = finish;
+  utterance.onend = () => finish('ended');
+  utterance.onerror = () => finish('failed');
 
-  setSpeechState('playing', key);
   window.speechSynthesis.speak(utterance);
+  // Paused while the provider was failing: the browser voice waits too.
+  if (paused) {
+    window.speechSynthesis.pause();
+    setSpeechState('paused', key);
+  } else {
+    setSpeechState('playing', key);
+  }
 }
 
 
