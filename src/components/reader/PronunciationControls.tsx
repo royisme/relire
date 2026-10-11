@@ -39,6 +39,7 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
+  const complete = !c.running && c.remaining === 0;
   const details = Object.entries(c.displayed).flatMap(([id, markers]) => markers.connections.map((connection, index) => ({
     key: `${id}-${index}`,
     left: markers.words[connection.left].source,
@@ -92,12 +93,12 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
             {!c.capable && <p className="text-bad-700">{t('prosody.unsupportedBrowser')}</p>}
             {c.error && <p role="alert" className="text-bad-700 break-words">{t('prosody.failed', { total: 1, message: c.error })}</p>}
             {c.stopped && <p>{t('prosody.stopped')}</p>}
-            {!c.running && c.remaining === 0 && c.ready > 0 && <p>{t('prosody.complete')}</p>}
-            {c.changed && c.usable ? <p>{t('prosody.staged')}</p> : !c.usable && !c.running && c.remaining === 0 ? <p>{t('prosody.noMarks')}</p> : null}
+            {complete && c.ready > 0 && <p>{t('prosody.complete')}</p>}
+            {complete && c.changed && c.usable ? <p>{t('prosody.staged')}</p> : complete && !c.usable ? <p>{t('prosody.noMarks')}</p> : null}
           </div>
           <div className="flex flex-wrap gap-2 border-t border-ink-200 pt-3">
             <Button variant="outline" aria-pressed={!c.mode} onClick={() => onMode(false)}>{t('prosody.plain')}</Button>
-            <Button variant={c.mode ? 'default' : 'outline'} aria-pressed={c.mode} disabled={!( !c.running && c.remaining === 0) || !c.usable} onClick={onDisplay}>
+            <Button variant={c.mode ? 'default' : 'outline'} aria-pressed={c.mode} disabled={!complete || !c.usable} onClick={onDisplay}>
               {c.mode && c.changed ? t('prosody.update') : t('prosody.marked')}
             </Button>
           </div>

@@ -48,8 +48,10 @@ const overlaps = (a: GraphemeRange, b: GraphemeRange) => a.start < b.end && b.st
 const hasLetter = (parts: string[], span: GraphemeRange) => /\p{L}/u.test(parts.slice(span.start, span.end).join(''));
 /** IPA vowels and glides: a link needs a vowel-initial right word. */
 const LINKABLE = /[aeiouyɑəɛœøɔãẽĩõũỹɛ̃œ̃ɔ̃jwɥ]/u;
-/** French spelling: every syllable carries a vowel letter. */
-const VOWEL_LETTER = /[aeiouyàâäéèêëîïôöùûüÿœæ]/iu;
+/** A French spoken syllable needs an IPA vowel nucleus, not a written vowel.
+ * Include lax Canadian variants; glides alone (j/w/ɥ) are not nuclei.
+ */
+const IPA_NUCLEUS = /[aeiouyɑɐəɛœøɔɒɪʊʏãẽĩõũỹ]/u;
 
 /** Returns a new, bounded typed object; never render the provider's source echo. */
 export function validatePronunciationMarkers(value: unknown, source: string): PronunciationMarkers {
@@ -64,6 +66,8 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
   const entries = list(obj.words, tokens.length, 'words');
   check(entries.length === tokens.length, 'word-count');
   const words: PronunciationWord[] = [];
+  // Validate stress references against the input before any segmentation repair.
+  const originalSyllables: number[] = [];
   const parts = tokens.map((token) => graphemes(token.text));
   const seen = new Set<number>();
   for (const entry of entries) {
@@ -81,6 +85,7 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
     const length = parts[ordinal].length;
     check(word.status === 'resolved' || word.status === 'unresolved', 'status');
     let ipa = list(word.ipa, length, `ipa:${ordinal}`).map((item) => text(item, 120));
+    originalSyllables[ordinal] = ipa.length;
     let boundaries = list(word.boundaries, length - 1, `boundaries:${ordinal}`).map((item) => integer(item, 1, length - 1));
     check(boundaries.every((position, index) => index === 0 || position > boundaries[index - 1]), 'boundary-order');
     const silent = list(word.silent, length, `silent:${ordinal}`).map((item) => range(item, length));
@@ -98,9 +103,11 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
       let edges = [0, ...boundaries, length];
       let spelling = edges.slice(1).map((end, index) => parts[ordinal].slice(edges[index], end).join(''));
       check(spelling.join('') === tokens[ordinal].text, 'reconstruction');
-      if (spelling.some((slice) => !VOWEL_LETTER.test(slice))) {
-        // Garbage segmentation (a vowel-less slice is not a syllable, e.g.
-        // "a/ppa/rt/e/ment"): drop this word's slashes, keep the rest.
+      check(IPA_NUCLEUS.test(ipa.join('')), 'syllable-nucleus');
+      if (ipa.some((syllable) => !IPA_NUCLEUS.test(syllable))) {
+        // A consonant-only IPA entry (e.g. /t/ after schwa deletion) is not
+        // a syllable. Suppress its segmentation without inventing boundaries.
+        // Spelled initials like T/C/F remain valid: /te/se/ɛf/ have nuclei.
         boundaries = [];
         ipa = [ipa.join('')];
         edges = [0, length];
@@ -122,11 +129,13 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
     check(words[left].status === 'resolved' && words[right].status === 'resolved', 'unresolved-connection');
     check(/^\s*$/u.test(source.slice(tokens[left].end, tokens[right].start)), 'connection-punctuation');
     check(conn.type === 'liaison' || conn.type === 'enchainement', 'connection-type');
+    const pronounced = range(conn.pronounced, parts[left].length);
+    const sound = text(conn.sound, 40);
+    check(hasLetter(parts[left], pronounced), 'silent-connection');
+    // Validate every field before filtering a well-formed impossible link.
     // No link is possible into a consonant-initial word (père ‿ s'appelle,
     // plus ‿ d'animaux): the model's own IPA contradicts the curve. Drop it.
     if (!LINKABLE.test(words[right].ipa[0]?.[0] ?? '')) return null;
-    const pronounced = range(conn.pronounced, parts[left].length);
-    check(hasLetter(parts[left], pronounced), 'silent-connection');
     // A letter realized in a connection is pronounced in this context; the
     // word-in-isolation silence claim loses. Trim the overlap instead of
     // rejecting, so "s silent" + "liaison s" resolves to the liaison.
@@ -137,7 +146,7 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
       if (span.end > pronounced.end) trimmed.push({ start: pronounced.end, end: span.end });
       return trimmed;
     });
-    return { left, right, type: conn.type, sound: text(conn.sound, 40), pronounced };
+    return { left, right, type: conn.type, sound, pronounced };
   }).filter((connection): connection is PronunciationConnection => connection !== null);
 
   const stressed = new Set<number>();
@@ -146,10 +155,11 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
     const word = integer(mark.word, 0, tokens.length - 1);
     check(words[word].status === 'resolved' && !stressed.has(word), 'stress-target');
     stressed.add(word);
-    // Collapsed words have a single syllable; a stress beyond it is dropped.
-    if (typeof mark.syllable !== 'number' || mark.syllable > words[word].ipa.length - 1) return null;
-    const syllable = integer(mark.syllable, 0, words[word].ipa.length - 1);
+    const syllable = integer(mark.syllable, 0, originalSyllables[word] - 1);
     const anchor = range(mark.anchor, parts[word].length);
+    // Only a valid reference whose segmentation was removed may be dropped.
+    // Unsegmented words keep one IPA entry, not a claim of one spoken syllable.
+    if (syllable > words[word].ipa.length - 1) return null;
     const edges = [0, ...words[word].boundaries, parts[word].length];
     // Models anchor the audible rhyme, which can cross their own syllable
     // boundary by a grapheme (compagnie: anchor "gni" for the "nie" syllable).
@@ -174,11 +184,15 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
       if (cursor < to) spans.push({ start: cursor, end: to });
       return spans;
     };
-    const spans = audible(marked.start, marked.end);
-    const chosen = spans.length
-      ? { start: spans[0].start, end: spans[spans.length - 1].end }
-      : audible(edges[syllable], edges[syllable + 1])[0];
-    check(chosen && hasLetter(parts[word], chosen), 'silent-stress');
+    const spans = audible(marked.start, marked.end).filter((span) => hasLetter(parts[word], span));
+    const candidates = spans.length ? spans : audible(edges[syllable], edges[syllable + 1])
+      .filter((span) => hasLetter(parts[word], span));
+    // Keep one continuous audible span: an envelope would put silent gaps
+    // back under the dot (compte: m + t must not become mpt again).
+    // Prefer the longest span, then the rightmost when lengths tie.
+    const chosen = candidates.reduce<GraphemeRange | undefined>((best, span) =>
+      !best || span.end - span.start >= best.end - best.start ? span : best, undefined);
+    check(chosen && !words[word].silent.some((span) => overlaps(span, chosen)), 'silent-stress');
     return { word, syllable, anchor: chosen };
   }).filter((mark): mark is PronunciationStress => mark !== null);
   return { version: 1, source, words, connections, stress };

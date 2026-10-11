@@ -9,7 +9,7 @@ Progress:
 - [x] Locales, saved-answer accounting, documentation, mocked browser acceptance, and diff review.
 - [x] Detector gate: after upgrading the user's global impeccable skill to engine 4.0.0, `detect --json src index.html` reports `[]` (the previous 3.x-engine single-font warning on the untouched `index.html` was a false positive, fixed upstream).
 
-Verification completed with mocked AI, not a live provider: type/i18n/build and diff checks passed; 35 throwaway token/validator assertions and 224 browser assertions passed. Browser coverage includes 360×740 and 1280×900, three themes, both languages, four font sizes, inspected screenshots, measured ink-relative stress dots, wrapped local tails, actual native clipboard text, keyboard/touch lookup and connection details, playback/vocabulary regressions, stable layers/staging, bounded continuation/Stop/retry, stale prompt/language/unmount guards, offline/no-key cache, invalid fresh/cached responses, malformed JSON, oversized sentences, unsupported grapheme segmentation, cache expiry/cap/clear and backup exclusion. Read-only security and architecture reviews found no blocking code issues. The build emits a large-chunk warning.
+Verification completed with mocked AI, not a live provider: type/i18n/build and diff checks passed; 35 throwaway token/validator assertions and 224 browser assertions passed. Browser coverage includes 360×740 and 1280×900, three themes, both languages, four font sizes, inspected screenshots, measured ink-relative stress dots, wrapped local tails, actual native clipboard text, keyboard/touch lookup and connection details, playback/vocabulary regressions, stable layers/staging, whole-article generation/Stop/retry, stale prompt/language/unmount guards, offline/no-key cache, invalid fresh/cached responses, malformed JSON, oversized sentences, unsupported grapheme segmentation, cache expiry/cap/clear and backup exclusion. Read-only security and architecture reviews found no blocking code issues. The build emits a large-chunk warning.
 
 Real-provider pronunciation accuracy is unverified. Structural validation and browser fixtures do not certify phonetic quality; no learner key was read and no paid provider call was made.
 
@@ -103,7 +103,7 @@ ReaderView
                          canonical reader tokens + validated annotations
 ```
 
-The seam exposed to the reader is a single marker-generation hook: it owns cache-first preparation, the bounded queue, staged/displayed snapshots, request identity, progress, and errors. UI modules do not construct prompts or touch IndexedDB. Rendering consumes only validated annotations and the canonical source tokens.
+The seam exposed to the reader is a single marker-generation hook: it owns cache-first preparation, the sequential queue, staged/displayed snapshots, request identity, progress, and errors. UI modules do not construct prompts or touch IndexedDB. Rendering consumes only validated annotations and the canonical source tokens.
 
 - `splitArticle` remains the shared sentence cutter for reading and listening. Do not create a second sentence regex.
 - Extract the reader's word tokenization/rendering into focused modules rather than adding more persistence and AI logic to the already 506-line `ReaderView`.
@@ -129,9 +129,10 @@ Validate unknown provider output before caching or rendering:
 - Correct version, field types, finite integer indices, and permitted enum values.
 - Exactly one entry per input occurrence, no missing/duplicate/extra token references.
 - Source echoes agree under the declared cache-equivalent normalization; always render the original input, never a model echo.
-- Boundaries are ordered, within the token, and do not split a grapheme; written parts reconstruct the token, and IPA/visible syllable counts agree.
-- Silent and stress spans are valid, nonempty, and do not conflict with the declared pronounced spans. Silent ranges are trimmed so they never cover elided-prefix spelling (l', d', j', m', qu'... — the elided consonant is always pronounced). A stress anchor is intersected with its syllable's spelling range; an empty intersection is an error (wrong syllable index), a crossing boundary is tolerated.
+- Boundaries are ordered, within the token, and do not split a grapheme; written parts reconstruct the token, and IPA/visible syllable counts agree. Every declared IPA syllable needs a vowel nucleus, including nasal vowels and lax Canadian variants; a written vowel (especially silent e) is not evidence of one. Spelled initials such as T/C/F are valid syllables when their IPA has nuclei. If a word has a consonant-only IPA entry among otherwise usable syllables, suppress its slashes and retain the joined IPA as unsegmented pronunciation, not a claim that the word is monosyllabic. Do not invent replacement boundaries. A wholly vowel-less resolved IPA is rejected.
+- Silent and stress spans are valid, nonempty, and do not conflict with the declared pronounced spans. Silent ranges are trimmed so they never cover elided-prefix spelling (l', d', j', m', qu'... — the elided consonant is always pronounced). A stress anchor is intersected with its syllable's spelling range; an empty intersection is an error (wrong syllable index), a crossing boundary is tolerated. Trim silence from the anchor and select a single continuous audible letter span (longest, rightmost on ties); never envelop separated spans across silent spelling. If the anchor is entirely silent, select such a span from its own syllable.
 - Connections target adjacent resolved words in the same sentence, without intervening punctuation. A connection's pronounced range wins over word-in-isolation silence: the overlap is trimmed from the silent ranges (a realized liaison consonant is not silent in this context); a pronounced range containing no letter is an error.
+- Validate every field before semantic filtering. Stress indices must refer to the original supplied syllable list and anchors must be valid even if segmentation repair later removes the stress. Connection sound/range fields must be valid even when the right word's consonant-initial IPA makes the connection impossible and its curve is dropped. Malformed fresh output is an error; malformed cached output is deleted.
 - Text fields are bounded; model strings are plain text through React, never `dangerouslySetInnerHTML`.
 
 A malformed result is an error, not a partially trusted answer. An intentionally unresolved word is valid incomplete coverage. Validate cached results again against the current canonical input; reject/delete an incompatible entry rather than applying it to a different occurrence.
@@ -184,7 +185,7 @@ Use the `verify-ui` skill with the real app and mocked AI responses, Chrome avai
 Acceptance cases:
 
 - Ordinary reading on first entry sends no marker request and has no separator spacing.
-- Generate/display all four layers on learner text; stop/continue/retry work; counts reflect real work. A run schedules no more than 20 uncached sentences and one logical sentence request concurrently.
+- Generate/display all four layers on learner text; Stop/Generate/Retry work; counts reflect real work. One run processes every uncached supported sentence sequentially, with one logical sentence request in flight. Completion/apply messaging stays hidden while any supported sentence remains or generation is running.
 - Word/sentence lookup, vocabulary saving, sentence playback and article playback receive the exact unannotated source. Clipboard output contains no synthetic slashes.
 - Repeat generation uses cache/in-flight sharing; changing the template invalidates it; cached results display without a key/offline; an uncached missing-key action opens Settings.
 - Loading, errors, layer toggles, and late results cause no article layout shift. Mode/apply actions may reflow, but preserve the reading anchor and correctly reposition the existing sentence-action pill.
