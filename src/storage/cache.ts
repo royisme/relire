@@ -1,4 +1,5 @@
 import { db, type CacheEntry } from './db';
+import { PRONUNCIATION_SCHEMA_VERSION, READER_TOKENIZER_VERSION } from '../types/pronunciation';
 
 /**
  * Persistent cache for AI answers, so the same word or sentence is never paid
@@ -12,6 +13,7 @@ const POLICY = {
   word: { ttl: Infinity, max: Infinity },
   // Sentence analyses are kept for 30 days.
   sentence: { ttl: 30 * DAY, max: 1000 },
+  prosody: { ttl: 30 * DAY, max: 1000 },
   // Practice drills for an article stay until the learner asks for new ones.
   drills: { ttl: 30 * DAY, max: 300 },
 } as const;
@@ -39,6 +41,17 @@ export const drillsKey = (lang: string, fingerprint: string, type: string, artic
 
 export const sentenceKey = (lang: string, fingerprint: string, sentence: string) =>
   `${fingerprint}|${lang}|${normalize(sentence)}`;
+
+export const prosodyKey = (lang: string, fingerprint: string, sentence: string) =>
+  `v${PRONUNCIATION_SCHEMA_VERSION}.t${READER_TOKENIZER_VERSION}|${fingerprint}|${lang}|${normalize(sentence)}`;
+
+export async function deleteCached(kind: CacheKind, key: string): Promise<void> {
+  try {
+    await (await db()).delete('cache', `${kind}:${key}`);
+  } catch {
+    // A broken cache must not prevent plain reading or a fresh request.
+  }
+}
 
 export async function getCached<T>(kind: CacheKind, key: string): Promise<T | undefined> {
   try {
@@ -75,17 +88,18 @@ export async function putCached(kind: CacheKind, key: string, value: unknown): P
   }
 }
 
-export async function cacheCounts(): Promise<{ words: number; sentences: number; drills: number }> {
+export async function cacheCounts(): Promise<{ words: number; sentences: number; drills: number; prosody: number }> {
   try {
     const d = await db();
-    const [words, sentences, drills] = await Promise.all([
+    const [words, sentences, drills, prosody] = await Promise.all([
       d.countFromIndex('cache', 'kind', 'word'),
       d.countFromIndex('cache', 'kind', 'sentence'),
       d.countFromIndex('cache', 'kind', 'drills'),
+      d.countFromIndex('cache', 'kind', 'prosody'),
     ]);
-    return { words, sentences, drills };
+    return { words, sentences, drills, prosody };
   } catch {
-    return { words: 0, sentences: 0, drills: 0 };
+    return { words: 0, sentences: 0, drills: 0, prosody: 0 };
   }
 }
 

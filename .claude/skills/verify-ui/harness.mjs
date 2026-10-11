@@ -21,13 +21,24 @@ export const defaultFixtures = {
   sentence: { sentence: 'Je suis en vacances !', translation: 'I am on holiday!', syntaxStructure: [], grammarPoints: [], patternCollocations: [], shadowingGuide: { speedTip: 'Slow, then natural.', rhythmGroups: ['Je suis', 'en vacances !'], liaisons: [], intonation: 'Falling at the end.' } },
   drills: { title: 'Drill', description: '', questions: [{ id: 1, type: 'oral', targetSentence: 'Je suis en vacances !', prompt: 'Read aloud', scrambledChunks: [], clozeText: '', options: [], correctOptionIndex: 0, grammarHint: '', shadowingAudioPrompt: '' }] },
   pronunciation: { overallScore: 80, accuracyScore: 81, fluencyScore: 79, rhythmScore: 78, phonemeFeedback: [], corrections: [], coachingNotes: '' },
+  // A source-addressed empty answer by default. Visual checks supply an explicit phonetic fixture.
+  prosody: (prompt) => {
+    const source = JSON.parse(prompt.match(/^".*"$/m)?.[0] || '""');
+    const tokens = JSON.parse(prompt.match(/^\[\{"ordinal":.*$/m)?.[0] || '[]');
+    return {
+      version: 1, source,
+      words: tokens.map(({ ordinal, source }) => ({ ordinal, source, status: 'unresolved', ipa: [], boundaries: [], silent: [] })),
+      connections: [], stress: [],
+    };
+  },
 };
 
 /** Which task a request is for, from the prompt text (see src/services/ai/prompts/defaults). */
 function taskOf(body) {
-  if (/phonetics (professor|coach)/i.test(body)) return 'pronunciation';
-  if (/practice drills|interactive practice/i.test(body)) return 'drills';
-  if (/syntax breakdown|shadowing guide/i.test(body)) return 'sentence';
+  if (/task: prosody|\u4efb\u52a1\uff1aprosody/i.test(body)) return 'prosody';
+  if (/phonetics (professor|coach)|\u8bed\u97f3\u5b66\u6559\u6388/i.test(body)) return 'pronunciation';
+  if (/practice drills|interactive practice|\u6cd5\u8bed\u7bc7\u7ae0/i.test(body)) return 'drills';
+  if (/syntax breakdown|shadowing guide|\u53e5\u6cd5\u62c6\u89e3/i.test(body)) return 'sentence';
   return 'word';
 }
 
@@ -44,7 +55,7 @@ export async function openApp(opts = {}) {
   const browser = await chromium.launch({ executablePath: findChrome(), args });
   const context = await browser.newContext({ viewport, hasTouch: touch, isMobile: touch, permissions: mic ? ['microphone'] : [] });
   const page = await context.newPage();
-  const calls = { tts: 0, word: 0, sentence: 0, drills: 0, pronunciation: 0 };
+  const calls = { tts: 0, word: 0, sentence: 0, drills: 0, pronunciation: 0, prosody: 0 };
   page.on('pageerror', (e) => console.log('PAGEERROR', e.message));
   await page.addInitScript(() => {
     localStorage.setItem('relire_onboarded', '1');
@@ -59,10 +70,13 @@ export async function openApp(opts = {}) {
       if (fail.has('tts')) return route.fulfill({ status: 500, body: '{"error":{"message":"tts failed"}}' });
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'audio/L16;rate=24000', data: silence } }] } }] }) });
     }
-    const task = taskOf(req.postData() || '');
+    const body = JSON.parse(req.postData() || '{}');
+    const prompt = (body.contents || []).flatMap((content) => content.parts || []).map((part) => part.text || '').join('\n');
+    const task = taskOf(prompt);
     calls[task]++;
     if (fail.has(task)) return route.fulfill({ status: 500, body: `{"error":{"message":"${task} failed"}}` });
-    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(fixtures[task]) }] } }] }) });
+    const fixture = typeof fixtures[task] === 'function' ? await fixtures[task](prompt) : fixtures[task];
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(fixture) }] } }] }) });
   });
   await page.goto(url);
   await page.waitForTimeout(1000);

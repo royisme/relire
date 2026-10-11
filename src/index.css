@@ -166,6 +166,28 @@
 }
 .reading-title { text-wrap: balance; }
 
+/* Marker mode alone reserves spoken-syllable slots; visibility toggles cannot move words. */
+.reading-markers { line-height: 2.05; }
+.reader-word { overflow-wrap: anywhere; }
+.pronunciation-paragraph { position: relative; }
+.pronunciation-slash {
+  display: inline-block;
+  width: 0.3em;
+  color: var(--color-ink-500);
+  text-align: center;
+  user-select: none;
+}
+.pronunciation-slash::before { content: '/'; font-size: 0.85em; }
+.pronunciation-hidden { visibility: hidden; }
+.pronunciation-geometry {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+  color: var(--color-ink-600);
+}
+
 /* Tabular numerals for scores, counts and intervals. */
 .tnum { font-variant-numeric: tabular-nums; }
 

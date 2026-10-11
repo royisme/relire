@@ -111,7 +111,7 @@ export default function App() {
   // Word Click Handler
   const handleWordClick = async (word: string, sentence: string) => {
     // Strip leading/trailing punctuation while preserving French accents
-    const cleanWord = word.trim().replace(/^[^a-zA-ZÀ-ÿœŒæÆ]+|[^a-zA-ZÀ-ÿœŒæÆ]+$/g, '');
+    const cleanWord = word.trim().replace(/^[^\p{L}\p{M}]+|[^\p{L}\p{M}]+$/gu, '');
     if (!cleanWord) return;
 
     setActiveWord(cleanWord);
@@ -330,6 +330,10 @@ export default function App() {
               onBack={() => setIsReading(false)}
               onWordClick={handleWordClick}
               onSentenceClick={handleSentenceClick}
+              onMissingKey={() => {
+                setSettingsNeedKey(true);
+                setIsSettingsOpen(true);
+              }}
               activeWord={activeWord}
               activeSentence={activeSentence}
             />

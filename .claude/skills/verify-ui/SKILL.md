@@ -23,12 +23,12 @@ Type checks do not prove a screen works. Drive the real app, with the AI mocked,
 
 Copy `example.mjs` and keep it in the scratch folder (checks are throwaway, not committed). `harness.mjs` gives you:
 
-- `openApp({ url, viewport, touch, fixtures, fail, ttsDelayMs, mic })`: opens the app onboarded with a test key. Every AI request is answered from `fixtures` (`word`, `sentence`, `drills`, `pronunciation`; defaults in the harness), chosen by the prompt text. Put long strings in fixtures to test wrapping. `fail: ['sentence']` makes that task return 500; `setFail([...])` changes it later. `ttsDelayMs` keeps clips in the loading state long enough to observe. `mic: true` gives a fake microphone. Returns `calls` (request counts per task).
+- `openApp({ url, viewport, touch, fixtures, fail, ttsDelayMs, mic })`: opens the app onboarded with a test key. Every AI request is answered from `fixtures` (`word`, `sentence`, `drills`, `pronunciation`, `prosody`; defaults in the harness), chosen by the prompt text. Put long strings in fixtures to test wrapping. `fail: ['sentence']` makes that task return 500; `setFail([...])` changes it later. `ttsDelayMs` keeps clips in the loading state long enough to observe. `mic: true` gives a fake microphone. Returns `calls` (request counts per task).
 - `layout(page, selector)`: page height and an element's top; compare before, during and after an action to prove nothing moved.
 - `overflowing(locator)`: descendants that stick out horizontally; must be empty.
 - `checks()`: `check(name, ok, detail)` and `report()`.
 
-Task detection reads the English prompts. Keep the UI in English for checks (the default in headless Chromium) or extend `taskOf` in the harness.
+Task detection reads the shipped English and Chinese prompts, with `prosody` detected first. Its default fixture returns source-addressed unresolved words, not invented phonetic data; supply an explicit fixture for marker geometry checks. Fixtures can be async functions of the parsed prompt. Customized templates may need a matching `taskOf` update in the scratch harness.
 
 ## What to check for a typical change
 

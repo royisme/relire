@@ -3,10 +3,13 @@ import { getApiKey, getAppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as ai from './ai/tasks';
 import { getTextProvider } from './ai/providers';
-import { promptFingerprint } from './ai/prompts';
+import { getPromptTemplate, promptFingerprint, subscribePromptChanges } from './ai/prompts';
 import type { Lang } from './ai/types';
-import { cachedRequest } from './cachedRequest';
-import { drillsKey, sentenceKey, wordKey } from '../storage/cache';
+import { cachedRequest, readCachedAnswer } from './cachedRequest';
+import { drillsKey, prosodyKey, sentenceKey, wordKey } from '../storage/cache';
+import { MAX_PRONUNCIATION_SOURCE, PRONUNCIATION_SCHEMA_VERSION, READER_TOKENIZER_VERSION } from '../types/pronunciation';
+import { hasGraphemeSupport } from '../utils/readerTokens';
+import { validatePronunciationMarkers } from '../utils/pronunciationMarkers';
 
 /**
  * What the UI calls: reads the user's settings and language, decides what is
@@ -43,6 +46,50 @@ export function fetchSentenceAnalysis(sentence: string, articleContext?: string)
   return cachedRequest('sentence', sentenceKey(ctx.lang, promptFingerprint('sentence', ctx.lang), sentence), () =>
     ai.analyzeSentence({ sentence, articleContext }, ctx)
   );
+}
+
+export function getPronunciationIdentity(): string {
+  const lang = i18n.language === 'zh' ? 'zh' : 'en';
+  return `${lang}|${promptFingerprint('prosody', lang)}|v${PRONUNCIATION_SCHEMA_VERSION}.t${READER_TOKENIZER_VERSION}`;
+}
+
+export function subscribePronunciationContext(listener: () => void): () => void {
+  const unsubscribe = subscribePromptChanges(listener);
+  i18n.on('languageChanged', listener);
+  return () => {
+    unsubscribe();
+    i18n.off('languageChanged', listener);
+  };
+}
+
+/** Freeze settings/template for a queue; later edits cannot poison its old cache key. */
+export function createPronunciationSession() {
+  const ctx = context();
+  const fingerprint = promptFingerprint('prosody', ctx.lang);
+  const template = getPromptTemplate('prosody', ctx.lang);
+  const key = (source: string) => prosodyKey(ctx.lang, fingerprint, source);
+  const supported = (source: string) => {
+    if (!hasGraphemeSupport()) throw new Error(i18n.t('prosody.unsupportedBrowser'));
+    if (source.length > MAX_PRONUNCIATION_SOURCE) throw new Error(i18n.t('prosody.oversizedSentence'));
+  };
+  return {
+    identity: `${ctx.lang}|${fingerprint}|v${PRONUNCIATION_SCHEMA_VERSION}.t${READER_TOKENIZER_VERSION}`,
+    async getCached(source: string) {
+      supported(source);
+      return readCachedAnswer('prosody', key(source), (value) => validatePronunciationMarkers(value, source));
+    },
+    async fetch(source: string) {
+      supported(source);
+      return cachedRequest('prosody', key(source), () => ai.annotatePronunciation({ source, template }, ctx), false,
+        (value) => validatePronunciationMarkers(value, source));
+    },
+  };
+}
+
+export type PronunciationSession = ReturnType<typeof createPronunciationSession>;
+
+export function fetchPronunciationMarkers(source: string, session = createPronunciationSession()) {
+  return session.fetch(source);
 }
 
 /** Not cached: every recording is different. */

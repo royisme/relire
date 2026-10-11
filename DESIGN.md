@@ -37,6 +37,12 @@ Plain words for what the thing does. No hype ("smart", "interactive", "immersive
 - Reading: `.reading` (68ch, line-height 1.8); sizes 17/19/21/24px. UI: 14px base, 12px (`text-xs`) for meta; nothing smaller.
 - Headings are semibold, not bold. No uppercase or letter-spaced labels. Scores and counts use `.tnum`.
 
+## Reader pronunciation mode
+
+Ordinary reading remains the initial state. A fixed-size toolbar button opens floating generation/status controls; no loading or error row enters the article. Generated results are staged; the marker view unlocks only when generation has completed, and switching it on applies them. Plain/marker switches may reflow but preserve the visible sentence anchor; toggling layers never changes word positions.
+
+Marker mode uses line-height 2.05. Decorative spoken-syllable `/` slots occupy 0.3em at 0.85em type size, retaining their width when hidden. Silent spelling and slashes use `ink-500`; unresolved spelling is unchanged. Marker inks are theme tokens, never literal lightness: what matters is the contrast relationship, so silent spelling and slashes stay at or above 4.5:1 (body-text AA) and curves at or above 3:1 (decorative) against the reading surface in light, sepia and dark. Paragraph-local `ink-600` curves sit below word gaps (liaison: 1.25px stroke/5px sag; enchaînement: 1px/3px, at 21px body size); wrapped pairs get local tails, never diagonal lines or nowrap wrappers. Stress dots have 1.3px radius and centres about 2.8px below the marked glyph ink bottom, scaling with type size. There are no rhythm-group lines or letter-spacing treatments, and no second muted grey: within marker mode the tint may only assert analysed silence (elided prefixes render in body ink there; the plain-reading prefix tint lives in plain mode only). Decorations are noninteractive and excluded from accessible/copy text; connection explanations are available in the panel by touch and keyboard.
+
 ## Shape and elevation
 
 - Radius: controls `rounded-md` (6px), surfaces and overlays `rounded-lg` (10px), `rounded-full` for badges and dots only.
