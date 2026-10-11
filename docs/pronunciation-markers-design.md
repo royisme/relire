@@ -141,7 +141,7 @@ A malformed result is an error, not a partially trusted answer. An intentionally
 
 - Add a provider-neutral `prosody` task and `fetchPronunciationMarkers` entry point in `services/api.ts`.
 - Add English/Chinese editable prompt templates and registry variables for the sentence and enumerated tokens. Input article text is data, not instructions.
-- Extend `JsonRequest` with an optional JSON-schema field. The existing Gemini adapter forwards it as `responseJsonSchema`; other tasks retain their current behavior. The installed SDK already exposes this option. Use a plain schema, no Zod dependency.
+- Extend `JsonRequest` with an optional JSON-schema field. The existing Gemini adapter forwards it as `responseJsonSchema`; other tasks retain their current behavior. The installed SDK already exposes this option. Use a fixed shape-only schema (field types, small version/status/type enums, required fields), with no sentence-dependent array limits or ordinal enums: Gemini's serving-time state budget is not reliably bounded by a token-count threshold. Exact word counts, unique ordinals and all ranges are enforced locally against the enumerated source. Keep the prompt/cache fingerprint unchanged when only serving-time constraints change. No Zod dependency.
 - Keep a runtime validator even with provider-side structured output. Schema validity is not linguistic validity.
 - Add `prosody` to the existing cache kind, with the sentence-analysis policy: 30 days, at most 1,000 entries. Include schema/tokenizer version, language, prompt fingerprint, and normalized sentence in the key. Do not add provider, model, or article context to the key.
 - Cache-equivalent normalization trims/collapses whitespace and folds case; local token ordinals and grapheme spans are independent of surrounding whitespace. Check token equivalence before reuse, so normalization cannot silently misattach spans.
@@ -178,7 +178,7 @@ Preserve existing user work: `.gitignore` has an unstaged `.works/` addition and
 
 ## Verification and release gate
 
-Run `bun run lint`, `bun run i18n:check`, `bun run build`, and `impeccable detect --json src index.html`. The detector must report `[]`. `impeccable` is not currently on PATH; report that verification as blocked unless an approved existing installation can be located. Do not claim a clean detector run or install a new project dependency to hide the gap.
+Run `bun run lint`, `bun run i18n:check`, `bun scripts/check-prosody-schema.ts`, `bun run build`, and `impeccable detect --json src index.html`. The detector must report `[]`. `impeccable` is not currently on PATH; report that verification as blocked unless an approved existing installation can be located. Do not claim a clean detector run or install a new project dependency to hide the gap.
 
 Use the `verify-ui` skill with the real app and mocked AI responses, Chrome available locally, and the scratch Playwright installation outside the repo. Extend task detection so `prosody` cannot accidentally be answered by a word-analysis fixture.
 

@@ -3,7 +3,7 @@ import { renderTemplate, type PromptVars } from './engine';
 import { getPromptTemplate } from './store';
 import type { PromptId } from './registry';
 import { enumeratedReaderWords } from '../../../utils/readerTokens';
-import { prosodySchemaFor } from '../prosodySchema';
+import { prosodySchema } from '../prosodySchema';
 
 /**
  * Builds provider-neutral requests from templates. This file only prepares the
@@ -49,8 +49,8 @@ export function prosodyRequest(input: { source: string; template?: string }, lan
   };
   return {
     prompt: input.template === undefined ? render('prosody', lang, vars) : renderTemplate(input.template, vars),
-    // The exact occurrence count is baked in so the model cannot add or drop words.
-    jsonSchema: prosodySchemaFor(enumerated.length),
+    // Counts/ordinals come from the local enumeration and are validated locally.
+    jsonSchema: prosodySchema,
   };
 }
 
