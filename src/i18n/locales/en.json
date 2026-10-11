@@ -382,8 +382,6 @@
     "generating": "Generating…",
     "stop": "Stop",
     "stopped": "Stopped. A request already sent may finish and may still be charged.",
-    "update": "Update markers",
-    "plain": "Plain reading",
     "marked": "Markers",
     "connections": "Connections",
     "stress": "Group-final stress",
@@ -396,7 +394,7 @@
     "unsupportedBrowser": "This browser lacks grapheme segmentation. Plain reading is still available.",
     "invalidResponse": "The AI marker response does not match the sentence or annotation structure ({{code}}). Retry to request a new answer.",
     "noMarks": "No usable marks yet. Unknown or unprocessed text remains unchanged.",
-    "staged": "Generation finished. Turn on Markers to apply the results.",
+    "staged": "Results are ready. Turn on Markers in the reader toolbar.",
     "connectionDetails": "Connection details",
     "noConnections": "No resolved connections in the displayed results.",
     "liaison": "Liaison",
@@ -404,6 +402,9 @@
     "connection": "{{left}} → {{right}} · {{type}} · /{{sound}}/",
     "layers": "Visible layers",
     "failed": "Generation paused. Failed sentences: {{total}}. {{message}}",
-    "complete": "All supported sentences processed."
+    "complete": "All supported sentences processed.",
+    "controls": "Marker settings",
+    "restoring": "Checking saved markers…",
+    "needsGeneration": "Saved markers are missing or incomplete. Choose Generate to prepare them, then turn on Markers in the reader toolbar."
   }
 }

@@ -32,7 +32,7 @@ The reference artifact is `/tmp/relire-prosody-prototype.html` (v7), with screen
 
 ### Building
 
-An explicit reader mode with four independently selectable layers: connections, stress, silent letters, and spoken syllables. All four layers start enabled within this mode, matching v7. Ordinary reading remains the initial state when entering an article.
+An explicit reader mode with four independently selectable layers: connections, stress, silent letters, and spoken syllables. All four layers default to enabled within this mode, matching v7. A new article starts in ordinary reading; subsequent visits restore its saved display and layer choices only against complete validated cached answers.
 
 Generate sentence-addressable annotations through the current text provider. Validate them, cache them locally, and render them over the original article. Existing word lookup, sentence analysis, vocabulary saving, and article/sentence playback continue to receive unannotated source text.
 
@@ -66,7 +66,7 @@ References checked during planning:
 
 ## Reader interaction
 
-Add a fixed-size pronunciation-markers control to the existing reading toolbar. Its panel floats over the article, follows the existing overlay/focus conventions, and contains the generation, display, and layer controls. On a narrow screen the panel fits the available width; errors and progress are inside the panel, never new rows in the reading column.
+Add a direct pronunciation-markers switch and separate settings button to the existing reading toolbar. The settings panel floats over the article, follows the existing overlay/focus conventions, and contains generation, status, and layer controls. On a narrow screen the panel fits the available width; errors and progress are inside the panel, never new rows in the reading column.
 
 Flow:
 
@@ -74,11 +74,11 @@ Flow:
 2. The learner explicitly starts article generation. Check the cache first, then request every uncached sentence sequentially, with at most one logical sentence task in flight; Stop cancels the rest. The panel shows the remaining count while it runs.
 3. Support Stop. It prevents new tasks; an already sent provider request may finish and may still be charged. Do not claim transport cancellation that the current provider interface cannot provide.
 4. Stage successful annotations without changing the article's text layout. Show actual progress and incomplete/error counts in the panel. A provider or validation failure pauses new network work and exposes the real error. Retry uses already cached successes and requests only missing/failed sentences.
-5. The marker view is enabled only once generation has completed (every supported sentence has a staged answer); until then its button stays disabled. Switching it on applies the staged snapshot explicitly. Unprocessed or unresolved text stays as original text, status distinguishes partial coverage, and a result with no usable marks does not enable a misleading empty marker mode.
+5. The marker view is enabled only once preparation has completed (every supported sentence has a validated staged answer); until then its toolbar switch opens the panel to guide explicit generation, rather than requesting AI or enabling incomplete results. The switch is temporarily disabled during cache recovery. Switching it on applies the staged snapshot explicitly. Unprocessed or unresolved text stays as original text, status distinguishes partial coverage, and a result with no usable marks does not enable a misleading empty marker mode.
 6. Switching between ordinary reading and marker mode is an intentional layout change, because visible slashes occupy width. Preserve the current reading anchor across the switch. Normal reading has no invisible micro-spacing.
-7. Within a displayed marker snapshot, reserve slash slots even when the syllable layer is hidden. Layer toggles change visibility/color, not word positions. New results are staged; the marker-view button (Update, when already displaying) applies them, never a late network response.
+7. Within a displayed marker snapshot, reserve slash slots even when the syllable layer is hidden. Layer toggles change visibility/color, not word positions. New results are staged; the toolbar switch applies them, never a late network response.
 8. Word tap or Enter/Space still opens the existing word detail. Decorative slashes, dots, and SVGs do not change lookup text or screen-reader text. Connections and their sound/type have a text explanation reachable by touch and keyboard, not just hover.
-9. Mode/layer choices are reader-session state only in this first release. Reopening an article starts in ordinary reading; generated answers remain cached.
+9. Mode/layer choices persist per article in `relire_pronunciation_preferences_v1`, including after refresh or browser restart. Entry reads and validates cached answers automatically, with stale identity/unmount guards. Readiness is derived from those answers, never a separate generated boolean. Only complete usable results can restore an enabled choice; partial, expired, invalid or cleared caches stay plain until explicit generation. Content/language/prompt identity is rechecked, and cache recovery never makes a paid request. These local UI preferences are not included in backups.
 
 Missing-key behavior reuses the app's settings entry point. Valid cached results work without a key and offline. A cache miss cannot fabricate markers. Stop or leaving the reader prevents further queued work.
 
@@ -157,7 +157,7 @@ A malformed result is an error, not a partially trusted answer. An intentionally
 - In marker mode an unresolved word renders its elided prefix in normal ink; the light prefix tint stays a plain-reading convention, so in marker mode grey can only assert analysed silence.
 - Make generated slash content decorative and excluded from selection/copy. Confirm actual clipboard text in the browser. TTS and all analysis calls use canonical source strings regardless of DOM decoration.
 - Async generation checks a session identity including article ID, exact article content, language, prompt fingerprint, and schema/tokenizer version. Switching input, stopping, or unmounting prevents stale state writes and new tasks. An already validated result may remain cached for its original input.
-- Once displayed, the snapshot changes only through an explicit mode/update action. Transient loading/error states and layer toggles do not reflow text.
+- Entry may restore a complete validated snapshot according to the saved display choice. After recovery, the displayed snapshot changes only through an explicit toolbar switch action. Transient loading/error states and layer toggles do not reflow text.
 
 ## Implementation order and file scope
 

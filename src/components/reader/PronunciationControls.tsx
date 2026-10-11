@@ -1,7 +1,7 @@
 /** Floating pronunciation controls. Generation/status never add rows to the reading column. */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AudioLines, X } from 'lucide-react';
+import { SlidersHorizontal, X } from 'lucide-react';
 import type { PronunciationController } from '../../hooks/usePronunciationMarkers';
 import type { PronunciationLayers } from '../../types/pronunciation';
 import { Button } from '../ui/button';
@@ -18,8 +18,23 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
+  const opener = useRef<HTMLButtonElement | null>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const [availableHeight, setAvailableHeight] = useState<number>();
+  useLayoutEffect(() => {
+    if (!open) return;
+    const fit = () => {
+      if (panel.current) setAvailableHeight(Math.max(40, window.innerHeight - Math.max(0, panel.current.getBoundingClientRect().top) - 16));
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    window.addEventListener('scroll', fit, { passive: true });
+    return () => {
+      window.removeEventListener('resize', fit);
+      window.removeEventListener('scroll', fit);
+    };
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     closeButton.current?.focus({ preventScroll: true });
@@ -29,7 +44,7 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setOpen(false);
-        trigger.current?.focus({ preventScroll: true });
+        opener.current?.focus({ preventScroll: true });
       }
     };
     document.addEventListener('pointerdown', onDown);
@@ -39,7 +54,7 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
-  const complete = !c.running && c.remaining === 0;
+  const complete = !c.restoring && !c.running && c.remaining === 0;
   const details = Object.entries(c.displayed).flatMap(([id, markers]) => markers.connections.map((connection, index) => ({
     key: `${id}-${index}`,
     left: markers.words[connection.left].source,
@@ -50,22 +65,49 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
 
   return (
     <div ref={root} className="contents">
-      <Button
-        ref={trigger}
-        variant="outline"
-        size="icon"
-        data-pronunciation-trigger
-        aria-label={t('prosody.title')}
-        title={t('prosody.title')}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={() => {
-          if (!open) onOpen();
-          setOpen(!open);
-        }}
-      ><AudioLines className="w-4 h-4" aria-hidden="true" /></Button>
+      <span className="inline-flex items-center gap-2">
+        <Button
+          variant="outline"
+          role="switch"
+          data-pronunciation-toggle
+          aria-label={t('prosody.title')}
+          aria-checked={c.mode}
+          aria-busy={c.restoring}
+          disabled={c.restoring}
+          onClick={(event) => {
+            if (c.mode) onMode(false);
+            else if (c.canDisplay) onDisplay();
+            else {
+              opener.current = event.currentTarget;
+              onOpen();
+              setOpen(true);
+            }
+          }}
+        >
+          <span aria-hidden="true" className={`relative h-4 w-7 shrink-0 rounded-full ${c.mode ? 'bg-accent-700' : 'bg-ink-500'}`}>
+            <span className={`absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-surface ${c.mode ? 'translate-x-3' : ''}`} />
+          </span>
+          <span>{t('prosody.marked')}</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          data-pronunciation-trigger
+          aria-label={t('prosody.controls')}
+          title={t('prosody.controls')}
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          onClick={(event) => {
+            opener.current = event.currentTarget;
+            if (!open) onOpen();
+            setOpen(!open);
+          }}
+        ><SlidersHorizontal className="w-4 h-4" aria-hidden="true" /></Button>
+      </span>
       {open && (
         <div
+          ref={panel}
+          style={{ maxHeight: availableHeight === undefined ? undefined : `min(70vh, 38rem, ${availableHeight}px)` }}
           role="dialog"
           aria-label={t('prosody.title')}
           data-pronunciation-panel
@@ -75,18 +117,20 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
             <h2 className="font-serif font-semibold text-base text-ink-900">{t('prosody.title')}</h2>
             <Button ref={closeButton} variant="ghost" size="icon" aria-label={t('common.close')} onClick={() => {
               setOpen(false);
-              trigger.current?.focus({ preventScroll: true });
+              opener.current?.focus({ preventScroll: true });
             }}><X className="w-4 h-4" aria-hidden="true" /></Button>
           </div>
           <p className="text-xs text-ink-600 leading-relaxed">{t('prosody.disclosure')}</p>
           <p className="text-xs text-ink-600 leading-relaxed">{t('prosody.consent')}</p>
           <div className="flex flex-wrap gap-2">
-            <Button variant={c.usable ? 'outline' : 'default'} disabled={!c.capable || c.running || c.remaining === 0} onClick={() => void c.run()}>
+            <Button variant={c.usable ? 'outline' : 'default'} disabled={!c.capable || c.restoring || c.running || c.remaining === 0} onClick={() => void c.run()}>
               {c.running ? t('prosody.generating') : c.error ? t('common.retry') : t('prosody.generate')}
             </Button>
             {c.running && <Button variant="outline" onClick={c.stop}>{t('prosody.stop')}</Button>}
           </div>
           <div aria-live="polite" className="space-y-1 text-xs text-ink-600">
+            {c.restoring && <p>{t('prosody.restoring')}</p>}
+            {!c.restoring && !c.running && c.remaining > 0 && <p>{t('prosody.needsGeneration')}</p>}
             <p className="tnum">{t('prosody.progress', { ready: c.ready, total: c.total, remaining: c.remaining })}</p>
             <p className="tnum">{t('prosody.coverage', c.coverage)}</p>
             {c.oversized > 0 && <p>{t('prosody.oversized', { total: c.oversized })}</p>}
@@ -95,12 +139,6 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
             {c.stopped && <p>{t('prosody.stopped')}</p>}
             {complete && c.ready > 0 && <p>{t('prosody.complete')}</p>}
             {complete && c.changed && c.usable ? <p>{t('prosody.staged')}</p> : complete && !c.usable ? <p>{t('prosody.noMarks')}</p> : null}
-          </div>
-          <div className="flex flex-wrap gap-2 border-t border-ink-200 pt-3">
-            <Button variant="outline" aria-pressed={!c.mode} onClick={() => onMode(false)}>{t('prosody.plain')}</Button>
-            <Button variant={c.mode ? 'default' : 'outline'} aria-pressed={c.mode} disabled={!complete || !c.usable} onClick={onDisplay}>
-              {c.mode && c.changed ? t('prosody.update') : t('prosody.marked')}
-            </Button>
           </div>
           <fieldset className="border-t border-ink-200 pt-2">
             <legend className="text-xs text-ink-600">{t('prosody.layers')}</legend>

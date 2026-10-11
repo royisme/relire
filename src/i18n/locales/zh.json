@@ -380,9 +380,7 @@
     "generating": "正在生成…",
     "stop": "停止",
     "stopped": "已停止。已发送的请求可能仍会完成并产生费用。",
-    "update": "更新标记",
-    "plain": "普通阅读",
-    "marked": "语音标记",
+    "marked": "发音标记",
     "connections": "联诵与连音",
     "stress": "意群末重音",
     "silent": "不发音拼写",
@@ -394,7 +392,7 @@
     "unsupportedBrowser": "此浏览器不支持字素分段，仍可正常阅读原文。",
     "invalidResponse": "AI 返回的发音标记与原句或标注结构不符（{{code}}），请重试获取新答案。",
     "noMarks": "还没有可用标记，未知或尚未处理的原文保持不变。",
-    "staged": "生成完成，打开“语音标记”即可应用结果。",
+    "staged": "结果已就绪。请打开阅读工具栏的发音标记开关。",
     "connectionDetails": "连接说明",
     "noConnections": "已显示的结果中没有确定的词间连接。",
     "liaison": "联诵",
@@ -402,6 +400,9 @@
     "connection": "{{left}} → {{right}} · {{type}} · /{{sound}}/",
     "layers": "显示图层",
     "failed": "生成已暂停，失败句数：{{total}}。{{message}}",
-    "complete": "所有符合长度限制的句子已处理。"
+    "complete": "所有符合长度限制的句子已处理。",
+    "controls": "发音标记设置",
+    "restoring": "正在检查已保存的标记…",
+    "needsGeneration": "已保存的标记缺失或不完整。请先生成，再打开阅读工具栏的发音标记开关。"
   }
 }
