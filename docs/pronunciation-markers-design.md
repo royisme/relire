@@ -13,6 +13,17 @@ Verification completed with mocked AI, not a live provider: type/i18n/build and 
 
 Real-provider pronunciation accuracy is unverified. Structural validation and browser fixtures do not certify phonetic quality; no learner key was read and no paid provider call was made.
 
+### Revision: spelling-based model output and word-level demotion
+
+Live Gemini answers kept failing on index bookkeeping (`le` with one IPA syllable and one boundary → `syllable-count`), and one bad word rejected its sentence, which then blocked the whole article. The user approved word-level demotion and a built-in function-word table. This revision supersedes the provider-output parts of the contract below; the index-based record stored in the cache and consumed by rendering is unchanged.
+
+- **Provider output.** Per word: `ordinal`, `source`, `status`, `syllables: [{spelling, ipa}]` with silent letters in parentheses (`tem(ps)`), and `groupEnd`. Per connection: `left` (right is always `left + 1`), `type`, `sound`, and the left word's realized consonant `spelling`. No grapheme indices, no sentence echo, no stress list. A syllable's spelling and IPA travel together, so their counts cannot disagree.
+- **Local derivation** (`utils/prosodyResponse.ts`): boundaries and silent ranges come from the spellings, checked letter by letter against the token. Stress goes on the last syllable of each `groupEnd` word, because French stress is group-final; the validator trims the anchor to audible letters. A connection's pronounced range is the last occurrence of its spelling in the left word.
+- **Function words** (`utils/functionWords.ts`): exact, case-insensitive whole-token matches for frequent unambiguous words replace the model's syllables, including an unresolved answer. Variable words (plus, tous, six…) stay with the model.
+- **Failure granularity.** Token alignment (word count, ordinal, source spelling, duplicates, top-level shape) still rejects the sentence. Word-local problems leave only that word unresolved: a spelling split that does not reproduce the token, unbalanced parentheses, a wholly silent syllable, and a new check, a syllable whose IPA has a vowel but whose pronounced spelling has no vowel letter (the `je` /ʒə/ with a silent e case; all-caps initials are exempt). An invalid connection or stress mark is dropped alone, including one pointing at a demoted word.
+- **Unchanged:** a sentence that still fails stops generation, and the marker view still requires every supported sentence. Whether a failed sentence may be skipped is an open product decision.
+- A user-customized prosody template written for the old index format will fail the new parser until reset.
+
 ## Goal and visual baseline
 
 Bring the approved v7 pronunciation-marker design into the real reader, using the learner's French article rather than hard-coded sample annotations.
@@ -172,7 +183,7 @@ This spans more than eight files, approximately 25-30, because templates, both l
 
 - Existing: `src/components/ReaderView.tsx`, `src/App.tsx`, `src/components/settings/DataSection.tsx`, `src/services/api.ts`, `src/services/ai/types.ts`, `src/services/ai/tasks.ts`, `src/services/ai/providers/gemini/client.ts`, `src/services/ai/prompts/{index,registry}.ts`, `src/storage/{cache,db}.ts`, `src/index.css`, `src/i18n/locales/{en,zh}.json`.
 - New: `src/components/reader/{PronunciationControls,PronunciationParagraph,ReaderWord}.tsx`, `src/hooks/usePronunciationMarkers.ts`, `src/utils/{readerTokens,pronunciationMarkers}.ts`, `src/types/pronunciation.ts`, `src/services/ai/prosodySchema.ts`, `src/services/ai/prompts/defaults/prosody.{en,zh}.txt`.
-- Verification/docs: `.claude/skills/verify-ui/harness.mjs` for task detection/fixtures, `docs/architecture.md`, `DESIGN.md`, `CHANGELOG.md`, and this proposal's final status.
+- Verification/docs: `e2e/fixtures.ts` (originally the verify-ui harness) for task detection/fixtures, `docs/architecture.md`, `DESIGN.md`, `CHANGELOG.md`, and this proposal's final status.
 
 Preserve existing user work: `.gitignore` has an unstaged `.works/` addition and `docs/real-content-learning-design.md` is untracked. Do not stage, revert, or rewrite either file. No PR, merge, push, or release is authorized by this proposal.
 

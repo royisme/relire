@@ -2,20 +2,17 @@
  * Fixed provider-neutral output shape. Sentence-dependent array bounds and
  * ordinal enums can exceed Gemini's serving-time schema state budget even
  * for short sentences. Keep types, small enums and required fields here;
- * exact occurrence counts and every range belong to the runtime validator.
+ * exact occurrence counts and every spelling check belong to the runtime parser.
+ *
+ * The model writes spelling, never grapheme indices: each syllable pairs its
+ * spelling (silent letters in parentheses) with its IPA, so syllable counts
+ * cannot disagree, and the client derives every range.
  */
 const index = { type: 'integer' };
-const span = {
-  type: 'object', additionalProperties: false,
-  properties: { start: index, end: index },
-  required: ['start', 'end'],
-};
 
 export const prosodySchema = {
   type: 'object', additionalProperties: false,
   properties: {
-    version: { type: 'integer', enum: [1] },
-    source: { type: 'string' },
     words: {
       type: 'array',
       items: {
@@ -24,11 +21,17 @@ export const prosodySchema = {
           ordinal: index,
           source: { type: 'string' },
           status: { type: 'string', enum: ['resolved', 'unresolved'] },
-          ipa: { type: 'array', items: { type: 'string' } },
-          boundaries: { type: 'array', items: index },
-          silent: { type: 'array', items: span },
+          syllables: {
+            type: 'array',
+            items: {
+              type: 'object', additionalProperties: false,
+              properties: { spelling: { type: 'string' }, ipa: { type: 'string' } },
+              required: ['spelling', 'ipa'],
+            },
+          },
+          groupEnd: { type: 'boolean' },
         },
-        required: ['ordinal', 'source', 'status', 'ipa', 'boundaries', 'silent'],
+        required: ['ordinal', 'source', 'status', 'syllables', 'groupEnd'],
       },
     },
     connections: {
@@ -36,22 +39,14 @@ export const prosodySchema = {
       items: {
         type: 'object', additionalProperties: false,
         properties: {
-          left: index, right: index,
+          left: index,
           type: { type: 'string', enum: ['liaison', 'enchainement'] },
           sound: { type: 'string' },
-          pronounced: span,
+          spelling: { type: 'string' },
         },
-        required: ['left', 'right', 'type', 'sound', 'pronounced'],
-      },
-    },
-    stress: {
-      type: 'array',
-      items: {
-        type: 'object', additionalProperties: false,
-        properties: { word: index, syllable: index, anchor: span },
-        required: ['word', 'syllable', 'anchor'],
+        required: ['left', 'type', 'sound', 'spelling'],
       },
     },
   },
-  required: ['version', 'source', 'words', 'connections', 'stress'],
+  required: ['words', 'connections'],
 };

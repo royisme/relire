@@ -1,7 +1,7 @@
 import type { PracticeDeck, PronunciationAssessment, SentenceAnalysis, WordAnalysis } from '../../types';
 import { drillsRequest, pronunciationRequest, prosodyRequest, sentenceRequest, wordRequest } from './prompts';
 import type { Lang, TextConfig, TextProvider } from './types';
-import { validatePronunciationMarkers } from '../../utils/pronunciationMarkers';
+import { parseProsodyResponse } from '../../utils/prosodyResponse';
 
 /**
  * What the app asks the AI to do. Each task is a prompt (prompts/) sent through
@@ -16,7 +16,7 @@ export interface TextContext {
 
 export async function annotatePronunciation(input: Parameters<typeof prosodyRequest>[0], ctx: TextContext) {
   const value = await ctx.provider.generateJson<unknown>(prosodyRequest(input, ctx.lang), ctx.config);
-  return validatePronunciationMarkers(value, input.source);
+  return parseProsodyResponse(value, input.source);
 }
 
 export const analyzeWord = (input: Parameters<typeof wordRequest>[0], ctx: TextContext) =>

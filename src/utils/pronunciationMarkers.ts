@@ -2,7 +2,7 @@
 import i18n from '../i18n';
 import type { GraphemeRange, PronunciationConnection, PronunciationMarkers, PronunciationStress, PronunciationWord } from '../types/pronunciation';
 import { MAX_PRONUNCIATION_SOURCE } from '../types/pronunciation';
-import { graphemes, normalizeMarkerSource, readerWords } from './readerTokens';
+import { graphemes, normalizeMarkerSource, readerWords, type ReaderWordToken } from './readerTokens';
 
 export class PronunciationValidationError extends Error {
   constructor(readonly code: string) {
@@ -53,6 +53,66 @@ const LINKABLE = /[aeiouyɑəɛœøɔãẽĩõũỹɛ̃œ̃ɔ̃jwɥ]/u;
  */
 const IPA_NUCLEUS = /[aeiouyɑɐəɛœøɔɒɪʊʏãẽĩõũỹ]/u;
 
+/** One bad connection or stress mark is dropped alone; other errors still propagate. */
+function dropInvalid<T>(run: () => T | null): T | null {
+  try {
+    return run();
+  } catch (error) {
+    if (error instanceof PronunciationValidationError) return null;
+    throw error;
+  }
+}
+
+/** A spoken vowel needs a pronounced written vowel: "je" /ʒə/ cannot have a silent e. */
+const VOWEL_LETTER = /[aeiouyàâäéèêëîïôöùûüÿœæ]/iu;
+
+const unresolvedWord = (ordinal: number, source: string): PronunciationWord =>
+  ({ ordinal, source, status: 'unresolved', ipa: [], boundaries: [], silent: [] });
+
+/** Throws a validation error for anything local to this word; the caller demotes it. */
+function validateWord(
+  word: Record<string, unknown>, token: ReaderWordToken, parts: string[], length: number, originalSyllables: number[],
+): PronunciationWord {
+  const ordinal = token.ordinal;
+  let ipa = list(word.ipa, length, `ipa:${ordinal}`).map((item) => text(item, 120));
+  originalSyllables[ordinal] = ipa.length;
+  let boundaries = list(word.boundaries, length - 1, `boundaries:${ordinal}`).map((item) => integer(item, 1, length - 1));
+  check(boundaries.every((position, index) => index === 0 || position > boundaries[index - 1]), 'boundary-order');
+  const silent = list(word.silent, length, `silent:${ordinal}`).map((item) => range(item, length));
+  check(silent.every((span, index) => index === 0 || span.start >= silent[index - 1].end), 'silent-order');
+  // Elided-prefix spelling (l', d', j', m', qu'...) is always pronounced:
+  // elision drops the vowel in spelling and the consonant links to the next
+  // vowel. Trim model silence covering it instead of rejecting the word.
+  const elided = graphemes(token.prefix).length;
+  const keptSilent = silent.flatMap((span) => span.start < elided ?
+    (span.end > elided ? [{ start: elided, end: span.end }] : []) : [span]);
+  if (word.status === 'unresolved') {
+    check(ipa.length === 0 && boundaries.length === 0 && silent.length === 0, 'unresolved-data');
+    return unresolvedWord(ordinal, token.text);
+  }
+  check(ipa.length === boundaries.length + 1, 'syllable-count');
+  let edges = [0, ...boundaries, length];
+  let spelling = edges.slice(1).map((end, index) => parts.slice(edges[index], end).join(''));
+  check(spelling.join('') === token.text, 'reconstruction');
+  check(IPA_NUCLEUS.test(ipa.join('')), 'syllable-nucleus');
+  if (ipa.some((syllable) => !IPA_NUCLEUS.test(syllable))) {
+    // A consonant-only IPA entry (e.g. /t/ after schwa deletion) is not
+    // a syllable. Suppress its segmentation without inventing boundaries.
+    // Spelled initials like T/C/F remain valid: /te/se/ɛf/ have nuclei.
+    boundaries = [];
+    ipa = [ipa.join('')];
+    edges = [0, length];
+    spelling = [token.text];
+  }
+  const audible = (index: number) => parts.slice(edges[index], edges[index + 1]).filter((_, offset) =>
+    !keptSilent.some((span) => edges[index] + offset >= span.start && edges[index] + offset < span.end));
+  check(spelling.every((_, index) => audible(index).some((part) => /\p{L}/u.test(part))), 'silent-syllable');
+  // Spelled initials (TCF: /te.se.ɛf/) are the one place a vowel sound has no vowel letter.
+  const initials = !/\p{Ll}/u.test(token.text);
+  check(initials || spelling.every((_, index) => audible(index).some((part) => VOWEL_LETTER.test(part))), 'silent-vowel');
+  return { ordinal, source: token.text, status: 'resolved', ipa, boundaries, silent: keptSilent };
+}
+
 /** Returns a new, bounded typed object; never render the provider's source echo. */
 export function validatePronunciationMarkers(value: unknown, source: string): PronunciationMarkers {
   check(source.length <= MAX_PRONUNCIATION_SOURCE, 'oversize');
@@ -84,43 +144,18 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
       part.toLowerCase() === parts[ordinal][index].toLowerCase()), 'grapheme-equivalence');
     const length = parts[ordinal].length;
     check(word.status === 'resolved' || word.status === 'unresolved', 'status');
-    let ipa = list(word.ipa, length, `ipa:${ordinal}`).map((item) => text(item, 120));
-    originalSyllables[ordinal] = ipa.length;
-    let boundaries = list(word.boundaries, length - 1, `boundaries:${ordinal}`).map((item) => integer(item, 1, length - 1));
-    check(boundaries.every((position, index) => index === 0 || position > boundaries[index - 1]), 'boundary-order');
-    const silent = list(word.silent, length, `silent:${ordinal}`).map((item) => range(item, length));
-    check(silent.every((span, index) => index === 0 || span.start >= silent[index - 1].end), 'silent-order');
-    // Elided-prefix spelling (l', d', j', m', qu'...) is always pronounced:
-    // elision drops the vowel in spelling and the consonant links to the next
-    // vowel. Trim model silence covering it instead of rejecting the sentence.
-    const elided = graphemes(tokens[ordinal].prefix).length;
-    const keptSilent = silent.flatMap((span) => span.start < elided ?
-      (span.end > elided ? [{ start: elided, end: span.end }] : []) : [span]);
-    if (word.status === 'unresolved') {
-      check(ipa.length === 0 && boundaries.length === 0 && silent.length === 0, 'unresolved-data');
-    } else {
-      check(ipa.length === boundaries.length + 1, 'syllable-count');
-      let edges = [0, ...boundaries, length];
-      let spelling = edges.slice(1).map((end, index) => parts[ordinal].slice(edges[index], end).join(''));
-      check(spelling.join('') === tokens[ordinal].text, 'reconstruction');
-      check(IPA_NUCLEUS.test(ipa.join('')), 'syllable-nucleus');
-      if (ipa.some((syllable) => !IPA_NUCLEUS.test(syllable))) {
-        // A consonant-only IPA entry (e.g. /t/ after schwa deletion) is not
-        // a syllable. Suppress its segmentation without inventing boundaries.
-        // Spelled initials like T/C/F remain valid: /te/se/ɛf/ have nuclei.
-        boundaries = [];
-        ipa = [ipa.join('')];
-        edges = [0, length];
-        spelling = [tokens[ordinal].text];
-      }
-      check(spelling.every((_, index) => parts[ordinal].slice(edges[index], edges[index + 1]).some((part, offset) =>
-        /\p{L}/u.test(part) && !keptSilent.some((span) => edges[index] + offset >= span.start && edges[index] + offset < span.end))), 'silent-syllable');
+    originalSyllables[ordinal] = 0;
+    try {
+      words[ordinal] = validateWord(word, tokens[ordinal], parts[ordinal], length, originalSyllables);
+    } catch (error) {
+      // A word-local inconsistency discards that word's marks, never the sentence.
+      if (!(error instanceof PronunciationValidationError)) throw error;
+      words[ordinal] = unresolvedWord(ordinal, tokens[ordinal].text);
     }
-    words[ordinal] = { ordinal, source: tokens[ordinal].text, status: word.status, ipa, boundaries, silent: keptSilent };
   }
 
   const connected = new Set<number>();
-  const connections = list(obj.connections, Math.max(0, tokens.length - 1), 'connections').map<PronunciationConnection | null>((entry) => {
+  const connections = list(obj.connections, Math.max(0, tokens.length - 1), 'connections').map((entry) => dropInvalid((): PronunciationConnection | null => {
     const conn = record(entry, ['left', 'right', 'type', 'sound', 'pronounced']);
     const left = integer(conn.left, 0, tokens.length - 2);
     const right = integer(conn.right, left + 1, left + 1);
@@ -147,10 +182,10 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
       return trimmed;
     });
     return { left, right, type: conn.type, sound, pronounced };
-  }).filter((connection): connection is PronunciationConnection => connection !== null);
+  })).filter((connection): connection is PronunciationConnection => connection !== null);
 
   const stressed = new Set<number>();
-  const stress = list(obj.stress, tokens.length, 'stress').map((entry) => {
+  const stress = list(obj.stress, tokens.length, 'stress').map((entry) => dropInvalid((): PronunciationStress | null => {
     const mark = record(entry, ['word', 'syllable', 'anchor']);
     const word = integer(mark.word, 0, tokens.length - 1);
     check(words[word].status === 'resolved' && !stressed.has(word), 'stress-target');
@@ -194,7 +229,7 @@ export function validatePronunciationMarkers(value: unknown, source: string): Pr
       !best || span.end - span.start >= best.end - best.start ? span : best, undefined);
     check(chosen && !words[word].silent.some((span) => overlaps(span, chosen)), 'silent-stress');
     return { word, syllable, anchor: chosen };
-  }).filter((mark): mark is PronunciationStress => mark !== null);
+  })).filter((mark): mark is PronunciationStress => mark !== null);
   return { version: 1, source, words, connections, stress };
 }
 
