@@ -10,9 +10,11 @@ description: The checklist for finishing a change in Relire - checks, changelog,
 bun run lint
 bun run i18n:check
 bun run build
+bun scripts/check-prosody-schema.ts       # when markers, the prosody prompt or its parser changed
+bun run e2e                               # browser flows, AI mocked
 impeccable detect --json src index.html   # must print []
 ```
-For UI changes, also run a browser check (`verify-ui` skill). There are no unit tests; do not claim tests ran.
+For UI changes, add or extend a spec in `e2e/` for the flow you changed (`verify-ui` skill). Report which specs ran; never claim the real provider was exercised.
 
 ## 2. Re-read your diff
 - Unrelated edits, debug output, screenshots or scratch files in the repo? Remove them.
