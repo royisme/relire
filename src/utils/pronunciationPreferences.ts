@@ -1,4 +1,4 @@
-/** Per-article reader display preferences only; annotations and readiness belong to the validated cache. */
+/** Per-article reader display preferences and skipped-sentence notes; annotations belong to the validated cache. */
 import type { PronunciationLayers } from '../types/pronunciation';
 
 interface PronunciationPreferences {
@@ -47,5 +47,36 @@ export function savePronunciationPreferences(articleId: string, preferences: Pro
     unsaved.clear();
   } catch {
     // The tab retains its choice; no annotation or generated-state flag is persisted here.
+  }
+}
+
+/**
+ * Sentences whose AI answers failed validation and were skipped, per article,
+ * so a finished article reopens ready without paying for them again. Bound to
+ * the language/prompt identity they failed under; Generate retries them.
+ */
+const SKIPPED_KEY = 'relire_pronunciation_skipped_v1';
+
+export function getSkippedSentences(articleId: string, identity: string): Record<string, string> {
+  try {
+    const all: unknown = JSON.parse(localStorage.getItem(SKIPPED_KEY) || '{}');
+    const entry = all && typeof all === 'object' ? (all as Record<string, unknown>)[articleId] : undefined;
+    if (!entry || typeof entry !== 'object') return {};
+    const { identity: saved, sentences } = entry as { identity?: unknown; sentences?: unknown };
+    if (saved !== identity || !sentences || typeof sentences !== 'object') return {};
+    return Object.fromEntries(Object.entries(sentences).filter((pair): pair is [string, string] => typeof pair[1] === 'string'));
+  } catch {
+    return {};
+  }
+}
+
+export function saveSkippedSentences(articleId: string, identity: string, sentences: Record<string, string>): void {
+  try {
+    const all = JSON.parse(localStorage.getItem(SKIPPED_KEY) || '{}') as Record<string, unknown>;
+    if (Object.keys(sentences).length) all[articleId] = { identity, sentences };
+    else delete all[articleId];
+    localStorage.setItem(SKIPPED_KEY, JSON.stringify(all));
+  } catch {
+    // Without storage, skipped sentences are requested again on the next Generate.
   }
 }

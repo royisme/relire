@@ -1,5 +1,5 @@
 /** Pronunciation markers: whole-article generation, word-level demotion, failure pause. */
-import { expect, layout, openArticle, prosodySentence, prosodyTokens, test } from './fixtures';
+import { expect, layout, openArticle, overflowing, prosodySentence, prosodyTokens, test } from './fixtures';
 import type { Page } from '@playwright/test';
 
 async function generate(page: Page) {
@@ -55,4 +55,34 @@ test('a provider failure pauses generation with the real error', async ({ page, 
   expect(new Set(ai.prompts.prosody.map(prosodySentence)).size).toBe(1);
   await page.keyboard.press('Escape');
   await expect(page.locator('[data-pronunciation-toggle]')).toHaveAttribute('aria-checked', 'false');
+});
+
+test('a sentence whose answer keeps failing validation is skipped, and the article reopens ready', async ({ page, ai }) => {
+  let broken = '';
+  ai.answer({
+    prosody: (prompt: string) => {
+      const sentence = prosodySentence(prompt);
+      broken ||= sentence;
+      const words = prosodyTokens(prompt).map(({ ordinal, source }) => ({ ordinal, source, status: 'unresolved', syllables: [], groupEnd: false }));
+      // A missing word is a sentence-level alignment error.
+      return { words: sentence === broken ? words.slice(1) : words, connections: [] };
+    },
+  });
+  await openArticle(page);
+  const dialog = await generate(page);
+  await expect(dialog).not.toContainText('Generation paused');
+  await expect(dialog).toContainText('Skipped sentences: 1');
+  // One automatic retry, then the queue moves on.
+  expect(ai.prompts.prosody.filter((prompt) => prosodySentence(prompt) === broken)).toHaveLength(2);
+  await expect(dialog.getByRole('button', { name: 'Retry skipped sentences' })).toBeEnabled();
+  expect(await overflowing(dialog)).toEqual([]);
+  await page.keyboard.press('Escape');
+  const toggle = page.locator('[data-pronunciation-toggle]');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-checked', 'true');
+
+  const sent = ai.calls.prosody;
+  await openArticle(page);
+  await expect(page.locator('[data-pronunciation-toggle]')).toHaveAttribute('aria-checked', 'true');
+  expect(ai.calls.prosody).toBe(sent);
 });

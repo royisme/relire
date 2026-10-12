@@ -7,15 +7,19 @@ import {
 import { errorMessage } from '../services/ai/errors';
 import type { PronunciationLayers, PronunciationMarkers } from '../types/pronunciation';
 import { MAX_PRONUNCIATION_SOURCE } from '../types/pronunciation';
-import { hasUsablePronunciationMarkers } from '../utils/pronunciationMarkers';
+import { hasUsablePronunciationMarkers, PronunciationValidationError } from '../utils/pronunciationMarkers';
 import { hasGraphemeSupport, readerWords } from '../utils/readerTokens';
 import type { SentencePiece } from '../utils/sentences';
-import { getPronunciationPreferences, savePronunciationPreferences } from '../utils/pronunciationPreferences';
+import {
+  getPronunciationPreferences, getSkippedSentences, savePronunciationPreferences, saveSkippedSentences,
+} from '../utils/pronunciationPreferences';
 
 export type PronunciationSnapshot = Readonly<Record<string, PronunciationMarkers>>;
 interface State {
   identity: string;
   staged: PronunciationSnapshot;
+  /** Sentence id → validation error; these stay plain and do not block the marker view. */
+  skipped: Readonly<Record<string, string>>;
   displayed: PronunciationSnapshot;
   mode: boolean;
   layers: PronunciationLayers;
@@ -25,7 +29,7 @@ interface State {
   error: string | null;
 }
 const empty = (identity: string, articleId: string): State => ({
-  identity, staged: {}, displayed: {}, mode: false, layers: getPronunciationPreferences(articleId).layers,
+  identity, staged: {}, skipped: {}, displayed: {}, mode: false, layers: getPronunciationPreferences(articleId).layers,
   restoring: true, running: false, stopped: false, error: null,
 });
 
@@ -55,6 +59,7 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
       current.current.identity === identity && getPronunciationIdentity() === session.identity;
     const restore = async () => {
       const staged: Record<string, PronunciationMarkers> = {};
+      const skipped: Record<string, string> = {};
       let error: string | null = null;
       try {
         if (capable) {
@@ -63,16 +68,21 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
             if (!live()) return;
             if (hit) staged[sentence.id] = hit;
           }
+          const saved = getSkippedSentences(articleId, session.identity);
+          for (const sentence of supported) {
+            if (!staged[sentence.id] && Object.hasOwn(saved, sentence.text)) skipped[sentence.id] = saved[sentence.text];
+          }
         }
       } catch (cause) {
         error = errorMessage(cause);
       }
       if (!live()) return;
-      const complete = capable && supported.length > 0 && Object.keys(staged).length === supported.length &&
+      const complete = capable && supported.length > 0 &&
+        Object.keys(staged).length + Object.keys(skipped).length === supported.length &&
         Object.values(staged).some(hasUsablePronunciationMarkers);
       const mode = complete && getPronunciationPreferences(articleId).enabled;
       // Apply once on entry, never incrementally and never by issuing a provider request.
-      const next = { ...current.current, staged, displayed: mode ? staged : {}, mode, restoring: false, error };
+      const next = { ...current.current, staged, skipped, displayed: mode ? staged : {}, mode, restoring: false, error };
       current.current = next;
       setStored(next);
     };
@@ -83,7 +93,8 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
     };
   }, [identity, articleId, supported, capable]);
   const ready = Object.keys(state.staged).length;
-  const remaining = supported.length - ready;
+  const skippedCount = Object.keys(state.skipped).length;
+  const remaining = supported.length - ready - skippedCount;
   const usable = Object.values(state.staged).some(hasUsablePronunciationMarkers);
   const changed = Object.keys(state.staged).some((id) => state.staged[id] !== state.displayed[id]);
   const canDisplay = capable && !state.restoring && !state.running && remaining === 0 && ready > 0 && usable;
@@ -112,9 +123,22 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
       current.current.identity === identity && getPronunciationIdentity() === session.identity;
     patch({ running: true, stopped: false, error: null });
     let staged = { ...current.current.staged };
+    let skipped = { ...current.current.skipped };
+    const persistSkipped = () => saveSkippedSentences(articleId, session.identity, Object.fromEntries(
+      supported.filter((sentence) => skipped[sentence.id]).map((sentence) => [sentence.text, skipped[sentence.id]])));
     const stage = (id: string, value: PronunciationMarkers) => {
       staged = { ...staged, [id]: value };
-      patch({ staged });
+      if (skipped[id]) {
+        const { [id]: _retried, ...rest } = skipped;
+        skipped = rest;
+        persistSkipped();
+      }
+      patch({ staged, skipped });
+    };
+    const skip = (id: string, message: string) => {
+      skipped = { ...skipped, [id]: message };
+      persistSkipped();
+      patch({ skipped });
     };
     try {
       // A stopped paid request can still finish. Do not overlap it with a new run.
@@ -136,16 +160,24 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
           stage(sentence.id, hit);
           continue;
         }
-        const request = fetchPronunciationMarkers(sentence.text, session);
-        tail.current = request;
-        let result: PronunciationMarkers;
-        try {
-          result = await request;
-        } finally {
-          if (tail.current === request) tail.current = null;
+        // An answer that fails validation gets one fresh request; a second
+        // failure skips the sentence (it stays plain) instead of blocking the
+        // article. Provider, key and network errors still stop the run.
+        let result: PronunciationMarkers | null = null;
+        for (let attempt = 0; attempt < 2 && !result; attempt++) {
+          const request = fetchPronunciationMarkers(sentence.text, session);
+          tail.current = request;
+          try {
+            result = await request;
+          } catch (error) {
+            if (!(error instanceof PronunciationValidationError) || !live()) throw error;
+            if (attempt === 1) skip(sentence.id, errorMessage(error));
+          } finally {
+            if (tail.current === request) tail.current = null;
+          }
+          if (!live()) return;
         }
-        if (!live()) return;
-        stage(sentence.id, result);
+        if (result) stage(sentence.id, result);
       }
       if (live()) patch({ running: false });
     } catch (error) {
@@ -172,7 +204,7 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
   };
 
   return {
-    ...state, capable, oversized, ready, remaining, total: supported.length,
+    ...state, capable, oversized, ready, remaining, skippedCount, total: supported.length,
     coverage, usable, changed, canDisplay, run, stop, display, setMode, toggleLayer,
   };
 }

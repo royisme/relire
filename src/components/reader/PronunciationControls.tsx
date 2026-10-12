@@ -123,8 +123,8 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
           <p className="text-xs text-ink-600 leading-relaxed">{t('prosody.disclosure')}</p>
           <p className="text-xs text-ink-600 leading-relaxed">{t('prosody.consent')}</p>
           <div className="flex flex-wrap gap-2">
-            <Button variant={c.usable ? 'outline' : 'default'} disabled={!c.capable || c.restoring || c.running || c.remaining === 0} onClick={() => void c.run()}>
-              {c.running ? t('prosody.generating') : c.error ? t('common.retry') : t('prosody.generate')}
+            <Button variant={c.usable ? 'outline' : 'default'} disabled={!c.capable || c.restoring || c.running || c.remaining + c.skippedCount === 0} onClick={() => void c.run()}>
+              {c.running ? t('prosody.generating') : c.error ? t('common.retry') : c.remaining === 0 && c.skippedCount > 0 ? t('prosody.retrySkipped') : t('prosody.generate')}
             </Button>
             {c.running && <Button variant="outline" onClick={c.stop}>{t('prosody.stop')}</Button>}
           </div>
@@ -135,6 +135,7 @@ export function PronunciationControls({ controller: c, onDisplay, onMode, onOpen
             <p className="tnum">{t('prosody.coverage', c.coverage)}</p>
             {c.oversized > 0 && <p>{t('prosody.oversized', { total: c.oversized })}</p>}
             {!c.capable && <p className="text-bad-700">{t('prosody.unsupportedBrowser')}</p>}
+            {c.skippedCount > 0 && !c.running && <p className="break-words">{t('prosody.skipped', { total: c.skippedCount, message: Object.values(c.skipped)[0] })}</p>}
             {c.error && <p role="alert" className="text-bad-700 break-words">{t('prosody.failed', { total: 1, message: c.error })}</p>}
             {c.stopped && <p>{t('prosody.stopped')}</p>}
             {complete && c.ready > 0 && <p>{t('prosody.complete')}</p>}

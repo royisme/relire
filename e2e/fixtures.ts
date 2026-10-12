@@ -99,6 +99,19 @@ export async function openArticle(page: Page, title = 'Le Petit Prince') {
   await page.goto('/');
   await page.getByText(title).first().click();
   await expect(page.locator('article [data-sentence]').first()).toBeVisible();
+  await settled(page);
+}
+
+/** Waits for fonts and two equal layout readings, so "before" measurements are not mid-load. */
+export async function settled(page: Page) {
+  await page.evaluate(() => document.fonts.ready);
+  let last = '';
+  await expect.poll(async () => {
+    const now = JSON.stringify(await layout(page, 'body'));
+    const same = now === last;
+    last = now;
+    return same;
+  }, { intervals: [100] }).toBe(true);
 }
 
 /** Document size and the top of `selector`, to assert that an action did not move the page. */

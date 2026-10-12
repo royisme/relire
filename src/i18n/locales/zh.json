@@ -399,6 +399,8 @@
     "enchainement": "连音",
     "connection": "{{left}} → {{right}} · {{type}} · /{{sound}}/",
     "layers": "显示图层",
+    "retrySkipped": "重试跳过的句子",
+    "skipped": "已跳过 {{total}} 句：这些句子保持原文，文章其余部分可以开启标记。点生成会重新请求它们。最近的错误：{{message}}",
     "failed": "生成已暂停，失败句数：{{total}}。{{message}}",
     "complete": "所有符合长度限制的句子已处理。",
     "controls": "发音标记设置",

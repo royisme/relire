@@ -401,6 +401,8 @@
     "enchainement": "Enchaînement",
     "connection": "{{left}} → {{right}} · {{type}} · /{{sound}}/",
     "layers": "Visible layers",
+    "retrySkipped": "Retry skipped sentences",
+    "skipped": "Skipped sentences: {{total}}. They stay plain; the rest of the article can use markers. Generate requests them again. Last error: {{message}}",
     "failed": "Generation paused. Failed sentences: {{total}}. {{message}}",
     "complete": "All supported sentences processed.",
     "controls": "Marker settings",
