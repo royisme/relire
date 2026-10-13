@@ -274,3 +274,47 @@ test('the practice card fits a phone @phone', async ({ page }) => {
   const box = await card(page).boundingBox();
   expect(box!.width).toBeLessThanOrEqual(360);
 });
+
+test('minimising the card keeps recording to one row', async ({ page }) => {
+  await openArticle(page);
+  await openCard(page);
+  const full = (await card(page).boundingBox())!.height;
+  await card(page).getByRole('button', { name: 'Minimise' }).click();
+  expect((await card(page).boundingBox())!.height).toBeLessThan(full / 2);
+  await expect(card(page).getByRole('button', { name: 'Redo' })).toHaveCount(0);
+
+  await page.waitForTimeout(800);
+  await card(page).getByRole('button', { name: 'Stop' }).click();
+  await expect(card(page).getByRole('button', { name: 'Record again' })).toBeVisible();
+  await card(page).getByRole('button', { name: 'Show the practice card' }).click();
+  await expect(card(page).getByText('All recordings (1)')).toBeVisible();
+});
+
+test('on touch, sentence actions sit in the bottom bar, clear of the text @phone', async ({ page }) => {
+  await openArticle(page);
+  const sentence = page.locator('article [data-sentence]').nth(1);
+  await sentence.tap();
+  const bar = page.locator('[data-sentence-actions]');
+  await expect(bar).toBeVisible();
+  await expect(page.locator('article [data-sentence-actions]')).toHaveCount(0);
+  const [s, b] = [(await sentence.boundingBox())!, (await bar.boundingBox())!];
+  expect(s.y + s.height).toBeLessThanOrEqual(b.y);
+
+  // A sentence low on the screen is scrolled up so the bar does not cover it.
+  const low = page.locator('article [data-sentence]').nth(6);
+  await low.scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollBy(0, -(innerHeight - 160)));
+  await low.tap();
+  await expect.poll(async () => {
+    const [l, bb] = [(await low.boundingBox())!, (await bar.boundingBox())!];
+    return l.y + l.height <= bb.y;
+  }).toBe(true);
+
+  await bar.getByRole('button', { name: 'Close' }).click();
+  await expect(bar).toHaveCount(0);
+  await low.tap();
+  await bar.locator('[data-practice-entry]').tap();
+  await expect(card(page).getByRole('button', { name: 'Stop' })).toBeVisible();
+  await expect(bar).toHaveCount(0);
+});
+

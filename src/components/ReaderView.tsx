@@ -16,6 +16,8 @@ import { Button } from './ui/button';
 import { ArticlePlayer } from './ArticlePlayer';
 import { BottomDock, dockHeight } from './reader/BottomDock';
 import { PracticeCard } from './reader/PracticeCard';
+import { SentenceBar } from './reader/SentenceBar';
+import { useTouchLayout } from '../hooks/useTouchLayout';
 import { usePracticeCard } from '../hooks/usePracticeCard';
 import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
@@ -68,7 +70,12 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     cancelClear();
     setHoveredId(id);
     setAnchorId(id);
+    setDismissedId(null);
   };
+  // Touch screens dock the sentence actions at the bottom instead of floating them over the text.
+  const touch = useTouchLayout();
+  // The docked actions' close button hides them for that sentence until another is chosen.
+  const [dismissedId, setDismissedId] = useState<string | null>(null);
 
   // Playback rate (0.5x to 1.5x), shared with every speak button.
   const [playbackRate, setPlaybackRate] = useState<number>(0.85);
@@ -247,6 +254,28 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   // Which sentence the actions belong to when nothing is hovered: the one playing, else the one open in the drawer.
   // While listening the pill does not chase the voice; it stays with what the reader points at.
   const activeKey = (listening ? null : playingKey) ?? (activeSentence ? speechKey(activeSentence) : null);
+  // Which sentence the actions belong to: the hovered or tapped one, else the active one.
+  const actionId = useMemo(() => {
+    if (hoveredId) return hoveredId;
+    if (!activeKey) return null;
+    const anchor = anchorId ? flatSentences.find((s) => s.id === anchorId) : undefined;
+    if (anchor && speechKey(anchor.text) === activeKey) return anchor.id;
+    return flatSentences.find((s) => speechKey(s.text) === activeKey)?.id ?? null;
+  }, [hoveredId, anchorId, activeKey, flatSentences]);
+  const barSentence = touch && actionId && actionId !== dismissedId && actionId !== practisedId
+    ? flatSentences.find((s) => s.id === actionId) ?? null
+    : null;
+  // The docked actions must not cover the sentence they act on.
+  useEffect(() => {
+    if (!barSentence) return;
+    const frame = requestAnimationFrame(() => requestAnimationFrame(() => {
+      const r = sentenceEls.current.get(barSentence.id)?.el.getBoundingClientRect();
+      const limit = window.innerHeight - dockHeight() - 16;
+      if (r && r.bottom > limit) window.scrollBy({ top: r.bottom - limit, behavior: 'instant' });
+    }));
+    return () => cancelAnimationFrame(frame);
+  }, [barSentence]);
+
   // Phase of the sentence the pill is showing, so its own button can theme itself (hooks cannot be conditional).
   const toolbarPhase = useSpeechPhase(toolbar?.text ?? '');
 
@@ -260,15 +289,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     let frame = 0;
 
     const place = () => {
-      // Which sentence the actions belong to: the hovered one, else the active one.
-      let id = hoveredId;
-      if (!id && activeKey) {
-        const entries = [...sentenceEls.current.entries()];
-        id =
-          (anchorId && sentenceEls.current.get(anchorId)?.key === activeKey ? anchorId : null) ??
-          entries.find(([, v]) => v.key === activeKey)?.[0] ??
-          null;
-      }
+      const id = touch ? null : actionId;
       const target = id ? sentenceEls.current.get(id) : undefined;
       const article = articleRef.current;
       const vh = window.innerHeight;
@@ -317,7 +338,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule);
     };
-  }, [hoveredId, anchorId, activeKey, fontSize, currentArticle.id, currentArticle.content, markers.mode, markers.displayed]);
+  }, [touch, actionId, fontSize, currentArticle.id, currentArticle.content, markers.mode, markers.displayed]);
 
   const toolbarButton = (active: boolean) =>
     active ? 'bg-accent-700 text-on-fill hover:bg-accent-800' : 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
@@ -542,9 +563,18 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     </div>
 
       {/* Outside the spaced column: as its last child it would add a margin to the article. */}
-      {(listening || card.phase !== 'closed') && (
+      {(listening || card.phase !== 'closed' || barSentence) && (
         <BottomDock>
           {card.phase !== 'closed' && <PracticeCard card={card} onOpenLog={() => onOpenShadowingLog(currentArticle.id)} />}
+          {barSentence && (
+            <SentenceBar
+              text={barSentence.text}
+              practiseBlocked={cardBusy}
+              onExplain={() => onSentenceClick(barSentence.text)}
+              onPractise={() => card.open({ articleId: currentArticle.id, sentenceId: barSentence.id, text: barSentence.text })}
+              onDismiss={() => setDismissedId(barSentence.id)}
+            />
+          )}
           {listening && (
             <ArticlePlayer
               index={sequence.index}

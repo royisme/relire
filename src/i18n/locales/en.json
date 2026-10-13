@@ -43,7 +43,8 @@
     "analyzeSentence": "Explain sentence",
     "wordCount": "{{count}} words",
     "textSize": "Text size",
-    "listenAll": "Listen"
+    "listenAll": "Listen",
+    "sentenceActions": "Sentence actions"
   },
   "player": {
     "label": "Article player",
@@ -449,7 +450,9 @@
     "retry": "Try again",
     "discard": "Discard",
     "keep": "Keep it",
-    "confirmDiscard": "Discard the unsaved recording?"
+    "confirmDiscard": "Discard the unsaved recording?",
+    "minimise": "Minimise",
+    "restore": "Show the practice card"
   },
   "study": {
     "label": "My study",

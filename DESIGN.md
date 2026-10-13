@@ -196,7 +196,7 @@ Four choices from the theme menu in the header: **Match system** (light or dark,
 
 - **App frame:** content up to `max-w-5xl` (64rem) centred, with 16px gutters on phones and 24px from `sm`. The header is 56px.
 - **Reader:** the article is a single bordered surface; the text column is `.reading` (68ch). Reading settings (font size, listen, speed, markers) sit in a toolbar above it.
-- **Bottom dock:** the reader has exactly one fixed bottom area (`reader/BottomDock`), holding the practice card above the article player, each up to `max-w-md` (28rem), centred, respecting the safe-area inset. It publishes its height as `--dock-height`; the article's bottom padding is `max(7rem, dock height + 2rem)` and follow-scrolling keeps the current sentence above it. Any new fixed UI in the reader goes inside the dock.
+- **Bottom dock:** the reader has exactly one fixed bottom area (`reader/BottomDock`), holding the practice card, then the touch sentence bar, then the article player, each up to `max-w-md` (28rem), centred, respecting the safe-area inset. It publishes its height as `--dock-height`; the article's bottom padding is `max(7rem, dock height + 2rem)` and follow-scrolling keeps the current sentence above it. Any new fixed UI in the reader goes inside the dock.
 - **Breakpoints:** `md` (768px) switches the nav from a drawer to flat tabs, sheets from bottom to side, and the shadowing log from stacked rows to a three-column table.
 - **360px:** every screen is checked at 360px with long text; layouts wrap (`break-words`, `min-w-0`, `flex-wrap`) instead of fixing widths. No horizontal page scroll.
 
@@ -231,7 +231,7 @@ Filters and modes (library level, vocabulary filter, My study's Words | Shadowin
 | Task that needs focus (settings, import, delete) | Centred dialog | `Dialog` |
 | Switch area | Flat underlined tabs from `md` up; below `md` a menu button opens a left drawer | `Navbar`, `Drawer` |
 | Change interface language or theme | One icon in the header opening a short menu | `MenuButton` |
-| Sentence actions | A compact pill at the end of the sentence (play, analyse, record), on hover **or tap**; never hover-only | `ReaderView` |
+| Sentence actions | With a mouse or keyboard, a compact pill at the end of the sentence (play, analyse, record). On touch screens (`hover: none`, `pointer: coarse`), a bar in the bottom dock with 40px buttons and close, never over the text; the tapped sentence is scrolled clear of it | `ReaderView`, `reader/SentenceBar` |
 | Practise a sentence | A docked card at the bottom of the reader | `PracticeCard` |
 
 Esc closes the topmost thing: a modal sheet first, then the practice card, then speech. Close buttons are at least 40px on touch.
@@ -244,10 +244,12 @@ Esc closes the topmost thing: a modal sheet first, then the practice card, then 
 
 ### Practice card (signature)
 A recording tool docked at the bottom of the reader, `surface` with a 1px `ink-300` border, 10px radius and `shadow-lg`, at most `min(45vh, 22rem)` tall, scrolling inside itself. Top to bottom:
-1. The sentence in the reading face, clamped to two lines, with expand and close.
+1. The sentence in the reading face, clamped to two lines (tap it to show the rest), with minimise and close.
 2. A control row that keeps its height in every phase: Reference (outline), Record (primary) or, while recording, Stop (destructive, with a `tnum` clock), Redo (outline) and seven `accent-600` level bars driven by the input level.
 3. A rule, then the latest take: play (`tnum` time and duration), Compare (reference then take) and the "All recordings (n)" link in `accent-900`.
 4. A rule, then one bounded `aria-live` line for the hint, status or error, with inline Retry/Discard when a save fails.
+
+**Minimised**, the card is one row like the sentence bar: the sentence truncated, then Record (or, while recording, the level bars and a Stop with its clock), restore and close. It restores itself when a save fails, an error appears or the microphone is busy.
 
 Focus goes to Close while the microphone is requested and to Stop while recording; it returns to the sentence's record button when the card closes. The level bars are the only motion that tracks live input; the recording state is the one place a pulse would be allowed.
 

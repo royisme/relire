@@ -43,7 +43,8 @@
     "analyzeSentence": "讲解句子",
     "wordCount": "{{count}} 词",
     "textSize": "字号",
-    "listenAll": "通听"
+    "listenAll": "通听",
+    "sentenceActions": "句子操作"
   },
   "player": {
     "label": "全文朗读",
@@ -447,7 +448,9 @@
     "retry": "重试",
     "discard": "丢弃",
     "keep": "保留",
-    "confirmDiscard": "丢弃这条未保存的录音？"
+    "confirmDiscard": "丢弃这条未保存的录音？",
+    "minimise": "收起",
+    "restore": "展开练习卡"
   },
   "study": {
     "label": "我的学习",

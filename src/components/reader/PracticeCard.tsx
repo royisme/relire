@@ -1,7 +1,7 @@
 /** The docked practice card: draws `usePracticeCard` state; owns no recording or storage logic. */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeftRight, ChevronDown, Mic, RotateCcw, Square, X } from 'lucide-react';
+import { ArrowLeftRight, ChevronDown, ChevronUp, Mic, RotateCcw, Square, X } from 'lucide-react';
 import type { PracticeCardController } from '../../hooks/usePracticeCard';
 import { takeKey } from '../../hooks/usePracticeCard';
 import { cancelCapture } from '../../utils/speech/recorder';
@@ -24,6 +24,8 @@ export function PracticeCard({ card, onOpenLog }: Props) {
   const { t, i18n } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
+  // Minimised: one row (sentence, record or stop, restore, close) so more of the article shows.
+  const [minimised, setMinimised] = useState(false);
   const closeButton = useRef<HTMLButtonElement>(null);
   const stopButton = useRef<HTMLButtonElement>(null);
   const bars = useRef<(HTMLSpanElement | null)[]>([]);
@@ -42,6 +44,11 @@ export function PracticeCard({ card, onOpenLog }: Props) {
   }, [card.phase]);
 
   useEffect(() => setExpanded(false), [card.target?.text]);
+  // Anything that needs a decision opens the card again.
+  const needsAttention = card.phase === 'unsaved' || !!card.error || card.notice === 'busy';
+  useEffect(() => {
+    if (needsAttention) setMinimised(false);
+  }, [needsAttention]);
   useEffect(() => {
     if (card.phase !== 'unsaved') setConfirmClose(false);
   }, [card.phase]);
@@ -70,6 +77,67 @@ export function PracticeCard({ card, onOpenLog }: Props) {
     else card.close();
   };
 
+  const levelBars = (
+    <span className="inline-flex h-6 items-center gap-0.5" aria-hidden="true">
+      {Array.from({ length: BARS }, (_, index) => (
+        <span key={index} ref={(el) => { bars.current[index] = el; }} className="h-6 w-1 rounded-full bg-accent-600 origin-center scale-y-[0.12]" />
+      ))}
+    </span>
+  );
+  const minimiseButton = (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-expanded={!minimised}
+      aria-label={minimised ? t('practiceCard.restore') : t('practiceCard.minimise')}
+      title={minimised ? t('practiceCard.restore') : t('practiceCard.minimise')}
+      onClick={() => setMinimised(!minimised)}
+    >
+      {minimised ? <ChevronUp className="w-4 h-4" aria-hidden="true" /> : <ChevronDown className="w-4 h-4" aria-hidden="true" />}
+    </Button>
+  );
+  const closeControl = (
+    <Button ref={closeButton} variant="ghost" size="icon" aria-label={t('common.close')} title={t('common.close')} onClick={requestClose}>
+      <X className="w-4 h-4" aria-hidden="true" />
+    </Button>
+  );
+
+  if (minimised) {
+    return (
+      <section
+        data-practice-card
+        aria-label={t('practiceCard.label', { sentence: card.target.text })}
+        className="pointer-events-auto flex items-center gap-1 rounded-lg border border-ink-300 bg-surface p-1 pl-3 shadow-lg font-sans text-sm text-ink-800"
+      >
+        <p className="min-w-0 flex-1 truncate font-serif text-base text-ink-900">{card.target.text}</p>
+        {recording ? (
+          <>
+            {levelBars}
+            <Button ref={stopButton} variant="destructive" size="sm" onClick={() => void card.stop()} aria-label={t('practiceCard.stop')}>
+              <Square className="w-3.5 h-3.5 fill-current" aria-hidden="true" />
+              <span className="tnum" aria-hidden="true">{clock(card.elapsedMs)}</span>
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={busy}
+            onClick={() => card.target && card.open(card.target)}
+            aria-label={card.count ? t('practiceCard.recordAgain') : t('practiceCard.record')}
+            title={card.count ? t('practiceCard.recordAgain') : t('practiceCard.record')}
+          >
+            <Mic className="w-4 h-4" aria-hidden="true" />
+          </Button>
+        )}
+        {minimiseButton}
+        {closeControl}
+        {/* Saved / too short still reach screen readers while minimised. */}
+        <span className="sr-only" aria-live="polite">{card.notice === 'saved' ? t('practiceCard.saved') : card.notice === 'tooShort' ? t('practiceCard.tooShort') : ''}</span>
+      </section>
+    );
+  }
+
   const time = card.latest ? new Date(card.latest.recordedAt).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' }) : '';
   const status =
     card.phase === 'acquiring' ? t('practiceCard.acquiring')
@@ -93,22 +161,18 @@ export function PracticeCard({ card, onOpenLog }: Props) {
       }}
     >
       <div className="flex items-start gap-1 px-3 pt-2">
-        <p className={`min-w-0 flex-1 py-1.5 font-serif text-base text-ink-900 break-words ${expanded ? '' : 'line-clamp-2'}`}>
-          {card.target.text}
-        </p>
-        <Button
-          variant="ghost"
-          size="icon"
+        {/* A long sentence shows two lines; tapping it shows the rest. */}
+        <button
+          type="button"
           aria-expanded={expanded}
-          aria-label={expanded ? t('practiceCard.collapse') : t('practiceCard.expand')}
           title={expanded ? t('practiceCard.collapse') : t('practiceCard.expand')}
           onClick={() => setExpanded(!expanded)}
+          className={`min-w-0 flex-1 py-1.5 text-left font-serif text-base text-ink-900 break-words cursor-pointer ${expanded ? '' : 'line-clamp-2'}`}
         >
-          <ChevronDown className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
-        </Button>
-        <Button ref={closeButton} variant="ghost" size="icon" aria-label={t('common.close')} title={t('common.close')} onClick={requestClose}>
-          <X className="w-4 h-4" aria-hidden="true" />
-        </Button>
+          {card.target.text}
+        </button>
+        {minimiseButton}
+        {closeControl}
       </div>
 
       {/* Controls: the slot keeps its height in every phase; buttons wrap on narrow screens. */}
@@ -133,11 +197,7 @@ export function PracticeCard({ card, onOpenLog }: Props) {
               <RotateCcw className="w-4 h-4" aria-hidden="true" />
               <span>{t('practiceCard.redo')}</span>
             </Button>
-            <span className="inline-flex h-6 items-center gap-0.5" aria-hidden="true">
-              {Array.from({ length: BARS }, (_, index) => (
-                <span key={index} ref={(el) => { bars.current[index] = el; }} className="h-6 w-1 rounded-full bg-accent-600 origin-center scale-y-[0.12]" />
-              ))}
-            </span>
+            {levelBars}
           </>
         ) : (
           <Button disabled={busy || card.phase === 'unsaved'} onClick={() => card.target && card.open(card.target)} className="whitespace-normal">
