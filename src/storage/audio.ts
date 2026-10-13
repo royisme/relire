@@ -4,8 +4,9 @@ import { db, type AudioEntry } from './db';
 /**
  * Pronunciation audio as a durable asset. Every clip Gemini synthesizes is kept
  * so it is never paid for twice. Clips that belong to the vocabulary (a saved
- * word, its context sentence, its example sentences) are never trimmed; the
- * rest are dropped least-recently-used once the store passes a size cap.
+ * word, its context sentence, its example sentences) or are the reference of a
+ * recorded shadowing sentence are never trimmed; the rest are dropped
+ * least-recently-used once the store passes a size cap.
  */
 
 /** Unprotected audio is trimmed beyond this size (WAV, about 48 KB per second). */
@@ -17,8 +18,8 @@ export const normalizeText = (s: string) => s.trim().toLowerCase().replace(/\s+/
 export const audioKey = (provider: string, model: string, voice: string, text: string) =>
   `${provider}|${model}|${voice}|${normalizeText(text)}`;
 
-/** Texts whose audio belongs to the vocabulary and must be kept. */
-export async function protectedTexts(): Promise<Set<string>> {
+/** Texts whose audio belongs to the vocabulary: what a backup's optional audio contains. */
+async function vocabularyTexts(): Promise<Set<string>> {
   const d = await db();
   const texts = new Set<string>();
   for (const w of await d.getAll('vocab')) {
@@ -26,6 +27,13 @@ export async function protectedTexts(): Promise<Set<string>> {
     if (w.contextSentence) texts.add(normalizeText(w.contextSentence));
     for (const ex of w.analysis?.usageExamples ?? []) if (ex.fr) texts.add(normalizeText(ex.fr));
   }
+  return texts;
+}
+
+/** Texts whose audio must be kept: the vocabulary's, and the reference of every recorded shadowing sentence. */
+export async function protectedTexts(): Promise<Set<string>> {
+  const texts = await vocabularyTexts();
+  for (const record of await (await db()).getAll('shadowing')) texts.add(normalizeText(record.text));
   return texts;
 }
 
@@ -148,7 +156,7 @@ export interface AudioBackup {
 /** Clips that belong to the vocabulary, for a backup. */
 export async function exportProtectedAudio(): Promise<AudioBackup[]> {
   const d = await db();
-  const keep = await protectedTexts();
+  const keep = await vocabularyTexts();
   const out: AudioBackup[] = [];
   for (const e of await d.getAll('audio')) {
     if (keep.has(e.text)) out.push({ text: e.text, provider: e.provider, voice: e.voice, model: e.model, data: await blobToBase64(e.blob) });

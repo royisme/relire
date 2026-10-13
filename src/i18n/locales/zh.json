@@ -99,6 +99,8 @@
     "checking": "评测中…",
     "yourRecording": "你的录音",
     "micError": "无法使用麦克风，请检查浏览器的麦克风权限。",
+    "busy": "阅读页的练习卡片正在录音。",
+    "stopOther": "停止那次录音",
     "assessError": "发音评测失败。",
     "overall": "综合评分",
     "accuracy": "准确度",
@@ -253,6 +255,9 @@
   },
   "storage": {
     "saveFailed": "最新的修改没能保存到这个浏览器里。",
+    "upgradeBlocked": "Relire 已更新。请关闭其他打开的 Relire 标签页以完成更新，本页随后会继续。",
+    "staleTab": "Relire 已在另一个标签页更新。请重新加载本页，以便继续保存。",
+    "reload": "重新加载",
     "openBackup": "打开设置导出备份"
   },
   "library": {

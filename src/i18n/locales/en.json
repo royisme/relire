@@ -99,6 +99,8 @@
     "checking": "Checking…",
     "yourRecording": "Your recording",
     "micError": "Unable to access the microphone. Check the browser’s microphone permission.",
+    "busy": "The practice card in the reader is recording.",
+    "stopOther": "Stop that recording",
     "assessError": "Could not check the pronunciation.",
     "overall": "Overall score",
     "accuracy": "Accuracy",
@@ -254,6 +256,9 @@
   },
   "storage": {
     "saveFailed": "Your latest changes could not be saved in this browser.",
+    "upgradeBlocked": "Relire was updated. Close its other open tabs to finish, and this page will continue.",
+    "staleTab": "Relire was updated in another tab. Reload this tab to keep saving your work.",
+    "reload": "Reload",
     "openBackup": "Open Settings to export a backup"
   },
   "library": {

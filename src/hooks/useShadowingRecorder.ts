@@ -3,6 +3,7 @@ import { PronunciationAssessment } from '../types';
 import { assessPronunciation } from '../services/api';
 import { errorMessage } from '../services/ai/errors';
 import { FrenchAudioRecorder, stopSpeech } from '../utils/speech';
+import { CaptureBusyError } from '../utils/speech/recorder';
 
 /**
  * The record, review and score flow for reading one sentence aloud. Owns the microphone, the
@@ -11,7 +12,8 @@ import { FrenchAudioRecorder, stopSpeech } from '../utils/speech';
 
 export type RecorderPhase = 'idle' | 'recording' | 'recorded';
 
-export type RecorderError = { kind: 'mic' } | { kind: 'assess'; detail: string };
+/** `busy`: the reader's practice card holds the microphone. */
+export type RecorderError = { kind: 'mic' } | { kind: 'busy' } | { kind: 'assess'; detail: string };
 
 interface Recording {
   base64: string;
@@ -82,7 +84,21 @@ export function useShadowingRecorder(
     const mine = ++session.current;
 
     const rec = new FrenchAudioRecorder();
-    const ok = await rec.start();
+    let ok: boolean;
+    try {
+      // Another screen's "stop" ends this recording without keeping it.
+      ok = await rec.start(() => {
+        if (mine !== session.current) return;
+        window.clearInterval(timer.current);
+        recognition.current?.stop();
+        recognition.current = null;
+        recorder.current = null;
+        setPhase('idle');
+      });
+    } catch (err) {
+      if (mine === session.current) setError(err instanceof CaptureBusyError ? { kind: 'busy' } : { kind: 'mic' });
+      return;
+    }
     if (mine !== session.current) {
       void rec.stop();
       return;

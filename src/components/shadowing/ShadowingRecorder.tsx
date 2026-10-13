@@ -4,6 +4,7 @@ import { AudioLines, Loader2, Mic, Square } from 'lucide-react';
 import { PronunciationAssessment } from '../../types';
 import { useShadowingRecorder } from '../../hooks/useShadowingRecorder';
 import { Button } from '../ui/button';
+import { cancelCapture } from '../../utils/speech/recorder';
 import { AssessmentResult } from './AssessmentResult';
 
 /**
@@ -55,7 +56,12 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }
         <audio controls src={r.audioUrl} aria-label={t('shadowing.yourRecording')} className="w-full max-w-md h-10" />
       )}
 
-      {r.error && (
+      {r.error?.kind === 'busy' ? (
+        <p role="alert" className="flex flex-wrap items-center gap-2 text-sm text-bad-700">
+          <span className="break-words">{t('shadowing.busy')}</span>
+          <Button variant="outline" size="sm" onClick={cancelCapture}>{t('shadowing.stopOther')}</Button>
+        </p>
+      ) : r.error && (
         <p role="alert" className="text-sm text-bad-700 break-words">
           {r.error.kind === 'mic' ? t('shadowing.micError') : `${t('shadowing.assessError')} ${r.error.detail}`}
         </p>

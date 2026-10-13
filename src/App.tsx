@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navbar } from './components/Navbar';
 import { ReaderView } from './components/ReaderView';
@@ -14,7 +14,7 @@ import { SettingsModal } from './components/SettingsModal';
 
 import { Article, VocabWord, WordAnalysis, SentenceAnalysis, UserStats, PronunciationAssessment } from './types';
 import { SAMPLE_ARTICLES } from './data/sampleArticles';
-import { EMPTY_STATS, loadData, saveArticles, saveStats, saveVocab } from './storage/db';
+import { deleteArticleData, EMPTY_STATS, getDbNotice, loadData, saveArticles, saveStats, saveVocab, subscribeDbNotice } from './storage/db';
 import { usePersist } from './storage/usePersist';
 import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
 import { isDueToday, formatDate } from './utils/srs';
@@ -37,6 +37,7 @@ export default function App() {
   const [currentTab, setCurrentTab] = useState<'reader' | 'vocab' | 'practice' | 'analytics'>('reader');
   // Data lives in IndexedDB (see src/storage). It loads once, then every change is saved.
   const [ready, setReady] = useState(false);
+  const dbNotice = useSyncExternalStore(subscribeDbNotice, getDbNotice);
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   // The Read tab is a library list; opening an article switches it to the reader.
@@ -227,7 +228,14 @@ export default function App() {
     if (!exists) openArticle(article);
   };
 
-  const handleDeleteArticle = (article: Article) => {
+  const handleDeleteArticle = async (article: Article) => {
+    // The article and its recordings go in one transaction; the list changes only once that committed.
+    try {
+      await deleteArticleData(article.id);
+    } catch (err) {
+      reportSave('articles', err);
+      return;
+    }
     setArticles((prev) => prev.filter((a) => a.id !== article.id));
     if (article.id === currentArticleId) {
       setCurrentArticleId(null);
@@ -280,7 +288,14 @@ export default function App() {
   const dueCount = vocabList.filter(isDueToday).length;
 
   // IndexedDB answers in a few milliseconds; render nothing until then so saved data never flashes as samples.
-  if (!ready) return <div className="min-h-screen bg-ink-50" aria-busy="true" />;
+  // An older tab can hold the database open and block an upgrade; say so instead of waiting silently.
+  if (!ready) {
+    return (
+      <div className="min-h-screen bg-ink-50 grid place-items-center p-6" aria-busy={dbNotice !== 'blocked'}>
+        {dbNotice === 'blocked' && <p role="alert" className="max-w-sm text-center text-sm text-ink-800">{t('storage.upgradeBlocked')}</p>}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-ink-50 text-ink-900 flex flex-col font-sans">
@@ -292,6 +307,15 @@ export default function App() {
         dueCount={dueCount}
         totalVocabCount={vocabList.length}
       />
+
+      {dbNotice === 'stale' && (
+        <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
+          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>{t('storage.staleTab')}</span>
+            <button className="underline underline-offset-2 cursor-pointer" onClick={() => window.location.reload()}>{t('storage.reload')}</button>
+          </div>
+        </div>
+      )}
 
       {failedSaves.length > 0 && (
         <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">

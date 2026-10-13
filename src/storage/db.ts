@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Article, UserStats, VocabWord } from '../types';
+import type { ShadowingSentence } from '../types/shadowing';
 
 /**
  * User data lives in IndexedDB: no 5 MB cap, async, and one record per article
@@ -15,6 +16,8 @@ interface RelireDB extends DBSchema {
   cache: { key: string; value: CacheEntry; indexes: { kind: string } };
   /** Synthesized speech. Clips for vocabulary words are kept for good; the rest are trimmed by use. */
   audio: { key: string; value: AudioEntry; indexes: { text: string; lastUsed: number } };
+  /** The learner's shadowing takes, per article sentence. User data: never trimmed, optionally backed up. */
+  shadowing: { key: string; value: ShadowingSentence; indexes: { articleId: string } };
 }
 
 export interface AudioEntry {
@@ -50,9 +53,29 @@ export const EMPTY_STATS: UserStats = {
 
 let dbPromise: Promise<IDBPDatabase<RelireDB>> | null = null;
 
+/**
+ * Version-change trouble between tabs: `blocked` means another open tab keeps
+ * this one from upgrading; `stale` means this tab closed its connection so a
+ * newer tab could upgrade, and must be reloaded.
+ */
+export type DbNotice = 'blocked' | 'stale' | null;
+let notice: DbNotice = null;
+const noticeListeners = new Set<() => void>();
+const setNotice = (next: DbNotice) => {
+  notice = next;
+  noticeListeners.forEach((listener) => listener());
+};
+export const getDbNotice = () => notice;
+export function subscribeDbNotice(listener: () => void): () => void {
+  noticeListeners.add(listener);
+  return () => {
+    noticeListeners.delete(listener);
+  };
+}
+
 export function db() {
   if (!dbPromise) {
-    dbPromise = openDB<RelireDB>('relire', 3, {
+    dbPromise = openDB<RelireDB>('relire', 4, {
       upgrade(d, oldVersion) {
         if (oldVersion < 1) {
           d.createObjectStore('articles', { keyPath: 'id' });
@@ -67,8 +90,23 @@ export function db() {
           audio.createIndex('text', 'text');
           audio.createIndex('lastUsed', 'lastUsed');
         }
+        if (oldVersion < 4) {
+          d.createObjectStore('shadowing', { keyPath: 'key' }).createIndex('articleId', 'articleId');
+        }
+      },
+      blocked() {
+        setNotice('blocked');
+      },
+      blocking() {
+        // A newer tab wants to upgrade: step aside instead of stalling it.
+        void dbPromise?.then((open) => open.close());
+        dbPromise = null;
+        setNotice('stale');
       },
     });
+    dbPromise.then(() => {
+      if (notice === 'blocked') setNotice(null);
+    }, () => undefined);
     dbPromise.catch(() => {
       dbPromise = null;
     });
@@ -114,15 +152,46 @@ export async function saveStats(stats: UserStats) {
   await tx.done;
 }
 
+/** Deletes an article and its shadowing recordings together, before the UI forgets it. */
+export async function deleteArticleData(articleId: string) {
+  const d = await db();
+  const tx = d.transaction(['articles', 'shadowing'], 'readwrite');
+  const recordings = tx.objectStore('shadowing');
+  for (const key of await recordings.index('articleId').getAllKeys(articleId)) await recordings.delete(key);
+  await tx.objectStore('articles').delete(articleId);
+  await tx.done;
+}
+
 export async function exportData(): Promise<AppData> {
   return (await loadData()) ?? { articles: [], vocab: [], stats: EMPTY_STATS };
 }
 
-/** Replaces everything stored with the given data. */
-export async function importData(data: Partial<AppData>) {
-  if (data.articles) await saveArticles(data.articles);
-  if (data.vocab) await saveVocab(data.vocab);
-  if (data.stats) await saveStats({ ...EMPTY_STATS, ...data.stats });
+/**
+ * Replaces the stores present in `data` in one transaction, so a failed restore
+ * changes nothing. `shadowing` undefined keeps the recordings already stored;
+ * an empty array clears them. Recordings must be validated by the caller.
+ */
+export async function importData(data: Partial<AppData> & { shadowing?: ShadowingSentence[] }) {
+  const d = await db();
+  const tx = d.transaction(['articles', 'vocab', 'meta', 'shadowing'], 'readwrite');
+  if (data.articles) {
+    const store = tx.objectStore('articles');
+    await store.clear();
+    for (const article of data.articles) await store.put(article);
+  }
+  if (data.vocab) {
+    const store = tx.objectStore('vocab');
+    await store.clear();
+    for (const word of data.vocab) await store.put(word);
+  }
+  if (data.shadowing) {
+    const store = tx.objectStore('shadowing');
+    await store.clear();
+    for (const sentence of data.shadowing) await store.put(sentence);
+  }
+  if (data.stats) await tx.objectStore('meta').put({ ...EMPTY_STATS, ...data.stats }, 'stats');
+  await tx.objectStore('meta').put(true, 'started');
+  await tx.done;
 }
 
 export interface StorageInfo {
