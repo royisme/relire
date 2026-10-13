@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-13T01:48:06.304405+00:00",
+  "title": "Design System: Relire",
+  "extensions": {
+    "colorMeta": {
+      "ink-paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "#F7F6F3",
+        "tonalRamp": [
+          "#121110",
+          "#1E1C1A",
+          "#2D2A27",
+          "#433F3A",
+          "#6F6B63",
+          "#CFCBC2",
+          "#EFEDE8",
+          "#F7F6F3"
+        ]
+      },
+      "ink-900": {
+        "role": "neutral",
+        "displayName": "Reading Ink",
+        "canonical": "#1E1C1A",
+        "tonalRamp": [
+          "#121110",
+          "#1E1C1A",
+          "#2D2A27",
+          "#433F3A",
+          "#6F6B63",
+          "#CFCBC2",
+          "#EFEDE8",
+          "#F7F6F3"
+        ]
+      },
+      "accent-700": {
+        "role": "primary",
+        "displayName": "Ink Blue",
+        "canonical": "#264676",
+        "tonalRamp": [
+          "#121F34",
+          "#1D3150",
+          "#264676",
+          "#2F5490",
+          "#3E69A8",
+          "#92B0DA",
+          "#DCE6F5",
+          "#EEF3FA"
+        ]
+      },
+      "accent-100": {
+        "role": "primary",
+        "displayName": "Selection Tint",
+        "canonical": "#DCE6F5",
+        "tonalRamp": [
+          "#121F34",
+          "#1D3150",
+          "#264676",
+          "#2F5490",
+          "#3E69A8",
+          "#92B0DA",
+          "#DCE6F5",
+          "#EEF3FA"
+        ]
+      },
+      "ok-700": {
+        "role": "semantic",
+        "displayName": "Correct Green",
+        "canonical": "#26633D"
+      },
+      "bad-600": {
+        "role": "semantic",
+        "displayName": "Error Red",
+        "canonical": "#AB3A30"
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#FFFFFF"
+      }
+    },
+    "typographyMeta": {
+      "reading": {
+        "displayName": "Reading",
+        "purpose": "Article text and quoted French; 17/19/21/24px chosen by the reader."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page and article titles."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Section and group headings."
+      },
+      "body": {
+        "displayName": "UI Body",
+        "purpose": "All interface text."
+      },
+      "label": {
+        "displayName": "Meta",
+        "purpose": "Hints, counts, timestamps; the smallest size used."
+      },
+      "phonetic": {
+        "displayName": "Phonetic",
+        "purpose": "IPA and code only."
+      },
+      "reading-small": {
+        "displayName": "Reading Small",
+        "purpose": "Reader font size step 17px."
+      },
+      "reading-medium": {
+        "displayName": "Reading Medium",
+        "purpose": "Reader font size step 19px."
+      },
+      "reading-large": {
+        "displayName": "Reading Large",
+        "purpose": "Reader font size step 24px."
+      }
+    },
+    "shadows": [
+      {
+        "name": "overlay",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Only things that float: sheets, dialogs, menus, sentence pill, article player, practice card."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "All transitions, 160–200ms; off under reduced motion."
+      },
+      {
+        "name": "sheet-in",
+        "value": "translate 24px + fade, 200ms",
+        "purpose": "Sheets: up on phones, from the right on md+."
+      },
+      {
+        "name": "fade-in",
+        "value": "opacity, 160ms",
+        "purpose": "Dialogs and floating controls."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      }
+    ],
+    "themes": [
+      {
+        "name": "light",
+        "surface": "#FFFFFF",
+        "paper": "#F7F6F3"
+      },
+      {
+        "name": "sepia",
+        "surface": "#FBF6EA",
+        "paper": "#F3EBD9"
+      },
+      {
+        "name": "dark",
+        "surface": "#1E1C19",
+        "paper": "#161513"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one filled action per view.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Record</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:6px;border:1px solid transparent;font:500 14px 'Public Sans',sans-serif;cursor:pointer;transition:background-color .16s} .ds-btn-primary{background:var(--color-accent-700);color:var(--color-on-fill)} .ds-btn-primary:hover{background:var(--color-accent-800)} .ds-btn:focus-visible{outline:2px solid var(--color-accent-600);outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions such as Reference or Redo.",
+      "html": "<button class=\"ds-btn-outline\">Reference</button>",
+      "css": ".ds-btn-outline{height:40px;padding:0 16px;border-radius:6px;border:1px solid var(--color-ink-300);background:var(--color-surface);color:var(--color-ink-800);font:500 14px 'Public Sans',sans-serif;cursor:pointer} .ds-btn-outline:hover{background:var(--color-ink-100)} .ds-btn-outline:focus-visible{outline:2px solid var(--color-accent-600);outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Quiet actions inside rows and cards.",
+      "html": "<button class=\"ds-btn-ghost\">Compare</button>",
+      "css": ".ds-btn-ghost{height:36px;padding:0 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--color-ink-600);font:500 12px 'Public Sans',sans-serif;cursor:pointer} .ds-btn-ghost:hover{background:var(--color-ink-100);color:var(--color-ink-900)} .ds-btn-ghost:focus-visible{outline:2px solid var(--color-accent-600);outline-offset:2px}"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text fields and search.",
+      "html": "<input class=\"ds-input\" placeholder=\"Search words, meanings or sentences\">",
+      "css": ".ds-input{height:40px;width:100%;padding:0 12px;border-radius:6px;border:1px solid var(--color-ink-300);background:var(--color-surface);color:var(--color-ink-900);font:14px 'Public Sans',sans-serif} .ds-input::placeholder{color:var(--color-ink-400)} .ds-input:focus-visible{outline:2px solid var(--color-accent-600);outline-offset:2px}"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "segmented",
+      "description": "Filters and modes, e.g. Words | Shadowing.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-on\">Words</button><button>Shadowing</button></div>",
+      "css": ".ds-seg{display:inline-flex;gap:2px;padding:4px;border-radius:10px;background:var(--color-ink-100)} .ds-seg button{height:32px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--color-ink-600);font:14px 'Public Sans',sans-serif;cursor:pointer} .ds-seg button:hover{color:var(--color-ink-900)} .ds-seg .ds-seg-on{background:var(--color-surface);color:var(--color-ink-900)}"
+    },
+    {
+      "name": "Navigation Tab",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Flat underlined tabs from md up.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-on\">Read</a><a>My study</a><a>Drills</a></nav>",
+      "css": ".ds-nav{display:flex;gap:20px;height:56px;align-items:stretch;font:14px 'Public Sans',sans-serif} .ds-nav a{display:flex;align-items:center;color:var(--color-ink-600);border-bottom:2px solid transparent;cursor:pointer} .ds-nav a:hover{color:var(--color-ink-900)} .ds-nav .ds-nav-on{color:var(--color-ink-900);border-color:var(--color-accent-700)}"
+    },
+    {
+      "name": "Practice Card",
+      "kind": "custom",
+      "refersTo": "practice-card",
+      "description": "Docked recording card in the reader.",
+      "html": "<section class=\"ds-pc\"><p class=\"ds-pc-text\">— Bien sûr, dit le renard.</p><div class=\"ds-pc-row\"><button class=\"ds-pc-out\">Reference</button><button class=\"ds-pc-stop\">Stop <span>0:03</span></button><span class=\"ds-pc-bars\"><i></i><i></i><i></i><i></i><i></i></span></div><p class=\"ds-pc-hint\">Listen to the reference, then read it aloud.</p></section>",
+      "css": ".ds-pc{max-width:28rem;border:1px solid var(--color-ink-300);border-radius:10px;background:var(--color-surface);box-shadow:0 10px 15px -3px rgb(0 0 0/.1),0 4px 6px -4px rgb(0 0 0/.1);font:14px 'Public Sans',sans-serif;color:var(--color-ink-800)} .ds-pc-text{margin:0;padding:10px 12px 0;font:16px 'Source Serif 4',serif;color:var(--color-ink-900)} .ds-pc-row{display:flex;gap:8px;align-items:center;padding:8px 12px;min-height:56px} .ds-pc-out{height:40px;padding:0 16px;border-radius:6px;border:1px solid var(--color-ink-300);background:var(--color-surface);color:var(--color-ink-800);cursor:pointer} .ds-pc-stop{height:40px;padding:0 16px;border-radius:6px;border:1px solid transparent;background:var(--color-bad-600);color:var(--color-on-fill);cursor:pointer;font-variant-numeric:tabular-nums} .ds-pc-bars{display:inline-flex;gap:2px;height:24px;align-items:center} .ds-pc-bars i{width:4px;height:12px;border-radius:9999px;background:var(--color-accent-600)} .ds-pc-hint{margin:0;padding:8px 12px;border-top:1px solid var(--color-ink-200);font-size:12px;color:var(--color-ink-600)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Reading Room",
+    "overview": "Warm-neutral paper, ink-coloured type, one blue accent. The article column is the loudest thing on screen; everything else steps back. French printed matter is the reference: a good paperback and a dictionary entry, not a gamified app or an AI dashboard.\n\nControls are refined and restrained: 1px lines, no shadow at rest, fixed sizes. A state changes an icon or a label inside its control, never the layout around it. Everything a learner does while reading (look up, listen, record) happens in overlays that leave the text where it was.",
+    "keyCharacteristics": [
+      "The article is the page: one serif reading column, 68ch, generous leading.",
+      "One accent, used for action and the current selection; colour beyond that is semantic only.",
+      "Flat surfaces separated by rules and headings; only overlays float.",
+      "Every theme (light, sepia, dark) redefines the same tokens, so components use one set of classes.",
+      "Nothing moves when a control is used."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Blue means \"act here\" or \"this is selected\". No amber, indigo, gradients or per-feature colours.",
+        "section": "colors"
+      },
+      {
+        "name": "The Fill Step Rule",
+        "body": "Text in a hue uses steps 800–950 (`text-accent-900`, `text-ok-800`, `text-bad-700`), never a fill step; filled controls use `text-on-fill`, never `text-white`; surfaces use `bg-surface`, never `bg-white`.",
+        "section": "colors"
+      },
+      {
+        "name": "The Semibold Rule",
+        "body": "Headings are semibold, never bold. No uppercase or letter-spaced labels. Scores, counts, clocks and timestamps use `.tnum`.",
+        "section": "typography"
+      },
+      {
+        "name": "The Still Page Rule",
+        "body": "Controls must not move the page. Loading, playing, recording and errors show on the pressed control (icon swap, fixed size) or in an overlay, never as a row that appears and disappears. A slot that changes content between states keeps its height.",
+        "section": "layout"
+      },
+      {
+        "name": "The Float Only Rule",
+        "body": "If it is in the page flow, it has no shadow. If it has a shadow, it is out of the page flow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** use role classes: `bg-surface`, `text-on-fill`, `bg-scrim/NN`, hue text from steps 800–950.",
+      "**Do** keep one filled button per view; the rest are outline or ghost.",
+      "**Do** show transient state on the control itself, at a fixed size.",
+      "**Do** put new fixed reader UI inside `BottomDock` and keep the current sentence clear of it.",
+      "**Do** check every new screen at 360px and in light, sepia and dark.",
+      "**Do** write plain copy: short noun titles (\"Vocabulary\", \"Drills\", \"Shadowing\") with one quiet line under them; empty states say what to do next in one sentence.",
+      "**Do** use lucide icons at 16px in controls, one stroke weight, `aria-hidden` when decorative."
+    ],
+    "donts": [
+      "**Don't** use gradients, glass or blur, glowing cards, hero-metric tiles, emoji as icons or rainbow icon sets.",
+      "**Don't** add streak flames, confetti, mascots or invented scores; empty means empty.",
+      "**Don't** nest cards or use tinted boxes for structure; use headings and rules.",
+      "**Don't** let a control insert or remove a row in the page flow.",
+      "**Don't** use uppercase or letter-spaced eyebrow labels, bold headings or text below 12px.",
+      "**Don't** write hype (\"smart\", \"immersive\", \"AI-powered\"), jargon in titles, exclamation marks, numbered section titles or French in parentheses in Chinese copy.",
+      "**Don't** use hex or arbitrary colour values outside `src/index.css`."
+    ]
+  }
+}
