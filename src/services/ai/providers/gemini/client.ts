@@ -48,6 +48,7 @@ export const geminiText: TextProvider = {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
           const options: any = { responseMimeType: 'application/json' };
+          if (request.jsonSchema) options.responseJsonSchema = request.jsonSchema;
           if (model.includes('gemini-3')) options.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
           const response = await ai.models.generateContent({ model, contents, config: options });
           if (response?.text) return parseJson<T>(response.text);

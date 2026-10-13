@@ -30,7 +30,7 @@ export interface AudioEntry {
 
 export interface CacheEntry {
   key: string;
-  kind: 'word' | 'sentence' | 'drills';
+  kind: 'word' | 'sentence' | 'drills' | 'prosody';
   value: unknown;
   createdAt: number;
 }

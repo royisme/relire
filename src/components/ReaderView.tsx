@@ -1,7 +1,12 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, Pause, Play } from 'lucide-react';
-import { Article, WordAnalysis, SentenceAnalysis } from '../types';
+import { Article } from '../types';
+import { usePronunciationMarkers } from '../hooks/usePronunciationMarkers';
+import { readerTokens } from '../utils/readerTokens';
+import { ReaderWord } from './reader/ReaderWord';
+import { PronunciationParagraph } from './reader/PronunciationParagraph';
+import { PronunciationControls } from './reader/PronunciationControls';
 import {
   stopSpeech, setGlobalRate, speechKey,
   startSequence, toggleSequence, stepSequence, stopSequence, getSequenceState, subscribeSequence,
@@ -17,6 +22,7 @@ interface ReaderViewProps {
   onBack: () => void;
   onWordClick: (word: string, sentence: string) => void;
   onSentenceClick: (sentence: string) => void;
+  onMissingKey: () => void;
   activeWord: string | null;
   activeSentence: string | null;
 }
@@ -26,6 +32,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   onBack,
   onWordClick,
   onSentenceClick,
+  onMissingKey,
   activeWord,
   activeSentence,
 }) => {
@@ -99,93 +106,39 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     onWordClick(word, sentenceText);
   };
 
-  const renderSentenceWords = (sentenceText: string, id: string) => {
-    // Normalize typographical quotes and apostrophes to standard ASCII
-    const normalizedText = sentenceText.replace(/[’‘`]/g, "'");
-    
-    // Regex splits words (including accents, internal apostrophes and hyphens) and punctuation
-    const tokens = normalizedText.split(/([a-zA-ZÀ-ÿœŒæÆ]+(?:'|-[a-zA-ZÀ-ÿœŒæÆ]+)?)/g);
-
-    return tokens.map((token, idx) => {
-      // Check if token contains French word letters
-      const isWord = /[a-zA-ZÀ-ÿœŒæÆ]/.test(token);
-
-      if (!isWord) {
-        return <span key={idx}>{token}</span>;
-      }
-
-      // If token starts with l', d', c', s', n', qu', j', m', t'
-      // handle word click cleanly
-      let cleanWord = token.trim();
-      if (/^[ldcsnjmt]'/i.test(cleanWord) && cleanWord.length > 2) {
-        // e.g. l'amour -> amour, d'accord -> accord
-        const prefix = cleanWord.slice(0, 2);
-        const root = cleanWord.slice(2);
-        return (
-          <span key={idx}>
-            <span className="text-ink-500">{prefix}</span>
-            <span
-              onClick={(e) => {
-                e.stopPropagation();
-                clickWord(root, sentenceText, id);
-              }}
-              className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
-                activeWord && activeWord.toLowerCase() === root.toLowerCase()
-                  ? 'bg-accent-200 text-ink-950'
-                  : ''
-              }`}
-            >
-              {root}
-            </span>
-          </span>
-        );
-      }
-
-      if (/^qu'/i.test(cleanWord) && cleanWord.length > 3) {
-        const prefix = cleanWord.slice(0, 3);
-        const root = cleanWord.slice(3);
-        return (
-          <span key={idx}>
-            <span className="text-ink-500">{prefix}</span>
-            <span
-              onClick={(e) => {
-                e.stopPropagation();
-                clickWord(root, sentenceText, id);
-              }}
-              className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
-                activeWord && activeWord.toLowerCase() === root.toLowerCase()
-                  ? 'bg-accent-200 text-ink-950'
-                  : ''
-              }`}
-            >
-              {root}
-            </span>
-          </span>
-        );
-      }
-
-      return (
-        <span
-          key={idx}
-          onClick={(e) => {
-            e.stopPropagation();
-            clickWord(cleanWord, sentenceText, id);
-          }}
-          className={`cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${
-            activeWord && activeWord.toLowerCase() === cleanWord.toLowerCase()
-              ? 'bg-accent-200 text-ink-950'
-              : ''
-          }`}
-        >
-          {token}
-        </span>
-      );
-    });
-  };
+  const renderSentenceWords = (sentenceText: string, id: string) =>
+    readerTokens(sentenceText).map((token) => token.word ? (
+      <ReaderWord
+        key={token.start}
+        token={token.word}
+        annotation={markers.mode ? markers.displayed[id]?.words[token.word.ordinal] : undefined}
+        decorating={markers.mode}
+        layers={markers.layers}
+        activeWord={activeWord}
+        onClick={(word) => clickWord(word, sentenceText, id)}
+      />
+    ) : <React.Fragment key={token.start}>{token.text}</React.Fragment>);
 
   // Paragraphs and sentences, cut the same way for reading and for listening.
   const paragraphs = useMemo(() => splitArticle(currentArticle.content), [currentArticle.content]);
   const flatSentences = useMemo(() => paragraphs.flat(), [paragraphs]);
+  const markers = usePronunciationMarkers(currentArticle.id, currentArticle.content, flatSentences, onMissingKey);
+  const readingAnchor = useRef<{ id: string; top: number } | null>(null);
+  const preserveAnchor = (apply: () => void) => {
+    const entry = [...sentenceEls.current.entries()].find(([, { el }]) => {
+      const box = el.getBoundingClientRect();
+      return box.bottom > 72 && box.top < window.innerHeight;
+    });
+    readingAnchor.current = entry ? { id: entry[0], top: entry[1].el.getBoundingClientRect().top } : null;
+    apply();
+  };
+  useLayoutEffect(() => {
+    const anchor = readingAnchor.current;
+    readingAnchor.current = null;
+    if (!anchor) return;
+    const el = sentenceEls.current.get(anchor.id)?.el;
+    if (el) window.scrollBy({ top: el.getBoundingClientRect().top - anchor.top, behavior: 'instant' });
+  }, [markers.mode, markers.displayed]);
 
   // Listening to the whole article: one sentence after another, the current one highlighted.
   const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
@@ -284,14 +237,19 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     };
 
     place();
+    const observer = new ResizeObserver(schedule);
+    if (articleRef.current) observer.observe(articleRef.current);
+    document.fonts.addEventListener('loadingdone', schedule);
     window.addEventListener('resize', schedule);
     window.addEventListener('scroll', schedule, { passive: true });
     return () => {
       cancelAnimationFrame(frame);
+      observer.disconnect();
+      document.fonts.removeEventListener('loadingdone', schedule);
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule);
     };
-  }, [hoveredId, anchorId, activeKey, fontSize, currentArticle.id]);
+  }, [hoveredId, anchorId, activeKey, fontSize, currentArticle.id, currentArticle.content, markers.mode, markers.displayed]);
 
   const toolbarButton = (active: boolean) =>
     active ? 'bg-accent-700 text-on-fill hover:bg-accent-800' : 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
@@ -359,6 +317,14 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           <ChevronDown className={`w-3.5 h-3.5 text-ink-400 transition-transform ${isSpeedControlOpen ? 'rotate-180' : ''}`} />
         </button>
 
+        <PronunciationControls
+          key={currentArticle.id}
+          controller={markers}
+          onDisplay={() => preserveAnchor(markers.display)}
+          onMode={(marked) => preserveAnchor(() => markers.setMode(marked))}
+          onOpen={() => setIsSpeedControlOpen(false)}
+        />
+
         {/* Floats over the article so opening it never moves the text */}
         {isSpeedControlOpen && (
         <div className="absolute inset-x-0 top-full z-20 mt-2 rounded-lg border border-ink-200 bg-surface p-4 space-y-3 shadow-lg anim-fade">
@@ -401,7 +367,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         }}
         className="relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border border-ink-200 bg-surface text-ink-900"
       >
-        <div className={`reading ${getFontSizeClass()}`}>
+        <div className={`reading ${getFontSizeClass()} ${markers.mode ? 'reading-markers' : ''}`}>
         <header className="mb-8">
           <p className="text-xs text-ink-500 font-sans mb-2">
             {formatLevel(currentArticle.level, i18n.language)}
@@ -417,7 +383,14 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         <div className="space-y-5">
           {paragraphs.map((sentences, pIdx) => {
             return (
-              <p key={pIdx}>
+              <PronunciationParagraph
+                key={pIdx}
+                snapshot={markers.displayed}
+                sentenceIds={sentences.map((s) => s.id)}
+                layers={markers.layers}
+                enabled={markers.mode}
+                fontSize={fontSize}
+              >
                 {sentences.map(({ id, raw: sent, text: cleanSentence }) => {
                   const isHovered = hoveredId === id;
                   const key = speechKey(cleanSentence);
@@ -429,6 +402,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                     <span
                       key={id}
                       data-sentence
+                      data-sentence-id={id}
                       ref={(el) => {
                         if (el) sentenceEls.current.set(id, { el, text: cleanSentence, key });
                         else sentenceEls.current.delete(id);
@@ -444,11 +418,10 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       }`}
                     >
                       {renderSentenceWords(sent, id)}
-                      {' '}
                     </span>
                   );
                 })}
-              </p>
+              </PronunciationParagraph>
             );
           })}
         </div>

@@ -12,7 +12,7 @@ Bun is the only package manager.
 - `bun run lint`: `tsc --noEmit`
 - `bun run i18n:check`: keys exist in both locales, locales match, no hard-coded Chinese in components (CI runs it)
 - `impeccable detect --json src index.html`: UI anti-pattern detector; keep it at `[]`
-- There are no automated tests. Verify UI changes in a browser with the `verify-ui` skill.
+- `bun run e2e`: Playwright specs in `e2e/` drive the real app in installed Chrome with every AI call mocked (`e2e/fixtures.ts`); `bun scripts/check-prosody-schema.ts` guards the marker parser. Cover UI changes with a spec (`verify-ui` skill).
 
 ## Always
 

@@ -12,7 +12,7 @@ export const DataSection: React.FC = () => {
   const { t } = useTranslation();
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
   const [storageInfo, setStorageInfo] = useState<StorageInfo>({});
-  const [cacheInfo, setCacheInfo] = useState({ words: 0, sentences: 0, drills: 0 });
+  const [cacheInfo, setCacheInfo] = useState({ words: 0, sentences: 0, drills: 0, prosody: 0 });
   const [audioInfo, setAudioInfo] = useState<AudioStats>({ clips: 0, bytes: 0, keptClips: 0, keptBytes: 0 });
   const [includeAudio, setIncludeAudio] = useState(false);
   const [localStats, setLocalStats] = useState({ articlesCount: 0, vocabCount: 0, statsHistoryCount: 0 });
@@ -120,11 +120,11 @@ export const DataSection: React.FC = () => {
         {/* Saved AI answers */}
         <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
           <span className="text-ink-600">
-            {t('settings.cacheSummary', { words: cacheInfo.words, sentences: cacheInfo.sentences, drills: cacheInfo.drills })}
+            {t('settings.cacheSummary', { words: cacheInfo.words, sentences: cacheInfo.sentences, drills: cacheInfo.drills, prosody: cacheInfo.prosody })}
           </span>
           <button
             type="button"
-            disabled={cacheInfo.words + cacheInfo.sentences + cacheInfo.drills === 0}
+            disabled={cacheInfo.words + cacheInfo.sentences + cacheInfo.drills + cacheInfo.prosody === 0}
             onClick={async () => {
               await clearCache();
               setCacheInfo(await cacheCounts());

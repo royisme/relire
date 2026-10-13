@@ -2,6 +2,8 @@ import type { JsonRequest, Lang } from '../types';
 import { renderTemplate, type PromptVars } from './engine';
 import { getPromptTemplate } from './store';
 import type { PromptId } from './registry';
+import { enumeratedReaderWords } from '../../../utils/readerTokens';
+import { prosodySchema } from '../prosodySchema';
 
 /**
  * Builds provider-neutral requests from templates. This file only prepares the
@@ -10,7 +12,7 @@ import type { PromptId } from './registry';
 
 export { renderTemplate, usedVariables } from './engine';
 export { PROMPTS, getPromptDefinition, type PromptId } from './registry';
-export { getPromptOverrides, savePromptOverrides, getPromptTemplate, isPromptCustomized, type PromptOverrides } from './store';
+export { getPromptOverrides, savePromptOverrides, getPromptTemplate, isPromptCustomized, subscribePromptChanges, type PromptOverrides } from './store';
 
 export function render(id: PromptId, lang: Lang, vars: PromptVars): string {
   return renderTemplate(getPromptTemplate(id, lang), vars);
@@ -36,6 +38,19 @@ export function wordRequest(input: { word: string; sentenceContext?: string; art
       sentence: input.sentenceContext || input.word,
       articleContext: summary(input.articleContext),
     }),
+  };
+}
+
+export function prosodyRequest(input: { source: string; template?: string }, lang: Lang): JsonRequest {
+  const enumerated = enumeratedReaderWords(input.source);
+  const vars = {
+    sentence: JSON.stringify(input.source),
+    tokens: JSON.stringify(enumerated),
+  };
+  return {
+    prompt: input.template === undefined ? render('prosody', lang, vars) : renderTemplate(input.template, vars),
+    // Counts/ordinals come from the local enumeration and are validated locally.
+    jsonSchema: prosodySchema,
   };
 }
 

@@ -10,9 +10,11 @@ import audioZh from './defaults/pronunciation-audio.zh.txt?raw';
 import textEn from './defaults/pronunciation-text.en.txt?raw';
 import textZh from './defaults/pronunciation-text.zh.txt?raw';
 import type { PromptVars } from './engine';
+import prosodyEn from './defaults/prosody.en.txt?raw';
+import prosodyZh from './defaults/prosody.zh.txt?raw';
 
 /** The prompts the app sends. Defaults ship as text files in ./defaults and can be overridden by the user. */
-export type PromptId = 'word' | 'sentence' | 'drills' | 'pronunciationAudio' | 'pronunciationText';
+export type PromptId = 'word' | 'sentence' | 'drills' | 'pronunciationAudio' | 'pronunciationText' | 'prosody';
 
 export interface PromptDefinition {
   id: PromptId;
@@ -24,6 +26,15 @@ export interface PromptDefinition {
 }
 
 export const PROMPTS: PromptDefinition[] = [
+  {
+    id: 'prosody',
+    variables: ['sentence', 'tokens'],
+    defaults: { en: prosodyEn, zh: prosodyZh },
+    sample: {
+      sentence: '"Bonjour."',
+      tokens: '[{"ordinal":0,"source":"Bonjour","graphemes":["B","o","n","j","o","u","r"]}]',
+    },
+  },
   {
     id: 'word',
     variables: ['word', 'sentence', 'articleContext'],

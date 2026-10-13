@@ -3,6 +3,8 @@ export type Lang = 'zh' | 'en';
 /** A provider-neutral request for structured (JSON) output. */
 export interface JsonRequest {
   prompt: string;
+  /** Optional provider-side output constraint; still validate at the task boundary. */
+  jsonSchema?: Record<string, unknown>;
   /** A recording for providers that can listen to it. */
   audio?: { mimeType: string; base64: string };
 }

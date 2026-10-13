@@ -36,6 +36,20 @@ export function savePromptOverrides(overrides: PromptOverrides): void {
   } catch {
     // Storage unavailable: edits last until the page closes.
   }
+  window.dispatchEvent(new Event('relire-prompts-changed'));
+}
+
+/** Notify active queues, including edits made in another tab. */
+export function subscribePromptChanges(listener: () => void): () => void {
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === KEY || event.key === null) listener();
+  };
+  window.addEventListener('relire-prompts-changed', listener);
+  window.addEventListener('storage', onStorage);
+  return () => {
+    window.removeEventListener('relire-prompts-changed', listener);
+    window.removeEventListener('storage', onStorage);
+  };
 }
 
 /** The template that will be sent: the user's, or the default. */
