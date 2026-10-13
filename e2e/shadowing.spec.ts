@@ -150,6 +150,26 @@ test('the log lists recordings in article order, opens the reader and deletes ta
   await expect(page.locator('article [data-sentence]', { hasText: second }).first()).toBeInViewport();
 });
 
+test('opening a sentence from the log scrolls to it once', async ({ page }) => {
+  await openArticle(page);
+  const far = page.locator('article [data-sentence]').last();
+  await far.scrollIntoViewIfNeeded();
+  await far.hover();
+  await page.locator('[data-practice-entry]').click();
+  await recordFor(page);
+  await card(page).getByText('All recordings (1)').click();
+
+  await page.locator('button[title="Open in the reader"]').click();
+  await expect(far).toBeInViewport();
+
+  await page.getByRole('button', { name: 'Progress' }).click();
+  await page.getByRole('button', { name: 'Read' }).click();
+  await expect(page.locator('article [data-sentence]').first()).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => scrollY)).toBeLessThan(200);
+  await expect(page.locator('[data-sentence-actions]')).toBeHidden();
+});
+
 test('backup round-trips recordings; a backup without them keeps them', async ({ page }) => {
   await openArticle(page);
   await openCard(page);
@@ -181,6 +201,25 @@ test('backup round-trips recordings; a backup without them keeps them', async ({
   expect(restored.afterRestore).toEqual([[backup[0].text, backup[0].takes[0].mimeType, true]]);
   expect(restored.plain).toBe(1);
   expect(restored.rejected).toBe('ShadowingBackupError');
+});
+
+test('recording pauses listening to the article; it resumes afterwards', async ({ page, ai }) => {
+  await openArticle(page);
+  await page.getByRole('button', { name: 'Listen' }).click();
+  const player = page.getByRole('region', { name: 'Article player' });
+  await expect(player.getByRole('button', { name: 'Pause' })).toBeVisible();
+  await expect.poll(() => plays(page)).toContain('reference');
+
+  await openCard(page, 3);
+  await expect(player.getByRole('button', { name: 'Play' })).toBeVisible();
+  await recordFor(page);
+  await expect(player).toBeVisible();
+
+  const before = ai.calls.tts;
+  await player.getByRole('button', { name: 'Play' }).click();
+  await expect(player.getByRole('button', { name: 'Pause' })).toBeVisible();
+  await expect.poll(() => ai.calls.tts).toBeGreaterThanOrEqual(before);
+  await expect.poll(async () => (await plays(page)).filter((p) => p === 'reference').length).toBeGreaterThan(1);
 });
 
 test('upgrading a version 3 database keeps its data', async ({ page }) => {

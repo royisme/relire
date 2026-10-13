@@ -308,7 +308,11 @@ export default function App() {
       {/* Top Navbar */}
       <Navbar
         currentTab={currentTab}
-        onSelectTab={setCurrentTab}
+        onSelectTab={(tab) => {
+          // A sentence opened from the shadowing log is shown once, not on every return to the reader.
+          setReaderFocus(null);
+          setCurrentTab(tab);
+        }}
         onOpenSettings={() => setIsSettingsOpen(true)}
         dueCount={dueCount}
         totalVocabCount={vocabList.length}
