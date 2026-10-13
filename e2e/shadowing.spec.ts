@@ -318,3 +318,29 @@ test('on touch, sentence actions sit in the bottom bar, clear of the text @phone
   await expect(bar).toHaveCount(0);
 });
 
+
+test('the card can be dragged on desktop, keeps its place, and docks on double-click', async ({ page }) => {
+  await openArticle(page);
+  await openCard(page);
+  await recordFor(page);
+  const handle = card(page).getByRole('button', { name: 'Move the card' });
+  const before = (await card(page).boundingBox())!;
+  const grip = (await handle.boundingBox())!;
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(grip.x + 300, grip.y - 300, { steps: 8 });
+  await page.mouse.up();
+  const moved = (await card(page).boundingBox())!;
+  expect(moved.x).toBeGreaterThan(before.x + 200);
+  expect(moved.y).toBeLessThan(before.y - 200);
+
+  // Practising another sentence opens the card where it was left.
+  await card(page).getByRole('button', { name: 'Close' }).click();
+  await openCard(page, 3);
+  const reopened = (await card(page).boundingBox())!;
+  expect(Math.abs(reopened.x - moved.x)).toBeLessThan(2);
+  expect(Math.abs(reopened.y - moved.y)).toBeLessThan(2);
+
+  await card(page).getByRole('button', { name: 'Move the card' }).dblclick();
+  await expect.poll(async () => (await card(page).boundingBox())!.y).toBeGreaterThan(moved.y + 200);
+});

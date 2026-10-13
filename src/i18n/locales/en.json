@@ -452,7 +452,10 @@
     "keep": "Keep it",
     "confirmDiscard": "Discard the unsaved recording?",
     "minimise": "Minimise",
-    "restore": "Show the practice card"
+    "restore": "Show the practice card",
+    "title": "Shadowing",
+    "move": "Move the card",
+    "moveHint": "Drag to move. Double-click, or press Home, to dock it again."
   },
   "study": {
     "label": "My study",

@@ -565,7 +565,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       {/* Outside the spaced column: as its last child it would add a margin to the article. */}
       {(listening || card.phase !== 'closed' || barSentence) && (
         <BottomDock>
-          {card.phase !== 'closed' && <PracticeCard card={card} onOpenLog={() => onOpenShadowingLog(currentArticle.id)} />}
+          {card.phase !== 'closed' && <PracticeCard card={card} movable={!touch} onOpenLog={() => onOpenShadowingLog(currentArticle.id)} />}
           {barSentence && (
             <SentenceBar
               text={barSentence.text}

@@ -59,6 +59,19 @@
   --color-on-fill: #FFFFFF;
   --color-scrim: #121110;
 
+  /* Panel: the reader's docked tools (sentence bar, practice card, article player). An ink surface that
+     reads as a tool, not as page, in every theme. Its own text, line, accent and error steps keep AA on it. */
+  --color-panel: #2D2A27;
+  --color-panel-raised: #3A3631;
+  --color-panel-line: #4A4640;
+  --color-panel-ink: #F4F0E8;
+  --color-panel-muted: #B9B3A8;
+  --color-panel-accent: #4473B5;
+  --color-panel-link: #A9C2E6;
+  --color-panel-wave: #92B0DA;
+  --color-panel-bad: #C24A40;
+  --color-panel-bad-ink: #F0B3AC;
+
   --radius-md: 6px;  /* controls */
   --radius-lg: 10px; /* surfaces, overlays */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -84,6 +97,11 @@
   --color-ink-900: #2B241A;
   --color-ink-950: #1C1711;
   --color-surface: #FBF6EA;
+  --color-panel: #382F23;
+  --color-panel-raised: #463B2D;
+  --color-panel-line: #574A38;
+  --color-panel-ink: #F6EEDC;
+  --color-panel-muted: #C7B89C;
 }
 
 :root[data-theme='dark'] {
@@ -134,6 +152,10 @@
   --color-bad-950: #FAE4E1;
   --color-surface: #1E1C19;
   --color-scrim: #000000;
+  /* Above the dark page the panel is the lighter, raised surface. */
+  --color-panel: #3B3732;
+  --color-panel-raised: #48433C;
+  --color-panel-line: #5C564D;
 }
 
 @layer base {
@@ -187,6 +209,9 @@
   user-select: none;
   color: var(--color-ink-600);
 }
+
+/* Focus on the ink panel needs a light ring. */
+.panel :focus-visible { outline-color: var(--color-panel-link); }
 
 /* Tabular numerals for scores, counts and intervals. */
 .tnum { font-variant-numeric: tabular-nums; }

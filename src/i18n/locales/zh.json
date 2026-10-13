@@ -450,7 +450,10 @@
     "keep": "保留",
     "confirmDiscard": "丢弃这条未保存的录音？",
     "minimise": "收起",
-    "restore": "展开练习卡"
+    "restore": "展开练习卡",
+    "title": "跟读",
+    "move": "移动卡片",
+    "moveHint": "拖动可移动；双击或按 Home 键放回底部。"
   },
   "study": {
     "label": "我的学习",

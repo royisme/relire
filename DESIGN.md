@@ -29,6 +29,16 @@ colors:
   surface: "#FFFFFF"
   on-fill: "#FFFFFF"
   scrim: "#121110"
+  panel: "#2D2A27"
+  panel-raised: "#3A3631"
+  panel-line: "#4A4640"
+  panel-ink: "#F4F0E8"
+  panel-muted: "#B9B3A8"
+  panel-accent: "#4473B5"
+  panel-link: "#A9C2E6"
+  panel-wave: "#92B0DA"
+  panel-bad: "#C24A40"
+  panel-bad-ink: "#F0B3AC"
 typography:
   reading:
     fontFamily: "'Source Serif 4', Georgia, 'Songti SC', serif"
@@ -125,10 +135,16 @@ components:
     rounded: "{rounded.md}"
     height: "40px"
   practice-card:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink-800}"
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.panel-ink}"
     rounded: "{rounded.lg}"
     width: "28rem"
+  record-button:
+    backgroundColor: "{colors.panel-accent}"
+    textColor: "{colors.on-fill}"
+    rounded: "{rounded.full}"
+    padding: "0 24px"
+    height: "48px"
 ---
 
 # Design System: Relire
@@ -164,6 +180,12 @@ A warm grey "ink" scale on paper, a single ink-blue accent and two semantic hues
 - **Rule** (`ink-200`; `ink-300` for inputs and outline buttons): every border and divider.
 - **Ink** (`ink-900` body; `ink-700`/`ink-600` secondary; `ink-500` meta; `ink-400` placeholder and disabled only).
 - **Scrim** (`scrim` at /25–/40): behind overlays; does not invert in dark.
+
+### Ink panel
+- **Ink Panel** (`panel`, hover `panel-raised`, rules `panel-line`): the reader's docked tools (sentence bar, practice card, article player). A dark warm ink in light and sepia (sepia's is brown), and in dark the lighter raised charcoal above the page, so a tool never reads as page.
+- On it: text `panel-ink`, secondary `panel-muted`, links `panel-link`, live waveform `panel-wave`, errors `panel-bad-ink`; filled actions `panel-accent` (record, play) and `panel-bad` (stop), both with `on-fill` text at 4.5:1 or better. Focus rings inside a `.panel` switch to `panel-link`.
+
+**The Tool Not Page Rule.** Anything docked over the article uses the ink panel; anything that is page uses `surface`. Never put page colours (`ink-*`, `accent-700`) on the panel.
 
 ### Semantic
 - **Correct** (`ok-700` fill, `ok-800` text, `ok-50` tint) and **Error** (`bad-600` fill, `bad-700` text, `bad-50` tint): status only, never decoration.
@@ -210,7 +232,7 @@ Surfaces are flat with a 1px `ink-200` border and no shadow. Depth exists only f
 
 ## Shapes
 
-Two radii: controls `rounded-md` (6px); surfaces and overlays `rounded-lg` (10px). `rounded-full` is for badges, dots and level bars only. Structure inside a surface comes from headings and `ink-200` rules, not nested cards or tinted boxes. Decorative icons next to headings and labels are not used.
+Two radii: controls `rounded-md` (6px); surfaces and overlays `rounded-lg` (10px). `rounded-full` is for badges, dots, waveform bars and the practice card's record button only. Structure inside a surface comes from headings and `ink-200` rules, not nested cards or tinted boxes. Decorative icons next to headings and labels are not used.
 
 ## Components
 
@@ -243,11 +265,15 @@ Esc closes the topmost thing: a modal sheet first, then the practice card, then 
 `SpeakButton` / `SpeakIcon` show idle (speaker), loading (spinner) and playing (stop square) at a fixed size; every button for the same text or take shows the same state. Never keep a separate "is speaking" flag.
 
 ### Practice card (signature)
-A recording tool docked at the bottom of the reader, `surface` with a 1px `ink-300` border, 10px radius and `shadow-lg`, at most `min(45vh, 22rem)` tall, scrolling inside itself. Top to bottom:
-1. The sentence in the reading face, clamped to two lines (tap it to show the rest), with minimise and close.
-2. A control row that keeps its height in every phase: Reference (outline), Record (primary) or, while recording, Stop (destructive, with a `tnum` clock), Redo (outline) and seven `accent-600` level bars driven by the input level.
-3. A rule, then the latest take: play (`tnum` time and duration), Compare (reference then take) and the "All recordings (n)" link in `accent-900`.
-4. A rule, then one bounded `aria-live` line for the hint, status or error, with inline Retry/Discard when a save fails.
+A recording tool on the ink panel (10px radius, `shadow-lg`, at most `min(70vh, 28rem)` tall, scrolling inside itself), docked at the bottom of the reader. Top to bottom:
+1. A title row: "Shadowing" in `panel-muted` (on mouse and keyboard it is the drag handle, with a grip icon), then minimise and close.
+2. The sentence in the reading face at 18px, clamped to two lines (tap it to show the rest).
+3. The waveform strip, 40px high, full width, with a `tnum` clock on the right: while recording, the live input scrolls in from the right in `panel-wave`; afterwards, the latest take's real peaks in `panel-muted`; with no take, a flat `panel-line` baseline. Never invented bars.
+4. The transport, three columns: Reference (outline) on the left, the record button in the centre (48px pill, `panel-accent`; while recording `panel-bad` with Stop and the clock), Compare on the right (Redo while recording). Below `sm` the side buttons show icons only.
+5. A rule, then the latest take (play, time · duration) and "All recordings (n) ›" in `panel-link`.
+6. A rule, then one bounded `aria-live` line for the hint, status or error, with inline Retry/Discard when a save fails.
+
+**Moving it (desktop).** On mouse and keyboard the title is a handle: drag it anywhere on screen (kept 8px inside the window and below the header), or use the arrow keys (Shift for larger steps). The position is remembered in this browser (`relire_practice_card_pos`) and the floating card no longer counts toward the dock height. Double-click the handle or press Home to dock it again. Touch screens always keep it docked.
 
 **Minimised**, the card is one row like the sentence bar: the sentence truncated, then Record (or, while recording, the level bars and a Stop with its clock), restore and close. It restores itself when a save fails, an error appears or the microphone is busy.
 
@@ -273,7 +299,7 @@ Flat tabs (Read, My study, Drills, Progress) with an icon and label, `ink-600` a
 - **Do** use role classes: `bg-surface`, `text-on-fill`, `bg-scrim/NN`, hue text from steps 800–950.
 - **Do** keep one filled button per view; the rest are outline or ghost.
 - **Do** show transient state on the control itself, at a fixed size.
-- **Do** put new fixed reader UI inside `BottomDock` and keep the current sentence clear of it.
+- **Do** put new fixed reader UI inside `BottomDock`, on the ink panel, and keep the current sentence clear of it.
 - **Do** check every new screen at 360px and in light, sepia and dark.
 - **Do** write plain copy: short noun titles ("Vocabulary", "Drills", "Shadowing") with one quiet line under them; empty states say what to do next in one sentence.
 - **Do** use lucide icons at 16px in controls, one stroke weight, `aria-hidden` when decorative.
