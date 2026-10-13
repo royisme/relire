@@ -14,7 +14,7 @@
   },
   "nav": {
     "reader": "Read",
-    "vocab": "Vocabulary",
+    "vocab": "My study",
     "practice": "Drills",
     "analytics": "Progress",
     "installApp": "Install app",
@@ -234,7 +234,12 @@
     "promptVariables": "Variables:",
     "promptSyntax": "Write {{open}}name{{close}} for a variable and {{open}}#if name{{close}}…{{open}}/if{{close}} for text that appears only when it has a value; {{open}}#if name=value{{close}} compares it to a value.",
     "promptUnknown": "Unknown variables will be empty: {{names}}",
-    "promptMissing": "This prompt does not use: {{names}}"
+    "promptMissing": "This prompt does not use: {{names}}",
+    "shadowingSummary": "Shadowing: {{sentences}} sentences, {{takes}} recordings, {{mb}} MB",
+    "clearShadowing": "Delete all recordings",
+    "clearShadowingConfirm": "Delete every shadowing recording on this device?",
+    "shadowingFailed": "Recordings: {{msg}}",
+    "backupShadowing": "Include my shadowing recordings (larger file)"
   },
   "importer": {
     "articleTitle": "Title",
@@ -289,7 +294,8 @@
     "noMatch": "No article matches your search.",
     "clearFilters": "Clear filters",
     "count_one": "{{count}} article",
-    "count_other": "{{count}} articles"
+    "count_other": "{{count}} articles",
+    "deleteRecordings": "Your recordings of {{count}} sentences in it are deleted too."
   },
   "onboarding": {
     "label": "Getting started",
@@ -413,5 +419,63 @@
     "controls": "Marker settings",
     "restoring": "Checking saved markers…",
     "needsGeneration": "Saved markers are missing or incomplete. Choose Generate to prepare them, then turn on Markers in the reader toolbar."
+  },
+  "practiceCard": {
+    "open": "Practise this sentence",
+    "finishFirst": "Finish the current recording first",
+    "label": "Practice: {{sentence}}",
+    "expand": "Show the whole sentence",
+    "collapse": "Show less",
+    "reference": "Reference",
+    "record": "Record",
+    "recordAgain": "Record again",
+    "stop": "Stop",
+    "redo": "Redo",
+    "latest": "Latest",
+    "playLatest": "Play your recording from {{time}}",
+    "compare": "Compare",
+    "compareTitle": "The reference, then your latest recording",
+    "noTakes": "No recordings of this sentence yet.",
+    "allRecordings": "All recordings ({{count}})",
+    "hint": "Listen to the reference, then read it aloud.",
+    "acquiring": "Waiting for the microphone…",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "tooShort": "Too short, nothing was saved. Record again.",
+    "listeningEnded": "Listening to the article stopped, because the card played audio.",
+    "busy": "The sentence sheet or Practice is recording.",
+    "error": "Could not record: {{msg}}",
+    "saveFailed": "Could not save the recording: {{msg}}",
+    "retry": "Try again",
+    "discard": "Discard",
+    "keep": "Keep it",
+    "confirmDiscard": "Discard the unsaved recording?"
+  },
+  "study": {
+    "label": "My study",
+    "words": "Words",
+    "shadowing": "Shadowing"
+  },
+  "shadowingLog": {
+    "title": "Shadowing",
+    "subtitle": "Your recordings of article sentences, kept on this device. The last three of each sentence are kept.",
+    "article": "Article",
+    "allArticles": "All articles",
+    "referenceVoice": "The reference plays in the voice chosen in Settings now, which may differ from when you recorded.",
+    "recorded": "Sentences recorded: {{count}}",
+    "text": "Text",
+    "reference": "Reference",
+    "mine": "My recordings",
+    "openInReader": "Open in the reader",
+    "playReference": "Play the reference",
+    "playTake": "Play your recording from {{when}}",
+    "allTakes": "All recordings ({{count}})",
+    "delete": "Delete",
+    "deleteTake": "Delete your recording from {{when}}",
+    "changed": "Original text changed ({{count}})",
+    "removed": "Article removed ({{count}})",
+    "empty": "No recordings yet. In the reader, press the microphone next to a sentence to practise it.",
+    "loadFailed": "Could not load your recordings: {{msg}}",
+    "deleteFailed": "Could not delete the recording: {{msg}}"
   }
 }

@@ -4,8 +4,10 @@ import { getSpeechState, setSpeechState, speechKey } from './state';
 
 /**
  * Playback of French speech (stored or synthesized clips, browser voice as a fallback) and its shared rate.
- * Progress (loading, playing, paused) is published through `state.ts`; UI reads it from there. Only
- * `sequence.ts` passes `onSettled`, to chain one clip after another.
+ * Progress (loading, playing, paused) is published through `state.ts`; UI reads it from there. `onSettled`
+ * chains clips: `sequence.ts` for an article, the practice card for reference → recording.
+ * The learner's own recordings play through the same machinery (`playRecording`), so only one sound
+ * plays at a time and every button shows the right state.
  */
 
 export type SpeechOutcome = 'ended' | 'interrupted' | 'failed';
@@ -30,6 +32,12 @@ let requestId = 0;
 let settle: ((outcome: SpeechOutcome) => void) | null = null;
 /** Paused by the user; a clip that finishes loading while paused waits instead of playing. */
 let paused = false;
+/** Runs before any sound starts or resumes; the practice card uses it to end a running recording first. */
+let beforePlay: (() => void) | null = null;
+
+export function setBeforePlay(hook: (() => void) | null) {
+  beforePlay = hook;
+}
 
 function settleWith(outcome: SpeechOutcome) {
   const fn = settle;
@@ -82,6 +90,7 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
   const cleanText = text.trim();
   if (!cleanText) return;
 
+  beforePlay?.();
   halt();
   const id = requestId;
   const isCurrent = () => id === requestId;
@@ -167,6 +176,7 @@ export function pauseSpeech() {
 export function resumeSpeech() {
   const { phase, key } = getSpeechState();
   if (phase !== 'paused') return;
+  beforePlay?.();
   paused = false;
   if (currentAudio) {
     const audio = currentAudio;
@@ -182,6 +192,47 @@ export function resumeSpeech() {
   } else {
     // Still loading: it starts as soon as the clip arrives.
     setSpeechState('loading', key);
+  }
+}
+
+/**
+ * Plays one of the learner's recordings at its natural speed. `key` (e.g. `take:<id>`) identifies it in the
+ * shared state, apart from any text. No browser-voice fallback: a recording that cannot play reports `failed`.
+ */
+export async function playRecording(blob: Blob, key: string, options: Pick<SpeechOptions, 'onSettled'> = {}) {
+  beforePlay?.();
+  halt();
+  const id = requestId;
+  const isCurrent = () => id === requestId;
+  settle = options.onSettled ?? null;
+  setSpeechState('loading', key);
+  const url = URL.createObjectURL(blob);
+  const audio = new Audio(url);
+  currentAudio = audio;
+  currentUrl = url;
+  audio.onended = () => {
+    if (!isCurrent()) return;
+    currentAudio = null;
+    releaseUrl();
+    setSpeechState('idle');
+    settleWith('ended');
+  };
+  audio.onerror = () => {
+    if (!isCurrent()) return;
+    currentAudio = null;
+    releaseUrl();
+    setSpeechState('idle');
+    settleWith('failed');
+  };
+  try {
+    await audio.play();
+    if (isCurrent() && !paused) setSpeechState('playing', key);
+  } catch {
+    if (!isCurrent() || (paused && currentAudio)) return;
+    currentAudio = null;
+    releaseUrl();
+    setSpeechState('idle');
+    settleWith('failed');
   }
 }
 

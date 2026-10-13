@@ -11,7 +11,8 @@ UI (src/components)  ──calls──▶  src/services/api.ts  ──▶  src/s
         │                               │
         │                               └──▶ src/storage/cache.ts   (saved AI answers)
         ├──▶ src/utils/speech  ──▶ src/storage/audio.ts              (saved TTS clips)
-        └──▶ App.tsx state  ──usePersist──▶ src/storage/db.ts        (articles, vocab, stats)
+        ├──▶ App.tsx state  ──usePersist──▶ src/storage/db.ts        (articles, vocab, stats)
+        └──▶ usePracticeCard / useShadowingLog ──▶ src/storage/shadowing.ts (recordings)
 ```
 
 GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): the static marketing page from `marketing/` at the root, and the app build at `/app/`.
@@ -24,14 +25,16 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 | `src/components/` | One file per screen or overlay: `LibraryView`, `ReaderView`, `VocabularyView`, `PracticeView`, `AnalyticsDashboard`, `WordDetailModal`, `SentenceDrawer`, `SettingsModal`, `ArticleEditorDialog`, `OnboardingDialog`, `Navbar`, `LanguageSwitcher`. |
 | `src/components/reader/` | `ReaderWord` (source-preserving clickable spelling), `PronunciationParagraph` (paragraph-local measured SVG), `PronunciationControls` (floating controls and accessible connection details). |
 | `src/components/settings/` | Sections of the Settings shell: `AiSection` (providers, models, voices, keys), `PromptsSection` (prompt editor), `DataSection` (backup, saved answers, audio). |
+| `src/components/reader/` (shadowing) | `PracticeCard` (the docked recording card; draws `usePracticeCard` state), `BottomDock` (one fixed bottom area for the card and `ArticlePlayer`; publishes `--dock-height`). |
+| `src/components/study/` | `StudyView` (My study: Words and Shadowing sub-tabs; `relire_study_tab`), `ShadowingLog` (recorded sentences in article order, playback, compare, delete). |
 | `src/components/shadowing/` | The read-aloud flow shared by the sentence sheet and Practice: `ShadowingGuide`, `ShadowingRecorder`, `AssessmentResult`. |
 | `src/components/ui/` | Primitives: `button`, `badge`, `card`, `overlay` (`Sheet`, `Dialog`, `Drawer`), `speak-button` (`SpeakButton`, `SpeakIcon`, `useSpeechPhase`), `page-header`, `segmented`, `menu-button`, `theme-swatch`. |
-| `src/hooks/` | `useShadowingRecorder` (microphone, recording, scoring), `usePronunciationMarkers` (cache-only recovery, cache-first sequential queue, session identity, staged/displayed snapshots), `usePWAInstall`. |
+| `src/hooks/` | `useShadowingRecorder` (microphone, recording, scoring), `usePracticeCard` (practice card state machine: capture lock, takes, save, interrupt), `useShadowingLog` (records grouped by article in current sentence order, changed and removed groups), `usePronunciationMarkers` (cache-only recovery, cache-first sequential queue, session identity, staged/displayed snapshots), `usePWAInstall`. |
 | `src/services/api.ts` | What the UI calls. Reads settings and language, builds the provider context, decides what is cached. |
 | `src/services/cachedRequest.ts` | Generic persistent cache plus in-flight request sharing; optional validation rejects/deletes incompatible answers and validates before storage. |
 | `src/services/ai/` | Everything that talks to an AI service; see below. |
-| `src/storage/` | `db.ts` (IndexedDB schema, backup import/export, storage persistence), `cache.ts`, `audio.ts`, `usePersist.ts`. The only code that touches IndexedDB. |
-| `src/utils/speech/` | `state.ts` (shared playback state), `clips.ts` (stored clip first, else synthesize and store), `playback.ts` (play, pause, resume, stop, rate, browser-voice fallback), `sequence.ts` (listening to a whole article: a queue of sentences played one after another), `recorder.ts` (microphone). |
+| `src/storage/` | `db.ts` (IndexedDB schema, backup import/export, storage persistence, upgrade notices), `cache.ts`, `audio.ts`, `shadowing.ts` (recordings: 3-take FIFO, queries, stats, backup validation), `usePersist.ts`. The only code that touches IndexedDB. |
+| `src/utils/speech/` | `state.ts` (shared playback state), `clips.ts` (stored clip first, else synthesize and store), `playback.ts` (play, pause, resume, stop, rate, browser-voice fallback), `sequence.ts` (listening to a whole article: a queue of sentences played one after another), `recorder.ts` (microphone stream, takes, and the capture lock shared by the card and the assessment recorder). |
 | `src/utils/` | `appSettings.ts` (settings in localStorage), `srs.ts` (SM-2 scheduling), `i18nHelpers.ts`, `binary.ts`, `sentences.ts` (cuts an article into paragraphs and sentences; the reader and the listener share it), `readerTokens.ts` (canonical word occurrences/source spans/graphemes), `pronunciationMarkers.ts` (runtime validation of unknown annotation output), `pronunciationPreferences.ts` (per-article display/layer flags in localStorage). |
 | `src/theme/` | `theme.ts` (theme preference, resolving "system", applying `data-theme` and the browser chrome colour), `useTheme`. `index.html` repeats the resolution inline before first paint. |
 | `src/i18n/` | i18next setup, `LANGUAGES`, `locales/en.json`, `locales/zh.json`. |
@@ -59,10 +62,11 @@ Split so each part has one job:
 | Articles, vocabulary (with full explanation in `VocabWord.analysis`), stats | IndexedDB `articles`, `vocab`, `meta` | Until the user deletes them; backed up |
 | Word analyses | IndexedDB `cache` | Until cleared |
 | Sentence analyses, practice drills, pronunciation markers | IndexedDB `cache` | 30 days (markers: at most 1,000 entries) |
+| Shadowing recordings | IndexedDB `shadowing` (one record per article + normalized sentence, last 3 takes as Blobs) | Until deleted; deleted with their article; optionally backed up. Their reference clips are protected from audio trimming |
 | Synthesized speech | IndexedDB `audio` (WAV Blobs) | Vocabulary clips (word, context sentence, examples) kept for good; the rest trimmed least-recently-used past 200 MB |
 | Reader marker display/layer preferences | localStorage `relire_pronunciation_preferences_v1` | Per article, across browser sessions; no annotations or independent readiness flag; not backed up |
 | Skipped marker sentences | localStorage `relire_pronunciation_skipped_v1` | Per article: sentence text → validation error, bound to the language/prompt identity; cleared when every skipped sentence later succeeds; not backed up |
-| Settings and API keys, prompt overrides, UI language, theme | localStorage `relire_app_settings_v1`, `relire_prompts_v1`, `relire_lang`, `relire_theme` | Needed synchronously at startup |
+| Settings and API keys, prompt overrides, UI language, theme, My study sub-tab | localStorage `relire_app_settings_v1`, `relire_prompts_v1`, `relire_lang`, `relire_theme`, `relire_study_tab` | Needed synchronously at startup |
 
 Cache keys are language + prompt fingerprint + normalized text, deliberately not provider, model or article context, so switching models never re-spends tokens. Marker keys additionally carry schema/tokenizer versions; hits are revalidated against current canonical source occurrences, so case/whitespace normalization cannot silently shift grapheme spans. The new `prosody` kind uses the existing cache store/index without a DB version change. Pronunciation assessments are never cached. The cache is never backed up; vocabulary audio optionally is.
 
@@ -74,4 +78,6 @@ Cache keys are language + prompt fingerprint + normalized text, deliberately not
 - **Hear text:** `SpeakButton` → `toggleSpeech` → `clips.loadSpeech` (stored clip, else provider, then store) → `playback` publishes loading/playing through `state.ts`; every button with the same text reflects it.
 - **Save a word:** `App` stores the word with its analysis, then prefetches word and sentence audio so it is protected and offline.
 - **Shadowing:** `ShadowingRecorder` → `useShadowingRecorder` (record, stop, play back) → `api.assessPronunciation` → `onAssessed` adds the score to stats.
-- **Backup:** `DataSection` → `exportData` / `importData` in `db.ts` (never API keys; includes prompt edits; audio optional).
+- **Shadow a sentence:** the sentence pill's microphone → `usePracticeCard.open` claims the capture lock, pauses an article sequence (`suspendSequence`) or stops speech, then records a `Take` with a level meter → Stop → `addTake` (one transaction: article still exists, append, drop the oldest past 3) → the card shows the latest take. Any other playback (`setBeforePlay`) or the reader's word/sentence sheet interrupts a take without saving. Closing the card, switching article or leaving the reader discards a running take.
+- **Shadowing log:** My study → Shadowing → `useShadowingLog` (lists and subscribes to the store) → rows by article in `splitArticle` order; "open in reader" sets the reader's `focusText`.
+- **Backup:** `DataSection` → `exportData` / `importData` in `db.ts` (never API keys; includes prompt edits; audio and shadowing recordings optional). Recordings are validated in full by `parseShadowingBackup` before one transaction replaces the stores; no `shadowing` key keeps the current recordings, `[]` clears them, malformed input rejects the whole restore.

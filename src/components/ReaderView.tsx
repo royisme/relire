@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, Pause, Play } from 'lucide-react';
+import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, Pause, Play, Mic } from 'lucide-react';
 import { Article } from '../types';
 import { usePronunciationMarkers } from '../hooks/usePronunciationMarkers';
 import { readerTokens } from '../utils/readerTokens';
@@ -14,6 +14,9 @@ import {
 import { splitArticle } from '../utils/sentences';
 import { Button } from './ui/button';
 import { ArticlePlayer } from './ArticlePlayer';
+import { BottomDock, dockHeight } from './reader/BottomDock';
+import { PracticeCard } from './reader/PracticeCard';
+import { usePracticeCard } from '../hooks/usePracticeCard';
 import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
@@ -23,6 +26,10 @@ interface ReaderViewProps {
   onWordClick: (word: string, sentence: string) => void;
   onSentenceClick: (sentence: string) => void;
   onMissingKey: () => void;
+  /** Opens My study → Shadowing at this article. */
+  onOpenShadowingLog: (articleId: string) => void;
+  /** Sentence text to bring into view on opening (from the shadowing log). */
+  focusText?: string | null;
   activeWord: string | null;
   activeSentence: string | null;
 }
@@ -33,6 +40,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   onWordClick,
   onSentenceClick,
   onMissingKey,
+  onOpenShadowingLog,
+  focusText = null,
   activeWord,
   activeSentence,
 }) => {
@@ -48,7 +57,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   const articleRef = useRef<HTMLElement>(null);
   const sentenceEls = useRef(new Map<string, { el: HTMLElement; text: string; key: string }>());
   const clearTimer = useRef<number | undefined>(undefined);
-  const [toolbar, setToolbar] = useState<{ text: string; top: number; left: number } | null>(null);
+  const [toolbar, setToolbar] = useState<{ id: string; text: string; top: number; left: number } | null>(null);
 
   const cancelClear = () => window.clearTimeout(clearTimer.current);
   const scheduleClear = () => {
@@ -74,6 +83,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
+      // One owner, outermost first: an open sheet handles its own Escape; then the card; then speech.
+      if (document.querySelector('[aria-modal="true"]')) return;
+      const practice = cardRef.current;
+      if (practice.phase !== 'closed') {
+        if (practice.phase !== 'unsaved') practice.close();
+        return;
+      }
       stopSpeech();
       setIsSpeedControlOpen(false);
     };
@@ -140,6 +156,56 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     if (el) window.scrollBy({ top: el.getBoundingClientRect().top - anchor.top, behavior: 'instant' });
   }, [markers.mode, markers.displayed]);
 
+  // Practising one sentence: recording happens in the docked card, never on the pill.
+  const card = usePracticeCard();
+  const cardBusy = card.phase === 'acquiring' || card.phase === 'recording' || card.phase === 'saving' || card.phase === 'unsaved';
+  const cardRef = useRef(card);
+  cardRef.current = card;
+  // A different article, or leaving the reader, closes the card.
+  useEffect(() => () => cardRef.current.close(), [currentArticle.id]);
+  // A lookup sheet's scrim would cover a running take: end it, keep the card.
+  useEffect(() => {
+    if (activeWord || activeSentence) cardRef.current.interrupt();
+  }, [activeWord, activeSentence]);
+  // The practised sentence stays clear of the dock.
+  const practisedId = card.target?.sentenceId ?? null;
+  useEffect(() => {
+    if (!practisedId) return;
+    const frame = requestAnimationFrame(() => {
+      const el = sentenceEls.current.get(practisedId)?.el;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      if (r.bottom > window.innerHeight - dockHeight() - 16 || r.top < 72) {
+        window.scrollBy({ top: r.bottom - (window.innerHeight - dockHeight() - 24), behavior: 'instant' });
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [practisedId, card.phase]);
+  // Closing the card returns focus to the practised sentence's record button.
+  const lastTarget = useRef<string | null>(null);
+  useEffect(() => {
+    if (practisedId) {
+      lastTarget.current = practisedId;
+      return;
+    }
+    const id = lastTarget.current;
+    lastTarget.current = null;
+    const active = document.activeElement;
+    if (!id || (active && active !== document.body && !active.closest('[data-practice-card]') && active.isConnected)) return;
+    focusSentence(id);
+    requestAnimationFrame(() => (document.querySelector('[data-practice-entry]') as HTMLElement | null)?.focus({ preventScroll: true }));
+  }, [practisedId]);
+
+  // Opened from the shadowing log: show that sentence with its actions.
+  useEffect(() => {
+    if (!focusText) return;
+    const entry = [...sentenceEls.current.entries()].find(([, v]) => v.key === speechKey(focusText));
+    if (!entry) return;
+    entry[1].el.scrollIntoView({ block: 'center', behavior: 'instant' });
+    focusSentence(entry[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusText, currentArticle.id]);
+
   // Listening to the whole article: one sentence after another, the current one highlighted.
   const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
   const listening = sequence.id === currentArticle.id;
@@ -156,7 +222,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     const el = sentenceEls.current.get(listeningId)?.el;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    if (r.top < 72 || r.bottom > window.innerHeight - 112) {
+    if (r.top < 72 || r.bottom > window.innerHeight - Math.max(112, dockHeight() + 16)) {
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       el.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
     }
@@ -186,8 +252,9 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
   useLayoutEffect(() => {
     const NAV = 56; // sticky header
-    // Measured pill size: h-7 buttons + p-1 padding + border = 71 x 38, plus an 8px invisible lead-in on its left.
-    const TOOLBAR_WIDTH = 71;
+    // Measured pill size: three h-7 buttons, a divider, gap-0.5, p-1 padding and border = 101 x 38,
+    // plus an 8px invisible lead-in on its left.
+    const TOOLBAR_WIDTH = 101;
     const TOOLBAR_HEIGHT = 38;
     const LEAD = 8;
     let frame = 0;
@@ -222,12 +289,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       const left = Math.min(lastLine.right - box.left - LEAD + 2, box.width - TOOLBAR_WIDTH - LEAD - 6);
 
       const next = {
+        id: id!,
         text: target.text,
         top,
         left,
       };
       setToolbar((prev) =>
-        prev && prev.text === next.text && Math.abs(prev.top - next.top) < 0.5 && Math.abs(prev.left - next.left) < 0.5 ? prev : next
+        prev && prev.id === next.id && prev.text === next.text && Math.abs(prev.top - next.top) < 0.5 && Math.abs(prev.left - next.left) < 0.5 ? prev : next
       );
     };
 
@@ -261,8 +329,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
   return (
     <>
-    {/* Bottom padding leaves room for the player, so the last lines can be read above it. */}
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-28 space-y-4">
+    {/* Bottom padding leaves room for the dock (player, practice card), so the last lines can be read above it. */}
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 space-y-4" style={{ paddingBottom: 'max(7rem, calc(var(--dock-height, 0px) + 2rem))' }}>
       {/* Reading toolbar: one row, article on the left, preferences on the right */}
       <div ref={controlsRef} className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
         <button
@@ -413,8 +481,9 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       }}
                       onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
                       onClick={() => focusSentence(id)}
+                      onFocus={() => focusSentence(id)}
                       className={`rounded-md py-0.5 px-0.5 transition-colors ${
-                        isActive || isPlaying ? 'bg-accent-100' : isHovered ? 'bg-accent-50' : ''
+                        isActive || isPlaying || practisedId === id ? 'bg-accent-100' : isHovered ? 'bg-accent-50' : ''
                       }`}
                     >
                       {renderSentenceWords(sent, id)}
@@ -456,6 +525,16 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               >
                 <TextSearch className="w-3.5 h-3.5" />
               </button>
+              <button
+                data-practice-entry
+                onClick={() => card.open({ articleId: currentArticle.id, sentenceId: toolbar.id, text: toolbar.text })}
+                disabled={cardBusy}
+                aria-label={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
+                title={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
+                className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${toolbarButton(practisedId === toolbar.id)}`}
+              >
+                <Mic className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
             </div>
           </div>
         )}
@@ -463,16 +542,21 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     </div>
 
       {/* Outside the spaced column: as its last child it would add a margin to the article. */}
-      {listening && (
-        <ArticlePlayer
-          index={sequence.index}
-          total={sequence.total}
-          phase={speech.phase}
-          failed={sequence.failed}
-          onToggle={toggleSequence}
-          onStep={stepSequence}
-          onStop={stopSequence}
-        />
+      {(listening || card.phase !== 'closed') && (
+        <BottomDock>
+          {card.phase !== 'closed' && <PracticeCard card={card} onOpenLog={() => onOpenShadowingLog(currentArticle.id)} />}
+          {listening && (
+            <ArticlePlayer
+              index={sequence.index}
+              total={sequence.total}
+              phase={speech.phase}
+              failed={sequence.failed}
+              onToggle={toggleSequence}
+              onStep={stepSequence}
+              onStop={stopSequence}
+            />
+          )}
+        </BottomDock>
       )}
     </>
   );

@@ -77,6 +77,7 @@ The sentence action pill (play, analyse) gets a third button, **●** (label "Pr
 
 - **Pointer:** today's pill (28 px buttons, measured as 71×38, centred on the sentence's last line) grows to three buttons; its measured geometry is updated.
 - **Touch:** three 40 px buttons make a ~50 px pill, taller than the smallest line pitch (≈31 px), so centring it on a line would cover text. On touch the pill is placed in clear space: below the sentence's last line when the next line has room in the gap, otherwise above its first line, otherwise docked at the paragraph's end. Placement is collision-checked against the neighbouring line boxes at every font size.
+  - **Implemented deviation (v1):** on touch the pill keeps today's geometry (compact buttons at the sentence end) with ● added, because no clear-space placement worked for a 50 px pill at every font size. Proposed follow-up: on touch screens, show the selected sentence's actions in the bottom dock instead of a floating pill.
 - **Keyboard:** focusing a sentence (its first word, or the sentence itself, which becomes focusable) reveals and pins its pill; Tab moves into it. The pill stays pinned while focus is inside it, and is the return target when the card closes.
 
 Pressing ● opens the card for that sentence and starts a take at once. ● on another sentence while the card is open switches it, but only from `ready`; in `acquiring`, `recording`, `saving` or `unsaved` the pill's ● is disabled with "Finish the current recording first".

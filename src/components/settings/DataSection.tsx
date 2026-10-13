@@ -6,6 +6,14 @@ import { cacheCounts, clearCache } from '../../storage/cache';
 import { audioStats, clearUnprotectedAudio, exportProtectedAudio, importAudio, type AudioStats } from '../../storage/audio';
 import { exportData, getStorageInfo, importData, requestPersistence, type StorageInfo } from '../../storage/db';
 import { getPromptOverrides, savePromptOverrides } from '../../services/ai/prompts';
+import {
+  clearShadowing,
+  exportShadowing,
+  parseShadowingBackup,
+  shadowingRestored,
+  shadowingStats,
+  type ShadowingStats,
+} from '../../storage/shadowing';
 
 /** Settings: what is stored on this device, backups, saved answers and audio. */
 export const DataSection: React.FC = () => {
@@ -15,6 +23,10 @@ export const DataSection: React.FC = () => {
   const [cacheInfo, setCacheInfo] = useState({ words: 0, sentences: 0, drills: 0, prosody: 0 });
   const [audioInfo, setAudioInfo] = useState<AudioStats>({ clips: 0, bytes: 0, keptClips: 0, keptBytes: 0 });
   const [includeAudio, setIncludeAudio] = useState(false);
+  const [shadowInfo, setShadowInfo] = useState<ShadowingStats>({ sentences: 0, takes: 0, bytes: 0 });
+  const [includeShadowing, setIncludeShadowing] = useState(false);
+  const [confirmClearShadowing, setConfirmClearShadowing] = useState(false);
+  const [shadowError, setShadowError] = useState<string | null>(null);
   const [localStats, setLocalStats] = useState({ articlesCount: 0, vocabCount: 0, statsHistoryCount: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,6 +43,7 @@ export const DataSection: React.FC = () => {
     getStorageInfo().then(setStorageInfo);
     cacheCounts().then(setCacheInfo);
     audioStats().then(setAudioInfo);
+    shadowingStats().then(setShadowInfo, (e) => setShadowError(e instanceof Error ? e.message : String(e)));
   }, []);
 
   // Export everything into one JSON file. API keys are left out on purpose; prompt edits are included.
@@ -44,6 +57,7 @@ export const DataSection: React.FC = () => {
         prompts: getPromptOverrides(),
         ...(await exportData()),
         ...(includeAudio ? { audio: await exportProtectedAudio() } : {}),
+        ...(includeShadowing ? { shadowing: await exportShadowing() } : {}),
       };
 
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
@@ -70,12 +84,17 @@ export const DataSection: React.FC = () => {
     reader.onload = async (event) => {
       try {
         const data = JSON.parse(event.target?.result as string);
+        // Recordings are checked in full before anything is written: absent keeps the current ones,
+        // [] clears them, anything malformed refuses the whole restore.
+        const shadowing = data.shadowing === undefined ? undefined : parseShadowingBackup(data.shadowing);
 
         await importData({
+          shadowing,
           articles: Array.isArray(data.articles) ? data.articles : undefined,
           vocab: Array.isArray(data.vocab) ? data.vocab : undefined,
           stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
         });
+        if (shadowing) shadowingRestored();
         const audioResult = Array.isArray(data.audio) ? await importAudio(data.audio) : { imported: 0, failed: 0 };
         if (data.prompts && typeof data.prompts === 'object') savePromptOverrides(data.prompts);
         if (data.settings && typeof data.settings === 'object') {
@@ -161,6 +180,56 @@ export const DataSection: React.FC = () => {
         </div>
         <p className="text-xs text-ink-500 leading-relaxed">{t('settings.audioDesc')}</p>
 
+        {/* Shadowing recordings */}
+        <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
+          <span className="text-ink-600 tnum">
+            {t('settings.shadowingSummary', {
+              sentences: shadowInfo.sentences,
+              takes: shadowInfo.takes,
+              mb: (shadowInfo.bytes / 1024 / 1024).toFixed(1),
+            })}
+          </span>
+          {confirmClearShadowing ? (
+            <span className="flex items-center gap-2 flex-wrap">
+              <span className="text-ink-800">{t('settings.clearShadowingConfirm')}</span>
+              <button
+                type="button"
+                onClick={async () => {
+                  setConfirmClearShadowing(false);
+                  setShadowError(null);
+                  try {
+                    await clearShadowing();
+                    setShadowInfo(await shadowingStats());
+                    setStorageInfo(await getStorageInfo());
+                  } catch (e) {
+                    setShadowError(e instanceof Error ? e.message : String(e));
+                  }
+                }}
+                className="h-9 px-3 rounded-md border border-bad-700 bg-surface text-bad-700 hover:bg-ink-100 font-medium cursor-pointer"
+              >
+                {t('settings.clearShadowing')}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmClearShadowing(false)}
+                className="h-9 px-3 rounded-md text-ink-800 hover:bg-ink-100 font-medium cursor-pointer"
+              >
+                {t('common.cancel')}
+              </button>
+            </span>
+          ) : (
+            <button
+              type="button"
+              disabled={shadowInfo.takes === 0}
+              onClick={() => setConfirmClearShadowing(true)}
+              className="h-9 px-3 rounded-md border border-ink-300 bg-surface text-ink-800 hover:bg-ink-100 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-default"
+            >
+              {t('settings.clearShadowing')}
+            </button>
+          )}
+        </div>
+        {shadowError && <p role="alert" className="text-xs text-bad-700 break-words">{t('settings.shadowingFailed', { msg: shadowError })}</p>}
+
         {/* Storage protection */}
         <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
           <span className="text-ink-600">
@@ -194,6 +263,21 @@ export const DataSection: React.FC = () => {
             {t('settings.backupAudio')}{' '}
             <span className="text-ink-500 tnum">
               {t('settings.backupAudioSize', { mb: ((audioInfo.keptBytes * 4) / 3 / 1024 / 1024).toFixed(1) })}
+            </span>
+          </span>
+        </label>
+
+        <label className="flex items-start gap-2 text-xs text-ink-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={includeShadowing}
+            onChange={(e) => setIncludeShadowing(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-accent-700"
+          />
+          <span>
+            {t('settings.backupShadowing')}{' '}
+            <span className="text-ink-500 tnum">
+              {t('settings.backupAudioSize', { mb: ((shadowInfo.bytes * 4) / 3 / 1024 / 1024).toFixed(1) })}
             </span>
           </span>
         </label>

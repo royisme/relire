@@ -105,6 +105,16 @@ export function stepSequence(delta: number) {
   playAt(index, ++token);
 }
 
+/**
+ * Holds an article in place while the learner records: the current clip pauses (prefetch stops with it)
+ * and the player's play button resumes the same sentence. Anything else that plays ends the sequence.
+ */
+export function suspendSequence() {
+  if (!state.id) return;
+  const { phase } = getSpeechState();
+  if (phase === 'loading' || phase === 'playing') pauseSpeech();
+}
+
 export function stopSequence() {
   if (!state.id) return;
   token++;

@@ -4,7 +4,7 @@ import { Navbar } from './components/Navbar';
 import { ReaderView } from './components/ReaderView';
 import { WordDetailModal } from './components/WordDetailModal';
 import { SentenceDrawer } from './components/SentenceDrawer';
-import { VocabularyView } from './components/VocabularyView';
+import { StudyView, readStudyTab, type StudyTab } from './components/study/StudyView';
 import { PracticeView } from './components/PracticeView';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { ArticleEditorDialog } from './components/ArticleEditorDialog';
@@ -35,6 +35,11 @@ export default function App() {
   const { t } = useTranslation();
   // Navigation tab
   const [currentTab, setCurrentTab] = useState<'reader' | 'vocab' | 'practice' | 'analytics'>('reader');
+  // My study (internal id stays 'vocab'): which sub-tab, and which article the log opens at.
+  const [studyTab, setStudyTab] = useState<StudyTab>(readStudyTab);
+  const [logArticleId, setLogArticleId] = useState<string | null>(null);
+  // A sentence to bring into view when the reader opens (from the shadowing log).
+  const [readerFocus, setReaderFocus] = useState<string | null>(null);
   // Data lives in IndexedDB (see src/storage). It loads once, then every change is saved.
   const [ready, setReady] = useState(false);
   const dbNotice = useSyncExternalStore(subscribeDbNotice, getDbNotice);
@@ -215,7 +220,8 @@ export default function App() {
     setVocabList((prev) => prev.filter((w) => w.id !== wordId));
   };
 
-  const openArticle = (article: Article) => {
+  const openArticle = (article: Article, focusText: string | null = null) => {
+    setReaderFocus(focusText);
     setCurrentArticleId(article.id);
     setIsReading(true);
     setCurrentTab('reader');
@@ -358,6 +364,12 @@ export default function App() {
                 setSettingsNeedKey(true);
                 setIsSettingsOpen(true);
               }}
+              onOpenShadowingLog={(articleId) => {
+                setLogArticleId(articleId);
+                setStudyTab('shadowing');
+                setCurrentTab('vocab');
+              }}
+              focusText={readerFocus}
               activeWord={activeWord}
               activeSentence={activeSentence}
             />
@@ -374,10 +386,18 @@ export default function App() {
           ))}
 
         {currentTab === 'vocab' && (
-          <VocabularyView
-            vocabList={vocabList}
-            onUpdateWord={handleUpdateWord}
-            onDeleteWord={handleDeleteWord}
+          <StudyView
+            tab={studyTab}
+            onTab={setStudyTab}
+            vocabulary={{ vocabList, onUpdateWord: handleUpdateWord, onDeleteWord: handleDeleteWord }}
+            shadowing={{
+              articles,
+              initialArticleId: logArticleId,
+              onOpenSentence: (articleId, text) => {
+                const article = articles.find((a) => a.id === articleId);
+                if (article) openArticle(article, text);
+              },
+            }}
           />
         )}
 

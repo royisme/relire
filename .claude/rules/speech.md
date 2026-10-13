@@ -16,4 +16,6 @@ paths:
 - Reader and listener must cut sentences the same way: use `utils/sentences.ts`, never a local regex.
 - Clips are paid for once: `clips.loadSpeech` reads the stored clip first, otherwise synthesizes and stores it. Do not call a speech provider directly from UI code.
 - The browser voice is only a fallback when the provider fails; `testSpeech` in Settings reports failure instead of falling back.
-- Recording lives in `useShadowingRecorder`: changing the reference text or unmounting must close the microphone, stop speech recognition and revoke object URLs.
+- Recordings play through `playRecording(blob, 'take:<id>')`, so they share the speech state and replace any other clip. `setBeforePlay` lets the practice card interrupt its take before anything plays; recording pauses an article sequence with `suspendSequence` instead of ending it.
+- One microphone user at a time: `claimCapture(owner, cancel)` before `getUserMedia`, `releaseCapture` when done; `cancelCapture` stops the other holder. Throw the browser's real error.
+- Recording lives in `useShadowingRecorder` (sentence sheet, Practice) and `usePracticeCard` (reader card): changing the reference text or unmounting must close the microphone, stop speech recognition and revoke object URLs.

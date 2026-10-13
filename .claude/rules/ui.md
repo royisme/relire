@@ -16,7 +16,7 @@ Read `DESIGN.md` (tokens in `src/index.css`) and `PRODUCT.md` before changing a 
 - Check new layouts at 360 px with long text. Wrap (`break-words`, `min-w-0`, `flex-wrap`, equal grid columns) instead of fixing widths.
 - Overlays come from `ui/overlay.tsx`: `Sheet` for lookups (bottom sheet on phones), `Dialog` for focused tasks, `Drawer` for navigation.
 - Speech: use `SpeakButton` / `SpeakIcon` / `useSpeechPhase` from `ui/speak-button`; never keep your own `isSpeaking` state.
-- Recording and scoring: use `components/shadowing/` and `hooks/useShadowingRecorder`; screens never hold recorder state.
+- Recording and scoring: use `components/shadowing/` and `hooks/useShadowingRecorder`, or in the reader `reader/PracticeCard` with `hooks/usePracticeCard`; screens never hold recorder state. Fixed bottom UI in the reader goes inside `reader/BottomDock`.
 - Errors appear inline next to what failed, with the real reason. No `alert()` for new code.
 
 ## Visual

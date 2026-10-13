@@ -14,7 +14,7 @@
   },
   "nav": {
     "reader": "精读",
-    "vocab": "生词本",
+    "vocab": "我的学习",
     "practice": "练习",
     "analytics": "进度",
     "installApp": "安装应用",
@@ -233,7 +233,12 @@
     "promptVariables": "可用变量：",
     "promptSyntax": "用 {{open}}name{{close}} 表示变量，用 {{open}}#if name{{close}}…{{open}}/if{{close}} 表示变量有值时才出现的内容；{{open}}#if name=value{{close}} 用来和某个值比较。",
     "promptUnknown": "未知变量会显示为空：{{names}}",
-    "promptMissing": "这条提示词没有用到：{{names}}"
+    "promptMissing": "这条提示词没有用到：{{names}}",
+    "shadowingSummary": "跟读：{{sentences}} 句，{{takes}} 条录音，{{mb}} MB",
+    "clearShadowing": "删除全部录音",
+    "clearShadowingConfirm": "删除本设备上的全部跟读录音？",
+    "shadowingFailed": "录音：{{msg}}",
+    "backupShadowing": "包含我的跟读录音（文件更大）"
   },
   "importer": {
     "articleTitle": "标题",
@@ -287,7 +292,8 @@
     "restoreSamples": "恢复示例文章",
     "noMatch": "没有符合搜索条件的文章。",
     "clearFilters": "清除筛选",
-    "count_other": "共 {{count}} 篇"
+    "count_other": "共 {{count}} 篇",
+    "deleteRecordings": "其中 {{count}} 句的跟读录音也会一并删除。"
   },
   "onboarding": {
     "label": "新手引导",
@@ -411,5 +417,63 @@
     "controls": "发音标记设置",
     "restoring": "正在检查已保存的标记…",
     "needsGeneration": "已保存的标记缺失或不完整。请先生成，再打开阅读工具栏的发音标记开关。"
+  },
+  "practiceCard": {
+    "open": "练习这一句",
+    "finishFirst": "请先完成当前录音",
+    "label": "练习：{{sentence}}",
+    "expand": "显示整句",
+    "collapse": "收起",
+    "reference": "范读",
+    "record": "录音",
+    "recordAgain": "再录一次",
+    "stop": "停止",
+    "redo": "重录",
+    "latest": "最新",
+    "playLatest": "播放你在 {{time}} 的录音",
+    "compare": "对比",
+    "compareTitle": "先播放范读，再播放你最新的录音",
+    "noTakes": "这一句还没有录音。",
+    "allRecordings": "全部录音（{{count}}）",
+    "hint": "先听范读，再大声读出来。",
+    "acquiring": "正在等待麦克风…",
+    "saving": "正在保存…",
+    "saved": "已保存。",
+    "tooShort": "太短了，没有保存。请再录一次。",
+    "listeningEnded": "卡片播放了声音，全文朗读已停止。",
+    "busy": "句子分析或练习页正在录音。",
+    "error": "无法录音：{{msg}}",
+    "saveFailed": "录音没能保存：{{msg}}",
+    "retry": "重试",
+    "discard": "丢弃",
+    "keep": "保留",
+    "confirmDiscard": "丢弃这条未保存的录音？"
+  },
+  "study": {
+    "label": "我的学习",
+    "words": "生词",
+    "shadowing": "跟读"
+  },
+  "shadowingLog": {
+    "title": "跟读本",
+    "subtitle": "你对文章句子的录音，保存在本设备上。每句保留最近三条。",
+    "article": "文章",
+    "allArticles": "全部文章",
+    "referenceVoice": "范读使用设置中当前选择的声音，可能与你录音时不同。",
+    "recorded": "已录 {{count}} 句",
+    "text": "原文",
+    "reference": "范读",
+    "mine": "我的录音",
+    "openInReader": "在阅读页打开",
+    "playReference": "播放范读",
+    "playTake": "播放你在 {{when}} 的录音",
+    "allTakes": "全部录音（{{count}}）",
+    "delete": "删除",
+    "deleteTake": "删除你在 {{when}} 的录音",
+    "changed": "原文已改动（{{count}}）",
+    "removed": "文章已删除（{{count}}）",
+    "empty": "还没有录音。在阅读页点击句子旁的麦克风即可练习。",
+    "loadFailed": "无法读取你的录音：{{msg}}",
+    "deleteFailed": "录音没能删除：{{msg}}"
   }
 }

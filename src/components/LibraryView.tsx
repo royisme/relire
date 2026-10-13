@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowDown, ArrowUp, FilePlus2, Pencil, Search, Trash2 } from 'lucide-react';
 import { Article } from '../types';
@@ -7,6 +7,7 @@ import { PageHeader } from './ui/page-header';
 import { Segmented } from './ui/segmented';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import { cleanArticleTitle, formatLevel } from '../utils/i18nHelpers';
+import { listShadowing } from '../storage/shadowing';
 
 interface LibraryViewProps {
   articles: Article[];
@@ -37,6 +38,17 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   const [level, setLevel] = useState('all');
   const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'createdAt', dir: 'desc' });
   const [pendingDelete, setPendingDelete] = useState<Article | null>(null);
+  // Recorded sentences that deleting the pending article would also remove.
+  const [pendingRecordings, setPendingRecordings] = useState(0);
+  useEffect(() => {
+    setPendingRecordings(0);
+    if (!pendingDelete) return;
+    let live = true;
+    listShadowing(pendingDelete.id).then((list) => live && setPendingRecordings(list.length), () => {});
+    return () => {
+      live = false;
+    };
+  }, [pendingDelete]);
 
   const levels = useMemo(
     () => [...new Set(articles.map((a) => (a.level.match(/(A1|A2|B1|B2|C1|C2)/i)?.[1] || a.level).toUpperCase()))].sort(),
@@ -212,6 +224,9 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             <p className="text-sm text-ink-700">
               {t('library.deleteDesc', { title: cleanArticleTitle(pendingDelete.title) })}
             </p>
+            {pendingRecordings > 0 && (
+              <p className="text-sm text-ink-700">{t('library.deleteRecordings', { count: pendingRecordings })}</p>
+            )}
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={() => setPendingDelete(null)}>
                 {t('common.cancel')}
