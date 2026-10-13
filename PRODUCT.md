@@ -1,12 +1,22 @@
 # Product
 
+<!-- impeccable:product-schema 1 -->
+
+## Platform
+
+web
+
 ## Register
 
 **Read** for the reader, **Operate** for vocabulary, practice, analytics and settings. Nothing in the app is Persuade; there is no marketing surface.
 
 ## What it is
 
-Relire (French for "to read again") is a close-reading assistant for French learners preparing for TCF Canada, with a Chinese and English interface. The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It is a static PWA: no app server, no account. The learner supplies their own API key (Gemini today), stored in the browser and used for direct calls to the provider; explanations and speech can use different providers. All user data lives in localStorage.
+Relire (French for "to read again") is a close-reading assistant for French learners preparing for TCF Canada, with a Chinese and English interface. The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It is a static PWA: no app server, no account. The learner supplies their own API key (Gemini today), stored in the browser and used for direct calls to the provider; explanations and speech can use different providers. User data (articles, vocabulary, stats, saved answers and audio, shadowing recordings) lives in the browser's IndexedDB; settings and keys live in localStorage.
+
+## Positioning
+
+Real French articles read sentence by sentence, where every sentence can be heard, repeated aloud and kept as a recording to compare against the reference later. The learner brings their own AI key; there is no account, and everything stays on their device.
 
 ## Users
 
@@ -17,8 +27,9 @@ Intermediate learners (roughly A2–C1) preparing for TCF/DELF/DALF or reading F
 1. **Read an article without losing the thread.** The text is the product. Chrome recedes.
 2. **Understand a word or sentence in context, then return to reading.** Lookups are brief detours: word (meaning, IPA, conjugation, examples), sentence (syntax segments, grammar points, shadowing guide).
 3. **Keep what was learned.** Save words, review them on an SM-2 schedule (ratings 1/3/4/5).
-4. **Speak and be corrected.** Shadowing and open practice with a score plus phoneme, liaison and intonation feedback.
-5. **See progress honestly.** Counts and scores from real data only.
+4. **Shadow a sentence and keep the record.** Hear a sentence, repeat it right away, and keep the last few takes per sentence to replay and compare with the reference at any time. No score is required.
+5. **Speak and be corrected.** Optional AI assessment: a score plus phoneme, liaison and intonation feedback (open practice and the sentence sheet today; an optional score for shadowing takes later, switched in Settings).
+6. **See progress honestly.** Counts and scores from real data only.
 
 ## Screens
 
@@ -26,13 +37,13 @@ First run: a three-step guide (welcome, connect Gemini with a checked key, try a
 
 
 - **Library** (the Read tab's home): a table of all articles with search, level filter, sortable columns, add, edit and delete. Opening a row opens the reader.
-- **Reader**: one article, back to the library, reading settings (font size, theme: parchment / white / sepia / dark, playback speed), tap-to-analyse words, sentence toolbar (play, analyse).
+- **Reader**: one article, back to the library, reading settings (font size, playback speed), listen to the whole article, optional pronunciation markers, tap-to-analyse words, sentence toolbar (play, analyse, record). Record opens a closable practice card docked at the bottom: reference, record/stop, redo, input level, latest take with play and compare.
 - **Word detail**: translation, IPA, tense, conjugation table, usage examples, save to vocabulary.
 - **Sentence drawer**: translation, syntax, grammar points, collocations, shadowing record and score.
-- **Vocabulary**: list plus flashcard quiz with SRS ratings.
+- **My study**: the learner's own material, in two parts. **Words**: the vocabulary list plus flashcard quiz with SRS ratings. **Shadowing**: every recorded sentence by article, as text | reference audio | my recordings, with compare, delete and open in the reader.
 - **Practice**: AI-generated drills and oral assessment.
 - **Progress**: three plain figures (words saved, average pronunciation score, shadowing sessions), recent scores, and a tap-to-hear chart of the French sounds in IPA. No coaching text or invented scores; an AI coach summary is a possible later feature.
-- **Settings**: Gemini key and models, voice, backup/restore JSON. Language is a single icon in the header.
+- **Settings**: AI provider, keys and models for explanations and speech, voice, editable prompts, stored data (saved answers, audio, shadowing recordings) and backup/restore JSON, with recordings optional. Language is a single icon in the header.
 
 ## Tone and personality
 
