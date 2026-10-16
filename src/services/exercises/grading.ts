@@ -21,7 +21,7 @@ export const normalizeFrench = (str: string, strictAccents: boolean) => {
     .replace(/[.,/#!$%^&*;:{}=\-_`~()?’]/g, "'")
     .replace(/\s+/g, ' ');
   if (!strictAccents) {
-    base = base.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    base = base.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }
   return base;
 };
