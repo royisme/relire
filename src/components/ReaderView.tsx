@@ -94,6 +94,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   const speech = useSpeechState();
   const playingKey = speech.phase !== 'idle' ? speech.key : null;
 
+  // Practising one sentence: recording happens in the docked card, never on the pill.
+  const card = usePracticeCard();
+  const cardBusy =
+    card.phase === 'acquiring' || card.phase === 'recording' || card.phase === 'saving' || card.phase === 'unsaved';
+  const cardRef = useRef(card);
+  useLayoutEffect(() => {
+    cardRef.current = card;
+  });
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
@@ -174,12 +183,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     if (el) window.scrollBy({ top: el.getBoundingClientRect().top - anchor.top, behavior: 'instant' });
   }, [markers.mode, markers.displayed]);
 
-  // Practising one sentence: recording happens in the docked card, never on the pill.
-  const card = usePracticeCard();
-  const cardBusy =
-    card.phase === 'acquiring' || card.phase === 'recording' || card.phase === 'saving' || card.phase === 'unsaved';
-  const cardRef = useRef(card);
-  cardRef.current = card;
   // A different article, or leaving the reader, closes the card.
   useEffect(() => () => cardRef.current.close(), [currentArticle.id]);
   // A lookup sheet's scrim would cover a running take: end it, keep the card.
@@ -225,7 +228,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     if (!entry) return;
     entry[1].el.scrollIntoView({ block: 'center', behavior: 'instant' });
     focusSentence(entry[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusText, currentArticle.id]);
 
   // Listening to the whole article: one sentence after another, the current one highlighted.

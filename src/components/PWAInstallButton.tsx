@@ -19,7 +19,7 @@ export const PWAInstallButton: React.FC<{ variant?: 'icon' | 'row'; onDone?: () 
   const label = t('nav.installApp');
   const onClick = () => {
     if (isInstallable) {
-      install();
+      void install();
       onDone?.();
     } else {
       setShowMacGuide(true);

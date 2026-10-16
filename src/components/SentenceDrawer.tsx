@@ -12,7 +12,6 @@ import { ShadowingRecorder } from './shadowing/ShadowingRecorder';
 interface SentenceDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  sentence: string;
   sentenceData: SentenceAnalysis | null;
   isLoading: boolean;
   errorMessage?: string | null;
@@ -22,7 +21,6 @@ interface SentenceDrawerProps {
 export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
   isOpen,
   onClose,
-  sentence,
   sentenceData,
   isLoading,
   errorMessage,

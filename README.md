@@ -103,7 +103,7 @@ src/components/          one file per screen or overlay
 src/utils/srs.ts         SM-2 scheduling
 ```
 
-`bun run lint` runs the TypeScript check. There are no automated tests yet.
+`bun run typecheck` runs the TypeScript check, `bun run lint` runs oxlint, `bun run format` formats with oxfmt, and `bun run e2e` runs the Playwright specs with every AI call mocked.
 
 ## Contributing
 

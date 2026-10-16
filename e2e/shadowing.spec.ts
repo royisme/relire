@@ -28,6 +28,8 @@ test.beforeEach(async ({ page, ai }) => {
     };
     const log: string[] = [];
     (window as unknown as { __plays: string[] }).__plays = log;
+    // Wrapped, then called with the element as `this`.
+    // oxlint-disable-next-line typescript/unbound-method
     const play = HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play = function () {
       const type = types.get(this.src) ?? '';
@@ -154,6 +156,25 @@ test('the log lists recordings in article order, opens the reader and deletes ta
 
   await rows.first().click();
   await expect(page.locator('article [data-sentence]', { hasText: second }).first()).toBeInViewport();
+});
+
+test('deleting an article names its recordings, and only its own', async ({ page }) => {
+  await openArticle(page);
+  await openCard(page);
+  await recordFor(page);
+  await card(page).getByRole('button', { name: 'Close' }).click();
+  await page.getByRole('button', { name: 'Library', exact: true }).click();
+
+  const row = (title: string) => page.getByRole('row').filter({ hasText: title });
+  const confirm = page.getByRole('dialog');
+  await row('Le Petit Prince').getByRole('button', { name: 'Delete' }).click();
+  await expect(confirm.getByText('Your recordings of 1 sentences in it are deleted too.')).toBeVisible();
+  await confirm.getByRole('button', { name: 'Cancel' }).click();
+
+  const other = page.getByRole('row').filter({ hasNotText: 'Le Petit Prince' }).nth(1);
+  await other.getByRole('button', { name: 'Delete' }).click();
+  await expect(confirm.getByRole('button', { name: 'Delete' })).toBeVisible();
+  await expect(confirm.getByText(/Your recordings of/)).toHaveCount(0);
 });
 
 test('opening a sentence from the log scrolls to it once', async ({ page }) => {

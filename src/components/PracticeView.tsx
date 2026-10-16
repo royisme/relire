@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle2, XCircle, RotateCcw, ArrowRight, Loader2 } from 'lucide-react';
 import { Article, PracticeDeck, PracticeQuestion, PronunciationAssessment } from '../types';
 import { generatePracticeDrills, MissingApiKeyError } from '../services/api';
-import { stopSpeech } from '../utils/speech';
 import { SpeakButton } from './ui/speak-button';
 import { Button } from './ui/button';
 import { PageHeader } from './ui/page-header';

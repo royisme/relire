@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { getProvider, speechProviders, textProviders } from '../../services/ai/providers';
 import { getApiKey, type AppSettings } from '../../utils/appSettings';
 import { testSpeech } from '../../utils/speech';
+import { errorMessage } from '../../services/ai/errors';
 
 interface AiSectionProps {
   settings: AppSettings;
@@ -93,8 +94,8 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
     try {
       await testSpeech(settings);
       setTestResult({ success: true, msg: t('settings.testSuccess') });
-    } catch (err: any) {
-      setTestResult({ success: false, msg: t('settings.testFailed', { msg: err.message || err }) });
+    } catch (err) {
+      setTestResult({ success: false, msg: t('settings.testFailed', { msg: errorMessage(err) }) });
     } finally {
       setTesting(false);
     }

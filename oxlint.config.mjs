@@ -26,4 +26,11 @@ export default defineConfig({
     'react/exhaustive-deps': 'error',
     ...hookRules,
   },
+  overrides: [
+    {
+      // Playwright fixtures call `use()`, which is not a React hook.
+      files: ['e2e/**/*.ts'],
+      rules: { 'react/rules-of-hooks': 'off', 'react-hooks-js/rules-of-hooks': 'off' },
+    },
+  ],
 });

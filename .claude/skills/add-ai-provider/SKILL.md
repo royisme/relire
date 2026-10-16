@@ -24,7 +24,7 @@ Read `docs/architecture.md` (AI layer) and `src/services/ai/types.ts` first. Use
 5. Add a CHANGELOG line under Unreleased → Added.
 
 ## Verify
-- `bun run lint`, `bun run i18n:check`, `bun run build`.
+- `bun run typecheck`, `bun run lint`, `bun run format:check`, `bun run i18n:check`, `bun run build`.
 - Settings lists the provider for the roles it supports; text and speech can use different providers, each keeping its own key.
 - A saved settings object naming an unknown provider or model still falls back to defaults (`appSettings.ts`).
 - Mock the provider's endpoint in a browser check (`verify-ui` skill, add a route) for a lookup and a clip. Tell the user it was not tested against the real API unless they supplied a key.

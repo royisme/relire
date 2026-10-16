@@ -6,7 +6,8 @@
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
 
 type Task = 'word' | 'sentence' | 'drills' | 'pronunciation' | 'prosody';
-type Answer = unknown | ((prompt: string) => unknown | Promise<unknown>);
+/** A fixed answer, or a function of the prompt that returns one (possibly async). */
+type Answer = unknown;
 
 /** The sentence a prosody prompt annotates. */
 export function prosodySentence(prompt: string): string {

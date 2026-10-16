@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 
 /**
  * Writes `value` with `save` shortly after it changes (debounced), and flushes
@@ -10,15 +10,18 @@ export function usePersist<T>(
   value: T,
   save: (value: T) => Promise<void>,
   enabled: boolean,
-  report: (name: string, error: unknown | null) => void,
+  report: (name: string, error: unknown) => void,
 ) {
   const latest = useRef(value);
   const dirty = useRef(false);
   const timer = useRef<number | undefined>(undefined);
   const saveRef = useRef(save);
-  saveRef.current = save;
   const reportRef = useRef(report);
-  reportRef.current = report;
+  // The latest callbacks, without re-arming the timer when they change; refs are written after commit.
+  useLayoutEffect(() => {
+    saveRef.current = save;
+    reportRef.current = report;
+  });
 
   const flush = useCallback(() => {
     if (!dirty.current) return;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PronunciationAssessment } from '../types';
 import { assessPronunciation } from '../services/api';
 import { errorMessage } from '../services/ai/errors';
@@ -20,6 +20,16 @@ interface Recording {
   mimeType: string;
 }
 
+/** The part of the Web Speech API this hook uses; Chrome still ships it prefixed. */
+interface Recognizer {
+  lang: string;
+  interimResults: boolean;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  start(): void;
+  stop(): void;
+}
+type RecognizerClass = new () => Recognizer;
+
 export function useShadowingRecorder(
   referenceText: string,
   onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void,
@@ -40,7 +50,9 @@ export function useShadowingRecorder(
   /** Bumped on every reset, so work that finishes for an earlier sentence is dropped. */
   const session = useRef(0);
   const onAssessedRef = useRef(onAssessed);
-  onAssessedRef.current = onAssessed;
+  useLayoutEffect(() => {
+    onAssessedRef.current = onAssessed;
+  });
 
   const releaseResources = useCallback(() => {
     window.clearInterval(timer.current);
@@ -55,27 +67,27 @@ export function useShadowingRecorder(
     }
   }, []);
 
-  const reset = useCallback(() => {
+  // Ends whatever the previous sentence left running; work that finishes for it is dropped.
+  const invalidate = useCallback(() => {
     session.current++;
     releaseResources();
     recording.current = null;
     transcript.current = '';
+  }, [releaseResources]);
+
+  // A new sentence starts from nothing (adjusted during render, so no stale frame shows)...
+  const [shownFor, setShownFor] = useState(referenceText);
+  if (shownFor !== referenceText) {
+    setShownFor(referenceText);
     setPhase('idle');
     setSeconds(0);
     setAudioUrl(null);
     setAssessment(null);
     setIsEvaluating(false);
     setError(null);
-  }, [releaseResources]);
-
-  // A new sentence starts from nothing; leaving the screen closes the microphone.
-  useEffect(() => {
-    reset();
-    return () => {
-      session.current++;
-      releaseResources();
-    };
-  }, [referenceText, reset, releaseResources]);
+  }
+  // ...and leaving it, or the screen, closes the microphone.
+  useEffect(() => invalidate, [referenceText, invalidate]);
 
   const start = useCallback(async () => {
     stopSpeech();
@@ -120,13 +132,17 @@ export function useShadowingRecorder(
 
     // Where the browser can, a transcript helps the scorer; it is optional.
     transcript.current = '';
-    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const speechWindow = window as unknown as {
+      SpeechRecognition?: RecognizerClass;
+      webkitSpeechRecognition?: RecognizerClass;
+    };
+    const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
     if (Recognition) {
       try {
         const r = new Recognition();
         r.lang = 'fr-FR';
         r.interimResults = false;
-        r.onresult = (evt: any) => {
+        r.onresult = (evt) => {
           if (mine === session.current) transcript.current = evt.results[0][0].transcript;
         };
         r.start();

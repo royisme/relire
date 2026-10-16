@@ -9,7 +9,9 @@ This file holds only what applies to every task. Everything else is loaded when 
 Bun is the only package manager.
 
 - `bun install` · `bun run dev` (Vite on :5173) · `bun run build` (static site in `dist/`, with the PWA service worker) · `bun run preview`
-- `bun run lint`: `tsc --noEmit`
+- `bun run typecheck`: `tsc --noEmit`
+- `bun run lint`: oxlint, type-aware, with the React Hooks rules; warnings fail (`bun run lint:fix` applies safe fixes)
+- `bun run format` / `bun run format:check`: oxfmt is the only formatter (CI checks it); Markdown, prompt templates and `marketing/` are left as written
 - `bun run i18n:check`: keys exist in both locales, locales match, no hard-coded Chinese in components (CI runs it)
 - `impeccable detect --json src index.html`: UI anti-pattern detector; keep it at `[]`
 - `bun run e2e`: Playwright specs in `e2e/` drive the real app in installed Chrome with every AI call mocked (`e2e/fixtures.ts`); `bun scripts/check-prosody-schema.ts` guards the marker parser. Cover UI changes with a spec (`verify-ui` skill).

@@ -56,9 +56,11 @@ export function usePronunciationMarkers(
   const contextIdentity = useSyncExternalStore(subscribePronunciationContext, getPronunciationIdentity);
   const identity = JSON.stringify([articleId, content, contextIdentity]);
   const [stored, setStored] = useState(() => empty(identity, articleId));
+  // A new article, text or AI context starts from nothing; adjusted during render, so no stale frame shows.
+  if (stored.identity !== identity) setStored(empty(identity, articleId));
   const state = stored.identity === identity ? stored : empty(identity, articleId);
+  /** The latest written state, for async work and handlers; every write goes through it first. */
   const current = useRef(state);
-  current.current = state;
   const generation = useRef(0);
   const mounted = useRef(false);
   const tail = useRef<Promise<unknown> | null>(null);
@@ -70,9 +72,7 @@ export function usePronunciationMarkers(
   useLayoutEffect(() => {
     mounted.current = true;
     const token = ++generation.current;
-    const initial = empty(identity, articleId);
-    current.current = initial;
-    setStored(initial);
+    current.current = empty(identity, articleId);
     const session = createPronunciationSession();
     const live = () =>
       mounted.current &&
@@ -120,10 +120,11 @@ export function usePronunciationMarkers(
       setStored(next);
     };
     void restore();
-    return () => {
+    const end = () => {
       mounted.current = false;
       generation.current++;
     };
+    return end;
   }, [identity, articleId, supported, capable]);
   const ready = Object.keys(state.staged).length;
   const skippedCount = Object.keys(state.skipped).length;

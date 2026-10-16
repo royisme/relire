@@ -99,7 +99,7 @@ src/components/          每个页面或浮层一个文件
 src/utils/srs.ts         SM-2 调度
 ```
 
-`bun run lint` 运行 TypeScript 检查。目前还没有自动化测试。
+`bun run typecheck` 运行 TypeScript 检查，`bun run lint` 运行 oxlint，`bun run format` 用 oxfmt 格式化，`bun run e2e` 运行 Playwright 端到端测试（所有 AI 请求均为模拟）。
 
 ## 参与贡献
 

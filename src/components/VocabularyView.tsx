@@ -12,15 +12,9 @@ interface VocabularyViewProps {
   vocabList: VocabWord[];
   onUpdateWord: (updatedWord: VocabWord) => void;
   onDeleteWord: (wordId: string) => void;
-  onImportVocab?: (words: VocabWord[]) => void;
 }
 
-export const VocabularyView: React.FC<VocabularyViewProps> = ({
-  vocabList,
-  onUpdateWord,
-  onDeleteWord,
-  onImportVocab,
-}) => {
+export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpdateWord, onDeleteWord }) => {
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
   const [viewMode, setViewMode] = useState<'list' | 'quiz'>('list');

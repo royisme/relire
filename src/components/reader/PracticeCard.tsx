@@ -60,15 +60,17 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
     if (card.phase === 'recording') stopButton.current?.focus({ preventScroll: true });
   }, [card.phase]);
 
-  useEffect(() => setExpanded(false), [card.target?.text]);
-  useEffect(() => {
-    if (card.phase !== 'unsaved') setConfirmClose(false);
-  }, [card.phase]);
-  // Anything that needs a decision opens the card again.
+  // Local view state follows the card, adjusted during render so no stale frame shows: a new sentence
+  // starts collapsed, the close confirmation only lives while a take is unsaved, and anything that needs
+  // a decision opens the card again.
   const needsAttention = card.phase === 'unsaved' || !!card.error || card.notice === 'busy';
-  useEffect(() => {
-    if (needsAttention) setMinimised(false);
-  }, [needsAttention]);
+  const [seen, setSeen] = useState({ text: card.target?.text, phase: card.phase, needsAttention });
+  if (seen.text !== card.target?.text || seen.phase !== card.phase || seen.needsAttention !== needsAttention) {
+    setSeen({ text: card.target?.text, phase: card.phase, needsAttention });
+    if (seen.text !== card.target?.text) setExpanded(false);
+    if (seen.phase !== card.phase && card.phase !== 'unsaved') setConfirmClose(false);
+    if (needsAttention && !seen.needsAttention) setMinimised(false);
+  }
 
   if (card.phase === 'closed' || !card.target) return null;
   const target = card.target;

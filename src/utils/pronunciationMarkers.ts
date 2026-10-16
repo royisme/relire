@@ -38,6 +38,8 @@ function list(value: unknown, max: number, subject: string): unknown[] {
 
 function text(value: unknown, max: number, empty = false): string {
   check(typeof value === 'string' && value.length <= max && (empty || value.trim().length > 0), 'text');
+  // Control characters are exactly what this rejects.
+  // oxlint-disable-next-line no-control-regex
   check(!/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/u.test(value), 'plain-text');
   return value;
 }
@@ -56,7 +58,7 @@ function range(value: unknown, length: number): GraphemeRange {
 const overlaps = (a: GraphemeRange, b: GraphemeRange) => a.start < b.end && b.start < a.end;
 const hasLetter = (parts: string[], span: GraphemeRange) => /\p{L}/u.test(parts.slice(span.start, span.end).join(''));
 /** IPA vowels and glides: a link needs a vowel-initial right word. */
-const LINKABLE = /[aeiouyɑəɛœøɔãẽĩõũỹɛ̃œ̃ɔ̃jwɥ]/u;
+const LINKABLE = /[aeiouyɑəɛœøɔãẽĩõũỹjwɥ]/u;
 /** A French spoken syllable needs an IPA vowel nucleus, not a written vowel.
  * Include lax Canadian variants; glides alone (j/w/ɥ) are not nuclei.
  */

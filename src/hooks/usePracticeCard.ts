@@ -4,7 +4,7 @@
  * save and every late-result guard; the card component only draws this state.
  * See docs/shadowing-log-design.md (Recording flow).
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { ShadowingTake } from '../types/shadowing';
 import { addTake, ArticleGoneError, getShadowingSentence, subscribeShadowing } from '../storage/shadowing';
 import { errorMessage } from '../services/ai/errors';
@@ -54,6 +54,8 @@ export function usePracticeCard() {
   const session = useRef(0);
   const phaseRef = useRef<CardPhase>('closed');
   const targetRef = useRef<PracticeTarget | null>(null);
+  /** `stop`, for the take timer that is set up before `stop` exists. */
+  const stopRef = useRef<() => Promise<void>>(async () => {});
   const token = useRef<symbol | null>(null);
   const stream = useRef<MediaStream | null>(null);
   const take = useRef<Take | null>(null);
@@ -103,59 +105,56 @@ export function usePracticeCard() {
     [releaseCaptureNow],
   );
 
-  const startTake = useCallback(
-    async (of: PracticeTarget) => {
-      const mine = ++session.current;
-      setError(null);
-      setNotice(null);
-      setElapsedMs(0);
-      // Hold an article in place instead of ending it; stop any single sentence that plays.
-      if (getSequenceState().id) suspendSequence();
-      else if (getSpeechState().phase !== 'idle') stopSpeech();
-      try {
-        // Claimed before the permission prompt: a pending prompt already owns capture.
-        token.current = claimCapture('card', () => toReady());
-      } catch (err) {
-        go('ready');
-        if (err instanceof CaptureBusyError) setNotice('busy');
-        else setError(errorMessage(err));
+  const startTake = useCallback(async () => {
+    const mine = ++session.current;
+    setError(null);
+    setNotice(null);
+    setElapsedMs(0);
+    // Hold an article in place instead of ending it; stop any single sentence that plays.
+    if (getSequenceState().id) suspendSequence();
+    else if (getSpeechState().phase !== 'idle') stopSpeech();
+    try {
+      // Claimed before the permission prompt: a pending prompt already owns capture.
+      token.current = claimCapture('card', () => toReady());
+    } catch (err) {
+      go('ready');
+      if (err instanceof CaptureBusyError) setNotice('busy');
+      else setError(errorMessage(err));
+      return;
+    }
+    go('acquiring');
+    try {
+      const opened = await acquireStream();
+      if (mine !== session.current) {
+        // Cancelled while the prompt was open: never keep a late stream.
+        releaseStream(opened);
         return;
       }
-      go('acquiring');
+      stream.current = opened;
+      take.current = new Take(opened);
       try {
-        const opened = await acquireStream();
-        if (mine !== session.current) {
-          // Cancelled while the prompt was open: never keep a late stream.
-          releaseStream(opened);
-          return;
-        }
-        stream.current = opened;
-        take.current = new Take(opened);
-        try {
-          const context = new AudioContext();
-          const node = context.createAnalyser();
-          node.fftSize = 256;
-          context.createMediaStreamSource(opened).connect(node);
-          analyser.current = { context, node, data: new Uint8Array(new ArrayBuffer(node.frequencyBinCount)) };
-        } catch {
-          // The level meter is decoration; recording works without it.
-        }
-        go('recording');
-        const started = performance.now();
-        timer.current = window.setInterval(() => {
-          const elapsed = performance.now() - started;
-          setElapsedMs(elapsed);
-          if (elapsed >= MAX_TAKE_MS) void stopRef.current();
-        }, 200);
-      } catch (err) {
-        if (mine !== session.current) return;
-        releaseCaptureNow();
-        go('ready');
-        setError(errorMessage(err));
+        const context = new AudioContext();
+        const node = context.createAnalyser();
+        node.fftSize = 256;
+        context.createMediaStreamSource(opened).connect(node);
+        analyser.current = { context, node, data: new Uint8Array(new ArrayBuffer(node.frequencyBinCount)) };
+      } catch {
+        // The level meter is decoration; recording works without it.
       }
-    },
-    [releaseCaptureNow, toReady],
-  );
+      go('recording');
+      const started = performance.now();
+      timer.current = window.setInterval(() => {
+        const elapsed = performance.now() - started;
+        setElapsedMs(elapsed);
+        if (elapsed >= MAX_TAKE_MS) void stopRef.current();
+      }, 200);
+    } catch (err) {
+      if (mine !== session.current) return;
+      releaseCaptureNow();
+      go('ready');
+      setError(errorMessage(err));
+    }
+  }, [releaseCaptureNow, toReady]);
 
   const save = useCallback(
     async (of: PracticeTarget, result: TakeResult, mine: number) => {
@@ -208,8 +207,9 @@ export function usePracticeCard() {
     }
     await save(of, result, mine);
   }, [releaseCaptureNow, save, toReady]);
-  const stopRef = useRef(stop);
-  stopRef.current = stop;
+  useLayoutEffect(() => {
+    stopRef.current = stop;
+  }, [stop]);
 
   /** Opens the card on a sentence and records at once; refused while a take is in progress. */
   const open = useCallback(
@@ -225,7 +225,7 @@ export function usePracticeCard() {
         setCount(0);
         void loadLatest(of);
       }
-      void startTake(of);
+      void startTake();
       return true;
     },
     [loadLatest, startTake],
@@ -236,7 +236,7 @@ export function usePracticeCard() {
     if (!of || phaseRef.current !== 'recording') return;
     session.current++;
     releaseCaptureNow();
-    void startTake(of);
+    void startTake();
   }, [releaseCaptureNow, startTake]);
 
   const retrySave = useCallback(() => {

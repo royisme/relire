@@ -9,7 +9,9 @@ function pcmToWavBase64(pcmBase64: string, sampleRate: number): string {
   const pcm = Uint8Array.from(atob(pcmBase64), (c) => c.charCodeAt(0));
   const header = new ArrayBuffer(44);
   const v = new DataView(header);
-  const str = (o: number, s: string) => [...s].forEach((ch, i) => v.setUint8(o + i, ch.charCodeAt(0)));
+  const str = (o: number, s: string) => {
+    for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i));
+  };
   str(0, 'RIFF');
   v.setUint32(4, 36 + pcm.length, true);
   str(8, 'WAVEfmt ');
@@ -47,7 +49,7 @@ export const geminiSpeech: SpeechProvider = {
           responseModalities: ['AUDIO'],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: config.voice } } },
         },
-      } as any);
+      });
     } catch (err) {
       throw new Error(errorMessage(err));
     }

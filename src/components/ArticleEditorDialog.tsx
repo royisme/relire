@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import { Button } from './ui/button';
@@ -26,14 +26,6 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
   const [category, setCategory] = useState(article?.category ?? '');
   const [source, setSource] = useState(article?.source ?? '');
   const [content, setContent] = useState(article?.content ?? '');
-
-  useEffect(() => {
-    setTitle(article?.title ?? '');
-    setLevel(article?.level ?? 'B1');
-    setCategory(article?.category ?? '');
-    setSource(article?.source ?? '');
-    setContent(article?.content ?? '');
-  }, [article]);
 
   const words = content.split(/\s+/).filter(Boolean).length;
 

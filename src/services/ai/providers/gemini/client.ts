@@ -1,4 +1,4 @@
-import { GoogleGenAI, ThinkingLevel } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
 import i18n from '../../../../i18n';
 import { MissingApiKeyError, errorMessage } from '../../errors';
 import type { JsonRequest, TextConfig, TextProvider } from '../../types';
@@ -47,7 +47,7 @@ export const geminiText: TextProvider = {
     for (const model of candidates) {
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          const options: any = { responseMimeType: 'application/json' };
+          const options: GenerateContentConfig = { responseMimeType: 'application/json' };
           if (request.jsonSchema) options.responseJsonSchema = request.jsonSchema;
           if (model.includes('gemini-3')) options.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
           const response = await ai.models.generateContent({ model, contents, config: options });

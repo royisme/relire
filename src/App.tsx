@@ -64,14 +64,14 @@ export default function App() {
   const [stats, setStats] = useState<UserStats>(EMPTY_STATS);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const reportSave = (name: string, error: unknown | null) => {
+  const reportSave = (name: string, error: unknown) => {
     if (error) console.error(`Saving ${name} failed`, error);
     setFailedSaves((prev) => (error ? [...new Set([...prev, name])] : prev.filter((n) => n !== name)));
   };
 
   useEffect(() => {
     let cancelled = false;
-    loadData()
+    void loadData()
       .catch((err) => {
         reportSave('load', err);
         return null;
@@ -151,7 +151,7 @@ export default function App() {
 
   const handleRetryWord = () => {
     if (activeWord) {
-      handleWordClick(activeWord, activeWordSentence);
+      void handleWordClick(activeWord, activeWordSentence);
     }
   };
 
@@ -452,7 +452,6 @@ export default function App() {
           setIsSentenceDrawerOpen(false);
           setActiveSentence(null);
         }}
-        sentence={activeSentence || ''}
         sentenceData={sentenceData}
         isLoading={isSentenceLoading}
         errorMessage={aiError}
@@ -461,7 +460,12 @@ export default function App() {
 
       {/* Article Importer / Pasting Modal */}
       {editor && (
-        <ArticleEditorDialog article={editor.article} onClose={() => setEditor(null)} onSave={handleSaveArticle} />
+        <ArticleEditorDialog
+          key={editor.article?.id ?? 'new'}
+          article={editor.article}
+          onClose={() => setEditor(null)}
+          onSave={handleSaveArticle}
+        />
       )}
 
       {onboardingOpen && (

@@ -39,13 +39,14 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'createdAt', dir: 'desc' });
   const [pendingDelete, setPendingDelete] = useState<Article | null>(null);
   // Recorded sentences that deleting the pending article would also remove.
-  const [pendingRecordings, setPendingRecordings] = useState(0);
+  const [recordings, setRecordings] = useState<{ articleId: string; count: number } | null>(null);
+  const pendingRecordings = pendingDelete && recordings?.articleId === pendingDelete.id ? recordings.count : 0;
   useEffect(() => {
-    setPendingRecordings(0);
     if (!pendingDelete) return;
     let live = true;
-    listShadowing(pendingDelete.id).then(
-      (list) => live && setPendingRecordings(list.length),
+    const articleId = pendingDelete.id;
+    listShadowing(articleId).then(
+      (list) => live && setRecordings({ articleId, count: list.length }),
       () => {},
     );
     return () => {

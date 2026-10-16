@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Upload } from 'lucide-react';
-import { getApiKey, getAppSettings, saveAppSettings } from '../../utils/appSettings';
+import { getAppSettings, saveAppSettings } from '../../utils/appSettings';
 import { cacheCounts, clearCache } from '../../storage/cache';
 import {
   audioStats,
@@ -12,6 +12,7 @@ import {
 } from '../../storage/audio';
 import { exportData, getStorageInfo, importData, requestPersistence, type StorageInfo } from '../../storage/db';
 import { getPromptOverrides, savePromptOverrides } from '../../services/ai/prompts';
+import { errorMessage } from '../../services/ai/errors';
 import {
   clearShadowing,
   exportShadowing,
@@ -46,9 +47,9 @@ export const DataSection: React.FC = () => {
         }),
       )
       .catch((e) => console.error('Failed to read local stats', e));
-    getStorageInfo().then(setStorageInfo);
-    cacheCounts().then(setCacheInfo);
-    audioStats().then(setAudioInfo);
+    void getStorageInfo().then(setStorageInfo);
+    void cacheCounts().then(setCacheInfo);
+    void audioStats().then(setAudioInfo);
     shadowingStats().then(setShadowInfo, (e) => setShadowError(e instanceof Error ? e.message : String(e)));
   }, []);
 
@@ -77,8 +78,8 @@ export const DataSection: React.FC = () => {
       URL.revokeObjectURL(url);
 
       setBackupStatus(t('settings.exportSuccess'));
-    } catch (err: any) {
-      setBackupStatus(t('settings.exportFailed', { msg: err.message || err }));
+    } catch (err) {
+      setBackupStatus(t('settings.exportFailed', { msg: errorMessage(err) }));
     }
   };
 
@@ -120,8 +121,8 @@ export const DataSection: React.FC = () => {
           },
           audioResult.failed > 0 ? 5000 : 1200,
         );
-      } catch (err: any) {
-        setBackupStatus(t('settings.restoreFailed', { msg: err.message || err }));
+      } catch (err) {
+        setBackupStatus(t('settings.restoreFailed', { msg: errorMessage(err) }));
       }
     };
     reader.readAsText(file);

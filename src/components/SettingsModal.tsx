@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button';
 import { Dialog, OverlayHeader } from './ui/overlay';
@@ -16,20 +16,15 @@ interface SettingsModalProps {
   needsKey?: boolean;
 }
 
-/** The settings dialog: a shell that holds the unsaved edits; each section lives in ./settings. */
-export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSettingsSaved, needsKey }) => {
+/** The settings dialog. Mounted only while open, so every opening starts from the saved values. */
+export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, ...props }) =>
+  isOpen ? <SettingsDialog {...props} /> : null;
+
+/** A shell that holds the unsaved edits; each section lives in ./settings. */
+const SettingsDialog: React.FC<Omit<SettingsModalProps, 'isOpen'>> = ({ onClose, onSettingsSaved, needsKey }) => {
   const { t } = useTranslation();
-  const [settings, setSettings] = useState<AppSettings>(getAppSettings());
-  const [promptDrafts, setPromptDrafts] = useState<PromptOverrides>(getPromptOverrides());
-
-  useEffect(() => {
-    if (isOpen) {
-      setSettings(getAppSettings());
-      setPromptDrafts(getPromptOverrides());
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  const [settings, setSettings] = useState<AppSettings>(getAppSettings);
+  const [promptDrafts, setPromptDrafts] = useState<PromptOverrides>(getPromptOverrides);
 
   const handleSave = () => {
     const updated = saveAppSettings(settings);

@@ -9,7 +9,7 @@ const STORAGE_KEY = 'relire_lang';
 const savedLang = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : 'en';
 const initialLang = savedLang === 'zh' ? 'zh' : 'en';
 
-i18n.use(initReactI18next).init({
+void i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
     zh: { translation: zh },
@@ -37,7 +37,7 @@ if (i18n.isInitialized) applyDocumentLanguage(initialLang);
 else i18n.on('initialized', () => applyDocumentLanguage(initialLang));
 
 export function setAppLanguage(lang: 'en' | 'zh') {
-  i18n.changeLanguage(lang);
+  void i18n.changeLanguage(lang);
   if (typeof window !== 'undefined') {
     localStorage.setItem(STORAGE_KEY, lang);
   }

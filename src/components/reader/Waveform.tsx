@@ -3,7 +3,7 @@
  * Live: a rolling history of the input level while recording. Take: the recorded take's real
  * peaks, decoded once and cached by take id. Nothing to show: a flat baseline, never invented bars.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 const BAR = 3;
 const GAP = 2;
@@ -43,7 +43,10 @@ type Source = { kind: 'live'; level: () => number } | { kind: 'take'; id: string
 export function Waveform({ source, className }: { source: Source; className?: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const levelRef = useRef<() => number>(() => 0);
-  if (source.kind === 'live') levelRef.current = source.level;
+  const liveLevel = source.kind === 'live' ? source.level : null;
+  useLayoutEffect(() => {
+    if (liveLevel) levelRef.current = liveLevel;
+  }, [liveLevel]);
   const takeId = source.kind === 'take' ? source.id : null;
   const takeBlob = source.kind === 'take' ? source.blob : null;
 
@@ -124,7 +127,6 @@ export function Waveform({ source, className }: { source: Source; className?: st
       observer.disconnect();
     };
     // The source is identified by its kind and take; `level` is read through a ref.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source.kind, takeId, takeBlob]);
 
   return <canvas ref={canvas} aria-hidden="true" className={className} />;
