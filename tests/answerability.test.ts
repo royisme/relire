@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { quoteInArticle, unsupportedQuotes } from '../src/services/exercises/answerability';
+import { keepAnswerable, quoteInArticle, unsupportedQuotes } from '../src/services/exercises/answerability';
 import { exercisesKey, explanationKey, hintKey } from '../src/storage/cache';
 
 const article = 'Le renard dit : « On ne voit bien qu’avec le cœur. »  L’essentiel est invisible pour les yeux.';
@@ -29,6 +29,26 @@ test('only items that carry a missing quote are reported', () => {
     },
   ];
   expect(unsupportedQuotes(units, article)).toEqual([{ unitId: 'u1', itemId: 'b', quote: 'le chapeau' }]);
+});
+
+test('only the items with a missing quote are left out; plain numbers close up and letters stay', () => {
+  const item = (id: string, itemNumber: number | string, articleQuote?: string) => ({ id, itemNumber, articleQuote });
+  const units = [
+    { id: 'u1', items: [item('a', 1, 'le cœur'), item('b', 2, 'le chapeau'), item('c', 3)] },
+    { id: 'u2', items: [item('d', 'a', 'le chapeau'), item('e', 'b', 'pour les yeux')] },
+    { id: 'u3', items: [item('f', 1, 'le chapeau')] },
+  ];
+  const kept = keepAnswerable(units, article);
+  expect(kept.dropped).toBe(3);
+  expect(kept.units.map((unit) => unit.id)).toEqual(['u1', 'u2']);
+  expect(kept.units[0].items.map((i) => [i.id, i.itemNumber])).toEqual([
+    ['a', 1],
+    ['c', 2],
+  ]);
+  expect(kept.units[1].items.map((i) => [i.id, i.itemNumber])).toEqual([['e', 'b']]);
+  expect(kept.missing.map((m) => m.itemId)).toEqual(['b', 'd', 'f']);
+  // The input is not changed.
+  expect(units[0].items).toHaveLength(3);
 });
 
 const base = { prompt: 'Je [___] {suis|es}', userAnswer: 'Es', grammarTag: 'present', exerciseType: 'FILL_BLANKS' };

@@ -340,7 +340,7 @@ test.describe('phones', () => {
     await expect(page.locator('[data-sidebar]')).toHaveCount(0);
     await page.getByRole('button', { name: 'Menu' }).click();
     const drawer = page.getByRole('dialog', { name: 'Menu' });
-    for (const name of ['Read', 'My study', 'Words', 'Shadowing', 'Drills', 'Progress', 'Settings'])
+    for (const name of ['Read', 'My study', 'Words', 'Shadowing', 'Practice', 'Progress', 'Settings'])
       await expect(drawer.getByRole('link', { name, exact: true })).toBeVisible();
     await drawer.getByRole('link', { name: 'Shadowing', exact: true }).click();
     await expect(drawer).toBeHidden();

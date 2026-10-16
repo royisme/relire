@@ -10,7 +10,7 @@ import { BackupControls } from './BackupControls';
 export const DataSection: React.FC = () => {
   const { t } = useTranslation();
   const [storageInfo, setStorageInfo] = useState<StorageInfo>({});
-  const [cacheInfo, setCacheInfo] = useState({ words: 0, sentences: 0, drills: 0, prosody: 0 });
+  const [cacheInfo, setCacheInfo] = useState({ words: 0, sentences: 0, exercises: 0, prosody: 0 });
   const [audioInfo, setAudioInfo] = useState<AudioStats>({ clips: 0, bytes: 0, keptClips: 0, keptBytes: 0 });
   const [shadowInfo, setShadowInfo] = useState<ShadowingStats>({ sentences: 0, takes: 0, bytes: 0 });
   const [confirmClearShadowing, setConfirmClearShadowing] = useState(false);
@@ -53,13 +53,13 @@ export const DataSection: React.FC = () => {
             {t('settings.cacheSummary', {
               words: cacheInfo.words,
               sentences: cacheInfo.sentences,
-              drills: cacheInfo.drills,
+              exercises: cacheInfo.exercises,
               prosody: cacheInfo.prosody,
             })}
           </span>
           <button
             type="button"
-            disabled={cacheInfo.words + cacheInfo.sentences + cacheInfo.drills + cacheInfo.prosody === 0}
+            disabled={cacheInfo.words + cacheInfo.sentences + cacheInfo.exercises + cacheInfo.prosody === 0}
             onClick={async () => {
               await clearCache();
               setCacheInfo(await cacheCounts());

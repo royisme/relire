@@ -4,8 +4,9 @@
  * never contain invented phonetic data by default; tests supply what they assert.
  */
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
+import { sampleExercises, sampleExplanation, sampleGrade, sampleHint } from './practiceFixtures';
 
-type Task = 'word' | 'sentence' | 'drills' | 'pronunciation' | 'prosody';
+type Task = 'word' | 'sentence' | 'pronunciation' | 'prosody' | 'exercises' | 'hint' | 'explain' | 'grade';
 /** A fixed answer, or a function of the prompt that returns one (possibly async). */
 type Answer = unknown;
 
@@ -47,24 +48,6 @@ export const defaultAnswers: Record<Task, Answer> = {
       intonation: 'Falling at the end.',
     },
   },
-  drills: {
-    title: 'Drill',
-    description: '',
-    questions: [
-      {
-        id: 1,
-        type: 'oral',
-        targetSentence: 'Je suis en vacances !',
-        prompt: 'Read aloud',
-        scrambledChunks: [],
-        clozeText: '',
-        options: [],
-        correctOptionIndex: 0,
-        grammarHint: '',
-        shadowingAudioPrompt: '',
-      },
-    ],
-  },
   pronunciation: {
     overallScore: 80,
     accuracyScore: 81,
@@ -74,6 +57,11 @@ export const defaultAnswers: Record<Task, Answer> = {
     corrections: [],
     coachingNotes: '',
   },
+  // Exercise tasks: replace `sampleExercises` (e2e/practiceFixtures.ts) to change the units every test starts from.
+  exercises: sampleExercises,
+  hint: sampleHint,
+  explain: sampleExplanation,
+  grade: sampleGrade,
   // Source-addressed and unresolved: only the built-in function-word table resolves anything.
   prosody: (prompt: string) => ({
     words: prosodyTokens(prompt).map(({ ordinal, source }) => ({
@@ -91,7 +79,11 @@ export const defaultAnswers: Record<Task, Answer> = {
 function taskOf(body: string): Task {
   if (/task: prosody|任务：prosody/i.test(body)) return 'prosody';
   if (/phonetics (professor|coach)|语音学教授/i.test(body)) return 'pronunciation';
-  if (/practice drills|interactive practice|法语篇章/i.test(body)) return 'drills';
+  if (/Create practice from an article that a learner is reading|根据学习者正在阅读的一篇法语文章/.test(body))
+    return 'exercises';
+  if (/has asked for a hint|并请求提示/.test(body)) return 'hint';
+  if (/explain the rule behind the expected answer|解释标准答案背后的规则/.test(body)) return 'explain';
+  if (/grading a learner's open-ended French answer|批改学习者的一道开放式/.test(body)) return 'grade';
   if (/syntax breakdown|shadowing guide|句法拆解/i.test(body)) return 'sentence';
   return 'word';
 }
@@ -116,8 +108,27 @@ export const test = base.extend<{ ai: MockAi }>({
     const answers = { ...defaultAnswers };
     const failing = new Set<string>();
     const ai: MockAi = {
-      calls: { tts: 0, word: 0, sentence: 0, drills: 0, pronunciation: 0, prosody: 0 },
-      prompts: { word: [], sentence: [], drills: [], pronunciation: [], prosody: [] },
+      calls: {
+        tts: 0,
+        word: 0,
+        sentence: 0,
+        pronunciation: 0,
+        prosody: 0,
+        exercises: 0,
+        hint: 0,
+        explain: 0,
+        grade: 0,
+      },
+      prompts: {
+        word: [],
+        sentence: [],
+        pronunciation: [],
+        prosody: [],
+        exercises: [],
+        hint: [],
+        explain: [],
+        grade: [],
+      },
       answer: (next) => Object.assign(answers, next),
       fail: (tasks) => {
         failing.clear();

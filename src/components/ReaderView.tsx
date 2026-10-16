@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, Pause, Play, Mic } from 'lucide-react';
+import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, ListChecks, Pause, Play, Mic } from 'lucide-react';
 import { Article } from '../types';
 import { usePronunciationMarkers } from '../hooks/usePronunciationMarkers';
 import { readerTokens } from '../utils/readerTokens';
@@ -19,7 +19,8 @@ import {
   subscribeSequence,
 } from '../utils/speech';
 import { splitArticle } from '../utils/sentences';
-import { Button } from './ui/button';
+import { Button, buttonVariants } from './ui/button';
+import { Link } from './shell/Link';
 import { ArticlePlayer } from './ArticlePlayer';
 import { BottomDock, dockHeight } from './reader/BottomDock';
 import { PracticeCard } from './reader/PracticeCard';
@@ -426,6 +427,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             )}
             <span>{t('reader.listenAll')}</span>
           </Button>
+
+          <Link
+            to={{ name: 'practice', articleId: currentArticle.id }}
+            className={buttonVariants({ variant: 'outline' })}
+            title={t('reader.makeExercisesHint')}
+          >
+            <ListChecks className="w-4 h-4" aria-hidden="true" />
+            <span>{t('reader.makeExercises')}</span>
+          </Link>
 
           <button
             onClick={() => setIsSpeedControlOpen(!isSpeedControlOpen)}

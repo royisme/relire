@@ -57,6 +57,14 @@ export const GeneratedExercisesSchema = z
   });
 export type GeneratedExercises = z.infer<typeof GeneratedExercisesSchema>;
 
+/**
+ * What `generateExercises` hands to the app: the units that passed the
+ * answerability check, and how many items were left out because their quote
+ * is not in the article. This is also what the cache keeps.
+ */
+export const GeneratedSetSchema = GeneratedExercisesSchema.safeExtend({ dropped: z.number().int().min(0) });
+export type GeneratedSet = z.infer<typeof GeneratedSetSchema>;
+
 /** Adaptive drills: every item names its own type, since the set has no unit default. */
 export const DrillsSchema = z
   .object({

@@ -3,8 +3,6 @@ import wordEn from './defaults/word.en.txt?raw';
 import wordZh from './defaults/word.zh.txt?raw';
 import sentenceEn from './defaults/sentence.en.txt?raw';
 import sentenceZh from './defaults/sentence.zh.txt?raw';
-import drillsEn from './defaults/drills.en.txt?raw';
-import drillsZh from './defaults/drills.zh.txt?raw';
 import audioEn from './defaults/pronunciation-audio.en.txt?raw';
 import audioZh from './defaults/pronunciation-audio.zh.txt?raw';
 import textEn from './defaults/pronunciation-text.en.txt?raw';
@@ -29,7 +27,6 @@ import exercisesZh from './defaults/exercises.zh.txt?raw';
 export type PromptId =
   | 'word'
   | 'sentence'
-  | 'drills'
   | 'pronunciationAudio'
   | 'pronunciationText'
   | 'prosody'
@@ -77,12 +74,6 @@ export const PROMPTS: PromptDefinition[] = [
       sentence: 'On ne voit bien qu’avec le cœur.',
       articleContext: 'Le renard confie son secret au petit prince.',
     },
-  },
-  {
-    id: 'drills',
-    variables: ['articleText', 'type'],
-    defaults: { en: drillsEn, zh: drillsZh },
-    sample: { articleText: 'Le petit prince commença à comprendre…', type: 'syntax' },
   },
   {
     id: 'pronunciationAudio',

@@ -1,7 +1,7 @@
 /**
  * The app's places as one tree, drawn by the sidebar (expanded or as a rail) and by the phone drawer:
- * Read, My study (Words, Shadowing), Drills and Progress at the top; install and Settings (with its
- * sections while on a settings page) at the bottom. Owns which row is current; navigation itself is `Link`.
+ * Read, My study (Words, Shadowing), Practice (with the open article's units) and Progress at the top;
+ * install and Settings (with its sections while on a settings page) at the bottom. Owns which row is current; navigation itself is `Link`.
  */
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { BarChart3, BookmarkCheck, BookOpen, Download, Dumbbell, Settings } from
 import { PWAInstallButton } from '../PWAInstallButton';
 import { areaOf, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../../utils/routes';
 import { NavItem } from './NavItem';
+import { PracticeSubnav } from './PracticeSubnav';
 
 interface NavTreeProps {
   route: Route;
@@ -66,8 +67,10 @@ export function NavTree({ route, dueCount, rail, onNavigate, footer }: NavTreePr
           to={{ name: 'practice' }}
           icon={Dumbbell}
           label={t('nav.practice')}
-          current={areaState('practice', false)}
+          // The list is a page of its own; an open unit makes Practice its parent.
+          current={route.name === 'unit' && !rail ? 'area' : areaState('practice', false)}
         />
+        {!rail && area === 'practice' && <PracticeSubnav route={route} onNavigate={onNavigate} />}
         <NavItem
           {...item}
           to={{ name: 'progress' }}

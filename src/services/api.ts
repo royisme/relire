@@ -1,4 +1,4 @@
-import { WordAnalysis, SentenceAnalysis, PronunciationAssessment, PracticeDeck } from '../types';
+import { WordAnalysis, SentenceAnalysis, PronunciationAssessment } from '../types';
 import { getApiKey, getAppSettings, type AppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as ai from './ai/tasks';
@@ -14,14 +14,14 @@ import {
 } from './ai/prompts';
 import type { Lang } from './ai/types';
 import { cachedRequest, readCachedAnswer } from './cachedRequest';
-import { drillsKey, exercisesKey, explanationKey, hintKey, prosodyKey, sentenceKey, wordKey } from '../storage/cache';
+import { exercisesKey, explanationKey, hintKey, prosodyKey, sentenceKey, wordKey } from '../storage/cache';
 import {
   ExplanationSchema,
-  GeneratedExercisesSchema,
+  GeneratedSetSchema,
   HintSchema,
   type Drills,
   type Explanation,
-  type GeneratedExercises,
+  type GeneratedSet,
   type Hint,
   type OpenGrade,
 } from '../types/exerciseAi';
@@ -43,6 +43,7 @@ import { validatePronunciationMarkers } from '../utils/pronunciationMarkers';
  */
 
 export { ImageInputUnsupportedError, InvalidAnswerError, MissingApiKeyError, isAbortError } from './ai/errors';
+export { MAX_GENERATED_ITEMS } from './ai/tasks';
 
 function context(): ai.TextContext & { lang: Lang } {
   const settings = getAppSettings();
@@ -134,21 +135,6 @@ export function assessPronunciation(params: {
   );
 }
 
-/** Drills are kept per article and type; `fresh` asks for a new set and replaces the saved one. */
-export function generatePracticeDrills(
-  articleText: string,
-  type: string = 'syntax',
-  fresh = false,
-): Promise<PracticeDeck> {
-  const ctx = context();
-  return cachedRequest(
-    'drills',
-    drillsKey(ctx.lang, promptFingerprint('drills', ctx.lang), type, articleText),
-    () => ai.generateDrills({ articleText, type }, ctx),
-    fresh,
-  );
-}
-
 /**
  * Exercise help. Hints and explanations are kept for 30 days under language +
  * prompt fingerprint + the normalized item, never provider or model; answers
@@ -203,12 +189,14 @@ export function extractMaterial(input: ExtractInput): Promise<ImportDraft> {
 /**
  * Exercise units made from an article, kept per article text + count + level
  * (the first 8,000 characters of the article are used); `fresh` asks for a new
- * set and replaces the saved one.
+ * set and replaces the saved one. The result is the kept set: items whose quote
+ * is not in the article are already left out and counted in `dropped`, and a
+ * cached set stays exactly that.
  */
 export function generateExercises(
   input: { articleText: string; count: number; level: string },
   fresh = false,
-): Promise<GeneratedExercises> {
+): Promise<GeneratedSet> {
   const ctx = context();
   return cachedRequest(
     'exercises',
@@ -221,7 +209,7 @@ export function generateExercises(
     ),
     () => ai.generateExercises(input, ctx),
     fresh,
-    (value) => GeneratedExercisesSchema.parse(value),
+    (value) => GeneratedSetSchema.parse(value),
   );
 }
 

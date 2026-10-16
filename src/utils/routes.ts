@@ -6,7 +6,8 @@
  *   #/read/:articleId        reader
  *   #/study/words            My study → Words
  *   #/study/shadowing        My study → Shadowing
- *   #/practice               drills
+ *   #/practice               practice: an article's exercise units (`?article=:articleId` picks the article)
+ *   #/practice/:unitId       one exercise unit on one sheet
  *   #/progress               progress
  *   #/settings               section list on phones; desktop resolves it to the first section
  *   #/settings/:section      text-ai | speech | prompts | data | about
@@ -22,7 +23,9 @@ export type Route =
   | { name: 'library' }
   | { name: 'reader'; articleId: string }
   | { name: 'study'; tab: StudyTab }
-  | { name: 'practice' }
+  /** `articleId` is the material whose units are listed; absent means the app's default (the article read last). */
+  | { name: 'practice'; articleId?: string }
+  | { name: 'unit'; unitId: string }
   | { name: 'progress' }
   /** `section: null` is the section list (phones). */
   | { name: 'settings'; section: SettingsSection | null }
@@ -44,7 +47,9 @@ export function routeHref(route: Route): string {
     case 'study':
       return `#/study/${route.tab}`;
     case 'practice':
-      return '#/practice';
+      return route.articleId ? `#/practice?article=${encodeURIComponent(route.articleId)}` : '#/practice';
+    case 'unit':
+      return `#/practice/${encodeURIComponent(route.unitId)}`;
     case 'progress':
       return '#/progress';
     case 'settings':
@@ -57,7 +62,8 @@ export function routeHref(route: Route): string {
  * (an empty hash, a trailing slash, `#/study`); the caller replaces it in history instead of pushing.
  */
 export function parseRoute(hash: string): { route: Route; canonical: string | null } {
-  const path = hash.replace(/^#\/?/, '').replace(/\/$/, '');
+  const [rawPath, query = ''] = hash.split('?', 2);
+  const path = rawPath.replace(/^#\/?/, '').replace(/\/$/, '');
   const parts = path === '' ? [] : path.split('/');
 
   let route: Route;
@@ -73,8 +79,16 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
     }
   } else if (area === 'study' && sub === undefined) route = { name: 'study', tab: 'words' };
   else if (area === 'study' && isStudyTab(sub)) route = { name: 'study', tab: sub };
-  else if (area === 'practice' && sub === undefined) route = { name: 'practice' };
-  else if (area === 'progress' && sub === undefined) route = { name: 'progress' };
+  else if (area === 'practice' && sub === undefined) {
+    const articleId = new URLSearchParams(query).get('article');
+    route = articleId ? { name: 'practice', articleId } : { name: 'practice' };
+  } else if (area === 'practice' && !query) {
+    try {
+      route = { name: 'unit', unitId: decodeURIComponent(sub) };
+    } catch {
+      route = { name: 'notFound' };
+    }
+  } else if (area === 'progress' && sub === undefined) route = { name: 'progress' };
   else if (area === 'settings' && sub === undefined) route = { name: 'settings', section: null };
   else if (area === 'settings' && isSection(sub)) route = { name: 'settings', section: sub };
   else route = { name: 'notFound' };
@@ -93,10 +107,12 @@ export function areaOf(route: Route): Area | null {
     case 'reader':
       return 'read';
     case 'study':
-    case 'practice':
     case 'progress':
     case 'settings':
       return route.name;
+    case 'practice':
+    case 'unit':
+      return 'practice';
     case 'notFound':
       return null;
   }

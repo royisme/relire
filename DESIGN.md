@@ -280,6 +280,20 @@ A recording tool on the ink panel (10px radius, `shadow-lg`, at most `min(70vh, 
 
 Focus goes to Close while the microphone is requested and to Stop while recording; it returns to the sentence's record button when the card closes. The level bars are the only motion that tracks live input; the recording state is the one place a pulse would be allowed.
 
+### Exercise sheet
+One unit on one sheet (`practice/UnitSheet`): a single `surface` card with a 1px `ink-200` border, as the reader's article is. Inside it, structure comes from rules, never from nested cards. Top to bottom:
+1. A header: the exercise type in `ink-500` (12px), the unit title in the serif headline, the instruction in `ink-700`, an optional example in `ink-500`.
+2. Numbered rows separated by hairline `ink-200` rules. A row is a 28px marker column (the number in `ink-500`, replaced by a check in `ok-800` or a cross in `bad-700` once checked) and the content: the grammar topic in `ink-500` (12px), the control, a line of buttons, then notes.
+3. A footer after a rule: **Check all** (the one filled button of the page; it checks only what is filled in, so an empty row is never a mistake), **Reset this unit** (ghost; it asks first and says the history of attempts is kept) and one status line, "n of N checked, m right", that turns into the reason when a draft could not be saved.
+
+**Underline inputs.** Typed answers are blanks in the sentence: the serif face at 18px on a 2px underline (`ink-300`, `accent-700` on focus), no box, 7rem wide inline and wrapping with the sentence. After a check a right blank is `ok-800` on an `ok-700` underline; a wrong one is struck through in `bad-700` on a `bad-600` underline, with the reference answer beside it in `ok-800` semibold, so right and wrong never rest on colour alone (the marker icon and a screen-reader label say it too). An answer that is checked or being checked is read-only, not disabled, so the cursor stays put and nothing dims. Inline choices (`{a|b}`) are a small row of buttons with a hairline `ink-300` border; the pick is `accent-100` until checked, then `ok-50` or struck through on `bad-50`. Open answers use a bordered text area of fixed height with one line under it that says an AI reads it and gives feedback, not a score.
+
+**Buttons under an item.** Check (outline), Hint and Explain (ghost) are always there at a fixed size; pressing one swaps its icon for a spinner and never changes its width (Check is 7rem wide so "Checked" fits). Hint is for before the check, Explain for a wrong answer after it; the unavailable one is disabled, not removed. On phones they are 40px high and wrap. Hints and the AI's feedback sit under the item as plain text behind a 2px `ink-300` rule (not a tinted box); an explanation opens in a `Sheet` like a word lookup.
+
+**Character bar.** One 40px round toggle fixed at the bottom right of the screen (`z-40`, below overlays), rising above the on-screen keyboard. It opens a small grid in a `surface` popover with `shadow-lg`: é è ê ë à â ç î ï ô ù û ü œ æ « », and a Shift key that makes the next character a capital (a physical Shift works too). Pressing a character inserts it at the cursor of the field the learner last used, and leaves focus there (the buttons do not take focus); it never opens by itself, never moves the page and does nothing to a checked answer. Esc closes it.
+
+**Keyboard.** Enter moves to the next blank, then to the first empty one, and checks when every blank is filled; Shift+Enter is a new line in an open answer; Enter that commits an IME composition does nothing.
+
 ### Shadowing log
 Under My study → Shadowing: one section per article (serif title, `tnum` count), then rows separated by `ink-200` rules. From `md` up a three-column grid (text | reference | my recordings) with a quiet label row; below `md` each row stacks, with every control 40px. The text is a serif button that opens the sentence in the reader. Takes expand inline; orphaned recordings sit in collapsed "original text changed" and "article removed" groups.
 
@@ -291,7 +305,7 @@ Marker mode uses line-height 2.05. Spoken-syllable `/` slots occupy 0.3em at 0.8
 ### Navigation
 The sidebar is the one place to switch area. The header keeps only the brand, theme and language, plus the menu button on phones. Every place has a hash address (`#/read`, `#/study/shadowing`, `#/settings/speech`; table in `docs/architecture.md`), and rows are real links, so Back, reload and copied links keep the place. An unknown address or a missing article shows a plain not-found page with a link to the library.
 
-- **Expanded** (from `lg`, 240px): a 40px row per area (Read, My study, Drills, Progress) with a 16px icon and label, `ink-700` at rest. The current page is `ink-950` on an `ink-100` fill with a 2px `accent-700` bar at the row's left edge; the current area lists its sub-pages indented under it (My study: Words, Shadowing). The due-vocabulary count is an `accent-700` badge on My study. After a rule at the bottom: Install app, Settings (its sections indented under it while on a settings page) and the collapse toggle.
+- **Expanded** (from `lg`, 240px): a 40px row per area (Read, My study, Practice, Progress) with a 16px icon and label, `ink-700` at rest. The current page is `ink-950` on an `ink-100` fill with a 2px `accent-700` bar at the row's left edge; the current area lists its sub-pages indented under it (My study: Words, Shadowing; Practice: the open article's exercise units). The due-vocabulary count is an `accent-700` badge on My study. After a rule at the bottom: Install app, Settings (its sections indented under it while on a settings page) and the collapse toggle.
 - **Rail** (56px; from `md`, and the collapsed state from `lg`): icons only, centred in 40px targets. The label is the tooltip (`title`) and the accessible name; the due count is a small badge on the icon's corner. Sub-pages are left out, so pages that have them draw their own list: My study's segmented control, and Settings' section list beside the page.
 - **Remembered choice:** expanded or collapsed is stored in `relire_sidebar`. In the reader the sidebar always starts as a rail so the article stays the page; expanding it there lasts for that visit and is not remembered. The sidebar takes its own column in the page flow, so it never covers text, and the reader's bottom dock centres on the content column.
 - **Phones** (below `md`): the header's menu button opens a left drawer with the same tree, closing when a link is followed.
@@ -313,7 +327,7 @@ When an AI feature needs a key, the app opens Settings → Text AI with the key 
 - **Do** show transient state on the control itself, at a fixed size.
 - **Do** put new fixed reader UI inside `BottomDock`, on the ink panel, and keep the current sentence clear of it.
 - **Do** check every new screen at 360px and in light, sepia and dark.
-- **Do** write plain copy: short noun titles ("Vocabulary", "Drills", "Shadowing") with one quiet line under them; empty states say what to do next in one sentence.
+- **Do** write plain copy: short noun titles ("Vocabulary", "Practice", "Shadowing") with one quiet line under them; empty states say what to do next in one sentence.
 - **Do** use lucide icons at 16px in controls, one stroke weight, `aria-hidden` when decorative.
 
 ### Don't:
