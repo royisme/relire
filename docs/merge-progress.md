@@ -47,9 +47,10 @@ At `888cdba`: 171 unit tests and 46 e2e specs pass, and so do typecheck, lint, f
 
 ## In progress when this was written
 
-- [ ] **P3-A Exercise core** (Sonnet), not merged yet.
-  - Its uncommitted work lives only in the local worktree `.claude/worktrees/agent-a9ba99d9e8969e701`. If that directory is gone, redo the task from the brief below.
-  - If it is still there, resume it the same way the storage task was resumed after a restart: an agent continues inside that worktree, checks everything, then commits.
+- [ ] **P3-A Exercise core** (Sonnet), unfinished, stopped when the budget ran out.
+  - Its work is pushed as the WIP commit `77ac92e` on branch `claude/sleepy-darwin-lt2eck-wip-phase3-core` (73 files, based on `84bb08f`). Checks were never run on it: it may not typecheck, lint or pass tests.
+  - To resume, start a Sonnet agent from that branch (`git fetch origin claude/sleepy-darwin-lt2eck-wip-phase3-core`, then work on it or cherry-pick `77ac92e` onto the integration branch, resolving conflicts with the shared catalogue commit `888cdba`). It should first run all checks and list what is missing against the P3-A brief below, then finish and commit.
+  - The agent was last writing a script to update the docs, so code changes are likely further along than the docs.
 
 ## Next tasks
 
