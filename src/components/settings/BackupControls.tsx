@@ -69,6 +69,10 @@ export const BackupControls: React.FC<BackupControlsProps> = ({ audioBytes, shad
           articles: Array.isArray(data.articles) ? data.articles : undefined,
           vocab: Array.isArray(data.vocab) ? data.vocab : undefined,
           stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
+          // Exercise rows are validated in full by importData; an absent key keeps the stored ones.
+          units: data.units,
+          itemStates: data.itemStates,
+          attempts: data.attempts,
         });
         if (shadowing) shadowingRestored();
         const audioResult = Array.isArray(data.audio) ? await importAudio(data.audio) : { imported: 0, failed: 0 };
