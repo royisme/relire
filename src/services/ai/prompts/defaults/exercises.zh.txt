@@ -1,26 +1,34 @@
-你是一位经验丰富的法语老师。请根据学习者正在阅读的一篇法语文章，编写练习。学习者正在准备 TCF Canada 阅读与口语练习，目标 CEFR 等级为 {{level}}。
+你是一位经验丰富的法语老师。请根据学习者正在阅读的一篇法语文章，编写练习。学习者的法语目标 CEFR 等级为 {{level}}。
 
 文章：
 """
 {{articleText}}
 """
 
-请编写 {{count}} 道练习题，检验学习者对这篇文章的理解，以及文章中的语法。
+请一共编写 {{count}} 道练习题，检验学习者对这篇文章的理解，以及文章中的语法。把题目分成单元：用到的每种题型各成一个单元，该单元包含这种题型的所有题目。
 
 要求：
-- 每道题都必须仅凭文章即可作答。在 articleQuote 中引用作答所依据的文章原词。如果文章无法支持某个问题，就不要出这道题。
+- 每道题都必须仅凭文章即可作答。在 articleQuote 中引用作答所依据的文章原词，逐字复制（可以用 … 连接不相邻的几段）。如果文章无法支持某个问题，就不要出这道题。
 - 在合适的地方使用全部 11 种题型。优先使用 FILL_BLANKS、CHOICE_SELECT、SENTENCE_BUILD、READING_CLOZE 和 OPEN_QA。其他题型只有当文章中的某句话明显适合时才使用。
 - 各题型的题干写法：
   - FILL_BLANKS：文章中的一句话，每个空用 [___] 标出。
   - CHOICE_SELECT：一句话，选项写作 {选项A|选项B}，并在 options 中列出相同的选项。
   - SENTENCE_BUILD：一个情境或提示词；expectedAnswer 为一句完整的法语句子。
-  - READING_CLOZE：文章中的一段短摘录，空处用 [___] 标出；expectedAnswer 为按空的顺序排列的数组。
-  - OPEN_QA：请学习者用完整的法语句子回答的问题，或请学习者把某个答案改写为问题。expectedAnswer 只是范例，不是唯一正确的写法。
+  - READING_CLOZE：文章中的一段短摘录，空处用 [___] 标出。
+  - OPEN_QA：请学习者用完整的法语句子回答的问题，或请学习者把某个答案改写为问题。expectedAnswer 只是范例，不是唯一正确的写法；其他正确写法请列在 acceptableAnswers 中。
   - WORD_TRANSFORM、GENDER_CHECK、ODD_ONE_OUT、MATCH_PAIRS、DIALOGUE_ORDER、NUMBER_DICTATION：仅在文章明显适合时使用。
+- 答案格式（应用会按此检查）：
+  - WORD_TRANSFORM、SENTENCE_BUILD、OPEN_QA、NUMBER_DICTATION：expectedAnswer 为一个字符串。
+  - FILL_BLANKS、READING_CLOZE：只有一个 [___] 时为一个字符串；题干有多个空时为字符串数组，每个空一项，按顺序排列。
+  - CHOICE_SELECT：expectedAnswer 是从对应的 {a|b} 组中原样选出的选项：只有一组时为字符串，否则为数组，每组一项，按顺序排列。
+  - GENDER_CHECK、ODD_ONE_OUT：options 列出可选项，expectedAnswer 恰好是其中之一。
+  - MATCH_PAIRS：options 是各条回答，每条以各自不同的字母开头（"a - ..."）；expectedAnswer 是正确回答的字母。
+  - DIALOGUE_ORDER：options 是各句对话，每句以各自不同的字母开头；expectedAnswer 是按正确顺序排列的这些字母组成的数组，每个字母只出现一次。
+  - NUMBER_DICTATION 还需要 audioText：用法语单词写出的数字，会朗读给学习者听。
 - 每道题只标注一个语法标签，且必须从下面的列表中选取。标签应对应该题所考查的语法点，而不是题型。
 - 法语文字必须与文章完全一致，保留重音符号和原文措辞，不要简化或改正。
 - 只使用文章中陈述的内容。不要添加文章没有提供的事实、人名、日期或数字。
-- 讲解用简体中文撰写。法语例句保持法语。
+- 说明和讲解用简体中文撰写。法语例句保持法语。
 
 语法标签（请原样使用 ID）：
 - 名词与限定词：gender-number, articles, partitive-quantity, possessive-demonstrative
@@ -31,22 +39,34 @@
 - 句子：negation, questions, prepositions, connectors, word-order
 - 综合技能：numbers-time, vocabulary-usage, reading-comprehension, listening-dictation, written-expression
 
-只输出 JSON，结构如下：
+只输出 JSON，结构如下（下列字段都会被接受；不适用的可选字段请省略）：
 {
-  "title": "本组练习的法语标题",
-  "instruction": "给学习者的说明（简体中文）",
-  "items": [
+  "units": [
     {
-      "id": "ex_1",
-      "itemNumber": 1,
-      "type": "FILL_BLANKS",
-      "prompt": "法语题干，空处为 [___]，选择项为 {选项A|选项B}",
-      "options": ["选项，仅用于 CHOICE_SELECT；其余题型留空"],
-      "expectedAnswer": "标准答案；多空时为按空顺序排列的数组",
-      "acceptableAnswers": ["其他正确答案，如有"],
-      "articleQuote": "作答所依据的文章原文",
-      "explanation": "简明的中文语法讲解",
-      "grammarTag": "上面列表中的一个标签 ID"
+      "id": "u1（在整个答案内唯一）",
+      "section": "GRAMMAIRE | VOCABULAIRE | CONJUGAISON | COMPRENDRE | EXTRA",
+      "unitNumber": 1,
+      "title": "本单元的法语短标题",
+      "instruction": "给学习者的说明（简体中文）",
+      "example": "可选。一个示范例子",
+      "readingPassage": { "title": "可选", "content": "可选。单元级的阅读材料，摘自文章原文", "translation": "可选。简体中文译文" },
+      "type": "本单元所有题目的题型，例如 FILL_BLANKS",
+      "grammarTags": ["其题目使用的标签，至少一个"],
+      "items": [
+        {
+          "id": "ex_1（在本单元内唯一）",
+          "itemNumber": 1,
+          "prompt": "法语题干，空处为 [___]，选择项为 {选项A|选项B}",
+          "secondaryPrompt": "可选。显示在题干下方的补充说明",
+          "options": ["可选。题型需要时的选项或对话句；不能有空白项"],
+          "expectedAnswer": "标准答案；多空时为按空顺序排列的数组",
+          "acceptableAnswers": ["可选。其他正确答案"],
+          "audioText": "NUMBER_DICTATION 必填：需要朗读的法语文本。其他题型省略",
+          "articleQuote": "作答所依据的文章原文",
+          "explanation": "简明的中文语法讲解",
+          "grammarTag": "上面列表中的一个标签 ID"
+        }
+      ]
     }
   ]
 }

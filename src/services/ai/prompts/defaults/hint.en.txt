@@ -15,9 +15,9 @@ Rules:
 - Do not invent details about the question. If the context does not cover the point, use the standard rule for this topic.
 - You may use inline Markdown: **bold** for key endings or letters, `code` for French forms. Do not use headers, blockquotes or tables.
 
-Output in JSON format:
+Output only JSON in this shape (hint and grammarRule are required; clueWord is optional):
 {
   "hint": "The hint for the learner, in English",
   "grammarRule": "The core rule as a short formula or mnemonic",
-  "clueWord": "A keyword or letter clue that does not give the answer away"
+  "clueWord": "Optional. A keyword or letter clue that does not give the answer away; leave it out when there is none"
 }

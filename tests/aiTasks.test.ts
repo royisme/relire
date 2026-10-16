@@ -1,0 +1,338 @@
+import { describe, expect, test } from 'bun:test';
+import { ImageInputUnsupportedError, InvalidAnswerError, isAbortError } from '../src/services/ai/errors';
+import {
+  MAX_EXTRACT_IMAGES,
+  explainMistake,
+  extractMaterial,
+  generateAdaptiveDrills,
+  generateExercises,
+  gradeOpenAnswer,
+  hint,
+} from '../src/services/ai/tasks';
+import { geminiText } from '../src/services/ai/providers/gemini/client';
+import { gemini } from '../src/services/ai/providers/gemini';
+import { draftFixture } from './fixtures/importDraft';
+import { contextOf, fakeProvider } from './fixtures/fakeProvider';
+import { ITEMS, unitOf } from './fixtures/units';
+
+/** Every key at any depth. */
+function keysOf(value: unknown, found = new Set<string>()): Set<string> {
+  if (Array.isArray(value)) for (const entry of value) keysOf(entry, found);
+  else if (value && typeof value === 'object')
+    for (const [key, entry] of Object.entries(value)) {
+      found.add(key);
+      keysOf(entry, found);
+    }
+  return found;
+}
+
+const expectSchemaSent = (request: { jsonSchema?: Record<string, unknown> }) => {
+  expect(request.jsonSchema).toBeDefined();
+  expect(request.jsonSchema!.type).toBe('object');
+  expect(keysOf(request.jsonSchema).has('const')).toBe(false);
+  expect(JSON.stringify(request.jsonSchema)).not.toContain('"const"');
+};
+
+const rejection = async (promise: Promise<unknown>) => {
+  try {
+    await promise;
+  } catch (err) {
+    return err as Error;
+  }
+  throw new Error('expected the task to throw');
+};
+
+const item = { id: 'h1', prompt: 'Je [___] française.', userAnswer: 'es', grammarTag: 'present' };
+
+describe('hint', () => {
+  const good = { hint: 'Look at the **subject**.', grammarRule: 'je + suis', clueWord: 's' };
+
+  test('returns the validated hint and sends the hint schema', async () => {
+    const provider = fakeProvider(good);
+    const result = await hint({ ...item, exerciseType: 'FILL_BLANKS' }, contextOf(provider));
+    expect(result).toEqual(good);
+    expectSchemaSent(provider.requests[0]);
+    expect(provider.requests[0].prompt).toContain('Je [___] française.');
+    expect(provider.requests[0].images).toBeUndefined();
+  });
+
+  test('clueWord is optional', async () => {
+    const { clueWord: _clue, ...without } = good;
+    const result = await hint({ ...item, exerciseType: 'FILL_BLANKS' }, contextOf(fakeProvider(without)));
+    expect(result.clueWord).toBeUndefined();
+  });
+
+  test('a malformed answer throws with the real reason and no fallback', async () => {
+    const provider = fakeProvider({ hint: 'Look.', clueWord: 's' });
+    const err = await rejection(hint({ ...item, exerciseType: 'FILL_BLANKS' }, contextOf(provider)));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+    expect(err.message).toContain('grammarRule');
+    expect((err as InvalidAnswerError).issues.length).toBeGreaterThan(0);
+  });
+
+  test('a provider failure is passed through unchanged', async () => {
+    const failure = new Error('quota exceeded');
+    const err = await rejection(hint({ ...item, exerciseType: 'FILL_BLANKS' }, contextOf(fakeProvider(failure))));
+    expect(err).toBe(failure);
+  });
+});
+
+describe('explainMistake', () => {
+  const good = { summary: 'Être in the present.', details: 'Je **suis**.', tip: 'je suis, tu es' };
+  const input = { ...item, expectedAnswer: 'suis' };
+
+  test('validates and sends the explanation schema', async () => {
+    const provider = fakeProvider(good);
+    expect(await explainMistake(input, contextOf(provider))).toEqual(good);
+    expectSchemaSent(provider.requests[0]);
+    expect(provider.requests[0].prompt).toContain('suis');
+  });
+
+  test('rejects an empty field', async () => {
+    const err = await rejection(explainMistake(input, contextOf(fakeProvider({ ...good, tip: '  ' }))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+    expect(err.message).toContain('tip');
+  });
+});
+
+describe('gradeOpenAnswer', () => {
+  const input = {
+    prompt: "Comment demande-t-on l'âge ?",
+    expectedAnswer: 'Vous avez quel âge ?',
+    userAnswer: 'Quel âge as-tu ?',
+  };
+
+  test('returns a verdict and feedback, with no invented score', async () => {
+    const provider = fakeProvider({ isCorrect: true, feedback: 'Fine, informal.', score: 97 });
+    const result = await gradeOpenAnswer(input, contextOf(provider));
+    expect(result).toEqual({ isCorrect: true, feedback: 'Fine, informal.' });
+    expectSchemaSent(provider.requests[0]);
+    expect(JSON.stringify(provider.requests[0].jsonSchema)).not.toContain('score');
+  });
+
+  test('rejects a verdict that is not a boolean', async () => {
+    const err = await rejection(gradeOpenAnswer(input, contextOf(fakeProvider({ isCorrect: 'yes', feedback: 'ok' }))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+    expect(err.message).toContain('isCorrect');
+  });
+});
+
+describe('generateAdaptiveDrills', () => {
+  const dictation = { ...ITEMS.NUMBER_DICTATION, id: 'd2', type: 'NUMBER_DICTATION' };
+  const drills = {
+    drillTitle: 'Passé composé',
+    focusSummary: 'Auxiliaries and agreement.',
+    items: [{ ...ITEMS.WORD_TRANSFORM, type: 'WORD_TRANSFORM' }, dictation],
+  };
+  const input = { targets: ['passe-compose' as const], count: 2, level: 'A2' };
+
+  test('validates the set and sends the drills schema', async () => {
+    const provider = fakeProvider(drills);
+    const result = await generateAdaptiveDrills(input, contextOf(provider));
+    expect(result.items).toHaveLength(2);
+    expectSchemaSent(provider.requests[0]);
+    expect(provider.requests[0].prompt).toContain('passe-compose');
+  });
+
+  test('recent mistakes reach the prompt as data', async () => {
+    const provider = fakeProvider(drills);
+    const recentMistakes = [{ prompt: 'Elle [___] partie.', userAnswer: 'a', expectedAnswer: 'est' }];
+    await generateAdaptiveDrills({ ...input, recentMistakes }, contextOf(provider));
+    expect(provider.requests[0].prompt).toContain(JSON.stringify(recentMistakes));
+  });
+
+  test('a dictation without the text to read aloud is rejected', async () => {
+    const { audioText: _audio, ...silent } = dictation;
+    const err = await rejection(generateAdaptiveDrills(input, contextOf(fakeProvider({ ...drills, items: [silent] }))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+    expect(err.message).toContain('audioText');
+  });
+
+  test('an item whose answer does not fit its type is rejected', async () => {
+    const wrong = { ...ITEMS.GENDER_CHECK, type: 'GENDER_CHECK', expectedAnswer: 'neutre' };
+    const err = await rejection(generateAdaptiveDrills(input, contextOf(fakeProvider({ ...drills, items: [wrong] }))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+  });
+
+  test('refuses impossible requests before sending anything', async () => {
+    const provider = fakeProvider(drills);
+    await rejection(generateAdaptiveDrills({ ...input, targets: [] }, contextOf(provider)));
+    await rejection(generateAdaptiveDrills({ ...input, count: 0 }, contextOf(provider)));
+    await rejection(generateAdaptiveDrills({ ...input, count: 50 }, contextOf(provider)));
+    await rejection(generateAdaptiveDrills({ ...input, level: ' ' }, contextOf(provider)));
+    expect(provider.requests).toHaveLength(0);
+  });
+});
+
+describe('generateExercises', () => {
+  const article = 'Le matin, Léa prend le train pour Lyon. Elle a rendez-vous avec une amie.';
+  const input = { articleText: article, count: 2, level: 'A2' };
+  const { materialId: _materialId, ...unit } = unitOf('FILL_BLANKS', [
+    {
+      ...ITEMS.FILL_BLANKS,
+      prompt: 'Léa [___] le train.',
+      expectedAnswer: 'prend',
+      articleQuote: 'Léa prend le train',
+    } as never,
+  ]);
+  const answer = (articleQuote: string | undefined) => ({
+    units: [{ ...unit, items: [{ ...unit.items[0], articleQuote }] }],
+  });
+
+  test('keeps a quote that is in the article and sends the exercise schema', async () => {
+    const provider = fakeProvider(answer('Le matin, Léa  PREND le train'));
+    const result = await generateExercises(input, contextOf(provider));
+    expect(result.units[0].items[0].articleQuote).toBe('Le matin, Léa  PREND le train');
+    expectSchemaSent(provider.requests[0]);
+    expect(provider.requests[0].prompt).toContain(article);
+  });
+
+  test('a quote may join stretches with an ellipsis', async () => {
+    const result = await generateExercises(input, contextOf(fakeProvider(answer('Léa prend … une amie.'))));
+    expect(result.units).toHaveLength(1);
+  });
+
+  test('an item without a quote cannot be checked and is kept', async () => {
+    const result = await generateExercises(input, contextOf(fakeProvider(answer(undefined))));
+    expect(result.units[0].items[0].articleQuote).toBeUndefined();
+  });
+
+  test('a quote that is not in the article rejects the set and names the item', async () => {
+    const err = await rejection(generateExercises(input, contextOf(fakeProvider(answer('Léa prend le bus')))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+    expect(err.message).toContain(unit.items[0].id);
+    expect(err.message).toContain('Léa prend le bus');
+  });
+
+  test('a schema failure throws with the schema reason', async () => {
+    const err = await rejection(generateExercises(input, contextOf(fakeProvider({ units: [] }))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+  });
+
+  test('an item that breaks its type shape is rejected', async () => {
+    const broken = { units: [{ ...unit, items: [{ ...unit.items[0], expectedAnswer: ['a', 'b'] }] }] };
+    const err = await rejection(generateExercises(input, contextOf(fakeProvider(broken))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+    expect(err.message).toContain('expectedAnswer');
+  });
+
+  test('refuses an empty article or a bad count before sending', async () => {
+    const provider = fakeProvider(answer('Léa prend le train'));
+    await rejection(generateExercises({ ...input, articleText: '  ' }, contextOf(provider)));
+    await rejection(generateExercises({ ...input, count: 2.5 }, contextOf(provider)));
+    expect(provider.requests).toHaveLength(0);
+  });
+});
+
+describe('extractMaterial', () => {
+  const page = { data: 'AAAA', mimeType: 'image/png' };
+
+  test('reads pasted text into a validated draft', async () => {
+    const provider = fakeProvider(draftFixture);
+    const draft = await extractMaterial({ mode: 'complete', text: 'Un exercice sans corrigé.' }, contextOf(provider));
+    expect(draft.units[0].items[0].expectedAnswer).toBeNull();
+    const request = provider.requests[0];
+    expectSchemaSent(request);
+    expect(request.images).toBeUndefined();
+    expect(request.prompt).toContain('Un exercice sans corrigé.');
+    // One attempt on the chosen model, as the learner was told.
+    expect(request.singleAttempt).toBe(true);
+  });
+
+  test('sends images to a model that reads them, with the abort signal', async () => {
+    const provider = fakeProvider(draftFixture);
+    const controller = new AbortController();
+    await extractMaterial({ mode: 'extract', images: [page, page], signal: controller.signal }, contextOf(provider));
+    expect(provider.requests[0].images).toEqual([page, page]);
+    expect(provider.requests[0].signal).toBe(controller.signal);
+    expect(provider.requests[0].prompt).toContain('one or more images');
+  });
+
+  test('refuses images for a model that cannot read them, before any request', async () => {
+    const provider = fakeProvider(draftFixture);
+    const err = await rejection(
+      extractMaterial({ mode: 'complete', images: [page] }, contextOf(provider, 'text-only')),
+    );
+    expect(err).toBeInstanceOf(ImageInputUnsupportedError);
+    expect(err.message).toContain('text-only');
+    expect(provider.requests).toHaveLength(0);
+  });
+
+  test('text alone works on a model without image input', async () => {
+    const provider = fakeProvider(draftFixture);
+    await extractMaterial({ mode: 'complete', text: 'Bonjour' }, contextOf(provider, 'text-only'));
+    expect(provider.requests).toHaveLength(1);
+  });
+
+  test('refuses nothing to read, too many pages and bad images', async () => {
+    const provider = fakeProvider(draftFixture);
+    const ctx = contextOf(provider);
+    await rejection(extractMaterial({ mode: 'complete' }, ctx));
+    await rejection(extractMaterial({ mode: 'complete', text: '   ' }, ctx));
+    await rejection(extractMaterial({ mode: 'complete', images: new Array(MAX_EXTRACT_IMAGES + 1).fill(page) }, ctx));
+    await rejection(extractMaterial({ mode: 'complete', images: [{ data: '', mimeType: 'image/png' }] }, ctx));
+    await rejection(
+      extractMaterial({ mode: 'complete', images: [{ data: 'AAAA', mimeType: 'application/pdf' }] }, ctx),
+    );
+    expect(provider.requests).toHaveLength(0);
+  });
+
+  test('a malformed draft throws with the schema reason', async () => {
+    const bad = { ...draftFixture, units: [{ ...draftFixture.units[0], section: 'NOPE' }] };
+    const err = await rejection(extractMaterial({ mode: 'complete', text: 'x' }, contextOf(fakeProvider(bad))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+    expect(err.message).toContain('section');
+    const notAnObject = await rejection(
+      extractMaterial({ mode: 'complete', text: 'x' }, contextOf(fakeProvider('oops'))),
+    );
+    expect(notAnObject).toBeInstanceOf(InvalidAnswerError);
+  });
+
+  test('the mode decides which answers stand', async () => {
+    const answered = {
+      ...draftFixture,
+      units: [{ ...draftFixture.units[0], items: [{ ...draftFixture.units[0].items[0], expectedAnswer: 'étudiant' }] }],
+    };
+    const extractOnly = await extractMaterial({ mode: 'extract', text: 'x' }, contextOf(fakeProvider(answered)));
+    expect(extractOnly.units[0].items[0].expectedAnswer).toBeNull();
+    const completed = await extractMaterial({ mode: 'complete', text: 'x' }, contextOf(fakeProvider(answered)));
+    expect(completed.units[0].items[0].expectedAnswer).toBe('étudiant');
+  });
+
+  test('a cancelled request surfaces as an abort, not a bad answer', async () => {
+    const abort = new DOMException('The request was cancelled.', 'AbortError');
+    const err = await rejection(extractMaterial({ mode: 'complete', text: 'x' }, contextOf(fakeProvider(abort))));
+    expect(isAbortError(err)).toBe(true);
+  });
+});
+
+describe('Gemini image input', () => {
+  test('the text models read images and the speech model does not', () => {
+    for (const model of gemini.info.text!.models) expect(geminiText.supportsImageInput(model)).toBe(true);
+    expect(gemini.info.text!.imageModels).toEqual(gemini.info.text!.models);
+    expect(geminiText.supportsImageInput('gemini-3.8-flash-lite-tts')).toBe(false);
+    expect(geminiText.supportsImageInput('some-other-model')).toBe(false);
+  });
+
+  test('an image request to a model that cannot read images is refused before the network', async () => {
+    const err = await rejection(
+      geminiText.generateJson(
+        { prompt: 'x', images: [{ data: 'AAAA', mimeType: 'image/png' }] },
+        { apiKey: 'test', model: 'some-other-model' },
+      ),
+    );
+    expect(err).toBeInstanceOf(ImageInputUnsupportedError);
+  });
+
+  test('an already cancelled request never reaches the network', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const err = await rejection(
+      geminiText.generateJson(
+        { prompt: 'x', signal: controller.signal, singleAttempt: true },
+        { apiKey: 'test', model: 'gemini-2.5-flash' },
+      ),
+    );
+    expect(isAbortError(err)).toBe(true);
+  });
+});

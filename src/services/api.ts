@@ -3,10 +3,29 @@ import { getApiKey, getAppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as ai from './ai/tasks';
 import { getTextProvider } from './ai/providers';
-import { getPromptTemplate, promptFingerprint, subscribePromptChanges } from './ai/prompts';
+import {
+  exerciseArticleText,
+  getPromptTemplate,
+  promptFingerprint,
+  subscribePromptChanges,
+  type AdaptiveInput,
+  type ExtractInput,
+  type ItemContext,
+} from './ai/prompts';
 import type { Lang } from './ai/types';
 import { cachedRequest, readCachedAnswer } from './cachedRequest';
-import { drillsKey, prosodyKey, sentenceKey, wordKey } from '../storage/cache';
+import { drillsKey, exercisesKey, explanationKey, hintKey, prosodyKey, sentenceKey, wordKey } from '../storage/cache';
+import {
+  ExplanationSchema,
+  GeneratedExercisesSchema,
+  HintSchema,
+  type Drills,
+  type Explanation,
+  type GeneratedExercises,
+  type Hint,
+  type OpenGrade,
+} from '../types/exerciseAi';
+import type { ImportDraft } from './exercises/importDraft';
 import {
   MAX_PRONUNCIATION_SOURCE,
   PRONUNCIATION_SCHEMA_VERSION,
@@ -23,7 +42,7 @@ import { validatePronunciationMarkers } from '../utils/pronunciationMarkers';
  * sentence in another article never re-spends tokens.
  */
 
-export { MissingApiKeyError } from './ai/errors';
+export { ImageInputUnsupportedError, InvalidAnswerError, MissingApiKeyError, isAbortError } from './ai/errors';
 
 function context(): ai.TextContext & { lang: Lang } {
   const settings = getAppSettings();
@@ -128,6 +147,93 @@ export function generatePracticeDrills(
     () => ai.generateDrills({ articleText, type }, ctx),
     fresh,
   );
+}
+
+/**
+ * Exercise help. Hints and explanations are kept for 30 days under language +
+ * prompt fingerprint + the normalized item, never provider or model; answers
+ * are revalidated on every hit. Open-answer grades, adaptive drills and
+ * extraction are never cached: each depends on a fresh learner answer or on
+ * files, and a stale grade or draft would be wrong rather than merely old.
+ */
+export function fetchHint(input: ItemContext & { exerciseType: string }): Promise<Hint> {
+  const ctx = context();
+  return cachedRequest(
+    'hint',
+    hintKey(ctx.lang, promptFingerprint('hint', ctx.lang), input),
+    () => ai.hint(input, ctx),
+    false,
+    (value) => HintSchema.parse(value),
+  );
+}
+
+export function fetchExplanation(input: ItemContext & { expectedAnswer: string }): Promise<Explanation> {
+  const ctx = context();
+  return cachedRequest(
+    'explanation',
+    explanationKey(ctx.lang, promptFingerprint('explain', ctx.lang), input),
+    () => ai.explainMistake(input, ctx),
+    false,
+    (value) => ExplanationSchema.parse(value),
+  );
+}
+
+/** Not cached: every answer is different, and the verdict must reflect this one. */
+export function gradeOpenAnswer(
+  input: Omit<ItemContext, 'grammarTag'> & { expectedAnswer: string },
+): Promise<OpenGrade> {
+  return ai.gradeOpenAnswer(input, context());
+}
+
+/** Not cached: drills follow the learner's latest mistakes. */
+export function generateAdaptiveDrills(input: AdaptiveInput): Promise<Drills> {
+  return ai.generateAdaptiveDrills(input, context());
+}
+
+/**
+ * Reads text or page images into an import draft. Not cached, one attempt, no
+ * fallback model; `signal` cancels it (the request throws an `AbortError`,
+ * see `isAbortError`). Images are refused up front when the chosen model
+ * cannot read them (`ImageInputUnsupportedError`).
+ */
+export function extractMaterial(input: ExtractInput): Promise<ImportDraft> {
+  return ai.extractMaterial(input, context());
+}
+
+/**
+ * Exercise units made from an article, kept per article text + count + level
+ * (the first 8,000 characters of the article are used); `fresh` asks for a new
+ * set and replaces the saved one.
+ */
+export function generateExercises(
+  input: { articleText: string; count: number; level: string },
+  fresh = false,
+): Promise<GeneratedExercises> {
+  const ctx = context();
+  return cachedRequest(
+    'exercises',
+    exercisesKey(
+      ctx.lang,
+      promptFingerprint('exercises', ctx.lang),
+      input.level,
+      input.count,
+      exerciseArticleText(input.articleText),
+    ),
+    () => ai.generateExercises(input, ctx),
+    fresh,
+    (value) => GeneratedExercisesSchema.parse(value),
+  );
+}
+
+/** What the import screen shows before it sends pages: who reads them, and whether that model can. */
+export function getTextModelStatus(): { providerId: string; model: string; readsImages: boolean } {
+  const settings = getAppSettings();
+  const provider = getTextProvider(settings.textProvider);
+  return {
+    providerId: settings.textProvider,
+    model: settings.textModel,
+    readsImages: provider.supportsImageInput(settings.textModel),
+  };
 }
 
 /** Checks a pasted key against the text provider before it is saved. */

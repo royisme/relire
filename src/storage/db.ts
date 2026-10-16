@@ -33,7 +33,7 @@ export interface AudioEntry {
 
 export interface CacheEntry {
   key: string;
-  kind: 'word' | 'sentence' | 'drills' | 'prosody';
+  kind: 'word' | 'sentence' | 'drills' | 'prosody' | 'hint' | 'explanation' | 'exercises';
   value: unknown;
   createdAt: number;
 }

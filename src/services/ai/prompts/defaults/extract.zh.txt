@@ -1,7 +1,7 @@
-你是一位经验丰富的法语教育专家。请把下面的法语练习材料整理成一份练习草稿，供正在准备 TCF Canada 阅读与口语练习的学习者使用。
+你是一位经验丰富的法语教育专家。请把下面的法语练习材料整理成一份练习草稿，供法语学习者使用。
 
-{{#if source=image}}材料是一张图片：可能是练习册的一页、课外测试卷、图文混排页，或答案页。请分两步处理。
-第一步，忠实转录：先通读整页，再做分类。按阅读顺序保留每一处法语标题、指令、段落、对话台词、标签、问题、选项和已印出的答案。
+{{#if source=image}}材料是一张或多张图片（同一本练习册的至多三页，按阅读顺序排列）：可能是练习册的一页、课外测试卷、图文混排页，或答案页。请分两步处理。
+第一步，忠实转录：先通读每一页，再做分类。按阅读顺序保留每一处法语标题、指令、段落、对话台词、标签、问题、选项和已印出的答案。
 第二步，梳理练习结构：单独识别真正的练习题，只把这些题目映射为 items、options、expectedAnswer 和 acceptableAnswers。如果页面只有答案，请重建可供练习的题目，并与印出的答案清楚区分。如果版式较复杂，请把说明文字和选项对应到正确的练习，且不要丢掉原文的阅读材料。
 {{/if}}
 {{#if source=text}}材料是粘贴进来的文字，来自练习册、阅读材料或练习单。请分两步处理。
@@ -13,7 +13,7 @@
 {{rawText}}
 """
 {{/if}}
-{{#if customTitle}}用户建议的标题是：“{{customTitle}}”。如果与材料相符，请将其用作 lessonTitle。
+{{#if customTitle}}用户建议的标题是：“{{customTitle}}”。如果与材料相符，请将其用作 materialTitle。
 {{/if}}
 题型（请原样使用题型 ID）：
 - WORD_TRANSFORM：改写词语，例如从阴性变为阳性（femme -> mari/homme，étudiante -> étudiant）。
@@ -29,12 +29,20 @@
 - OPEN_QA：提出开放式问题（Trouvez la question）、翻译，或写一段短文。
 
 字段说明（应用会另行提供完整的结构）：
-- lessonTitle：课程标题，或课外测试的标题。
+- materialTitle：课程标题，或课外测试的标题。材料没有标题时不要填写此字段。
 - sourceText：材料的完整转录，而不是摘要。
 - warnings：你注意到的问题，例如无法辨认的文字或不清晰的版式。没有问题时留空。
 - units：练习单元。如果材料中没有问题，则留空。
-- 每个单元包含：section（GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，单元需要阅读材料时）、type、grammarTags（其练习题使用的标签）以及 items。
-- 每道题包含：id、itemNumber、prompt（空处为 [___]；CHOICE_SELECT 的选项写作 {a|b}）、secondaryPrompt（有则填写）、audioText（听写或数字题需要朗读的法语文本）、options（有选项或判断项时）、expectedAnswer（字符串；多空时为字符串数组；无答案时为 null）、printedAnswer（仅限材料中确实印出的答案，否则为 null）、acceptableAnswers、explanation（简明的中文语法讲解）、grammarTag（下面列表中恰好一个标签）以及 blockers（缺少哪些内容导致该题无法使用，例如音频、图示、选项或背景；没有缺失时留空）。
+- 每个单元包含：id（在草稿内唯一，例如 u1）、section（GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber（正整数）、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，单元需要阅读材料时；标题和译文可以省略）、type（上面的题型之一）、grammarTags（其练习题使用的标签，至少一个）以及 items。
+- 每道题包含：id（在所属单元内唯一）、itemNumber（数字，或类似 "a" 的文字）、type（仅当该题与所属单元的题型不同时填写）、prompt（空处为 [___]；CHOICE_SELECT 的选项写作 {a|b}）、secondaryPrompt（有则填写）、audioText（听写或数字题需要朗读的法语文本）、options（有选项或判断项时；其中不能有空白项）、expectedAnswer（字符串；多空时为字符串数组；无答案时为 null）、printedAnswer（仅限材料中确实印出的答案，否则为 null）、acceptableAnswers、explanation（简明的中文语法讲解）、grammarTag（下面列表中恰好一个标签）以及 blockers（缺少哪些内容导致该题无法使用，例如音频、图示、选项或背景；没有缺失时留空）。
+
+答案格式（单元能否用于练习，应用会按此检查）：
+- WORD_TRANSFORM、SENTENCE_BUILD、OPEN_QA、NUMBER_DICTATION：expectedAnswer 为一个字符串。
+- FILL_BLANKS、READING_CLOZE：只有一个 [___] 时为一个字符串；题干有多个空时为字符串数组，每个空一项，按顺序排列。
+- CHOICE_SELECT：题干中每处选择写成一组 {a|b}。expectedAnswer 是从该组中原样选出的选项：只有一组时为字符串，否则为数组，每组一项，按顺序排列。
+- GENDER_CHECK、ODD_ONE_OUT：options 列出可选项，expectedAnswer 恰好是其中之一。
+- MATCH_PAIRS：options 是各条回答，每条以各自不同的字母开头（"a - ..."）；expectedAnswer 是正确回答的字母。
+- DIALOGUE_ORDER：options 是各句对话，每句以各自不同的字母开头；expectedAnswer 是按正确顺序排列的这些字母组成的数组，每个字母只出现一次。
 
 语法标签（请原样使用 ID，每道题只能选一个）：
 - 名词与限定词：gender-number, articles, partitive-quantity, possessive-demonstrative

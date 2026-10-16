@@ -5,7 +5,13 @@
  * name a provider or send anything.
  */
 import { z } from 'zod';
-import { DrillsSchema, GeneratedExercisesSchema } from '../../types/exerciseAi';
+import {
+  DrillsSchema,
+  ExplanationSchema,
+  GeneratedExercisesSchema,
+  HintSchema,
+  OpenGradeSchema,
+} from '../../types/exerciseAi';
 import { ImportDraftSchema } from './importDraft';
 
 /** A plain JSON-schema document. */
@@ -42,3 +48,12 @@ export const drillsJsonSchema = () => toProviderJsonSchema(DrillsSchema);
 
 /** Response schema for reading a worksheet into a draft. */
 export const importDraftJsonSchema = () => toProviderJsonSchema(ImportDraftSchema);
+
+/** Response schema for a hint. */
+export const hintJsonSchema = () => toProviderJsonSchema(HintSchema);
+
+/** Response schema for a mistake explanation. */
+export const explanationJsonSchema = () => toProviderJsonSchema(ExplanationSchema);
+
+/** Response schema for an open-answer grade. */
+export const openGradeJsonSchema = () => toProviderJsonSchema(OpenGradeSchema);

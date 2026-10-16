@@ -382,7 +382,13 @@
     "drills": "练习题",
     "pronunciationAudio": "发音评分（带录音）",
     "pronunciationText": "发音评分（仅文字转写）",
-    "prosody": "发音标记"
+    "prosody": "发音标记",
+    "extract": "导入：识读练习材料",
+    "hint": "练习提示",
+    "explain": "错题讲解",
+    "grade": "开放题批改",
+    "adaptive": "针对性练习",
+    "exercises": "由文章生成练习"
   },
   "prosody": {
     "title": "发音标记",

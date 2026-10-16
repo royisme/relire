@@ -384,7 +384,13 @@
     "drills": "Practice drills",
     "pronunciationAudio": "Pronunciation scoring (with recording)",
     "pronunciationText": "Pronunciation scoring (transcript only)",
-    "prosody": "Pronunciation markers"
+    "prosody": "Pronunciation markers",
+    "extract": "Import: read worksheet",
+    "hint": "Exercise hint",
+    "explain": "Mistake explanation",
+    "grade": "Open answer grading",
+    "adaptive": "Adaptive drills",
+    "exercises": "Exercises from an article"
   },
   "prosody": {
     "title": "Pronunciation markers",

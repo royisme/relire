@@ -16,6 +16,11 @@ const POLICY = {
   prosody: { ttl: 30 * DAY, max: 1000 },
   // Practice drills for an article stay until the learner asks for new ones.
   drills: { ttl: 30 * DAY, max: 300 },
+  // Exercise hints and explanations depend on the exact item and learner answer.
+  hint: { ttl: 30 * DAY, max: 2000 },
+  explanation: { ttl: 30 * DAY, max: 2000 },
+  // Units generated from an article; large, so fewer are kept.
+  exercises: { ttl: 30 * DAY, max: 200 },
 } as const;
 
 export type CacheKind = keyof typeof POLICY;
@@ -38,6 +43,30 @@ export const wordKey = (lang: string, fingerprint: string, word: string, sentenc
 
 export const drillsKey = (lang: string, fingerprint: string, type: string, articleText: string) =>
   `${fingerprint}|${lang}|${type}|${hashText(articleText.slice(0, 1500))}`;
+
+/** What a hint or explanation is about; every field is part of the key. */
+export interface ItemKeyInput {
+  exerciseType?: string;
+  prompt: string;
+  userAnswer: string;
+  expectedAnswer?: string;
+  grammarTag: string;
+  context?: string;
+}
+
+// A JSON array keeps fields apart even when a prompt contains the "|" of a {a|b} choice. Lesson context can be a
+// whole passage, so it is hashed.
+const itemKey = (lang: string, fingerprint: string, i: ItemKeyInput) =>
+  `${fingerprint}|${lang}|${JSON.stringify(
+    [i.exerciseType, i.prompt, i.userAnswer, i.expectedAnswer, i.grammarTag].map((v) => normalize(v ?? '')),
+  )}|${hashText(normalize(i.context ?? ''))}`;
+
+export const hintKey = itemKey;
+export const explanationKey = itemKey;
+
+/** Generated exercises are kept per article text, item count and level. */
+export const exercisesKey = (lang: string, fingerprint: string, level: string, count: number, articleText: string) =>
+  `${fingerprint}|${lang}|${normalize(level)}|${count}|${hashText(articleText)}.${articleText.length}`;
 
 export const sentenceKey = (lang: string, fingerprint: string, sentence: string) =>
   `${fingerprint}|${lang}|${normalize(sentence)}`;

@@ -11,13 +11,13 @@ Rules:
 - Ignore minor punctuation differences.
 - Do not assume the learner meant something they did not write.
 - Name the specific word or form that is wrong, and say why.
-- This is practice feedback. Any judgement or score it implies is an estimate for learning, not an official TCF Canada score.
+- This is practice feedback and an estimate for learning, not an official score of any exam. Do not give a number or a grade.
 
 Write the feedback in English. You may use inline **bold** for specific letters or words. Do not use headers, blockquotes or tables.
 
-Output JSON:
+Output only JSON in this shape (isCorrect and feedback are required; correctedVersion is optional):
 {
   "isCorrect": true,
   "feedback": "Concise feedback in English",
-  "correctedVersion": "The ideal or corrected French sentence"
+  "correctedVersion": "Optional. The corrected or ideal French sentence; leave it out when the learner's answer needs no change"
 }

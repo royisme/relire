@@ -3,30 +3,39 @@ You are a French test curriculum designer. Write new practice items for a learne
 Weak grammar areas (tag IDs):
 {{targetCategories}}
 {{#if recentMistakes}}
-Recent mistakes to learn from:
+Recent mistakes to learn from (JSON: the prompt, the learner's answer and the expected answer):
 {{recentMistakes}}
 {{/if}}
 Write {{count}} new items that target these weak areas. Each item practises one of the listed areas, and its grammarTag is that area's ID. Vary the situations and vocabulary, and do not repeat the recent mistakes word for word.
 
 Target CEFR level: {{level}}. Keep the French natural and within that level.
 
-Mix these formats: WORD_TRANSFORM, FILL_BLANKS, GENDER_CHECK, CHOICE_SELECT, NUMBER_DICTATION and OPEN_QA. Mark gaps with [___]. For CHOICE_SELECT, write the choices in the prompt as {option A|option B} and also list them in options.
+Mix these exercise types (use the type IDs exactly): WORD_TRANSFORM, FILL_BLANKS, GENDER_CHECK, CHOICE_SELECT, NUMBER_DICTATION and OPEN_QA. Mark gaps with [___]. For CHOICE_SELECT, write the choices in the prompt as {option A|option B} and also list them in options.
+
+Answer shapes (the app checks these):
+- WORD_TRANSFORM, OPEN_QA: expectedAnswer is one string. For OPEN_QA it is a sample, not the only correct wording; list other correct wordings in acceptableAnswers.
+- FILL_BLANKS: one string for a single [___]; an array with one string per blank, in order, when the prompt has several.
+- CHOICE_SELECT: expectedAnswer is the chosen option copied exactly from its {a|b} group: a string for one group, otherwise an array with one option per group, in order.
+- GENDER_CHECK: options lists the choices (for example "Masculin" and "Féminin"), and expectedAnswer is exactly one of them.
+- NUMBER_DICTATION: prompt is the number as the learner sees it, audioText is the same number written in French words and read aloud to the learner, and expectedAnswer is the number written in French words (one string). audioText is required for this type.
 
 Check that every expected answer is correct and unambiguous. Use standard French only.
 
-Output only JSON in this shape:
+Output only JSON in this shape (every field below is accepted; leave out the optional ones that do not apply):
 {
   "drillTitle": "Title for this focused practice set, in English",
   "focusSummary": "One or two sentences on what the set targets, in English",
   "items": [
     {
-      "id": "drill_1",
+      "id": "drill_1 (unique in the set)",
       "itemNumber": 1,
-      "prompt": "Prompt text with [___] for a gap, or the stem",
       "type": "WORD_TRANSFORM | FILL_BLANKS | GENDER_CHECK | CHOICE_SELECT | NUMBER_DICTATION | OPEN_QA",
-      "options": ["choices, for choice and check items; otherwise empty"],
+      "prompt": "Prompt text with [___] for a gap, or the stem",
+      "secondaryPrompt": "Optional. An extra line shown under the prompt",
+      "options": ["Optional. Choices, for CHOICE_SELECT and GENDER_CHECK; none of them blank"],
       "expectedAnswer": "The correct answer, or an array for several gaps",
-      "acceptableAnswers": ["other correct answers, if any"],
+      "acceptableAnswers": ["Optional. Other correct answers"],
+      "audioText": "Required for NUMBER_DICTATION: the French text to read aloud. Leave it out for other types",
       "explanation": "Clear grammar explanation in English",
       "grammarTag": "one of the weak areas listed above"
     }

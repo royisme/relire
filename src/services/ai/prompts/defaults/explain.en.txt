@@ -18,7 +18,7 @@ Formatting rules:
 - Keep the explanation crisp and pedagogical. Keep French examples short and accurate.
 - Do not use headers, blockquotes or tables.
 
-Output in JSON format:
+Output only JSON in this shape (all three fields are required):
 {
   "summary": "One sentence summarising the rule, in English",
   "details": "A clear, friendly breakdown with French examples",

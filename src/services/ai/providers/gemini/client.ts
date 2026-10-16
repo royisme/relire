@@ -1,6 +1,6 @@
-import { GoogleGenAI, ThinkingLevel, type GenerateContentConfig } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel, type GenerateContentConfig, type Part } from '@google/genai';
 import i18n from '../../../../i18n';
-import { MissingApiKeyError, errorMessage } from '../../errors';
+import { ImageInputUnsupportedError, MissingApiKeyError, errorMessage } from '../../errors';
 import type { JsonRequest, TextConfig, TextProvider } from '../../types';
 
 /**
@@ -10,6 +10,14 @@ import type { JsonRequest, TextConfig, TextProvider } from '../../types';
  */
 
 const FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-pro'];
+
+/** Gemini text models read images; the speech models cannot. An unset model resolves to the default text model. */
+export const geminiAcceptsImages = (model: string) => {
+  const name = model.trim();
+  return !name || (/^gemini-/i.test(name) && !/tts/i.test(name));
+};
+
+const cancelled = () => new DOMException('The request was cancelled.', 'AbortError');
 
 export function geminiClient(apiKey: string) {
   const key = apiKey?.trim();
@@ -29,36 +37,53 @@ function parseJson<T>(rawText: string): T {
   }
 }
 
-const toContents = (req: JsonRequest) =>
-  req.audio
-    ? { parts: [{ inlineData: { mimeType: req.audio.mimeType, data: req.audio.base64 } }, { text: req.prompt }] }
-    : req.prompt;
+const toContents = (req: JsonRequest) => {
+  if (!req.audio && !req.images?.length) return req.prompt;
+  const parts: Part[] = (req.images ?? []).map((image) => ({
+    inlineData: { mimeType: image.mimeType, data: image.data },
+  }));
+  if (req.audio) parts.push({ inlineData: { mimeType: req.audio.mimeType, data: req.audio.base64 } });
+  parts.push({ text: req.prompt });
+  return { parts };
+};
 
 export const geminiText: TextProvider = {
   supportsAudioInput: true,
+  supportsImageInput: geminiAcceptsImages,
 
   async generateJson<T>(request: JsonRequest, config: TextConfig): Promise<T> {
     const ai = geminiClient(config.apiKey);
-    const preferred = config.model?.trim();
-    const candidates = preferred ? [preferred, ...FALLBACK_MODELS.filter((m) => m !== preferred)] : FALLBACK_MODELS;
+    const preferred = config.model?.trim() ?? '';
+    if (request.images?.length && !geminiAcceptsImages(preferred)) throw new ImageInputUnsupportedError(preferred);
+    // A single attempt stays on the chosen model: the learner sees which model reads their pages.
+    const candidates = request.singleAttempt
+      ? [preferred || FALLBACK_MODELS[0]]
+      : preferred
+        ? [preferred, ...FALLBACK_MODELS.filter((m) => m !== preferred)]
+        : FALLBACK_MODELS;
+    const attempts = request.singleAttempt ? 1 : 2;
     const contents = toContents(request);
 
     let lastError: unknown = null;
     for (const model of candidates) {
-      for (let attempt = 0; attempt < 2; attempt++) {
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        if (request.signal?.aborted) throw cancelled();
         try {
           const options: GenerateContentConfig = { responseMimeType: 'application/json' };
+          if (request.signal) options.abortSignal = request.signal;
           if (request.jsonSchema) options.responseJsonSchema = request.jsonSchema;
           if (model.includes('gemini-3')) options.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
           const response = await ai.models.generateContent({ model, contents, config: options });
           if (response?.text) return parseJson<T>(response.text);
         } catch (err) {
+          // A cancelled request is the learner's choice: never retry it or report it as a failure.
+          if (request.signal?.aborted) throw cancelled();
           lastError = err;
           // A bad key will fail on every model; stop early instead of cycling.
           if (/API key|permission|PERMISSION_DENIED|UNAUTHENTICATED/i.test(errorMessage(err))) {
             throw new Error(errorMessage(err));
           }
-          await new Promise((r) => setTimeout(r, 400));
+          if (!request.singleAttempt) await new Promise((r) => setTimeout(r, 400));
         }
       }
     }

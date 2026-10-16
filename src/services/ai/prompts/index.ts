@@ -1,9 +1,19 @@
-import type { JsonRequest, Lang } from '../types';
+import type { ImageInput, JsonRequest, Lang } from '../types';
 import { renderTemplate, type PromptVars } from './engine';
 import { getPromptTemplate } from './store';
 import type { PromptId } from './registry';
 import { enumeratedReaderWords } from '../../../utils/readerTokens';
 import { prosodySchema } from '../prosodySchema';
+import type { GrammarTag } from '../../../types/grammar';
+import type { ImportMode } from '../../../types/exercises';
+import {
+  drillsJsonSchema,
+  exerciseJsonSchema,
+  explanationJsonSchema,
+  hintJsonSchema,
+  importDraftJsonSchema,
+  openGradeJsonSchema,
+} from '../../exercises/jsonSchema';
 
 /**
  * Builds provider-neutral requests from templates. This file only prepares the
@@ -87,4 +97,124 @@ export function pronunciationRequest(
   return input.audio
     ? { prompt: render('pronunciationAudio', lang, vars), audio: input.audio }
     : { prompt: render('pronunciationText', lang, vars) };
+}
+
+/* ----------------------------- exercise requests ----------------------------- */
+
+/** The part of an article sent for exercise generation; the answerability check uses the same text. */
+export const MAX_EXERCISE_ARTICLE = 8000;
+export const exerciseArticleText = (articleText: string) => articleText.trim().slice(0, MAX_EXERCISE_ARTICLE);
+
+export interface ExtractInput {
+  mode: ImportMode;
+  /** Pasted text; with images it travels as extra context. */
+  text?: string;
+  images?: ImageInput[];
+  /** A title the learner suggested. */
+  title?: string;
+  signal?: AbortSignal;
+}
+
+export function extractRequest(input: ExtractInput, lang: Lang): JsonRequest {
+  const images = input.images?.length ? input.images : undefined;
+  return {
+    prompt: render('extract', lang, {
+      source: images ? 'image' : 'text',
+      mode: input.mode,
+      rawText: input.text?.trim(),
+      customTitle: input.title?.trim(),
+    }),
+    jsonSchema: importDraftJsonSchema(),
+    images,
+    signal: input.signal,
+    // The learner is shown which model reads their pages; it must be that one, once.
+    singleAttempt: true,
+  };
+}
+
+export interface ItemContext {
+  prompt: string;
+  userAnswer: string;
+  grammarTag: string;
+  /** Lesson text around the item, when there is some. */
+  context?: string;
+}
+
+export function hintRequest(input: ItemContext & { exerciseType: string }, lang: Lang): JsonRequest {
+  return {
+    prompt: render('hint', lang, {
+      exerciseType: input.exerciseType,
+      prompt: input.prompt,
+      userAnswer: input.userAnswer,
+      grammarTag: input.grammarTag,
+      context: input.context,
+    }),
+    jsonSchema: hintJsonSchema(),
+  };
+}
+
+export function explainRequest(input: ItemContext & { expectedAnswer: string }, lang: Lang): JsonRequest {
+  return {
+    prompt: render('explain', lang, {
+      prompt: input.prompt,
+      userAnswer: input.userAnswer,
+      expectedAnswer: input.expectedAnswer,
+      grammarTag: input.grammarTag,
+      context: input.context,
+    }),
+    jsonSchema: explanationJsonSchema(),
+  };
+}
+
+export function gradeRequest(
+  input: Omit<ItemContext, 'grammarTag'> & { expectedAnswer: string },
+  lang: Lang,
+): JsonRequest {
+  return {
+    prompt: render('grade', lang, {
+      prompt: input.prompt,
+      expectedAnswer: input.expectedAnswer,
+      userAnswer: input.userAnswer,
+      context: input.context,
+    }),
+    jsonSchema: openGradeJsonSchema(),
+  };
+}
+
+/** How many recent mistakes the adaptive prompt shows; more adds cost without new patterns. */
+const MAX_RECENT_MISTAKES = 10;
+
+export interface AdaptiveInput {
+  /** The weak grammar tags to practise. */
+  targets: GrammarTag[];
+  recentMistakes?: { prompt: string; userAnswer: string; expectedAnswer: string }[];
+  count: number;
+  level: string;
+}
+
+export function adaptiveRequest(input: AdaptiveInput, lang: Lang): JsonRequest {
+  const mistakes = (input.recentMistakes ?? []).slice(0, MAX_RECENT_MISTAKES);
+  return {
+    prompt: render('adaptive', lang, {
+      targetCategories: input.targets.join(', '),
+      recentMistakes: mistakes.length ? JSON.stringify(mistakes) : undefined,
+      count: String(input.count),
+      level: input.level.trim(),
+    }),
+    jsonSchema: drillsJsonSchema(),
+  };
+}
+
+export function exercisesRequest(
+  input: { articleText: string; count: number; level: string },
+  lang: Lang,
+): JsonRequest {
+  return {
+    prompt: render('exercises', lang, {
+      level: input.level.trim(),
+      articleText: exerciseArticleText(input.articleText),
+      count: String(input.count),
+    }),
+    jsonSchema: exerciseJsonSchema(),
+  };
 }
