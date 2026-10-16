@@ -1,4 +1,4 @@
-import type { PracticeDeck, PronunciationAssessment, SentenceAnalysis, WordAnalysis } from '../../types';
+import type { PronunciationAssessment, SentenceAnalysis, WordAnalysis } from '../../types';
 import {
   DrillsSchema,
   ExplanationSchema,
@@ -7,15 +7,14 @@ import {
   OpenGradeSchema,
   type Drills,
   type Explanation,
-  type GeneratedExercises,
+  type GeneratedSet,
   type Hint,
   type OpenGrade,
 } from '../../types/exerciseAi';
 import { parseImportDraft, type ImportDraft } from '../exercises/importDraft';
-import { unsupportedQuotes } from '../exercises/answerability';
+import { keepAnswerable } from '../exercises/answerability';
 import {
   adaptiveRequest,
-  drillsRequest,
   exerciseArticleText,
   exercisesRequest,
   explainRequest,
@@ -59,9 +58,6 @@ export const analyzeWord = (input: Parameters<typeof wordRequest>[0], ctx: TextC
 
 export const analyzeSentence = (input: Parameters<typeof sentenceRequest>[0], ctx: TextContext) =>
   ctx.provider.generateJson<SentenceAnalysis>(sentenceRequest(input, ctx.lang), ctx.config);
-
-export const generateDrills = (input: Parameters<typeof drillsRequest>[0], ctx: TextContext) =>
-  ctx.provider.generateJson<PracticeDeck>(drillsRequest(input, ctx.lang), ctx.config);
 
 export const assessPronunciation = (input: Parameters<typeof pronunciationRequest>[0], ctx: TextContext) =>
   ctx.provider.generateJson<PronunciationAssessment>(
@@ -145,13 +141,14 @@ export async function generateAdaptiveDrills(input: AdaptiveInput, ctx: TextCont
 
 /**
  * Exercise units made from an article. Beyond the schema, every item that
- * quotes the article must quote words that are really in it: a quote that is
- * not there means the item cannot be answered from the article.
+ * quotes the article must quote words that are really in it: an item whose
+ * quote is not there cannot be answered from the article and is left out, with
+ * the rest kept. Only when nothing is left does the call fail.
  */
 export async function generateExercises(
   input: { articleText: string; count: number; level: string },
   ctx: TextContext,
-): Promise<GeneratedExercises> {
+): Promise<GeneratedSet> {
   checkCount(input.count);
   checkLevel(input.level);
   const article = exerciseArticleText(input.articleText);
@@ -159,11 +156,11 @@ export async function generateExercises(
 
   const value = await ctx.provider.generateJson<unknown>(exercisesRequest(input, ctx.lang), ctx.config);
   const exercises = parseAnswer('the exercises', GeneratedExercisesSchema, value);
-  const missing = unsupportedQuotes(exercises.units, article);
-  if (missing.length)
+  const { units, dropped, missing } = keepAnswerable(exercises.units, article);
+  if (!units.length)
     throw new InvalidAnswerError(
       'the exercises',
       missing.map((m) => `item ${m.itemId} of unit ${m.unitId} quotes words that are not in the article: "${m.quote}"`),
     );
-  return exercises;
+  return { units, dropped };
 }

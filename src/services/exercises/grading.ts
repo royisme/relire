@@ -31,6 +31,9 @@ export interface GradingOptions {
   strictAccents: boolean;
 }
 
+/** How answers are compared until the Practice settings offer a choice: accents count as spelling help. */
+export const DEFAULT_GRADING: GradingOptions = { strictAccents: false };
+
 /**
  * - `graded`: the verdict is final.
  * - `needs-ai`: a free-text answer that matched no reference; only an AI

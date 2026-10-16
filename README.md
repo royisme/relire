@@ -54,7 +54,7 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 - **Shadow and get feedback.** Record yourself reading a sentence and receive an overall score, plus feedback on individual sounds, liaisons and intonation.
 - **Look up any French sound.** A chart of the sounds of French in IPA, each with an example word you can tap to hear.
 - **Review vocabulary with spaced repetition.** An SM-2 schedule decides what is due today.
-- **Drill from the article you are reading.** Sentence scramble, oral shadowing and grammar cloze, generated from the current text.
+- **Exercises from your articles.** Make fill-in-the-blank, multiple-choice, word-form and open questions from any article, answer them on one sheet with hints, explanations and a French character bar, and read a sentence aloud for a pronunciation score.
 - **Choose your AI.** The AI that writes explanations and the AI that reads aloud are separate settings, each with its own provider, model and key, and the code is built so more providers can be added.
 - **Edit the prompts.** The instructions sent to the AI are plain-text templates you can view, change and reset in Settings.
 - **Use it in English or Chinese.** The interface and the explanations switch between the two.

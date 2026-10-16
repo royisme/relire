@@ -178,11 +178,26 @@ describe('generateExercises', () => {
   const answer = (articleQuote: string | undefined) => ({
     units: [{ ...unit, items: [{ ...unit.items[0], articleQuote }] }],
   });
+  /** One unit of three items numbered 1-3, with the given quotes. */
+  const threeItems = (quotes: (string | undefined)[]) => ({
+    units: [
+      {
+        ...unit,
+        items: quotes.map((articleQuote, index) => ({
+          ...unit.items[0],
+          id: `i${index + 1}`,
+          itemNumber: index + 1,
+          articleQuote,
+        })),
+      },
+    ],
+  });
 
   test('keeps a quote that is in the article and sends the exercise schema', async () => {
     const provider = fakeProvider(answer('Le matin, Léa  PREND le train'));
     const result = await generateExercises(input, contextOf(provider));
     expect(result.units[0].items[0].articleQuote).toBe('Le matin, Léa  PREND le train');
+    expect(result.dropped).toBe(0);
     expectSchemaSent(provider.requests[0]);
     expect(provider.requests[0].prompt).toContain(article);
   });
@@ -195,9 +210,29 @@ describe('generateExercises', () => {
   test('an item without a quote cannot be checked and is kept', async () => {
     const result = await generateExercises(input, contextOf(fakeProvider(answer(undefined))));
     expect(result.units[0].items[0].articleQuote).toBeUndefined();
+    expect(result.dropped).toBe(0);
   });
 
-  test('a quote that is not in the article rejects the set and names the item', async () => {
+  test('items whose quote is not in the article are left out and counted; the rest is kept and renumbered', async () => {
+    const result = await generateExercises(
+      input,
+      contextOf(fakeProvider(threeItems(['Léa prend le train', 'Léa prend le bus', undefined]))),
+    );
+    expect(result.dropped).toBe(1);
+    expect(result.units).toHaveLength(1);
+    expect(result.units[0].items.map((item) => item.id)).toEqual(['i1', 'i3']);
+    expect(result.units[0].items.map((item) => item.itemNumber)).toEqual([1, 2]);
+  });
+
+  test('a unit left with no items is dropped and the other units stay', async () => {
+    const second = { ...unit, id: 'u2', items: [{ ...unit.items[0], articleQuote: 'Léa prend le bus' }] };
+    const first = { ...unit, items: [{ ...unit.items[0], articleQuote: 'Elle a rendez-vous' }] };
+    const result = await generateExercises(input, contextOf(fakeProvider({ units: [first, second] })));
+    expect(result.units.map((u) => u.id)).toEqual([unit.id]);
+    expect(result.dropped).toBe(1);
+  });
+
+  test('when nothing is left it fails and names the quotes', async () => {
     const err = await rejection(generateExercises(input, contextOf(fakeProvider(answer('Léa prend le bus')))));
     expect(err).toBeInstanceOf(InvalidAnswerError);
     expect(err.message).toContain(unit.items[0].id);

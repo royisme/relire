@@ -15,7 +15,7 @@
   "nav": {
     "reader": "Read",
     "vocab": "My study",
-    "practice": "Drills",
+    "practice": "Practice",
     "analytics": "Progress",
     "installApp": "Install app",
     "settings": "Settings",
@@ -47,7 +47,9 @@
     "wordCount": "{{count}} words",
     "textSize": "Text size",
     "listenAll": "Listen",
-    "sentenceActions": "Sentence actions"
+    "sentenceActions": "Sentence actions",
+    "makeExercises": "Make exercises",
+    "makeExercisesHint": "Make exercises from this article"
   },
   "player": {
     "label": "Article player",
@@ -147,25 +149,71 @@
     "backToList": "Back to list"
   },
   "practice": {
-    "title": "Drills",
-    "subtitle": "Questions made from the article you are reading",
-    "tabSyntax": "Word order",
-    "tabCloze": "Fill the gap",
-    "tabOral": "Read aloud",
-    "generateDrills": "Make questions",
-    "generating": "Making questions from the article…",
-    "checkAnswer": "Check Answer",
-    "nextQuestion": "Next question",
-    "showExplanation": "Hint",
-    "questionProgress": "Question {{current}} of {{total}}",
-    "realTTS": "Listen",
-    "scramblePrompt": "Tap the pieces in the right order.",
-    "removeChunk": "Tap to remove",
-    "chunksToOrder": "Pieces",
-    "noArticleTitle": "Open an article first",
-    "noArticleDesc": "Drills are generated from the article you are reading.",
+    "title": "Practice",
+    "subtitle": "Exercises made from your articles, and reading aloud.",
+    "noArticleTitle": "Add an article first",
+    "noArticleDesc": "Exercises are made from an article in your library.",
     "openLibrary": "Go to library",
-    "newDrills": "New questions"
+    "article": "Article",
+    "unitsTitle": "Exercises",
+    "unitsDesc": "Sets of questions made from this article. Your answers and progress are saved on this device.",
+    "noUnits": "No exercises from this article yet. Make a set below.",
+    "level": "Level",
+    "count": "Items",
+    "countRange": "Choose a whole number from 1 to {{max}}.",
+    "make": "Make exercises from this article",
+    "making": "Making exercises from the article…",
+    "made_one": "Made {{count}} item. It is in the list below.",
+    "made_other": "Made {{count}} items. They are in the list below.",
+    "dropped_one": "{{count}} item could not be checked against the article and was left out.",
+    "dropped_other": "{{count}} items could not be checked against the article and were left out.",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items",
+    "notStarted": "Not started",
+    "progress": "{{checked}} of {{total}} checked, {{correct}} right",
+    "oralTitle": "Read aloud",
+    "oralDesc": "Read a sentence from the article aloud and get a pronunciation score from the AI.",
+    "sentenceOf": "Sentence {{current}} of {{total}}",
+    "previousSentence": "Previous sentence",
+    "nextSentence": "Next sentence",
+    "listenSlowly": "Listen slowly",
+    "check": "Check",
+    "checked": "Checked",
+    "checkAll": "Check all",
+    "hint": "Hint",
+    "explain": "Explain",
+    "resetUnit": "Reset this unit",
+    "reset": "Reset",
+    "resetTitle": "Reset this unit?",
+    "resetBody": "The answers on “{{title}}” are cleared so you can do it again. Your history of attempts is kept.",
+    "saveFailed": "Your last change could not be saved: {{msg}}",
+    "right": "Correct",
+    "wrong": "Incorrect",
+    "expected": "Correct answer",
+    "yourAnswer": "Your answer",
+    "blankLabel": "Item {{number}}, blank {{blank}}",
+    "answerLabel": "Item {{number}}, your answer",
+    "choiceLabel": "Item {{number}}, choice {{group}}",
+    "openNote": "An AI reads your answer and writes feedback. It is an estimate, not a score.",
+    "sampleAnswer": "Sample answer",
+    "comingSoon": "{{type}} exercises are coming. This item cannot be answered yet.",
+    "example": "Example",
+    "note": "Note",
+    "rule": "Rule",
+    "clue": "Clue",
+    "aiFeedback": "AI feedback",
+    "betterVersion": "A better version",
+    "estimate": "An estimate to help you practise, not a score.",
+    "explanationTitle": "Explanation",
+    "explaining": "Explaining…",
+    "tip": "Tip",
+    "chars": {
+      "label": "French characters",
+      "toggle": "French characters",
+      "shift": "Shift",
+      "hint": "Press a character to put it at the cursor.",
+      "none": "Click in an answer first."
+    }
   },
   "analytics": {
     "title": "Progress",
@@ -207,9 +255,9 @@
     "protectStorage": "Protect my data",
     "exportFailed": "Export failed: {{msg}}",
     "restoreFailed": "Restore failed: {{msg}}",
-    "cacheSummary": "Saved answers: {{words}} words, {{sentences}} sentences, {{drills}} drill sets, {{prosody}} marker sets",
+    "cacheSummary": "Saved answers: {{words}} words, {{sentences}} sentences, {{exercises}} exercise answers, {{prosody}} marker sets",
     "clearCache": "Clear saved answers",
-    "cacheDesc": "Explanations, drills and markers are saved on this device. Words are kept until you clear them; sentences, drills and markers for 30 days. They are not part of backups.",
+    "cacheDesc": "Explanations, exercise help and markers are saved on this device. Words are kept until you clear them; sentences, exercise help and markers for 30 days. They are not part of backups.",
     "audioSummary": "Pronunciation audio: {{clips}} clips, {{mb}} MB; {{kept}} kept for your vocabulary",
     "clearAudio": "Clear other audio",
     "audioDesc": "Every clip is saved so it plays offline and is never generated twice. Audio for words in your vocabulary, their sentences and examples is always kept; the rest is trimmed when it grows past 200 MB.",
@@ -247,7 +295,7 @@
     "sections": {
       "text-ai": {
         "title": "Text AI",
-        "desc": "Writes word and sentence analyses, practice drills and pronunciation feedback."
+        "desc": "Writes word and sentence analyses, exercises, hints and pronunciation feedback."
       },
       "speech": {
         "title": "Speech",
@@ -382,7 +430,8 @@
   "errors": {
     "badResponse": "The AI returned a response that could not be read. Please try again.",
     "noAudio": "Could not generate speech audio.",
-    "allModelsFailed": "Every model failed. Please try again."
+    "allModelsFailed": "Every model failed. Please try again.",
+    "invalidAnswer": "The AI answer could not be used: {{msg}}"
   },
   "models": {
     "gemini-2_5-flash": {
@@ -412,7 +461,6 @@
   "prompts": {
     "word": "Word analysis",
     "sentence": "Sentence analysis",
-    "drills": "Practice drills",
     "pronunciationAudio": "Pronunciation scoring (with recording)",
     "pronunciationText": "Pronunciation scoring (transcript only)",
     "prosody": "Pronunciation markers",
@@ -619,6 +667,8 @@
     "title": "This page is not here",
     "page": "This address does not match a page in Relire.",
     "article": "That article is not in your library. It may have been deleted, or the link comes from another browser.",
-    "toLibrary": "Go to the library"
+    "toLibrary": "Go to the library",
+    "unit": "That exercise is not here. It may have been deleted, or the link comes from another browser.",
+    "toPractice": "Go to Practice"
   }
 }

@@ -80,11 +80,6 @@ export function sentenceRequest(input: { sentence: string; articleContext?: stri
   };
 }
 
-export function drillsRequest(input: { articleText: string; type: string }, lang: Lang): JsonRequest {
-  const type = ['syntax', 'cloze', 'oral'].includes(input.type) ? input.type : 'other';
-  return { prompt: render('drills', lang, { articleText: input.articleText.slice(0, 1500), type }) };
-}
-
 export function pronunciationRequest(
   input: { referenceText: string; audio?: { mimeType: string; base64: string }; userTranscript?: string },
   lang: Lang,

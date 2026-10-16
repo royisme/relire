@@ -54,3 +54,47 @@ export function recordedAnswerText(type: ExerciseType, item: Pick<ExerciseItem, 
   if (countBlanks(item.prompt) > 1) return answer.multiAnswers.join(' / ');
   return answer.singleAnswer;
 }
+
+/**
+ * A stored answer made usable for the item as it is now. Rows are written by
+ * the sheet, but a restored backup or an edited unit can leave arrays shorter
+ * or longer than the item's blanks and choices; missing slots start empty and
+ * extra ones are dropped, so a control never reads past its slots.
+ */
+export function restoreAnswer(
+  item: Pick<ExerciseItem, 'prompt' | 'options'>,
+  stored: Partial<ExerciseAnswer>,
+): ExerciseAnswer {
+  const empty = emptyAnswer(item);
+  const fit = (values: string[] | undefined, size: number) =>
+    Array.from({ length: size }, (_, index) => values?.[index] ?? '');
+  return {
+    singleAnswer: stored.singleAnswer ?? empty.singleAnswer,
+    multiAnswers: fit(stored.multiAnswers, empty.multiAnswers.length),
+    choiceSelections: fit(stored.choiceSelections, empty.choiceSelections.length),
+    selectedOdd: stored.selectedOdd ?? null,
+    dialogueOrder: stored.dialogueOrder?.length ? stored.dialogueOrder : empty.dialogueOrder,
+    matchSelection: stored.matchSelection ?? '',
+  };
+}
+
+/** A sentence with inline `{a|b}` choices cut into plain text and choice groups, numbered in reading order. */
+export type ChoicePiece = { kind: 'text'; text: string } | { kind: 'group'; index: number; options: string[] };
+
+export function choicePieces(prompt: string): ChoicePiece[] {
+  let index = 0;
+  return prompt
+    .split(/(\{[^}]+\})/g)
+    .filter(Boolean)
+    .map((part): ChoicePiece => {
+      if (!/^\{[^}]+\}$/.test(part)) return { kind: 'text', text: part };
+      return {
+        kind: 'group',
+        index: index++,
+        options: part
+          .slice(1, -1)
+          .split('|')
+          .map((option) => option.trim()),
+      };
+    });
+}

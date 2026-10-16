@@ -7,7 +7,8 @@ import { ReaderView } from './components/ReaderView';
 import { WordDetailModal } from './components/WordDetailModal';
 import { SentenceDrawer } from './components/SentenceDrawer';
 import { StudyView } from './components/study/StudyView';
-import { PracticeView } from './components/PracticeView';
+import { PracticePage } from './components/practice/PracticePage';
+import { UnitView } from './components/practice/UnitView';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { ArticleEditorDialog } from './components/ArticleEditorDialog';
 import { LibraryView } from './components/LibraryView';
@@ -56,7 +57,7 @@ export default function App() {
   const [logArticleId, setLogArticleId] = useState<string | null>(null);
   // A sentence to bring into view when the reader opens (from the shadowing log). Shown once.
   const [readerFocus, setReaderFocus] = useState<{ articleId: string; text: string } | null>(null);
-  // The article Drills works on: the one most recently read.
+  // The article Practice opens on when the address names none: the one read or practised most recently.
   const [lastArticleId, setLastArticleId] = useState<string | null>(null);
   // Set while an AI feature is waiting for a key, so Settings can focus the field and offer the way back.
   const [keyRequest, setKeyRequest] = useState<KeyRequest | null>(null);
@@ -74,6 +75,9 @@ export default function App() {
 
   // State that belongs to one place is dropped when the learner leaves it (adjusted while rendering, not in an effect).
   if (currentArticle && lastArticleId !== currentArticle.id) setLastArticleId(currentArticle.id);
+  const practisedId = route.name === 'practice' ? route.articleId : undefined;
+  if (practisedId && lastArticleId !== practisedId && articles.some((a) => a.id === practisedId))
+    setLastArticleId(practisedId);
   if (readerFocus && readerFocus.articleId !== currentArticle?.id) setReaderFocus(null);
   if (logArticleId && route.name !== 'study') setLogArticleId(null);
   if (keyRequest && route.name !== 'settings') setKeyRequest(null);
@@ -104,6 +108,13 @@ export default function App() {
       cancelled = true;
     };
   }, []);
+
+  // `#/practice` always names an article, so the address, the sidebar and Back agree on which one.
+  const defaultPracticeId = (articles.find((a) => a.id === lastArticleId) ?? articles[0])?.id ?? null;
+  useEffect(() => {
+    if (ready && route.name === 'practice' && !route.articleId && defaultPracticeId)
+      navigate({ name: 'practice', articleId: defaultPracticeId }, { replace: true });
+  }, [ready, route, defaultPracticeId]);
 
   usePersist('articles', articles, saveArticles, ready, reportSave);
   usePersist('vocabulary', vocabList, saveVocab, ready, reportSave);
@@ -322,7 +333,6 @@ export default function App() {
     );
   }
 
-  const practiceArticle = articles.find((a) => a.id === lastArticleId) ?? null;
   // The sidebar is a rail from md and expands from lg; the sections of Settings then list in it.
   const expanded = breakpoint === 'desktop' && sidebar.expanded;
   const sidebarWidth = breakpoint === 'phone' ? 0 : expanded ? 240 : 56;
@@ -434,13 +444,15 @@ export default function App() {
             )}
 
             {route.name === 'practice' && (
-              <PracticeView
-                currentArticle={practiceArticle}
-                onNeedsKey={requestKey}
-                onOpenLibrary={() => navigate(LIBRARY)}
-                onRecordAssessmentComplete={handleRecordAssessmentComplete}
+              <PracticePage
+                articles={articles}
+                articleId={route.articleId ?? defaultPracticeId}
+                onMissingKey={requestKey}
+                onAssessed={handleRecordAssessmentComplete}
               />
             )}
+
+            {route.name === 'unit' && <UnitView key={route.unitId} unitId={route.unitId} onMissingKey={requestKey} />}
 
             {route.name === 'progress' && <AnalyticsDashboard stats={stats} vocabList={vocabList} />}
 

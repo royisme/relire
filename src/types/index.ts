@@ -139,25 +139,6 @@ export interface Article {
   kind?: 'article' | 'workbook';
 }
 
-export interface PracticeQuestion {
-  id: number;
-  type: 'scramble' | 'cloze' | 'oral_prompt' | 'translation';
-  targetSentence: string;
-  prompt: string;
-  scrambledChunks?: string[];
-  clozeText?: string;
-  options?: string[];
-  correctOptionIndex?: number;
-  grammarHint?: string;
-  shadowingAudioPrompt?: string;
-}
-
-export interface PracticeDeck {
-  title: string;
-  description: string;
-  questions: PracticeQuestion[];
-}
-
 export interface UserStats {
   sentencesAnalyzed: number;
   shadowingSessionsCompleted: number;

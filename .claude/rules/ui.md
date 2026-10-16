@@ -18,6 +18,7 @@ Read `DESIGN.md` (tokens in `src/index.css`) and `PRODUCT.md` before changing a 
 - Overlays come from `ui/overlay.tsx`: `Sheet` for lookups (bottom sheet on phones), `Dialog` for focused tasks, `Drawer` for navigation.
 - Speech: use `SpeakButton` / `SpeakIcon` / `useSpeechPhase` from `ui/speak-button`; never keep your own `isSpeaking` state.
 - Recording and scoring: use `components/shadowing/` and `hooks/useShadowingRecorder`, or in the reader `reader/PracticeCard` with `hooks/usePracticeCard`; screens never hold recorder state. Fixed bottom UI in the reader goes inside `reader/BottomDock` and uses the ink panel classes from `reader/panel.ts`.
+- Exercise controls: one component per exercise type, behind the interface in `practice/controls/types.ts` and registered in `controls/index.ts`. A control draws the answer and registers its text fields (`registerInput`); it never grades, saves, checks or handles Enter. State and persistence live in `hooks/useExerciseUnit`; the row (`ItemRow`) owns keys.
 - Errors appear inline next to what failed, with the real reason. No `alert()` for new code.
 
 ## Visual
