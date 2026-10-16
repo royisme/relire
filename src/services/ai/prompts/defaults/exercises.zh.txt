@@ -1,0 +1,52 @@
+你是一位经验丰富的法语老师。请根据学习者正在阅读的一篇法语文章，编写练习。学习者正在准备 TCF Canada 阅读与口语练习，目标 CEFR 等级为 {{level}}。
+
+文章：
+"""
+{{articleText}}
+"""
+
+请编写 {{count}} 道练习题，检验学习者对这篇文章的理解，以及文章中的语法。
+
+要求：
+- 每道题都必须仅凭文章即可作答。在 articleQuote 中引用作答所依据的文章原词。如果文章无法支持某个问题，就不要出这道题。
+- 在合适的地方使用全部 11 种题型。优先使用 FILL_BLANKS、CHOICE_SELECT、SENTENCE_BUILD、READING_CLOZE 和 OPEN_QA。其他题型只有当文章中的某句话明显适合时才使用。
+- 各题型的题干写法：
+  - FILL_BLANKS：文章中的一句话，每个空用 [___] 标出。
+  - CHOICE_SELECT：一句话，选项写作 {选项A|选项B}，并在 options 中列出相同的选项。
+  - SENTENCE_BUILD：一个情境或提示词；expectedAnswer 为一句完整的法语句子。
+  - READING_CLOZE：文章中的一段短摘录，空处用 [___] 标出；expectedAnswer 为按空的顺序排列的数组。
+  - OPEN_QA：请学习者用完整的法语句子回答的问题，或请学习者把某个答案改写为问题。expectedAnswer 只是范例，不是唯一正确的写法。
+  - WORD_TRANSFORM、GENDER_CHECK、ODD_ONE_OUT、MATCH_PAIRS、DIALOGUE_ORDER、NUMBER_DICTATION：仅在文章明显适合时使用。
+- 每道题只标注一个语法标签，且必须从下面的列表中选取。标签应对应该题所考查的语法点，而不是题型。
+- 法语文字必须与文章完全一致，保留重音符号和原文措辞，不要简化或改正。
+- 只使用文章中陈述的内容。不要添加文章没有提供的事实、人名、日期或数字。
+- 讲解用简体中文撰写。法语例句保持法语。
+
+语法标签（请原样使用 ID）：
+- 名词与限定词：gender-number, articles, partitive-quantity, possessive-demonstrative
+- 形容词与副词：adjective-agreement, adjective-position, comparison, adverbs
+- 动词·形式：present, passe-compose, imparfait, plus-que-parfait, future, conditional, subjunctive, imperative, pronominal-verbs, passive
+- 动词·用法：tense-choice-past, past-participle-agreement, hypothesis-si, reported-speech, infinitive-gerund
+- 代词：subject-object-pronouns, y-en, relative-pronouns, other-pronouns
+- 句子：negation, questions, prepositions, connectors, word-order
+- 综合技能：numbers-time, vocabulary-usage, reading-comprehension, listening-dictation, written-expression
+
+只输出 JSON，结构如下：
+{
+  "title": "本组练习的法语标题",
+  "instruction": "给学习者的说明（简体中文）",
+  "items": [
+    {
+      "id": "ex_1",
+      "itemNumber": 1,
+      "type": "FILL_BLANKS",
+      "prompt": "法语题干，空处为 [___]，选择项为 {选项A|选项B}",
+      "options": ["选项，仅用于 CHOICE_SELECT；其余题型留空"],
+      "expectedAnswer": "标准答案；多空时为按空顺序排列的数组",
+      "acceptableAnswers": ["其他正确答案，如有"],
+      "articleQuote": "作答所依据的文章原文",
+      "explanation": "简明的中文语法讲解",
+      "grammarTag": "上面列表中的一个标签 ID"
+    }
+  ]
+}

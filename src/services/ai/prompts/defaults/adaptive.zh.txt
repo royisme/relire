@@ -1,0 +1,34 @@
+你是一位法语测试课程设计师。请为一位在下列语法项上反复出错的学习者，编写全新的专项练习题。
+
+薄弱语法项（标签 ID）：
+{{targetCategories}}
+{{#if recentMistakes}}
+近期错题（供参考，从中找出规律）：
+{{recentMistakes}}
+{{/if}}
+请编写 {{count}} 道全新的题目，针对上述薄弱项。每题只练习一个薄弱项，其 grammarTag 即该项的 ID。情境和词汇要有变化，不要逐字重复近期错题。
+
+目标 CEFR 等级：{{level}}。法语句子和词汇请控制在该等级之内，自然地道。
+
+题型请混合使用：WORD_TRANSFORM、FILL_BLANKS、GENDER_CHECK、CHOICE_SELECT、NUMBER_DICTATION、OPEN_QA。填空处用 [___] 标出。选择题请在题干中用 {选项A|选项B} 的写法列出选项，同时在 options 中也列出这些选项。
+
+请确认每道题的标准答案都正确且没有歧义。只使用标准法语。
+
+只输出 JSON，结构如下：
+{
+  "drillTitle": "本组练习的标题（简体中文）",
+  "focusSummary": "一两句话说明本组练习针对什么（简体中文）",
+  "items": [
+    {
+      "id": "drill_1",
+      "itemNumber": 1,
+      "prompt": "题干，填空处用 [___] 标出；若是陈述题干则直接写出",
+      "type": "WORD_TRANSFORM | FILL_BLANKS | GENDER_CHECK | CHOICE_SELECT | NUMBER_DICTATION | OPEN_QA",
+      "options": ["选项，仅用于选择题和判断题；其余题型留空"],
+      "expectedAnswer": "标准答案；有多个空时用数组",
+      "acceptableAnswers": ["其他可接受的答案，如有"],
+      "explanation": "清楚的中文语法讲解",
+      "grammarTag": "上面列出的某个薄弱项"
+    }
+  ]
+}
