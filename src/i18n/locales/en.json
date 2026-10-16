@@ -21,7 +21,10 @@
     "settings": "Settings",
     "menu": "Menu",
     "language": "Language",
-    "main": "Main navigation"
+    "main": "Main navigation",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "due": "{{count}} due"
   },
   "theme": {
     "label": "Theme",
@@ -181,7 +184,6 @@
     "voiceSection": "Voice",
     "female": "Female",
     "male": "Male",
-    "offlineSection": "Your data",
     "offlineSummary": "On this device:",
     "articlesCount": "{{count}} articles",
     "vocabCount": "{{count}} words",
@@ -195,7 +197,6 @@
     "testingBtn": "Testing…",
     "testSuccess": "Connection and voice work.",
     "testFailed": "Test failed: {{msg}}",
-    "savedNotice": "Stored in this browser only.",
     "keySet": "Key saved in this browser",
     "keyMissing": "No key yet",
     "keyPrivacy": "The key is stored only in this browser and sent only to {{provider}} when you use an AI feature. There is no app server.",
@@ -215,17 +216,10 @@
     "backupAudio": "Include pronunciation audio for my vocabulary (larger file)",
     "backupAudioSize": "about {{mb}} MB",
     "importAudioPartial": "Backup restored, but {{failed}} audio clips could not be saved on this device (storage may be full). Playing those words will generate them again.",
-    "textSection": "Explanations",
-    "textSectionDesc": "Writes word and sentence analyses, practice drills and pronunciation feedback.",
-    "speechSection": "Speech",
-    "speechSectionDesc": "Reads French aloud. It can be a different provider from the one above.",
     "providerLabel": "Provider",
     "modelLabel": "Model",
     "keyLabel": "{{provider}} API key",
     "sameKeyNote": "Uses the same {{provider}} key as above.",
-    "promptsSection": "Prompts",
-    "show": "Show",
-    "hide": "Hide",
     "promptsDesc": "The instructions sent to the AI, as plain text. Edit them to change how answers are written; reset any prompt to go back to the original. Answers already saved on this device stay as they are; edited prompts get fresh answers.",
     "promptTask": "Prompt",
     "promptLanguage": "Prompt language",
@@ -240,7 +234,44 @@
     "clearShadowing": "Delete all recordings",
     "clearShadowingConfirm": "Delete every shadowing recording on this device?",
     "shadowingFailed": "Recordings: {{msg}}",
-    "backupShadowing": "Include my shadowing recordings (larger file)"
+    "backupShadowing": "Include my shadowing recordings (larger file)",
+    "saved": "Saved",
+    "unsaved": "Unsaved changes",
+    "saveFailed": "Could not save: {{msg}}",
+    "notStored": "The browser did not keep the change. Storage may be blocked or full.",
+    "checkAndSave": "Check and save",
+    "checking": "Checking…",
+    "keyChecked": "Key works. Saved.",
+    "keyCheckFailed": "Key check failed: {{msg}}",
+    "returnToWork": "Go back to where you were",
+    "sections": {
+      "text-ai": {
+        "title": "Text AI",
+        "desc": "Writes word and sentence analyses, practice drills and pronunciation feedback."
+      },
+      "speech": {
+        "title": "Speech",
+        "desc": "Reads French aloud. It can be a different provider from the text AI."
+      },
+      "prompts": {
+        "title": "Prompts",
+        "desc": "Edit how the AI writes its answers."
+      },
+      "data": {
+        "title": "Data and backup",
+        "desc": "What is stored on this device, and backups."
+      },
+      "about": {
+        "title": "About",
+        "desc": "What Relire is and where your data goes."
+      }
+    },
+    "about": {
+      "what": "Relire is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
+      "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
+      "scope": "Relire is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
+      "source": "Source code on GitHub"
+    }
   },
   "importer": {
     "articleTitle": "Title",
@@ -583,5 +614,11 @@
       "name": "Open questions",
       "instruction": "Write your own question or answer."
     }
+  },
+  "notFound": {
+    "title": "This page is not here",
+    "page": "This address does not match a page in Relire.",
+    "article": "That article is not in your library. It may have been deleted, or the link comes from another browser.",
+    "toLibrary": "Go to the library"
   }
 }

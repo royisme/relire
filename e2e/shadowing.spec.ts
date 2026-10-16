@@ -189,9 +189,12 @@ test('opening a sentence from the log scrolls to it once', async ({ page }) => {
   await page.locator('button[title="Open in the reader"]').click();
   await expect(far).toBeInViewport();
 
-  await page.getByRole('button', { name: 'Progress' }).click();
-  await page.getByRole('button', { name: 'Read' }).click();
+  await page.getByRole('link', { name: 'Progress' }).click();
+  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByText('Le Petit Prince').first().click();
   await expect(page.locator('article [data-sentence]').first()).toBeVisible();
+  // The pointer is still where the library row was; hovering a sentence would show its actions.
+  await page.mouse.move(5, 5);
   await page.waitForTimeout(300);
   expect(await page.evaluate(() => scrollY)).toBeLessThan(200);
   await expect(page.locator('[data-sentence-actions]')).toBeHidden();
@@ -325,7 +328,7 @@ test('upgrading a version 3 database keeps its data', async ({ page }) => {
   );
   expect(stores.version).toBe(4);
   expect(stores.stores).toContain('shadowing');
-  await page.getByRole('button', { name: 'My study' }).click();
+  await page.getByRole('link', { name: 'My study' }).click();
   await expect(page.getByText('ancien').first()).toBeVisible();
 });
 

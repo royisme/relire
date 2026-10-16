@@ -47,7 +47,7 @@ First run: a three-step guide (welcome, connect Gemini with a checked key, try a
 - **My study**: the learner's own material, in two parts. **Words**: the vocabulary list plus flashcard quiz with SRS ratings. **Shadowing**: every recorded sentence by article, as text | reference audio | my recordings, with compare, delete and open in the reader.
 - **Practice**: AI-generated drills and oral assessment.
 - **Progress**: three plain figures (words saved, average pronunciation score, shadowing sessions), recent scores, and a tap-to-hear chart of the French sounds in IPA. No coaching text or invented scores; an AI coach summary is a possible later feature.
-- **Settings**: AI provider, keys and models for explanations and speech, voice, editable prompts, stored data (saved answers, audio, shadowing recordings) and backup/restore JSON, with recordings optional. Language is a single icon in the header.
+- **Settings**: a page with sections that each save on their own: Text AI (provider, model, key), Speech (provider, model, voice, key), editable prompts, stored data (saved answers, audio, shadowing recordings) with backup/restore JSON (recordings optional), and About. Language and theme are single icons in the header.
 
 ## Tone and personality
 
@@ -60,7 +60,7 @@ Duolingo-style gamification (streak flames, confetti, mascots), generic AI-dashb
 ## Design principles
 
 1. **The article is the page.** Reading column 60–70ch, generous leading, a real text face. Everything else is secondary and quieter.
-2. **Lookups are detours, not destinations.** Contextual lookups open in a side sheet (bottom sheet on phones) beside the text and never hide it. Centered modals are reserved for tasks that need focus: settings, import, install.
+2. **Lookups are detours, not destinations.** Contextual lookups open in a side sheet (bottom sheet on phones) beside the text and never hide it. Centered modals are reserved for tasks that need focus: the first-run guide, import, delete, install. Settings is a page.
 3. **One accent, used for action and the current selection.** Colour beyond that is semantic only: success, error.
 4. **Show real data or nothing.** No invented scores, streaks or levels; empty states say what to do next.
 5. **Touch and keyboard are first-class.** Hover never gates a feature; targets are at least 40px on touch; focus is always visible; motion is short and respects reduced-motion.

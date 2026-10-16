@@ -1,5 +1,5 @@
 import { WordAnalysis, SentenceAnalysis, PronunciationAssessment, PracticeDeck } from '../types';
-import { getApiKey, getAppSettings } from '../utils/appSettings';
+import { getApiKey, getAppSettings, type AppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as ai from './ai/tasks';
 import { getTextProvider } from './ai/providers';
@@ -236,8 +236,7 @@ export function getTextModelStatus(): { providerId: string; model: string; reads
   };
 }
 
-/** Checks a pasted key against the text provider before it is saved. */
-export function checkTextKey(apiKey: string): Promise<void> {
-  const settings = getAppSettings();
+/** Checks a pasted key against the text provider before it is saved. Defaults to the stored provider and model. */
+export function checkTextKey(apiKey: string, settings: AppSettings = getAppSettings()): Promise<void> {
   return getTextProvider(settings.textProvider).checkKey({ apiKey, model: settings.textModel });
 }

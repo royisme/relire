@@ -21,7 +21,10 @@
     "settings": "设置",
     "menu": "菜单",
     "language": "语言",
-    "main": "主导航"
+    "main": "主导航",
+    "collapse": "收起侧边栏",
+    "expand": "展开侧边栏",
+    "due": "{{count}} 个待复习"
   },
   "theme": {
     "label": "主题",
@@ -180,7 +183,6 @@
     "voiceSection": "音色",
     "female": "女声",
     "male": "男声",
-    "offlineSection": "你的数据",
     "offlineSummary": "本机已保存：",
     "articlesCount": "{{count}} 篇文章",
     "vocabCount": "{{count}} 个生词",
@@ -194,7 +196,6 @@
     "testingBtn": "测试中…",
     "testSuccess": "连接和朗读都正常。",
     "testFailed": "测试失败：{{msg}}",
-    "savedNotice": "只保存在这个浏览器里。",
     "keySet": "Key 已保存在此浏览器",
     "keyMissing": "尚未设置 Key",
     "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 {{provider}}。没有应用服务器。",
@@ -214,17 +215,10 @@
     "backupAudio": "备份时包含生词本的发音音频（文件会更大）",
     "backupAudioSize": "约 {{mb}} MB",
     "importAudioPartial": "备份已恢复，但有 {{failed}} 段音频没能保存到这台设备（可能存储空间已满）。播放这些单词时会重新生成。",
-    "textSection": "讲解",
-    "textSectionDesc": "负责单词和句子解析、练习题和发音反馈。",
-    "speechSection": "朗读",
-    "speechSectionDesc": "负责朗读法语，可以和上面选不同的提供方。",
     "providerLabel": "提供方",
     "modelLabel": "模型",
     "keyLabel": "{{provider}} API Key",
     "sameKeyNote": "与上面使用同一个 {{provider}} Key。",
-    "promptsSection": "提示词",
-    "show": "展开",
-    "hide": "收起",
     "promptsDesc": "发给 AI 的指令，是纯文本。修改它们就能改变回答的写法；任何一条都可以恢复默认。已经保存在这台设备上的解析不会变，改过的提示词会得到新的解析。",
     "promptTask": "提示词",
     "promptLanguage": "提示词语言",
@@ -239,7 +233,44 @@
     "clearShadowing": "删除全部录音",
     "clearShadowingConfirm": "删除本设备上的全部跟读录音？",
     "shadowingFailed": "录音：{{msg}}",
-    "backupShadowing": "包含我的跟读录音（文件更大）"
+    "backupShadowing": "包含我的跟读录音（文件更大）",
+    "saved": "已保存",
+    "unsaved": "有未保存的修改",
+    "saveFailed": "没能保存：{{msg}}",
+    "notStored": "浏览器没有保存这次修改，可能是存储被禁用或已满。",
+    "checkAndSave": "检查并保存",
+    "checking": "检查中…",
+    "keyChecked": "Key 可用，已保存。",
+    "keyCheckFailed": "Key 检查没有通过：{{msg}}",
+    "returnToWork": "回到刚才的位置",
+    "sections": {
+      "text-ai": {
+        "title": "文字 AI",
+        "desc": "负责单词和句子解析、练习题和发音反馈。"
+      },
+      "speech": {
+        "title": "朗读",
+        "desc": "负责朗读法语，可以和文字 AI 选不同的提供方。"
+      },
+      "prompts": {
+        "title": "提示词",
+        "desc": "修改 AI 写回答的方式。"
+      },
+      "data": {
+        "title": "数据与备份",
+        "desc": "本机保存的内容，以及备份。"
+      },
+      "about": {
+        "title": "关于",
+        "desc": "Relire 是什么，数据去了哪里。"
+      }
+    },
+    "about": {
+      "what": "Relire 是为准备 TCF Canada 的法语学习者做的精读助手：读真实的法语文章，点开任何单词或句子查看解析，并开口练习发音。",
+      "privacy": "没有账号，也没有应用服务器。文章、生词和录音都保存在这个浏览器里。使用 AI 功能时，文本或录音会用你自己的 Key 从这个浏览器直接发给你选择的提供方。",
+      "scope": "Relire 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
+      "source": "在 GitHub 查看源代码"
+    }
   },
   "importer": {
     "articleTitle": "标题",
@@ -581,5 +612,11 @@
       "name": "开放式问答",
       "instruction": "用你自己的话写出问题或答案。"
     }
+  },
+  "notFound": {
+    "title": "找不到这个页面",
+    "page": "这个地址在 Relire 里没有对应的页面。",
+    "article": "文章库里没有这篇文章。它可能已被删除，或者链接来自另一个浏览器。",
+    "toLibrary": "回到文章库"
   }
 }

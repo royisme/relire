@@ -1,4 +1,4 @@
-/** Dialogs start from the saved values every time they open; nothing typed and cancelled comes back. */
+/** Dialogs and the Settings page start from the saved values; nothing typed and abandoned comes back. */
 import { expect, test } from './fixtures';
 
 // `ai` onboards the app with a test key; nothing here calls the AI.
@@ -7,17 +7,17 @@ test.beforeEach(async ({ page, ai }) => {
   expect(ai.calls.tts).toBe(0);
 });
 
-test('settings reopen with the saved values after Cancel', async ({ page }) => {
-  const settings = page.getByRole('dialog', { name: 'Settings' });
-  const key = settings.getByPlaceholder('Paste your key here').first();
+test('settings come back with the saved values; an unsaved edit is not kept', async ({ page }) => {
+  const key = page.getByPlaceholder('Paste your key here').first();
 
-  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('link', { name: 'Settings', exact: true }).click();
+  await expect(page).toHaveURL(/#\/settings\/text-ai$/);
   await expect(key).toHaveValue('TEST');
   await key.fill('unsaved draft');
-  await settings.getByRole('button', { name: 'Cancel' }).click();
-  await expect(settings).toBeHidden();
+  await expect(page.getByText('Unsaved changes')).toBeVisible();
 
-  await page.getByRole('button', { name: 'Settings' }).click();
+  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(key).toHaveValue('TEST');
 });
 

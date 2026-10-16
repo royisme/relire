@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useSyncExternalStore } from 'react';
+import React, { useState, useEffect, useSyncExternalStore, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navbar } from './components/Navbar';
+import { Header } from './components/shell/Header';
+import { Sidebar } from './components/shell/Sidebar';
+import { NotFoundView } from './components/shell/NotFoundView';
 import { ReaderView } from './components/ReaderView';
 import { WordDetailModal } from './components/WordDetailModal';
 import { SentenceDrawer } from './components/SentenceDrawer';
-import { StudyView, readStudyTab, type StudyTab } from './components/study/StudyView';
+import { StudyView } from './components/study/StudyView';
 import { PracticeView } from './components/PracticeView';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { ArticleEditorDialog } from './components/ArticleEditorDialog';
 import { LibraryView } from './components/LibraryView';
 import { OnboardingDialog } from './components/OnboardingDialog';
-import { SettingsModal } from './components/SettingsModal';
+import { SettingsPage } from './components/settings/SettingsPage';
+import type { KeyRequest } from './components/settings/keyRequest';
 
 import { Article, VocabWord, WordAnalysis, SentenceAnalysis, UserStats, PronunciationAssessment } from './types';
 import { SAMPLE_ARTICLES } from './data/sampleArticles';
@@ -29,6 +32,10 @@ import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './
 import { isDueToday, formatDate } from './utils/srs';
 import { prefetchSpeech } from './utils/speech';
 import { hasTextKey } from './utils/appSettings';
+import { LIBRARY, parseRoute } from './utils/routes';
+import { navigate, useRoute } from './hooks/useRoute';
+import { useBreakpoint } from './hooks/useMediaQuery';
+import { useSidebar } from './hooks/useSidebar';
 
 const ONBOARDING_KEY = 'relire_onboarded';
 const storedFlag = (key: string) => {
@@ -41,28 +48,35 @@ const storedFlag = (key: string) => {
 
 export default function App() {
   const { t } = useTranslation();
-  // Navigation tab
-  const [currentTab, setCurrentTab] = useState<'reader' | 'vocab' | 'practice' | 'analytics'>('reader');
-  // My study (internal id stays 'vocab'): which sub-tab, and which article the log opens at.
-  const [studyTab, setStudyTab] = useState<StudyTab>(readStudyTab);
+  // Where the learner is: the address decides the screen (see utils/routes.ts).
+  const route = useRoute();
+  const breakpoint = useBreakpoint();
+  const sidebar = useSidebar(route.name === 'reader');
+  // The article the log opens at (set when the reader sends the learner to its recordings).
   const [logArticleId, setLogArticleId] = useState<string | null>(null);
-  // A sentence to bring into view when the reader opens (from the shadowing log).
-  const [readerFocus, setReaderFocus] = useState<string | null>(null);
+  // A sentence to bring into view when the reader opens (from the shadowing log). Shown once.
+  const [readerFocus, setReaderFocus] = useState<{ articleId: string; text: string } | null>(null);
+  // The article Drills works on: the one most recently read.
+  const [lastArticleId, setLastArticleId] = useState<string | null>(null);
+  // Set while an AI feature is waiting for a key, so Settings can focus the field and offer the way back.
+  const [keyRequest, setKeyRequest] = useState<KeyRequest | null>(null);
   // Data lives in IndexedDB (see src/storage). It loads once, then every change is saved.
   const [ready, setReady] = useState(false);
   const dbNotice = useSyncExternalStore(subscribeDbNotice, getDbNotice);
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  // The Read tab is a library list; opening an article switches it to the reader.
-  const [currentArticleId, setCurrentArticleId] = useState<string | null>(null);
-  const [isReading, setIsReading] = useState(false);
-  const currentArticle = articles.find((a) => a.id === currentArticleId) ?? null;
+  const currentArticle = route.name === 'reader' ? (articles.find((a) => a.id === route.articleId) ?? null) : null;
   const [editor, setEditor] = useState<{ article: Article | null } | null>(null);
   const [hasKey, setHasKey] = useState(() => hasTextKey());
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [vocabList, setVocabList] = useState<VocabWord[]>([]);
   const [stats, setStats] = useState<UserStats>(EMPTY_STATS);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // State that belongs to one place is dropped when the learner leaves it (adjusted while rendering, not in an effect).
+  if (currentArticle && lastArticleId !== currentArticle.id) setLastArticleId(currentArticle.id);
+  if (readerFocus && readerFocus.articleId !== currentArticle?.id) setReaderFocus(null);
+  if (logArticleId && route.name !== 'study') setLogArticleId(null);
+  if (keyRequest && route.name !== 'settings') setKeyRequest(null);
 
   const reportSave = (name: string, error: unknown) => {
     if (error) console.error(`Saving ${name} failed`, error);
@@ -110,13 +124,19 @@ export default function App() {
 
   // AI failures: a missing key sends the user to Settings, anything else is shown in the sheet.
   const [aiError, setAiError] = useState<string | null>(null);
-  const [settingsNeedKey, setSettingsNeedKey] = useState(false);
+
+  // Settings → Text AI with the key field ready; its way back is wherever the learner is now.
+  const requestKey = () => {
+    const here = window.location.hash || '#/read';
+    const inSettings = parseRoute(window.location.hash).route.name === 'settings';
+    setKeyRequest({ id: Date.now(), returnTo: inSettings ? null : here });
+    navigate({ name: 'settings', section: 'text-ai' });
+  };
 
   const handleAiError = (err: unknown, closeSheet: () => void) => {
     if (err instanceof MissingApiKeyError) {
       closeSheet();
-      setSettingsNeedKey(true);
-      setIsSettingsOpen(true);
+      requestKey();
       return;
     }
     setAiError(err instanceof Error ? err.message : String(err));
@@ -223,10 +243,8 @@ export default function App() {
   };
 
   const openArticle = (article: Article, focusText: string | null = null) => {
-    setReaderFocus(focusText);
-    setCurrentArticleId(article.id);
-    setIsReading(true);
-    setCurrentTab('reader');
+    setReaderFocus(focusText ? { articleId: article.id, text: focusText } : null);
+    navigate({ name: 'reader', articleId: article.id });
   };
 
   // Add or edit. A new article opens straight away; an edit stays where it is.
@@ -245,10 +263,8 @@ export default function App() {
       return;
     }
     setArticles((prev) => prev.filter((a) => a.id !== article.id));
-    if (article.id === currentArticleId) {
-      setCurrentArticleId(null);
-      setIsReading(false);
-    }
+    const here = parseRoute(window.location.hash).route;
+    if (here.name === 'reader' && here.articleId === article.id) navigate(LIBRARY, { replace: true });
   };
 
   const missingSamples = SAMPLE_ARTICLES.filter((sample) => !articles.some((a) => a.id === sample.id));
@@ -306,127 +322,142 @@ export default function App() {
     );
   }
 
+  const practiceArticle = articles.find((a) => a.id === lastArticleId) ?? null;
+  // The sidebar is a rail from md and expands from lg; the sections of Settings then list in it.
+  const expanded = breakpoint === 'desktop' && sidebar.expanded;
+  const sidebarWidth = breakpoint === 'phone' ? 0 : expanded ? 240 : 56;
+
   return (
-    <div className="min-h-screen bg-ink-50 text-ink-900 flex flex-col font-sans">
-      {/* Top Navbar */}
-      <Navbar
-        currentTab={currentTab}
-        onSelectTab={(tab) => {
-          // A sentence opened from the shadowing log is shown once, not on every return to the reader.
-          setReaderFocus(null);
-          setCurrentTab(tab);
-        }}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        dueCount={dueCount}
-        totalVocabCount={vocabList.length}
-      />
+    <div
+      className="min-h-screen bg-ink-50 text-ink-900 flex flex-col font-sans"
+      style={{ '--sidebar-w': `${sidebarWidth}px` } as CSSProperties}
+    >
+      <Header route={route} dueCount={dueCount} showMenu={breakpoint === 'phone'} />
 
-      {dbNotice === 'stale' && (
-        <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>{t('storage.staleTab')}</span>
-            <button className="underline underline-offset-2 cursor-pointer" onClick={() => window.location.reload()}>
-              {t('storage.reload')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {failedSaves.length > 0 && (
-        <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>{t('storage.saveFailed')}</span>
-            <button className="underline underline-offset-2 cursor-pointer" onClick={() => setIsSettingsOpen(true)}>
-              {t('storage.openBackup')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!hasKey && !onboardingOpen && (
-        <div className="bg-accent-50 border-b border-accent-200 text-accent-900 text-sm">
-          <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>{t('keyBanner.text')}</span>
-            <button
-              className="font-medium underline underline-offset-2 cursor-pointer"
-              onClick={() => {
-                setSettingsNeedKey(true);
-                setIsSettingsOpen(true);
-              }}
-            >
-              {t('keyBanner.action')}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Main View Area */}
-      <main className="flex-1 pb-16">
-        {currentTab === 'reader' &&
-          (isReading && currentArticle ? (
-            <ReaderView
-              currentArticle={currentArticle}
-              onBack={() => setIsReading(false)}
-              onWordClick={handleWordClick}
-              onSentenceClick={handleSentenceClick}
-              onMissingKey={() => {
-                setSettingsNeedKey(true);
-                setIsSettingsOpen(true);
-              }}
-              onOpenShadowingLog={(articleId) => {
-                setLogArticleId(articleId);
-                setStudyTab('shadowing');
-                setCurrentTab('vocab');
-              }}
-              focusText={readerFocus}
-              activeWord={activeWord}
-              activeSentence={activeSentence}
-            />
-          ) : (
-            <LibraryView
-              articles={articles}
-              missingSamples={missingSamples.length}
-              onOpen={openArticle}
-              onAdd={() => setEditor({ article: null })}
-              onEdit={(article) => setEditor({ article })}
-              onDelete={handleDeleteArticle}
-              onRestoreSamples={handleRestoreSamples}
-            />
-          ))}
-
-        {currentTab === 'vocab' && (
-          <StudyView
-            tab={studyTab}
-            onTab={setStudyTab}
-            vocabulary={{ vocabList, onUpdateWord: handleUpdateWord, onDeleteWord: handleDeleteWord }}
-            shadowing={{
-              articles,
-              initialArticleId: logArticleId,
-              onOpenSentence: (articleId, text) => {
-                const article = articles.find((a) => a.id === articleId);
-                if (article) openArticle(article, text);
-              },
-            }}
+      <div className="flex flex-1 items-start">
+        {breakpoint !== 'phone' && (
+          <Sidebar
+            route={route}
+            dueCount={dueCount}
+            expanded={expanded}
+            onToggle={breakpoint === 'desktop' ? sidebar.toggle : undefined}
           />
         )}
 
-        {currentTab === 'practice' && (
-          <PracticeView
-            currentArticle={currentArticle}
-            onNeedsKey={() => {
-              setSettingsNeedKey(true);
-              setIsSettingsOpen(true);
-            }}
-            onOpenLibrary={() => {
-              setIsReading(false);
-              setCurrentTab('reader');
-            }}
-            onRecordAssessmentComplete={handleRecordAssessmentComplete}
-          />
-        )}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {dbNotice === 'stale' && (
+            <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
+              <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>{t('storage.staleTab')}</span>
+                <button
+                  className="underline underline-offset-2 cursor-pointer"
+                  onClick={() => window.location.reload()}
+                >
+                  {t('storage.reload')}
+                </button>
+              </div>
+            </div>
+          )}
 
-        {currentTab === 'analytics' && <AnalyticsDashboard stats={stats} vocabList={vocabList} />}
-      </main>
+          {failedSaves.length > 0 && (
+            <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
+              <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>{t('storage.saveFailed')}</span>
+                <button
+                  className="underline underline-offset-2 cursor-pointer"
+                  onClick={() => navigate({ name: 'settings', section: 'data' })}
+                >
+                  {t('storage.openBackup')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {!hasKey && !onboardingOpen && route.name !== 'settings' && (
+            <div className="bg-accent-50 border-b border-accent-200 text-accent-900 text-sm">
+              <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <span>{t('keyBanner.text')}</span>
+                <button className="font-medium underline underline-offset-2 cursor-pointer" onClick={requestKey}>
+                  {t('keyBanner.action')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          <main className="flex-1 pb-16">
+            {route.name === 'library' && (
+              <LibraryView
+                articles={articles}
+                missingSamples={missingSamples.length}
+                onOpen={openArticle}
+                onAdd={() => setEditor({ article: null })}
+                onEdit={(article) => setEditor({ article })}
+                onDelete={handleDeleteArticle}
+                onRestoreSamples={handleRestoreSamples}
+              />
+            )}
+
+            {route.name === 'reader' &&
+              (currentArticle ? (
+                <ReaderView
+                  key={currentArticle.id}
+                  currentArticle={currentArticle}
+                  onBack={() => navigate(LIBRARY)}
+                  onWordClick={handleWordClick}
+                  onSentenceClick={handleSentenceClick}
+                  onMissingKey={requestKey}
+                  onOpenShadowingLog={(articleId) => {
+                    setLogArticleId(articleId);
+                    navigate({ name: 'study', tab: 'shadowing' });
+                  }}
+                  focusText={readerFocus?.text ?? null}
+                  activeWord={activeWord}
+                  activeSentence={activeSentence}
+                />
+              ) : (
+                <NotFoundView reason="article" />
+              ))}
+
+            {route.name === 'study' && (
+              <StudyView
+                tab={route.tab}
+                vocabulary={{ vocabList, onUpdateWord: handleUpdateWord, onDeleteWord: handleDeleteWord }}
+                shadowing={{
+                  articles,
+                  initialArticleId: logArticleId,
+                  onOpenSentence: (articleId, text) => {
+                    const article = articles.find((a) => a.id === articleId);
+                    if (article) openArticle(article, text);
+                  },
+                }}
+              />
+            )}
+
+            {route.name === 'practice' && (
+              <PracticeView
+                currentArticle={practiceArticle}
+                onNeedsKey={requestKey}
+                onOpenLibrary={() => navigate(LIBRARY)}
+                onRecordAssessmentComplete={handleRecordAssessmentComplete}
+              />
+            )}
+
+            {route.name === 'progress' && <AnalyticsDashboard stats={stats} vocabList={vocabList} />}
+
+            {route.name === 'settings' && (
+              <SettingsPage
+                section={route.section}
+                sectionsInSidebar={expanded}
+                keyRequest={keyRequest}
+                onSettingsSaved={(newSettings) => setHasKey(hasTextKey(newSettings))}
+                onReturn={(hash) => navigate(hash)}
+              />
+            )}
+
+            {route.name === 'notFound' && <NotFoundView reason="page" />}
+          </main>
+        </div>
+      </div>
 
       {/* Word Detail Floating Modal */}
       <WordDetailModal
@@ -475,19 +506,6 @@ export default function App() {
           onOpenSample={articles[0] ? () => openArticle(articles[0]) : undefined}
         />
       )}
-
-      {/* Settings */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => {
-          setIsSettingsOpen(false);
-          setSettingsNeedKey(false);
-        }}
-        needsKey={settingsNeedKey}
-        onSettingsSaved={(newSettings) => {
-          setHasKey(hasTextKey(newSettings));
-        }}
-      />
     </div>
   );
 }

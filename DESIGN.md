@@ -216,10 +216,10 @@ Four choices from the theme menu in the header: **Match system** (light or dark,
 
 ## Layout
 
-- **App frame:** content up to `max-w-5xl` (64rem) centred, with 16px gutters on phones and 24px from `sm`. The header is 56px.
+- **App frame:** a 56px sticky header, then from `md` a sidebar column beside the content (see Navigation). Content up to `max-w-5xl` (64rem) centred in the space beside it, with 16px gutters on phones and 24px from `sm`.
 - **Reader:** the article is a single bordered surface; the text column is `.reading` (68ch). Reading settings (font size, listen, speed, markers) sit in a toolbar above it.
 - **Bottom dock:** the reader has exactly one fixed bottom area (`reader/BottomDock`), holding the practice card, then the touch sentence bar, then the article player, each up to `max-w-md` (28rem), centred, respecting the safe-area inset. It publishes its height as `--dock-height`; the article's bottom padding is `max(7rem, dock height + 2rem)` and follow-scrolling keeps the current sentence above it. Any new fixed UI in the reader goes inside the dock.
-- **Breakpoints:** `md` (768px) switches the nav from a drawer to flat tabs, sheets from bottom to side, and the shadowing log from stacked rows to a three-column table.
+- **Breakpoints:** `md` (768px) brings in the sidebar as a 56px icon rail (below it, a menu button opens the same tree in a left drawer), switches sheets from bottom to side, and turns the shadowing log from stacked rows into a three-column table. `lg` (1024px) lets the sidebar expand to 240px with labels and sub-pages.
 - **360px:** every screen is checked at 360px with long text; layouts wrap (`break-words`, `min-w-0`, `flex-wrap`) instead of fixing widths. No horizontal page scroll.
 
 **The Still Page Rule.** Controls must not move the page. Loading, playing, recording and errors show on the pressed control (icon swap, fixed size) or in an overlay, never as a row that appears and disappears. A slot that changes content between states keeps its height.
@@ -250,8 +250,9 @@ Filters and modes (library level, vocabulary filter, My study's Words | Shadowin
 | Need | Pattern | Component |
 |---|---|---|
 | Look up a word or sentence while reading | Side sheet on md+, bottom sheet on phones, light scrim so text stays visible | `Sheet` |
-| Task that needs focus (settings, import, delete) | Centred dialog | `Dialog` |
-| Switch area | Flat underlined tabs from `md` up; below `md` a menu button opens a left drawer | `Navbar`, `Drawer` |
+| Task that needs focus (import, delete, install guide, first-run guide) | Centred dialog | `Dialog` |
+| Switch area | A sidebar beside the content from `md` (rail, expanded from `lg`); below `md` a menu button opens the same tree in a left drawer | `shell/Sidebar`, `shell/Header` (`Drawer`) |
+| Change settings | A page, not an overlay: its own sections, each saved on its own | `settings/SettingsPage` |
 | Change interface language or theme | One icon in the header opening a short menu | `MenuButton` |
 | Sentence actions | With a mouse or keyboard, a compact pill at the end of the sentence (play, analyse, record). On touch screens (`hover: none`, `pointer: coarse`), a bar in the bottom dock with 40px buttons and close, never over the text; the tapped sentence is scrolled clear of it | `ReaderView`, `reader/SentenceBar` |
 | Practise a sentence | A docked card at the bottom of the reader | `PracticeCard` |
@@ -288,7 +289,18 @@ Ordinary reading is the default. The toolbar has a direct marker switch and a se
 Marker mode uses line-height 2.05. Spoken-syllable `/` slots occupy 0.3em at 0.85em type size and keep their width when hidden. Silent spelling and slashes use `ink-500`; unresolved spelling is unchanged. Marker inks are theme tokens: silent spelling and slashes stay at or above 4.5:1 and curves at or above 3:1 against the reading surface in every theme. Paragraph-local `ink-600` curves sit below word gaps (liaison: 1.25px stroke / 5px sag; enchaînement: 1px / 3px, at 21px); wrapped pairs get local tails, never diagonal lines or nowrap wrappers. Stress dots have a 1.3px radius, centred about 2.8px below the marked glyph's ink bottom, scaling with type size. No rhythm-group lines or letter-spacing treatments, and no second muted grey. Decorations are non-interactive and excluded from accessible and copied text; connection explanations are available in the panel by touch and keyboard.
 
 ### Navigation
-Flat tabs (Read, My study, Drills, Progress) with an icon and label, `ink-600` at rest, `ink-900` with a 2px `accent-700` underline when current. Below `md` a menu button opens a left drawer holding the tabs, install and settings.
+The sidebar is the one place to switch area. The header keeps only the brand, theme and language, plus the menu button on phones. Every place has a hash address (`#/read`, `#/study/shadowing`, `#/settings/speech`; table in `docs/architecture.md`), and rows are real links, so Back, reload and copied links keep the place. An unknown address or a missing article shows a plain not-found page with a link to the library.
+
+- **Expanded** (from `lg`, 240px): a 40px row per area (Read, My study, Drills, Progress) with a 16px icon and label, `ink-700` at rest. The current page is `ink-950` on an `ink-100` fill with a 2px `accent-700` bar at the row's left edge; the current area lists its sub-pages indented under it (My study: Words, Shadowing). The due-vocabulary count is an `accent-700` badge on My study. After a rule at the bottom: Install app, Settings (its sections indented under it while on a settings page) and the collapse toggle.
+- **Rail** (56px; from `md`, and the collapsed state from `lg`): icons only, centred in 40px targets. The label is the tooltip (`title`) and the accessible name; the due count is a small badge on the icon's corner. Sub-pages are left out, so pages that have them draw their own list: My study's segmented control, and Settings' section list beside the page.
+- **Remembered choice:** expanded or collapsed is stored in `relire_sidebar`. In the reader the sidebar always starts as a rail so the article stays the page; expanding it there lasts for that visit and is not remembered. The sidebar takes its own column in the page flow, so it never covers text, and the reader's bottom dock centres on the content column.
+- **Phones** (below `md`): the header's menu button opens a left drawer with the same tree, closing when a link is followed.
+- **Flat:** a 1px `ink-200` rule on its right edge, no shadow, and no width animation.
+
+### Settings page
+Settings is a page, not an overlay, with five sections: Text AI, Speech, Prompts, Data and backup, About. The section list is the sidebar's sub-pages when it is expanded; beside the section from `md` otherwise; and on phones the page itself (a list of titles with a line each, then the section behind a "‹ Settings" link). Each section ends with its own Save button (disabled until something changed) and one fixed-height status line: "Unsaved changes", "Saved" in `ok-800`, or the real reason in `bad-700`. Data and backup acts immediately and has no Save. Unsaved edits survive moving between sections and are dropped when the learner leaves Settings.
+
+When an AI feature needs a key, the app opens Settings → Text AI with the key field focused and a short notice; once the key is checked and saved, "Go back to where you were" (drawn from the start, disabled until then) returns to the page the learner left. The first-run guide stays a dialog.
 
 ### Motion
 160–200ms with `ease-out` (`cubic-bezier(0.22, 1, 0.36, 1)`): sheets slide 24px (up on phones, from the right on md+), dialogs and floating controls fade. Everything is disabled under `prefers-reduced-motion`. No bounce, pulse or decorative animation.
