@@ -40,6 +40,7 @@ Bun is the only package manager.
 | --- | --- |
 | What the product is for, who it serves, what it must not claim | `PRODUCT.md` |
 | Merging FrenchLab AI: decisions, target screens, storage, phases | `docs/merge-plan.md` |
+| Where the merge stands and what to do next (resume here) | `docs/merge-progress.md` |
 | Visual system: tokens, type, spacing, overlays | `DESIGN.md` |
 | Which module owns what, data flow, storage lifetimes | `docs/architecture.md` |
 | Area rules (UI, AI layer, storage, speech, i18n, marketing site, TypeScript style) | `.claude/rules/*.md`, loaded automatically when you open matching files |

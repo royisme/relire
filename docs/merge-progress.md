@@ -1,0 +1,136 @@
+# Relire Plus merge: progress and next steps
+
+Status: living handoff document. Update it at the end of every work session.
+Last updated: 2026-10-16.
+Plan and decisions: `docs/merge-plan.md`. Branch: `claude/sleepy-darwin-lt2eck` (all merged work is pushed there; no PR yet).
+
+## How to resume
+
+Paste this into a new session:
+
+> Continue the Relire Plus merge. Read `docs/merge-progress.md` and `docs/merge-plan.md`, check the state of branch `claude/sleepy-darwin-lt2eck`, then run the next unchecked task in "Next tasks", splitting the work across Sonnet and Haiku subagents as the table suggests. Review, merge, check and push each result, and update this file.
+
+Working method used so far:
+
+1. **Split** each phase into tasks with clear file boundaries. Sonnet gets logic, state, UI and storage; Haiku gets well-specified text, data and translation work.
+2. **Isolate** parallel agents with `isolation: "worktree"`. Every prompt starts with: "If your worktree branch has no commits of its own, run `git reset --hard claude/sleepy-darwin-lt2eck`, then `bun install`." Worktrees can start from an old commit otherwise.
+3. **Commit, don't push.** Agents commit on their worktree branch and report the branch, the sha, the API they exported and the checks they ran.
+4. **Review and merge.** Read the diff, then `git cherry-pick <sha>` onto the branch. Merge locale JSON with a three-way merge of keys, not by hand.
+5. **Run every check** (below), fix anything small yourself, then push and remove the worktree (`git worktree remove -f -f …`, `git branch -D worktree-agent-…`).
+6. **Add `.claude/worktrees/` to `.git/info/exclude`.** Agent worktrees are not part of the repo.
+
+Checks (all must pass before a push):
+
+```sh
+bun run typecheck && bun run lint && bun run format:check && bun run test \
+  && bun run i18n:check && bun scripts/check-prosody-schema.ts && bun run build
+CHROME_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome bun run e2e   # never `playwright install`
+```
+
+- **Parallel e2e.** Only one e2e run at a time can own port 5174. Agents running e2e in parallel produce load flakes, so re-run a failing spec on its own before calling it a bug.
+- **`impeccable`.** The detector is not installed in the cloud container. Say so in reports rather than claiming it ran.
+- **Container restarts.** A restart kills running agents. Their committed work survives only in their local worktree branch, and uncommitted edits survive in the worktree directory. Neither is pushed, so check `git worktree list` first and resume from what is there.
+
+## Done
+
+| Phase | What | Commits |
+| --- | --- | --- |
+| 1 | Plan; scope and name in `CLAUDE.md` / `PRODUCT.md`; oxfmt + oxlint with a zero-finding baseline | `0fb3d17`, `c3ca56b`, `ff5a70d` |
+| 2 | Locale labels (grammar areas, 37 tags, 11 exercise types); FrenchLab prompts as `extract/hint/explain/grade/adaptive/exercises` templates | `36af6f3`, `52385da` |
+| 2 | Zod exercise contracts, grammar taxonomy and FrenchLab mapping, grading, import drafts, provider JSON schema, `bun test` | `57280cd`, `e17daf7` |
+| 2 | AI layer: templates registered, image input, tasks and `api.ts` functions with caching rules | `a32fea4` |
+| 2 | Storage: IndexedDB v5 (`units`, `itemStates`, `attempts`), check/reset transactions with reset tokens, backup; Settings restore passes exercise data | `f7c6f80`, `84bb08f` |
+| 2b | App shell: collapsible sidebar, Settings as a page with per-section save, hash routes, not-found view | `247b61c` |
+| 3 (prep) | Shared 11-type exercise catalogue with right and wrong answers and mock AI answers (`tests/fixtures/exerciseCatalog.ts`) | `888cdba` |
+
+At `888cdba`: 171 unit tests and 46 e2e specs pass, and so do typecheck, lint, format, translations and build.
+
+## In progress when this was written
+
+- [ ] **P3-A Exercise core** (Sonnet), not merged yet.
+  - Its uncommitted work lives only in the local worktree `.claude/worktrees/agent-a9ba99d9e8969e701`. If that directory is gone, redo the task from the brief below.
+  - If it is still there, resume it the same way the storage task was resumed after a restart: an agent continues inside that worktree, checks everything, then commits.
+
+## Next tasks
+
+Tasks run in order unless marked parallel. Each one ends with the full checks, a CHANGELOG line for anything a learner can notice, both locales, and the docs it affects (`docs/architecture.md`, `DESIGN.md`, `PRODUCT.md`, `.claude/rules/*`).
+
+### Phase 3: Practise
+
+- [ ] **P3-A Exercise core** (Sonnet).
+  - **Routes:** `#/practice` (pick an article, list its units, "Make exercises from this article" with level and count) and `#/practice/:unitId` (one unit on one sheet).
+  - **State:** `useExerciseUnit` (load, autosave drafts with the reset token, `gradeUnitItem` → `checkItem`, `needs-ai` → `gradeOpenAnswer`, drop late results on `StaleResetError`).
+  - **Controls:** an interface in `src/components/practice/controls/types.ts` with a registry in `controls/index.ts`. Implement `FILL_BLANKS`, `CHOICE_SELECT`, `WORD_TRANSFORM` and `OPEN_QA`; the other 7 types get placeholders.
+  - **Input:** Enter advances to the next blank, then checks; IME composition never submits; a French character bar inserts at the cursor without stealing focus.
+  - **Help:** hints show inline; explanations open in a `Sheet`.
+  - **Generation:** items whose `articleQuote` is not in the article are dropped and the learner is told how many. It fails only if nothing is left.
+  - **Old drills:** remove the drills (task, `drills.*.txt`, `PracticeDeck` types). Keep the open oral-assessment practice as its own section.
+  - **e2e:** extend the mock in `e2e/fixtures.ts` to the exercises, hint, explain and grade tasks.
+- [ ] **P3-B1 Choice and order controls** (Sonnet, parallel with B2). Covers `GENDER_CHECK`, `ODD_ONE_OUT` (strike-through), `MATCH_PAIRS` and `DIALOGUE_ORDER`.
+  - Keyboard operable; 40px touch targets; one file per control; swap the placeholders in the registry.
+  - e2e uses `CATALOG_EXERCISES` / `CATALOG_ANSWERS` to answer each type right and wrong, at 1280px and 360px.
+- [ ] **P3-B2 Writing and listening controls** (Sonnet, parallel with B1). Covers `SENTENCE_BUILD` (AI-graded when unmatched), `READING_CLOZE` (passage beside the questions on desktop, stacked on phones, opens in the reader) and `NUMBER_DICTATION` (plays `audioText` through `utils/speech`, clips stored in the `audio` store).
+  - Add a **Practice** section in Settings: strict accents, dictation speed, speak after checking (off by default).
+  - e2e as in B1.
+- [ ] **P3-C Catalogue in e2e** (Haiku). Make the e2e mock answer `exercises` with `CATALOG_EXERCISES` against `CATALOG_ARTICLE`, and the hint, explain and grade tasks with the catalogue's mock answers. Remove any ad-hoc defaults left by P3-A.
+- [ ] **P3-D Review pass** (orchestrator).
+  - Screenshots in light, sepia and dark at 1280px and 360px.
+  - Check the decisions recorded in `docs/merge-plan.md`; mark phase 3 done there and here.
+
+### Phase 4: Import
+
+- [ ] **P4-A Material handling** (Sonnet).
+  - Add `pdfjs-dist`, loaded only when a PDF is chosen, with its worker, cmaps and fonts bundled for offline use.
+  - Port FrenchLab `services/import-material.ts`: image limits (10 MiB / 20 MP), PDF limits (20 MiB / 100 pages, at most 3 pages per analysis) and local page rendering. Release handles, canvases and workers when done.
+  - Unit tests for the limits.
+- [ ] **P4-B Import flow UI** (Sonnet, after A).
+  - "Add" in the library offers "Import from image, PDF or text" with choose, drop and clipboard paste.
+  - Before sending, show the provider, the model and what will be sent. Refuse up front when the model cannot read images. Cancel goes through `AbortSignal`.
+  - The editable draft review is ported from FrenchLab `ImportDraftReview`: edit, exclude, blockers, answer origin labels.
+  - Save as exercises (`prepareImport` → `saveUnits` on a new `Article` with `kind: 'workbook'`), as an article, or both.
+  - Unconfirmed drafts block navigation, and a failed save keeps the draft.
+- [ ] **P4-C Import e2e data** (Haiku, parallel with B). Mock `extract` answers for text, images and blockers, plus small image and PDF test files. Fixtures only.
+
+### Phase 5: Review loop
+
+- [ ] **P5-A Mistakes** (Sonnet). Add a third tab in My study (`#/study/mistakes`, from `listMistakes`), grouped by grammar area.
+  - Per mistake: explanation, retry, "open in material", and "add the word to vocabulary" (reuse `WordDetailModal` / save flow).
+- [ ] **P5-B Progress and adaptive drills** (Sonnet, parallel with A). Progress shows accuracy by grammar area from `accuracyByGrammarTag`, empty until there is data. One action generates drills for the weakest tags (`generateAdaptiveDrills` → saved unit → sheet).
+- [ ] **P5-C Cross-links** (Sonnet). Exercise prompts, passages and explanations use `ReaderWord`, so words open the word sheet. Settle whether attempts of a deleted material count in Progress (open question from the plan).
+- [ ] **P5-D Copy review** (Haiku). Read all new zh strings for tone (plain, no hype) and consistency with existing terms, and fix wording only.
+
+### Phase 6: Migration and launch
+
+- [ ] **P6-A FrenchLab backup import** (Sonnet). Restore accepts a `frenchlab-backup` v1 file:
+  - lessons become workbook articles and units; states and attempts are kept;
+  - tags are mapped with `mapFrenchLabGrammarTag`; an unknown tag stops the restore with a clear message;
+  - prompt overrides are offered for review, never applied silently.
+  - Test with a real FrenchLab export.
+- [ ] **P6-B Rename to Relire Plus** (Haiku, with an exact file list). Change the display name only: `common.appName`, `index.html` title and meta, the PWA manifest in `vite.config.ts`, `marketing/` (en and zh), both READMEs and `metadata.json`.
+  - Keep the `relire` IndexedDB name, the `relire_*` keys, the package name and the repository.
+  - Update positioning text to the wider scope without overclaiming (no mock exams, no official scores).
+- [ ] **P6-C More providers** (Sonnet, one per provider, `add-ai-provider` skill). OpenAI-compatible, Anthropic (direct-browser-access header) and Ollama (learner sets `OLLAMA_ORIGINS`).
+  - Mark vision models for import.
+  - Add Fish Audio TTS only if a browser request to its API succeeds; verify that first.
+- [ ] **P6-D Launch** (needs the user).
+  - Open the PR when asked.
+  - Archive `royisme/frenchPracticeApp` with a pointer to Relire Plus.
+
+## Decisions log
+
+- **Server:** none. BYOK in the browser; FrenchLab's server is dropped.
+- **Scope:** widened to exercises, including dictation and AI-graded writing. Still no mock exams and no official scores.
+- **Taxonomy:** a new A1–C1 grammar taxonomy (37 tags, `src/types/grammar.ts`); FrenchLab tags are mapped and unknown tags are refused.
+- **Dependencies:** `zod` and `pdfjs-dist` (P4), oxlint and oxfmt, plus dev-only `@types/bun` and `fake-indexeddb`.
+- **Name:** Relire Plus is the display name from phase 6. Internal identifiers stay `relire`.
+- **Navigation:** a collapsible sidebar from `lg` up, Settings as a page with per-section save, and hash routes.
+- **Generated exercises:** items that do not quote the article are dropped individually and the count is shown.
+- **Open answers:** AI text feedback only, no numeric score.
+
+## Known gaps to pick up
+
+- **AI error messages:** exercise-task errors are English-only, and the UI must wrap them for `t()` (P3-A covers this for hint, explain and grade).
+- **Saved-answer counts:** `cacheCounts()` in Settings does not count the new cache kinds (`hint`, `explanation`, `exercises`), though Clear removes them.
+- **Sidebar Read link:** it goes to the library, not the last-open article; one-time reader state (`focusText`) is not in the URL. Confirm with the user if it matters.
+- **File length:** `tests/exercises.test.ts` is 310 lines, slightly over the ~300-line guideline.
+- **Build warning:** the existing chunk-size warning remains; consider code-splitting practice and import screens in P4.
