@@ -18,6 +18,8 @@ jobs:
         run: bun run lint
       - name: Format
         run: bun run format:check
+      - name: Unit tests
+        run: bun run test
       - name: Translations
         run: bun run i18n:check
       - name: Build
