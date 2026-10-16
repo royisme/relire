@@ -32,5 +32,5 @@ export const assessPronunciation = (input: Parameters<typeof pronunciationReques
   ctx.provider.generateJson<PronunciationAssessment>(
     // A provider that cannot listen is scored on the transcript alone.
     pronunciationRequest({ ...input, audio: ctx.provider.supportsAudioInput ? input.audio : undefined }, ctx.lang),
-    ctx.config
+    ctx.config,
   );

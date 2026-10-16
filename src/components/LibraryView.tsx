@@ -44,15 +44,19 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     setPendingRecordings(0);
     if (!pendingDelete) return;
     let live = true;
-    listShadowing(pendingDelete.id).then((list) => live && setPendingRecordings(list.length), () => {});
+    listShadowing(pendingDelete.id).then(
+      (list) => live && setPendingRecordings(list.length),
+      () => {},
+    );
     return () => {
       live = false;
     };
   }, [pendingDelete]);
 
   const levels = useMemo(
-    () => [...new Set(articles.map((a) => (a.level.match(/(A1|A2|B1|B2|C1|C2)/i)?.[1] || a.level).toUpperCase()))].sort(),
-    [articles]
+    () =>
+      [...new Set(articles.map((a) => (a.level.match(/(A1|A2|B1|B2|C1|C2)/i)?.[1] || a.level).toUpperCase()))].sort(),
+    [articles],
   );
 
   const rows = useMemo(() => {
@@ -64,7 +68,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     });
     const dir = sort.dir === 'asc' ? 1 : -1;
     const value = (a: Article) =>
-      sort.key === 'words' ? wordCount(a) : sort.key === 'title' ? cleanArticleTitle(a.title).toLowerCase() : (a[sort.key] || '');
+      sort.key === 'words'
+        ? wordCount(a)
+        : sort.key === 'title'
+          ? cleanArticleTitle(a.title).toLowerCase()
+          : a[sort.key] || '';
     return [...filtered].sort((a, b) => {
       const x = value(a);
       const y = value(b);
@@ -73,10 +81,18 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   }, [articles, query, level, sort]);
 
   const toggleSort = (key: SortKey) =>
-    setSort((s) => (s.key === key ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: key === 'createdAt' || key === 'words' ? 'desc' : 'asc' }));
+    setSort((s) =>
+      s.key === key
+        ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' }
+        : { key, dir: key === 'createdAt' || key === 'words' ? 'desc' : 'asc' },
+    );
 
   const th = (key: SortKey, label: string, className = '') => (
-    <th scope="col" aria-sort={sort.key === key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'} className={`font-medium ${className}`}>
+    <th
+      scope="col"
+      aria-sort={sort.key === key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+      className={`font-medium ${className}`}
+    >
       <button
         onClick={() => toggleSort(key)}
         className="inline-flex items-center gap-1 h-10 text-left text-ink-600 hover:text-ink-900 cursor-pointer"
@@ -89,7 +105,13 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   const date = (iso: string) => {
     const d = new Date(iso);
-    return isNaN(d.getTime()) ? iso : d.toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return isNaN(d.getTime())
+      ? iso
+      : d.toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-GB', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        });
   };
 
   return (
@@ -182,12 +204,20 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       </span>
                     </button>
                   </td>
-                  <td className="hidden sm:table-cell px-2 py-3 align-top text-ink-700 whitespace-nowrap">{formatLevel(a.level, i18n.language)}</td>
+                  <td className="hidden sm:table-cell px-2 py-3 align-top text-ink-700 whitespace-nowrap">
+                    {formatLevel(a.level, i18n.language)}
+                  </td>
                   <td className="hidden md:table-cell px-2 py-3 align-top text-ink-700 tnum">{wordCount(a)}</td>
                   <td className="hidden md:table-cell px-2 py-3 align-top text-ink-600">{date(a.createdAt)}</td>
                   <td className="pr-2 py-1.5 align-top">
                     <div className="flex items-center justify-end">
-                      <Button variant="ghost" size="icon" onClick={() => onEdit(a)} aria-label={t('library.edit')} title={t('library.edit')}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(a)}
+                        aria-label={t('library.edit')}
+                        title={t('library.edit')}
+                      >
                         <Pencil className="w-4 h-4" />
                       </Button>
                       <Button
@@ -219,7 +249,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
       {pendingDelete && (
         <Dialog onClose={() => setPendingDelete(null)} label={t('library.deleteTitle')} className="max-w-sm">
-          <OverlayHeader title={t('library.deleteTitle')} onClose={() => setPendingDelete(null)} closeLabel={t('common.close')} />
+          <OverlayHeader
+            title={t('library.deleteTitle')}
+            onClose={() => setPendingDelete(null)}
+            closeLabel={t('common.close')}
+          />
           <div className="p-5 space-y-4">
             <p className="text-sm text-ink-700">
               {t('library.deleteDesc', { title: cleanArticleTitle(pendingDelete.title) })}

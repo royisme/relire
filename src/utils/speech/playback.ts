@@ -256,9 +256,12 @@ function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions
   utterance.rate = options.rate ?? 0.88;
 
   const voices = window.speechSynthesis.getVoices();
-  const frVoice = voices.find(
-    (v) => v.lang.startsWith('fr') && (v.name.includes('Google') || v.name.includes('Thomas') || v.name.includes('Audrey'))
-  ) || voices.find((v) => v.lang.startsWith('fr'));
+  const frVoice =
+    voices.find(
+      (v) =>
+        v.lang.startsWith('fr') &&
+        (v.name.includes('Google') || v.name.includes('Thomas') || v.name.includes('Audrey')),
+    ) || voices.find((v) => v.lang.startsWith('fr'));
 
   if (frVoice) utterance.voice = frVoice;
 
@@ -280,7 +283,6 @@ function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions
     setSpeechState('playing', key);
   }
 }
-
 
 /**
  * Plays a short phrase with the given (possibly unsaved) settings and reports

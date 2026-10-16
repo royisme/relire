@@ -4,7 +4,11 @@ import { deleteCached, getCached, putCached, type CacheKind } from '../storage/c
 const inFlight = new Map<string, Promise<unknown>>();
 
 /** Invalid disposable answers are deleted, not partially trusted. */
-export async function readCachedAnswer<T>(kind: CacheKind, key: string, validate: (value: unknown) => T): Promise<T | undefined> {
+export async function readCachedAnswer<T>(
+  kind: CacheKind,
+  key: string,
+  validate: (value: unknown) => T,
+): Promise<T | undefined> {
   const hit = await getCached<unknown>(kind, key);
   if (hit === undefined) return undefined;
   try {
@@ -25,9 +29,13 @@ export async function cachedRequest<T>(
   key: string,
   fetchFresh: () => Promise<T>,
   skipCache = false,
-  validate?: (value: unknown) => T
+  validate?: (value: unknown) => T,
 ): Promise<T> {
-  const hit = skipCache ? undefined : validate ? await readCachedAnswer(kind, key, validate) : await getCached<T>(kind, key);
+  const hit = skipCache
+    ? undefined
+    : validate
+      ? await readCachedAnswer(kind, key, validate)
+      : await getCached<T>(kind, key);
   if (hit) return hit;
 
   const flightKey = `${kind}:${key}`;

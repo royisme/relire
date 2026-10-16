@@ -14,7 +14,16 @@ import { SettingsModal } from './components/SettingsModal';
 
 import { Article, VocabWord, WordAnalysis, SentenceAnalysis, UserStats, PronunciationAssessment } from './types';
 import { SAMPLE_ARTICLES } from './data/sampleArticles';
-import { deleteArticleData, EMPTY_STATS, getDbNotice, loadData, saveArticles, saveStats, saveVocab, subscribeDbNotice } from './storage/db';
+import {
+  deleteArticleData,
+  EMPTY_STATS,
+  getDbNotice,
+  loadData,
+  saveArticles,
+  saveStats,
+  saveVocab,
+  subscribeDbNotice,
+} from './storage/db';
 import { usePersist } from './storage/usePersist';
 import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
 import { isDueToday, formatDate } from './utils/srs';
@@ -29,7 +38,6 @@ const storedFlag = (key: string) => {
     return false;
   }
 };
-
 
 export default function App() {
   const { t } = useTranslation();
@@ -175,14 +183,10 @@ export default function App() {
 
   // Toggle Vocabulary handler
   const handleToggleVocab = (data: WordAnalysis, contextSentence: string) => {
-    const exists = vocabList.some(
-      (w) => w.word.toLowerCase() === data.word.toLowerCase()
-    );
+    const exists = vocabList.some((w) => w.word.toLowerCase() === data.word.toLowerCase());
 
     if (exists) {
-      setVocabList((prev) =>
-        prev.filter((w) => w.word.toLowerCase() !== data.word.toLowerCase())
-      );
+      setVocabList((prev) => prev.filter((w) => w.word.toLowerCase() !== data.word.toLowerCase()));
     } else {
       const newWord: VocabWord = {
         id: 'v-' + Date.now(),
@@ -211,9 +215,7 @@ export default function App() {
   };
 
   const handleUpdateWord = (updatedWord: VocabWord) => {
-    setVocabList((prev) =>
-      prev.map((w) => (w.id === updatedWord.id ? updatedWord : w))
-    );
+    setVocabList((prev) => prev.map((w) => (w.id === updatedWord.id ? updatedWord : w)));
   };
 
   const handleDeleteWord = (wordId: string) => {
@@ -261,10 +263,7 @@ export default function App() {
     setOnboardingOpen(false);
   };
 
-  const handleRecordAssessmentComplete = (
-    assessment: PronunciationAssessment,
-    sentenceText: string
-  ) => {
+  const handleRecordAssessmentComplete = (assessment: PronunciationAssessment, sentenceText: string) => {
     setStats((prev) => {
       const newHistory = [
         ...(prev.pronunciationHistory || []),
@@ -298,7 +297,11 @@ export default function App() {
   if (!ready) {
     return (
       <div className="min-h-screen bg-ink-50 grid place-items-center p-6" aria-busy={dbNotice !== 'blocked'}>
-        {dbNotice === 'blocked' && <p role="alert" className="max-w-sm text-center text-sm text-ink-800">{t('storage.upgradeBlocked')}</p>}
+        {dbNotice === 'blocked' && (
+          <p role="alert" className="max-w-sm text-center text-sm text-ink-800">
+            {t('storage.upgradeBlocked')}
+          </p>
+        )}
       </div>
     );
   }
@@ -322,7 +325,9 @@ export default function App() {
         <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
           <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
             <span>{t('storage.staleTab')}</span>
-            <button className="underline underline-offset-2 cursor-pointer" onClick={() => window.location.reload()}>{t('storage.reload')}</button>
+            <button className="underline underline-offset-2 cursor-pointer" onClick={() => window.location.reload()}>
+              {t('storage.reload')}
+            </button>
           </div>
         </div>
       )}
@@ -420,12 +425,7 @@ export default function App() {
           />
         )}
 
-        {currentTab === 'analytics' && (
-          <AnalyticsDashboard
-            stats={stats}
-            vocabList={vocabList}
-          />
-        )}
+        {currentTab === 'analytics' && <AnalyticsDashboard stats={stats} vocabList={vocabList} />}
       </main>
 
       {/* Word Detail Floating Modal */}

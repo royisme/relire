@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --font-serif: 'Source Serif 4', Georgia, 'Songti SC', serif;
@@ -6,73 +6,73 @@
   --font-mono: 'Fira Code', ui-monospace, monospace;
 
   /* Neutral: warm ink on paper. Page = ink-50, surfaces = white, lines = ink-200. */
-  --color-ink-50: #F7F6F3;
-  --color-ink-100: #EFEDE8;
-  --color-ink-200: #E2DFD8;
-  --color-ink-300: #CFCBC2;
+  --color-ink-50: #f7f6f3;
+  --color-ink-100: #efede8;
+  --color-ink-200: #e2dfd8;
+  --color-ink-300: #cfcbc2;
   --color-ink-400: #949087;
-  --color-ink-500: #6F6B63;
-  --color-ink-600: #5C5851;
-  --color-ink-700: #433F3A;
-  --color-ink-800: #2D2A27;
-  --color-ink-900: #1E1C1A;
+  --color-ink-500: #6f6b63;
+  --color-ink-600: #5c5851;
+  --color-ink-700: #433f3a;
+  --color-ink-800: #2d2a27;
+  --color-ink-900: #1e1c1a;
   --color-ink-950: #121110;
   /* Accent: ink blue. Actions and the current selection only. */
-  --color-accent-50: #EEF3FA;
-  --color-accent-100: #DCE6F5;
-  --color-accent-200: #BDD0EA;
-  --color-accent-300: #92B0DA;
-  --color-accent-400: #5F89C4;
-  --color-accent-500: #3E69A8;
-  --color-accent-600: #2F5490;
+  --color-accent-50: #eef3fa;
+  --color-accent-100: #dce6f5;
+  --color-accent-200: #bdd0ea;
+  --color-accent-300: #92b0da;
+  --color-accent-400: #5f89c4;
+  --color-accent-500: #3e69a8;
+  --color-accent-600: #2f5490;
   --color-accent-700: #264676;
-  --color-accent-800: #213A5F;
-  --color-accent-900: #1D3150;
-  --color-accent-950: #121F34;
+  --color-accent-800: #213a5f;
+  --color-accent-900: #1d3150;
+  --color-accent-950: #121f34;
   /* Semantic: success and error only. */
-  --color-ok-50: #EEF6F0;
-  --color-ok-100: #D8EADD;
-  --color-ok-200: #B3D5BD;
-  --color-ok-300: #86BC97;
-  --color-ok-400: #55A06F;
-  --color-ok-500: #3A8656;
-  --color-ok-600: #2F7A4B;
-  --color-ok-700: #26633D;
-  --color-ok-800: #1F4F32;
-  --color-ok-900: #1A402A;
-  --color-ok-950: #0E2418;
-  --color-bad-50: #FBEFEE;
-  --color-bad-100: #F5D9D6;
-  --color-bad-200: #EBB5AF;
-  --color-bad-300: #DE8A82;
-  --color-bad-400: #D0645A;
-  --color-bad-500: #C2453A;
-  --color-bad-600: #AB3A30;
-  --color-bad-700: #8E2F27;
+  --color-ok-50: #eef6f0;
+  --color-ok-100: #d8eadd;
+  --color-ok-200: #b3d5bd;
+  --color-ok-300: #86bc97;
+  --color-ok-400: #55a06f;
+  --color-ok-500: #3a8656;
+  --color-ok-600: #2f7a4b;
+  --color-ok-700: #26633d;
+  --color-ok-800: #1f4f32;
+  --color-ok-900: #1a402a;
+  --color-ok-950: #0e2418;
+  --color-bad-50: #fbefee;
+  --color-bad-100: #f5d9d6;
+  --color-bad-200: #ebb5af;
+  --color-bad-300: #de8a82;
+  --color-bad-400: #d0645a;
+  --color-bad-500: #c2453a;
+  --color-bad-600: #ab3a30;
+  --color-bad-700: #8e2f27;
   --color-bad-800: #702520;
-  --color-bad-900: #5B1F1B;
-  --color-bad-950: #330F0D;
+  --color-bad-900: #5b1f1b;
+  --color-bad-950: #330f0d;
 
   /* Roles that are not a step on a scale. Surface: cards, sheets, inputs. On-fill: text and icons on a
      filled accent, ok or bad button. Scrim: the dimming layer behind overlays (never inverts). */
-  --color-surface: #FFFFFF;
-  --color-on-fill: #FFFFFF;
+  --color-surface: #ffffff;
+  --color-on-fill: #ffffff;
   --color-scrim: #121110;
 
   /* Panel: the reader's docked tools (sentence bar, practice card, article player). An ink surface that
      reads as a tool, not as page, in every theme. Its own text, line, accent and error steps keep AA on it. */
-  --color-panel: #2D2A27;
-  --color-panel-raised: #3A3631;
-  --color-panel-line: #4A4640;
-  --color-panel-ink: #F4F0E8;
-  --color-panel-muted: #B9B3A8;
-  --color-panel-accent: #4473B5;
-  --color-panel-link: #A9C2E6;
-  --color-panel-wave: #92B0DA;
-  --color-panel-bad: #C24A40;
-  --color-panel-bad-ink: #F0B3AC;
+  --color-panel: #2d2a27;
+  --color-panel-raised: #3a3631;
+  --color-panel-line: #4a4640;
+  --color-panel-ink: #f4f0e8;
+  --color-panel-muted: #b9b3a8;
+  --color-panel-accent: #4473b5;
+  --color-panel-link: #a9c2e6;
+  --color-panel-wave: #92b0da;
+  --color-panel-bad: #c24a40;
+  --color-panel-bad-ink: #f0b3ac;
 
-  --radius-md: 6px;  /* controls */
+  --radius-md: 6px; /* controls */
   --radius-lg: 10px; /* surfaces, overlays */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -85,95 +85,118 @@
  * index.html sets data-theme before paint.
  */
 :root[data-theme='sepia'] {
-  --color-ink-50: #F3EBD9;
-  --color-ink-100: #EADFC8;
-  --color-ink-200: #DED0B4;
-  --color-ink-300: #CBB996;
+  --color-ink-50: #f3ebd9;
+  --color-ink-100: #eadfc8;
+  --color-ink-200: #ded0b4;
+  --color-ink-300: #cbb996;
   --color-ink-400: #968566;
-  --color-ink-500: #74654E;
+  --color-ink-500: #74654e;
   --color-ink-600: #625440;
-  --color-ink-700: #4B4030;
-  --color-ink-800: #382F23;
-  --color-ink-900: #2B241A;
-  --color-ink-950: #1C1711;
-  --color-surface: #FBF6EA;
-  --color-panel: #382F23;
-  --color-panel-raised: #463B2D;
-  --color-panel-line: #574A38;
-  --color-panel-ink: #F6EEDC;
-  --color-panel-muted: #C7B89C;
+  --color-ink-700: #4b4030;
+  --color-ink-800: #382f23;
+  --color-ink-900: #2b241a;
+  --color-ink-950: #1c1711;
+  --color-surface: #fbf6ea;
+  --color-panel: #382f23;
+  --color-panel-raised: #463b2d;
+  --color-panel-line: #574a38;
+  --color-panel-ink: #f6eedc;
+  --color-panel-muted: #c7b89c;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
   --color-ink-50: #161513;
   --color-ink-100: #272420;
-  --color-ink-200: #35312C;
-  --color-ink-300: #48443D;
-  --color-ink-400: #6E685F;
-  --color-ink-500: #948E84;
-  --color-ink-600: #AFA99F;
-  --color-ink-700: #C7C1B7;
-  --color-ink-800: #D9D4CB;
-  --color-ink-900: #E7E2D9;
-  --color-ink-950: #F4F0E8;
+  --color-ink-200: #35312c;
+  --color-ink-300: #48443d;
+  --color-ink-400: #6e685f;
+  --color-ink-500: #948e84;
+  --color-ink-600: #afa99f;
+  --color-ink-700: #c7c1b7;
+  --color-ink-800: #d9d4cb;
+  --color-ink-900: #e7e2d9;
+  --color-ink-950: #f4f0e8;
   --color-accent-50: #172133;
-  --color-accent-100: #1D2B44;
-  --color-accent-200: #283C60;
-  --color-accent-300: #37548A;
-  --color-accent-400: #4C71AE;
-  --color-accent-500: #6589C6;
-  --color-accent-600: #7EA1D9;
-  --color-accent-700: #3D65A5;
-  --color-accent-800: #4A73B4;
-  --color-accent-900: #C4D6F1;
-  --color-accent-950: #DDE8F7;
-  --color-ok-50: #12231A;
+  --color-accent-100: #1d2b44;
+  --color-accent-200: #283c60;
+  --color-accent-300: #37548a;
+  --color-accent-400: #4c71ae;
+  --color-accent-500: #6589c6;
+  --color-accent-600: #7ea1d9;
+  --color-accent-700: #3d65a5;
+  --color-accent-800: #4a73b4;
+  --color-accent-900: #c4d6f1;
+  --color-accent-950: #dde8f7;
+  --color-ok-50: #12231a;
   --color-ok-100: #173024;
   --color-ok-200: #204431;
-  --color-ok-300: #2D6045;
-  --color-ok-400: #3F7F58;
-  --color-ok-500: #56A06F;
-  --color-ok-600: #3C8A5A;
-  --color-ok-700: #2E7049;
-  --color-ok-800: #A4D7B5;
-  --color-ok-900: #C0E5CC;
-  --color-ok-950: #DCF1E3;
-  --color-bad-50: #2A1513;
-  --color-bad-100: #3A1B18;
+  --color-ok-300: #2d6045;
+  --color-ok-400: #3f7f58;
+  --color-ok-500: #56a06f;
+  --color-ok-600: #3c8a5a;
+  --color-ok-700: #2e7049;
+  --color-ok-800: #a4d7b5;
+  --color-ok-900: #c0e5cc;
+  --color-ok-950: #dcf1e3;
+  --color-bad-50: #2a1513;
+  --color-bad-100: #3a1b18;
   --color-bad-200: #562622;
-  --color-bad-300: #7B352F;
-  --color-bad-400: #A8473E;
-  --color-bad-500: #CF6257;
-  --color-bad-600: #B4473D;
-  --color-bad-700: #E9978E;
-  --color-bad-800: #F0B3AC;
-  --color-bad-900: #F5CCC7;
-  --color-bad-950: #FAE4E1;
-  --color-surface: #1E1C19;
+  --color-bad-300: #7b352f;
+  --color-bad-400: #a8473e;
+  --color-bad-500: #cf6257;
+  --color-bad-600: #b4473d;
+  --color-bad-700: #e9978e;
+  --color-bad-800: #f0b3ac;
+  --color-bad-900: #f5ccc7;
+  --color-bad-950: #fae4e1;
+  --color-surface: #1e1c19;
   --color-scrim: #000000;
   /* Above the dark page the panel is the lighter, raised surface. */
-  --color-panel: #3B3732;
-  --color-panel-raised: #48433C;
-  --color-panel-line: #5C564D;
+  --color-panel: #3b3732;
+  --color-panel-raised: #48433c;
+  --color-panel-line: #5c564d;
 }
 
 @layer base {
-  *, ::after, ::before, ::backdrop { border-color: var(--color-ink-200); }
-  html { -webkit-text-size-adjust: 100%; }
+  *,
+  ::after,
+  ::before,
+  ::backdrop {
+    border-color: var(--color-ink-200);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     font-family: var(--font-sans);
     background: var(--color-ink-50);
     color: var(--color-ink-900);
-    transition: background-color 200ms var(--ease-out), color 200ms var(--ease-out);
+    transition:
+      background-color 200ms var(--ease-out),
+      color 200ms var(--ease-out);
     font-size: 14px;
     line-height: 1.5;
   }
-  ::selection { background: var(--color-accent-200); color: var(--color-ink-950); }
-  :focus-visible { outline: 2px solid var(--color-accent-600); outline-offset: 2px; }
-  button, [role='button'] { touch-action: manipulation; }
+  ::selection {
+    background: var(--color-accent-200);
+    color: var(--color-ink-950);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent-600);
+    outline-offset: 2px;
+  }
+  button,
+  [role='button'] {
+    touch-action: manipulation;
+  }
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -186,12 +209,20 @@
   font-feature-settings: 'liga', 'kern';
   hyphens: manual;
 }
-.reading-title { text-wrap: balance; }
+.reading-title {
+  text-wrap: balance;
+}
 
 /* Marker mode alone reserves spoken-syllable slots; visibility toggles cannot move words. */
-.reading-markers { line-height: 2.05; }
-.reader-word { overflow-wrap: anywhere; }
-.pronunciation-paragraph { position: relative; }
+.reading-markers {
+  line-height: 2.05;
+}
+.reader-word {
+  overflow-wrap: anywhere;
+}
+.pronunciation-paragraph {
+  position: relative;
+}
 .pronunciation-slash {
   display: inline-block;
   width: 0.3em;
@@ -199,8 +230,13 @@
   text-align: center;
   user-select: none;
 }
-.pronunciation-slash::before { content: '/'; font-size: 0.85em; }
-.pronunciation-hidden { visibility: hidden; }
+.pronunciation-slash::before {
+  content: '/';
+  font-size: 0.85em;
+}
+.pronunciation-hidden {
+  visibility: hidden;
+}
 .pronunciation-geometry {
   position: absolute;
   inset: 0;
@@ -211,20 +247,67 @@
 }
 
 /* Focus on the ink panel needs a light ring. */
-.panel :focus-visible { outline-color: var(--color-panel-link); }
+.panel :focus-visible {
+  outline-color: var(--color-panel-link);
+}
 
 /* Tabular numerals for scores, counts and intervals. */
-.tnum { font-variant-numeric: tabular-nums; }
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
 
 /* Overlay motion */
-@keyframes sheet-in-right { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes sheet-in-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-.anim-sheet { animation: sheet-in-up 200ms var(--ease-out); }
-@media (min-width: 768px) { .anim-sheet { animation-name: sheet-in-right; } }
-.anim-fade { animation: fade-in 160ms var(--ease-out); }
+@keyframes sheet-in-right {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sheet-in-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.anim-sheet {
+  animation: sheet-in-up 200ms var(--ease-out);
+}
+@media (min-width: 768px) {
+  .anim-sheet {
+    animation-name: sheet-in-right;
+  }
+}
+.anim-fade {
+  animation: fade-in 160ms var(--ease-out);
+}
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-ink-300); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-ink-400); }
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-300);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-400);
+}

@@ -105,7 +105,9 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
             </Button>
           ) : (
             <>
-              {vocabList.length > 0 && dueWords.length === 0 && <span className="text-sm text-ink-500">{t('vocab.allReviewed')}</span>}
+              {vocabList.length > 0 && dueWords.length === 0 && (
+                <span className="text-sm text-ink-500">{t('vocab.allReviewed')}</span>
+              )}
               {dueWords.length > 0 && (
                 <Button onClick={handleStartReview}>
                   <RotateCw className="w-4 h-4" aria-hidden="true" />
@@ -113,7 +115,13 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                 </Button>
               )}
               {vocabList.length > 0 && (
-                <Button variant="outline" size="icon" onClick={handleExportJSON} title={t('vocab.exportJson')} aria-label={t('vocab.exportJson')}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleExportJSON}
+                  title={t('vocab.exportJson')}
+                  aria-label={t('vocab.exportJson')}
+                >
                   <Download className="w-4 h-4" />
                 </Button>
               )}
@@ -140,7 +148,10 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                   <span>{t('vocab.reviewedCount', { count: reviewedCount })}</span>
                 </div>
                 <div className="w-full bg-ink-200 h-1 rounded-full overflow-hidden">
-                  <div className="bg-accent-600 h-full transition-all duration-300" style={{ width: `${((currentIndex + 1) / dueWords.length) * 100}%` }} />
+                  <div
+                    className="bg-accent-600 h-full transition-all duration-300"
+                    style={{ width: `${((currentIndex + 1) / dueWords.length) * 100}%` }}
+                  />
                 </div>
               </div>
 
@@ -149,12 +160,18 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                 tabIndex={0}
                 aria-expanded={isFlipped}
                 onClick={() => setIsFlipped(!isFlipped)}
-                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setIsFlipped(!isFlipped))}
+                onKeyDown={(e) =>
+                  (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setIsFlipped(!isFlipped))
+                }
                 className="px-6 py-8 rounded-lg bg-surface border border-ink-200 cursor-pointer transition-colors hover:border-ink-300 min-h-[300px] flex flex-col justify-between gap-6"
               >
                 <div className="space-y-3 text-center">
-                  {currentQuizWord.partOfSpeech && <p className="text-xs text-ink-500">{currentQuizWord.partOfSpeech}</p>}
-                  <h3 className="font-serif font-semibold text-4xl sm:text-5xl text-ink-900 break-words">{currentQuizWord.word}</h3>
+                  {currentQuizWord.partOfSpeech && (
+                    <p className="text-xs text-ink-500">{currentQuizWord.partOfSpeech}</p>
+                  )}
+                  <h3 className="font-serif font-semibold text-4xl sm:text-5xl text-ink-900 break-words">
+                    {currentQuizWord.word}
+                  </h3>
                   <div className="flex items-center justify-center gap-2">
                     <span className="font-mono text-sm text-ink-600">{currentQuizWord.ipa}</span>
                     <SpeakButton
@@ -167,15 +184,21 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                     />
                   </div>
                   {currentQuizWord.contextSentence && (
-                    <p className="font-serif text-base text-ink-600 italic max-w-md mx-auto break-words">« {currentQuizWord.contextSentence} »</p>
+                    <p className="font-serif text-base text-ink-600 italic max-w-md mx-auto break-words">
+                      « {currentQuizWord.contextSentence} »
+                    </p>
                   )}
                 </div>
 
                 {isFlipped ? (
                   <div className="pt-5 border-t border-ink-200 space-y-2 text-center">
                     <p className="text-xl font-medium text-ink-900 break-words">{translationOf(currentQuizWord)}</p>
-                    {currentQuizWord.contextTense && <p className="text-sm text-ink-600">{currentQuizWord.contextTense}</p>}
-                    {guideOf(currentQuizWord) && <p className="text-sm text-ink-500 max-w-md mx-auto">{guideOf(currentQuizWord)}</p>}
+                    {currentQuizWord.contextTense && (
+                      <p className="text-sm text-ink-600">{currentQuizWord.contextTense}</p>
+                    )}
+                    {guideOf(currentQuizWord) && (
+                      <p className="text-sm text-ink-500 max-w-md mx-auto">{guideOf(currentQuizWord)}</p>
+                    )}
                   </div>
                 ) : (
                   <p className="text-center text-sm text-ink-500">{t('vocab.showAnswer')}</p>
@@ -221,8 +244,22 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
               value={filterType}
               onChange={setFilterType}
               options={[
-                { value: 'all', label: <>{t('vocab.filterAll')} <span className="tnum text-ink-500">{vocabList.length}</span></> },
-                { value: 'due', label: <>{t('vocab.filterDue')} <span className="tnum text-ink-500">{dueWords.length}</span></> },
+                {
+                  value: 'all',
+                  label: (
+                    <>
+                      {t('vocab.filterAll')} <span className="tnum text-ink-500">{vocabList.length}</span>
+                    </>
+                  ),
+                },
+                {
+                  value: 'due',
+                  label: (
+                    <>
+                      {t('vocab.filterDue')} <span className="tnum text-ink-500">{dueWords.length}</span>
+                    </>
+                  ),
+                },
                 { value: 'learning', label: t('vocab.filterLearning') },
                 { value: 'mastered', label: t('vocab.filterMastered') },
               ]}
@@ -270,12 +307,15 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({
                     </div>
 
                     {item.contextSentence && (
-                      <p className="text-sm font-serif italic text-ink-600 line-clamp-2 break-words">« {item.contextSentence} »</p>
+                      <p className="text-sm font-serif italic text-ink-600 line-clamp-2 break-words">
+                        « {item.contextSentence} »
+                      </p>
                     )}
 
                     <div className="mt-auto pt-2 border-t border-ink-200 flex items-center justify-between gap-2 text-xs text-ink-500 tnum">
                       <span>
-                        {t('vocab.interval', { days: item.intervalDays })} · {t('vocab.reps', { count: item.repetitions })}
+                        {t('vocab.interval', { days: item.intervalDays })} ·{' '}
+                        {t('vocab.reps', { count: item.repetitions })}
                       </span>
                       {isDue ? (
                         <span className="font-medium text-accent-900">{t('vocab.dueToday')}</span>

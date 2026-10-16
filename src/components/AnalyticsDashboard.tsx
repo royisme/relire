@@ -45,7 +45,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, v
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.wordsLearned')}</dt>
           <dd className="text-2xl font-serif font-semibold text-ink-900 tnum">{vocabList.length}</dd>
-          <dd className="text-xs text-ink-500">{t('vocab.mastered')}: <span className="tnum">{masteredCount}</span></dd>
+          <dd className="text-xs text-ink-500">
+            {t('vocab.mastered')}: <span className="tnum">{masteredCount}</span>
+          </dd>
         </div>
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.avgScore')}</dt>
@@ -56,7 +58,9 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, v
         </div>
         <div className="p-4 space-y-1">
           <dt className="text-xs text-ink-500">{t('analytics.oralSessions')}</dt>
-          <dd className="text-2xl font-serif font-semibold text-ink-900 tnum">{stats.shadowingSessionsCompleted ?? 0}</dd>
+          <dd className="text-2xl font-serif font-semibold text-ink-900 tnum">
+            {stats.shadowingSessionsCompleted ?? 0}
+          </dd>
           <dd className="text-xs text-ink-500">
             {t('analytics.sentencesCount', { count: stats.sentencesAnalyzed ?? 0 })}
           </dd>
@@ -67,18 +71,21 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, v
         <section className="space-y-3">
           <h3 className="font-serif font-semibold text-lg text-ink-900">{t('analytics.scoreHistory')}</h3>
           <ul className="rounded-lg border border-ink-200 bg-surface divide-y divide-ink-200">
-            {history.slice(-5).reverse().map((rec, idx) => (
-              <li key={idx} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="font-serif text-ink-900 truncate">« {rec.text} »</p>
-                  <p className="text-xs text-ink-500 mt-0.5">{rec.date}</p>
-                </div>
-                <span className="font-serif text-lg font-semibold text-ink-900 tnum shrink-0">
-                  {rec.score}
-                  <span className="text-xs font-normal text-ink-400"> / 100</span>
-                </span>
-              </li>
-            ))}
+            {history
+              .slice(-5)
+              .reverse()
+              .map((rec, idx) => (
+                <li key={idx} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="font-serif text-ink-900 truncate">« {rec.text} »</p>
+                    <p className="text-xs text-ink-500 mt-0.5">{rec.date}</p>
+                  </div>
+                  <span className="font-serif text-lg font-semibold text-ink-900 tnum shrink-0">
+                    {rec.score}
+                    <span className="text-xs font-normal text-ink-400"> / 100</span>
+                  </span>
+                </li>
+              ))}
           </ul>
         </section>
       )}

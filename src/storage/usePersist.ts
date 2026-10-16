@@ -10,7 +10,7 @@ export function usePersist<T>(
   value: T,
   save: (value: T) => Promise<void>,
   enabled: boolean,
-  report: (name: string, error: unknown | null) => void
+  report: (name: string, error: unknown | null) => void,
 ) {
   const latest = useRef(value);
   const dirty = useRef(false);

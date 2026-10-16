@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Download, Upload } from 'lucide-react';
 import { getApiKey, getAppSettings, saveAppSettings } from '../../utils/appSettings';
 import { cacheCounts, clearCache } from '../../storage/cache';
-import { audioStats, clearUnprotectedAudio, exportProtectedAudio, importAudio, type AudioStats } from '../../storage/audio';
+import {
+  audioStats,
+  clearUnprotectedAudio,
+  exportProtectedAudio,
+  importAudio,
+  type AudioStats,
+} from '../../storage/audio';
 import { exportData, getStorageInfo, importData, requestPersistence, type StorageInfo } from '../../storage/db';
 import { getPromptOverrides, savePromptOverrides } from '../../services/ai/prompts';
 import {
@@ -37,7 +43,7 @@ export const DataSection: React.FC = () => {
           articlesCount: d.articles.length,
           vocabCount: d.vocab.length,
           statsHistoryCount: d.stats.pronunciationHistory?.length || 0,
-        })
+        }),
       )
       .catch((e) => console.error('Failed to read local stats', e));
     getStorageInfo().then(setStorageInfo);
@@ -106,11 +112,14 @@ export const DataSection: React.FC = () => {
         setBackupStatus(
           audioResult.failed > 0
             ? t('settings.importAudioPartial', { failed: audioResult.failed })
-            : t('settings.importSuccess')
+            : t('settings.importSuccess'),
         );
-        setTimeout(() => {
-          window.location.reload();
-        }, audioResult.failed > 0 ? 5000 : 1200);
+        setTimeout(
+          () => {
+            window.location.reload();
+          },
+          audioResult.failed > 0 ? 5000 : 1200,
+        );
       } catch (err: any) {
         setBackupStatus(t('settings.restoreFailed', { msg: err.message || err }));
       }
@@ -127,19 +136,23 @@ export const DataSection: React.FC = () => {
         <div className="flex items-center justify-between text-xs pb-2 border-b border-ink-200 flex-wrap gap-2">
           <span className="text-ink-600">{t('settings.offlineSummary')}</span>
           <span className="text-ink-800 tnum">
-            {t('settings.articlesCount', { count: localStats.articlesCount })} · {t('settings.vocabCount', { count: localStats.vocabCount })} ·{' '}
+            {t('settings.articlesCount', { count: localStats.articlesCount })} ·{' '}
+            {t('settings.vocabCount', { count: localStats.vocabCount })} ·{' '}
             {t('settings.historyCount', { count: localStats.statsHistoryCount })}
           </span>
         </div>
 
-        <p className="text-xs text-ink-500 leading-relaxed">
-          {t('settings.offlineDesc')}
-        </p>
+        <p className="text-xs text-ink-500 leading-relaxed">{t('settings.offlineDesc')}</p>
 
         {/* Saved AI answers */}
         <div className="flex items-center justify-between gap-3 flex-wrap text-xs">
           <span className="text-ink-600">
-            {t('settings.cacheSummary', { words: cacheInfo.words, sentences: cacheInfo.sentences, drills: cacheInfo.drills, prosody: cacheInfo.prosody })}
+            {t('settings.cacheSummary', {
+              words: cacheInfo.words,
+              sentences: cacheInfo.sentences,
+              drills: cacheInfo.drills,
+              prosody: cacheInfo.prosody,
+            })}
           </span>
           <button
             type="button"
@@ -228,7 +241,11 @@ export const DataSection: React.FC = () => {
             </button>
           )}
         </div>
-        {shadowError && <p role="alert" className="text-xs text-bad-700 break-words">{t('settings.shadowingFailed', { msg: shadowError })}</p>}
+        {shadowError && (
+          <p role="alert" className="text-xs text-bad-700 break-words">
+            {t('settings.shadowingFailed', { msg: shadowError })}
+          </p>
+        )}
 
         {/* Storage protection */}
         <div className="flex items-center justify-between gap-3 flex-wrap text-xs">

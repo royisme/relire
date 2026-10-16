@@ -85,10 +85,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
     const target = currentQ.targetSentence.trim();
 
     // Check if matched
-    if (
-      userBuilt.toLowerCase().replace(/[^a-zà-ÿ]/g, '') ===
-      target.toLowerCase().replace(/[^a-zà-ÿ]/g, '')
-    ) {
+    if (userBuilt.toLowerCase().replace(/[^a-zà-ÿ]/g, '') === target.toLowerCase().replace(/[^a-zà-ÿ]/g, '')) {
       setScrambleStatus('correct');
     } else {
       setScrambleStatus('incorrect');
@@ -119,7 +116,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-      
       <PageHeader title={t('practice.title')} subtitle={cleanArticleTitle(currentArticle.title)} />
 
       <Segmented
@@ -151,7 +147,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
         </div>
       ) : currentQ ? (
         <div className="p-6 sm:p-8 rounded-lg bg-surface border border-ink-200 space-y-6">
-          
           {/* Question Header & Counter */}
           <div className="flex items-center justify-between gap-3 border-b border-ink-200 pb-3">
             <p className="min-w-0 text-sm text-ink-500 tnum">
@@ -169,9 +164,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
 
           {/* Question Prompt */}
           <div className="space-y-1">
-            <h3 className="text-base font-medium text-ink-900">
-              {currentQ.prompt}
-            </h3>
+            <h3 className="text-base font-medium text-ink-900">{currentQ.prompt}</h3>
           </div>
 
           {/* MODE 1: SCRAMBLE / SYNTAX RECONSTRUCTION */}
@@ -180,9 +173,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               {/* Target Drop/Assembly Area */}
               <div className="min-h-[72px] p-3 rounded-lg bg-ink-50 border border-dashed border-ink-300 flex flex-wrap items-center gap-2">
                 {selectedChunks.length === 0 ? (
-                  <span className="text-xs text-ink-400">
-                    {t('practice.scramblePrompt')}
-                  </span>
+                  <span className="text-xs text-ink-400">{t('practice.scramblePrompt')}</span>
                 ) : (
                   selectedChunks.map((chunk, idx) => (
                     <span
@@ -244,9 +235,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                     <CheckCircle2 className="w-5 h-5 text-ok-800" />
                     <span>{t('common.success')}</span>
                   </div>
-                  <p className="text-sm text-ink-800 leading-relaxed">
-                    {currentQ.grammarHint}
-                  </p>
+                  <p className="text-sm text-ink-800 leading-relaxed">{currentQ.grammarHint}</p>
                 </div>
               )}
 
@@ -256,9 +245,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                     <XCircle className="w-5 h-5 text-bad-700" />
                     <span>{t('practice.showExplanation')}</span>
                   </div>
-                  <p className="text-sm text-ink-800 leading-relaxed">
-                    {currentQ.grammarHint}
-                  </p>
+                  <p className="text-sm text-ink-800 leading-relaxed">{currentQ.grammarHint}</p>
                 </div>
               )}
             </div>
@@ -281,7 +268,11 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
                 />
               </div>
 
-              <ShadowingRecorder key={activeQuestionIdx} referenceText={currentQ.targetSentence} onAssessed={onRecordAssessmentComplete} />
+              <ShadowingRecorder
+                key={activeQuestionIdx}
+                referenceText={currentQ.targetSentence}
+                onAssessed={onRecordAssessmentComplete}
+              />
             </div>
           )}
 
@@ -326,7 +317,10 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               )}
 
               <div className="pt-2 flex items-center gap-3">
-                <Button onClick={() => setIsAnswerRevealed(true)} disabled={selectedOption === null || isAnswerRevealed}>
+                <Button
+                  onClick={() => setIsAnswerRevealed(true)}
+                  disabled={selectedOption === null || isAnswerRevealed}
+                >
                   {t('practice.checkAnswer')}
                 </Button>
               </div>
@@ -334,9 +328,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
               {isAnswerRevealed && (
                 <div className="p-4 rounded-lg bg-ink-50 border border-ink-200 space-y-1">
                   <div className="text-xs font-medium text-ink-500">{t('practice.showExplanation')}</div>
-                  <p className="text-sm text-ink-800 leading-relaxed">
-                    {currentQ.grammarHint}
-                  </p>
+                  <p className="text-sm text-ink-800 leading-relaxed">{currentQ.grammarHint}</p>
                 </div>
               )}
             </div>

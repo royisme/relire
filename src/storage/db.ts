@@ -104,9 +104,12 @@ export function db() {
         setNotice('stale');
       },
     });
-    dbPromise.then(() => {
-      if (notice === 'blocked') setNotice(null);
-    }, () => undefined);
+    dbPromise.then(
+      () => {
+        if (notice === 'blocked') setNotice(null);
+      },
+      () => undefined,
+    );
     dbPromise.catch(() => {
       dbPromise = null;
     });

@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "semi": true,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "printWidth": 120,
+  "endOfLine": "lf",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "node_modules/**",
+    "dist/**",
+    "dev-dist/**",
+    "test-results/**",
+    "playwright-report/**",
+    "bun.lock",
+    "*.md",
+    "src/services/ai/prompts/defaults/**",
+    "marketing/**"
+  ]
+}

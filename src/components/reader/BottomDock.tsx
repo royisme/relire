@@ -31,4 +31,5 @@ export function BottomDock({ children }: { children: ReactNode }) {
 }
 
 /** Current dock height in px (0 when nothing is docked). */
-export const dockHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-height')) || 0;
+export const dockHeight = () =>
+  parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-height')) || 0;

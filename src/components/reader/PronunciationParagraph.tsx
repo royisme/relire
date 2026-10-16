@@ -17,9 +17,21 @@ interface Ink {
   bottom: number;
   line: number;
 }
-interface Curve { path: string; width: number }
-interface Dot { x: number; y: number; radius: number }
-interface Geometry { curves: Curve[]; dots: Dot[]; width: number; height: number }
+interface Curve {
+  path: string;
+  width: number;
+}
+interface Dot {
+  x: number;
+  y: number;
+  radius: number;
+}
+interface Geometry {
+  curves: Curve[];
+  dots: Dot[];
+  width: number;
+  height: number;
+}
 const blank: Geometry = { curves: [], dots: [], width: 0, height: 0 };
 
 export function PronunciationParagraph({ children, snapshot, sentenceIds, layers, enabled, fontSize }: Props) {
@@ -89,7 +101,10 @@ export function PronunciationParagraph({ children, snapshot, sentenceIds, layers
             const ay = a.bottom + 4 * scale;
             const by = b.bottom + 4 * scale;
             curves.push({ path: `M ${a.right - 2 * scale} ${ay} Q ${end} ${ay + sag * 2} ${end} ${ay + sag}`, width });
-            curves.push({ path: `M ${start} ${by + sag} Q ${start} ${by + sag * 2} ${b.left + 2 * scale} ${by}`, width });
+            curves.push({
+              path: `M ${start} ${by + sag} Q ${start} ${by + sag * 2} ${b.left + 2 * scale} ${by}`,
+              width,
+            });
           }
         }
         for (const stress of markers.stress) {
@@ -115,7 +130,9 @@ export function PronunciationParagraph({ children, snapshot, sentenceIds, layers
     observer.observe(paragraph);
     window.addEventListener('resize', schedule);
     document.fonts.addEventListener('loadingdone', schedule);
-    void document.fonts.ready.then(() => { if (!disposed) schedule(); });
+    void document.fonts.ready.then(() => {
+      if (!disposed) schedule();
+    });
     measure();
     return () => {
       disposed = true;
@@ -137,11 +154,20 @@ export function PronunciationParagraph({ children, snapshot, sentenceIds, layers
           height={geometry.height}
           viewBox={`0 0 ${geometry.width || 1} ${geometry.height || 1}`}
         >
-          <g visibility={layers.connections ? 'visible' : 'hidden'} fill="none" stroke="currentColor" strokeLinecap="round">
-            {geometry.curves.map((curve, index) => <path key={index} d={curve.path} strokeWidth={curve.width} />)}
+          <g
+            visibility={layers.connections ? 'visible' : 'hidden'}
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+          >
+            {geometry.curves.map((curve, index) => (
+              <path key={index} d={curve.path} strokeWidth={curve.width} />
+            ))}
           </g>
           <g visibility={layers.stress ? 'visible' : 'hidden'} fill="currentColor">
-            {geometry.dots.map((dot, index) => <circle key={index} cx={dot.x} cy={dot.y} r={dot.radius} />)}
+            {geometry.dots.map((dot, index) => (
+              <circle key={index} cx={dot.x} cy={dot.y} r={dot.radius} />
+            ))}
           </g>
         </svg>
       )}

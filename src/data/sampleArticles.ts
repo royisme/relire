@@ -36,7 +36,7 @@ Le renard se tut et regarda longtemps le petit prince :
   },
   {
     id: 'cafe-parisien',
-    title: 'L\'Art de Vivre dans un Café Parisien',
+    title: "L'Art de Vivre dans un Café Parisien",
     level: 'B2',
     category: 'Culture & Société',
     source: 'Chronique Parisienne',
@@ -48,7 +48,7 @@ Bien que le rythme de la capitale se soit considérablement accéléré au fil d
   },
   {
     id: 'tech-ecologie',
-    title: 'L\'Intelligence Artificielle et la Transition Écologique',
+    title: "L'Intelligence Artificielle et la Transition Écologique",
     level: 'C1',
     category: 'Science & Avenir',
     source: 'Revue Prospective',

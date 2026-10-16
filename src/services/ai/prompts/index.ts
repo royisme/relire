@@ -12,7 +12,14 @@ import { prosodySchema } from '../prosodySchema';
 
 export { renderTemplate, usedVariables } from './engine';
 export { PROMPTS, getPromptDefinition, type PromptId } from './registry';
-export { getPromptOverrides, savePromptOverrides, getPromptTemplate, isPromptCustomized, subscribePromptChanges, type PromptOverrides } from './store';
+export {
+  getPromptOverrides,
+  savePromptOverrides,
+  getPromptTemplate,
+  isPromptCustomized,
+  subscribePromptChanges,
+  type PromptOverrides,
+} from './store';
 
 export function render(id: PromptId, lang: Lang, vars: PromptVars): string {
   return renderTemplate(getPromptTemplate(id, lang), vars);
@@ -31,7 +38,10 @@ export function promptFingerprint(id: PromptId, lang: Lang): string {
 
 const summary = (text?: string) => (text ? text.slice(0, 250) : '');
 
-export function wordRequest(input: { word: string; sentenceContext?: string; articleContext?: string }, lang: Lang): JsonRequest {
+export function wordRequest(
+  input: { word: string; sentenceContext?: string; articleContext?: string },
+  lang: Lang,
+): JsonRequest {
   return {
     prompt: render('word', lang, {
       word: input.word,
@@ -55,7 +65,9 @@ export function prosodyRequest(input: { source: string; template?: string }, lan
 }
 
 export function sentenceRequest(input: { sentence: string; articleContext?: string }, lang: Lang): JsonRequest {
-  return { prompt: render('sentence', lang, { sentence: input.sentence, articleContext: summary(input.articleContext) }) };
+  return {
+    prompt: render('sentence', lang, { sentence: input.sentence, articleContext: summary(input.articleContext) }),
+  };
 }
 
 export function drillsRequest(input: { articleText: string; type: string }, lang: Lang): JsonRequest {
@@ -65,7 +77,7 @@ export function drillsRequest(input: { articleText: string; type: string }, lang
 
 export function pronunciationRequest(
   input: { referenceText: string; audio?: { mimeType: string; base64: string }; userTranscript?: string },
-  lang: Lang
+  lang: Lang,
 ): JsonRequest {
   const vars = {
     referenceText: input.referenceText,

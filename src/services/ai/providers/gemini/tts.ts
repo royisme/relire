@@ -30,7 +30,8 @@ function pcmToWavBase64(pcmBase64: string, sampleRate: number): string {
   return btoa(bin);
 }
 
-const DEFAULT_STYLE = 'Natural, authentic native French speaker with clear French accent, standard liaisons, and warm tone';
+const DEFAULT_STYLE =
+  'Natural, authentic native French speaker with clear French accent, standard liaisons, and warm tone';
 
 export const geminiSpeech: SpeechProvider = {
   async synthesize(request, config: SpeechConfig): Promise<Blob> {
@@ -39,7 +40,9 @@ export const geminiSpeech: SpeechProvider = {
     try {
       response = await ai.models.generateContent({
         model: config.model,
-        contents: [{ role: 'user', parts: [{ text: request.text, speechMetadata: { style: request.style || DEFAULT_STYLE } }] }],
+        contents: [
+          { role: 'user', parts: [{ text: request.text, speechMetadata: { style: request.style || DEFAULT_STYLE } }] },
+        ],
         config: {
           responseModalities: ['AUDIO'],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: config.voice } } },

@@ -8,8 +8,15 @@ import { ReaderWord } from './reader/ReaderWord';
 import { PronunciationParagraph } from './reader/PronunciationParagraph';
 import { PronunciationControls } from './reader/PronunciationControls';
 import {
-  stopSpeech, setGlobalRate, speechKey,
-  startSequence, toggleSequence, stepSequence, stopSequence, getSequenceState, subscribeSequence,
+  stopSpeech,
+  setGlobalRate,
+  speechKey,
+  startSequence,
+  toggleSequence,
+  stepSequence,
+  stopSequence,
+  getSequenceState,
+  subscribeSequence,
 } from '../utils/speech';
 import { splitArticle } from '../utils/sentences';
 import { Button } from './ui/button';
@@ -130,17 +137,21 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   };
 
   const renderSentenceWords = (sentenceText: string, id: string) =>
-    readerTokens(sentenceText).map((token) => token.word ? (
-      <ReaderWord
-        key={token.start}
-        token={token.word}
-        annotation={markers.mode ? markers.displayed[id]?.words[token.word.ordinal] : undefined}
-        decorating={markers.mode}
-        layers={markers.layers}
-        activeWord={activeWord}
-        onClick={(word) => clickWord(word, sentenceText, id)}
-      />
-    ) : <React.Fragment key={token.start}>{token.text}</React.Fragment>);
+    readerTokens(sentenceText).map((token) =>
+      token.word ? (
+        <ReaderWord
+          key={token.start}
+          token={token.word}
+          annotation={markers.mode ? markers.displayed[id]?.words[token.word.ordinal] : undefined}
+          decorating={markers.mode}
+          layers={markers.layers}
+          activeWord={activeWord}
+          onClick={(word) => clickWord(word, sentenceText, id)}
+        />
+      ) : (
+        <React.Fragment key={token.start}>{token.text}</React.Fragment>
+      ),
+    );
 
   // Paragraphs and sentences, cut the same way for reading and for listening.
   const paragraphs = useMemo(() => splitArticle(currentArticle.content), [currentArticle.content]);
@@ -165,7 +176,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
   // Practising one sentence: recording happens in the docked card, never on the pill.
   const card = usePracticeCard();
-  const cardBusy = card.phase === 'acquiring' || card.phase === 'recording' || card.phase === 'saving' || card.phase === 'unsaved';
+  const cardBusy =
+    card.phase === 'acquiring' || card.phase === 'recording' || card.phase === 'saving' || card.phase === 'unsaved';
   const cardRef = useRef(card);
   cardRef.current = card;
   // A different article, or leaving the reader, closes the card.
@@ -198,9 +210,12 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     const id = lastTarget.current;
     lastTarget.current = null;
     const active = document.activeElement;
-    if (!id || (active && active !== document.body && !active.closest('[data-practice-card]') && active.isConnected)) return;
+    if (!id || (active && active !== document.body && !active.closest('[data-practice-card]') && active.isConnected))
+      return;
     focusSentence(id);
-    requestAnimationFrame(() => (document.querySelector('[data-practice-entry]') as HTMLElement | null)?.focus({ preventScroll: true }));
+    requestAnimationFrame(() =>
+      (document.querySelector('[data-practice-entry]') as HTMLElement | null)?.focus({ preventScroll: true }),
+    );
   }, [practisedId]);
 
   // Opened from the shadowing log: show that sentence with its actions.
@@ -216,11 +231,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   // Listening to the whole article: one sentence after another, the current one highlighted.
   const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
   const listening = sequence.id === currentArticle.id;
-  const listeningId = listening ? flatSentences[sequence.index]?.id ?? null : null;
+  const listeningId = listening ? (flatSentences[sequence.index]?.id ?? null) : null;
 
   const toggleListening = () => {
     if (listening) toggleSequence();
-    else startSequence(currentArticle.id, flatSentences.map((s) => s.text));
+    else
+      startSequence(
+        currentArticle.id,
+        flatSentences.map((s) => s.text),
+      );
   };
 
   // Keep the sentence being read on screen, clear of the header and the player.
@@ -262,17 +281,20 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     if (anchor && speechKey(anchor.text) === activeKey) return anchor.id;
     return flatSentences.find((s) => speechKey(s.text) === activeKey)?.id ?? null;
   }, [hoveredId, anchorId, activeKey, flatSentences]);
-  const barSentence = touch && actionId && actionId !== dismissedId && actionId !== practisedId
-    ? flatSentences.find((s) => s.id === actionId) ?? null
-    : null;
+  const barSentence =
+    touch && actionId && actionId !== dismissedId && actionId !== practisedId
+      ? (flatSentences.find((s) => s.id === actionId) ?? null)
+      : null;
   // The docked actions must not cover the sentence they act on.
   useEffect(() => {
     if (!barSentence) return;
-    const frame = requestAnimationFrame(() => requestAnimationFrame(() => {
-      const r = sentenceEls.current.get(barSentence.id)?.el.getBoundingClientRect();
-      const limit = window.innerHeight - dockHeight() - 16;
-      if (r && r.bottom > limit) window.scrollBy({ top: r.bottom - limit, behavior: 'instant' });
-    }));
+    const frame = requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const r = sentenceEls.current.get(barSentence.id)?.el.getBoundingClientRect();
+        const limit = window.innerHeight - dockHeight() - 16;
+        if (r && r.bottom > limit) window.scrollBy({ top: r.bottom - limit, behavior: 'instant' });
+      }),
+    );
     return () => cancelAnimationFrame(frame);
   }, [barSentence]);
 
@@ -316,7 +338,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
         left,
       };
       setToolbar((prev) =>
-        prev && prev.id === next.id && prev.text === next.text && Math.abs(prev.top - next.top) < 0.5 && Math.abs(prev.left - next.left) < 0.5 ? prev : next
+        prev &&
+        prev.id === next.id &&
+        prev.text === next.text &&
+        Math.abs(prev.top - next.top) < 0.5 &&
+        Math.abs(prev.left - next.left) < 0.5
+          ? prev
+          : next,
       );
     };
 
@@ -350,228 +378,250 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
   return (
     <>
-    {/* Bottom padding leaves room for the dock (player, practice card), so the last lines can be read above it. */}
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 space-y-4" style={{ paddingBottom: 'max(7rem, calc(var(--dock-height, 0px) + 2rem))' }}>
-      {/* Reading toolbar: one row, article on the left, preferences on the right */}
-      <div ref={controlsRef} className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
-        <button
-          onClick={onBack}
-          className="mr-auto -ml-2 h-10 inline-flex items-center gap-1.5 px-2 rounded-md text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{t('library.back')}</span>
-        </button>
+      {/* Bottom padding leaves room for the dock (player, practice card), so the last lines can be read above it. */}
+      <div
+        className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 space-y-4"
+        style={{ paddingBottom: 'max(7rem, calc(var(--dock-height, 0px) + 2rem))' }}
+      >
+        {/* Reading toolbar: one row, article on the left, preferences on the right */}
+        <div ref={controlsRef} className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
+          <button
+            onClick={onBack}
+            className="mr-auto -ml-2 h-10 inline-flex items-center gap-1.5 px-2 rounded-md text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>{t('library.back')}</span>
+          </button>
 
-        <div className="flex items-center rounded-md border border-ink-200 bg-surface p-0.5" role="group" aria-label={t('reader.textSize')}>
-          {(['sm', 'base', 'lg', 'xl'] as const).map((sz, i) => (
-            <button
-              key={sz}
-              onClick={() => setFontSize(sz)}
-              aria-pressed={fontSize === sz}
-              aria-label={sz}
-              className={`h-8 w-8 rounded-md font-serif cursor-pointer ${
-                fontSize === sz ? 'bg-ink-100 text-ink-950' : 'text-ink-600 hover:bg-ink-100'
-              }`}
-              style={{ fontSize: 12 + i * 2.5 }}
-            >
-              A
-            </button>
-          ))}
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={toggleListening}
-          aria-pressed={listening}
-          title={t('reader.listenAll')}
-        >
-          {listening && (speech.phase === 'playing' || speech.phase === 'loading') ? (
-            <Pause className="w-4 h-4" aria-hidden="true" />
-          ) : listening ? (
-            <Play className="w-4 h-4" aria-hidden="true" />
-          ) : (
-            <Headphones className="w-4 h-4" aria-hidden="true" />
-          )}
-          <span>{t('reader.listenAll')}</span>
-        </Button>
-
-        <button
-          onClick={() => setIsSpeedControlOpen(!isSpeedControlOpen)}
-          aria-expanded={isSpeedControlOpen}
-          className="h-10 inline-flex items-center gap-1.5 px-3 rounded-md border border-ink-200 bg-surface text-ink-700 hover:bg-ink-100 text-xs cursor-pointer"
-          title={t('reader.speedSlider')}
-        >
-          <Volume2 className="w-4 h-4" />
-          <span className="tnum">{playbackRate.toFixed(2)}×</span>
-          <ChevronDown className={`w-3.5 h-3.5 text-ink-400 transition-transform ${isSpeedControlOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        <PronunciationControls
-          key={currentArticle.id}
-          controller={markers}
-          onDisplay={() => preserveAnchor(markers.display)}
-          onMode={(marked) => preserveAnchor(() => markers.setMode(marked))}
-          onOpen={() => setIsSpeedControlOpen(false)}
-        />
-
-        {/* Floats over the article so opening it never moves the text */}
-        {isSpeedControlOpen && (
-        <div className="absolute inset-x-0 top-full z-20 mt-2 rounded-lg border border-ink-200 bg-surface p-4 space-y-3 shadow-lg anim-fade">
-          <div className="flex items-center justify-between text-xs text-ink-600">
-            <span className="font-medium text-ink-800">{t('reader.shadowingSpeedRange')}</span>
-            <span className="text-ink-500">
-              {playbackRate <= 0.65 ? t('reader.slowPace') : playbackRate <= 0.85 ? t('reader.shadowingPace') : playbackRate <= 1.05 ? t('reader.normalPace') : t('reader.challengePace')}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-ink-500 tnum">0.5×</span>
-            <input
-              type="range"
-              min="0.5"
-              max="1.5"
-              step="0.05"
-              value={playbackRate}
-              onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
-              aria-label={t('reader.tempo')}
-              className="flex-1 h-2 cursor-pointer accent-accent-700"
-            />
-            <span className="text-xs text-ink-500 tnum">1.5×</span>
-          </div>
-          <div className="flex items-center gap-1 flex-wrap">
-            {[0.5, 0.75, 1.0, 1.25, 1.5].map((rate) => (
-              <button key={rate} onClick={() => handlePlaybackRateChange(rate)} className={rateButton(Math.abs(playbackRate - rate) < 0.01)}>
-                {rate}×
+          <div
+            className="flex items-center rounded-md border border-ink-200 bg-surface p-0.5"
+            role="group"
+            aria-label={t('reader.textSize')}
+          >
+            {(['sm', 'base', 'lg', 'xl'] as const).map((sz, i) => (
+              <button
+                key={sz}
+                onClick={() => setFontSize(sz)}
+                aria-pressed={fontSize === sz}
+                aria-label={sz}
+                className={`h-8 w-8 rounded-md font-serif cursor-pointer ${
+                  fontSize === sz ? 'bg-ink-100 text-ink-950' : 'text-ink-600 hover:bg-ink-100'
+                }`}
+                style={{ fontSize: 12 + i * 2.5 }}
+              >
+                A
               </button>
             ))}
           </div>
-        </div>
-        )}
-      </div>
 
-      {/* Main Reading Surface */}
-      <article
-        ref={articleRef}
-        onClick={(e) => {
-          if (!(e.target as HTMLElement).closest('[data-sentence],[data-sentence-actions]')) setHoveredId(null);
-        }}
-        className="relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border border-ink-200 bg-surface text-ink-900"
-      >
-        <div className={`reading ${getFontSizeClass()} ${markers.mode ? 'reading-markers' : ''}`}>
-        <header className="mb-8">
-          <p className="text-xs text-ink-500 font-sans mb-2">
-            {formatLevel(currentArticle.level, i18n.language)}
-            {currentArticle.category ? ` · ${currentArticle.category}` : ''}
-            {currentArticle.source ? ` · ${currentArticle.source}` : ''}
-          </p>
-          <h1 className="reading-title font-serif font-semibold text-3xl sm:text-4xl leading-tight">
-            {cleanArticleTitle(currentArticle.title)}
-          </h1>
-        </header>
+          <Button variant="outline" onClick={toggleListening} aria-pressed={listening} title={t('reader.listenAll')}>
+            {listening && (speech.phase === 'playing' || speech.phase === 'loading') ? (
+              <Pause className="w-4 h-4" aria-hidden="true" />
+            ) : listening ? (
+              <Play className="w-4 h-4" aria-hidden="true" />
+            ) : (
+              <Headphones className="w-4 h-4" aria-hidden="true" />
+            )}
+            <span>{t('reader.listenAll')}</span>
+          </Button>
 
-        {/* Article Paragraphs */}
-        <div className="space-y-5">
-          {paragraphs.map((sentences, pIdx) => {
-            return (
-              <PronunciationParagraph
-                key={pIdx}
-                snapshot={markers.displayed}
-                sentenceIds={sentences.map((s) => s.id)}
-                layers={markers.layers}
-                enabled={markers.mode}
-                fontSize={fontSize}
-              >
-                {sentences.map(({ id, raw: sent, text: cleanSentence }) => {
-                  const isHovered = hoveredId === id;
-                  const key = speechKey(cleanSentence);
-                  const isActive = activeSentence === cleanSentence;
-                  // While listening, the position decides (the same sentence can repeat); otherwise the text.
-                  const isPlaying = listening ? listeningId === id : playingKey === key;
-
-                  return (
-                    <span
-                      key={id}
-                      data-sentence
-                      data-sentence-id={id}
-                      ref={(el) => {
-                        if (el) sentenceEls.current.set(id, { el, text: cleanSentence, key });
-                        else sentenceEls.current.delete(id);
-                      }}
-                      onPointerEnter={(e) => {
-                        if (e.pointerType !== 'mouse') return;
-                        focusSentence(id);
-                      }}
-                      onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
-                      onClick={() => focusSentence(id)}
-                      onFocus={() => focusSentence(id)}
-                      className={`rounded-md py-0.5 px-0.5 transition-colors ${
-                        isActive || isPlaying || practisedId === id ? 'bg-accent-100' : isHovered ? 'bg-accent-50' : ''
-                      }`}
-                    >
-                      {renderSentenceWords(sent, id)}
-                    </span>
-                  );
-                })}
-              </PronunciationParagraph>
-            );
-          })}
-        </div>
-        </div>
-
-        {/* Floating sentence actions: compact pill at the end of the sentence */}
-        {toolbar && (
-          <div
-            data-sentence-actions
-            onPointerEnter={(e) => e.pointerType === 'mouse' && cancelClear()}
-            onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
-            style={{ top: toolbar.top, left: toolbar.left }}
-            className="absolute z-20 pl-2 anim-fade select-none"
+          <button
+            onClick={() => setIsSpeedControlOpen(!isSpeedControlOpen)}
+            aria-expanded={isSpeedControlOpen}
+            className="h-10 inline-flex items-center gap-1.5 px-3 rounded-md border border-ink-200 bg-surface text-ink-700 hover:bg-ink-100 text-xs cursor-pointer"
+            title={t('reader.speedSlider')}
           >
-            <div
-              className="flex items-center gap-0.5 p-1 rounded-lg border border-ink-300 bg-surface text-ink-900 shadow-lg font-sans text-xs"
-            >
-              <SpeakButton
-                text={toolbar.text}
-                label={t('reader.playSentence')}
-                stopLabel={t('reader.stop')}
-                variant="ghost"
-                size="icon"
-                className={`h-7 w-7 transition-colors ${toolbarButton(toolbarPhase !== 'idle')}`}
-              />
-              <div className="w-px h-3.5 bg-ink-200" />
-              <button
-                onClick={() => onSentenceClick(toolbar.text)}
-                aria-label={t('reader.analyzeSentence')}
-                title={t('reader.analyzeSentence')}
-                className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors ${toolbarButton(false)}`}
-              >
-                <TextSearch className="w-3.5 h-3.5" />
-              </button>
-              <button
-                data-practice-entry
-                onClick={() => card.open({ articleId: currentArticle.id, sentenceId: toolbar.id, text: toolbar.text })}
-                disabled={cardBusy}
-                aria-label={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
-                title={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
-                className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${toolbarButton(practisedId === toolbar.id)}`}
-              >
-                <Mic className="w-3.5 h-3.5" aria-hidden="true" />
-              </button>
+            <Volume2 className="w-4 h-4" />
+            <span className="tnum">{playbackRate.toFixed(2)}×</span>
+            <ChevronDown
+              className={`w-3.5 h-3.5 text-ink-400 transition-transform ${isSpeedControlOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          <PronunciationControls
+            key={currentArticle.id}
+            controller={markers}
+            onDisplay={() => preserveAnchor(markers.display)}
+            onMode={(marked) => preserveAnchor(() => markers.setMode(marked))}
+            onOpen={() => setIsSpeedControlOpen(false)}
+          />
+
+          {/* Floats over the article so opening it never moves the text */}
+          {isSpeedControlOpen && (
+            <div className="absolute inset-x-0 top-full z-20 mt-2 rounded-lg border border-ink-200 bg-surface p-4 space-y-3 shadow-lg anim-fade">
+              <div className="flex items-center justify-between text-xs text-ink-600">
+                <span className="font-medium text-ink-800">{t('reader.shadowingSpeedRange')}</span>
+                <span className="text-ink-500">
+                  {playbackRate <= 0.65
+                    ? t('reader.slowPace')
+                    : playbackRate <= 0.85
+                      ? t('reader.shadowingPace')
+                      : playbackRate <= 1.05
+                        ? t('reader.normalPace')
+                        : t('reader.challengePace')}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-ink-500 tnum">0.5×</span>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="1.5"
+                  step="0.05"
+                  value={playbackRate}
+                  onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
+                  aria-label={t('reader.tempo')}
+                  className="flex-1 h-2 cursor-pointer accent-accent-700"
+                />
+                <span className="text-xs text-ink-500 tnum">1.5×</span>
+              </div>
+              <div className="flex items-center gap-1 flex-wrap">
+                {[0.5, 0.75, 1.0, 1.25, 1.5].map((rate) => (
+                  <button
+                    key={rate}
+                    onClick={() => handlePlaybackRateChange(rate)}
+                    className={rateButton(Math.abs(playbackRate - rate) < 0.01)}
+                  >
+                    {rate}×
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Main Reading Surface */}
+        <article
+          ref={articleRef}
+          onClick={(e) => {
+            if (!(e.target as HTMLElement).closest('[data-sentence],[data-sentence-actions]')) setHoveredId(null);
+          }}
+          className="relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border border-ink-200 bg-surface text-ink-900"
+        >
+          <div className={`reading ${getFontSizeClass()} ${markers.mode ? 'reading-markers' : ''}`}>
+            <header className="mb-8">
+              <p className="text-xs text-ink-500 font-sans mb-2">
+                {formatLevel(currentArticle.level, i18n.language)}
+                {currentArticle.category ? ` · ${currentArticle.category}` : ''}
+                {currentArticle.source ? ` · ${currentArticle.source}` : ''}
+              </p>
+              <h1 className="reading-title font-serif font-semibold text-3xl sm:text-4xl leading-tight">
+                {cleanArticleTitle(currentArticle.title)}
+              </h1>
+            </header>
+
+            {/* Article Paragraphs */}
+            <div className="space-y-5">
+              {paragraphs.map((sentences, pIdx) => {
+                return (
+                  <PronunciationParagraph
+                    key={pIdx}
+                    snapshot={markers.displayed}
+                    sentenceIds={sentences.map((s) => s.id)}
+                    layers={markers.layers}
+                    enabled={markers.mode}
+                    fontSize={fontSize}
+                  >
+                    {sentences.map(({ id, raw: sent, text: cleanSentence }) => {
+                      const isHovered = hoveredId === id;
+                      const key = speechKey(cleanSentence);
+                      const isActive = activeSentence === cleanSentence;
+                      // While listening, the position decides (the same sentence can repeat); otherwise the text.
+                      const isPlaying = listening ? listeningId === id : playingKey === key;
+
+                      return (
+                        <span
+                          key={id}
+                          data-sentence
+                          data-sentence-id={id}
+                          ref={(el) => {
+                            if (el) sentenceEls.current.set(id, { el, text: cleanSentence, key });
+                            else sentenceEls.current.delete(id);
+                          }}
+                          onPointerEnter={(e) => {
+                            if (e.pointerType !== 'mouse') return;
+                            focusSentence(id);
+                          }}
+                          onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
+                          onClick={() => focusSentence(id)}
+                          onFocus={() => focusSentence(id)}
+                          className={`rounded-md py-0.5 px-0.5 transition-colors ${
+                            isActive || isPlaying || practisedId === id
+                              ? 'bg-accent-100'
+                              : isHovered
+                                ? 'bg-accent-50'
+                                : ''
+                          }`}
+                        >
+                          {renderSentenceWords(sent, id)}
+                        </span>
+                      );
+                    })}
+                  </PronunciationParagraph>
+                );
+              })}
             </div>
           </div>
-        )}
-      </article>
-    </div>
+
+          {/* Floating sentence actions: compact pill at the end of the sentence */}
+          {toolbar && (
+            <div
+              data-sentence-actions
+              onPointerEnter={(e) => e.pointerType === 'mouse' && cancelClear()}
+              onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
+              style={{ top: toolbar.top, left: toolbar.left }}
+              className="absolute z-20 pl-2 anim-fade select-none"
+            >
+              <div className="flex items-center gap-0.5 p-1 rounded-lg border border-ink-300 bg-surface text-ink-900 shadow-lg font-sans text-xs">
+                <SpeakButton
+                  text={toolbar.text}
+                  label={t('reader.playSentence')}
+                  stopLabel={t('reader.stop')}
+                  variant="ghost"
+                  size="icon"
+                  className={`h-7 w-7 transition-colors ${toolbarButton(toolbarPhase !== 'idle')}`}
+                />
+                <div className="w-px h-3.5 bg-ink-200" />
+                <button
+                  onClick={() => onSentenceClick(toolbar.text)}
+                  aria-label={t('reader.analyzeSentence')}
+                  title={t('reader.analyzeSentence')}
+                  className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors ${toolbarButton(false)}`}
+                >
+                  <TextSearch className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  data-practice-entry
+                  onClick={() =>
+                    card.open({ articleId: currentArticle.id, sentenceId: toolbar.id, text: toolbar.text })
+                  }
+                  disabled={cardBusy}
+                  aria-label={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
+                  title={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
+                  className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${toolbarButton(practisedId === toolbar.id)}`}
+                >
+                  <Mic className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          )}
+        </article>
+      </div>
 
       {/* Outside the spaced column: as its last child it would add a margin to the article. */}
       {(listening || card.phase !== 'closed' || barSentence) && (
         <BottomDock>
-          {card.phase !== 'closed' && <PracticeCard card={card} movable={!touch} onOpenLog={() => onOpenShadowingLog(currentArticle.id)} />}
+          {card.phase !== 'closed' && (
+            <PracticeCard card={card} movable={!touch} onOpenLog={() => onOpenShadowingLog(currentArticle.id)} />
+          )}
           {barSentence && (
             <SentenceBar
               text={barSentence.text}
               practiseBlocked={cardBusy}
               onExplain={() => onSentenceClick(barSentence.text)}
-              onPractise={() => card.open({ articleId: currentArticle.id, sentenceId: barSentence.id, text: barSentence.text })}
+              onPractise={() =>
+                card.open({ articleId: currentArticle.id, sentenceId: barSentence.id, text: barSentence.text })
+              }
               onDismiss={() => setDismissedId(barSentence.id)}
             />
           )}

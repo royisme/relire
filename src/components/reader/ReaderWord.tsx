@@ -36,17 +36,33 @@ export function ReaderWord({ token, annotation, layers, activeWord, decorating, 
       }}
       className={`reader-word cursor-pointer rounded-sm hover:bg-accent-100 hover:underline decoration-accent-600 underline-offset-4 ${selected ? 'bg-accent-200 text-ink-950' : ''}`}
     >
-      {marked ? graphemes(token.text).map((glyph, index) => (
-        <React.Fragment key={index}>
-          {annotation.boundaries.includes(index) && (
-            <span aria-hidden="true" className={`pronunciation-slash ${layers.syllables ? '' : 'pronunciation-hidden'}`} />
-          )}
-          <span
-            data-grapheme={index}
-            className={layers.silent && annotation.silent.some((span) => index >= span.start && index < span.end) ? 'text-ink-500' : undefined}
-          >{glyph}</span>
-        </React.Fragment>
-      )) : <>{token.prefix && <span className={decorating ? undefined : 'text-ink-500'}>{token.prefix}</span>}{token.lookup}</>}
+      {marked ? (
+        graphemes(token.text).map((glyph, index) => (
+          <React.Fragment key={index}>
+            {annotation.boundaries.includes(index) && (
+              <span
+                aria-hidden="true"
+                className={`pronunciation-slash ${layers.syllables ? '' : 'pronunciation-hidden'}`}
+              />
+            )}
+            <span
+              data-grapheme={index}
+              className={
+                layers.silent && annotation.silent.some((span) => index >= span.start && index < span.end)
+                  ? 'text-ink-500'
+                  : undefined
+              }
+            >
+              {glyph}
+            </span>
+          </React.Fragment>
+        ))
+      ) : (
+        <>
+          {token.prefix && <span className={decorating ? undefined : 'text-ink-500'}>{token.prefix}</span>}
+          {token.lookup}
+        </>
+      )}
     </span>
   );
 }

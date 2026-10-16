@@ -29,14 +29,15 @@ export function useShadowingLog(articles: Article[]) {
 
   useEffect(() => {
     let live = true;
-    const load = () => listShadowing().then(
-      (all) => {
-        if (!live) return;
-        setRecords(all);
-        setError(null);
-      },
-      (err) => live && setError(errorMessage(err)),
-    );
+    const load = () =>
+      listShadowing().then(
+        (all) => {
+          if (!live) return;
+          setRecords(all);
+          setError(null);
+        },
+        (err) => live && setError(errorMessage(err)),
+      );
     void load();
     const unsubscribe = subscribeShadowing(() => void load());
     return () => {
@@ -47,17 +48,20 @@ export function useShadowingLog(articles: Article[]) {
 
   const { groups, removed } = useMemo(() => {
     const byArticle = new Map<string, ShadowingSentence[]>();
-    for (const record of records ?? []) byArticle.set(record.articleId, [...(byArticle.get(record.articleId) ?? []), record]);
+    for (const record of records ?? [])
+      byArticle.set(record.articleId, [...(byArticle.get(record.articleId) ?? []), record]);
     const groups: LogGroup[] = [];
     for (const article of articles) {
       const list = byArticle.get(article.id);
       if (!list) continue;
       byArticle.delete(article.id);
       const first = new Map<string, { id: string; index: number }>();
-      splitArticle(article.content).flat().forEach((sentence, index) => {
-        const key = normalizeText(sentence.text);
-        if (!first.has(key)) first.set(key, { id: sentence.id, index });
-      });
+      splitArticle(article.content)
+        .flat()
+        .forEach((sentence, index) => {
+          const key = normalizeText(sentence.text);
+          if (!first.has(key)) first.set(key, { id: sentence.id, index });
+        });
       const rows: (LogRow & { index: number })[] = [];
       const changed: LogRow[] = [];
       for (const record of list) {

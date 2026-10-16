@@ -1,7 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText } from 'lucide-react';
-import { getPromptDefinition, PROMPTS, renderTemplate, usedVariables, type PromptId, type PromptOverrides } from '../../services/ai/prompts';
+import {
+  getPromptDefinition,
+  PROMPTS,
+  renderTemplate,
+  usedVariables,
+  type PromptId,
+  type PromptOverrides,
+} from '../../services/ai/prompts';
 import type { Lang } from '../../services/ai/types';
 import { LANGUAGES } from '../../i18n';
 
@@ -23,7 +30,9 @@ export const PromptsSection: React.FC<PromptsSectionProps> = ({ drafts, onChange
   const value = drafts[id]?.[lang] ?? def.defaults[lang];
   const customized = drafts[id]?.[lang] !== undefined && drafts[id]![lang] !== def.defaults[lang];
   const unknown = usedVariables(value).filter((v) => !def.variables.includes(v));
-  const missing = def.variables.filter((v) => v !== 'transcript' && !usedVariables(value).includes(v) && v !== 'articleContext' && v !== 'userTranscript');
+  const missing = def.variables.filter(
+    (v) => v !== 'transcript' && !usedVariables(value).includes(v) && v !== 'articleContext' && v !== 'userTranscript',
+  );
 
   const setValue = (text: string) => onChange({ ...drafts, [id]: { ...drafts[id], [lang]: text } });
   const reset = () => {
@@ -64,9 +73,19 @@ export const PromptsSection: React.FC<PromptsSectionProps> = ({ drafts, onChange
                 </option>
               ))}
             </select>
-            <div className="flex items-center rounded-md border border-ink-200 p-0.5" role="group" aria-label={t('settings.promptLanguage')}>
+            <div
+              className="flex items-center rounded-md border border-ink-200 p-0.5"
+              role="group"
+              aria-label={t('settings.promptLanguage')}
+            >
               {(['en', 'zh'] as const).map((l) => (
-                <button key={l} type="button" aria-pressed={lang === l} onClick={() => setLang(l)} className={tab(lang === l)}>
+                <button
+                  key={l}
+                  type="button"
+                  aria-pressed={lang === l}
+                  onClick={() => setLang(l)}
+                  className={tab(lang === l)}
+                >
                   {LANGUAGES.find((x) => x.code === l)?.label}
                 </button>
               ))}
@@ -118,7 +137,9 @@ export const PromptsSection: React.FC<PromptsSectionProps> = ({ drafts, onChange
             </p>
           )}
           {unknown.length === 0 && missing.length > 0 && (
-            <p className="text-xs text-accent-900">{t('settings.promptMissing', { names: missing.map((v) => `{{${v}}}`).join(' ') })}</p>
+            <p className="text-xs text-accent-900">
+              {t('settings.promptMissing', { names: missing.map((v) => `{{${v}}}`).join(' ') })}
+            </p>
           )}
         </div>
       )}

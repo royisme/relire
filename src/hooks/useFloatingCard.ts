@@ -2,7 +2,16 @@
  * Lets the practice card leave the bottom dock and float where the learner drags it (mouse and keyboard
  * only; touch keeps it docked). The position is remembered in this browser; double-click or Home docks it.
  */
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type RefObject } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+  type RefObject,
+} from 'react';
 
 const KEY = 'relire_practice_card_pos';
 const MARGIN = 8;
@@ -36,26 +45,30 @@ export function useFloatingCard(enabled: boolean, card: RefObject<HTMLElement | 
   const drag = useRef<{ dx: number; dy: number; id: number } | null>(null);
 
   // Keep the whole card on screen.
-  const clamp = useCallback((point: Point): Point => {
-    const box = card.current?.getBoundingClientRect();
-    const width = box?.width ?? 448;
-    const height = box?.height ?? 300;
-    return {
-      x: Math.round(Math.min(Math.max(MARGIN, point.x), window.innerWidth - width - MARGIN)),
-      y: Math.round(Math.min(Math.max(HEADER, point.y), window.innerHeight - height - MARGIN)),
-    };
-  }, [card]);
+  const clamp = useCallback(
+    (point: Point): Point => {
+      const box = card.current?.getBoundingClientRect();
+      const width = box?.width ?? 448;
+      const height = box?.height ?? 300;
+      return {
+        x: Math.round(Math.min(Math.max(MARGIN, point.x), window.innerWidth - width - MARGIN)),
+        y: Math.round(Math.min(Math.max(HEADER, point.y), window.innerHeight - height - MARGIN)),
+      };
+    },
+    [card],
+  );
 
   const floating = enabled && position !== null;
 
   // A smaller window, or the card growing (restore, a long error), must not push it off screen.
   useEffect(() => {
     if (!floating) return;
-    const refit = () => setPosition((p) => {
-      if (!p) return p;
-      const next = clamp(p);
-      return next.x === p.x && next.y === p.y ? p : next;
-    });
+    const refit = () =>
+      setPosition((p) => {
+        if (!p) return p;
+        const next = clamp(p);
+        return next.x === p.x && next.y === p.y ? p : next;
+      });
     refit();
     window.addEventListener('resize', refit);
     const observer = new ResizeObserver(refit);
@@ -113,6 +126,8 @@ export function useFloatingCard(enabled: boolean, card: RefObject<HTMLElement | 
     },
   };
 
-  const style: CSSProperties | undefined = floating ? { position: 'fixed', left: position.x, top: position.y } : undefined;
+  const style: CSSProperties | undefined = floating
+    ? { position: 'fixed', left: position.x, top: position.y }
+    : undefined;
   return { floating, style, handleProps, dock };
 }

@@ -57,7 +57,8 @@ export function subscribeCapture(listener: () => void): () => void {
 
 /** Opens the microphone; throws the browser's own error (NotAllowedError, NotFoundError...). */
 export function acquireStream(): Promise<MediaStream> {
-  if (!navigator.mediaDevices?.getUserMedia) return Promise.reject(new DOMException('getUserMedia unavailable', 'NotSupportedError'));
+  if (!navigator.mediaDevices?.getUserMedia)
+    return Promise.reject(new DOMException('getUserMedia unavailable', 'NotSupportedError'));
   return navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 },
   });
@@ -68,7 +69,9 @@ export function releaseStream(stream: MediaStream | null | undefined) {
 }
 
 function preferredMimeType(): string | undefined {
-  return ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'].find((type) => MediaRecorder.isTypeSupported(type));
+  return ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'].find((type) =>
+    MediaRecorder.isTypeSupported(type),
+  );
 }
 
 export interface TakeResult {
@@ -115,12 +118,14 @@ export class Take {
     this.recorder.ondataavailable = (event) => {
       if (event.data.size > 0) this.chunks.push(event.data);
     };
-    this.recorder.onerror = (event) => this.fail((event as unknown as { error?: Error }).error ?? new Error('Recorder error'));
-    this.recorder.onstop = () => this.finish({
-      blob: new Blob(this.chunks, { type: this.recorder.mimeType || mimeType || 'audio/webm' }),
-      mimeType: this.recorder.mimeType || mimeType || 'audio/webm',
-      durationMs: Math.round(performance.now() - this.startedAt),
-    });
+    this.recorder.onerror = (event) =>
+      this.fail((event as unknown as { error?: Error }).error ?? new Error('Recorder error'));
+    this.recorder.onstop = () =>
+      this.finish({
+        blob: new Blob(this.chunks, { type: this.recorder.mimeType || mimeType || 'audio/webm' }),
+        mimeType: this.recorder.mimeType || mimeType || 'audio/webm',
+        durationMs: Math.round(performance.now() - this.startedAt),
+      });
     stream.getAudioTracks().forEach((track) => track.addEventListener('ended', this.onTrackEnded));
     this.recorder.start(100);
   }

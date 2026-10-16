@@ -3,7 +3,8 @@
  * tools read as tools, not page. Pass them to `Button` as className; tailwind-merge replaces the
  * variant's page colours.
  */
-export const panelSurface = 'panel pointer-events-auto rounded-lg border border-panel-line bg-panel text-panel-ink shadow-lg';
+export const panelSurface =
+  'panel pointer-events-auto rounded-lg border border-panel-line bg-panel text-panel-ink shadow-lg';
 /** Icon and text buttons on the panel (use with variant="ghost"). */
 export const panelGhost = 'text-panel-ink hover:bg-panel-raised hover:text-panel-ink';
 /** Secondary buttons with a visible edge (use with variant="outline"). */

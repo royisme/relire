@@ -18,7 +18,8 @@ export default defineConfig(() => {
           id: './',
           name: 'Relire - French close reading',
           short_name: 'Relire',
-          description: 'Close reading for French: tap any word or sentence for an explanation, then read it aloud and get pronunciation feedback.',
+          description:
+            'Close reading for French: tap any word or sentence for an explanation, then read it aloud and get pronunciation feedback.',
           theme_color: '#F7F6F3',
           background_color: '#F7F6F3',
           display: 'standalone',

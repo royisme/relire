@@ -9,16 +9,20 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const flat = (o: Record<string, unknown>, prefix = ''): Record<string, string> =>
-  Object.entries(o).reduce((acc, [k, v]) => {
-    if (v && typeof v === 'object') Object.assign(acc, flat(v as Record<string, unknown>, `${prefix}${k}.`));
-    else acc[`${prefix}${k}`] = String(v);
-    return acc;
-  }, {} as Record<string, string>);
+  Object.entries(o).reduce(
+    (acc, [k, v]) => {
+      if (v && typeof v === 'object') Object.assign(acc, flat(v as Record<string, unknown>, `${prefix}${k}.`));
+      else acc[`${prefix}${k}`] = String(v);
+      return acc;
+    },
+    {} as Record<string, string>,
+  );
 
 const en = flat(JSON.parse(readFileSync('src/i18n/locales/en.json', 'utf8')));
 const zh = flat(JSON.parse(readFileSync('src/i18n/locales/zh.json', 'utf8')));
 const base = (k: string) => k.replace(/_(one|other|zero)$/, '');
-const has = (loc: Record<string, string>, k: string) => k in loc || ['_one', '_other', '_zero'].some((s) => k + s in loc);
+const has = (loc: Record<string, string>, k: string) =>
+  k in loc || ['_one', '_other', '_zero'].some((s) => k + s in loc);
 
 const walk = (dir: string): string[] =>
   readdirSync(dir).flatMap((f) => {
@@ -43,12 +47,19 @@ for (const file of files) {
 }
 
 for (const k of Object.keys(en)) if (!has(zh, base(k))) problems.push(`"${k}" is in en.json but not zh.json`);
-for (const k of Object.keys(zh)) if (!(k in en) && !(base(k) in en)) problems.push(`"${k}" is in zh.json but not en.json`);
+for (const k of Object.keys(zh))
+  if (!(k in en) && !(base(k) in en)) problems.push(`"${k}" is in zh.json but not en.json`);
 for (const k of Object.keys(en)) {
   const counterpart = k in zh ? k : base(k) + '_other';
   if (!(counterpart in zh)) continue;
-  const a = [...en[k].matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort().join();
-  const b = [...zh[counterpart].matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort().join();
+  const a = [...en[k].matchAll(/\{\{(\w+)\}\}/g)]
+    .map((m) => m[1])
+    .sort()
+    .join();
+  const b = [...zh[counterpart].matchAll(/\{\{(\w+)\}\}/g)]
+    .map((m) => m[1])
+    .sort()
+    .join();
   if (a !== b) problems.push(`"${k}": placeholders differ between en.json and zh.json`);
 }
 

@@ -19,13 +19,69 @@ export function prosodyTokens(prompt: string): { ordinal: number; source: string
 }
 
 export const defaultAnswers: Record<Task, Answer> = {
-  word: { word: 'chose', lemma: 'chose', partOfSpeech: 'nom', ipa: '/ʃoz/', phoneticsGuide: '', translation: 'thing', otherMeanings: [], contextTense: '', conjugationTable: [], usageExamples: [{ fr: 'Quelle chose !', zh: '', highlight: 'chose' }], cefrLevel: 'A1', memoryTrick: '' },
-  sentence: { sentence: 'Je suis en vacances !', translation: 'I am on holiday!', syntaxStructure: [], grammarPoints: [], patternCollocations: [], shadowingGuide: { speedTip: 'Slow, then natural.', rhythmGroups: ['Je suis', 'en vacances !'], liaisons: [], intonation: 'Falling at the end.' } },
-  drills: { title: 'Drill', description: '', questions: [{ id: 1, type: 'oral', targetSentence: 'Je suis en vacances !', prompt: 'Read aloud', scrambledChunks: [], clozeText: '', options: [], correctOptionIndex: 0, grammarHint: '', shadowingAudioPrompt: '' }] },
-  pronunciation: { overallScore: 80, accuracyScore: 81, fluencyScore: 79, rhythmScore: 78, phonemeFeedback: [], corrections: [], coachingNotes: '' },
+  word: {
+    word: 'chose',
+    lemma: 'chose',
+    partOfSpeech: 'nom',
+    ipa: '/ʃoz/',
+    phoneticsGuide: '',
+    translation: 'thing',
+    otherMeanings: [],
+    contextTense: '',
+    conjugationTable: [],
+    usageExamples: [{ fr: 'Quelle chose !', zh: '', highlight: 'chose' }],
+    cefrLevel: 'A1',
+    memoryTrick: '',
+  },
+  sentence: {
+    sentence: 'Je suis en vacances !',
+    translation: 'I am on holiday!',
+    syntaxStructure: [],
+    grammarPoints: [],
+    patternCollocations: [],
+    shadowingGuide: {
+      speedTip: 'Slow, then natural.',
+      rhythmGroups: ['Je suis', 'en vacances !'],
+      liaisons: [],
+      intonation: 'Falling at the end.',
+    },
+  },
+  drills: {
+    title: 'Drill',
+    description: '',
+    questions: [
+      {
+        id: 1,
+        type: 'oral',
+        targetSentence: 'Je suis en vacances !',
+        prompt: 'Read aloud',
+        scrambledChunks: [],
+        clozeText: '',
+        options: [],
+        correctOptionIndex: 0,
+        grammarHint: '',
+        shadowingAudioPrompt: '',
+      },
+    ],
+  },
+  pronunciation: {
+    overallScore: 80,
+    accuracyScore: 81,
+    fluencyScore: 79,
+    rhythmScore: 78,
+    phonemeFeedback: [],
+    corrections: [],
+    coachingNotes: '',
+  },
   // Source-addressed and unresolved: only the built-in function-word table resolves anything.
   prosody: (prompt: string) => ({
-    words: prosodyTokens(prompt).map(({ ordinal, source }) => ({ ordinal, source, status: 'unresolved', syllables: [], groupEnd: false })),
+    words: prosodyTokens(prompt).map(({ ordinal, source }) => ({
+      ordinal,
+      source,
+      status: 'unresolved',
+      syllables: [],
+      groupEnd: false,
+    })),
     connections: [],
   }),
 };
@@ -62,13 +118,17 @@ export const test = base.extend<{ ai: MockAi }>({
       calls: { tts: 0, word: 0, sentence: 0, drills: 0, pronunciation: 0, prosody: 0 },
       prompts: { word: [], sentence: [], drills: [], pronunciation: [], prosody: [] },
       answer: (next) => Object.assign(answers, next),
-      fail: (tasks) => { failing.clear(); tasks.forEach((task) => failing.add(task)); },
+      fail: (tasks) => {
+        failing.clear();
+        tasks.forEach((task) => failing.add(task));
+      },
       ttsDelayMs: 300,
     };
     page.on('pageerror', (error) => console.log('PAGEERROR', error.message));
     await page.addInitScript(() => {
       localStorage.setItem('relire_onboarded', '1');
-      if (!localStorage.getItem('relire_app_settings_v1')) localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: { gemini: 'TEST' } }));
+      if (!localStorage.getItem('relire_app_settings_v1'))
+        localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: { gemini: 'TEST' } }));
     });
     await page.route('**/generativelanguage.googleapis.com/**', async (route) => {
       const request = route.request();
@@ -76,17 +136,30 @@ export const test = base.extend<{ ai: MockAi }>({
         ai.calls.tts++;
         await new Promise((resolve) => setTimeout(resolve, ai.ttsDelayMs));
         if (failing.has('tts')) return route.fulfill({ status: 500, body: '{"error":{"message":"tts failed"}}' });
-        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ inlineData: { mimeType: 'audio/L16;rate=24000', data: silence } }] } }] }) });
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            candidates: [{ content: { parts: [{ inlineData: { mimeType: 'audio/L16;rate=24000', data: silence } }] } }],
+          }),
+        });
       }
       const body = JSON.parse(request.postData() || '{}');
-      const prompt = (body.contents || []).flatMap((content: { parts?: { text?: string }[] }) => content.parts || []).map((part: { text?: string }) => part.text || '').join('\n');
+      const prompt = (body.contents || [])
+        .flatMap((content: { parts?: { text?: string }[] }) => content.parts || [])
+        .map((part: { text?: string }) => part.text || '')
+        .join('\n');
       const task = taskOf(prompt);
       ai.calls[task]++;
       ai.prompts[task].push(prompt);
       if (failing.has(task)) return route.fulfill({ status: 500, body: `{"error":{"message":"${task} failed"}}` });
       const answer = answers[task];
       const value = typeof answer === 'function' ? await answer(prompt) : answer;
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }] }) });
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }] }),
+      });
     });
     await use(ai);
   },
@@ -106,21 +179,29 @@ export async function openArticle(page: Page, title = 'Le Petit Prince') {
 export async function settled(page: Page) {
   await page.evaluate(() => document.fonts.ready);
   let last = '';
-  await expect.poll(async () => {
-    const now = JSON.stringify(await layout(page, 'body'));
-    const same = now === last;
-    last = now;
-    return same;
-  }, { intervals: [100] }).toBe(true);
+  await expect
+    .poll(
+      async () => {
+        const now = JSON.stringify(await layout(page, 'body'));
+        const same = now === last;
+        last = now;
+        return same;
+      },
+      { intervals: [100] },
+    )
+    .toBe(true);
 }
 
 /** Document size and the top of `selector`, to assert that an action did not move the page. */
 export async function layout(page: Page, selector = 'main') {
-  return page.evaluate((sel) => ({
-    top: Math.round((document.querySelector(sel)?.getBoundingClientRect().top ?? NaN) + scrollY),
-    height: document.documentElement.scrollHeight,
-    width: document.documentElement.scrollWidth,
-  }), selector);
+  return page.evaluate(
+    (sel) => ({
+      top: Math.round((document.querySelector(sel)?.getBoundingClientRect().top ?? NaN) + scrollY),
+      height: document.documentElement.scrollHeight,
+      width: document.documentElement.scrollWidth,
+    }),
+    selector,
+  );
 }
 
 /** Elements inside `root` that stick out of it horizontally. Empty means no overflow. */
@@ -130,7 +211,8 @@ export async function overflowing(root: Locator) {
     const out: string[] = [];
     el.querySelectorAll('*').forEach((node) => {
       const rect = node.getBoundingClientRect();
-      if (rect.width > 0 && (rect.right > box.right + 1 || rect.left < box.left - 1)) out.push(`${node.tagName}.${String(node.className).slice(0, 40)}`);
+      if (rect.width > 0 && (rect.right > box.right + 1 || rect.left < box.left - 1))
+        out.push(`${node.tagName}.${String(node.className).slice(0, 40)}`);
     });
     return out;
   });

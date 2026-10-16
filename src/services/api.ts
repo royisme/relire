@@ -7,7 +7,11 @@ import { getPromptTemplate, promptFingerprint, subscribePromptChanges } from './
 import type { Lang } from './ai/types';
 import { cachedRequest, readCachedAnswer } from './cachedRequest';
 import { drillsKey, prosodyKey, sentenceKey, wordKey } from '../storage/cache';
-import { MAX_PRONUNCIATION_SOURCE, PRONUNCIATION_SCHEMA_VERSION, READER_TOKENIZER_VERSION } from '../types/pronunciation';
+import {
+  MAX_PRONUNCIATION_SOURCE,
+  PRONUNCIATION_SCHEMA_VERSION,
+  READER_TOKENIZER_VERSION,
+} from '../types/pronunciation';
 import { hasGraphemeSupport } from '../utils/readerTokens';
 import { validatePronunciationMarkers } from '../utils/pronunciationMarkers';
 
@@ -33,18 +37,18 @@ function context(): ai.TextContext & { lang: Lang } {
 export function fetchWordAnalysis(
   word: string,
   sentenceContext: string,
-  articleContext?: string
+  articleContext?: string,
 ): Promise<WordAnalysis> {
   const ctx = context();
   return cachedRequest('word', wordKey(ctx.lang, promptFingerprint('word', ctx.lang), word, sentenceContext), () =>
-    ai.analyzeWord({ word, sentenceContext, articleContext }, ctx)
+    ai.analyzeWord({ word, sentenceContext, articleContext }, ctx),
   );
 }
 
 export function fetchSentenceAnalysis(sentence: string, articleContext?: string): Promise<SentenceAnalysis> {
   const ctx = context();
   return cachedRequest('sentence', sentenceKey(ctx.lang, promptFingerprint('sentence', ctx.lang), sentence), () =>
-    ai.analyzeSentence({ sentence, articleContext }, ctx)
+    ai.analyzeSentence({ sentence, articleContext }, ctx),
   );
 }
 
@@ -80,8 +84,13 @@ export function createPronunciationSession() {
     },
     async fetch(source: string) {
       supported(source);
-      return cachedRequest('prosody', key(source), () => ai.annotatePronunciation({ source, template }, ctx), false,
-        (value) => validatePronunciationMarkers(value, source));
+      return cachedRequest(
+        'prosody',
+        key(source),
+        () => ai.annotatePronunciation({ source, template }, ctx),
+        false,
+        (value) => validatePronunciationMarkers(value, source),
+      );
     },
   };
 }
@@ -102,7 +111,7 @@ export function assessPronunciation(params: {
   const { audioBase64, mimeType, ...rest } = params;
   return ai.assessPronunciation(
     { ...rest, audio: audioBase64 ? { base64: audioBase64, mimeType: mimeType || 'audio/webm' } : undefined },
-    context()
+    context(),
   );
 }
 
@@ -110,14 +119,14 @@ export function assessPronunciation(params: {
 export function generatePracticeDrills(
   articleText: string,
   type: string = 'syntax',
-  fresh = false
+  fresh = false,
 ): Promise<PracticeDeck> {
   const ctx = context();
   return cachedRequest(
     'drills',
     drillsKey(ctx.lang, promptFingerprint('drills', ctx.lang), type, articleText),
     () => ai.generateDrills({ articleText, type }, ctx),
-    fresh
+    fresh,
   );
 }
 

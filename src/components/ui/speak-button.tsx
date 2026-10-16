@@ -30,7 +30,8 @@ export function useSpeechPhase(text: string): SpeechPhase {
 export function SpeakIcon({ phase, className }: { phase: SpeechPhase; className?: string }) {
   const cls = cn('w-4 h-4', className);
   if (phase === 'loading') return <Loader2 className={cn(cls, 'animate-spin')} aria-hidden="true" />;
-  if (phase === 'playing' || phase === 'paused') return <Square className={cn(cls, 'fill-current')} aria-hidden="true" />;
+  if (phase === 'playing' || phase === 'paused')
+    return <Square className={cn(cls, 'fill-current')} aria-hidden="true" />;
   return <Volume2 className={cls} aria-hidden="true" />;
 }
 
@@ -46,7 +47,17 @@ interface SpeakButtonProps extends Omit<ButtonProps, 'children'> {
   showLabel?: boolean;
 }
 
-export function SpeakButton({ text, rate, label, stopLabel, showLabel, variant, onClick, className, ...rest }: SpeakButtonProps) {
+export function SpeakButton({
+  text,
+  rate,
+  label,
+  stopLabel,
+  showLabel,
+  variant,
+  onClick,
+  className,
+  ...rest
+}: SpeakButtonProps) {
   const phase = useSpeechPhase(text);
   const active = phase !== 'idle';
   const name = active ? stopLabel : label;
@@ -70,7 +81,9 @@ export function SpeakButton({ text, rate, label, stopLabel, showLabel, variant, 
         // Both names share one grid cell, so the button is as wide as the longer one in every state.
         <span className="inline-grid">
           <span className={cn('col-start-1 row-start-1', active && 'invisible')}>{label}</span>
-          <span className={cn('col-start-1 row-start-1', !active && 'invisible')} aria-hidden="true">{stopLabel}</span>
+          <span className={cn('col-start-1 row-start-1', !active && 'invisible')} aria-hidden="true">
+            {stopLabel}
+          </span>
         </span>
       )}
     </Button>

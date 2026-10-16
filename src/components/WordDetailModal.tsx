@@ -27,7 +27,12 @@ interface WordDetailModalProps {
 }
 
 /** One conjugated form; pressing it speaks the form, and its icon shows loading / playing in place. */
-const FormTile: React.FC<{ person: string; form: string; rate: number; label: string }> = ({ person, form, rate, label }) => {
+const FormTile: React.FC<{ person: string; form: string; rate: number; label: string }> = ({
+  person,
+  form,
+  rate,
+  label,
+}) => {
   const text = `${person} ${form}`;
   const phase = useSpeechPhase(text);
   return (
@@ -44,7 +49,11 @@ const FormTile: React.FC<{ person: string; form: string; rate: number; label: st
   );
 };
 
-const Section: React.FC<{ title: string; aside?: React.ReactNode; children: React.ReactNode }> = ({ title, aside, children }) => (
+const Section: React.FC<{ title: string; aside?: React.ReactNode; children: React.ReactNode }> = ({
+  title,
+  aside,
+  children,
+}) => (
   <section className="pt-5 border-t border-ink-200 space-y-2">
     <div className="flex items-baseline justify-between gap-3">
       <h4 className="text-xs font-medium text-ink-500">{title}</h4>
@@ -73,7 +82,14 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
   if (!isOpen) return null;
 
   const closeButton = (
-    <Button variant="ghost" size="icon" onClick={onClose} aria-label={t('common.close')} title={t('common.close')} className="-mr-2 -mt-1 shrink-0">
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onClose}
+      aria-label={t('common.close')}
+      title={t('common.close')}
+      className="-mr-2 -mt-1 shrink-0"
+    >
       <X className="w-5 h-5" />
     </Button>
   );
@@ -92,11 +108,17 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
         ) : !wordData ? (
           <div className="p-6 space-y-3">
             <div className="flex items-start justify-between gap-3">
-              <h2 className="font-serif text-2xl font-semibold text-ink-900 break-words">{activeWord || t('common.error')}</h2>
+              <h2 className="font-serif text-2xl font-semibold text-ink-900 break-words">
+                {activeWord || t('common.error')}
+              </h2>
               {closeButton}
             </div>
             <p className="text-sm text-ink-600">{t('wordModal.failed')}</p>
-            {errorMessage && <p role="alert" className="text-sm text-bad-700 break-words">{errorMessage}</p>}
+            {errorMessage && (
+              <p role="alert" className="text-sm text-bad-700 break-words">
+                {errorMessage}
+              </p>
+            )}
             {onRetry && <Button onClick={onRetry}>{t('common.retry')}</Button>}
           </div>
         ) : (
@@ -110,7 +132,11 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                     <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm text-ink-500">
                       <span className="font-mono text-base text-ink-700">{wordData.ipa || `[${wordData.word}]`}</span>
                       {wordData.partOfSpeech && <span>{wordData.partOfSpeech}</span>}
-                      {wordData.cefrLevel && <span className="rounded-md border border-ink-300 px-1.5 text-xs leading-5">{wordData.cefrLevel}</span>}
+                      {wordData.cefrLevel && (
+                        <span className="rounded-md border border-ink-300 px-1.5 text-xs leading-5">
+                          {wordData.cefrLevel}
+                        </span>
+                      )}
                       {wordData.lemma && wordData.lemma.toLowerCase() !== wordData.word.toLowerCase() && (
                         <span>
                           {t('wordModal.lemma')} <span className="font-serif text-ink-800">{wordData.lemma}</span>
@@ -122,7 +148,14 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <SpeakButton text={wordData.word} rate={speechSpeed} label={t('wordModal.listen')} stopLabel={t('reader.stop')} variant="outline" showLabel />
+                  <SpeakButton
+                    text={wordData.word}
+                    rate={speechSpeed}
+                    label={t('wordModal.listen')}
+                    stopLabel={t('reader.stop')}
+                    variant="outline"
+                    showLabel
+                  />
                   <Button
                     variant="ghost"
                     size="sm"
@@ -136,7 +169,9 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                 </div>
 
                 <div>
-                  <p className="text-lg font-medium text-ink-900 break-words">{isEn && wordData.translationEn ? wordData.translationEn : wordData.translation}</p>
+                  <p className="text-lg font-medium text-ink-900 break-words">
+                    {isEn && wordData.translationEn ? wordData.translationEn : wordData.translation}
+                  </p>
                   {wordData.otherMeanings && wordData.otherMeanings.length > 0 && (
                     <p className="text-sm text-ink-600 mt-0.5 break-words">
                       {t('wordModal.otherMeanings')} {wordData.otherMeanings.join(t('common.listSeparator'))}
@@ -156,21 +191,33 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                   <p className="text-sm text-ink-800 leading-relaxed break-words">{wordData.contextTense}</p>
                   {contextSentence && (
                     <p className="font-serif text-base italic text-ink-600 break-words">
-                      <span className="not-italic font-sans text-xs text-ink-500 mr-1.5">{t('wordModal.originalSentence')}</span>« {contextSentence} »
+                      <span className="not-italic font-sans text-xs text-ink-500 mr-1.5">
+                        {t('wordModal.originalSentence')}
+                      </span>
+                      « {contextSentence} »
                     </p>
                   )}
                 </Section>
               )}
 
               {wordData.conjugationTable && wordData.conjugationTable.length > 0 && (
-                <Section title={t('wordModal.conjugation')} aside={<span className="text-xs text-ink-500">{t('wordModal.clickToListen')}</span>}>
+                <Section
+                  title={t('wordModal.conjugation')}
+                  aside={<span className="text-xs text-ink-500">{t('wordModal.clickToListen')}</span>}
+                >
                   <div className="space-y-3">
                     {wordData.conjugationTable.map((tenseBlock, idx) => (
                       <div key={idx}>
                         <p className="text-sm font-medium text-ink-800 mb-1">{tenseBlock.tense}</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2">
                           {tenseBlock.forms.map((item, fIdx) => (
-                            <FormTile key={fIdx} person={item.person} form={item.form} rate={speechSpeed} label={t('wordModal.clickToListen')} />
+                            <FormTile
+                              key={fIdx}
+                              person={item.person}
+                              form={item.form}
+                              rate={speechSpeed}
+                              label={t('wordModal.clickToListen')}
+                            />
                           ))}
                         </div>
                       </div>
@@ -217,7 +264,11 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                 aria-pressed={isSavedInVocab}
                 title={isSavedInVocab ? t('wordModal.removeHint') : undefined}
               >
-                {isSavedInVocab ? <BookmarkCheck className="w-4 h-4 text-ok-800" aria-hidden="true" /> : <Bookmark className="w-4 h-4" aria-hidden="true" />}
+                {isSavedInVocab ? (
+                  <BookmarkCheck className="w-4 h-4 text-ok-800" aria-hidden="true" />
+                ) : (
+                  <Bookmark className="w-4 h-4" aria-hidden="true" />
+                )}
                 <span>{isSavedInVocab ? t('wordModal.removeFromVocab') : t('wordModal.addToVocab')}</span>
               </Button>
               <Button variant="ghost" onClick={onClose}>

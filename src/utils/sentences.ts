@@ -22,7 +22,7 @@ export function splitArticle(content: string): SentencePiece[][] {
     .map((p) => p.trim())
     .filter(Boolean)
     .map((p, pIdx) =>
-      joinStrays(p.match(SENTENCE) || [p]).map((raw, sIdx) => ({ id: `${pIdx}-${sIdx}`, raw, text: raw.trim() }))
+      joinStrays(p.match(SENTENCE) || [p]).map((raw, sIdx) => ({ id: `${pIdx}-${sIdx}`, raw, text: raw.trim() })),
     );
 }
 

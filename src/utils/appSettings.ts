@@ -77,4 +77,5 @@ export const getApiKey = (settings: AppSettings, providerId: string) => settings
 export const hasTextKey = (settings: AppSettings = getAppSettings()) => !!getApiKey(settings, settings.textProvider);
 
 /** True when the provider that speaks has a key (otherwise the browser's own voice is used). */
-export const hasSpeechKey = (settings: AppSettings = getAppSettings()) => !!getApiKey(settings, settings.speechProvider);
+export const hasSpeechKey = (settings: AppSettings = getAppSettings()) =>
+  !!getApiKey(settings, settings.speechProvider);

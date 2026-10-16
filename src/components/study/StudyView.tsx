@@ -40,7 +40,10 @@ export function StudyView({ tab, onTab, vocabulary, shadowing }: Props) {
           label={t('study.label')}
           value={tab}
           onChange={choose}
-          options={[{ value: 'words', label: t('study.words') }, { value: 'shadowing', label: t('study.shadowing') }]}
+          options={[
+            { value: 'words', label: t('study.words') },
+            { value: 'shadowing', label: t('study.shadowing') },
+          ]}
         />
       </div>
       {tab === 'words' ? (

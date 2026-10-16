@@ -83,7 +83,8 @@ export async function deleteTake(key: string, takeId: string): Promise<void> {
   const record = await tx.store.get(key);
   if (record) {
     const takes = record.takes.filter((take) => take.id !== takeId);
-    if (takes.length) await tx.store.put({ ...record, takes, updatedAt: Math.max(...takes.map((take) => take.recordedAt)) });
+    if (takes.length)
+      await tx.store.put({ ...record, takes, updatedAt: Math.max(...takes.map((take) => take.recordedAt)) });
     else await tx.store.delete(key);
   }
   await tx.done;
@@ -138,7 +139,13 @@ export async function exportShadowing(): Promise<ShadowingBackup[]> {
   for (const record of await listShadowing()) {
     const takes: TakeBackup[] = [];
     for (const take of record.takes) {
-      takes.push({ id: take.id, recordedAt: take.recordedAt, mimeType: take.mimeType, durationMs: take.durationMs, data: await blobToBase64(take.blob) });
+      takes.push({
+        id: take.id,
+        recordedAt: take.recordedAt,
+        mimeType: take.mimeType,
+        durationMs: take.durationMs,
+        data: await blobToBase64(take.blob),
+      });
     }
     out.push({ articleId: record.articleId, text: record.text, takes });
   }
@@ -153,7 +160,8 @@ export class ShadowingBackupError extends Error {
   }
 }
 
-const isText = (value: unknown, max: number): value is string => typeof value === 'string' && value.trim().length > 0 && value.length <= max;
+const isText = (value: unknown, max: number): value is string =>
+  typeof value === 'string' && value.trim().length > 0 && value.length <= max;
 const isTime = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0;
 
 /** Validates and decodes everything before anything is written. */
@@ -165,27 +173,46 @@ export function parseShadowingBackup(value: unknown): ShadowingSentence[] {
     const where = `recordings[${index}]`;
     const item = raw as Partial<ShadowingBackup> | null;
     if (!item || typeof item !== 'object') throw new ShadowingBackupError(`${where}: not an object`);
-    if (!isText(item.articleId, 200) || !isText(item.text, 4000)) throw new ShadowingBackupError(`${where}: article or text missing`);
-    if (!Array.isArray(item.takes) || item.takes.length === 0 || item.takes.length > MAX_TAKES) throw new ShadowingBackupError(`${where}: 1 to ${MAX_TAKES} takes expected`);
+    if (!isText(item.articleId, 200) || !isText(item.text, 4000))
+      throw new ShadowingBackupError(`${where}: article or text missing`);
+    if (!Array.isArray(item.takes) || item.takes.length === 0 || item.takes.length > MAX_TAKES)
+      throw new ShadowingBackupError(`${where}: 1 to ${MAX_TAKES} takes expected`);
     const key = shadowingKey(item.articleId, item.text);
     if (records.has(key)) throw new ShadowingBackupError(`${where}: duplicate sentence`);
-    const takes = item.takes.map((take, at): ShadowingTake => {
-      const there = `${where}.takes[${at}]`;
-      if (!take || typeof take !== 'object') throw new ShadowingBackupError(`${there}: not an object`);
-      if (!isText(take.id, 100) || ids.has(take.id)) throw new ShadowingBackupError(`${there}: missing or duplicate id`);
-      if (!isTime(take.recordedAt) || !isTime(take.durationMs)) throw new ShadowingBackupError(`${there}: bad time`);
-      if (!isText(take.mimeType, 100) || !take.mimeType.startsWith('audio/')) throw new ShadowingBackupError(`${there}: not audio`);
-      if (typeof take.data !== 'string' || !take.data) throw new ShadowingBackupError(`${there}: no audio data`);
-      let blob: Blob;
-      try {
-        blob = base64ToBlob(take.data, take.mimeType);
-      } catch {
-        throw new ShadowingBackupError(`${there}: audio data is not base64`);
-      }
-      ids.add(take.id);
-      return { id: take.id, recordedAt: take.recordedAt, mimeType: take.mimeType, durationMs: take.durationMs, bytes: blob.size, blob };
-    }).sort((a, b) => a.recordedAt - b.recordedAt);
-    records.set(key, { key, articleId: item.articleId, text: item.text.trim(), updatedAt: takes[takes.length - 1].recordedAt, takes });
+    const takes = item.takes
+      .map((take, at): ShadowingTake => {
+        const there = `${where}.takes[${at}]`;
+        if (!take || typeof take !== 'object') throw new ShadowingBackupError(`${there}: not an object`);
+        if (!isText(take.id, 100) || ids.has(take.id))
+          throw new ShadowingBackupError(`${there}: missing or duplicate id`);
+        if (!isTime(take.recordedAt) || !isTime(take.durationMs)) throw new ShadowingBackupError(`${there}: bad time`);
+        if (!isText(take.mimeType, 100) || !take.mimeType.startsWith('audio/'))
+          throw new ShadowingBackupError(`${there}: not audio`);
+        if (typeof take.data !== 'string' || !take.data) throw new ShadowingBackupError(`${there}: no audio data`);
+        let blob: Blob;
+        try {
+          blob = base64ToBlob(take.data, take.mimeType);
+        } catch {
+          throw new ShadowingBackupError(`${there}: audio data is not base64`);
+        }
+        ids.add(take.id);
+        return {
+          id: take.id,
+          recordedAt: take.recordedAt,
+          mimeType: take.mimeType,
+          durationMs: take.durationMs,
+          bytes: blob.size,
+          blob,
+        };
+      })
+      .sort((a, b) => a.recordedAt - b.recordedAt);
+    records.set(key, {
+      key,
+      articleId: item.articleId,
+      text: item.text.trim(),
+      updatedAt: takes[takes.length - 1].recordedAt,
+      takes,
+    });
   });
   return [...records.values()];
 }

@@ -27,7 +27,11 @@ const plain = (value: unknown, max: number): string => {
 
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
-interface Segmented { ipa: string[]; boundaries: number[]; silent: GraphemeRange[] }
+interface Segmented {
+  ipa: string[];
+  boundaries: number[];
+  silent: GraphemeRange[];
+}
 
 /**
  * "tem(ps)" + "ps" → letters and the silent range, checked letter by letter
@@ -94,10 +98,13 @@ export function parseProsodyResponse(value: unknown, source: string) {
     check(word.status === 'resolved' || word.status === 'unresolved', 'status');
     check(typeof word.groupEnd === 'boolean' && Array.isArray(word.syllables), 'fields');
     const base = { ordinal, source: tokens[ordinal].text };
-    const fromModel = word.status === 'resolved' ? word.syllables.map((item) => {
-      const syllable = record(item, ['spelling', 'ipa']);
-      return { spelling: plain(syllable.spelling, MAX_PRONUNCIATION_SOURCE + 64), ipa: plain(syllable.ipa, 120) };
-    }) : null;
+    const fromModel =
+      word.status === 'resolved'
+        ? word.syllables.map((item) => {
+            const syllable = record(item, ['spelling', 'ipa']);
+            return { spelling: plain(syllable.spelling, MAX_PRONUNCIATION_SOURCE + 64), ipa: plain(syllable.ipa, 120) };
+          })
+        : null;
     const syllables = lexicon(tokens[ordinal].text) ?? fromModel;
     if (!syllables) return { ...base, status: 'unresolved', ipa: [], boundaries: [], silent: [] };
     try {
@@ -112,11 +119,13 @@ export function parseProsodyResponse(value: unknown, source: string) {
 
   // French stress falls on the last syllable of a rhythm group; the model
   // only says where groups end. The validator trims the anchor to audible letters.
-  const stress = words.filter((word) => groupEnds.has(word.ordinal)).map((word) => ({
-    word: word.ordinal,
-    syllable: word.ipa.length - 1,
-    anchor: { start: word.boundaries.at(-1) ?? 0, end: parts[word.ordinal].length },
-  }));
+  const stress = words
+    .filter((word) => groupEnds.has(word.ordinal))
+    .map((word) => ({
+      word: word.ordinal,
+      syllable: word.ipa.length - 1,
+      anchor: { start: word.boundaries.at(-1) ?? 0, end: parts[word.ordinal].length },
+    }));
 
   const linked = new Set<number>();
   const connections = obj.connections.flatMap((entry) => {
@@ -124,7 +133,14 @@ export function parseProsodyResponse(value: unknown, source: string) {
     const left = conn.left;
     const spelling = plain(conn.spelling, 40);
     // A link the sentence cannot hold is dropped alone, like the validator's own link checks.
-    if (typeof left !== 'number' || !Number.isInteger(left) || left < 0 || left >= tokens.length - 1 || linked.has(left)) return [];
+    if (
+      typeof left !== 'number' ||
+      !Number.isInteger(left) ||
+      left < 0 ||
+      left >= tokens.length - 1 ||
+      linked.has(left)
+    )
+      return [];
     // A consonant the left word does not contain cannot be the realized one.
     const pronounced = lastOccurrence(parts[left], spelling);
     if (!pronounced) return [];

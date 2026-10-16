@@ -13,7 +13,8 @@ const BUCKETS = 120;
 const peaksCache = new Map<string, number[] | null>();
 
 async function decodePeaks(blob: Blob): Promise<number[] | null> {
-  const AudioCtx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  const AudioCtx =
+    window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AudioCtx) return null;
   const context = new AudioCtx();
   try {
@@ -23,7 +24,8 @@ async function decodePeaks(blob: Blob): Promise<number[] | null> {
     const peaks: number[] = [];
     for (let b = 0; b < BUCKETS; b++) {
       let max = 0;
-      for (let i = b * size, end = Math.min(data.length, i + size); i < end; i++) max = Math.max(max, Math.abs(data[i]));
+      for (let i = b * size, end = Math.min(data.length, i + size); i < end; i++)
+        max = Math.max(max, Math.abs(data[i]));
       peaks.push(max);
     }
     const top = Math.max(...peaks);
@@ -36,10 +38,7 @@ async function decodePeaks(blob: Blob): Promise<number[] | null> {
   }
 }
 
-type Source =
-  | { kind: 'live'; level: () => number }
-  | { kind: 'take'; id: string; blob: Blob }
-  | { kind: 'none' };
+type Source = { kind: 'live'; level: () => number } | { kind: 'take'; id: string; blob: Blob } | { kind: 'none' };
 
 export function Waveform({ source, className }: { source: Source; className?: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);

@@ -20,47 +20,90 @@ interface ArticlePlayerProps {
   onStop: () => void;
 }
 
-export const ArticlePlayer: React.FC<ArticlePlayerProps> = ({ index, total, phase, failed, onToggle, onStep, onStop }) => {
+export const ArticlePlayer: React.FC<ArticlePlayerProps> = ({
+  index,
+  total,
+  phase,
+  failed,
+  onToggle,
+  onStep,
+  onStop,
+}) => {
   const { t } = useTranslation();
   const playing = phase === 'playing' || phase === 'loading';
   const toggleLabel = playing ? t('player.pause') : t('player.play');
 
   return (
-      <div
-        role="region"
-        aria-label={t('player.label')}
-        className={`${panelSurface} px-2 py-2 flex items-center gap-1 anim-fade`}
+    <div
+      role="region"
+      aria-label={t('player.label')}
+      className={`${panelSurface} px-2 py-2 flex items-center gap-1 anim-fade`}
+    >
+      <Button
+        variant="ghost"
+        size="icon"
+        className={panelGhost}
+        onClick={() => onStep(-1)}
+        disabled={index === 0}
+        aria-label={t('player.previous')}
+        title={t('player.previous')}
       >
-        <Button variant="ghost" size="icon" className={panelGhost} onClick={() => onStep(-1)} disabled={index === 0} aria-label={t('player.previous')} title={t('player.previous')}>
-          <SkipBack className="w-4 h-4" />
-        </Button>
-        <Button size="icon" className={panelPrimary} onClick={onToggle} aria-label={toggleLabel} title={toggleLabel} aria-busy={phase === 'loading'}>
-          {phase === 'loading' ? (
-            <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-          ) : playing ? (
-            <Pause className="w-4 h-4 fill-current" aria-hidden="true" />
-          ) : (
-            <Play className="w-4 h-4 fill-current" aria-hidden="true" />
-          )}
-        </Button>
-        <Button variant="ghost" size="icon" className={panelGhost} onClick={() => onStep(1)} disabled={index >= total - 1} aria-label={t('player.next')} title={t('player.next')}>
-          <SkipForward className="w-4 h-4" />
-        </Button>
+        <SkipBack className="w-4 h-4" />
+      </Button>
+      <Button
+        size="icon"
+        className={panelPrimary}
+        onClick={onToggle}
+        aria-label={toggleLabel}
+        title={toggleLabel}
+        aria-busy={phase === 'loading'}
+      >
+        {phase === 'loading' ? (
+          <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+        ) : playing ? (
+          <Pause className="w-4 h-4 fill-current" aria-hidden="true" />
+        ) : (
+          <Play className="w-4 h-4 fill-current" aria-hidden="true" />
+        )}
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        className={panelGhost}
+        onClick={() => onStep(1)}
+        disabled={index >= total - 1}
+        aria-label={t('player.next')}
+        title={t('player.next')}
+      >
+        <SkipForward className="w-4 h-4" />
+      </Button>
 
-        <div className="min-w-0 flex-1 px-2" aria-live="polite">
-          {failed ? (
-            <p className="text-xs text-panel-bad-ink truncate">{t('player.failed')}</p>
-          ) : (
-            <p className="text-xs text-panel-muted tnum truncate">{t('player.progress', { current: index + 1, total })}</p>
-          )}
-          <div className="mt-1 h-1 rounded-full bg-panel-line overflow-hidden" aria-hidden="true">
-            <div className="h-full bg-panel-wave transition-[width] duration-300" style={{ width: `${((index + 1) / total) * 100}%` }} />
-          </div>
+      <div className="min-w-0 flex-1 px-2" aria-live="polite">
+        {failed ? (
+          <p className="text-xs text-panel-bad-ink truncate">{t('player.failed')}</p>
+        ) : (
+          <p className="text-xs text-panel-muted tnum truncate">
+            {t('player.progress', { current: index + 1, total })}
+          </p>
+        )}
+        <div className="mt-1 h-1 rounded-full bg-panel-line overflow-hidden" aria-hidden="true">
+          <div
+            className="h-full bg-panel-wave transition-[width] duration-300"
+            style={{ width: `${((index + 1) / total) * 100}%` }}
+          />
         </div>
-
-        <Button variant="ghost" size="icon" className={panelGhost} onClick={onStop} aria-label={t('player.stop')} title={t('player.stop')}>
-          <X className="w-4 h-4" />
-        </Button>
       </div>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        className={panelGhost}
+        onClick={onStop}
+        aria-label={t('player.stop')}
+        title={t('player.stop')}
+      >
+        <X className="w-4 h-4" />
+      </Button>
+    </div>
   );
 };

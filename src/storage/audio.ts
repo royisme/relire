@@ -37,14 +37,20 @@ export async function protectedTexts(): Promise<Set<string>> {
   return texts;
 }
 
-export async function getAudio(provider: string, model: string, voice: string, text: string): Promise<Blob | undefined> {
+export async function getAudio(
+  provider: string,
+  model: string,
+  voice: string,
+  text: string,
+): Promise<Blob | undefined> {
   try {
     const d = await db();
     const entry = await d.get('audio', audioKey(provider, model, voice, text));
     if (!entry) return undefined;
     // Record use at most once a day so playing a clip is not a write every time.
     // A failed write must not turn a clip we did read into a miss.
-    if (Date.now() - entry.lastUsed > DAY) await d.put('audio', { ...entry, lastUsed: Date.now() }).catch(() => undefined);
+    if (Date.now() - entry.lastUsed > DAY)
+      await d.put('audio', { ...entry, lastUsed: Date.now() }).catch(() => undefined);
     return entry.blob;
   } catch {
     return undefined;
@@ -78,7 +84,13 @@ async function storeAudio(provider: string, model: string, voice: string, text: 
 }
 
 /** Best-effort for playback: if the clip cannot be kept (quota, private mode) it still plays. */
-export async function putAudio(provider: string, model: string, voice: string, text: string, blob: Blob): Promise<void> {
+export async function putAudio(
+  provider: string,
+  model: string,
+  voice: string,
+  text: string,
+  blob: Blob,
+): Promise<void> {
   try {
     await storeAudio(provider, model, voice, text, blob);
   } catch {
@@ -159,7 +171,14 @@ export async function exportProtectedAudio(): Promise<AudioBackup[]> {
   const keep = await vocabularyTexts();
   const out: AudioBackup[] = [];
   for (const e of await d.getAll('audio')) {
-    if (keep.has(e.text)) out.push({ text: e.text, provider: e.provider, voice: e.voice, model: e.model, data: await blobToBase64(e.blob) });
+    if (keep.has(e.text))
+      out.push({
+        text: e.text,
+        provider: e.provider,
+        voice: e.voice,
+        model: e.model,
+        data: await blobToBase64(e.blob),
+      });
   }
   return out;
 }

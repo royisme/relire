@@ -11,7 +11,11 @@ import { getApiKey, getAppSettings, hasSpeechKey, type AppSettings } from '../ap
 const synthesizing = new Map<string, Promise<Blob>>();
 
 /** Returns the clip from storage when we have it, otherwise synthesizes and keeps it. */
-export async function loadSpeech(text: string, voice?: string, settings: AppSettings = getAppSettings()): Promise<Blob> {
+export async function loadSpeech(
+  text: string,
+  voice?: string,
+  settings: AppSettings = getAppSettings(),
+): Promise<Blob> {
   const provider = settings.speechProvider;
   const effectiveVoice = voice || settings.speechVoice;
   const model = settings.speechModel;

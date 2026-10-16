@@ -34,7 +34,7 @@ export function Segmented<T extends string>({ options, value, onChange, label, c
               onClick={() => onChange(o.value)}
               className={cn(
                 'h-8 px-3 rounded-md text-sm whitespace-nowrap cursor-pointer transition-colors',
-                active ? 'bg-surface text-ink-950 font-medium shadow-xs' : 'text-ink-600 hover:text-ink-900'
+                active ? 'bg-surface text-ink-950 font-medium shadow-xs' : 'text-ink-600 hover:text-ink-900',
               )}
             >
               {o.label}

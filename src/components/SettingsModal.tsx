@@ -40,7 +40,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
 
   return (
     <Dialog onClose={onClose} label={t('settings.title')}>
-      <OverlayHeader title={t('settings.title')} subtitle={t('settings.subtitle')} onClose={onClose} closeLabel={t('common.close')} />
+      <OverlayHeader
+        title={t('settings.title')}
+        subtitle={t('settings.subtitle')}
+        onClose={onClose}
+        closeLabel={t('common.close')}
+      />
 
       <div className="p-5 sm:p-6 space-y-8 max-h-[72vh] overflow-y-auto">
         <AiSection settings={settings} onChange={setSettings} needsKey={needsKey} />

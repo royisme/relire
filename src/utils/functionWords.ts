@@ -64,7 +64,10 @@ export const FUNCTION_WORDS: Readonly<Record<string, readonly SyllableSpelling[]
   pour: [{ spelling: 'pour', ipa: 'puʁ' }],
   sur: [{ spelling: 'sur', ipa: 'syʁ' }],
   sous: [{ spelling: 'sou(s)', ipa: 'su' }],
-  avec: [{ spelling: 'a', ipa: 'a' }, { spelling: 'vec', ipa: 'vɛk' }],
+  avec: [
+    { spelling: 'a', ipa: 'a' },
+    { spelling: 'vec', ipa: 'vɛk' },
+  ],
   sans: [{ spelling: 'san(s)', ipa: 'sɑ̃' }],
   chez: [{ spelling: 'che(z)', ipa: 'ʃe' }],
   et: [{ spelling: 'e(t)', ipa: 'e' }],
@@ -83,11 +86,17 @@ export const FUNCTION_WORDS: Readonly<Record<string, readonly SyllableSpelling[]
   ai: [{ spelling: 'ai', ipa: 'e' }],
   suis: [{ spelling: 'sui(s)', ipa: 'sɥi' }],
   es: [{ spelling: 'e(s)', ipa: 'ɛ' }],
-  était: [{ spelling: 'é', ipa: 'e' }, { spelling: 'tai(t)', ipa: 'tɛ' }],
+  était: [
+    { spelling: 'é', ipa: 'e' },
+    { spelling: 'tai(t)', ipa: 'tɛ' },
+  ],
   // Adverbs
   ne: [{ spelling: 'ne', ipa: 'nə' }],
   pas: [{ spelling: 'pa(s)', ipa: 'pa' }],
   très: [{ spelling: 'trè(s)', ipa: 'tʁɛ' }],
   bien: [{ spelling: 'bien', ipa: 'bjɛ̃' }],
-  aussi: [{ spelling: 'au', ipa: 'o' }, { spelling: 'ssi', ipa: 'si' }],
+  aussi: [
+    { spelling: 'au', ipa: 'o' },
+    { spelling: 'ssi', ipa: 'si' },
+  ],
 };

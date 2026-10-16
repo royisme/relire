@@ -31,7 +31,9 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }
           <Button variant="destructive" onClick={r.stop}>
             <Square className="w-4 h-4 fill-current" aria-hidden="true" />
             <span>{t('shadowing.stop')}</span>
-            <span className="tnum" aria-hidden="true">{clock(r.seconds)}</span>
+            <span className="tnum" aria-hidden="true">
+              {clock(r.seconds)}
+            </span>
           </Button>
         ) : (
           <Button variant={hasRecording ? 'outline' : 'default'} onClick={r.start}>
@@ -59,12 +61,16 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }
       {r.error?.kind === 'busy' ? (
         <p role="alert" className="flex flex-wrap items-center gap-2 text-sm text-bad-700">
           <span className="break-words">{t('shadowing.busy')}</span>
-          <Button variant="outline" size="sm" onClick={cancelCapture}>{t('shadowing.stopOther')}</Button>
+          <Button variant="outline" size="sm" onClick={cancelCapture}>
+            {t('shadowing.stopOther')}
+          </Button>
         </p>
-      ) : r.error && (
-        <p role="alert" className="text-sm text-bad-700 break-words">
-          {r.error.kind === 'mic' ? t('shadowing.micError') : `${t('shadowing.assessError')} ${r.error.detail}`}
-        </p>
+      ) : (
+        r.error && (
+          <p role="alert" className="text-sm text-bad-700 break-words">
+            {r.error.kind === 'mic' ? t('shadowing.micError') : `${t('shadowing.assessError')} ${r.error.detail}`}
+          </p>
+        )
       )}
 
       {r.assessment && <AssessmentResult assessment={r.assessment} />}

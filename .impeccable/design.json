@@ -8,61 +8,25 @@
         "role": "neutral",
         "displayName": "Warm Paper",
         "canonical": "#F7F6F3",
-        "tonalRamp": [
-          "#121110",
-          "#1E1C1A",
-          "#2D2A27",
-          "#433F3A",
-          "#6F6B63",
-          "#CFCBC2",
-          "#EFEDE8",
-          "#F7F6F3"
-        ]
+        "tonalRamp": ["#121110", "#1E1C1A", "#2D2A27", "#433F3A", "#6F6B63", "#CFCBC2", "#EFEDE8", "#F7F6F3"]
       },
       "ink-900": {
         "role": "neutral",
         "displayName": "Reading Ink",
         "canonical": "#1E1C1A",
-        "tonalRamp": [
-          "#121110",
-          "#1E1C1A",
-          "#2D2A27",
-          "#433F3A",
-          "#6F6B63",
-          "#CFCBC2",
-          "#EFEDE8",
-          "#F7F6F3"
-        ]
+        "tonalRamp": ["#121110", "#1E1C1A", "#2D2A27", "#433F3A", "#6F6B63", "#CFCBC2", "#EFEDE8", "#F7F6F3"]
       },
       "accent-700": {
         "role": "primary",
         "displayName": "Ink Blue",
         "canonical": "#264676",
-        "tonalRamp": [
-          "#121F34",
-          "#1D3150",
-          "#264676",
-          "#2F5490",
-          "#3E69A8",
-          "#92B0DA",
-          "#DCE6F5",
-          "#EEF3FA"
-        ]
+        "tonalRamp": ["#121F34", "#1D3150", "#264676", "#2F5490", "#3E69A8", "#92B0DA", "#DCE6F5", "#EEF3FA"]
       },
       "accent-100": {
         "role": "primary",
         "displayName": "Selection Tint",
         "canonical": "#DCE6F5",
-        "tonalRamp": [
-          "#121F34",
-          "#1D3150",
-          "#264676",
-          "#2F5490",
-          "#3E69A8",
-          "#92B0DA",
-          "#DCE6F5",
-          "#EEF3FA"
-        ]
+        "tonalRamp": ["#121F34", "#1D3150", "#264676", "#2F5490", "#3E69A8", "#92B0DA", "#DCE6F5", "#EEF3FA"]
       },
       "ok-700": {
         "role": "semantic",
@@ -83,16 +47,7 @@
         "role": "neutral",
         "displayName": "Ink Panel",
         "canonical": "#2D2A27",
-        "tonalRamp": [
-          "#1E1C1A",
-          "#2D2A27",
-          "#3A3631",
-          "#4A4640",
-          "#6F6B63",
-          "#B9B3A8",
-          "#E2DFD8",
-          "#F4F0E8"
-        ]
+        "tonalRamp": ["#1E1C1A", "#2D2A27", "#3A3631", "#4A4640", "#6F6B63", "#B9B3A8", "#E2DFD8", "#F4F0E8"]
       },
       "panel-accent": {
         "role": "primary",

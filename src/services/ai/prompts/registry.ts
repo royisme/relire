@@ -39,13 +39,20 @@ export const PROMPTS: PromptDefinition[] = [
     id: 'word',
     variables: ['word', 'sentence', 'articleContext'],
     defaults: { en: wordEn, zh: wordZh },
-    sample: { word: 'apprivoiser', sentence: 'Mais, si tu m’apprivoises, nous aurons besoin l’un de l’autre.', articleContext: 'Le renard explique au petit prince ce que signifie apprivoiser.' },
+    sample: {
+      word: 'apprivoiser',
+      sentence: 'Mais, si tu m’apprivoises, nous aurons besoin l’un de l’autre.',
+      articleContext: 'Le renard explique au petit prince ce que signifie apprivoiser.',
+    },
   },
   {
     id: 'sentence',
     variables: ['sentence', 'articleContext'],
     defaults: { en: sentenceEn, zh: sentenceZh },
-    sample: { sentence: 'On ne voit bien qu’avec le cœur.', articleContext: 'Le renard confie son secret au petit prince.' },
+    sample: {
+      sentence: 'On ne voit bien qu’avec le cœur.',
+      articleContext: 'Le renard confie son secret au petit prince.',
+    },
   },
   {
     id: 'drills',
@@ -63,7 +70,11 @@ export const PROMPTS: PromptDefinition[] = [
     id: 'pronunciationText',
     variables: ['referenceText', 'userTranscript', 'transcript'],
     defaults: { en: textEn, zh: textZh },
-    sample: { referenceText: 'Bonjour tout le monde.', userTranscript: 'bonjour tout le monde', transcript: 'bonjour tout le monde' },
+    sample: {
+      referenceText: 'Bonjour tout le monde.',
+      userTranscript: 'bonjour tout le monde',
+      transcript: 'bonjour tout le monde',
+    },
   },
 ];
 

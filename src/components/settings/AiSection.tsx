@@ -49,9 +49,7 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
     const info = getProvider(providerId).info;
     return (
       <div>
-        <label className={fieldLabel}>
-          {t('settings.keyLabel', { provider: name(providerId) })}
-        </label>
+        <label className={fieldLabel}>{t('settings.keyLabel', { provider: name(providerId) })}</label>
         <input
           type="password"
           autoComplete="off"
@@ -62,7 +60,12 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
         />
         <p className="text-xs text-ink-500 mt-1 leading-relaxed">
           {t('settings.keyPrivacy', { provider: name(providerId) })}{' '}
-          <a href={info.keyUrl} target="_blank" rel="noreferrer" className="text-accent-900 underline underline-offset-2 hover:text-accent-900">
+          <a
+            href={info.keyUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-accent-900 underline underline-offset-2 hover:text-accent-900"
+          >
             {t('settings.getKey', { provider: name(providerId) })}
           </a>
         </p>
@@ -108,9 +111,7 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
       {/* Text provider: analysis, drills, pronunciation scoring */}
       <section className="space-y-3.5">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <h4 className={heading}>
-            {t('settings.textSection')}
-          </h4>
+          <h4 className={heading}>{t('settings.textSection')}</h4>
           {keyBadge(settings.textProvider)}
         </div>
         <div className={card}>
@@ -118,7 +119,11 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="block">
               <span className={fieldLabel}>{t('settings.providerLabel')}</span>
-              <select className={select} value={settings.textProvider} onChange={(e) => pickTextProvider(e.target.value)}>
+              <select
+                className={select}
+                value={settings.textProvider}
+                onChange={(e) => pickTextProvider(e.target.value)}
+              >
                 {textProviders().map((p) => (
                   <option key={p.info.id} value={p.info.id}>
                     {name(p.info.id)}
@@ -127,10 +132,12 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
               </select>
             </label>
             <label className="block">
-              <span className={fieldLabel}>
-                {t('settings.modelLabel')}
-              </span>
-              <select className={select} value={settings.textModel} onChange={(e) => onChange({ ...settings, textModel: e.target.value })}>
+              <span className={fieldLabel}>{t('settings.modelLabel')}</span>
+              <select
+                className={select}
+                value={settings.textModel}
+                onChange={(e) => onChange({ ...settings, textModel: e.target.value })}
+              >
                 {text.text!.models.map((m) => (
                   <option key={m} value={m}>
                     {modelName(m)}
@@ -140,9 +147,7 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
             </label>
           </div>
           {modelDesc(settings.textModel) && (
-            <p className="text-xs text-ink-500 leading-relaxed">
-              {modelDesc(settings.textModel)}
-            </p>
+            <p className="text-xs text-ink-500 leading-relaxed">{modelDesc(settings.textModel)}</p>
           )}
           {keyField(settings.textProvider)}
         </div>
@@ -151,9 +156,7 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
       {/* Speech provider: spoken French */}
       <section className="space-y-3.5">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <h4 className={heading}>
-            {t('settings.speechSection')}
-          </h4>
+          <h4 className={heading}>{t('settings.speechSection')}</h4>
           {!sameKey && keyBadge(settings.speechProvider)}
         </div>
         <div className={card}>
@@ -161,7 +164,11 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="block">
               <span className={fieldLabel}>{t('settings.providerLabel')}</span>
-              <select className={select} value={settings.speechProvider} onChange={(e) => pickSpeechProvider(e.target.value)}>
+              <select
+                className={select}
+                value={settings.speechProvider}
+                onChange={(e) => pickSpeechProvider(e.target.value)}
+              >
                 {speechProviders().map((p) => (
                   <option key={p.info.id} value={p.info.id}>
                     {name(p.info.id)}
@@ -170,10 +177,12 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
               </select>
             </label>
             <label className="block">
-              <span className={fieldLabel}>
-                {t('settings.modelLabel')}
-              </span>
-              <select className={select} value={settings.speechModel} onChange={(e) => onChange({ ...settings, speechModel: e.target.value })}>
+              <span className={fieldLabel}>{t('settings.modelLabel')}</span>
+              <select
+                className={select}
+                value={settings.speechModel}
+                onChange={(e) => onChange({ ...settings, speechModel: e.target.value })}
+              >
                 {speech.speech!.models.map((m) => (
                   <option key={m} value={m}>
                     {modelName(m)}
@@ -183,9 +192,7 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
             </label>
           </div>
           {modelDesc(settings.speechModel) && (
-            <p className="text-xs text-ink-500 leading-relaxed">
-              {modelDesc(settings.speechModel)}
-            </p>
+            <p className="text-xs text-ink-500 leading-relaxed">{modelDesc(settings.speechModel)}</p>
           )}
 
           <div>
@@ -200,7 +207,9 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
                     aria-pressed={selected}
                     onClick={() => onChange({ ...settings, speechVoice: v.id })}
                     className={`p-3 rounded-lg border text-left cursor-pointer ${
-                      selected ? 'border-accent-700 bg-accent-50/80 ring-2 ring-accent-700/20' : 'border-ink-200 bg-surface hover:border-ink-300'
+                      selected
+                        ? 'border-accent-700 bg-accent-50/80 ring-2 ring-accent-700/20'
+                        : 'border-ink-200 bg-surface hover:border-ink-300'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
@@ -209,7 +218,9 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
                         {v.gender === 'female' ? t('settings.female') : t('settings.male')}
                       </span>
                     </div>
-                    <span className="text-xs text-ink-500 block truncate">{t(`voices.${v.id}`, { defaultValue: '' })}</span>
+                    <span className="text-xs text-ink-500 block truncate">
+                      {t(`voices.${v.id}`, { defaultValue: '' })}
+                    </span>
                   </button>
                 );
               })}
@@ -217,7 +228,9 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
           </div>
 
           {sameKey ? (
-            <p className="text-xs text-ink-500">{t('settings.sameKeyNote', { provider: name(settings.speechProvider) })}</p>
+            <p className="text-xs text-ink-500">
+              {t('settings.sameKeyNote', { provider: name(settings.speechProvider) })}
+            </p>
           ) : (
             keyField(settings.speechProvider)
           )}
@@ -233,7 +246,9 @@ export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsK
               <span>{testing ? t('settings.testingBtn') : t('settings.testBtn')}</span>
             </button>
             {testResult && (
-              <span className={`text-xs font-medium ${testResult.success ? 'text-ok-800' : 'text-bad-800'}`}>{testResult.msg}</span>
+              <span className={`text-xs font-medium ${testResult.success ? 'text-ok-800' : 'text-bad-800'}`}>
+                {testResult.msg}
+              </span>
             )}
           </div>
         </div>

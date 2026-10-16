@@ -11,12 +11,14 @@
 const index = { type: 'integer' };
 
 export const prosodySchema = {
-  type: 'object', additionalProperties: false,
+  type: 'object',
+  additionalProperties: false,
   properties: {
     words: {
       type: 'array',
       items: {
-        type: 'object', additionalProperties: false,
+        type: 'object',
+        additionalProperties: false,
         properties: {
           ordinal: index,
           source: { type: 'string' },
@@ -24,7 +26,8 @@ export const prosodySchema = {
           syllables: {
             type: 'array',
             items: {
-              type: 'object', additionalProperties: false,
+              type: 'object',
+              additionalProperties: false,
               properties: { spelling: { type: 'string' }, ipa: { type: 'string' } },
               required: ['spelling', 'ipa'],
             },
@@ -37,7 +40,8 @@ export const prosodySchema = {
     connections: {
       type: 'array',
       items: {
-        type: 'object', additionalProperties: false,
+        type: 'object',
+        additionalProperties: false,
         properties: {
           left: index,
           type: { type: 'string', enum: ['liaison', 'enchainement'] },

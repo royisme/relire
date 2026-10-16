@@ -45,7 +45,10 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
   };
 
   const skip = (
-    <button onClick={onClose} className="text-sm text-ink-500 hover:text-ink-900 underline underline-offset-2 cursor-pointer">
+    <button
+      onClick={onClose}
+      className="text-sm text-ink-500 hover:text-ink-900 underline underline-offset-2 cursor-pointer"
+    >
       {t('onboarding.skip')}
     </button>
   );
@@ -64,7 +67,9 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
             <p className="text-xs text-ink-500 tnum">{t('onboarding.stepOf', { n: 1, total: STEPS })}</p>
             <h2 className="font-serif text-2xl font-semibold text-ink-900">{t('onboarding.welcomeTitle')}</h2>
             <p className="text-sm text-ink-700 leading-relaxed">{t('onboarding.welcomeBody')}</p>
-            <p className="text-sm text-ink-700 leading-relaxed">{t('onboarding.welcomeNeed', { provider: providerName })}</p>
+            <p className="text-sm text-ink-700 leading-relaxed">
+              {t('onboarding.welcomeNeed', { provider: providerName })}
+            </p>
             <div className="flex items-center justify-between pt-2">
               {skip}
               <Button onClick={() => setStep(1)}>{t('onboarding.next')}</Button>
@@ -75,7 +80,9 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
         {step === 1 && (
           <div className="space-y-4">
             <p className="text-xs text-ink-500 tnum">{t('onboarding.stepOf', { n: 2, total: STEPS })}</p>
-            <h2 className="font-serif text-2xl font-semibold text-ink-900">{t('onboarding.keyTitle', { provider: providerName })}</h2>
+            <h2 className="font-serif text-2xl font-semibold text-ink-900">
+              {t('onboarding.keyTitle', { provider: providerName })}
+            </h2>
             <ol className="space-y-4 text-sm text-ink-700">
               <li className="space-y-2">
                 <p>{t('onboarding.keyStep1', { provider: providerName })}</p>

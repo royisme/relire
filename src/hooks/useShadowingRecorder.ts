@@ -22,7 +22,7 @@ interface Recording {
 
 export function useShadowingRecorder(
   referenceText: string,
-  onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void
+  onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void,
 ) {
   const [phase, setPhase] = useState<RecorderPhase>('idle');
   const [seconds, setSeconds] = useState(0);

@@ -17,12 +17,7 @@ interface NavbarProps {
   totalVocabCount: number;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  currentTab,
-  onSelectTab,
-  onOpenSettings,
-  dueCount,
-}) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentTab, onSelectTab, onOpenSettings, dueCount }) => {
   const { t } = useTranslation();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -92,7 +87,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           <LanguageSwitcher />
           <div className="hidden md:flex items-center gap-1">
             <PWAInstallButton />
-            <Button variant="ghost" size="icon" onClick={onOpenSettings} aria-label={t('nav.settings')} title={t('nav.settings')}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onOpenSettings}
+              aria-label={t('nav.settings')}
+              title={t('nav.settings')}
+            >
               <Settings className="w-5 h-5" />
             </Button>
           </div>
