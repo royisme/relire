@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Relire is a static, browser-only PWA for French close reading and pronunciation practice, aimed at learners preparing for TCF Canada (reading and speaking help only; no listening, writing, mock exams or official scores). React 19 + Vite + Tailwind v4 + i18next, IndexedDB for data, the user's own AI key called straight from the browser. There is no server.
+Relire is a static, browser-only PWA for French close reading and pronunciation practice, aimed at learners preparing for TCF Canada (no mock exams or official scores). It is becoming **Relire Plus** by absorbing the FrenchLab AI workbook (exercises including dictation and AI-graded writing, material import, mistake notebook); follow `docs/merge-plan.md` for that work. React 19 + Vite + Tailwind v4 + i18next, IndexedDB for data, the user's own AI key called straight from the browser. There is no server.
 
 This file holds only what applies to every task. Everything else is loaded when needed (see "Where to look").
 
@@ -36,6 +36,7 @@ Bun is the only package manager.
 | When you need… | Read |
 | --- | --- |
 | What the product is for, who it serves, what it must not claim | `PRODUCT.md` |
+| Merging FrenchLab AI: decisions, target screens, storage, phases | `docs/merge-plan.md` |
 | Visual system: tokens, type, spacing, overlays | `DESIGN.md` |
 | Which module owns what, data flow, storage lifetimes | `docs/architecture.md` |
 | Area rules (UI, AI layer, storage, speech, i18n, marketing site, TypeScript style) | `.claude/rules/*.md`, loaded automatically when you open matching files |

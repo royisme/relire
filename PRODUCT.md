@@ -14,6 +14,10 @@ web
 
 Relire (French for "to read again") is a close-reading assistant for French learners preparing for TCF Canada, with a Chinese and English interface. The learner reads real French articles and taps any word or sentence to get an AI-generated breakdown from Gemini. Words they save feed a spaced-repetition deck, and they practise pronunciation aloud against an AI assessor. It is a static PWA: no app server, no account. The learner supplies their own API key (Gemini today), stored in the browser and used for direct calls to the provider; explanations and speech can use different providers. User data (articles, vocabulary, stats, saved answers and audio, shadowing recordings) lives in the browser's IndexedDB; settings and keys live in localStorage.
 
+## Direction: Relire Plus
+
+Relire is absorbing FrenchLab AI so a learner does all of their study in one app: exercises bound to the material (11 types, including dictation and AI-graded open answers), importing workbook pages from images, PDFs or text, a mistake notebook, and drills for weak grammar areas, beside reading and shadowing. Scope therefore widens to listening and writing practice; there are still no mock exams and no official scores. The audience widens to A1–C1. The display name becomes Relire Plus when the first exercise features ship. Everything stays static and BYOK. The approved plan, its phases and the decisions behind them are in `docs/merge-plan.md`; until a phase ships, the sections below describe the product as it is.
+
 ## Positioning
 
 Real French articles read sentence by sentence, where every sentence can be heard, repeated aloud and kept as a recording to compare against the reference later. The learner brings their own AI key; there is no account, and everything stays on their device.
