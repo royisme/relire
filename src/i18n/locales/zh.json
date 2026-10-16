@@ -481,5 +481,99 @@
     "empty": "还没有录音。在阅读页点击句子旁的麦克风即可练习。",
     "loadFailed": "无法读取你的录音：{{msg}}",
     "deleteFailed": "录音没能删除：{{msg}}"
+  },
+  "grammarAreas": {
+    "nouns": "名词与限定词",
+    "adjectives": "形容词与副词",
+    "verbForms": "动词形式",
+    "verbUse": "动词用法",
+    "pronouns": "代词",
+    "sentence": "句子结构",
+    "skills": "语言技能"
+  },
+  "grammarTags": {
+    "gender-number": "阴阳性与单复数",
+    "articles": "冠词",
+    "partitive-quantity": "部分冠词与数量",
+    "possessive-demonstrative": "物主形容词与指示形容词",
+    "adjective-agreement": "形容词的性数配合",
+    "adjective-position": "形容词的位置",
+    "comparison": "比较级与最高级",
+    "adverbs": "副词",
+    "present": "现在时",
+    "passe-compose": "复合过去时",
+    "imparfait": "未完成过去时",
+    "plus-que-parfait": "大过去时",
+    "future": "将来时",
+    "conditional": "条件式",
+    "subjunctive": "虚拟式",
+    "imperative": "命令式",
+    "pronominal-verbs": "代词式动词",
+    "passive": "被动语态",
+    "tense-choice-past": "过去时态的选择",
+    "past-participle-agreement": "过去分词的配合",
+    "hypothesis-si": "si 条件句",
+    "reported-speech": "间接引语",
+    "infinitive-gerund": "不定式与副动词",
+    "subject-object-pronouns": "主语与宾语人称代词",
+    "y-en": "代词 y 和 en",
+    "relative-pronouns": "关系代词",
+    "other-pronouns": "其他代词",
+    "negation": "否定句",
+    "questions": "疑问句",
+    "prepositions": "介词",
+    "connectors": "连接词",
+    "word-order": "语序",
+    "numbers-time": "数字与时间",
+    "vocabulary-usage": "词汇运用",
+    "reading-comprehension": "阅读理解",
+    "listening-dictation": "听写",
+    "written-expression": "书面表达"
+  },
+  "exerciseTypes": {
+    "WORD_TRANSFORM": {
+      "name": "词形变换",
+      "instruction": "把每个词改成要求的阴阳性或单复数。"
+    },
+    "FILL_BLANKS": {
+      "name": "填空",
+      "instruction": "在每个空格中填入缺少的词。"
+    },
+    "GENDER_CHECK": {
+      "name": "判断阴阳性",
+      "instruction": "为每个词选择阳性、阴性，或两者皆可。"
+    },
+    "ODD_ONE_OUT": {
+      "name": "找出不同项",
+      "instruction": "划掉不属于同一类的那个词。"
+    },
+    "MATCH_PAIRS": {
+      "name": "连线配对",
+      "instruction": "把每个问题与对应的回答配对。"
+    },
+    "DIALOGUE_ORDER": {
+      "name": "排列对话顺序",
+      "instruction": "把对话的各句排成正确的顺序。"
+    },
+    "CHOICE_SELECT": {
+      "name": "选择正确选项",
+      "instruction": "在每个句子中选出正确的选项。"
+    },
+    "SENTENCE_BUILD": {
+      "name": "根据信息写句子",
+      "instruction": "根据给出的信息写出完整的句子。"
+    },
+    "READING_CLOZE": {
+      "name": "阅读短文",
+      "instruction": "阅读短文，然后完成空格和问题。"
+    },
+    "NUMBER_DICTATION": {
+      "name": "数字听写",
+      "instruction": "写出你听到的数字，可用数字或文字。"
+    },
+    "OPEN_QA": {
+      "name": "开放式问答",
+      "instruction": "用你自己的话写出问题或答案。"
+    }
   }
 }

@@ -483,5 +483,99 @@
     "empty": "No recordings yet. In the reader, press the microphone next to a sentence to practise it.",
     "loadFailed": "Could not load your recordings: {{msg}}",
     "deleteFailed": "Could not delete the recording: {{msg}}"
+  },
+  "grammarAreas": {
+    "nouns": "Nouns and determiners",
+    "adjectives": "Adjectives and adverbs",
+    "verbForms": "Verbs: forms",
+    "verbUse": "Verbs: use",
+    "pronouns": "Pronouns",
+    "sentence": "Sentence",
+    "skills": "Skills"
+  },
+  "grammarTags": {
+    "gender-number": "Gender and number",
+    "articles": "Articles",
+    "partitive-quantity": "Partitive and quantity",
+    "possessive-demonstrative": "Possessives and demonstratives",
+    "adjective-agreement": "Adjective agreement",
+    "adjective-position": "Adjective position",
+    "comparison": "Comparatives and superlatives",
+    "adverbs": "Adverbs",
+    "present": "Present tense",
+    "passe-compose": "Passé composé",
+    "imparfait": "Imparfait",
+    "plus-que-parfait": "Plus-que-parfait",
+    "future": "Future tense",
+    "conditional": "Conditional",
+    "subjunctive": "Subjunctive",
+    "imperative": "Imperative",
+    "pronominal-verbs": "Pronominal verbs",
+    "passive": "Passive voice",
+    "tense-choice-past": "Choosing between past tenses",
+    "past-participle-agreement": "Past participle agreement",
+    "hypothesis-si": "Si clauses",
+    "reported-speech": "Reported speech",
+    "infinitive-gerund": "Infinitive and gérondif",
+    "subject-object-pronouns": "Subject and object pronouns",
+    "y-en": "The pronouns y and en",
+    "relative-pronouns": "Relative pronouns",
+    "other-pronouns": "Other pronouns",
+    "negation": "Negation",
+    "questions": "Questions",
+    "prepositions": "Prepositions",
+    "connectors": "Connectors",
+    "word-order": "Word order",
+    "numbers-time": "Numbers and time",
+    "vocabulary-usage": "Vocabulary in use",
+    "reading-comprehension": "Reading comprehension",
+    "listening-dictation": "Dictation",
+    "written-expression": "Written expression"
+  },
+  "exerciseTypes": {
+    "WORD_TRANSFORM": {
+      "name": "Transform the word",
+      "instruction": "Change each word to the requested gender or number."
+    },
+    "FILL_BLANKS": {
+      "name": "Fill in the blanks",
+      "instruction": "Type the missing word in each blank."
+    },
+    "GENDER_CHECK": {
+      "name": "Gender check",
+      "instruction": "Choose masculine, feminine or either for each word."
+    },
+    "ODD_ONE_OUT": {
+      "name": "Odd one out",
+      "instruction": "Cross out the word that does not belong."
+    },
+    "MATCH_PAIRS": {
+      "name": "Match the pairs",
+      "instruction": "Match each question with its answer."
+    },
+    "DIALOGUE_ORDER": {
+      "name": "Order the dialogue",
+      "instruction": "Put the lines of the conversation in the right order."
+    },
+    "CHOICE_SELECT": {
+      "name": "Choose the option",
+      "instruction": "Choose the correct option in each sentence."
+    },
+    "SENTENCE_BUILD": {
+      "name": "Write from a profile",
+      "instruction": "Use the details given to write full sentences."
+    },
+    "READING_CLOZE": {
+      "name": "Reading passage",
+      "instruction": "Read the passage, then complete the gaps and questions."
+    },
+    "NUMBER_DICTATION": {
+      "name": "Number dictation",
+      "instruction": "Write the number you hear, in digits or in words."
+    },
+    "OPEN_QA": {
+      "name": "Open questions",
+      "instruction": "Write your own question or answer."
+    }
   }
 }
