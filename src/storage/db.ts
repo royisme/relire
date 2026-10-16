@@ -1,6 +1,10 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Article, UserStats, VocabWord } from '../types';
 import type { ShadowingSentence } from '../types/shadowing';
+import type { ExerciseAttempt, ExerciseItemState, ExerciseUnit } from '../types/exercises';
+import { exercisesChanged } from './exerciseEvents';
+import { parseExerciseBackup, restoreExerciseRows } from './exerciseBackup';
+import { deleteUnitRows } from './exerciseRows';
 
 /**
  * User data lives in IndexedDB: no 5 MB cap, async, and one record per article
@@ -8,7 +12,7 @@ import type { ShadowingSentence } from '../types/shadowing';
  * localStorage because they are needed before the first render.
  */
 
-interface RelireDB extends DBSchema {
+export interface RelireDB extends DBSchema {
   articles: { key: string; value: Article };
   vocab: { key: string; value: VocabWord };
   meta: { key: string; value: unknown };
@@ -18,6 +22,16 @@ interface RelireDB extends DBSchema {
   audio: { key: string; value: AudioEntry; indexes: { text: string; lastUsed: number } };
   /** The learner's shadowing takes, per article sentence. User data: never trimmed, optionally backed up. */
   shadowing: { key: string; value: ShadowingSentence; indexes: { articleId: string } };
+  /** Exercise units, each bound to a material (article or workbook). Owned by `exercises.ts`. */
+  units: { key: string; value: ExerciseUnit; indexes: { materialId: string } };
+  /** The learner's current answer per item (`unitId:itemId`). Cleared by a unit reset. */
+  itemStates: { key: string; value: ExerciseItemState; indexes: { unitId: string } };
+  /** One row per check, with its own prompt and answer text. Survives resets, unit deletes and material deletes. */
+  attempts: {
+    key: string;
+    value: ExerciseAttempt;
+    indexes: { unitId: string; materialId: string; grammarTag: string; timestamp: number };
+  };
 }
 
 export interface AudioEntry {
@@ -42,6 +56,13 @@ export interface AppData {
   articles: Article[];
   vocab: VocabWord[];
   stats: UserStats;
+}
+
+/** Everything a backup carries from IndexedDB: the app data plus the exercise stores. */
+export interface BackupData extends AppData {
+  units: ExerciseUnit[];
+  itemStates: ExerciseItemState[];
+  attempts: ExerciseAttempt[];
 }
 
 export const EMPTY_STATS: UserStats = {
@@ -75,7 +96,7 @@ export function subscribeDbNotice(listener: () => void): () => void {
 
 export function db() {
   if (!dbPromise) {
-    dbPromise = openDB<RelireDB>('relire', 4, {
+    dbPromise = openDB<RelireDB>('relire', 5, {
       upgrade(d, oldVersion) {
         if (oldVersion < 1) {
           d.createObjectStore('articles', { keyPath: 'id' });
@@ -92,6 +113,15 @@ export function db() {
         }
         if (oldVersion < 4) {
           d.createObjectStore('shadowing', { keyPath: 'key' }).createIndex('articleId', 'articleId');
+        }
+        if (oldVersion < 5) {
+          d.createObjectStore('units', { keyPath: 'id' }).createIndex('materialId', 'materialId');
+          d.createObjectStore('itemStates', { keyPath: 'id' }).createIndex('unitId', 'unitId');
+          const attempts = d.createObjectStore('attempts', { keyPath: 'id' });
+          attempts.createIndex('unitId', 'unitId');
+          attempts.createIndex('materialId', 'materialId');
+          attempts.createIndex('grammarTag', 'grammarTag');
+          attempts.createIndex('timestamp', 'timestamp');
         }
       },
       blocked() {
@@ -115,6 +145,13 @@ export function db() {
     });
   }
   return dbPromise;
+}
+
+/** Closes the connection so the next `db()` call opens a fresh one (tests, after deleting the database). */
+export async function closeDb() {
+  const open = dbPromise;
+  dbPromise = null;
+  (await open?.catch(() => undefined))?.close();
 }
 
 /** Returns null on the very first run, before anything has been saved. */
@@ -155,28 +192,63 @@ export async function saveStats(stats: UserStats) {
   await tx.done;
 }
 
-/** Deletes an article and its shadowing recordings together, before the UI forgets it. */
+/**
+ * Deletes an article with its shadowing recordings, exercise units and their item states in
+ * one transaction, before the UI forgets it. Attempts stay: they carry their own prompt and
+ * answer text, so accuracy and the mistake notebook remain true after the material is gone.
+ */
 export async function deleteArticleData(articleId: string) {
   const d = await db();
-  const tx = d.transaction(['articles', 'shadowing'], 'readwrite');
+  const tx = d.transaction(['articles', 'shadowing', 'units', 'itemStates', 'meta'], 'readwrite');
   const recordings = tx.objectStore('shadowing');
   for (const key of await recordings.index('articleId').getAllKeys(articleId)) await recordings.delete(key);
+  const unitIds = await tx.objectStore('units').index('materialId').getAllKeys(articleId);
+  const stores = {
+    units: tx.objectStore('units'),
+    itemStates: tx.objectStore('itemStates'),
+    meta: tx.objectStore('meta'),
+  };
+  for (const unitId of unitIds) await deleteUnitRows(stores, unitId);
   await tx.objectStore('articles').delete(articleId);
   await tx.done;
+  if (unitIds.length) exercisesChanged();
 }
 
-export async function exportData(): Promise<AppData> {
-  return (await loadData()) ?? { articles: [], vocab: [], stats: EMPTY_STATS };
+/** App data plus the exercise stores, read as one snapshot of the exercise stores. API keys are never in IndexedDB. */
+export async function exportData(): Promise<BackupData> {
+  const d = await db();
+  const tx = d.transaction(['units', 'itemStates', 'attempts'], 'readonly');
+  const [units, itemStates, attempts] = await Promise.all([
+    tx.objectStore('units').getAll(),
+    tx.objectStore('itemStates').getAll(),
+    tx.objectStore('attempts').getAll(),
+  ]);
+  const app = (await loadData()) ?? { articles: [], vocab: [], stats: EMPTY_STATS };
+  return { ...app, units, itemStates, attempts };
+}
+
+/** What a backup file may hand to `importData`. The exercise keys are unvalidated JSON here. */
+export interface RestoreInput extends Partial<AppData> {
+  /** Validated by the caller (`parseShadowingBackup`). */
+  shadowing?: ShadowingSentence[];
+  units?: unknown;
+  itemStates?: unknown;
+  attempts?: unknown;
 }
 
 /**
  * Replaces the stores present in `data` in one transaction, so a failed restore
  * changes nothing. `shadowing` undefined keeps the recordings already stored;
  * an empty array clears them. Recordings must be validated by the caller.
+ * The exercise keys (`units`, `itemStates`, `attempts`) are validated here, in
+ * full, before the transaction opens: a malformed payload throws
+ * `ExerciseBackupError` and nothing is written; an absent key keeps the stored rows.
  */
-export async function importData(data: Partial<AppData> & { shadowing?: ShadowingSentence[] }) {
+export async function importData(data: RestoreInput) {
+  const exercises = parseExerciseBackup(data, data.articles && new Set(data.articles.map((a) => a.id)));
+  const touchesExercises = Boolean(exercises.units || exercises.itemStates || exercises.attempts);
   const d = await db();
-  const tx = d.transaction(['articles', 'vocab', 'meta', 'shadowing'], 'readwrite');
+  const tx = d.transaction(['articles', 'vocab', 'meta', 'shadowing', 'units', 'itemStates', 'attempts'], 'readwrite');
   if (data.articles) {
     const store = tx.objectStore('articles');
     await store.clear();
@@ -194,7 +266,27 @@ export async function importData(data: Partial<AppData> & { shadowing?: Shadowin
   }
   if (data.stats) await tx.objectStore('meta').put({ ...EMPTY_STATS, ...data.stats }, 'stats');
   await tx.objectStore('meta').put(true, 'started');
+  if (touchesExercises || data.articles) {
+    try {
+      await restoreExerciseRows(
+        {
+          articles: tx.objectStore('articles'),
+          units: tx.objectStore('units'),
+          itemStates: tx.objectStore('itemStates'),
+          attempts: tx.objectStore('attempts'),
+          meta: tx.objectStore('meta'),
+        },
+        exercises,
+        Boolean(data.articles),
+      );
+    } catch (err) {
+      tx.abort();
+      await tx.done.catch(() => undefined);
+      throw err;
+    }
+  }
   await tx.done;
+  if (touchesExercises || data.articles) exercisesChanged();
 }
 
 export interface StorageInfo {

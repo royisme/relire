@@ -45,6 +45,7 @@
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
     "eslint-plugin-react-hooks": "7.1.1",
+    "fake-indexeddb": "^6.2.6",
     "oxfmt": "0.73.0",
     "oxlint": "1.88.0",
     "oxlint-tsgolint": "7.0.2004",

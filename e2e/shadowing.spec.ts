@@ -326,7 +326,7 @@ test('upgrading a version 3 database keeps its data', async ({ page }) => {
         };
       }),
   );
-  expect(stores.version).toBe(4);
+  expect(stores.version).toBe(5);
   expect(stores.stores).toContain('shadowing');
   await page.getByRole('link', { name: 'My study' }).click();
   await expect(page.getByText('ancien').first()).toBeVisible();
