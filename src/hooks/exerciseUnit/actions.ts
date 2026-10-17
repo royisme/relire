@@ -51,6 +51,7 @@ function fail(ctx: ActionContext, itemId: string, err: unknown) {
 async function saveFlag(ctx: ActionContext, itemId: string, progress: ItemProgress) {
   try {
     await saveItemProgress(ctx.unit.id, itemId, ctx.token, progress);
+    if (ctx.isCurrent()) ctx.onSaveError(null);
   } catch (err) {
     if (!ctx.isCurrent()) return;
     if (err instanceof StaleResetError) ctx.onForeignReset();

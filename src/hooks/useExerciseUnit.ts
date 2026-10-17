@@ -6,14 +6,7 @@
  * moves the reset token, so work that began before it cannot write after it.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  getResetToken,
-  getUnit,
-  listItemStates,
-  resetUnit,
-  saveItemProgress,
-  StaleResetError,
-} from '../storage/exercises';
+import { getUnitSnapshot, resetUnit, saveItemProgress, StaleResetError } from '../storage/exercises';
 import { errorMessage } from '../services/ai/errors';
 import type { ExerciseAnswer, ExerciseUnit } from '../types/exercises';
 import { runCheck, runExplanation, runHint, type ActionContext } from './exerciseUnit/actions';
@@ -91,9 +84,23 @@ export function useExerciseUnit(unitId: string, { canAnswer, onMissingKey }: Opt
   const onMissingKeyRef = useRef(onMissingKey);
   // The latest values for callbacks that outlive a render; refs are written after commit.
   useEffect(() => {
-    itemsRef.current = items;
     onMissingKeyRef.current = onMissingKey;
   });
+
+  const cancelDrafts = useCallback(() => {
+    drafts.current.forEach((draft) => window.clearTimeout(draft.timer));
+    drafts.current.clear();
+  }, []);
+
+  const reload = useCallback(() => {
+    endSession();
+    cancelDrafts();
+    unitRef.current = null;
+    setResetting(false);
+    setResetError(null);
+    setLoad({ status: 'loading' });
+    setLoadKey((key) => key + 1);
+  }, [cancelDrafts, endSession]);
 
   const writeDraft = useCallback(
     (itemId: string) => {
@@ -102,38 +109,33 @@ export function useExerciseUnit(unitId: string, { canAnswer, onMissingKey }: Opt
       window.clearTimeout(draft.timer);
       drafts.current.delete(itemId);
       const mine = session.current;
+      const isCurrent = () => mine === session.current && draft.token === token.current;
       saveItemProgress(unitId, itemId, draft.token, { answer: draft.answer }).then(
-        () => mine === session.current && setSaveError(null),
+        () => isCurrent() && setSaveError(null),
         (err) => {
-          // A reset or delete since the edit makes the draft obsolete, not an error.
-          if (mine !== session.current || err instanceof StaleResetError) return;
+          if (!isCurrent()) return;
+          // Another writer reset or restored this sheet: discard our draft and read their state.
+          if (err instanceof StaleResetError) return reload();
           setSaveError(errorMessage(err));
         },
       );
     },
-    [unitId],
+    [unitId, reload],
   );
 
   const flushDrafts = useCallback(() => [...drafts.current.keys()].forEach(writeDraft), [writeDraft]);
-
-  const cancelDrafts = () => {
-    drafts.current.forEach((draft) => window.clearTimeout(draft.timer));
-    drafts.current.clear();
-  };
 
   useEffect(() => {
     const mine = ++session.current;
     void (async () => {
       try {
-        // The token first: anything written for what is read next must carry a token no newer than the read.
-        const readToken = await getResetToken(unitId);
-        const unit = await getUnit(unitId);
-        if (!unit) return mine === session.current ? setLoad({ status: 'missing' }) : undefined;
-        const states = await listItemStates(unitId);
+        const { unit, states, resetToken } = await getUnitSnapshot(unitId);
         if (mine !== session.current) return;
-        token.current = readToken;
+        if (!unit) return setLoad({ status: 'missing' });
+        token.current = resetToken;
         unitRef.current = unit;
-        setItems(restoreItems(unit, states));
+        itemsRef.current = restoreItems(unit, states);
+        setItems(itemsRef.current);
         setSaveError(null);
         setLoad({ status: 'ready', unit });
       } catch (err) {
@@ -152,13 +154,10 @@ export function useExerciseUnit(unitId: string, { canAnswer, onMissingKey }: Opt
   }, [unitId, loadKey, flushDrafts, writeDraft, endSession]);
 
   const patch = useCallback((itemId: string, partial: Partial<ItemRuntime>) => {
-    setItems((prev) => (prev[itemId] ? { ...prev, [itemId]: { ...prev[itemId], ...partial } } : prev));
-  }, []);
-
-  const reload = useCallback(() => {
-    cancelDrafts();
-    setLoad({ status: 'loading' });
-    setLoadKey((key) => key + 1);
+    const current = itemsRef.current;
+    if (!current[itemId]) return;
+    itemsRef.current = { ...current, [itemId]: { ...current[itemId], ...partial } };
+    setItems(itemsRef.current);
   }, []);
 
   /** Context for one piece of work; it is current only while the sheet is open and the token has not moved. */
@@ -191,8 +190,9 @@ export function useExerciseUnit(unitId: string, { canAnswer, onMissingKey }: Opt
   };
 
   /** Runs `work` on the open unit unless the same work for the same item is already running. */
-  const once = async (key: string, work: (unit: ExerciseUnit) => Promise<void>) => {
+  const once = async (action: string, work: (unit: ExerciseUnit) => Promise<void>) => {
     const unit = unitRef.current;
+    const key = `${session.current}:${token.current}:${action}`;
     if (!unit || running.current.has(key)) return;
     running.current.add(key);
     try {
@@ -217,20 +217,23 @@ export function useExerciseUnit(unitId: string, { canAnswer, onMissingKey }: Opt
   const reset = async () => {
     const unit = unitRef.current;
     if (!unit) return false;
+    const mine = session.current;
     setResetting(true);
     setResetError(null);
     try {
       const next = await resetUnit(unit.id);
+      if (mine !== session.current) return false;
       cancelDrafts();
       token.current = next;
-      setItems(emptyItems(unit));
+      itemsRef.current = emptyItems(unit);
+      setItems(itemsRef.current);
       setSaveError(null);
       return true;
     } catch (err) {
-      setResetError(errorMessage(err));
+      if (mine === session.current) setResetError(errorMessage(err));
       return false;
     } finally {
-      setResetting(false);
+      if (mine === session.current) setResetting(false);
     }
   };
 

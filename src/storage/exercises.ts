@@ -132,6 +132,22 @@ export async function getUnit(unitId: string): Promise<ExerciseUnit | undefined>
   return (await db()).get('units', unitId);
 }
 
+/** The sheet's unit, states and reset token from one consistent read, never across a reset or restore. */
+export async function getUnitSnapshot(unitId: string): Promise<{
+  unit: ExerciseUnit | undefined;
+  states: ExerciseItemState[];
+  resetToken: number;
+}> {
+  const tx = (await db()).transaction(['units', 'itemStates', 'meta']);
+  const [unit, states, resetToken] = await Promise.all([
+    tx.objectStore('units').get(unitId),
+    tx.objectStore('itemStates').index('unitId').getAll(unitId),
+    readResetToken(tx.objectStore('meta'), unitId),
+  ]);
+  await tx.done;
+  return { unit, states, resetToken };
+}
+
 /** Deletes a unit and its item states in one transaction. Its attempts stay. Resolves false when there was no such unit. */
 export async function deleteUnit(unitId: string): Promise<boolean> {
   const d = await db();
