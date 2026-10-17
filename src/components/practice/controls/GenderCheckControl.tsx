@@ -9,8 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
-export function GenderCheckControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
+export function GenderCheckControl({ item, onWord, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const options = item.options ?? ['M', 'F'];
   const expected = String(item.expectedAnswer);
@@ -43,7 +44,9 @@ export function GenderCheckControl({ item, answer, onChange, checked, disabled }
 
   return (
     <div className="space-y-2">
-      <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
+      <p className="break-words font-serif text-lg text-ink-900">
+        <InlineMarkup text={item.prompt} onWord={onWord} />
+      </p>
       <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
         <span
           role="radiogroup"

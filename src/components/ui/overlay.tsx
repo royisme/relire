@@ -8,14 +8,16 @@ interface OverlayProps {
   children: React.ReactNode;
 }
 
-function useEscape(onClose: () => void) {
+function useEscape(onClose: () => void, dialog?: React.RefObject<HTMLElement | null>) {
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key !== 'Escape') return;
+      if (dialog && Array.from(document.querySelectorAll('[role="dialog"]')).at(-1) !== dialog.current) return;
+      onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [onClose, dialog]);
 }
 
 /**
@@ -23,13 +25,23 @@ function useEscape(onClose: () => void) {
  * The scrim is light so the article stays legible behind it.
  */
 export function Sheet({ onClose, label, className, children }: OverlayProps) {
-  useEscape(onClose);
+  const dialog = React.useRef<HTMLElement>(null);
+  useEscape(onClose, dialog);
+  React.useEffect(() => {
+    const opener = document.activeElement;
+    dialog.current?.focus({ preventScroll: true });
+    return () => {
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true });
+    };
+  }, []);
   return (
     <div
       className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end bg-scrim/25 anim-fade"
       onClick={onClose}
     >
       <aside
+        ref={dialog}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={label}

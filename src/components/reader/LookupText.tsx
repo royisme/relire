@@ -1,8 +1,8 @@
 /** Look up an actual source token, never a guessed word from a whole answer. */
 import { readerTokens } from '../../utils/readerTokens';
-import { ReaderWord } from '../reader/ReaderWord';
+import { ReaderWord } from './ReaderWord';
 
-export function MistakeText({ text, onWord }: { text: string; onWord: (word: string, sentence: string) => void }) {
+export function LookupText({ text, onWord }: { text: string; onWord: (word: string, sentence: string) => void }) {
   return (
     <>
       {readerTokens(text).map((token) =>

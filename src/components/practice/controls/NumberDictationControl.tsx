@@ -13,9 +13,11 @@ import { speakFrench } from '../../../utils/speech';
 import { SpeakButton } from '../../ui/speak-button';
 import { ExpectedBeside, UnderlineInput } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
 export function NumberDictationControl({
   item,
+  onWord,
   answer,
   onChange,
   checked,
@@ -40,7 +42,9 @@ export function NumberDictationControl({
 
   return (
     <div className="space-y-2">
-      <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
+      <p className="break-words font-serif text-lg text-ink-900">
+        <InlineMarkup text={item.prompt} onWord={onWord} />
+      </p>
       <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
         <SpeakButton
           text={audio}

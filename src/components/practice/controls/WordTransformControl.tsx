@@ -6,9 +6,11 @@ import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ExpectedBeside, UnderlineInput } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
 export function WordTransformControl({
   item,
+  onWord,
   answer,
   onChange,
   checked,
@@ -19,7 +21,9 @@ export function WordTransformControl({
   return (
     <div className="space-y-1">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 font-serif text-lg text-ink-900">
-        <span className="break-words">{item.prompt}</span>
+        <span className="break-words">
+          <InlineMarkup text={item.prompt} onWord={onWord} />
+        </span>
         <ArrowRight className="h-4 w-4 shrink-0 self-center text-ink-400" aria-hidden="true" />
         <UnderlineInput
           value={answer.singleAnswer}
@@ -38,7 +42,11 @@ export function WordTransformControl({
           />
         )}
       </div>
-      {item.secondaryPrompt && <p className="break-words text-sm text-ink-500">{item.secondaryPrompt}</p>}
+      {item.secondaryPrompt && (
+        <p className="break-words text-sm text-ink-500">
+          <InlineMarkup text={item.secondaryPrompt} onWord={onWord} />
+        </p>
+      )}
     </div>
   );
 }

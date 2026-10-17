@@ -10,8 +10,9 @@ import { normalizeFrench } from '../../../services/exercises/grading';
 import { cn } from '../../../lib/utils';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
-export function ChoiceSelectControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
+export function ChoiceSelectControl({ item, onWord, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const pieces = choicePieces(item.prompt);
   const expected = Array.isArray(item.expectedAnswer) ? item.expectedAnswer : [item.expectedAnswer];
@@ -28,7 +29,12 @@ export function ChoiceSelectControl({ item, answer, onChange, checked, disabled 
   return (
     <p className="break-words font-serif text-lg leading-[2.4] text-ink-900">
       {pieces.map((piece, at) => {
-        if (piece.kind === 'text') return <Fragment key={at}>{piece.text}</Fragment>;
+        if (piece.kind === 'text')
+          return (
+            <Fragment key={at}>
+              <InlineMarkup text={piece.text} onWord={(word) => onWord(word, item.prompt)} />
+            </Fragment>
+          );
         const chosen = answer.choiceSelections[piece.index] ?? '';
         const right = markSlots && same(chosen, expected[piece.index] ?? '');
         return (

@@ -15,13 +15,14 @@ import { InlineMarkup } from './InlineMarkup';
 
 interface ExplanationSheetProps {
   item: ExerciseItem;
+  onWord: (word: string, sentence: string) => void;
   type: ExerciseType;
   runtime: ItemRuntime;
   onClose: () => void;
   onRetry: () => void;
 }
 
-export function ExplanationSheet({ item, type, runtime, onClose, onRetry }: ExplanationSheetProps) {
+export function ExplanationSheet({ item, type, runtime, onClose, onRetry, onWord }: ExplanationSheetProps) {
   const { t } = useTranslation();
   const { explanation, busy, error } = runtime;
   const given = recordedAnswerText(type, item, runtime.answer);
@@ -35,7 +36,9 @@ export function ExplanationSheet({ item, type, runtime, onClose, onRetry }: Expl
       />
       <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
         <section className="space-y-2">
-          <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
+          <p className="break-words font-serif text-lg text-ink-900">
+            <InlineMarkup text={item.prompt} onWord={onWord} />
+          </p>
           <p className="break-words text-sm">
             <span className="text-ink-600">{t('practice.yourAnswer')}: </span>
             <span className="font-serif text-base text-bad-700 line-through">{given || '—'}</span>
@@ -67,16 +70,16 @@ export function ExplanationSheet({ item, type, runtime, onClose, onRetry }: Expl
         {explanation && (
           <section className="space-y-3 text-sm text-ink-800">
             <h4 className="break-words font-serif text-base font-semibold text-ink-900">
-              <InlineMarkup text={explanation.summary} />
+              <InlineMarkup text={explanation.summary} onWord={onWord} />
             </h4>
             {explanation.details.split(/\n+/).map((paragraph, index) => (
               <p key={index} className="break-words leading-relaxed">
-                <InlineMarkup text={paragraph} />
+                <InlineMarkup text={paragraph} onWord={onWord} />
               </p>
             ))}
             <p className="break-words border-t border-ink-200 pt-3 text-ink-600">
               <span className="font-medium text-ink-800">{t('practice.tip')}. </span>
-              <InlineMarkup text={explanation.tip} />
+              <InlineMarkup text={explanation.tip} onWord={onWord} />
             </p>
           </section>
         )}

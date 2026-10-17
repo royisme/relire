@@ -9,7 +9,15 @@ import { Button } from '../ui/button';
 import { NotFoundView } from '../shell/NotFoundView';
 import { UnitSheet } from './UnitSheet';
 
-export function UnitView({ unitId, onMissingKey }: { unitId: string; onMissingKey: () => void }) {
+export function UnitView({
+  unitId,
+  onMissingKey,
+  onWord,
+}: {
+  unitId: string;
+  onMissingKey: () => void;
+  onWord: (word: string, sentence: string, context: string) => void;
+}) {
   const { t } = useTranslation();
   const session = useExerciseUnit(unitId, { onMissingKey });
 
@@ -26,5 +34,5 @@ export function UnitView({ unitId, onMissingKey }: { unitId: string; onMissingKe
       </div>
     );
   if (!session.unit) return <div aria-busy="true" className="min-h-[50vh]" />;
-  return <UnitSheet unit={session.unit} session={session} />;
+  return <UnitSheet unit={session.unit} session={session} onWord={onWord} />;
 }

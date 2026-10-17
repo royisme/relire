@@ -19,9 +19,18 @@ import type { TextInputElement } from './controls/types';
 import { ExplanationSheet } from './ExplanationSheet';
 import { ItemRow } from './ItemRow';
 import { ResetDialog } from './ResetDialog';
+import { InlineMarkup } from './InlineMarkup';
 
 /** The unit's reading passage, and for a cloze unit the way back into the material. */
-function PassageSection({ unit, beside }: { unit: ExerciseUnit; beside: boolean }) {
+function PassageSection({
+  unit,
+  beside,
+  onWord,
+}: {
+  unit: ExerciseUnit;
+  beside: boolean;
+  onWord: (word: string, sentence: string) => void;
+}) {
   const { t } = useTranslation();
   const passage = unit.readingPassage!;
   return (
@@ -30,9 +39,13 @@ function PassageSection({ unit, beside }: { unit: ExerciseUnit; beside: boolean 
         beside ? 'border-b border-ink-200 md:border-b-0 md:border-r' : 'border-b border-ink-200'
       }`}
     >
-      {passage.title && <h3 className="font-serif text-lg font-semibold text-ink-900">{passage.title}</h3>}
+      {passage.title && (
+        <h3 className="font-serif text-lg font-semibold text-ink-900">
+          <InlineMarkup text={passage.title} onWord={onWord} />
+        </h3>
+      )}
       <p lang="fr" className="font-serif text-lg leading-relaxed text-ink-900">
-        {passage.content}
+        <InlineMarkup text={passage.content} onWord={onWord} />
       </p>
       {passage.translation && <p className="text-sm leading-relaxed text-ink-600">{passage.translation}</p>}
       {beside && (
@@ -47,12 +60,23 @@ function PassageSection({ unit, beside }: { unit: ExerciseUnit; beside: boolean 
   );
 }
 
-export function UnitSheet({ unit, session }: { unit: ExerciseUnit; session: ExerciseUnitSession }) {
+export function UnitSheet({
+  unit,
+  session,
+  onWord,
+}: {
+  unit: ExerciseUnit;
+  session: ExerciseUnitSession;
+  onWord: (word: string, sentence: string, context: string) => void;
+}) {
   const { t } = useTranslation();
   const [bound, setBound] = useState<TextInputElement | null>(null);
   const [explainId, setExplainId] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const { items, progress } = session;
+  // Empty is explicit: a workbook must never inherit the last reader's context.
+  const context = [unit.instruction, unit.readingPassage?.content].filter(Boolean).join('\n');
+  const lookup = (word: string, sentence: string) => onWord(word, sentence, context);
   const explained = unit.items.find((item) => item.id === explainId);
   const anyChecking = unit.items.some((item) => items[item.id]?.busy === 'check');
   // A cloze unit's questions are answered with the passage in sight, so from `md` it stays beside them.
@@ -69,6 +93,7 @@ export function UnitSheet({ unit, session }: { unit: ExerciseUnit; session: Exer
         <ItemRow
           key={item.id}
           unit={unit}
+          onWord={lookup}
           item={item}
           runtime={items[item.id]}
           onAnswer={(answer) => session.setAnswer(item.id, answer)}
@@ -115,12 +140,12 @@ export function UnitSheet({ unit, session }: { unit: ExerciseUnit; session: Exer
 
         {cloze ? (
           <div className="md:grid md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
-            <PassageSection unit={unit} beside />
+            <PassageSection unit={unit} beside onWord={lookup} />
             {rows}
           </div>
         ) : (
           <>
-            {unit.readingPassage && <PassageSection unit={unit} beside={false} />}
+            {unit.readingPassage && <PassageSection unit={unit} beside={false} onWord={lookup} />}
             {rows}
           </>
         )}
@@ -155,6 +180,7 @@ export function UnitSheet({ unit, session }: { unit: ExerciseUnit; session: Exer
       {explained && items[explained.id] && (
         <ExplanationSheet
           item={explained}
+          onWord={lookup}
           type={effectiveItemType(explained, unit)}
           runtime={items[explained.id]}
           onClose={() => setExplainId(null)}

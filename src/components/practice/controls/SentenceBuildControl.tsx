@@ -13,6 +13,7 @@ import { expectedAnswerText } from '../../../services/exercises/answer';
 import { cn } from '../../../lib/utils';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
 const wordsOf = (text: string) => text.split(/\s+/).filter(Boolean);
 
@@ -47,7 +48,7 @@ const placedStyle = 'min-h-9 max-sm:min-h-10 max-w-full break-words rounded-md p
 const bankStyle = 'min-h-9 max-sm:min-h-10 max-w-full break-words rounded-md px-3 font-sans text-sm';
 const tileLine = 'col-start-1 row-start-1 flex flex-wrap items-center gap-0.5';
 
-export function SentenceBuildControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
+export function SentenceBuildControl({ item, onWord, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const tiles = shuffledTiles(item.options?.flatMap(wordsOf) ?? wordsOf(expectedAnswerText(item)), item.id).map(
     (word, at) => ({ id: String(at), word }),
@@ -90,8 +91,14 @@ export function SentenceBuildControl({ item, answer, onChange, checked, disabled
 
   return (
     <div className="space-y-2">
-      <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
-      {item.secondaryPrompt && <p className="break-words text-sm text-ink-500">{item.secondaryPrompt}</p>}
+      <p className="break-words font-serif text-lg text-ink-900">
+        <InlineMarkup text={item.prompt} onWord={onWord} />
+      </p>
+      {item.secondaryPrompt && (
+        <p className="break-words text-sm text-ink-500">
+          <InlineMarkup text={item.secondaryPrompt} onWord={onWord} />
+        </p>
+      )}
       <div
         role="group"
         aria-label={t('practice.sentenceLabel', { number: item.itemNumber })}

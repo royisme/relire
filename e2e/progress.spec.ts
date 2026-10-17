@@ -117,6 +117,12 @@ for (const phone of [false, true]) {
       kind: 'workbook',
       content: '',
     });
+    await page.goto('/#/read');
+    await page.getByRole('button', { name: new RegExp(CATALOG_DRILLS.drillTitle) }).click();
+    await expect(page).toHaveURL(new RegExp(`#/practice\\?article=${after.units[0].materialId}$`));
+    await page.reload();
+    await expect(page.getByRole('combobox', { name: 'Article', exact: true })).toHaveValue(after.units[0].materialId);
+    await page.locator(`main a[href="#/practice/${after.units[0].id}"]`).click();
     await page.reload();
     await expect(page.getByRole('heading', { name: CATALOG_DRILLS.drillTitle })).toBeVisible();
     for (const item of CATALOG_DRILLS.items.slice(0, 2)) {

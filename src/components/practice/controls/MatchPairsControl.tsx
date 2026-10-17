@@ -10,11 +10,12 @@ import { normalizeFrench } from '../../../services/exercises/grading';
 import { cn } from '../../../lib/utils';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
 /** The letter an option is keyed by: its first character, as the grader does. */
 const optionKey = (option: string) => (option.trim()[0] ?? '').toLowerCase();
 
-export function MatchPairsControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
+export function MatchPairsControl({ item, onWord, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const options = item.options ?? [];
   const expected = String(item.expectedAnswer);
@@ -54,7 +55,9 @@ export function MatchPairsControl({ item, answer, onChange, checked, disabled }:
 
   return (
     <div className="space-y-2">
-      <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
+      <p className="break-words font-serif text-lg text-ink-900">
+        <InlineMarkup text={item.prompt} onWord={onWord} />
+      </p>
       <div className="flex min-w-0 flex-col items-start gap-2">
         <div
           role="radiogroup"

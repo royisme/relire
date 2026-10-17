@@ -8,8 +8,17 @@ import { useTranslation } from 'react-i18next';
 import { normalizeFrench } from '../../../services/exercises/grading';
 import { ExpectedBeside, UnderlineInput, type BlankState } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
-export function FillBlanksControl({ item, answer, onChange, checked, disabled, registerInput }: ExerciseControlProps) {
+export function FillBlanksControl({
+  item,
+  onWord,
+  answer,
+  onChange,
+  checked,
+  disabled,
+  registerInput,
+}: ExerciseControlProps) {
   const { t } = useTranslation();
   const parts = item.prompt.split('[___]');
   const blanks = Math.max(1, parts.length - 1);
@@ -62,7 +71,9 @@ export function FillBlanksControl({ item, answer, onChange, checked, disabled, r
   if (parts.length === 1) {
     return (
       <div className="space-y-2">
-        <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
+        <p className="break-words font-serif text-lg text-ink-900">
+          <InlineMarkup text={item.prompt} onWord={onWord} />
+        </p>
         {blank(0, 'w-full max-w-md', 'left')}
       </div>
     );
@@ -72,7 +83,7 @@ export function FillBlanksControl({ item, answer, onChange, checked, disabled, r
     <p className="break-words font-serif text-lg leading-[2.1] text-ink-900">
       {parts.map((part, index) => (
         <Fragment key={index}>
-          {part}
+          <InlineMarkup text={part} onWord={(word) => onWord(word, item.prompt)} />
           {index < parts.length - 1 && <span className="mx-1">{blank(index, 'w-28')}</span>}
         </Fragment>
       ))}

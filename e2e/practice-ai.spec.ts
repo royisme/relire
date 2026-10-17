@@ -188,7 +188,7 @@ test.describe('hints and explanations', () => {
     await expect(sheet.getByText('Manger is a regular -er verb.')).toBeVisible();
     await expect(sheet.getByText('Check the subject first, then choose the ending.')).toBeVisible();
     await expect(sheet.getByText('mangez')).toBeVisible();
-    await expect(sheet.getByText('mange', { exact: true })).toBeVisible();
+    await expect(sheet.getByText('Correct answer:', { exact: true }).locator('..')).toHaveText('Correct answer: mange');
     expect(ai.prompts.explain[0]).toContain('Expected answer: "mange"');
     await expect
       .poll(async () => (await stored(page)).itemStates.map((s: { explanationShown: boolean }) => s.explanationShown))

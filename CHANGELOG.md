@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Look up words while practising.** Tap words in exercise prompts, passages, hints and explanations to open the usual word sheet and save them to My study, using the current unit’s context. Word lookup keeps answer keyboard actions separate, and closing a word sheet returns to an open explanation.
 - **Mistake notebook in My study.** Wrong answers are grouped by grammar area with their actual prompt and answers, kept after source deletion, and marked resolved after a later correct attempt. Explain a mistake, tap an actual word to look it up and save it, or reopen the surviving material/unit. Retry preserves the saved sheet; checked answers change only after its existing confirmed Reset.
 - **Grammar progress and focused drills.** Progress shows weighted accuracy and real attempt counts by grammar area, including retained history from deleted material. Make a separate workbook targeting up to three weakest topics with errors, at your chosen level and size. Failed saves keep the generated set for retry without another AI call; leaving an unsaved set requires explicit discard.
 - **Import and review workbook material.** Add now offers the existing article editor or image/PDF/text import. See the selected model and content before sending, edit or exclude extracted questions and answers, then explicitly save exercises, an article, or one article with exercises. Drafts remain in memory, warn before leaving, and survive failed saves for retry; material and exercises commit together.
@@ -56,6 +57,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Empty-text workbooks reopened from the Library now show their own Practice unit list instead of a blank Reader; readable materials still open Reader.
 - A word lookup that is still loading, or already showing, closes with the page that opened it: browser Back, Forward or a typed address no longer leaves a sheet over the new screen, and a late answer or failure for the old page cannot show up, replace a newer lookup or send you to Settings. A lookup started on the page you are on completes as before.
 - Exercises-only imports can save a workbook with valid exercises and no source text, without inventing a passage. Article imports still require source text.
 - Article startup, saves and sample restores preserve the original storage error when a failed request automatically aborts its transaction, without an extra unhandled error.

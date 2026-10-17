@@ -11,11 +11,12 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../ui/button';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
 /** The letter a line is keyed by: its first character, as the grader does. */
 const lineKey = (line: string) => (line.trim()[0] ?? '').toLowerCase();
 
-export function DialogueOrderControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
+export function DialogueOrderControl({ item, onWord, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const order = answer.dialogueOrder;
   const markSlots = checked?.strictAccents !== undefined;
@@ -45,7 +46,9 @@ export function DialogueOrderControl({ item, answer, onChange, checked, disabled
 
   return (
     <div className="space-y-2">
-      <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
+      <p className="break-words font-serif text-lg text-ink-900">
+        <InlineMarkup text={item.prompt} onWord={onWord} />
+      </p>
       <ol aria-label={t('practice.linesLabel', { number: item.itemNumber })} className="min-w-0">
         {order.map((line, at) => {
           const key = lineKey(line);

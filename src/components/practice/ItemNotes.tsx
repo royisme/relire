@@ -9,7 +9,15 @@ import type { ExerciseItem } from '../../types/exercises';
 import type { ItemRuntime } from '../../hooks/useExerciseUnit';
 import { InlineMarkup } from './InlineMarkup';
 
-export function ItemNotes({ item, runtime }: { item: ExerciseItem; runtime: ItemRuntime }) {
+export function ItemNotes({
+  item,
+  runtime,
+  onWord,
+}: {
+  item: ExerciseItem;
+  runtime: ItemRuntime;
+  onWord: (word: string, sentence: string) => void;
+}) {
   const { t } = useTranslation();
   const { hint, checked, error } = runtime;
   const ai = checked?.aiFeedback;
@@ -19,14 +27,14 @@ export function ItemNotes({ item, runtime }: { item: ExerciseItem; runtime: Item
         <div className="space-y-1 border-l-2 border-ink-300 pl-3 text-sm text-ink-800">
           <p className="break-words">
             <span className="font-medium">{t('practice.hint')}. </span>
-            <InlineMarkup text={hint.hint} />
+            <InlineMarkup text={hint.hint} onWord={onWord} />
           </p>
           <p className="break-words text-ink-600">
-            {t('practice.rule')}: <InlineMarkup text={hint.grammarRule} />
+            {t('practice.rule')}: <InlineMarkup text={hint.grammarRule} onWord={onWord} />
             {hint.clueWord && (
               <>
                 {' '}
-                · {t('practice.clue')}: <InlineMarkup text={hint.clueWord} />
+                · {t('practice.clue')}: <InlineMarkup text={hint.clueWord} onWord={onWord} />
               </>
             )}
           </p>
@@ -35,14 +43,14 @@ export function ItemNotes({ item, runtime }: { item: ExerciseItem; runtime: Item
       {checked && item.explanation && (
         <p className="break-words text-sm text-ink-600">
           <span className="font-medium text-ink-800">{t('practice.note')}. </span>
-          {item.explanation}
+          <InlineMarkup text={item.explanation} onWord={onWord} />
         </p>
       )}
       {ai && (
         <div className="space-y-1 border-l-2 border-ink-300 pl-3 text-sm text-ink-800">
           <p className="break-words">
             <span className="font-medium">{t('practice.aiFeedback')}. </span>
-            <InlineMarkup text={ai.feedback} />
+            <InlineMarkup text={ai.feedback} onWord={onWord} />
           </p>
           {ai.correctedVersion && (
             <p className="break-words text-ink-600">

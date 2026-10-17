@@ -6,7 +6,7 @@ import type { Article } from '../../types';
 import { GRAMMAR_AREA_IDS, GRAMMAR_TAGS, grammarAreaOf } from '../../types/grammar';
 import { Button } from '../ui/button';
 import { Link } from '../shell/Link';
-import { MistakeText } from './MistakeText';
+import { LookupText } from '../reader/LookupText';
 import { MistakeExplanationSheet } from './MistakeExplanationSheet';
 
 const areaLabel = {
@@ -85,18 +85,18 @@ export function MistakeNotebook({ articles, onMissingKey, onWord }: Props) {
                         </span>
                       </div>
                       <p className="font-serif text-lg text-ink-900">
-                        <MistakeText text={attempt.prompt} onWord={onToken} />
+                        <LookupText text={attempt.prompt} onWord={onToken} />
                       </p>
                       <p className="text-sm">
                         <span className="text-ink-600">{t('practice.yourAnswer')}: </span>
                         <span className="font-serif text-base text-bad-700 line-through">
-                          <MistakeText text={attempt.userAnswer} onWord={onToken} />
+                          <LookupText text={attempt.userAnswer} onWord={onToken} />
                         </span>
                       </p>
                       <p className="text-sm">
                         <span className="text-ink-600">{t('practice.expected')}: </span>
                         <span className="font-serif text-base text-ok-800">
-                          <MistakeText text={attempt.expectedAnswer} onWord={onToken} />
+                          <LookupText text={attempt.expectedAnswer} onWord={onToken} />
                         </span>
                       </p>
                       <div className="flex flex-wrap items-center gap-2">

@@ -18,6 +18,7 @@ import { ItemNotes } from './ItemNotes';
 
 interface ItemRowProps {
   unit: ExerciseUnit;
+  onWord: (word: string, sentence: string) => void;
   item: ExerciseItem;
   runtime: ItemRuntime;
   onAnswer: (answer: ExerciseAnswer) => void;
@@ -28,7 +29,7 @@ interface ItemRowProps {
   onBind: (element: TextInputElement) => void;
 }
 
-export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExplain, onBind }: ItemRowProps) {
+export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExplain, onBind, onWord }: ItemRowProps) {
   const { t } = useTranslation();
   const type = effectiveItemType(item, unit);
   const Control = CONTROLS[type];
@@ -82,6 +83,7 @@ export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExpl
         <div onKeyDown={onKeyDown} onFocus={onFocus}>
           <Control
             item={item}
+            onWord={onWord}
             type={type}
             answer={runtime.answer}
             onChange={onAnswer}
@@ -97,7 +99,7 @@ export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExpl
           onHint={onHint}
           onExplain={onExplain}
         />
-        <ItemNotes item={item} runtime={runtime} />
+        <ItemNotes item={item} runtime={runtime} onWord={onWord} />
       </div>
     </li>
   );

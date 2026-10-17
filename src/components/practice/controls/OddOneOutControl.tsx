@@ -9,8 +9,9 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
-export function OddOneOutControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
+export function OddOneOutControl({ item, onWord, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const options = item.options ?? [];
   const expected = String(item.expectedAnswer);
@@ -41,7 +42,9 @@ export function OddOneOutControl({ item, answer, onChange, checked, disabled }: 
 
   return (
     <div className="space-y-2">
-      <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
+      <p className="break-words font-serif text-lg text-ink-900">
+        <InlineMarkup text={item.prompt} onWord={onWord} />
+      </p>
       <p className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
         <span
           role="radiogroup"
@@ -81,7 +84,11 @@ export function OddOneOutControl({ item, answer, onChange, checked, disabled }: 
         </span>
         {checked && !checked.correct && <ExpectedBeside text={expected} />}
       </p>
-      {item.secondaryPrompt && <p className="break-words text-sm text-ink-500">{item.secondaryPrompt}</p>}
+      {item.secondaryPrompt && (
+        <p className="break-words text-sm text-ink-500">
+          <InlineMarkup text={item.secondaryPrompt} onWord={onWord} />
+        </p>
+      )}
     </div>
   );
 }

@@ -128,7 +128,7 @@ export default function App() {
   const [wordData, setWordData] = useState<WordAnalysis | null>(null);
   const [isWordLoading, setIsWordLoading] = useState(false);
   const [activeWordSentence, setActiveWordSentence] = useState('');
-  // The address whose reader or notebook opened the sheet.
+  // The address whose reader, exercise or notebook opened the sheet.
   const [wordSheetHref, setWordSheetHref] = useState<string | null>(null);
   const wordRequest = useRef(0);
   const wordContext = useRef<string | undefined>(undefined);
@@ -280,7 +280,11 @@ export default function App() {
 
   const openArticle = (article: Article, focusText: string | null = null) => {
     setReaderFocus(focusText ? { articleId: article.id, text: focusText } : null);
-    navigate({ name: 'reader', articleId: article.id });
+    navigate(
+      article.kind === 'workbook' && !article.content.trim()
+        ? { name: 'practice', articleId: article.id }
+        : { name: 'reader', articleId: article.id },
+    );
   };
 
   // Add or edit only after commit. A new article opens; an edit stays where it is.
@@ -511,7 +515,9 @@ export default function App() {
               />
             )}
 
-            {route.name === 'unit' && <UnitView key={route.unitId} unitId={route.unitId} onMissingKey={requestKey} />}
+            {route.name === 'unit' && (
+              <UnitView key={route.unitId} unitId={route.unitId} onMissingKey={requestKey} onWord={handleWordClick} />
+            )}
 
             {route.name === 'progress' && (
               <AnalyticsDashboard

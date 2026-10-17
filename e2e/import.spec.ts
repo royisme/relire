@@ -51,6 +51,9 @@ for (const phone of [false, true]) {
     expect(rows).toHaveLength(1);
     expect(rows[0].kind).toBe('article');
     expect(saved.units.filter((unit) => unit.materialId === rows[0].id)).toHaveLength(1);
+    await page.goto('/#/read');
+    await page.getByRole('button', { name: /Imported workbook/ }).click();
+    await expect(page).toHaveURL(new RegExp(`#/read/${rows[0].id}$`));
   });
 }
 
@@ -93,6 +96,15 @@ for (const phone of [false, true]) {
     expect(saved.units).toHaveLength(1);
     expect(saved.units[0].materialId).toBe(workbooks[0].id);
     expect(saved.units[0].importSource?.extractedText).toBe('');
+    await page.goto('/#/read');
+    await page.getByRole('button', { name: new RegExp(workbooks[0].title) }).click();
+    await expect(page).toHaveURL(new RegExp(`#/practice\\?article=${workbooks[0].id}$`));
+    await page.reload();
+    await expect(page.getByRole('combobox', { name: 'Article', exact: true })).toHaveValue(workbooks[0].id);
+    await page.locator(`main a[href="#/practice/${saved.units[0].id}"]`).click();
+    await expect(page.getByRole('heading', { name: saved.units[0].title })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('heading', { name: saved.units[0].title })).toBeVisible();
   });
 }
 
@@ -193,11 +205,15 @@ test('blockers cannot partially save; explicit exclusion and article/workbook de
   await page.getByLabel('I have reviewed').check();
   await page.getByRole('button', { name: 'Confirm and save' }).click();
   await expect(page).toHaveURL(/#\/practice\?article=material-/);
-  const kind = await page.evaluate(async () => {
+  const material = await page.evaluate(async () => {
     const { db } = (await import('/src/storage/db.ts' as string)) as typeof import('../src/storage/db');
-    return (await (await db()).getAll('articles')).find((row) => row.title === 'Mon document')?.kind;
+    return (await (await db()).getAll('articles')).find((row) => row.title === 'Mon document')!;
   });
-  expect(kind).toBe('workbook');
+  expect(material.kind).toBe('workbook');
+  expect(material.content.trim()).not.toBe('');
+  await page.goto('/#/read');
+  await page.getByRole('button', { name: /Mon document/ }).click();
+  await expect(page).toHaveURL(new RegExp(`#/read/${material.id}$`));
   await page.goto('/#/import');
   ai.answer({ extract: { ...draftFixture, units: [] } });
   await extractText(page);

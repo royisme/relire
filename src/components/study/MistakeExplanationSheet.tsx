@@ -10,7 +10,7 @@ import { aiErrorText } from '../../utils/aiErrorText';
 import { Button } from '../ui/button';
 import { OverlayHeader, Sheet } from '../ui/overlay';
 import { InlineMarkup } from '../practice/InlineMarkup';
-import { MistakeText } from './MistakeText';
+import { LookupText } from '../reader/LookupText';
 
 interface Props {
   attempt: ExerciseAttempt;
@@ -66,18 +66,18 @@ export function MistakeExplanationSheet({ attempt, onClose, onMissingKey, onWord
       <div className="flex-1 overflow-y-auto space-y-5 px-5 py-4">
         <section className="space-y-2 break-words">
           <p className="font-serif text-lg text-ink-900">
-            <MistakeText text={attempt.prompt} onWord={onWord} />
+            <LookupText text={attempt.prompt} onWord={onWord} />
           </p>
           <p>
             <span className="text-ink-600">{t('practice.yourAnswer')}: </span>
             <span className="font-serif text-bad-700 line-through">
-              <MistakeText text={attempt.userAnswer} onWord={onWord} />
+              <LookupText text={attempt.userAnswer} onWord={onWord} />
             </span>
           </p>
           <p>
             <span className="text-ink-600">{t('practice.expected')}: </span>
             <span className="font-serif text-ok-800">
-              <MistakeText text={attempt.expectedAnswer} onWord={onWord} />
+              <LookupText text={attempt.expectedAnswer} onWord={onWord} />
             </span>
           </p>
         </section>
@@ -101,16 +101,16 @@ export function MistakeExplanationSheet({ attempt, onClose, onMissingKey, onWord
         {result?.explanation && (
           <section className="space-y-3 break-words text-sm text-ink-800">
             <h3 className="font-serif text-base font-semibold">
-              <InlineMarkup text={result.explanation.summary} />
+              <InlineMarkup text={result.explanation.summary} onWord={onWord} />
             </h3>
             {result.explanation.details.split(/\n+/).map((text, index) => (
               <p key={index}>
-                <InlineMarkup text={text} />
+                <InlineMarkup text={text} onWord={onWord} />
               </p>
             ))}
             <p className="border-t border-ink-200 pt-3">
               <span>{t('practice.tip')}. </span>
-              <InlineMarkup text={result.explanation.tip} />
+              <InlineMarkup text={result.explanation.tip} onWord={onWord} />
             </p>
           </section>
         )}

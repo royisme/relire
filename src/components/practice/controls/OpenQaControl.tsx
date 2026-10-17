@@ -9,14 +9,29 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
+import { InlineMarkup } from '../InlineMarkup';
 
-export function OpenQaControl({ item, answer, onChange, checked, disabled, registerInput }: ExerciseControlProps) {
+export function OpenQaControl({
+  item,
+  onWord,
+  answer,
+  onChange,
+  checked,
+  disabled,
+  registerInput,
+}: ExerciseControlProps) {
   const { t } = useTranslation();
   const sample = Array.isArray(item.expectedAnswer) ? item.expectedAnswer.join(' / ') : item.expectedAnswer;
   return (
     <div className="space-y-2">
-      <p className="break-words font-serif text-lg text-ink-900">{item.prompt}</p>
-      {item.secondaryPrompt && <p className="break-words text-sm text-ink-500">{item.secondaryPrompt}</p>}
+      <p className="break-words font-serif text-lg text-ink-900">
+        <InlineMarkup text={item.prompt} onWord={onWord} />
+      </p>
+      {item.secondaryPrompt && (
+        <p className="break-words text-sm text-ink-500">
+          <InlineMarkup text={item.secondaryPrompt} onWord={onWord} />
+        </p>
+      )}
       <textarea
         ref={(element) => registerInput(0, element)}
         lang="fr"
