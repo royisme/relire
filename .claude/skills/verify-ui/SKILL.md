@@ -5,7 +5,7 @@ description: Check a Relire UI change with the committed Playwright e2e suite, e
 
 # Verify a UI change in the browser
 
-Type checks do not prove a screen works. Drive the real app, with the AI mocked, and assert what the user would see. Checks live in `e2e/` and are committed, so the next change re-runs them.
+Type checks do not prove a screen works. Drive the real app, with the AI mocked, and assert what the user would see. Checks live in `e2e/` and are committed, so the next change re-runs them. The user performs visual acceptance manually for all subsequent features: do not request, add or review screenshots as a delivery requirement unless explicitly asked. Existing test artifacts need not be removed; functional, overflow and layout-stability assertions still apply.
 
 ## Run
 
@@ -30,7 +30,7 @@ The default prosody answer is source-addressed and unresolved: no invented phone
 ## What to check for a typical change
 
 - At 360×740 (`@phone`) and 1280×900: no horizontal overflow on the screens you touched, with long content.
-- Themes: set `localStorage.relire_theme` to `light`, `sepia` or `dark` in `page.addInitScript`, then look at screenshots (`page.screenshot({ path: test.info().outputPath('x.png') })`).
+- Themes: when relevant to the change, set `localStorage.relire_theme` to `light`, `sepia` or `dark` in `page.addInitScript` and verify behaviour and layout assertions. Visual appearance is for the user's manual review, not a screenshot gate.
 - Transient states (loading, playing, recording, errors) do not change page height or move the content above and below.
 - The flow end to end: the happy path, a failed AI call (error shown inline with the real reason), and repeating or cancelling the action. For exercise sheets, cover answer/check, help, Enter/IME, saved drafts and reset keeping history; all 11 exercise types have controls, so answer at least the types you touched.
 

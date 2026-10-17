@@ -31,7 +31,7 @@ Bun is the only package manager.
 
 - Read before you change: the files you will touch, and the docs below for the area.
 - Keep diffs minimal and on-topic. Ask before decisions that are the user's (product scope, new dependencies, a new provider, data shape after release).
-- Prove it works before saying so: run the checks, and for UI drive the app (`verify-ui`). Report what was and was not verified; AI responses in checks are mocked.
+- Prove it works before saying so: run the checks, and for UI drive the app (`verify-ui`). Report what was and was not verified; AI responses in checks are mocked. Visual acceptance is performed manually by the user: do not add screenshot capture or review as a delivery gate unless explicitly requested.
 - Develop on the designated branch. Do not open PRs, merge or force-push unless asked. Finish with the `ship-change` skill.
 
 ## Where to look
