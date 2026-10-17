@@ -1,5 +1,5 @@
-/** My study → Shadowing: every recorded sentence as "text | reference | my recordings". Display only. */
-import { useEffect, useState } from 'react';
+/** My study → Shadowing: sentence-first history with playback and per-take actions. */
+import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight, ChevronDown, Trash2 } from 'lucide-react';
 import type { Article } from '../../types';
@@ -105,11 +105,6 @@ export function ShadowingLog({ articles, units, unitsError, initialSourceId, onO
                   {t('shadowingLog.recorded', { count: group.rows.length + group.changed.length })}
                 </span>
               </h3>
-              <div className="hidden md:grid grid-cols-[minmax(0,1fr)_5rem_minmax(0,18rem)] gap-3 px-3 text-xs text-ink-500">
-                <span>{t('shadowingLog.text')}</span>
-                <span>{t('shadowingLog.reference')}</span>
-                <span>{t('shadowingLog.mine')}</span>
-              </div>
               <ul className="divide-y divide-ink-200 border-y border-ink-200">
                 {group.rows.map((row) => (
                   <Row key={row.record.key} row={row} onOpen={() => onOpenSentence(row.record)} onDelete={remove} />
@@ -169,6 +164,7 @@ function Row({
 }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+  const takesId = useId();
   const { record } = row;
   const latest = record.takes[record.takes.length - 1];
   const latestPhase = useSpeechPhase(takeKey(latest));
@@ -187,69 +183,62 @@ function Row({
     });
 
   return (
-    <li className="px-3 py-3 space-y-2">
-      <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_5rem_minmax(0,18rem)] md:gap-3 md:items-center">
-        {onOpen ? (
-          <button
-            type="button"
-            onClick={onOpen}
-            className="text-left font-serif text-base text-ink-900 break-words hover:underline underline-offset-4 cursor-pointer"
-            title={t('shadowingLog.openInReader')}
-          >
-            {record.text}
-          </button>
-        ) : (
-          <p className="font-serif text-base text-ink-700 break-words">{record.text}</p>
-        )}
-        <div className="flex flex-wrap items-center gap-1">
-          <SpeakButton
-            text={record.text}
-            label={t('shadowingLog.playReference')}
-            stopLabel={t('reader.stop')}
-            variant="outline"
-            size="icon"
-          />
-          <span className="md:hidden text-xs text-ink-500">{t('shadowingLog.reference')}</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => (latestPhase === 'idle' ? void playRecording(latest.blob, takeKey(latest)) : stopSpeech())}
-            aria-label={t('shadowingLog.playTake', { when: when(latest) })}
-            className="min-h-10"
-          >
-            <SpeakIcon phase={latestPhase} className="w-3.5 h-3.5" />
-            <span className="tnum">{when(latest)}</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={compare}
-            title={t('practiceCard.compareTitle')}
-            className="min-h-10"
-          >
-            <ArrowLeftRight className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{t('practiceCard.compare')}</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            aria-expanded={open}
-            onClick={() => setOpen(!open)}
-            className="min-h-10"
-            aria-label={t('shadowingLog.allTakes', { count: record.takes.length })}
-          >
-            <span className="tnum">{record.takes.length}</span>
-            <ChevronDown
-              className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`}
-              aria-hidden="true"
-            />
-          </Button>
-        </div>
+    <li className="min-w-0 py-4 space-y-2">
+      {onOpen ? (
+        <button
+          type="button"
+          onClick={onOpen}
+          className="block min-h-10 w-full text-left font-serif text-base text-ink-900 break-words hover:underline underline-offset-4 cursor-pointer"
+          title={t('shadowingLog.openInReader')}
+        >
+          {record.text}
+        </button>
+      ) : (
+        <p className="font-serif text-base text-ink-700 break-words">{record.text}</p>
+      )}
+      <div className="flex flex-wrap items-center gap-2">
+        <SpeakButton
+          text={record.text}
+          label={t('shadowingLog.reference')}
+          stopLabel={t('reader.stop')}
+          showLabel
+          variant="outline"
+          size="sm"
+          className="min-h-10"
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => (latestPhase === 'idle' ? void playRecording(latest.blob, takeKey(latest)) : stopSpeech())}
+          aria-label={t('shadowingLog.playLatest')}
+          aria-busy={latestPhase === 'loading'}
+          className="min-h-10"
+        >
+          <SpeakIcon phase={latestPhase} className="w-3.5 h-3.5" />
+          <span>{t('shadowingLog.playLatest')}</span>
+        </Button>
+        <Button variant="ghost" size="sm" onClick={compare} title={t('practiceCard.compareTitle')} className="min-h-10">
+          <ArrowLeftRight className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>{t('practiceCard.compare')}</span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-expanded={open}
+          aria-controls={open ? takesId : undefined}
+          onClick={() => setOpen(!open)}
+          className="min-h-10"
+          aria-label={t('shadowingLog.allTakes', { count: record.takes.length })}
+        >
+          <span className="tnum">{t('shadowingLog.allTakes', { count: record.takes.length })}</span>
+          <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+        </Button>
       </div>
+      <p className="tnum text-xs text-ink-500">
+        {t('shadowingLog.lastRecorded', { when: when(latest) })} · {clock(latest.durationMs)}
+      </p>
       {open && (
-        <ul className="space-y-1 md:pl-4">
+        <ul id={takesId} className="space-y-1 border-t border-ink-200 pt-2">
           {[...record.takes].reverse().map((take) => (
             <TakeLine key={take.id} take={take} label={when(take)} onDelete={() => onDelete(record.key, take)} />
           ))}
