@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, spyOn, test } from 'bun:test';
 import { ImageInputUnsupportedError, InvalidAnswerError, isAbortError } from '../src/services/ai/errors';
 import {
   MAX_EXTRACT_IMAGES,
@@ -303,6 +303,16 @@ describe('extractMaterial', () => {
     expect(provider.requests).toHaveLength(0);
   });
 
+  test('an explicitly selected unknown image model reaches the provider and surfaces its real error', async () => {
+    const failure = new Error('The selected model does not accept image input.');
+    const provider = fakeProvider(failure);
+    const err = await rejection(extractMaterial({ mode: 'complete', images: [page] }, contextOf(provider, 'unknown')));
+    expect(err).toBe(failure);
+    expect(provider.requests).toHaveLength(1);
+    expect(provider.configs[0].model).toBe('unknown');
+    expect(provider.requests[0].singleAttempt).toBe(true);
+  });
+
   test('text alone works on a model without image input', async () => {
     const provider = fakeProvider(draftFixture);
     await extractMaterial({ mode: 'complete', text: 'Bonjour' }, contextOf(provider, 'text-only'));
@@ -353,20 +363,48 @@ describe('extractMaterial', () => {
 
 describe('Gemini image input', () => {
   test('the text models read images and the speech model does not', () => {
-    for (const model of gemini.info.text!.models) expect(geminiText.supportsImageInput(model)).toBe(true);
+    for (const model of gemini.info.text!.models) expect(geminiText.imageInputCapability(model)).toBe('supported');
     expect(gemini.info.text!.imageModels).toEqual(gemini.info.text!.models);
-    expect(geminiText.supportsImageInput('gemini-3.8-flash-lite-tts')).toBe(false);
-    expect(geminiText.supportsImageInput('some-other-model')).toBe(false);
+    expect(geminiText.imageInputCapability('gemini-3.8-flash-lite-tts')).toBe('unsupported');
+    expect(geminiText.imageInputCapability('gemini-custom-vision')).toBe('unknown');
+    expect(geminiText.imageInputCapability('some-other-model')).toBe('unknown');
   });
 
   test('an image request to a model that cannot read images is refused before the network', async () => {
     const err = await rejection(
       geminiText.generateJson(
         { prompt: 'x', images: [{ data: 'AAAA', mimeType: 'image/png' }] },
-        { apiKey: 'test', model: 'some-other-model' },
+        { apiKey: 'test', model: 'gemini-3.8-flash-lite-tts' },
       ),
     );
     expect(err).toBeInstanceOf(ImageInputUnsupportedError);
+  });
+
+  test('Gemini sends an explicitly selected unknown image model once and returns the real unsupported error', async () => {
+    const fetch = spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      Response.json(
+        {
+          error: { code: 400, message: 'This model cannot accept image input.', status: 'INVALID_ARGUMENT' },
+        },
+        { status: 400 },
+      ),
+    );
+    try {
+      const err = await rejection(
+        geminiText.generateJson(
+          { prompt: 'x', images: [{ data: 'AAAA', mimeType: 'image/png' }], singleAttempt: true },
+          { apiKey: 'fixture-key', model: 'gemini-unknown-image-model' },
+        ),
+      );
+      expect(err).not.toBeInstanceOf(ImageInputUnsupportedError);
+      expect(err.message).toContain('This model cannot accept image input.');
+      expect(fetch).toHaveBeenCalledTimes(1);
+      const requested = fetch.mock.calls[0][0];
+      const url = requested instanceof Request ? requested.url : requested.toString();
+      expect(url).toContain('gemini-unknown-image-model:generateContent');
+    } finally {
+      fetch.mockRestore();
+    }
   });
 
   test('an already cancelled request never reaches the network', async () => {

@@ -31,7 +31,7 @@ import {
 } from './prompts';
 import { ImageInputUnsupportedError, InvalidAnswerError } from './errors';
 import { guardAnswer, parseAnswer } from './validate';
-import type { Lang, TextConfig, TextProvider } from './types';
+import type { Lang, TextExecution } from './types';
 import { parseProsodyResponse } from '../../utils/prosodyResponse';
 
 /**
@@ -43,27 +43,25 @@ import { parseProsodyResponse } from '../../utils/prosodyResponse';
  */
 
 export interface TextContext {
-  provider: TextProvider;
-  config: TextConfig;
+  execution: TextExecution;
   lang: Lang;
 }
 
 export async function annotatePronunciation(input: Parameters<typeof prosodyRequest>[0], ctx: TextContext) {
-  const value = await ctx.provider.generateJson<unknown>(prosodyRequest(input, ctx.lang), ctx.config);
+  const value = await ctx.execution.generateJson<unknown>(prosodyRequest(input, ctx.lang));
   return parseProsodyResponse(value, input.source);
 }
 
 export const analyzeWord = (input: Parameters<typeof wordRequest>[0], ctx: TextContext) =>
-  ctx.provider.generateJson<WordAnalysis>(wordRequest(input, ctx.lang), ctx.config);
+  ctx.execution.generateJson<WordAnalysis>(wordRequest(input, ctx.lang));
 
 export const analyzeSentence = (input: Parameters<typeof sentenceRequest>[0], ctx: TextContext) =>
-  ctx.provider.generateJson<SentenceAnalysis>(sentenceRequest(input, ctx.lang), ctx.config);
+  ctx.execution.generateJson<SentenceAnalysis>(sentenceRequest(input, ctx.lang));
 
 export const assessPronunciation = (input: Parameters<typeof pronunciationRequest>[0], ctx: TextContext) =>
-  ctx.provider.generateJson<PronunciationAssessment>(
+  ctx.execution.generateJson<PronunciationAssessment>(
     // A provider that cannot listen is scored on the transcript alone.
-    pronunciationRequest({ ...input, audio: ctx.provider.supportsAudioInput ? input.audio : undefined }, ctx.lang),
-    ctx.config,
+    pronunciationRequest({ ...input, audio: ctx.execution.supportsAudioInput ? input.audio : undefined }, ctx.lang),
   );
 
 /* ------------------------------ exercise tasks ------------------------------ */
@@ -99,16 +97,16 @@ export async function extractMaterial(input: ExtractInput, ctx: TextContext): Pr
     throw new Error('Every image needs base64 data and an image type.');
   if (text.length > MAX_EXTRACT_TEXT)
     throw new RangeError(`The text is longer than ${MAX_EXTRACT_TEXT} characters; import it in parts.`);
-  if (images.length && !ctx.provider.supportsImageInput(ctx.config.model))
-    throw new ImageInputUnsupportedError(ctx.config.model);
+  if (images.length && ctx.execution.imageInput === 'unsupported')
+    throw new ImageInputUnsupportedError(ctx.execution.model);
 
-  const value = await ctx.provider.generateJson<unknown>(extractRequest(input, ctx.lang), ctx.config);
+  const value = await ctx.execution.generateJson<unknown>(extractRequest(input, ctx.lang));
   return guardAnswer('the material', () => parseImportDraft(value, input.mode));
 }
 
 /** A hint that points at the rule without giving the answer away. */
 export async function hint(input: ItemContext & { exerciseType: string }, ctx: TextContext): Promise<Hint> {
-  const value = await ctx.provider.generateJson<unknown>(hintRequest(input, ctx.lang), ctx.config);
+  const value = await ctx.execution.generateJson<unknown>(hintRequest(input, ctx.lang));
   return parseAnswer('the hint', HintSchema, value);
 }
 
@@ -117,7 +115,7 @@ export async function explainMistake(
   input: ItemContext & { expectedAnswer: string },
   ctx: TextContext,
 ): Promise<Explanation> {
-  const value = await ctx.provider.generateJson<unknown>(explainRequest(input, ctx.lang), ctx.config);
+  const value = await ctx.execution.generateJson<unknown>(explainRequest(input, ctx.lang));
   return parseAnswer('the explanation', ExplanationSchema, value);
 }
 
@@ -126,7 +124,7 @@ export async function gradeOpenAnswer(
   input: Omit<ItemContext, 'grammarTag'> & { expectedAnswer: string },
   ctx: TextContext,
 ): Promise<OpenGrade> {
-  const value = await ctx.provider.generateJson<unknown>(gradeRequest(input, ctx.lang), ctx.config);
+  const value = await ctx.execution.generateJson<unknown>(gradeRequest(input, ctx.lang));
   return parseAnswer('the grade', OpenGradeSchema, value);
 }
 
@@ -135,7 +133,7 @@ export async function generateAdaptiveDrills(input: AdaptiveInput, ctx: TextCont
   if (!input.targets.length) throw new Error('Pick at least one grammar area to practise.');
   checkCount(input.count);
   checkLevel(input.level);
-  const value = await ctx.provider.generateJson<unknown>(adaptiveRequest(input, ctx.lang), ctx.config);
+  const value = await ctx.execution.generateJson<unknown>(adaptiveRequest(input, ctx.lang));
   return parseAnswer('the drills', DrillsSchema, value);
 }
 
@@ -154,7 +152,7 @@ export async function generateExercises(
   const article = exerciseArticleText(input.articleText);
   if (!article) throw new Error('The article is empty.');
 
-  const value = await ctx.provider.generateJson<unknown>(exercisesRequest(input, ctx.lang), ctx.config);
+  const value = await ctx.execution.generateJson<unknown>(exercisesRequest(input, ctx.lang));
   const exercises = parseAnswer('the exercises', GeneratedExercisesSchema, value);
   const { units, dropped, missing } = keepAnswerable(exercises.units, article);
   if (!units.length)

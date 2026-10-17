@@ -1,4 +1,5 @@
 import type { AppSettings } from '../appSettings';
+import { getAiAccess } from '../../services/ai/access';
 import { loadSpeech } from './clips';
 import { getSpeechState, setSpeechState, speechKey } from './state';
 
@@ -288,10 +289,28 @@ function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions
  * Plays a short phrase with the given (possibly unsaved) settings and reports
  * failure, unlike speakFrench which quietly falls back to the browser voice.
  */
-export async function testSpeech(settings: AppSettings): Promise<void> {
-  const clip = await loadSpeech('Bonjour ! Bienvenue sur Relire.', undefined, settings);
+export async function testSpeech(settings: AppSettings, signal?: AbortSignal): Promise<void> {
+  // A cached clip cannot verify the current draft key or model.
+  const clip = await getAiAccess(settings).synthesize({ text: 'Bonjour ! Bienvenue sur Relire.', signal });
+  signal?.throwIfAborted();
   const url = URL.createObjectURL(clip);
   const audio = new Audio(url);
-  audio.addEventListener('ended', () => URL.revokeObjectURL(url), { once: true });
-  await audio.play();
+  const release = () => {
+    URL.revokeObjectURL(url);
+    signal?.removeEventListener('abort', abort);
+  };
+  const abort = () => {
+    audio.pause();
+    release();
+  };
+  signal?.addEventListener('abort', abort, { once: true });
+  audio.addEventListener('ended', release, { once: true });
+  audio.addEventListener('error', release, { once: true });
+  try {
+    await audio.play();
+    signal?.throwIfAborted();
+  } catch (err) {
+    release();
+    throw err;
+  }
 }

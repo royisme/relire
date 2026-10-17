@@ -2,6 +2,7 @@ import { GoogleGenAI, ThinkingLevel, type GenerateContentConfig, type Part } fro
 import i18n from '../../../../i18n';
 import { ImageInputUnsupportedError, MissingApiKeyError, errorMessage } from '../../errors';
 import type { JsonRequest, TextConfig, TextProvider } from '../../types';
+import { geminiCapabilities } from './models';
 
 /**
  * Gemini text generation through the browser SDK. The key is the user's own and
@@ -10,12 +11,6 @@ import type { JsonRequest, TextConfig, TextProvider } from '../../types';
  */
 
 const FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite', 'gemini-2.5-pro'];
-
-/** Gemini text models read images; the speech models cannot. An unset model resolves to the default text model. */
-export const geminiAcceptsImages = (model: string) => {
-  const name = model.trim();
-  return !name || (/^gemini-/i.test(name) && !/tts/i.test(name));
-};
 
 const cancelled = () => new DOMException('The request was cancelled.', 'AbortError');
 
@@ -49,12 +44,13 @@ const toContents = (req: JsonRequest) => {
 
 export const geminiText: TextProvider = {
   supportsAudioInput: true,
-  supportsImageInput: geminiAcceptsImages,
+  imageInputCapability: (model) => geminiCapabilities(model).imageInput,
 
   async generateJson<T>(request: JsonRequest, config: TextConfig): Promise<T> {
     const ai = geminiClient(config.apiKey);
     const preferred = config.model?.trim() ?? '';
-    if (request.images?.length && !geminiAcceptsImages(preferred)) throw new ImageInputUnsupportedError(preferred);
+    if (request.images?.length && geminiCapabilities(preferred).imageInput === 'unsupported')
+      throw new ImageInputUnsupportedError(preferred);
     // A single attempt stays on the chosen model: the learner sees which model reads their pages.
     const candidates = request.singleAttempt
       ? [preferred || FALLBACK_MODELS[0]]
@@ -81,13 +77,13 @@ export const geminiText: TextProvider = {
           lastError = err;
           // A bad key will fail on every model; stop early instead of cycling.
           if (/API key|permission|PERMISSION_DENIED|UNAUTHENTICATED/i.test(errorMessage(err))) {
-            throw new Error(errorMessage(err));
+            throw new Error(errorMessage(err, config.apiKey));
           }
           if (!request.singleAttempt) await new Promise((r) => setTimeout(r, 400));
         }
       }
     }
-    throw new Error(lastError ? errorMessage(lastError) : i18n.t('errors.allModelsFailed'));
+    throw new Error(lastError ? errorMessage(lastError, config.apiKey) : i18n.t('errors.allModelsFailed'));
   },
 
   async checkKey(config: TextConfig): Promise<void> {
@@ -95,7 +91,7 @@ export const geminiText: TextProvider = {
     try {
       await ai.models.generateContent({ model: config.model || FALLBACK_MODELS[0], contents: 'Reply with OK.' });
     } catch (err) {
-      throw new Error(errorMessage(err));
+      throw new Error(errorMessage(err, config.apiKey));
     }
   },
 };

@@ -1,8 +1,8 @@
 import { WordAnalysis, SentenceAnalysis, PronunciationAssessment } from '../types';
-import { getApiKey, getAppSettings, type AppSettings } from '../utils/appSettings';
+import { getAppSettings, type AppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as ai from './ai/tasks';
-import { getTextProvider } from './ai/providers';
+import { getAiAccess } from './ai/access';
 import {
   exerciseArticleText,
   getPromptTemplate,
@@ -12,7 +12,7 @@ import {
   type ExtractInput,
   type ItemContext,
 } from './ai/prompts';
-import type { Lang } from './ai/types';
+import type { AiAccess, TextPurpose } from './ai/types';
 import { cachedRequest, readCachedAnswer } from './cachedRequest';
 import { exercisesKey, explanationKey, hintKey, prosodyKey, sentenceKey, wordKey } from '../storage/cache';
 import {
@@ -45,10 +45,9 @@ import { validatePronunciationMarkers } from '../utils/pronunciationMarkers';
 export { ImageInputUnsupportedError, InvalidAnswerError, MissingApiKeyError, isAbortError } from './ai/errors';
 export { MAX_GENERATED_ITEMS } from './ai/tasks';
 
-function context(settings: AppSettings = getAppSettings()): ai.TextContext & { lang: Lang } {
+function context(access: AiAccess = getAiAccess(), purpose: TextPurpose = 'text'): ai.TextContext {
   return {
-    provider: getTextProvider(settings.textProvider),
-    config: { apiKey: getApiKey(settings, settings.textProvider), model: settings.textModel },
+    execution: access.text(purpose),
     lang: i18n.language === 'zh' ? 'zh' : 'en',
   };
 }
@@ -181,8 +180,12 @@ export function generateAdaptiveDrills(input: AdaptiveInput): Promise<Drills> {
  * see `isAbortError`). Images are refused up front when the chosen model
  * cannot read them (`ImageInputUnsupportedError`).
  */
-export function extractMaterial(input: ExtractInput, consentSettings?: AppSettings): Promise<ImportDraft> {
-  return ai.extractMaterial(input, context(consentSettings));
+export function extractionPurpose(input: Pick<ExtractInput, 'images'>): TextPurpose {
+  return input.images?.length ? 'ocr' : 'text';
+}
+
+export function extractMaterial(input: ExtractInput, consentAccess: AiAccess = getAiAccess()): Promise<ImportDraft> {
+  return ai.extractMaterial(input, context(consentAccess, extractionPurpose(input)));
 }
 
 /**
@@ -212,18 +215,10 @@ export function generateExercises(
   );
 }
 
-/** What the import screen shows before it sends pages: who reads them, and whether that model can. */
-export function getTextModelStatus(): { providerId: string; model: string; readsImages: boolean } {
-  const settings = getAppSettings();
-  const provider = getTextProvider(settings.textProvider);
-  return {
-    providerId: settings.textProvider,
-    model: settings.textModel,
-    readsImages: provider.supportsImageInput(settings.textModel),
-  };
-}
-
 /** Checks a pasted key against the text provider before it is saved. Defaults to the stored provider and model. */
 export function checkTextKey(apiKey: string, settings: AppSettings = getAppSettings()): Promise<void> {
-  return getTextProvider(settings.textProvider).checkKey({ apiKey, model: settings.textModel });
+  return getAiAccess({
+    ...settings,
+    apiKeys: { ...settings.apiKeys, [settings.textProvider]: apiKey },
+  }).checkConnection('text');
 }

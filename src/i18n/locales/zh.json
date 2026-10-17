@@ -454,7 +454,14 @@
     "badResponse": "AI 返回的内容无法解析，请重试。",
     "noAudio": "没能生成语音。",
     "allModelsFailed": "所有模型都失败了，请重试。",
-    "invalidAnswer": "无法使用 AI 的回答：{{msg}}"
+    "invalidAnswer": "无法使用 AI 的回答：{{msg}}",
+    "modelListMalformed": "服务商返回的模型列表格式有误。",
+    "modelListPagination": "无法安全地获取完整的模型列表。",
+    "modelListUnavailable": "此服务商不提供模型列表。",
+    "invalidModelId": "请输入不超过 512 个字符的模型 ID，不能为空或包含控制字符。",
+    "providerUnavailable": "服务商 {{provider}} 不可用。",
+    "purposeUnavailable": "此服务商不支持所选任务。",
+    "speechOutputUnsupported": "模型 {{model}} 无法合成语音，请选择语音模型。"
   },
   "models": {
     "gemini-2_5-flash": {

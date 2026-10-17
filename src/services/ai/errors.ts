@@ -7,15 +7,19 @@ export class MissingApiKeyError extends Error {
 }
 
 /** The human-readable part of an SDK error (providers often wrap a JSON body in `message`). */
-export function errorMessage(err: unknown): string {
-  let msg = (err as { message?: string })?.message || String(err);
+export function errorMessage(err: unknown, secret?: string): string {
+  const detail =
+    (err as { error?: { message?: unknown }; message?: unknown })?.error?.message ||
+    (err as { message?: unknown })?.message;
+  let msg = typeof detail === 'string' ? detail : String(err);
   try {
     const parsed = JSON.parse(msg);
-    if (parsed?.error?.message) msg = parsed.error.message;
+    if (typeof parsed?.error?.message === 'string') msg = parsed.error.message;
   } catch {
     // message was not JSON
   }
-  return msg;
+  const key = secret?.trim();
+  return key ? msg.split(key).join('[redacted]') : msg;
 }
 
 /** Thrown before any request when images are sent to a model that cannot read them. */

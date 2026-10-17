@@ -1,9 +1,10 @@
 import type { GradingOptions } from '../services/exercises/grading';
 import { getProvider } from '../services/ai/providers';
+import { normalizeModelId } from '../services/ai/catalogue';
 
 /**
  * User settings: which provider and model write the answers, which provider
- * speaks them, one API key per provider (so the two can differ), and the
+ * reads page images, which provider speaks them, one shared key per provider, and the
  * practice preferences (how answers are compared and dictation is played).
  * Display names live in the locale files (providers.*, models.*, voices.*).
  */
@@ -11,6 +12,8 @@ import { getProvider } from '../services/ai/providers';
 export interface AppSettings {
   textProvider: string;
   textModel: string;
+  ocrProvider: string;
+  ocrModel: string;
   speechProvider: string;
   speechModel: string;
   speechVoice: string;
@@ -45,6 +48,8 @@ function defaults(): AppSettings {
   return {
     textProvider: DEFAULT_PROVIDER,
     textModel: text.defaultModel,
+    ocrProvider: DEFAULT_PROVIDER,
+    ocrModel: text.defaultModel,
     speechProvider: DEFAULT_PROVIDER,
     speechModel: speech.defaultModel,
     speechVoice: speech.defaultVoice,
@@ -55,20 +60,30 @@ function defaults(): AppSettings {
   };
 }
 
-/** Keeps a stored value usable: unknown providers, models or voices fall back to the provider's defaults. */
-function normalize(raw: Partial<AppSettings>): AppSettings {
+/** Validate browser storage, retaining custom IDs even when absent from a fetched or static catalogue. */
+function normalize(value: unknown): AppSettings {
+  const raw = value && typeof value === 'object' && !Array.isArray(value) ? (value as Partial<AppSettings>) : {};
   const base = defaults();
   const textProvider = getProvider(raw.textProvider ?? base.textProvider).info;
+  const ocrProvider = getProvider(raw.ocrProvider ?? base.ocrProvider).info;
   const speechProvider = getProvider(raw.speechProvider ?? base.speechProvider).info;
   const text = textProvider.text ?? textDefaults(DEFAULT_PROVIDER)!;
+  const ocr = ocrProvider.text ?? textDefaults(DEFAULT_PROVIDER)!;
   const speech = speechProvider.speech ?? speechDefaults(DEFAULT_PROVIDER)!;
+  const apiKeys = Object.fromEntries(
+    Object.entries(
+      raw.apiKeys && typeof raw.apiKeys === 'object' && !Array.isArray(raw.apiKeys) ? raw.apiKeys : {},
+    ).filter(([, key]) => typeof key === 'string'),
+  );
   return {
     textProvider: textProvider.id,
-    textModel: text.models.includes(raw.textModel ?? '') ? raw.textModel! : text.defaultModel,
+    textModel: normalizeModelId(raw.textModel) ?? text.defaultModel,
+    ocrProvider: ocrProvider.id,
+    ocrModel: normalizeModelId(raw.ocrModel) ?? ocr.defaultModel,
     speechProvider: speechProvider.id,
-    speechModel: speech.models.includes(raw.speechModel ?? '') ? raw.speechModel! : speech.defaultModel,
+    speechModel: normalizeModelId(raw.speechModel) ?? speech.defaultModel,
     speechVoice: speech.voices.some((v) => v.id === raw.speechVoice) ? raw.speechVoice! : speech.defaultVoice,
-    apiKeys: { ...(raw.apiKeys ?? {}) },
+    apiKeys,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),
     practiceDictationSpeed: speedOr(raw.practiceDictationSpeed),
     practiceSpeakAfterCheck: boolOr(raw.practiceSpeakAfterCheck, false),
@@ -98,6 +113,9 @@ export const getApiKey = (settings: AppSettings, providerId: string) => settings
 
 /** True when the provider that writes the answers has a key. */
 export const hasTextKey = (settings: AppSettings = getAppSettings()) => !!getApiKey(settings, settings.textProvider);
+
+/** OCR has its own selection, never inherited from Text AI. */
+export const hasOcrKey = (settings: AppSettings = getAppSettings()) => !!getApiKey(settings, settings.ocrProvider);
 
 /** True when the provider that speaks has a key (otherwise the browser's own voice is used). */
 export const hasSpeechKey = (settings: AppSettings = getAppSettings()) =>

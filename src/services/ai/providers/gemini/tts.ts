@@ -37,6 +37,7 @@ const DEFAULT_STYLE =
 
 export const geminiSpeech: SpeechProvider = {
   async synthesize(request, config: SpeechConfig): Promise<Blob> {
+    request.signal?.throwIfAborted();
     const ai = geminiClient(config.apiKey);
     let response;
     try {
@@ -46,13 +47,16 @@ export const geminiSpeech: SpeechProvider = {
           { role: 'user', parts: [{ text: request.text, speechMetadata: { style: request.style || DEFAULT_STYLE } }] },
         ],
         config: {
+          abortSignal: request.signal,
           responseModalities: ['AUDIO'],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: config.voice } } },
         },
       });
     } catch (err) {
-      throw new Error(errorMessage(err));
+      request.signal?.throwIfAborted();
+      throw new Error(errorMessage(err, config.apiKey));
     }
+    request.signal?.throwIfAborted();
     const inline = response.candidates?.[0]?.content?.parts?.[0]?.inlineData;
     if (!inline?.data) throw new Error(i18n.t('errors.noAudio'));
     if (inline.mimeType?.includes('wav')) return base64ToBlob(inline.data);

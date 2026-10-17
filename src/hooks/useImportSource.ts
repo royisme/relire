@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openMaterial, parsePageSelection, type ImportMaterial } from '../services/importMaterial';
 import { extractMaterial, MissingApiKeyError } from '../services/api';
-import { getTextProvider } from '../services/ai/providers';
-import { getAppSettings } from '../utils/appSettings';
+import { getAiAccess } from '../services/ai/access';
 import type { ImportDraft, ImportMode, ImportSource } from '../services/exercises/importDraft';
 
 export function useImportSource() {
@@ -17,12 +16,9 @@ export function useImportSource() {
   const [error, setError] = useState('');
   const [result, setResult] = useState<{ draft: ImportDraft; source: ImportSource; mode: ImportMode } | null>(null);
   // Consent pins the settings including the key in memory, even if another tab changes settings while pages render.
-  const [settings] = useState(getAppSettings);
-  const model = {
-    providerId: settings.textProvider,
-    model: settings.textModel,
-    readsImages: getTextProvider(settings.textProvider).supportsImageInput(settings.textModel),
-  };
+  const [access] = useState(() => getAiAccess());
+  const purpose = material ? 'ocr' : 'text';
+  const model = access.selection(purpose);
   const lifetime = useRef<AbortController | null>(null);
   const request = useRef<AbortController | null>(null);
   const active = useRef<ImportMaterial | null>(null);
@@ -86,7 +82,7 @@ export function useImportSource() {
       pageError = err instanceof Error ? err.message : String(err);
     }
   }
-  const unsupported = !!material && !model.readsImages;
+  const unsupported = !!material && model.capabilities.imageInput === 'unsupported';
   async function analyze() {
     if (phase !== 'idle' || unsupported || pageError || (!material && !text.trim()) || text.length > 40000) return;
     cancel();
@@ -101,7 +97,7 @@ export function useImportSource() {
     try {
       const images = material ? await material.render(selectedPages, controller.signal) : undefined;
       controller.signal.throwIfAborted();
-      const draft = await extractMaterial({ mode, text, images, signal: controller.signal }, settings);
+      const draft = await extractMaterial({ mode, text, images, signal: controller.signal }, access);
       if (version === revision.current && !controller.signal.aborted) setResult({ draft, source, mode });
     } catch (err) {
       if (version === revision.current && !controller.signal.aborted)
@@ -132,6 +128,7 @@ export function useImportSource() {
     cancel,
     dispose,
     model,
+    purpose,
     selectedPages,
     pageError,
     unsupported,

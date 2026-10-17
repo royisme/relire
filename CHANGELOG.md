@@ -42,6 +42,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- **Independent image-reading configuration.** Image/PDF extraction uses its own OCR selection, while pasted text uses Text AI; consent pins the selected recipient and key. Custom model IDs survive reload, and model discovery keeps unconfirmed image/speech capabilities distinct from known support. Speech previews check the current draft rather than reusing an old clip.
 - **Clearer study navigation and About.** About is now the last sidebar destination, outside Settings; old About links still work. Collapse or expand the sidebar with its own icon at the top. My study shows page links locally only on phones or with the icon rail, without repeating the expanded sidebar’s links.
 - **Sentence-first shadowing history.** Each full-width sentence now has its reference, recording playback, Compare and clearly named All recordings actions underneath, with the last recording’s date and duration kept as quiet metadata. Expanding the history uses the full width and keeps playback and deletion available even for a single take.
 - **Chinese copy for the new screens checked.** The mistake notebook, grammar progress and passage reading now use the app's existing Chinese terms (文章库 for the library, 加入生词本 for saving a word, 重置本组 for resetting a unit) instead of new synonyms.

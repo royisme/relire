@@ -30,12 +30,69 @@ export interface SpeechConfig extends TextConfig {
   voice: string;
 }
 
+/** Unknown is selectable with consent, not evidence of support or a reason to block a request. */
+export type Capability = 'supported' | 'unsupported' | 'unknown';
+export type AiPurpose = 'text' | 'ocr' | 'speech';
+export type TextPurpose = Exclude<AiPurpose, 'speech'>;
+
+export interface ModelCapabilities {
+  textGeneration: Capability;
+  imageInput: Capability;
+  speechOutput: Capability;
+}
+
+/** Discovery metadata is not a successful connection test. IDs are canonical (without `models/`). */
+export interface ModelInfo {
+  id: string;
+  displayName?: string;
+  description?: string;
+  inputTokenLimit?: number;
+  outputTokenLimit?: number;
+  supportedActions?: string[];
+  capabilities: ModelCapabilities;
+}
+
+export interface ModelCatalogue {
+  listModels(apiKey: string, signal?: AbortSignal): Promise<ModelInfo[]>;
+  capabilities(model: string): ModelCapabilities;
+}
+
+/** Bound execution: tasks receive capabilities and execution, never BYOK credentials. */
+export interface TextExecution {
+  readonly model: string;
+  readonly supportsAudioInput: boolean;
+  readonly imageInput: Capability;
+  generateJson<T>(request: JsonRequest): Promise<T>;
+}
+
+export interface AiSelection {
+  providerId: string;
+  model: string;
+  capabilities: ModelCapabilities;
+}
+
+export interface SpeechSelection extends AiSelection {
+  voice: string;
+}
+
+/** The replaceable access boundary. BYOK is its only implementation today. */
+export interface AiAccess {
+  /** Local readiness, not verification that a key or model will work. */
+  isConfigured(purpose: AiPurpose): boolean;
+  selection(purpose: 'speech'): SpeechSelection;
+  selection(purpose: AiPurpose): AiSelection;
+  text(purpose: TextPurpose): TextExecution;
+  synthesize(request: { text: string; style?: string; voice?: string; signal?: AbortSignal }): Promise<Blob>;
+  checkConnection(purpose: TextPurpose): Promise<void>;
+  listModels(purpose: AiPurpose, signal?: AbortSignal): Promise<ModelInfo[]>;
+}
+
 /** Writes structured answers: word and sentence analysis, drills, exercises, grading, pronunciation scoring. */
 export interface TextProvider {
   /** Without audio input the learner's recording is dropped and only the transcript is scored. */
   supportsAudioInput: boolean;
-  /** Whether the given model can read images; a request with images to any other model is refused. */
-  supportsImageInput(model: string): boolean;
+  /** Only confirmed incompatibility blocks a request; unknown models reach the provider. */
+  imageInputCapability(model: string): Capability;
   generateJson<T>(request: JsonRequest, config: TextConfig): Promise<T>;
   /** Makes one tiny request so a pasted key can be checked before it is saved. */
   checkKey(config: TextConfig): Promise<void>;
@@ -43,7 +100,7 @@ export interface TextProvider {
 
 /** Turns text into a playable clip (WAV). */
 export interface SpeechProvider {
-  synthesize(request: { text: string; style?: string }, config: SpeechConfig): Promise<Blob>;
+  synthesize(request: { text: string; style?: string; signal?: AbortSignal }, config: SpeechConfig): Promise<Blob>;
 }
 
 export interface VoiceInfo {
@@ -64,6 +121,8 @@ export interface ProviderInfo {
 /** A provider offers text, speech or both. */
 export interface Provider {
   info: ProviderInfo;
+  /** Absent means this provider does not offer model discovery. Never guess an endpoint. */
+  catalogue?: ModelCatalogue;
   text?: TextProvider;
   speech?: SpeechProvider;
 }
