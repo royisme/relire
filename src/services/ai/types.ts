@@ -13,7 +13,7 @@ export interface JsonRequest {
   jsonSchema?: Record<string, unknown>;
   /** A recording for providers that can listen to it. */
   audio?: { mimeType: string; base64: string };
-  /** Pictures for providers that can read them (see `TextProvider.supportsImageInput`). */
+  /** Pictures for providers that can read them (see `TextProvider.imageInputCapability`). */
   images?: ImageInput[];
   /** Cancels the request; a cancelled request throws an `AbortError` and is never retried. */
   signal?: AbortSignal;
@@ -113,7 +113,7 @@ export interface ProviderInfo {
   id: string;
   /** Where the user creates an API key. */
   keyUrl: string;
-  /** `imageModels` are the `models` that accept images, for the settings screen and import. */
+  /** `imageModels` are the static `models` known to accept images, a starting hint for Settings; discovery adds the rest. */
   text?: { models: string[]; defaultModel: string; imageModels?: string[] };
   speech?: { models: string[]; defaultModel: string; voices: VoiceInfo[]; defaultVoice: string };
 }

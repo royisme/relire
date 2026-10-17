@@ -1,4 +1,4 @@
-/** Form pieces shared by the Text AI and Speech sections: select styling, the key field and its status badge. */
+/** Form pieces shared by the AI services page: select styling, the key field and its status badge. */
 import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
