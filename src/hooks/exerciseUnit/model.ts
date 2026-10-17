@@ -9,7 +9,6 @@ import {
   type CheckedResult,
   type ExerciseAnswer,
   type ExerciseItemState,
-  type ExerciseType,
   type ExerciseUnit,
 } from '../../types/exercises';
 import { emptyAnswer, isAnswerFilled, restoreAnswer } from '../../services/exercises/answer';
@@ -72,27 +71,23 @@ export interface SheetProgress {
   total: number;
   checked: number;
   correct: number;
-  /** Items that can be checked now: answerable, filled in, not yet checked and not waiting. */
+  /** Items that can be checked now: filled in, not yet checked and not waiting. */
   pending: number;
 }
 
-/** True when `type` has a real control, so its items can be answered and checked. */
-export type AnswerableTypes = (type: ExerciseType) => boolean;
-
-export function checkable(unit: ExerciseUnit, itemId: string, items: ItemMap, canAnswer: AnswerableTypes): boolean {
+export function checkable(unit: ExerciseUnit, itemId: string, items: ItemMap): boolean {
   const item = unit.items.find((candidate) => candidate.id === itemId);
   const view = items[itemId];
   if (!item || !view || view.checked || view.busy === 'check') return false;
-  const type = effectiveItemType(item, unit);
-  return canAnswer(type) && isAnswerFilled(type, view.answer);
+  return isAnswerFilled(effectiveItemType(item, unit), view.answer);
 }
 
-export function sheetProgress(unit: ExerciseUnit, items: ItemMap, canAnswer: AnswerableTypes): SheetProgress {
+export function sheetProgress(unit: ExerciseUnit, items: ItemMap): SheetProgress {
   const views = unit.items.map((item) => items[item.id]).filter(Boolean);
   return {
     total: unit.items.length,
     checked: views.filter((view) => view.checked).length,
     correct: views.filter((view) => view.checked?.correct).length,
-    pending: unit.items.filter((item) => checkable(unit, item.id, items, canAnswer)).length,
+    pending: unit.items.filter((item) => checkable(unit, item.id, items)).length,
   };
 }

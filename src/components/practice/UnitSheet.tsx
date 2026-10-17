@@ -3,7 +3,9 @@
  * instruction, numbered hairline rows, and a footer with "Check all", the unit
  * reset and one status line. It draws the state of `useExerciseUnit` and keeps
  * only what is about this screen: the field the character bar types into, the
- * open explanation and the open reset confirmation.
+ * open explanation and the open reset confirmation. A READING_CLOZE unit's
+ * passage sits beside the questions from `md` (stacked above them on phones)
+ * and links to the material in the reader.
  */
 import { useState } from 'react';
 import { ArrowLeft, ListChecks, Loader2, RotateCcw } from 'lucide-react';
@@ -18,6 +20,33 @@ import { ExplanationSheet } from './ExplanationSheet';
 import { ItemRow } from './ItemRow';
 import { ResetDialog } from './ResetDialog';
 
+/** The unit's reading passage, and for a cloze unit the way back into the material. */
+function PassageSection({ unit, beside }: { unit: ExerciseUnit; beside: boolean }) {
+  const { t } = useTranslation();
+  const passage = unit.readingPassage!;
+  return (
+    <section
+      className={`space-y-2 whitespace-pre-wrap break-words px-4 py-5 sm:px-6 ${
+        beside ? 'border-b border-ink-200 md:border-b-0 md:border-r' : 'border-b border-ink-200'
+      }`}
+    >
+      {passage.title && <h3 className="font-serif text-lg font-semibold text-ink-900">{passage.title}</h3>}
+      <p lang="fr" className="font-serif text-lg leading-relaxed text-ink-900">
+        {passage.content}
+      </p>
+      {passage.translation && <p className="text-sm leading-relaxed text-ink-600">{passage.translation}</p>}
+      {beside && (
+        <Link
+          to={{ name: 'reader', articleId: unit.materialId }}
+          className="inline-flex h-10 items-center rounded-md text-sm font-medium text-accent-900 hover:underline underline-offset-4"
+        >
+          {t('practice.openInReader')}
+        </Link>
+      )}
+    </section>
+  );
+}
+
 export function UnitSheet({ unit, session }: { unit: ExerciseUnit; session: ExerciseUnitSession }) {
   const { t } = useTranslation();
   const [bound, setBound] = useState<TextInputElement | null>(null);
@@ -26,11 +55,31 @@ export function UnitSheet({ unit, session }: { unit: ExerciseUnit; session: Exer
   const { items, progress } = session;
   const explained = unit.items.find((item) => item.id === explainId);
   const anyChecking = unit.items.some((item) => items[item.id]?.busy === 'check');
+  // A cloze unit's questions are answered with the passage in sight, so from `md` it stays beside them.
+  const cloze = unit.type === 'READING_CLOZE' && unit.readingPassage;
 
   const explain = (itemId: string) => {
     setExplainId(itemId);
     void session.requestExplanation(itemId);
   };
+
+  const rows = (
+    <ol className="min-w-0 px-4 sm:px-6">
+      {unit.items.map((item) => (
+        <ItemRow
+          key={item.id}
+          unit={unit}
+          item={item}
+          runtime={items[item.id]}
+          onAnswer={(answer) => session.setAnswer(item.id, answer)}
+          onCheck={() => void session.check(item.id)}
+          onHint={() => void session.requestHint(item.id)}
+          onExplain={() => explain(item.id)}
+          onBind={setBound}
+        />
+      ))}
+    </ol>
+  );
 
   const reset = async () => {
     if (await session.reset()) {
@@ -64,35 +113,17 @@ export function UnitSheet({ unit, session }: { unit: ExerciseUnit; session: Exer
           )}
         </header>
 
-        {unit.readingPassage && (
-          <section className="space-y-2 whitespace-pre-wrap break-words border-b border-ink-200 px-4 py-5 sm:px-6">
-            {unit.readingPassage.title && (
-              <h3 className="font-serif text-lg font-semibold text-ink-900">{unit.readingPassage.title}</h3>
-            )}
-            <p lang="fr" className="font-serif text-lg leading-relaxed text-ink-900">
-              {unit.readingPassage.content}
-            </p>
-            {unit.readingPassage.translation && (
-              <p className="text-sm leading-relaxed text-ink-600">{unit.readingPassage.translation}</p>
-            )}
-          </section>
+        {cloze ? (
+          <div className="md:grid md:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
+            <PassageSection unit={unit} beside />
+            {rows}
+          </div>
+        ) : (
+          <>
+            {unit.readingPassage && <PassageSection unit={unit} beside={false} />}
+            {rows}
+          </>
         )}
-
-        <ol className="px-4 sm:px-6">
-          {unit.items.map((item) => (
-            <ItemRow
-              key={item.id}
-              unit={unit}
-              item={item}
-              runtime={items[item.id]}
-              onAnswer={(answer) => session.setAnswer(item.id, answer)}
-              onCheck={() => void session.check(item.id)}
-              onHint={() => void session.requestHint(item.id)}
-              onExplain={() => explain(item.id)}
-              onBind={setBound}
-            />
-          ))}
-        </ol>
 
         <footer className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-ink-200 px-4 py-3 sm:px-6">
           <Button onClick={() => void session.checkAll()} disabled={progress.pending === 0}>

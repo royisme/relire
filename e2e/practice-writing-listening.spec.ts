@@ -1,0 +1,229 @@
+/**
+ * The writing and listening controls: SENTENCE_BUILD (tiles; an arrangement
+ * that matches the reference is graded at once, any other goes to the AI
+ * grader), READING_CLOZE (the passage beside the questions on desktop, above
+ * them on phones, with a link into the reader) and NUMBER_DICTATION (Listen at
+ * the dictation speed, then type what was heard), plus the Settings → Practice
+ * section those preferences live in. Answered right and wrong from the
+ * catalogue fixtures, at 1280px and 360px.
+ */
+import type { Locator, Page } from '@playwright/test';
+import { expect, overflowing, test, type MockAi } from './fixtures';
+import { CATALOG_EXERCISES } from '../tests/fixtures/exerciseCatalog';
+import { checkButton, openUnit, row, seedUnits, stored } from './practice.helpers';
+
+const units = CATALOG_EXERCISES.units.filter((unit) =>
+  ['unit-sentence-build', 'unit-reading-cloze', 'unit-number-dictation', 'unit-word-transform'].includes(unit.id),
+);
+
+const struck = (field: Locator) => expect(field).toHaveCSS('text-decoration-line', 'line-through');
+const fits = (page: Page) => overflowing(page.locator('body')).then((out) => expect(out).toEqual([]));
+
+/** Every clip in the audio store, so a spoken number is seen to be synthesized once and kept. */
+type Db = typeof import('../src/storage/db');
+const audioClips = (page: Page) =>
+  page.evaluate(async () => {
+    const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+    return (await (await db()).getAll('audio')).length;
+  });
+
+test.beforeEach(async ({ page, ai }) => {
+  void ai; // onboards the app with a test key and answers every AI request from fixtures
+  await seedUnits(page, units);
+});
+
+async function sentenceBuild(page: Page, ai: MockAi, phone: boolean) {
+  await openUnit(page, 'unit-sentence-build', 'Reformuler une idée');
+  const one = row(page, 'Dites que le blé');
+  const sentence = one.getByRole('group', { name: 'Item 1, your sentence' });
+  const bank = one.getByRole('group', { name: 'Item 1, word tiles' });
+  await expect(checkButton(one)).toBeDisabled();
+  if (phone) {
+    const box = await bank.getByRole('button').first().boundingBox();
+    expect(box?.height).toBeGreaterThanOrEqual(40);
+  }
+
+  // Tiles in the reference order: a match is graded at once, with no AI call.
+  for (const word of ['Le', 'blé', 'pour', 'moi', 'est', 'inutile.'])
+    await bank.getByRole('button', { name: word, exact: true }).click();
+  await expect(sentence.getByRole('button')).toHaveCount(6);
+  await checkButton(one).click();
+  await expect(one.getByText('Correct', { exact: true })).toBeAttached();
+  expect(ai.calls.grade).toBe(0);
+  const { attempts } = await stored(page);
+  expect(attempts.find((a: { itemId: string }) => a.itemId === 'sb-1')).toMatchObject({
+    userAnswer: 'Le blé pour moi est inutile.',
+    correct: true,
+  });
+
+  // After a reset, the same words in another order go to the AI grader: words, never a score.
+  await page.getByRole('button', { name: 'Reset this unit' }).click();
+  await page.getByRole('button', { name: 'Reset', exact: true }).click();
+  for (const word of ['moi', 'Le', 'blé', 'pour', 'est', 'inutile.'])
+    await bank.getByRole('button', { name: word, exact: true }).click();
+  await checkButton(one).click();
+  await expect(one.getByText('Incorrect', { exact: true })).toBeAttached();
+  await expect(one.getByText('AI feedback.')).toBeVisible();
+  expect(ai.calls.grade).toBe(1);
+  await expect(one.getByText('Sample answer')).toBeVisible();
+  await expect(one.getByText('Le blé pour moi est inutile.').last()).toBeVisible();
+  await fits(page);
+}
+
+async function readingCloze(page: Page, phone: boolean) {
+  await openUnit(page, 'unit-reading-cloze', 'Compléter le passage');
+  const passage = page
+    .locator('section')
+    .filter({ has: page.getByRole('link', { name: 'Open in the reader' }) })
+    .last();
+  const questions = page.locator('main ol');
+  await expect(page.getByRole('heading', { name: 'Le renard et les poules' })).toBeVisible();
+  await expect(page.getByText('Ma vie est monotone. Je chasse les poules')).toBeVisible();
+
+  // The passage sits beside the questions on a desktop and above them on a phone.
+  const p = (await passage.boundingBox())!;
+  const q = (await questions.boundingBox())!;
+  if (phone) {
+    expect(p.y + p.height).toBeLessThanOrEqual(q.y + 1);
+  } else {
+    expect(p.x + p.width).toBeLessThanOrEqual(q.x + 1);
+    expect(p.y + p.height).toBeGreaterThan(q.y);
+  }
+
+  const one = row(page, 'Le renard dit');
+  await expect(checkButton(one)).toBeDisabled();
+  const [first, second] = [one.getByRole('textbox').nth(0), one.getByRole('textbox').nth(1)];
+  await first.fill('chasse');
+  await second.fill('chassent');
+  await checkButton(one).click();
+  await expect(one.getByText('Correct', { exact: true })).toBeAttached();
+
+  const two = row(page, 'donc un peu');
+  await two.getByRole('textbox').fill('ennuies');
+  await checkButton(two).click();
+  await expect(two.getByText('Incorrect', { exact: true })).toBeAttached();
+  await struck(two.getByRole('textbox'));
+  await expect(two.getByText('ennuie', { exact: true })).toBeVisible();
+  await fits(page);
+
+  // The passage leads back into the material it came from.
+  await page.getByRole('link', { name: 'Open in the reader' }).click();
+  await expect(page).toHaveURL(/#\/read\/petit-prince$/);
+  await expect(page.locator('article [data-sentence]').first()).toBeVisible();
+}
+
+async function numberDictation(page: Page, ai: MockAi, phone: boolean) {
+  await openUnit(page, 'unit-number-dictation', 'Les nombres');
+  const items = row(page, 'Écoutez et écrivez');
+  const one = items.first();
+  const two = items.nth(1);
+  await expect(checkButton(one)).toBeDisabled();
+  if (phone) {
+    const box = await one.getByRole('button', { name: 'Listen' }).boundingBox();
+    expect(box?.height).toBeGreaterThanOrEqual(40);
+  }
+
+  // Listen synthesizes the clip once and stores it; the answer is typed, not shown.
+  await one.getByRole('button', { name: 'Listen' }).click();
+  await expect.poll(() => ai.calls.tts).toBe(1);
+  await one.getByRole('textbox').fill('cent mille');
+  await checkButton(one).click();
+  await expect(one.getByText('Correct', { exact: true })).toBeAttached();
+
+  await two.getByRole('textbox').fill('dix-neuf');
+  await checkButton(two).click();
+  await expect(two.getByText('Incorrect', { exact: true })).toBeAttached();
+  await struck(two.getByRole('textbox'));
+  await expect(two.getByText('dix-huit', { exact: true })).toBeVisible();
+  await fits(page);
+  // Nothing was spoken for the second item: speaking after a check is off by default.
+  await expect.poll(() => audioClips(page)).toBe(1);
+  await page.waitForTimeout(400);
+  expect(ai.calls.tts).toBe(1);
+  expect(await audioClips(page)).toBe(1);
+  const { attempts } = await stored(page);
+  expect(attempts.find((a: { itemId: string }) => a.itemId === 'nd-2')).toMatchObject({
+    userAnswer: 'dix-neuf',
+    expectedAnswer: 'dix-huit',
+    correct: false,
+  });
+}
+
+for (const phone of [false, true]) {
+  const suffix = phone ? ' @phone' : '';
+
+  test(`sentence build: the reference arrangement is graded at once, another goes to the AI${suffix}`, async ({
+    page,
+    ai,
+  }) => {
+    await sentenceBuild(page, ai, phone);
+  });
+
+  test(`reading cloze: the passage stays in sight beside or above the questions${suffix}`, async ({ page }) => {
+    await readingCloze(page, phone);
+  });
+
+  test(`number dictation: listen at the dictation speed, then type what was heard${suffix}`, async ({ page, ai }) => {
+    await numberDictation(page, ai, phone);
+  });
+}
+
+test('Enter places and takes back a tile', async ({ page }) => {
+  await openUnit(page, 'unit-sentence-build', 'Reformuler une idée');
+  const one = row(page, 'Dites que le blé');
+  const sentence = one.getByRole('group', { name: 'Item 1, your sentence' });
+  const bank = one.getByRole('group', { name: 'Item 1, word tiles' });
+  await bank.getByRole('button', { name: 'Le', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(sentence).toContainText('Le');
+  await sentence.getByRole('button', { name: 'Remove Le' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(sentence).toContainText('Build the sentence with the tiles below.');
+});
+
+test('speak after checking replays the dictation when a check lands', async ({ page, ai }) => {
+  // Written straight into storage: opening the unit only changes the hash, so an init script would not run.
+  await page.evaluate(() => {
+    const raw: Record<string, unknown> = JSON.parse(localStorage.getItem('relire_app_settings_v1') || '{}');
+    raw.practiceSpeakAfterCheck = true;
+    localStorage.setItem('relire_app_settings_v1', JSON.stringify(raw));
+  });
+  await openUnit(page, 'unit-number-dictation', 'Les nombres');
+  const one = row(page, 'Écoutez et écrivez').first();
+  await one.getByRole('textbox').fill('cent mille');
+  await checkButton(one).click();
+  await expect(one.getByText('Correct', { exact: true })).toBeAttached();
+  await expect.poll(() => ai.calls.tts).toBe(1);
+});
+
+test('the Practice section saves its own slice and strict accents changes the verdict', async ({ page }) => {
+  await page.goto('/#/settings/practice');
+  await expect(page.getByRole('heading', { name: 'Practice' })).toBeVisible();
+  const save = page.getByRole('button', { name: 'Save', exact: true });
+  await expect(save).toBeDisabled();
+
+  await page.getByRole('checkbox', { name: 'Strict accents' }).check();
+  await expect(page.getByText('Unsaved changes')).toBeVisible();
+  await page.getByRole('button', { name: '1×' }).click();
+  await save.click();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  const settings = await page.evaluate(() => JSON.parse(localStorage.getItem('relire_app_settings_v1') || '{}'));
+  expect(settings.practiceStrictAccents).toBe(true);
+  expect(settings.practiceDictationSpeed).toBe(1);
+  expect(settings.practiceSpeakAfterCheck).toBe(false);
+  // The AI settings are another section's slice and stay as they were.
+  expect(settings.apiKeys.gemini).toBe('TEST');
+  expect(settings.textProvider).toBe('gemini');
+
+  await page.reload();
+  await expect(page.getByRole('checkbox', { name: 'Strict accents' })).toBeChecked();
+  await expect(page.getByRole('button', { name: '1×' })).toHaveAttribute('aria-pressed', 'true');
+
+  // With strict accents on, a missing accent is now wrong (the default accepts it).
+  await openUnit(page, 'unit-word-transform', 'Le féminin des adjectifs');
+  const one = row(page, 'intrigué');
+  await one.getByRole('textbox').fill('intrigué');
+  await checkButton(one).click();
+  await expect(one.getByText('Incorrect', { exact: true })).toBeAttached();
+  await expect(one.getByText('intriguée', { exact: true })).toBeVisible();
+});

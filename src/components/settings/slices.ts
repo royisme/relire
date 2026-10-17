@@ -6,12 +6,19 @@
 import i18n from '../../i18n';
 import { getAppSettings, saveAppSettings, type AppSettings } from '../../utils/appSettings';
 
-export type SettingsSlice = 'text' | 'speech';
+export type SettingsSlice = 'text' | 'speech' | 'practice';
 
 /** The fields a section shows, as a comparable string. */
 export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
   if (slice === 'text') {
     return JSON.stringify([settings.textProvider, settings.textModel, settings.apiKeys[settings.textProvider] ?? '']);
+  }
+  if (slice === 'practice') {
+    return JSON.stringify([
+      settings.practiceStrictAccents,
+      settings.practiceDictationSpeed,
+      settings.practiceSpeakAfterCheck,
+    ]);
   }
   const keyed = settings.speechProvider !== settings.textProvider;
   return JSON.stringify([
@@ -30,6 +37,14 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
       textProvider: from.textProvider,
       textModel: from.textModel,
       apiKeys: { ...base.apiKeys, [from.textProvider]: from.apiKeys[from.textProvider] ?? '' },
+    };
+  }
+  if (slice === 'practice') {
+    return {
+      ...base,
+      practiceStrictAccents: from.practiceStrictAccents,
+      practiceDictationSpeed: from.practiceDictationSpeed,
+      practiceSpeakAfterCheck: from.practiceSpeakAfterCheck,
     };
   }
   const keyed = from.speechProvider !== from.textProvider;

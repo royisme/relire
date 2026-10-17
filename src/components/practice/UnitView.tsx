@@ -5,17 +5,13 @@
  */
 import { useTranslation } from 'react-i18next';
 import { useExerciseUnit } from '../../hooks/useExerciseUnit';
-import type { ExerciseType } from '../../types/exercises';
 import { Button } from '../ui/button';
 import { NotFoundView } from '../shell/NotFoundView';
-import { isPlaceholder } from './controls';
 import { UnitSheet } from './UnitSheet';
-
-const canAnswer = (type: ExerciseType) => !isPlaceholder(type);
 
 export function UnitView({ unitId, onMissingKey }: { unitId: string; onMissingKey: () => void }) {
   const { t } = useTranslation();
-  const session = useExerciseUnit(unitId, { canAnswer, onMissingKey });
+  const session = useExerciseUnit(unitId, { onMissingKey });
 
   if (session.status === 'missing') return <NotFoundView reason="unit" />;
   if (session.status === 'error')

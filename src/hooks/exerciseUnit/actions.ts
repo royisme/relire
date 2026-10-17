@@ -9,8 +9,9 @@
 import { fetchExplanation, fetchHint, gradeOpenAnswer, MissingApiKeyError } from '../../services/api';
 import { checkItem, saveItemProgress, StaleResetError, type ItemProgress } from '../../storage/exercises';
 import { expectedAnswerText, recordedAnswerText } from '../../services/exercises/answer';
-import { DEFAULT_GRADING, gradeUnitItem } from '../../services/exercises/grading';
+import { gradeUnitItem } from '../../services/exercises/grading';
 import { errorMessage } from '../../services/ai/errors';
+import { practiceGrading } from '../../utils/appSettings';
 import { effectiveItemType, type CheckedResult, type ExerciseItem, type ExerciseUnit } from '../../types/exercises';
 import { aiErrorText } from '../../utils/aiErrorText';
 import type { ItemRuntime } from './model';
@@ -66,7 +67,7 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
   const answer = view.answer;
   ctx.patch(itemId, { busy: 'check', error: null });
   try {
-    const graded = gradeUnitItem(ctx.unit, item, answer, DEFAULT_GRADING);
+    const graded = gradeUnitItem(ctx.unit, item, answer, practiceGrading());
     let result: CheckedResult;
     if (graded.status === 'graded') {
       result = { correct: graded.correct };

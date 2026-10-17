@@ -16,6 +16,7 @@ import { PageHeader } from '../ui/page-header';
 import { AboutSection } from './AboutSection';
 import { DataSection } from './DataSection';
 import type { KeyRequest } from './keyRequest';
+import { PracticeSection } from './PracticeSection';
 import { PromptsSection } from './PromptsSection';
 import { SectionList } from './SectionList';
 import { withSlice, type SettingsSlice } from './slices';
@@ -90,6 +91,14 @@ export function SettingsPage({ section, sectionsInSidebar, keyRequest, onSetting
           )}
           {active === 'speech' && (
             <SpeechSection draft={draft} saved={saved} onChange={setDraft} onSaved={(next) => commit(next, 'speech')} />
+          )}
+          {active === 'practice' && (
+            <PracticeSection
+              draft={draft}
+              saved={saved}
+              onChange={setDraft}
+              onSaved={(next) => commit(next, 'practice')}
+            />
           )}
           {active === 'prompts' && (
             <PromptsSection

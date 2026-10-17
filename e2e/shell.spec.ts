@@ -55,6 +55,8 @@ test.describe('sidebar', () => {
     await nav.getByRole('link', { name: 'Settings', exact: true }).click();
     for (const name of ['Text AI', 'Speech', 'Prompts', 'Data and backup', 'About'])
       await expect(nav.getByRole('link', { name })).toBeVisible();
+    // "Practice" names both the area and its settings section; the section has its own address.
+    await expect(nav.locator('a[href="#/settings/practice"]')).toBeVisible();
   });
 
   test('the reader starts with the sidebar collapsed, and opening it there is not remembered', async ({ page }) => {
@@ -277,6 +279,7 @@ test.describe('layout', () => {
     '#/progress',
     '#/settings/text-ai',
     '#/settings/speech',
+    '#/settings/practice',
     '#/settings/prompts',
     '#/settings/data',
     '#/settings/about',

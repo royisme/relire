@@ -205,7 +205,6 @@
     "moveLineDown": "Move {{line}} down",
     "openNote": "An AI reads your answer and writes feedback. It is an estimate, not a score.",
     "sampleAnswer": "Sample answer",
-    "comingSoon": "{{type}} exercises are coming. This item cannot be answered yet.",
     "example": "Example",
     "note": "Note",
     "rule": "Rule",
@@ -222,7 +221,13 @@
       "shift": "Shift",
       "hint": "Press a character to put it at the cursor.",
       "none": "Click in an answer first."
-    }
+    },
+    "listen": "Listen",
+    "openInReader": "Open in the reader",
+    "sentenceLabel": "Item {{number}}, your sentence",
+    "tilesLabel": "Item {{number}}, word tiles",
+    "sentenceEmpty": "Build the sentence with the tiles below.",
+    "removeWord": "Remove {{word}}"
   },
   "analytics": {
     "title": "Progress",
@@ -310,6 +315,10 @@
         "title": "Speech",
         "desc": "Reads French aloud. It can be a different provider from the text AI."
       },
+      "practice": {
+        "title": "Practice",
+        "desc": "How exercises are checked and how dictation is played."
+      },
       "prompts": {
         "title": "Prompts",
         "desc": "Edit how the AI writes its answers."
@@ -328,7 +337,13 @@
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
       "scope": "Relire is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
       "source": "Source code on GitHub"
-    }
+    },
+    "strictAccents": "Strict accents",
+    "strictAccentsNote": "On, an answer is only correct with the right accents. Off, an answer without accents still counts.",
+    "dictationSpeed": "Dictation speed",
+    "dictationSpeedNote": "How fast a dictation item is read when you press Listen.",
+    "speakAfterCheck": "Speak after checking",
+    "speakAfterCheckNote": "After a dictation item is checked, its number is spoken again."
   },
   "importer": {
     "articleTitle": "Title",

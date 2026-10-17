@@ -9,10 +9,10 @@ import { useCallback, useRef, type FocusEvent, type KeyboardEvent } from 'react'
 import { Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { isAnswerFilled } from '../../services/exercises/answer';
-import { DEFAULT_GRADING } from '../../services/exercises/grading';
 import { effectiveItemType, type ExerciseAnswer, type ExerciseItem, type ExerciseUnit } from '../../types/exercises';
+import { practiceGrading } from '../../utils/appSettings';
 import type { ItemRuntime } from '../../hooks/useExerciseUnit';
-import { CONTROLS, isPlaceholder } from './controls';
+import { CONTROLS } from './controls';
 import type { TextInputElement } from './controls/types';
 import { ItemActions } from './ItemActions';
 import { ItemNotes } from './ItemNotes';
@@ -33,7 +33,6 @@ export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExpl
   const { t } = useTranslation();
   const type = effectiveItemType(item, unit);
   const Control = CONTROLS[type];
-  const answerable = !isPlaceholder(type);
   const { checked, busy } = runtime;
   const locked = Boolean(checked) || busy === 'check';
 
@@ -89,19 +88,17 @@ export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExpl
             onChange={onAnswer}
             checked={checked}
             disabled={locked}
-            grading={DEFAULT_GRADING}
+            grading={practiceGrading()}
             registerInput={registerInput}
           />
         </div>
-        {answerable && (
-          <ItemActions
-            runtime={runtime}
-            canCheck={isAnswerFilled(type, runtime.answer)}
-            onCheck={onCheck}
-            onHint={onHint}
-            onExplain={onExplain}
-          />
-        )}
+        <ItemActions
+          runtime={runtime}
+          canCheck={isAnswerFilled(type, runtime.answer)}
+          onCheck={onCheck}
+          onHint={onHint}
+          onExplain={onExplain}
+        />
         <ItemNotes item={item} runtime={runtime} />
       </div>
     </li>

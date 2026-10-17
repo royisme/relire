@@ -1,6 +1,7 @@
 /**
  * The unit sheet: FILL_BLANKS, CHOICE_SELECT and WORD_TRANSFORM answered right and wrong, what a
- * wrong answer looks like, batch checking, and a type whose control is not built yet.
+ * wrong answer looks like, and batch checking. The remaining types are covered by
+ * practice-choice-order.spec.ts and practice-writing-listening.spec.ts.
  */
 import { expect, test } from './fixtures';
 import { checkButton, openUnit, row, seedUnits, stored } from './practice.helpers';
@@ -154,37 +155,4 @@ test.describe('transform the word', () => {
     await struck(two.getByRole('textbox'));
     await expect(two.getByText('dorée', { exact: true })).toBeVisible();
   });
-});
-
-test('a type whose control is not built yet is shown but cannot be answered', async ({ page }) => {
-  await page.evaluate(async () => {
-    const storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
-    await storage.saveUnits('petit-prince', [
-      {
-        id: 'soon',
-        section: 'COMPRENDRE',
-        unitNumber: 9,
-        title: 'Bientôt',
-        instruction: 'Write the number you hear.',
-        type: 'NUMBER_DICTATION',
-        grammarTags: ['numbers-time'],
-        items: [
-          {
-            id: 'n1',
-            itemNumber: 1,
-            prompt: 'Écoutez et écrivez le nombre.',
-            expectedAnswer: 'cent mille',
-            grammarTag: 'numbers-time',
-          },
-        ],
-      },
-    ]);
-  });
-  await openUnit(page, 'soon', 'Bientôt');
-  const item = row(page, 'Écoutez et écrivez le nombre.');
-  await expect(
-    item.getByText('Number dictation exercises are coming. This item cannot be answered yet.'),
-  ).toBeVisible();
-  await expect(item.getByRole('button')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Check all' })).toBeDisabled();
 });

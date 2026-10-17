@@ -10,10 +10,10 @@
  *   #/practice/:unitId       one exercise unit on one sheet
  *   #/progress               progress
  *   #/settings               section list on phones; desktop resolves it to the first section
- *   #/settings/:section      text-ai | speech | prompts | data | about
+ *   #/settings/:section      text-ai | speech | practice | prompts | data | about
  */
 
-export const SETTINGS_SECTIONS = ['text-ai', 'speech', 'prompts', 'data', 'about'] as const;
+export const SETTINGS_SECTIONS = ['text-ai', 'speech', 'practice', 'prompts', 'data', 'about'] as const;
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
 export const STUDY_TABS = ['words', 'shadowing'] as const;

@@ -202,7 +202,6 @@
     "moveLineDown": "把 {{line}} 下移",
     "openNote": "AI 会阅读你的回答并写出反馈。这是估计，不是分数。",
     "sampleAnswer": "参考答案",
-    "comingSoon": "“{{type}}”题型即将推出，这道题暂时不能作答。",
     "example": "例",
     "note": "说明",
     "rule": "规则",
@@ -219,7 +218,13 @@
       "shift": "大写",
       "hint": "点字符即可插入到光标处。",
       "none": "请先点一下要填写的答案。"
-    }
+    },
+    "listen": "播放",
+    "openInReader": "在阅读页打开",
+    "sentenceLabel": "第 {{number}} 题，你拼的句子",
+    "tilesLabel": "第 {{number}} 题，词语卡片",
+    "sentenceEmpty": "用下面的词语卡片拼出句子。",
+    "removeWord": "移除 {{word}}"
   },
   "analytics": {
     "title": "进度",
@@ -306,6 +311,10 @@
         "title": "朗读",
         "desc": "负责朗读法语，可以和文字 AI 选不同的提供方。"
       },
+      "practice": {
+        "title": "练习",
+        "desc": "练习答案的判定方式，以及听写的播放。"
+      },
       "prompts": {
         "title": "提示词",
         "desc": "修改 AI 写回答的方式。"
@@ -324,7 +333,13 @@
       "privacy": "没有账号，也没有应用服务器。文章、生词和录音都保存在这个浏览器里。使用 AI 功能时，文本或录音会用你自己的 Key 从这个浏览器直接发给你选择的提供方。",
       "scope": "Relire 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
       "source": "在 GitHub 查看源代码"
-    }
+    },
+    "strictAccents": "严格重音符号",
+    "strictAccentsNote": "开启后，重音符号写错即判错；关闭时，不带重音符号的答案也算对。",
+    "dictationSpeed": "听写播放速度",
+    "dictationSpeedNote": "点“播放”时，听写内容朗读的速度。",
+    "speakAfterCheck": "检查后再播放",
+    "speakAfterCheckNote": "听写题检查后，再播放一遍它的数字。"
   },
   "importer": {
     "articleTitle": "标题",

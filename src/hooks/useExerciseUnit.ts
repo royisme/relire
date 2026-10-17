@@ -15,7 +15,6 @@ import {
   emptyItems,
   restoreItems,
   sheetProgress,
-  type AnswerableTypes,
   type ItemMap,
   type ItemRuntime,
   type SheetProgress,
@@ -55,13 +54,11 @@ export interface ExerciseUnitSession {
 }
 
 interface Options {
-  /** Whether items of this type have a control; the others are shown but cannot be checked. */
-  canAnswer: AnswerableTypes;
   /** The AI call needs a key: take the learner to Settings. */
   onMissingKey: () => void;
 }
 
-export function useExerciseUnit(unitId: string, { canAnswer, onMissingKey }: Options): ExerciseUnitSession {
+export function useExerciseUnit(unitId: string, { onMissingKey }: Options): ExerciseUnitSession {
   const [load, setLoad] = useState<Load>({ status: 'loading' });
   const [items, setItems] = useState<ItemMap>({});
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -210,7 +207,7 @@ export function useExerciseUnit(unitId: string, { canAnswer, onMissingKey }: Opt
   const checkAll = async () => {
     const unit = unitRef.current;
     if (!unit) return;
-    const ids = unit.items.map((item) => item.id).filter((id) => checkable(unit, id, itemsRef.current, canAnswer));
+    const ids = unit.items.map((item) => item.id).filter((id) => checkable(unit, id, itemsRef.current));
     await Promise.all(ids.map(check));
   };
 
@@ -243,7 +240,7 @@ export function useExerciseUnit(unitId: string, { canAnswer, onMissingKey }: Opt
     loadError: load.status === 'error' ? load.message : null,
     unit,
     items,
-    progress: unit ? sheetProgress(unit, items, canAnswer) : { total: 0, checked: 0, correct: 0, pending: 0 },
+    progress: unit ? sheetProgress(unit, items) : { total: 0, checked: 0, correct: 0, pending: 0 },
     saveError,
     setAnswer,
     check,
