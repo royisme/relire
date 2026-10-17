@@ -13,42 +13,42 @@ test.beforeEach(async ({ page, ai }) => {
 
 test.describe('Enter', () => {
   test('moves to the next blank, then to an empty one, then checks', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
-    const two = row(page, 'invisible');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    const two = row(page, "Si tu m'");
     const [first, second] = [two.getByRole('textbox').nth(0), two.getByRole('textbox').nth(1)];
 
-    await first.fill('est');
+    await first.fill('apprivoises');
     await first.press('Enter');
     await expect(second).toBeFocused();
 
     // On the last blank with an earlier one still empty, Enter goes back to the empty one.
     await second.press('Enter');
     await expect(second).toBeFocused();
-    await second.fill('pour');
+    await second.fill('aurons');
     await first.fill('');
     await second.press('Enter');
     await expect(first).toBeFocused();
     expect((await stored(page)).attempts).toHaveLength(0);
 
-    await first.fill('est');
+    await first.fill('apprivoises');
     await second.press('Enter');
     await expect(two.getByText('Correct', { exact: true })).toBeAttached();
     expect((await stored(page)).attempts).toHaveLength(1);
   });
 
   test('a single blank is checked by Enter', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const item = row(page, 'Je ne');
-    await item.getByRole('textbox').fill('suis');
+    await item.getByRole('textbox').fill('mange');
     await item.getByRole('textbox').press('Enter');
     await expect(item.getByText('Correct', { exact: true })).toBeAttached();
   });
 
   test('Enter during an IME composition only commits the text', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const item = row(page, 'Je ne');
     const field = item.getByRole('textbox');
-    await field.fill('suis');
+    await field.fill('mange');
     await field.focus();
     // A composing Enter: the standard flag, and the legacy key code some browsers send instead.
     await field.dispatchEvent('keydown', { key: 'Enter', isComposing: true });
@@ -62,14 +62,14 @@ test.describe('Enter', () => {
   });
 
   test('in an open answer, Enter checks and Shift+Enter starts a new line', async ({ page }) => {
-    await openUnit(page, 'u4', 'Questions ouvertes');
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
     const area = page.getByRole('textbox');
-    await area.fill('Il veut créer des liens avec le petit prince.');
+    await area.fill("On ne voit bien qu'avec le cœur.");
     await area.press('Shift+Enter');
-    await expect(area).toHaveValue('Il veut créer des liens avec le petit prince.\n');
+    await expect(area).toHaveValue("On ne voit bien qu'avec le cœur.\n");
     await area.press('Backspace');
     await area.press('Enter');
-    await expect(row(page, 'Que veut le renard').getByText('Correct', { exact: true })).toBeAttached();
+    await expect(row(page, 'Quel est le secret').getByText('Correct', { exact: true })).toBeAttached();
   });
 });
 
@@ -78,7 +78,7 @@ test.describe('French characters', () => {
   const grid = (page: import('@playwright/test').Page) => page.getByRole('group', { name: 'French characters' });
 
   test('inserts at the cursor, keeps focus in the input and opens only by its toggle', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const field = row(page, 'Je ne').getByRole('textbox');
     await expect(grid(page)).toHaveCount(0);
 
@@ -107,7 +107,7 @@ test.describe('French characters', () => {
   });
 
   test('capitals come from Shift, once', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const field = row(page, 'Je ne').getByRole('textbox');
     await field.click();
     await toggle(page).click();
@@ -122,8 +122,8 @@ test.describe('French characters', () => {
   });
 
   test('follows the field the cursor is in, and the answer it writes is saved', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
-    const [a, b] = [row(page, 'Je ne').getByRole('textbox'), row(page, 'On ne').getByRole('textbox')];
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    const [a, b] = [row(page, 'Je ne').getByRole('textbox'), row(page, "Si tu m'").getByRole('textbox').nth(0)];
     await toggle(page).click();
     await expect(grid(page).getByText('Click in an answer first.')).toBeVisible();
     await a.click();
@@ -134,25 +134,29 @@ test.describe('French characters', () => {
     await expect(b).toHaveValue('â');
     await expect
       .poll(async () =>
-        (await stored(page)).itemStates.map((s: { answer: { singleAnswer: string } }) => s.answer.singleAnswer).sort(),
+        (await stored(page)).itemStates
+          .map((s: { answer: { singleAnswer: string; multiAnswers: string[] } }) =>
+            (s.answer.singleAnswer || s.answer.multiAnswers.join('')).trim(),
+          )
+          .sort(),
       )
       .toEqual(['â', 'ç']);
   });
 
   test('does not type into a checked answer', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const item = row(page, 'Je ne');
-    await item.getByRole('textbox').fill('suis');
+    await item.getByRole('textbox').fill('mange');
     await checkButton(item).click();
     await item.getByRole('textbox').focus();
     await toggle(page).click();
     await expect(grid(page).getByRole('button', { name: 'é', exact: true })).toBeDisabled();
-    await expect(item.getByRole('textbox')).toHaveValue('suis');
+    await expect(item.getByRole('textbox')).toHaveValue('mange');
   });
 
   test('opening it and inserting do not move the page', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
-    const field = row(page, 'On ne').getByRole('textbox');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    const field = row(page, "Si tu m'").getByRole('textbox').nth(0);
     await field.scrollIntoViewIfNeeded();
     await field.click();
     const scrollBefore = await page.evaluate(() => scrollY);

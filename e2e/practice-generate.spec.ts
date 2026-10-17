@@ -1,14 +1,16 @@
 /**
- * Practice page: making exercises from an article (the AI is mocked), the units it lists with real
- * progress, the reader's entry point, the sidebar list, a missing unit and a missing key.
+ * Practice page: making exercises from an article (the AI is mocked with the shared
+ * catalogue), the units it lists with real progress, the reader's entry point, the sidebar
+ * list, a missing unit and a missing key.
  */
 import { expect, openArticle, test } from './fixtures';
-import { sampleExercises } from './practiceFixtures';
+import { CATALOG_EXERCISES } from '../tests/fixtures/exerciseCatalog';
 import { PRACTICE, openUnit, seedUnits, stored, waitForArticle } from './practice.helpers';
 
 type Db = typeof import('../src/storage/db');
 
-// `ai` onboards the app with a test key and answers every AI request from fixtures.
+// `ai` onboards the app with a test key and answers the exercises task with CATALOG_EXERCISES,
+// which the catalogue wrote against the sample article (CATALOG_ARTICLE, "petit-prince").
 test.beforeEach(async ({ ai }) => {
   ai.ttsDelayMs = 50;
 });
@@ -16,6 +18,7 @@ test.beforeEach(async ({ ai }) => {
 const main = (page: import('@playwright/test').Page) => page.getByRole('main');
 const make = (page: import('@playwright/test').Page) =>
   page.getByRole('button', { name: 'Make exercises from this article' });
+const catalogueIds = CATALOG_EXERCISES.units.map((unit) => unit.id);
 
 test('makes exercises from the article, saves them with fresh ids and lists them', async ({ page, ai }) => {
   await page.goto(PRACTICE);
@@ -24,45 +27,48 @@ test('makes exercises from the article, saves them with fresh ids and lists them
   await expect(page.getByText('No exercises from this article yet.')).toBeVisible();
 
   await make(page).click();
-  await expect(main(page).getByRole('link', { name: /Les mots du renard/ })).toBeVisible();
-  await expect(page.getByText('Made 8 items. They are in the list below.')).toBeVisible();
+  await expect(main(page).getByRole('link', { name: /Le féminin des adjectifs/ })).toBeVisible();
+  await expect(page.getByText('Made 15 items. They are in the list below.')).toBeVisible();
   await expect(page.getByText('could not be checked')).toHaveCount(0);
 
-  // The article's own words and the chosen level and count reach the prompt.
+  // The article's own words and the chosen level and count reach the prompt; the mock answers
+  // with the catalogue's 15 items whatever count was asked for (the form's default is 8).
   expect(ai.prompts.exercises).toHaveLength(1);
   expect(ai.prompts.exercises[0]).toContain('Tu seras pour moi unique au monde');
   expect(ai.prompts.exercises[0]).toContain('CEFR level B1');
   expect(ai.prompts.exercises[0]).toContain('Write 8 exercise items');
 
   const { units } = await stored(page);
-  expect(units).toHaveLength(4);
+  expect(units).toHaveLength(11);
   for (const unit of units) {
     expect(unit.materialId).toBe('petit-prince');
-    expect(['u1', 'u2', 'u3', 'u4']).not.toContain(unit.id);
+    expect(catalogueIds).not.toContain(unit.id);
     expect(unit.items.every((item: { answerSource?: string }) => item.answerSource === 'ai')).toBe(true);
     expect(JSON.stringify(unit)).not.toContain('articleQuote');
   }
-  expect(units.map((unit: { unitNumber: number }) => unit.unitNumber).sort((a, b) => a - b)).toEqual([1, 2, 3, 4]);
+  expect(units.map((unit: { unitNumber: number }) => unit.unitNumber).sort((a, b) => a - b)).toEqual(
+    Array.from({ length: 11 }, (_, index) => index + 1),
+  );
 
   // Progress is counted from stored states: nothing is checked yet.
-  const first = main(page).getByRole('link', { name: /Les mots du renard/ });
-  await expect(first).toContainText('Fill in the blanks');
-  await expect(first).toContainText('3 items');
+  const first = main(page).getByRole('link', { name: /Le féminin des adjectifs/ });
+  await expect(first).toContainText('Transform the word');
+  await expect(first).toContainText('1 item');
   await expect(first).toContainText('Not started');
 
   // A second set continues the numbering instead of colliding with the first.
   await make(page).click();
-  await expect(main(page).getByRole('link', { name: /Les mots du renard/ })).toHaveCount(2);
+  await expect(main(page).getByRole('link', { name: /Le féminin des adjectifs/ })).toHaveCount(2);
   expect(
     (await stored(page)).units.map((unit: { unitNumber: number }) => unit.unitNumber).sort((a, b) => a - b),
-  ).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+  ).toEqual(Array.from({ length: 22 }, (_, index) => index + 1));
 });
 
 test('the button shows the work and keeps its size', async ({ page, ai }) => {
   ai.answer({
     exercises: async () => {
       await new Promise((resolve) => setTimeout(resolve, 600));
-      return sampleExercises;
+      return CATALOG_EXERCISES;
     },
   });
   await page.goto(PRACTICE);
@@ -74,36 +80,47 @@ test('the button shows the work and keeps its size', async ({ page, ai }) => {
   await expect(button).toHaveAttribute('aria-busy', 'true');
   await expect(page.getByText('Making exercises from the article…')).toBeVisible();
   expect(await button.boundingBox()).toEqual(before);
-  await expect(main(page).getByRole('link', { name: /Les mots du renard/ })).toBeVisible();
+  await expect(main(page).getByRole('link', { name: /Le féminin des adjectifs/ })).toBeVisible();
   await expect(button).toBeEnabled();
   expect(await button.boundingBox()).toEqual(before);
 });
 
 test('items whose quote is not in the article are left out and counted; the rest is kept', async ({ page, ai }) => {
-  const [u1, u2, u3, u4] = sampleExercises.units;
-  const first = { ...u1.items[0], articleQuote: 'Je ne suis pas un renard du tout' };
-  const lost = { ...u4.items[0], articleQuote: 'Le renard parle du chapeau' };
-  ai.answer({
-    exercises: { units: [{ ...u1, items: [first, ...u1.items.slice(1)] }, u2, u3, { ...u4, items: [lost] }] },
+  const units = CATALOG_EXERCISES.units.map((unit) => {
+    if (unit.id === 'unit-fill-blanks')
+      return {
+        ...unit,
+        items: unit.items.map((item) =>
+          item.id === 'fb-1' ? { ...item, articleQuote: 'Je ne mange pas de chapeau' } : item,
+        ),
+      };
+    if (unit.id === 'unit-open-qa')
+      return { ...unit, items: unit.items.map((item) => ({ ...item, articleQuote: 'Le renard parle du chapeau' })) };
+    return unit;
   });
+  ai.answer({ exercises: { units } });
   await page.goto(PRACTICE);
   await waitForArticle(page);
   await make(page).click();
 
   await expect(page.getByText('2 items could not be checked against the article and were left out.')).toBeVisible();
-  await expect(page.getByText('Made 6 items.')).toBeVisible();
+  await expect(page.getByText('Made 13 items.')).toBeVisible();
   // The unit left with no items is gone; the one that lost an item shows what stayed.
-  await expect(main(page).getByRole('link', { name: /Questions ouvertes/ })).toHaveCount(0);
-  await expect(main(page).getByRole('link', { name: /Les mots du renard/ })).toContainText('2 items');
-  const { units } = await stored(page);
-  expect(units).toHaveLength(3);
-  const kept = units.find((unit: { title: string }) => unit.title === 'Les mots du renard');
-  expect(kept?.items.map((item: { itemNumber: number | string }) => item.itemNumber)).toEqual([1, 2]);
+  await expect(main(page).getByRole('link', { name: /Questions sur le texte/ })).toHaveCount(0);
+  await expect(main(page).getByRole('link', { name: /Conjuguer au présent/ })).toContainText('1 item');
+  const { units: saved } = await stored(page);
+  expect(saved).toHaveLength(10);
+  const kept = saved.find((unit: { title: string }) => unit.title === 'Conjuguer au présent et au futur');
+  expect(kept?.items.map((item: { itemNumber: number | string }) => item.itemNumber)).toEqual([1]);
 });
 
 test('when no item can be checked against the article it fails and saves nothing', async ({ page, ai }) => {
-  const [u1] = sampleExercises.units;
-  ai.answer({ exercises: { units: [{ ...u1, items: u1.items.map((i) => ({ ...i, articleQuote: 'Un chapeau' })) }] } });
+  const fillUnit = CATALOG_EXERCISES.units.find((unit) => unit.id === 'unit-fill-blanks')!;
+  ai.answer({
+    exercises: {
+      units: [{ ...fillUnit, items: fillUnit.items.map((item) => ({ ...item, articleQuote: 'Un chapeau' })) }],
+    },
+  });
   await page.goto(PRACTICE);
   await waitForArticle(page);
   await make(page).click();
@@ -174,18 +191,30 @@ test('the sidebar lists the units of the open article and marks the open one', a
   await page.goto(PRACTICE);
   const nav = page.locator('[data-sidebar]');
   await expect(nav.getByRole('link', { name: 'Practice', exact: true })).toHaveAttribute('aria-current', 'page');
-  for (const title of ['Les mots du renard', 'Choisir la bonne forme', 'Accorder le mot', 'Questions ouvertes'])
+  for (const title of [
+    'Le féminin des adjectifs',
+    'Conjuguer au présent et au futur',
+    'Le genre des noms',
+    'Le vocabulaire du texte',
+    'Associer la question et la réponse',
+    'Remettre le dialogue dans l’ordre',
+    'Les pronoms personnels',
+    'Reformuler une idée',
+    'Compléter le passage',
+    'Les nombres',
+    'Questions sur le texte',
+  ])
     await expect(nav.getByRole('link', { name: title })).toBeVisible();
 
-  await nav.getByRole('link', { name: 'Accorder le mot' }).click();
-  await expect(page).toHaveURL(/#\/practice\/u3$/);
-  await expect(page.getByRole('heading', { name: 'Accorder le mot' })).toBeVisible();
+  await nav.getByRole('link', { name: 'Le genre des noms' }).click();
+  await expect(page).toHaveURL(/#\/practice\/unit-gender-check$/);
+  await expect(page.getByRole('heading', { name: 'Le genre des noms' })).toBeVisible();
   await expect(nav).toHaveAttribute('data-sidebar', 'rail');
   await page.getByRole('button', { name: 'Expand sidebar' }).click();
   await expect(nav).toHaveAttribute('data-sidebar', 'expanded');
   expect(await page.evaluate(() => localStorage.getItem('relire_sidebar'))).toBeNull();
-  await expect(nav.getByRole('link', { name: 'Accorder le mot' })).toHaveAttribute('aria-current', 'page');
-  await expect(nav.getByRole('link', { name: 'Les mots du renard' })).toBeVisible();
+  await expect(nav.getByRole('link', { name: 'Le genre des noms' })).toHaveAttribute('aria-current', 'page');
+  await expect(nav.getByRole('link', { name: 'Le féminin des adjectifs' })).toBeVisible();
 
   // Progress shows on the list from stored states.
   await page.getByRole('link', { name: 'Practice', exact: true }).first().click();
@@ -194,14 +223,16 @@ test('the sidebar lists the units of the open article and marks the open one', a
 
 test('progress on the list comes from the checked items', async ({ page }) => {
   await seedUnits(page);
-  await openUnit(page, 'u3', 'Accorder le mot');
-  const item = page.getByRole('listitem').filter({ hasText: 'ensoleillée' });
-  await item.getByRole('textbox').fill('ensoleillé');
+  await openUnit(page, 'unit-word-transform', 'Le féminin des adjectifs');
+  const item = page.getByRole('listitem').filter({ hasText: 'intrigué' });
+  await item.getByRole('textbox').fill('intriguée');
   await item.getByRole('button', { name: 'Check', exact: true }).click();
   await expect(item.getByText('Correct')).toBeAttached();
   await page.goto(PRACTICE);
-  await expect(main(page).getByRole('link', { name: /Accorder le mot/ })).toContainText('1 of 2 checked, 1 right');
-  await expect(main(page).getByRole('link', { name: /Les mots du renard/ })).toContainText('Not started');
+  await expect(main(page).getByRole('link', { name: /Le féminin des adjectifs/ })).toContainText(
+    '1 of 1 checked, 1 right',
+  );
+  await expect(main(page).getByRole('link', { name: /Conjuguer au présent/ })).toContainText('Not started');
 });
 
 test('the open oral assessment stays on the practice page as its own section', async ({ page }) => {
@@ -219,13 +250,13 @@ test('a deep-linked unit keeps its article in the sidebar Practice link', async 
     const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     const d = await db();
     const article = (await d.getAll('articles')).find((a) => a.id !== 'petit-prince')!;
-    const unit = (await d.get('units', 'u4'))!;
+    const unit = (await d.get('units', 'unit-open-qa'))!;
     await d.put('units', { ...unit, materialId: article.id });
     return article.id as string;
   });
-  await openUnit(page, 'u4', 'Questions ouvertes');
+  await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Questions ouvertes' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Questions sur le texte' })).toBeVisible();
   const link = page.locator('[data-sidebar]').getByRole('link', { name: 'Practice', exact: true });
   await expect(link).toHaveAttribute('href', `#/practice?article=${materialId}`);
   await link.click();
@@ -233,7 +264,7 @@ test('a deep-linked unit keeps its article in the sidebar Practice link', async 
 });
 
 test('generation refuses to attach exercises when the source article changed', async ({ page, ai }) => {
-  const pending = Promise.withResolvers<typeof sampleExercises>();
+  const pending = Promise.withResolvers<typeof CATALOG_EXERCISES>();
   ai.answer({ exercises: () => pending.promise });
   await page.goto(PRACTICE);
   await waitForArticle(page);
@@ -246,7 +277,7 @@ test('generation refuses to attach exercises when the source article changed', a
     const article = (await d.get('articles', 'petit-prince'))!;
     await d.put('articles', { ...article, content: 'Un autre texte.' });
   });
-  pending.resolve(sampleExercises);
+  pending.resolve(CATALOG_EXERCISES);
   await expect(page.getByRole('alert')).toHaveText(
     'The article changed while exercises were being made. Make a new set from the updated text.',
   );

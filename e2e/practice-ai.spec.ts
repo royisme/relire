@@ -1,10 +1,11 @@
 /**
- * The AI parts of a unit (all mocked): open answers get words, never a score; hints and
- * explanations with their flags; failures shown with the real reason; unit reset keeps the history;
- * answers survive a reload; late results after a reset or after leaving are dropped.
+ * The AI parts of a unit (all mocked from the shared catalogue): open answers get words,
+ * never a score; hints and explanations with their flags; failures shown with the real
+ * reason; unit reset keeps the history; answers survive a reload; late results after a
+ * reset or after leaving are dropped.
  */
 import { expect, test } from './fixtures';
-import { sampleGrade } from './practiceFixtures';
+import { CATALOG_OPEN_GRADE } from '../tests/fixtures/exerciseCatalog';
 import { PRACTICE, checkButton, openUnit, row, seedUnits, stored } from './practice.helpers';
 
 test.beforeEach(async ({ page, ai }) => {
@@ -12,55 +13,59 @@ test.beforeEach(async ({ page, ai }) => {
   await seedUnits(page);
 });
 
-const QUESTION = 'Que veut le renard';
-const SAMPLE = 'Il veut créer des liens avec le petit prince.';
+const QUESTION = 'Quel est le secret du renard';
+const SAMPLE = "On ne voit bien qu'avec le cœur.";
+// A wording no reference answer lists, so the AI grader decides it.
+const PARAPHRASE = 'Le cœur seul permet de bien voir.';
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 test.describe('open answers', () => {
   test('an answer that matches nothing gets AI feedback in words, with no score', async ({ page, ai }) => {
-    await openUnit(page, 'u4', 'Questions ouvertes');
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
     const item = row(page, QUESTION);
     await expect(
       item.getByText('An AI reads your answer and writes feedback. It is an estimate, not a score.'),
     ).toBeVisible();
-    await item.getByRole('textbox').fill('Il veut un ami.');
+    await item.getByRole('textbox').fill(PARAPHRASE);
     await checkButton(item).click();
 
     await expect(item.getByText('AI feedback.')).toBeVisible();
-    await expect(item.getByText('The idea is right, but the answer is not a full sentence with')).toBeVisible();
-    await expect(item.locator('strong', { hasText: 'il veut' })).toBeVisible();
+    await expect(item.getByText("Accepted. The answer gives the fox's secret")).toBeVisible();
     await expect(item.getByText('A better version:')).toBeVisible();
     await expect(item.getByText(SAMPLE, { exact: true }).first()).toBeVisible();
-    await expect(item.getByText('Incorrect', { exact: true })).toBeAttached();
-    await expect(item.getByText('Sample answer')).toBeVisible();
+    // The catalogue's grade accepts the paraphrase, so the sample answer is not shown beside it.
+    await expect(item.getByText('Sample answer')).toHaveCount(0);
+    await expect(item.getByText('Correct', { exact: true })).toBeAttached();
     await expect(item).not.toContainText(/\d+\s*(\/|%|points)/);
 
     expect(ai.calls.grade).toBe(1);
-    expect(ai.prompts.grade[0]).toContain('Il veut un ami.');
+    expect(ai.prompts.grade[0]).toContain(PARAPHRASE);
     expect(ai.prompts.grade[0]).toContain(SAMPLE);
     const { itemStates, attempts } = await stored(page);
     expect(itemStates[0].checked).toEqual({
-      correct: false,
-      aiFeedback: { feedback: sampleGrade.feedback, correctedVersion: sampleGrade.correctedVersion },
+      correct: true,
+      aiFeedback: { feedback: CATALOG_OPEN_GRADE.feedback, correctedVersion: CATALOG_OPEN_GRADE.correctedVersion },
     });
     expect(attempts).toHaveLength(1);
-    expect(attempts[0]).toMatchObject({ correct: false, userAnswer: 'Il veut un ami.', expectedAnswer: SAMPLE });
+    expect(attempts[0]).toMatchObject({ correct: true, userAnswer: PARAPHRASE, expectedAnswer: SAMPLE });
   });
 
-  test('the AI can accept another wording', async ({ page, ai }) => {
-    ai.answer({ grade: { isCorrect: true, feedback: 'Another good way to say it.' } });
-    await openUnit(page, 'u4', 'Questions ouvertes');
+  test('a rejected answer is struck through with the sample answer beside it', async ({ page, ai }) => {
+    ai.answer({ grade: { isCorrect: false, feedback: 'The idea is there, but this is not a French sentence.' } });
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
     const item = row(page, QUESTION);
-    await item.getByRole('textbox').fill("Il veut qu'on l'apprivoise.");
+    await item.getByRole('textbox').fill(PARAPHRASE);
     await checkButton(item).click();
-    await expect(item.getByText('Correct', { exact: true })).toBeAttached();
-    await expect(item.getByText('Another good way to say it.')).toBeVisible();
+    await expect(item.getByText('Incorrect', { exact: true })).toBeAttached();
+    await expect(item.getByText('The idea is there, but this is not a French sentence.')).toBeVisible();
+    await expect(item.getByText('Sample answer')).toBeVisible();
     await expect(item.getByText('A better version:')).toHaveCount(0);
-    expect((await stored(page)).attempts[0].correct).toBe(true);
+    await expect(item.getByRole('textbox')).toHaveCSS('text-decoration-line', 'line-through');
+    expect((await stored(page)).attempts[0].correct).toBe(false);
   });
 
   test('the sample answer needs no AI', async ({ page, ai }) => {
-    await openUnit(page, 'u4', 'Questions ouvertes');
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
     const item = row(page, QUESTION);
     await item.getByRole('textbox').fill(SAMPLE);
     await checkButton(item).click();
@@ -71,9 +76,9 @@ test.describe('open answers', () => {
 
   test('a failed grade shows the reason, records nothing and can be tried again', async ({ page, ai }) => {
     ai.fail(['grade']);
-    await openUnit(page, 'u4', 'Questions ouvertes');
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
     const item = row(page, QUESTION);
-    await item.getByRole('textbox').fill('Il veut un ami.');
+    await item.getByRole('textbox').fill(PARAPHRASE);
     await checkButton(item).click();
     await expect(item.getByRole('alert')).toContainText('grade failed');
     await expect(item.getByText('Incorrect', { exact: true })).toHaveCount(0);
@@ -89,9 +94,9 @@ test.describe('open answers', () => {
 
   test('an answer the app cannot use is reported through a translated sentence', async ({ page, ai }) => {
     ai.answer({ grade: { isCorrect: 'maybe', feedback: '' } });
-    await openUnit(page, 'u4', 'Questions ouvertes');
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
     const item = row(page, QUESTION);
-    await item.getByRole('textbox').fill('Il veut un ami.');
+    await item.getByRole('textbox').fill(PARAPHRASE);
     await checkButton(item).click();
     await expect(item.getByRole('alert')).toContainText('The AI answer could not be used: ');
     await expect(item.getByRole('alert')).toContainText('isCorrect');
@@ -104,22 +109,26 @@ test.describe('hints and explanations', () => {
     ai.answer({
       hint: async () => {
         await sleep(500);
-        return { hint: 'Look at the **subject**.', grammarRule: '`je` + `suis`', clueWord: 's' };
+        return {
+          hint: "Look at the subject 'je' and the ending a regular -er verb takes with it.",
+          grammarRule: "Regular -er verbs such as manger take -e with 'je' in the present tense.",
+          clueWord: 'Je',
+        };
       },
     });
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const item = row(page, 'Je ne');
     const hint = item.getByRole('button', { name: 'Hint' });
     const before = await hint.boundingBox();
-    await item.getByRole('textbox').fill('es');
+    await item.getByRole('textbox').fill('mangez');
     await hint.click();
     await expect(hint).toBeDisabled();
     expect(await hint.boundingBox()).toEqual(before);
-    await expect(item.getByText('Look at the')).toBeVisible();
-    await expect(item.locator('strong', { hasText: 'subject' })).toBeVisible();
-    await expect(item.getByText('Rule:')).toContainText('je + suis');
+    await expect(item.getByText("Look at the subject 'je'")).toBeVisible();
+    await expect(item.getByText('Rule:')).toContainText('Regular -er verbs such as manger');
+    await expect(item.getByText('Clue:')).toContainText('Je');
     await expect(hint).toBeEnabled();
-    expect(ai.prompts.hint[0]).toContain('Learner\'s current input: "es"');
+    expect(ai.prompts.hint[0]).toContain('Learner\'s current input: "mangez"');
     expect(ai.prompts.hint[0]).toContain('Grammar topic: present');
 
     await expect
@@ -128,17 +137,17 @@ test.describe('hints and explanations', () => {
 
     // After a reload only the flag is stored; asking again is answered from the saved hint.
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Les mots du renard' })).toBeVisible();
-    await expect(row(page, 'Je ne').getByText('Look at the')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Conjuguer au présent et au futur' })).toBeVisible();
+    await expect(row(page, 'Je ne').getByText("Look at the subject 'je'")).toHaveCount(0);
     expect((await stored(page)).itemStates[0].hintShown).toBe(true);
     await row(page, 'Je ne').getByRole('button', { name: 'Hint' }).click();
-    await expect(row(page, 'Je ne').getByText('Look at the')).toBeVisible();
+    await expect(row(page, 'Je ne').getByText("Look at the subject 'je'")).toBeVisible();
   });
 
   test('Hint is for before the check', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const item = row(page, 'Je ne');
-    await item.getByRole('textbox').fill('suis');
+    await item.getByRole('textbox').fill('mange');
     await checkButton(item).click();
     await expect(item.getByRole('button', { name: 'Hint' })).toBeDisabled();
     // A right answer has nothing to explain.
@@ -147,7 +156,7 @@ test.describe('hints and explanations', () => {
 
   test('a failed hint shows the real reason under the item', async ({ page, ai }) => {
     ai.fail(['hint']);
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const item = row(page, 'Je ne');
     await item.getByRole('button', { name: 'Hint' }).click();
     await expect(item.getByRole('alert')).toContainText('hint failed');
@@ -159,28 +168,27 @@ test.describe('hints and explanations', () => {
 
   test('a hint the app cannot use is reported through a translated sentence', async ({ page, ai }) => {
     ai.answer({ hint: { hint: '', grammarRule: 'x' } });
-    await openUnit(page, 'u1', 'Les mots du renard');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const item = row(page, 'Je ne');
     await item.getByRole('button', { name: 'Hint' }).click();
     await expect(item.getByRole('alert')).toContainText('The AI answer could not be used: ');
   });
 
   test('Explain opens a sheet for a wrong answer and saves the flag', async ({ page, ai }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
-    const item = row(page, 'On ne');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    const item = row(page, 'Je ne');
     await expect(item.getByRole('button', { name: 'Explain' })).toBeDisabled();
-    await item.getByRole('textbox').fill('voie');
+    await item.getByRole('textbox').fill('mangez');
     await checkButton(item).click();
     await item.getByRole('button', { name: 'Explain' }).click();
 
     const sheet = page.getByRole('dialog', { name: 'Explanation' });
-    await expect(sheet.getByText('The verb')).toBeVisible();
-    await expect(sheet.locator('strong', { hasText: 'être' })).toBeVisible();
-    await expect(sheet.getByText('Check the subject first, then pick the form.')).toBeVisible();
-    await expect(sheet.getByText('je suis, tu es, il est')).toBeVisible();
-    await expect(sheet.getByText('voie')).toBeVisible();
-    await expect(sheet.getByText('voit', { exact: true })).toBeVisible();
-    expect(ai.prompts.explain[0]).toContain('Expected answer: "voit"');
+    await expect(sheet.getByText("With 'je', an -er verb ends in -e, not -ez.")).toBeVisible();
+    await expect(sheet.getByText('Manger is a regular -er verb.')).toBeVisible();
+    await expect(sheet.getByText('Check the subject first, then choose the ending.')).toBeVisible();
+    await expect(sheet.getByText('mangez')).toBeVisible();
+    await expect(sheet.getByText('mange', { exact: true })).toBeVisible();
+    expect(ai.prompts.explain[0]).toContain('Expected answer: "mange"');
     await expect
       .poll(async () => (await stored(page)).itemStates.map((s: { explanationShown: boolean }) => s.explanationShown))
       .toEqual([true]);
@@ -189,80 +197,88 @@ test.describe('hints and explanations', () => {
     await expect(sheet).toHaveCount(0);
     // The sheet reopens from the stored text without asking again.
     await item.getByRole('button', { name: 'Explain' }).click();
-    await expect(sheet.getByText('je suis, tu es, il est')).toBeVisible();
+    await expect(sheet.getByText('Check the subject first, then choose the ending.')).toBeVisible();
     expect(ai.calls.explain).toBe(1);
   });
 
   test('a failed explanation shows the reason in the sheet with a way to ask again', async ({ page, ai }) => {
     ai.fail(['explain']);
-    await openUnit(page, 'u1', 'Les mots du renard');
-    const item = row(page, 'On ne');
-    await item.getByRole('textbox').fill('voie');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    const item = row(page, 'Je ne');
+    await item.getByRole('textbox').fill('mangez');
     await checkButton(item).click();
     await item.getByRole('button', { name: 'Explain' }).click();
     const sheet = page.getByRole('dialog', { name: 'Explanation' });
     await expect(sheet.getByRole('alert')).toContainText('explain failed');
     ai.fail([]);
     await sheet.getByRole('button', { name: 'Retry' }).click();
-    await expect(sheet.getByText('je suis, tu es, il est')).toBeVisible();
+    await expect(sheet.getByText('Check the subject first, then choose the ending.')).toBeVisible();
     await expect(sheet.getByRole('alert')).toHaveCount(0);
   });
 });
 
 test.describe('history', () => {
   test('resetting a unit clears the sheet, asks first and keeps every attempt', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
-    await row(page, 'Je ne').getByRole('textbox').fill('suis');
-    await row(page, 'On ne').getByRole('textbox').fill('voie');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    await row(page, 'Je ne').getByRole('textbox').fill('mange');
+    const wrong = row(page, "Si tu m'");
+    await wrong.getByRole('textbox').nth(0).fill('apprivoise');
+    await wrong.getByRole('textbox').nth(1).fill('aurons');
     await page.getByRole('button', { name: 'Check all' }).click();
-    await expect(page.getByText('2 of 3 checked, 1 right')).toBeVisible();
+    await expect(page.getByText('2 of 2 checked, 1 right')).toBeVisible();
     expect((await stored(page)).attempts).toHaveLength(2);
 
     await page.getByRole('button', { name: 'Reset this unit' }).click();
     const dialog = page.getByRole('dialog', { name: 'Reset this unit?' });
     await expect(dialog.getByText('Your history of attempts is kept.')).toBeVisible();
     await dialog.getByRole('button', { name: 'Cancel' }).click();
-    await expect(page.getByText('2 of 3 checked, 1 right')).toBeVisible();
+    await expect(page.getByText('2 of 2 checked, 1 right')).toBeVisible();
 
     await page.getByRole('button', { name: 'Reset this unit' }).click();
     await page.getByRole('dialog').getByRole('button', { name: 'Reset', exact: true }).click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    await expect(page.getByText('0 of 3 checked, 0 right')).toBeVisible();
-    for (const text of ['Je ne', 'On ne']) {
-      await expect(row(page, text).getByRole('textbox')).toHaveValue('');
-      await expect(row(page, text).getByRole('textbox')).toBeEditable();
+    await expect(page.getByText('0 of 2 checked, 0 right')).toBeVisible();
+    await expect(row(page, 'Je ne').getByRole('textbox')).toHaveValue('');
+    await expect(row(page, 'Je ne').getByRole('textbox')).toBeEditable();
+    for (const blank of [0, 1]) {
+      await expect(row(page, "Si tu m'").getByRole('textbox').nth(blank)).toHaveValue('');
+      await expect(row(page, "Si tu m'").getByRole('textbox').nth(blank)).toBeEditable();
     }
     const after = await stored(page);
     expect(after.itemStates).toEqual([]);
     expect(after.attempts).toHaveLength(2);
 
     // The unit can be done again, and the new attempt joins the old ones.
-    await row(page, 'Je ne').getByRole('textbox').fill('suis');
+    await row(page, 'Je ne').getByRole('textbox').fill('mange');
     await checkButton(row(page, 'Je ne')).click();
     await expect(row(page, 'Je ne').getByText('Correct', { exact: true })).toBeAttached();
     expect((await stored(page)).attempts).toHaveLength(3);
   });
 
   test('a draft and a checked answer are still there after a reload', async ({ page }) => {
-    await openUnit(page, 'u1', 'Les mots du renard');
-    await row(page, 'On ne').getByRole('textbox').fill('voi');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    await row(page, "Si tu m'").getByRole('textbox').nth(0).fill('apprivois');
     const done = row(page, 'Je ne');
-    await done.getByRole('textbox').fill('suis');
+    await done.getByRole('textbox').fill('mange');
     await checkButton(done).click();
     await expect(done.getByText('Correct', { exact: true })).toBeAttached();
     await expect
       .poll(async () =>
-        (await stored(page)).itemStates.map((s: { answer: { singleAnswer: string } }) => s.answer.singleAnswer).sort(),
+        (await stored(page)).itemStates
+          .map((s: { answer: { singleAnswer: string; multiAnswers: string[] } }) =>
+            (s.answer.singleAnswer || s.answer.multiAnswers.join('')).trim(),
+          )
+          .sort(),
       )
-      .toEqual(['suis', 'voi']);
+      .toEqual(['apprivois', 'mange']);
 
     await page.reload();
-    await expect(page.getByRole('heading', { name: 'Les mots du renard' })).toBeVisible();
-    await expect(row(page, 'On ne').getByRole('textbox')).toHaveValue('voi');
-    await expect(row(page, 'On ne').getByRole('textbox')).toBeEditable();
-    await expect(row(page, 'Je ne').getByRole('textbox')).toHaveValue('suis');
+    await expect(page.getByRole('heading', { name: 'Conjuguer au présent et au futur' })).toBeVisible();
+    await expect(row(page, "Si tu m'").getByRole('textbox').nth(0)).toHaveValue('apprivois');
+    await expect(row(page, "Si tu m'").getByRole('textbox').nth(0)).toBeEditable();
+    await expect(row(page, 'Je ne').getByRole('textbox')).toHaveValue('mange');
     await expect(row(page, 'Je ne').getByText('Correct', { exact: true })).toBeAttached();
-    await expect(page.getByText('1 of 3 checked, 1 right')).toBeVisible();
+    await expect(page.getByText('1 of 2 checked, 1 right')).toBeVisible();
     // Typing stops being saved once the item is checked.
     expect((await stored(page)).attempts).toHaveLength(1);
   });
@@ -271,12 +287,12 @@ test.describe('history', () => {
     ai.answer({
       grade: async () => {
         await sleep(1200);
-        return sampleGrade;
+        return CATALOG_OPEN_GRADE;
       },
     });
-    await openUnit(page, 'u4', 'Questions ouvertes');
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
     const item = row(page, QUESTION);
-    await item.getByRole('textbox').fill('Il veut un ami.');
+    await item.getByRole('textbox').fill(PARAPHRASE);
     await checkButton(item).click();
     await expect.poll(() => ai.calls.grade).toBe(1);
     await page.getByRole('button', { name: 'Reset this unit' }).click();
@@ -298,12 +314,12 @@ test.describe('history', () => {
     ai.answer({
       grade: async () => {
         await sleep(1000);
-        return sampleGrade;
+        return CATALOG_OPEN_GRADE;
       },
     });
-    await openUnit(page, 'u4', 'Questions ouvertes');
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
     const item = row(page, QUESTION);
-    await item.getByRole('textbox').fill('Il veut un ami.');
+    await item.getByRole('textbox').fill(PARAPHRASE);
     await checkButton(item).click();
     await expect.poll(() => ai.calls.grade).toBe(1);
     await page.goto(PRACTICE);
@@ -314,8 +330,8 @@ test.describe('history', () => {
     expect((await stored(page)).attempts).toEqual([]);
     expect(errors).toEqual([]);
     // What was typed is kept as a draft for next time.
-    await openUnit(page, 'u4', 'Questions ouvertes');
-    await expect(row(page, QUESTION).getByRole('textbox')).toHaveValue('Il veut un ami.');
+    await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
+    await expect(row(page, QUESTION).getByRole('textbox')).toHaveValue(PARAPHRASE);
     await expect(row(page, QUESTION).getByText('AI feedback.')).toHaveCount(0);
   });
 });

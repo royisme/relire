@@ -5,8 +5,8 @@
  */
 import type { Page } from '@playwright/test';
 import { expect, layout, overflowing, settled, test } from './fixtures';
+import { CATALOG_EXERCISES } from '../tests/fixtures/exerciseCatalog';
 import { PRACTICE, checkButton, openUnit, row, seedUnits, stored } from './practice.helpers';
-import { sampleExercises } from './practiceFixtures';
 
 test.beforeEach(async ({ ai }) => {
   ai.ttsDelayMs = 50;
@@ -16,7 +16,7 @@ const LONG = 'Supercalifragilisticexpialidocieuxcaractéristiquement';
 const longUnit = {
   id: 'long',
   section: 'GRAMMAIRE',
-  unitNumber: 9,
+  unitNumber: 12,
   title: `Un titre de série très long pour vérifier que tout passe à la ligne ${LONG}`,
   instruction: `Complétez chaque phrase avec le mot qui convient, puis vérifiez. ${LONG}`,
   readingPassage: {
@@ -57,30 +57,27 @@ const theme = (page: Page, value: string) => page.addInitScript((t) => localStor
 
 test('checking does not move the header, the title or the button that was pressed', async ({ page }) => {
   await seedUnits(page);
-  await openUnit(page, 'u1', 'Les mots du renard');
+  await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
   await settled(page);
-  const title = page.getByRole('heading', { name: 'Les mots du renard' });
-  const second = row(page, 'invisible');
-  const third = row(page, 'On ne');
-  const pressed = checkButton(second);
-  await second.getByRole('textbox').nth(0).fill('est');
-  await second.getByRole('textbox').nth(1).fill('par');
+  const title = page.getByRole('heading', { name: 'Conjuguer au présent et au futur' });
+  const pressedRow = row(page, 'Je ne');
+  const below = row(page, "Si tu m'");
+  const pressed = checkButton(pressedRow);
+  await pressedRow.getByRole('textbox').fill('mangez');
 
   const before = {
     page: await layout(page, 'main'),
     title: await title.boundingBox(),
-    first: await row(page, 'Je ne').boundingBox(),
     pressed: await pressed.boundingBox(),
-    below: await third.boundingBox(),
+    below: await below.boundingBox(),
   };
   await pressed.click();
-  await expect(second.getByText('Incorrect', { exact: true })).toBeAttached();
+  await expect(pressedRow.getByText('Incorrect', { exact: true })).toBeAttached();
   await settled(page);
   expect(await title.boundingBox()).toEqual(before.title);
-  expect(await row(page, 'Je ne').boundingBox()).toEqual(before.first);
-  expect((await second.getByRole('button', { name: 'Checked' }).boundingBox())!.y).toBe(before.pressed!.y);
-  // With room beside the blank for the right answer, the rows below stay where they were.
-  expect(await third.boundingBox()).toEqual(before.below);
+  expect((await pressedRow.getByRole('button', { name: 'Checked' }).boundingBox())!.y).toBe(before.pressed!.y);
+  // With room beside the blank for the right answer, the row below stays where it was.
+  expect(await below.boundingBox()).toEqual(before.below);
   expect((await layout(page, 'main')).top).toBe(before.page.top);
   expect((await layout(page, 'main')).height).toBe(before.page.height);
 });
@@ -93,9 +90,9 @@ test('working on an item changes its buttons, not their place', async ({ page, a
     },
   });
   await seedUnits(page);
-  await openUnit(page, 'u4', 'Questions ouvertes');
-  const item = row(page, 'Que veut le renard');
-  await item.getByRole('textbox').fill('Il veut un ami.');
+  await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
+  const item = row(page, 'Quel est le secret');
+  await item.getByRole('textbox').fill('Le cœur seul permet de bien voir.');
   const buttons = item.getByRole('button');
   const boxes = async () => Promise.all([0, 1, 2].map((i) => buttons.nth(i).boundingBox()));
   const before = await boxes();
@@ -110,8 +107,8 @@ for (const phone of [false, true]) {
   const suffix = phone ? ' @phone' : '';
   const size = phone ? '360' : '1280';
 
-  test(`the practice page and a unit sheet fit the screen, with long content${suffix}`, async ({ page }) => {
-    await seedUnits(page, [...sampleExercises.units, longUnit]);
+  test(`the practice page and a unit sheet fit the screen, with long content${suffix}`, async ({ page, ai }) => {
+    await seedUnits(page, [...CATALOG_EXERCISES.units, longUnit]);
     await page.goto(PRACTICE);
     await expect(page.getByRole('main').getByRole('link', { name: /Un titre de série très long/ })).toBeVisible();
     await settled(page);
@@ -144,9 +141,17 @@ for (const phone of [false, true]) {
     expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize()!.width);
     await page.getByRole('button', { name: 'French characters' }).click();
 
+    // The long unit is not in the catalogue, so the spec supplies the explanation it shows.
+    ai.answer({
+      explain: {
+        summary: `The missing word is **${LONG}**, not what was typed.`,
+        details: `The sentence needs \`${LONG}${LONG}\` after the relative clause.\nCheck what the subject is, then choose the ending.`,
+        tip: `Read the sentence aloud with ${LONG} in the blank.`,
+      },
+    });
     await first.getByRole('button', { name: 'Explain' }).click();
     const sheet = page.getByRole('dialog', { name: 'Explanation' });
-    await expect(sheet.getByText('je suis, tu es, il est')).toBeVisible();
+    await expect(sheet.getByText('Check what the subject is, then choose the ending.')).toBeVisible();
     expect(await overflowing(sheet)).toEqual([]);
     await page.keyboard.press('Escape');
 
@@ -156,25 +161,26 @@ for (const phone of [false, true]) {
 
   test(`looks: the practice page and a unit sheet in light, sepia and dark at ${size}px${suffix}`, async ({ page }) => {
     await seedUnits(page);
-    await openUnit(page, 'u1', 'Les mots du renard');
-    await row(page, 'Je ne').getByRole('textbox').fill('suis');
-    await row(page, 'On ne').getByRole('textbox').fill('voie');
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    const wrong = row(page, "Si tu m'");
+    await wrong.getByRole('textbox').nth(0).fill('apprivoise');
+    await wrong.getByRole('textbox').nth(1).fill('auron');
     await page.getByRole('button', { name: 'Check all' }).click();
-    await expect(page.getByText('2 of 3 checked, 1 right')).toBeVisible();
-    await row(page, 'invisible').getByRole('button', { name: 'Hint' }).click();
-    await expect(row(page, 'invisible').getByText('Rule:')).toBeVisible();
+    await expect(page.getByText('1 of 2 checked, 0 right')).toBeVisible();
+    await row(page, 'Je ne').getByRole('button', { name: 'Hint' }).click();
+    await expect(row(page, 'Je ne').getByText('Rule:')).toBeVisible();
     await page.goto(PRACTICE);
-    await expect(page.getByRole('main').getByRole('link', { name: /Les mots du renard/ })).toContainText(
-      '2 of 3 checked',
+    await expect(page.getByRole('main').getByRole('link', { name: /Conjuguer au présent/ })).toContainText(
+      '1 of 2 checked',
     );
 
     for (const mode of ['light', 'sepia', 'dark']) {
       await page.evaluate((m) => localStorage.setItem('relire_theme', m), mode);
       await page.reload();
-      await expect(page.getByRole('main').getByRole('link', { name: /Les mots du renard/ })).toBeVisible();
+      await expect(page.getByRole('main').getByRole('link', { name: /Conjuguer au présent/ })).toBeVisible();
       await look(page, `practice-${mode}-${size}`);
-      await openUnit(page, 'u1', 'Les mots du renard');
-      await row(page, 'invisible').getByRole('textbox').nth(0).focus();
+      await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+      await row(page, "Si tu m'").getByRole('textbox').nth(0).focus();
       await page.getByRole('button', { name: 'French characters' }).click();
       await look(page, `unit-${mode}-${size}`);
       await page.goto(PRACTICE);
@@ -185,14 +191,16 @@ for (const phone of [false, true]) {
 test('theme tokens: right and wrong keep their meaning in dark', async ({ page }) => {
   await theme(page, 'dark');
   await seedUnits(page);
-  await openUnit(page, 'u1', 'Les mots du renard');
-  await row(page, 'Je ne').getByRole('textbox').fill('suis');
-  await row(page, 'On ne').getByRole('textbox').fill('voie');
+  await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+  await row(page, 'Je ne').getByRole('textbox').fill('mange');
+  const wrong = row(page, "Si tu m'");
+  await wrong.getByRole('textbox').nth(0).fill('apprivoise');
+  await wrong.getByRole('textbox').nth(1).fill('aurons');
   await page.getByRole('button', { name: 'Check all' }).click();
-  await expect(page.getByText('2 of 3 checked, 1 right')).toBeVisible();
+  await expect(page.getByText('2 of 2 checked, 1 right')).toBeVisible();
   const rgb = (locator: ReturnType<Page['locator']>) => locator.evaluate((el) => getComputedStyle(el).color);
   const right = await rgb(row(page, 'Je ne').getByRole('textbox'));
-  const wrong = await rgb(row(page, 'On ne').getByRole('textbox'));
-  expect(right).not.toBe(wrong);
+  const wrongColor = await rgb(wrong.getByRole('textbox').nth(0));
+  expect(right).not.toBe(wrongColor);
   expect((await stored(page)).attempts).toHaveLength(2);
 });

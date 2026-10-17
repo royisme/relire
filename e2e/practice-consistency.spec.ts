@@ -4,7 +4,9 @@ import { checkButton, openUnit, row, seedUnits, stored } from './practice.helper
 
 type Db = typeof import('../src/storage/db');
 
-const QUESTION = 'Que veut le renard';
+const QUESTION = 'Quel est le secret du renard';
+// A wording no reference answer lists, so the AI grader decides it.
+const PARAPHRASE = 'Le cœur seul permet de bien voir.';
 
 test.beforeEach(async ({ page, ai }) => {
   void ai;
@@ -14,10 +16,10 @@ test.beforeEach(async ({ page, ai }) => {
 test('a pending hint blocks every check entry point until it finishes', async ({ page, ai }) => {
   const pending = Promise.withResolvers<{ hint: string; grammarRule: string }>();
   ai.answer({ hint: () => pending.promise });
-  await openUnit(page, 'u4', 'Questions ouvertes');
+  await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
   const item = row(page, QUESTION);
   const field = item.getByRole('textbox');
-  await field.fill('Il veut un ami.');
+  await field.fill(PARAPHRASE);
   await item.getByRole('button', { name: 'Hint' }).click();
   await expect.poll(() => ai.calls.hint).toBe(1);
   await expect(checkButton(item)).toBeDisabled();
@@ -26,20 +28,23 @@ test('a pending hint blocks every check entry point until it finishes', async ({
   expect(ai.calls.grade).toBe(0);
   expect((await stored(page)).attempts).toEqual([]);
 
-  pending.resolve({ hint: 'Think about friendship.', grammarRule: 'Answer in a full sentence.' });
-  await expect(item.getByText('Think about friendship.')).toBeVisible();
+  pending.resolve({
+    hint: 'Think about what one sees with, not with the eyes.',
+    grammarRule: 'Answer in a full sentence.',
+  });
+  await expect(item.getByText('Think about what one sees with, not with the eyes.')).toBeVisible();
   await expect(checkButton(item)).toBeEnabled();
-  await field.fill('Il veut des liens.');
+  await field.fill('Seul le cœur voit bien.');
   await checkButton(item).click();
   await expect(item.getByText('AI feedback.')).toBeVisible();
-  expect((await stored(page)).attempts[0].userAnswer).toBe('Il veut des liens.');
+  expect((await stored(page)).attempts[0].userAnswer).toBe('Seul le cœur voit bien.');
 });
 
 test('a supplied reading passage appears before the questions', async ({ page }) => {
   await page.evaluate(async () => {
     const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     const d = await db();
-    const unit = (await d.get('units', 'u4'))!;
+    const unit = (await d.get('units', 'unit-open-qa'))!;
     await d.put('units', {
       ...unit,
       readingPassage: {
@@ -48,7 +53,7 @@ test('a supplied reading passage appears before the questions', async ({ page })
       },
     });
   });
-  await openUnit(page, 'u4', 'Questions ouvertes');
+  await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
   const passage = page.getByText('Le renard veut un ami.', { exact: false });
   await expect(page.getByRole('heading', { name: 'Le souhait du renard' })).toBeVisible();
   await expect(passage).toBeVisible();

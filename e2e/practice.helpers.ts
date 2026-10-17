@@ -5,7 +5,7 @@
  */
 import type { Locator, Page } from '@playwright/test';
 import { expect } from './fixtures';
-import { sampleExercises } from './practiceFixtures';
+import { CATALOG_EXERCISES } from '../tests/fixtures/exerciseCatalog';
 
 type Storage = typeof import('../src/storage/exercises');
 type Db = typeof import('../src/storage/db');
@@ -25,8 +25,8 @@ export async function waitForArticle(page: Page) {
     .toBeGreaterThan(0);
 }
 
-/** Saves units for the sample article and leaves the app on the library. */
-export async function seedUnits(page: Page, units: unknown[] = sampleExercises.units) {
+/** Saves units for the sample article and leaves the app on the library (the catalogue by default). */
+export async function seedUnits(page: Page, units: unknown[] = CATALOG_EXERCISES.units) {
   await page.goto('/#/read');
   await waitForArticle(page);
   await page.evaluate(async (list) => {

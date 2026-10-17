@@ -1,10 +1,18 @@
 /**
  * Test fixtures: an onboarded app with a fake key, every Gemini request answered
- * from per-task fixtures (chosen by prompt text), and layout helpers. Fixtures
- * never contain invented phonetic data by default; tests supply what they assert.
+ * from per-task fixtures (chosen by prompt text), and layout helpers. Exercise tasks
+ * are answered from the shared catalogue (tests/fixtures/exerciseCatalog.ts), so
+ * e2e and unit tests practise the same 11-type set. Fixtures never contain invented
+ * phonetic data by default; tests supply what they assert.
  */
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
-import { sampleExercises, sampleExplanation, sampleGrade, sampleHint } from './practiceFixtures';
+import {
+  CATALOG_ARTICLE,
+  CATALOG_EXERCISES,
+  CATALOG_EXPLANATION,
+  CATALOG_HINT,
+  CATALOG_OPEN_GRADE,
+} from '../tests/fixtures/exerciseCatalog';
 
 type Task = 'word' | 'sentence' | 'pronunciation' | 'prosody' | 'exercises' | 'hint' | 'explain' | 'grade';
 /** A fixed answer, or a function of the prompt that returns one (possibly async). */
@@ -19,6 +27,16 @@ export function prosodySentence(prompt: string): string {
 export function prosodyTokens(prompt: string): { ordinal: number; source: string }[] {
   return JSON.parse(prompt.match(/^\[\{"ordinal":.*$/m)?.[0] || '[]');
 }
+
+/** The catalogue item a hint, explanation or grade prompt is about, by the item's prompt text. */
+function catalogueItem(prompt: string) {
+  return CATALOG_EXERCISES.units.flatMap((unit) => unit.items).find((item) => prompt.includes(item.prompt));
+}
+
+/** A default with no catalogue answer for this request: fail with guidance instead of inventing one. */
+const noCatalogAnswer = (task: Task, about: string): never => {
+  throw new Error(`No default ${task} answer for ${about}; give this spec an explicit ai.answer({ ${task} }) override`);
+};
 
 export const defaultAnswers: Record<Task, Answer> = {
   word: {
@@ -57,11 +75,20 @@ export const defaultAnswers: Record<Task, Answer> = {
     corrections: [],
     coachingNotes: '',
   },
-  // Exercise tasks: replace `sampleExercises` (e2e/practiceFixtures.ts) to change the units every test starts from.
-  exercises: sampleExercises,
-  hint: sampleHint,
-  explain: sampleExplanation,
-  grade: sampleGrade,
+  // Exercise tasks: answered with the catalogue, which is written about CATALOG_ARTICLE (the
+  // "petit-prince" sample article) and carries one hint, one explanation and one open grade, for
+  // fb-1, fb-1 and qa-1. A request about anything else needs an explicit ai.answer override.
+  exercises: (prompt: string) =>
+    // The prompt embeds the article trimmed (the app's 8,000-character cap is far above the sample).
+    prompt.includes(CATALOG_ARTICLE.trim())
+      ? CATALOG_EXERCISES
+      : noCatalogAnswer('exercises', 'an article other than CATALOG_ARTICLE'),
+  hint: (prompt: string) =>
+    catalogueItem(prompt)?.id === 'fb-1' ? CATALOG_HINT : noCatalogAnswer('hint', 'an item other than fb-1'),
+  explain: (prompt: string) =>
+    catalogueItem(prompt)?.id === 'fb-1' ? CATALOG_EXPLANATION : noCatalogAnswer('explain', 'an item other than fb-1'),
+  grade: (prompt: string) =>
+    catalogueItem(prompt)?.id === 'qa-1' ? CATALOG_OPEN_GRADE : noCatalogAnswer('grade', 'an item other than qa-1'),
   // Source-addressed and unresolved: only the built-in function-word table resolves anything.
   prosody: (prompt: string) => ({
     words: prosodyTokens(prompt).map(({ ordinal, source }) => ({
@@ -166,7 +193,13 @@ export const test = base.extend<{ ai: MockAi }>({
       ai.prompts[task].push(prompt);
       if (failing.has(task)) return route.fulfill({ status: 500, body: `{"error":{"message":"${task} failed"}}` });
       const answer = answers[task];
-      const value = typeof answer === 'function' ? await answer(prompt) : answer;
+      let value: unknown;
+      try {
+        value = typeof answer === 'function' ? await answer(prompt) : answer;
+      } catch (error) {
+        // A default that does not cover this request: say so, so a missing spec override fails loudly.
+        return route.fulfill({ status: 500, body: JSON.stringify({ error: { message: String(error) } }) });
+      }
       return route.fulfill({
         status: 200,
         contentType: 'application/json',

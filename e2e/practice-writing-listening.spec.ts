@@ -57,6 +57,14 @@ async function sentenceBuild(page: Page, ai: MockAi, phone: boolean) {
   });
 
   // After a reset, the same words in another order go to the AI grader: words, never a score.
+  // The catalogue grades only qa-1, so this spec supplies the verdict for sb-1.
+  ai.answer({
+    grade: {
+      isCorrect: false,
+      feedback: 'The words are all there, but this order does not say the idea of the sentence.',
+      correctedVersion: 'Le blé pour moi est inutile.',
+    },
+  });
   await page.getByRole('button', { name: 'Reset this unit' }).click();
   await page.getByRole('button', { name: 'Reset', exact: true }).click();
   for (const word of ['moi', 'Le', 'blé', 'pour', 'est', 'inutile.'])
