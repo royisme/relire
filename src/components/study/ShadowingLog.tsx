@@ -44,7 +44,10 @@ export function ShadowingLog({ articles, units, unitsError, initialSourceId, onO
     [],
   );
 
-  const groups = sourceId === 'all' ? log.groups : log.groups.filter((g) => g.id === sourceId);
+  // A source that no longer has anything under its own heading (deleted) is shown as "all": the log
+  // must never hide the other recordings behind a stale selection.
+  const effectiveSourceId = sourceId === 'all' || log.groups.some((g) => g.id === sourceId) ? sourceId : 'all';
+  const groups = effectiveSourceId === 'all' ? log.groups : log.groups.filter((g) => g.id === effectiveSourceId);
   const remove = (key: string, take: ShadowingTake) => {
     setFailure(null);
     deleteTake(key, take.id).catch((err) => setFailure(errorMessage(err)));
@@ -57,11 +60,11 @@ export function ShadowingLog({ articles, units, unitsError, initialSourceId, onO
         title={t('shadowingLog.title')}
         subtitle={t('shadowingLog.subtitle')}
         actions={
-          log.groups.length > 1 ? (
+          log.groups.length > 1 || log.removed.length > 0 ? (
             <label className="flex items-center gap-2 text-sm text-ink-700">
               <span>{t('shadowingLog.source')}</span>
               <select
-                value={sourceId}
+                value={effectiveSourceId}
                 onChange={(e) => setSourceId(e.target.value)}
                 className="h-10 max-w-[16rem] rounded-md border border-ink-200 bg-surface px-2 text-sm text-ink-900"
               >
@@ -121,7 +124,7 @@ export function ShadowingLog({ articles, units, unitsError, initialSourceId, onO
               )}
             </section>
           ))}
-          {sourceId === 'all' && log.removed.length > 0 && (
+          {effectiveSourceId === 'all' && log.removed.length > 0 && (
             <Orphans
               title={t('shadowingLog.removed', { count: log.removed.length })}
               rows={log.removed}

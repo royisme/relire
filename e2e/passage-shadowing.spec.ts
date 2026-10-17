@@ -94,7 +94,6 @@ for (const phone of [false, true]) {
         count: (await shadowing.listShadowing()).length,
         legacy: backup.some((r) => !r.passage),
         removed: !(await storage.getUnit('removed-passage')),
-        stores: [...d.objectStoreNames],
         version: d.version,
       };
     });
@@ -186,10 +185,29 @@ for (const deletion of ['unit', 'material'] as const) {
       const { deleteArticleData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
       if (mode === 'unit') await deleteUnit('unit-reading-cloze');
       else await deleteArticleData('petit-prince');
-      (window as unknown as { releasePassageTake: () => void }).releasePassageTake();
     }, deletion);
+    // The delayed take's save opens its own shadowing write; that transaction ending is the signal that the
+    // attempt is over, so the assertion below needs no arbitrary delay.
+    await page.evaluate(() => {
+      let finished: () => void = () => undefined;
+      (window as unknown as { takeSaveFinished: Promise<void> }).takeSaveFinished = new Promise<void>((resolve) => {
+        finished = () => resolve();
+      });
+      // oxlint-disable-next-line typescript/unbound-method -- Called with the original database below.
+      const open = IDBDatabase.prototype.transaction;
+      IDBDatabase.prototype.transaction = function (...args: Parameters<typeof open>) {
+        const tx = open.apply(this, args);
+        const scope = typeof args[0] === 'string' ? [args[0]] : [...args[0]];
+        if (scope.includes('shadowing') && args[1] === 'readwrite') {
+          tx.addEventListener('complete', () => finished());
+          tx.addEventListener('abort', () => finished());
+        }
+        return tx;
+      };
+    });
+    await page.evaluate(() => (window as unknown as { releasePassageTake: () => void }).releasePassageTake());
     await expect(page.getByText('This passage is no longer available.', { exact: false })).toBeVisible();
-    await page.waitForTimeout(300);
+    await page.evaluate(() => (window as unknown as { takeSaveFinished: Promise<void> }).takeSaveFinished);
     const recordings = await page.evaluate(async () => {
       const { listShadowing }: typeof import('../src/storage/shadowing') = await import(
         /* @vite-ignore */ '/src/storage/shadowing.ts' as string
@@ -201,3 +219,78 @@ for (const deletion of ['unit', 'material'] as const) {
     await expect(page.getByText('This passage is no longer available.', { exact: false })).toBeVisible();
   });
 }
+
+test('the log reaches unavailable history from the practice card and follows the source that still has rows', async ({
+  page,
+}) => {
+  await prepare(page);
+  await page.getByRole('link', { name: 'Open in the reader' }).click();
+  await chooseSentence(page);
+  await page.getByRole('button', { name: 'Practise this sentence', exact: true }).click();
+  await expect(card(page).getByRole('button', { name: 'Stop', exact: true })).toBeVisible();
+  await page.waitForTimeout(900);
+  await card(page).getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(card(page).getByText('Saved.', { exact: true })).toBeVisible();
+  const passageSource = await page.evaluate(async () => {
+    const { readerIdentity }: typeof import('../src/types/readerSource') = await import(
+      /* @vite-ignore */ '/src/types/readerSource.ts' as string
+    );
+    return readerIdentity({ kind: 'passage', materialId: 'petit-prince', unitId: 'unit-reading-cloze' });
+  });
+  // One live source plus a recording whose passage no longer exists.
+  await page.evaluate(async () => {
+    const shadowing: typeof import('../src/storage/shadowing') = await import(
+      /* @vite-ignore */ '/src/storage/shadowing.ts' as string
+    );
+    const storage: Exercises = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
+    const [record] = await shadowing.listShadowing();
+    const unit = await storage.getUnit('unit-reading-cloze');
+    await storage.saveUnits(record.articleId, [{ ...unit!, id: 'removed-passage', unitNumber: 99 }]);
+    await shadowing.addTake(
+      { kind: 'passage', materialId: record.articleId, unitId: 'removed-passage' },
+      'Nous visitons le jardin.',
+      record.takes[0],
+    );
+    await storage.deleteUnit('removed-passage');
+  });
+  await card(page).getByText('All recordings (1)').click();
+  const source = page.getByLabel('Source');
+  await expect(source).toHaveValue(passageSource);
+  await expect(page.locator('button[title="Open in the reader"]')).toHaveCount(1);
+  await expect(page.getByText('Source unavailable (1)', { exact: true })).toHaveCount(0);
+  // The selector is the only way to the unavailable history from here.
+  await source.selectOption({ label: 'All sources' });
+  await expect(page.getByText('Source unavailable (1)', { exact: true })).toBeVisible();
+  await page.getByText('Source unavailable (1)', { exact: true }).click();
+  await expect(page.getByText('Nous visitons le jardin.', { exact: true })).toBeVisible();
+
+  // A second source with recordings: the material's own prose, read in the article reader.
+  await page.goto('/#/read/petit-prince');
+  const materialSentence = page.locator('article [data-sentence]').first();
+  await materialSentence.getByRole('button').first().focus();
+  await page.getByRole('button', { name: 'Practise this sentence', exact: true }).click();
+  await expect(card(page).getByRole('button', { name: 'Stop', exact: true })).toBeVisible();
+  await page.waitForTimeout(900);
+  await card(page).getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(card(page).getByText('Saved.', { exact: true })).toBeVisible();
+  const materialText = (await materialSentence.textContent())?.trim();
+  // Enter the log again on the passage, then take it away under the open log.
+  await page.goto('/#/passage/petit-prince/unit-reading-cloze');
+  await chooseSentence(page);
+  await page.getByRole('button', { name: 'Practise this sentence', exact: true }).click();
+  await expect(card(page).getByRole('button', { name: 'Stop', exact: true })).toBeVisible();
+  await page.waitForTimeout(900);
+  await card(page).getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(card(page).getByText('Saved.', { exact: true })).toBeVisible();
+  await card(page).getByText('All recordings (2)').click();
+  await expect(page.getByLabel('Source')).toHaveValue(passageSource);
+  await page.evaluate(async () => {
+    const { deleteUnit }: Exercises = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
+    await deleteUnit('unit-reading-cloze');
+  });
+  await expect(page.getByLabel('Source')).toHaveValue('all');
+  await expect(page.getByText('Source unavailable (2)', { exact: true })).toBeVisible();
+  const rows = page.locator('button[title="Open in the reader"]');
+  await expect(rows).toHaveCount(1);
+  await expect(rows.first()).toHaveText(materialText!);
+});

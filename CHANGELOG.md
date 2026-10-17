@@ -58,6 +58,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- The Shadowing log opened from a practice card's "All recordings" no longer hides the rest of your recordings: the source list also appears when only unavailable history is left, and a source that is gone shows the other recordings instead of an empty page.
 - Empty-text workbooks reopened from the Library now show their own Practice unit list instead of a blank Reader; readable materials still open Reader.
 - A word lookup that is still loading, or already showing, closes with the page that opened it: browser Back, Forward or a typed address no longer leaves a sheet over the new screen, and a late answer or failure for the old page cannot show up, replace a newer lookup or send you to Settings. A lookup started on the page you are on completes as before.
 - Exercises-only imports can save a workbook with valid exercises and no source text, without inventing a passage. Article imports still require source text.

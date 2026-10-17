@@ -47,8 +47,9 @@ New IndexedDB object store `shadowing`, added by an `oldVersion < 4` step in `db
 
 ```ts
 interface ShadowingSentence {
-  key: string;            // `${articleId}|${normalizeText(text)}`
+  key: string;            // `${articleId}|${normalizeText(text)}`, or the disjoint passage key
   articleId: string;
+  passage?: { unitId: string }; // provenance of a passage take; absent for a material take
   text: string;           // trimmed sentence as written when last recorded
   updatedAt: number;      // recordedAt of the newest remaining take
   takes: ShadowingTake[]; // oldest first, at most 3
@@ -67,7 +68,7 @@ interface ShadowingTake {
 - **One record per sentence** (takes inside) is kept for v1: at most three takes, so reading a record is bounded. Reading the list does read the blobs of every record it returns (IndexedDB returns whole values); the list stays lazy at the decoding level only, by creating object URLs on play. If lists get slow, split metadata and blobs later.
 - **FIFO in one readwrite transaction:** get, append, drop from the front while `takes.length > 3`, put, `await tx.done`. No other async work inside the transaction. The UI reports "saved" only after `tx.done`.
 - **Deleting the newest take** recomputes `updatedAt`; deleting the last take deletes the record.
-- **Identity and order.** `splitArticle` ids are positional and shift on edits, so identity is the normalized text (`normalizeText`: trim, lowercase, collapse spaces), the same normalization as speech clips. Order and "open in reader" are always derived from the current `splitArticle(article.content)`: a record matches the first sentence whose normalized text equals its key. Identical sentences in one article share one record and open at the first occurrence. A record with no match is "original text changed" (playable, deletable, no reader link); a record whose article is missing is grouped under "article removed" (same, no link). No stored position.
+- **Identity and order.** `splitArticle` ids are positional and shift on edits, so identity is the normalized text (`normalizeText`: trim, lowercase, collapse spaces), the same normalization as speech clips. Order and "open in reader" are always derived from the current `splitArticle(article.content)`: a record matches the first sentence whose normalized text equals its key. Identical sentences in one article share one record and open at the first occurrence. A record with no match is "original text changed" (playable, deletable, no reader link); a record whose article is missing is grouped under "Source unavailable" (designed here as "article removed"; unit passages group there too), same, no link. No stored position.
 - **Takes** under 0.5 s are discarded; a take stops at 60 s. Recorder bitrate is left to the browser; sizes are measured, not assumed. Example: opus at ~32 kbps is ~4 KB/s, so a 6 s take is ~24 KB and 3 takes × 500 sentences ≈ 36 MB. The real total is shown in Settings.
 - **Retention vs backup.** Reference clips of recorded sentences are kept from trimming: `protectedTexts()` (retention) also returns those texts. The vocabulary audio backup must not grow because of this, so `exportProtectedAudio()` gets its own vocabulary-only selection instead of reusing `protectedTexts()`.
 - **Storage persistence:** after the first committed take, call `navigator.storage.persist()` if not already persisted (best effort; browsers may still evict).
@@ -176,7 +177,7 @@ Desktop (≥ md): one table per article, rows in current article order.
 ## Settings, backup and deletion
 
 - **Data section:** "Shadowing: N sentences, M recordings, X MB" and **Delete all recordings** (confirm).
-- **Export:** checkbox "Include shadowing recordings" (off by default). Each take is written with `mimeType`, `durationMs`, `recordedAt`, `id` and base64 data under a `shadowing` key.
+- **Export:** checkbox "Include shadowing recordings" (off by default). Each take is written with `mimeType`, `durationMs`, `recordedAt`, `id` and base64 data under a `shadowing` key, plus its optional `passage: { unitId }` provenance.
 - **Import** (`importData` today writes stores one by one and only checks outer shapes; recordings get stricter handling):
   1. Validate and decode everything first: record keys recomputed from `articleId` + text, ≤ 3 takes, unique ids, positive durations, known MIME prefix (`audio/`), base64 decodes to the stated MIME (`base64ToBlob` defaults to WAV, so the MIME is passed explicitly), bytes recomputed.
   2. Then replace in **one** transaction over the stores being restored.

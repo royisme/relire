@@ -14,6 +14,8 @@ test.beforeEach(async ({ page, ai }) => {
   ai.ttsDelayMs = 30;
   await trackPlayback(page);
 });
+/** Opening words of the material's own prose (`src/data/sampleArticles.ts`): a passage prompt must never carry them. */
+const materialProse = "C'est une chose trop oubliée, dit le renard.";
 for (const phone of [false, true]) {
   for (const blank of [false, true]) {
     test(`passage link reads the exact distinct stored text with ${blank ? 'empty' : 'different'} material, Back and reload ${phone ? '@phone' : ''}`, async ({
@@ -62,20 +64,21 @@ for (const phone of [false, true]) {
     page,
     ai,
   }) => {
-    await prepare(page, true);
+    // The material keeps its own (different) prose, so "not the material" below can actually fail.
+    await prepare(page);
     await page.getByRole('link', { name: 'Open in the reader' }).click();
     await page.locator('article').getByRole('button', { name: 'jardin', exact: true }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect.poll(() => ai.prompts.word.length).toBe(1);
     expect(ai.prompts.word[0]).toContain(content);
-    expect(ai.prompts.word[0]).not.toContain('Un jour, le Petit Prince');
+    expect(ai.prompts.word[0]).not.toContain(materialProse);
     await page.keyboard.press('Escape');
     await chooseSentence(page);
     const analyze = page.getByRole('button', { name: 'Explain sentence', exact: true });
     await analyze.click();
     await expect.poll(() => ai.prompts.sentence.length).toBe(1);
     expect(ai.prompts.sentence[0]).toContain(content);
-    expect(ai.prompts.sentence[0]).not.toContain('Un jour, le Petit Prince');
+    expect(ai.prompts.sentence[0]).not.toContain(materialProse);
     await page.keyboard.press('Escape');
     ai.answer({
       sentence: async () => {
