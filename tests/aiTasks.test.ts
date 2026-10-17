@@ -251,6 +251,16 @@ describe('generateExercises', () => {
     expect(err.message).toContain('expectedAnswer');
   });
 
+  test('a generated cloze without its passage fails instead of inventing one', async () => {
+    const cloze = { ...unit, type: 'READING_CLOZE' };
+    const err = await rejection(generateExercises(input, contextOf(fakeProvider({ units: [cloze] }))));
+    expect(err).toBeInstanceOf(InvalidAnswerError);
+    expect(err.message).toContain('readingPassage');
+    const readingPassage = { content: article };
+    const result = await generateExercises(input, contextOf(fakeProvider({ units: [{ ...cloze, readingPassage }] })));
+    expect(result.units[0].readingPassage).toEqual(readingPassage);
+  });
+
   test('refuses an empty article or a bad count before sending', async () => {
     const provider = fakeProvider(answer('Léa prend le train'));
     await rejection(generateExercises({ ...input, articleText: '  ' }, contextOf(provider)));

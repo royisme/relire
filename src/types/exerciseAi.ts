@@ -49,11 +49,17 @@ export const GeneratedExercisesSchema = z
   .superRefine((data, ctx) => {
     if (new Set(data.units.map((unit) => unit.id)).size !== data.units.length)
       ctx.addIssue({ code: 'custom', message: 'Duplicate unit IDs' });
-    data.units.forEach((unit, u) =>
+    data.units.forEach((unit, u) => {
+      if (unit.items.some((item) => (item.type ?? unit.type) === 'READING_CLOZE') && !unit.readingPassage)
+        ctx.addIssue({
+          code: 'custom',
+          path: ['units', u, 'readingPassage'],
+          message: 'Generated reading cloze requires a reading passage',
+        });
       unit.items.forEach((item, i) =>
         requireDictationAudio(item.type ?? unit.type, item, ctx, ['units', u, 'items', i]),
-      ),
-    );
+      );
+    });
   });
 export type GeneratedExercises = z.infer<typeof GeneratedExercisesSchema>;
 

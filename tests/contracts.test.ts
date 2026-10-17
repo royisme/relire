@@ -56,6 +56,29 @@ test('per-item type override is preserved and governs validation', () => {
   }
 });
 
+test('generated cloze units require a passage, including effective item type overrides', () => {
+  const cloze = unitOf('READING_CLOZE');
+  const mixed = { ...cloze, type: 'FILL_BLANKS', items: [{ ...cloze.items[0], type: 'READING_CLOZE' }] };
+  for (const unit of [cloze, mixed]) {
+    const missing = GeneratedExercisesSchema.safeParse({ units: [unit] });
+    expect(missing.success).toBe(false);
+    expect(missing.error?.issues[0].path).toEqual(['units', 0, 'readingPassage']);
+    expect(
+      GeneratedExercisesSchema.safeParse({ units: [{ ...unit, readingPassage: { content: '  ' } }] }).success,
+    ).toBe(false);
+    expect(
+      GeneratedExercisesSchema.safeParse({ units: [{ ...unit, readingPassage: { content: 'Léa habite ici.' } }] })
+        .success,
+    ).toBe(true);
+    // Existing stored/imported units are not subject to the generation-only requirement.
+    expect(ExtractedUnitSchema.safeParse(unit).success).toBe(true);
+    expect(ExerciseUnitSchema.safeParse(unit).success).toBe(true);
+  }
+  const overridden = { ...cloze, items: [{ ...cloze.items[0], type: 'FILL_BLANKS' }] };
+  expect(GeneratedExercisesSchema.safeParse({ units: [overridden] }).success).toBe(true);
+  expect(GeneratedExercisesSchema.safeParse({ units: [extracted] }).success).toBe(true);
+});
+
 test('drill items must name their own type', () => {
   const { type: _type, ...withoutType } = { ...item, type: 'WORD_TRANSFORM' };
   expect(

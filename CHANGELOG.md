@@ -52,6 +52,9 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Sentence-building options split into individual word tiles while keeping repeated words; placing and removing tiles keeps keyboard focus and no longer moves the controls below them.
+- Dictation speaks again after each check following a unit reset when “Speak after checking” is enabled, without replaying saved checks on reload.
+- Newly generated reading-cloze sets must include the article passage; an incomplete AI response shows an error instead of leaving the passage and reader link missing.
 - A pending hint no longer lets a check start on the same answer, preventing a late hint from unlocking an answer still being graded.
 - Exercise sheets show their supplied reading passage, start with a collapsed sidebar, and keep the unit's article when opening Practice from the sidebar. Choice buttons are at least 40 px high on phones.
 - Exercises generated from an article's old content are not attached after that article is edited; make a new set from the updated text instead.

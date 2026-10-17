@@ -28,7 +28,11 @@ export function NumberDictationControl({
   const wasChecked = useRef(Boolean(checked));
 
   useEffect(() => {
-    if (!checked || wasChecked.current) return;
+    if (!checked) {
+      wasChecked.current = false;
+      return;
+    }
+    if (wasChecked.current) return;
     wasChecked.current = true;
     const settings = getAppSettings();
     if (settings.practiceSpeakAfterCheck) void speakFrench(audio, { rate: settings.practiceDictationSpeed });

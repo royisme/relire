@@ -14,7 +14,7 @@
   - FILL_BLANKS：文章中的一句话，每个空用 [___] 标出。
   - CHOICE_SELECT：一句话，选项写作 {选项A|选项B}，并在 options 中列出相同的选项。
   - SENTENCE_BUILD：一个情境或提示词；expectedAnswer 为一句完整的法语句子。
-  - READING_CLOZE：文章中的一段短摘录，空处用 [___] 标出。
+  - READING_CLOZE：文章中的一段短摘录，空处用 [___] 标出。只要单元中有 READING_CLOZE 题目（包括通过题目的 type 覆盖单元题型），就必须提供 readingPassage.content，复制文章原文且不留空。
   - OPEN_QA：请学习者用完整的法语句子回答的问题，或请学习者把某个答案改写为问题。expectedAnswer 只是范例，不是唯一正确的写法；其他正确写法请列在 acceptableAnswers 中。
   - WORD_TRANSFORM、GENDER_CHECK、ODD_ONE_OUT、MATCH_PAIRS、DIALOGUE_ORDER、NUMBER_DICTATION：仅在文章明显适合时使用。
 - 答案格式（应用会按此检查）：
@@ -49,7 +49,7 @@
       "title": "本单元的法语短标题",
       "instruction": "给学习者的说明（简体中文）",
       "example": "可选。一个示范例子",
-      "readingPassage": { "title": "可选", "content": "可选。单元级的阅读材料，摘自文章原文", "translation": "可选。简体中文译文" },
+      "readingPassage": { "title": "可选", "content": "单元中有 READING_CLOZE 题目时必填，否则可选。单元级阅读材料，复制文章原文且不留空", "translation": "可选。简体中文译文" },
       "type": "本单元所有题目的题型，例如 FILL_BLANKS",
       "grammarTags": ["其题目使用的标签，至少一个"],
       "items": [
