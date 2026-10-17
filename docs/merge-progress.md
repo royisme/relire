@@ -45,15 +45,17 @@ bun run e2e   # installed Chrome; never `playwright install`
 | 3 (prep) | Shared 11-type exercise catalogue with right and wrong answers and mock AI answers (`tests/fixtures/exerciseCatalog.ts`) | `888cdba` |
 | 3-A | Exercise core: recovered WIP, four controls, article generation, saved drafts/checks/reset, help, character bar, oral practice retained; review fixes for races, reading context, navigation and source changes | `d3b05e9`, `521a351`, `9ebf40c`, `4d49fb2` |
 | 3-B1 | Choice and order controls: `GENDER_CHECK`, `ODD_ONE_OUT`, `MATCH_PAIRS`, `DIALOGUE_ORDER` (radio groups with arrow keys, per-line up/down), catalogue e2e right and wrong at 1280px and 360px | `4c8d9f8`, `e8c5db8` |
+| 3-B2 | Writing and listening controls: `SENTENCE_BUILD` (tiles, unmatched goes to the AI grader), `READING_CLOZE` (passage beside the questions from `md`, reader link), `NUMBER_DICTATION` (Listen at the dictation speed, clip stored); Settings → Practice (strict accents, dictation speed, speak after checking); all 11 types playable, the placeholder machinery removed | `9e6b721` |
 
 At `4d49fb2`: parent integration checks passed — typecheck, lint, format, 191 unit tests, i18n, 37 prosody checks, build and all 102 e2e tests in installed Chrome. AI responses were mocked; real providers were not exercised. Layout coverage includes 1280px and 360px in light, sepia and dark, with screenshots inspected. The follow-up Impeccable scan of `src` and `index.html` returned `[]` using the skill launcher (the command was absent from PATH, not from the machine). The existing bundle-size warning remains. The integration checkout initially lacked installed Bun types; `bun install --frozen-lockfile` resolved that without dependency-file changes.
 
 At `e8c5db8` (3-B1): parent integration checks passed — typecheck, lint, format, 191 unit tests, i18n, 37 prosody checks, build, all 111 e2e tests in installed Chrome, and the Impeccable detector `[]` via the skill launcher. AI responses were mocked; real providers were not exercised.
 
+At `9e6b721` (3-B2, on `merge-p3b2` in the task worktree): typecheck, lint, format, 191 unit tests, i18n, 37 prosody checks, build, Impeccable `[]`, and all 119 e2e tests in installed Chrome (9 new in `practice-writing-listening.spec.ts`; the not-built-yet sheet test was removed). AI responses were mocked. The worker's session could not render screenshots, so the P3-D screenshot pass should cover the three new units and Settings → Practice in the three themes.
+
 ## Current handoff
 
-- **P3-A and P3-B1 are complete.** The old `77ac92e` WIP on `claude/sleepy-darwin-lt2eck-wip-phase3-core` was recovered and finished; do not cherry-pick it again.
-- **Next: P3-B2** (writing and listening controls + Settings Practice section). The first two launches on `openai-codex/gpt-6.1-sol` failed with "usage limit reached" (no changes made); the user is deciding whether to run it on `zai/glm-5.3` or wait for the quota. Its worktree `../relire-p3b2` (branch `merge-p3b2`, at `163eddd`, deps installed) is unused and clean. Three controls remain placeholders (`SENTENCE_BUILD`, `READING_CLOZE`, `NUMBER_DICTATION`); the "not built yet" sheet test currently uses `NUMBER_DICTATION`, so B2 must move or drop it. P3-C catalogue adoption and P3-D whole-phase review are still pending; phase 3 is not complete.
+- **P3-A, P3-B1 and P3-B2 are complete.** The old `77ac92e` WIP on `claude/sleepy-darwin-lt2eck-wip-phase3-core` was recovered and finished; do not cherry-pick it again. P3-B2 landed on `merge-p3b2` (`9e6b721`, worktree `../relire-p3b2`): the three last controls are real, the "not built yet" sheet test is replaced by real NUMBER_DICTATION coverage, and every type of the 11 is playable. P3-C catalogue adoption and P3-D whole-phase review are still pending; phase 3 is not complete.
 - The user's pre-existing `.gitignore` addition for `.works/` was left untouched and uncommitted.
 
 ## Next tasks
@@ -74,9 +76,9 @@ Tasks run in order unless marked parallel. Each one ends with the full checks, a
 - [x] **P3-B1 Choice and order controls** (done with GLM; commits `4c8d9f8`, `e8c5db8`). Covers `GENDER_CHECK`, `ODD_ONE_OUT` (strike-through), `MATCH_PAIRS` and `DIALOGUE_ORDER`.
   - Keyboard operable; 40px touch targets; one file per control; swap the placeholders in the registry.
   - e2e uses `CATALOG_EXERCISES` / `CATALOG_ANSWERS` to answer each type right and wrong, at 1280px and 360px.
-- [ ] **P3-B2 Writing and listening controls** (Sonnet, parallel with B1). Covers `SENTENCE_BUILD` (AI-graded when unmatched), `READING_CLOZE` (passage beside the questions on desktop, stacked on phones, opens in the reader) and `NUMBER_DICTATION` (plays `audioText` through `utils/speech`, clips stored in the `audio` store).
-  - Add a **Practice** section in Settings: strict accents, dictation speed, speak after checking (off by default).
-  - e2e as in B1.
+- [x] **P3-B2 Writing and listening controls**. Covers `SENTENCE_BUILD` (AI-graded when unmatched), `READING_CLOZE` (passage beside the questions on desktop, stacked on phones, opens in the reader) and `NUMBER_DICTATION` (plays `audioText` through `utils/speech`, clips stored in the `audio` store).
+  - Added a **Practice** section in Settings: strict accents, dictation speed, speak after checking (off by default).
+  - e2e as in B1. Done in `9e6b721`; the sheet's not-built-yet test was dropped (no placeholder types remain) and real NUMBER_DICTATION coverage took its place.
 - [ ] **P3-C Catalogue in e2e** (Haiku). Make the e2e mock answer `exercises` with `CATALOG_EXERCISES` against `CATALOG_ARTICLE`, and the hint, explain and grade tasks with the catalogue's mock answers. Remove any ad-hoc defaults left by P3-A.
 - [ ] **P3-D Review pass** (orchestrator).
   - Screenshots in light, sepia and dark at 1280px and 360px.
