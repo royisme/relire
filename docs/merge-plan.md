@@ -16,7 +16,7 @@ One application in which a learner does all of their French study: read real mat
 | 2 | Product scope widens to exercises, including listening (dictation) and writing (AI-graded open answers). | `CLAUDE.md`, `PRODUCT.md` and the READMEs stop saying "reading and speaking only". Still no mock exams and no official scores; AI grades are estimates. |
 | 3 | A new grammar taxonomy that covers A1–C1 (section 6). | FrenchLab's 14 textbook-specific categories are mapped onto it when old data is imported. |
 | 4 | New dependencies: `zod` (exercise contracts, import drafts, AI answer validation) and `pdfjs-dist` (local PDF page rendering, loaded on demand). Linting and formatting move to oxlint and oxfmt. | `bun run lint` becomes oxlint; type checking moves to `bun run typecheck`; `bun run format:check` joins CI. |
-| 5 | The merged product is called **Relire Plus**. | The display name (title, manifest, header, marketing, READMEs) changes when the first exercise features ship (phase 6), so the name never promises something the build lacks. Internal identifiers stay `relire`: the IndexedDB database `relire`, the `relire_*` localStorage keys, the package and the repository. Renaming them would lose learners' data. |
+| 5 | The merged product is called **Relire Plus**. | The display name (title, manifest, header, marketing, READMEs) changes in phase 6, after the learning loop and migration are ready. Internal identifiers stay `relire`: the IndexedDB database `relire`, the `relire_*` localStorage keys, the package and the repository. Renaming them would lose learners' data. |
 | 6 | A checked result retains the strict-accent preference used when it was graded, including through backup/restore. | Changing the preference does not reinterpret saved checks. Legacy results without this metadata retain their overall verdict; multi-slot controls show no guessed per-slot verdicts. |
 | 7 | An import saved as both article and exercises creates one readable material with attached units, not two library entries. | Save opens Practice when exercises were saved, otherwise Reader. Unconfirmed drafts stay in memory, block navigation, and trigger the browser warning on reload/close; leaving after confirmation loses the draft. |
 
@@ -51,18 +51,18 @@ Today Relire has four flat tabs (a left drawer below `md`) and Settings is a cen
 
 - **Collapsible sidebar from `lg` up**, replacing the top tabs. Expanded it shows icon + label for each area with its sub-pages indented under the current area, the due-vocabulary count, and Settings and install at the bottom. Collapsed it is a 56px icon rail with tooltips and accessible names; the choice is remembered (`relire_sidebar`). In the reader and on an exercise sheet it collapses by default, so the article and the sheet stay the page; the rail never covers the text. Between `md` and `lg` it is the rail only; below `md` the existing left drawer shows the same tree.
 - **Context in the sidebar, not a second rail.** While a workbook is open, its units list under Practise (replacing FrenchLab's separate `CurriculumNav` rail).
-- **Settings becomes a page** with its own section list (sidebar sub-pages on desktop, a list then detail on phones): Text AI, Speech, Practice (dictation rate, speak after checking, auto-advance), Prompts, Data and backup, About. Each section saves on its own with a visible saved/failed state instead of one Save button for everything. When an AI feature needs a key, the app opens Settings → Text AI with the key field focused and returns to where the learner was after a successful check; the first-run guide stays a dialog.
-- **Hash routes** (`#/read`, `#/read/:articleId`, `#/practise/:unitId`, `#/study/mistakes`, `#/settings/speech` …) with no router dependency, as FrenchLab's `useAppNavigation` does, so Back works, a reload keeps the place and Settings sections can be linked. An unknown route shows a recoverable not-found page.
+- **Settings becomes a page** with its own section list (sidebar sub-pages on desktop, a list then detail on phones): Text AI, Speech, Practice (strict accents, dictation rate, speak after checking), Prompts, Data and backup, About. Each section saves on its own with a visible saved/failed state instead of one Save button for everything. When an AI feature needs a key, the app opens Settings → Text AI with the key field focused and returns to where the learner was after a successful check; the first-run guide stays a dialog.
+- **Hash routes** (`#/read`, `#/read/:articleId`, `#/practice/:unitId`, `#/study/mistakes`, `#/settings/speech` …) with no router dependency, as FrenchLab's `useAppNavigation` does, so Back works, a reload keeps the place and Settings sections can be linked. An unknown route shows a recoverable not-found page.
 - Header keeps only the brand, theme and language. `DESIGN.md` "Navigation" and "Overlay" rules are updated in the same change.
 
 ### Cross-links that make it one app
 
 - Exercise prompts, reading passages (`READING_CLOZE`) and explanations use `ReaderWord`, so any word opens `WordDetailModal` and can be saved.
 - A `READING_CLOZE` passage opens in the reader, with listening, sentence analysis and shadowing.
-- Exercises generated from an article are saved as units with `sourceArticleId`. Today's drills are thrown away; after the merge they keep their attempts and feed the mistake notebook.
+- Exercises generated from an article are saved as units with `materialId` pointing to that article. Today's drills are thrown away; after the merge they keep their attempts and feed the mistake notebook.
 - A mistake offers "add the word to vocabulary"; vocabulary review then schedules it.
 - Exercise audio (dictation, prompts) goes through `utils/speech` and the IndexedDB `audio` store, replacing FrenchLab's Cache API cache.
-- Deleting a material deletes its units, item states and attempts, with the same confirmation the article delete has today. Attempts carry their prompt and answer text, so the Progress figures stay true even for deleted material if the learner keeps history (decided in phase 4).
+- Deleting a material currently deletes its units and item states but keeps attempts, as enforced by storage tests. Attempts carry their own prompt and answer text. Retention is the existing storage contract. The user confirmed that Progress and adaptive targeting include these retained attempts, so deleting a material does not erase its contribution to learning history. P5-A shows retained mistakes honestly and disables unavailable source/retry links.
 
 ## 4. Architecture after the merge
 
@@ -114,7 +114,7 @@ Each phase is shippable on its own, with e2e coverage, both locales and a CHANGE
 | 5. Review loop | Mistakes in My study, accuracy by grammar area in Progress, adaptive drills, mistake → vocabulary, cross-links to the reader. | E2E: a wrong answer appears in Mistakes, its drill is generated, its word is saved. |
 | 6. Migration and launch | FrenchLab backup import, the Relire Plus name across app, manifest, marketing and READMEs, additional providers, FrenchLab repository archived with a pointer here. | A real FrenchLab backup restores with every attempt kept. |
 
-## 6. Grammar taxonomy (draft for phase 2)
+## 6. Grammar taxonomy (implemented in phase 2)
 
 Grouped by area; each attempt carries exactly one tag. Names are stable IDs; labels live in the locale files.
 
@@ -129,6 +129,13 @@ Grouped by area; each attempt carries exactly one tag. Names are stable IDs; lab
 | Skills | `numbers-time`, `vocabulary-usage`, `reading-comprehension`, `listening-dictation`, `written-expression` |
 
 Mapping from FrenchLab: `gender-agreement` → `gender-number`; `nationality-adjectives` → `adjective-agreement`; `country-prepositions` → `prepositions`; `verb-conjugation-etre`, `verb-conjugation-sappeler`, `verb-conjugation-aller-avoir` → `present`; `pronouns-subject` → `subject-object-pronouns`; `definite-articles` → `articles`; `possessive-adjectives` → `possessive-demonstrative`; `numbers-time` → `numbers-time`; `question-formulation` → `questions`; `dialogue-comprehension`, `reading-comprehension` → `reading-comprehension`; `professions-vocabulary` → `vocabulary-usage`.
+
+### Phase 5 execution gates
+
+- **P5-A first:** the mistake notebook uses `listMistakes`, including its existing resolved marker, grouped with `grammarAreaOf`. Explanation and vocabulary lookup reuse the existing AI and word-sheet flows. Retry opens the surviving exercise sheet and uses its existing confirmed reset when needed, without silently resetting a unit or deleting attempts. Missing units/materials keep their historical text but offer no broken links.
+- **P5-B, parallel with A:** the user confirmed both product gates: Progress/adaptive targeting includes retained attempts from deleted materials, and each generated adaptive set creates one new workbook saved atomically with its units. Every unit belongs to that workbook, never an arbitrary last-open article. Area accuracy sums correct/total counts, not an unweighted average of tag percentages. No account, new dependency or new persistence schema is required.
+- **P5-C after verified A/B:** add word lookup to exercise prompts, passages and explanations, preserving answer-control keyboard behavior and safe inline markup. The existing reading-passage link is already present and should be extended, not duplicated. Repair the Library entry for empty-text workbooks so it opens their material-specific Practice list, while readable materials continue to open Reader. Synchronize `PRODUCT.md` with the shipped Progress/adaptive behavior.
+- **P5-D last:** review the new Chinese copy after these interfaces settle; then run the full integration checks and update completion evidence. Do not mark a task complete before review and verification.
 
 ## 7. Risks
 
