@@ -1,4 +1,4 @@
-/** The import page's in-memory leave decision and native reload warning. */
+/** In-memory leave decision and native reload warning for import drafts and prepared adaptive sets. */
 import { useLayoutEffect, useRef, useState } from 'react';
 import { protectImport } from '../utils/importNavigation';
 export function useImportGuard(dirty: boolean, saving: boolean, discard: () => void) {

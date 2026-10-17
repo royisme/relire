@@ -88,6 +88,12 @@ Things that are not in the address, on purpose: the sentence the reader opens at
 
 `index.html` synchronously owns history-position recording before deferred modules; it merges history.state and records native hashes while the application loads. `utils/importNavigation` consumes that recorder: route publication stays at import until the Dialog decision, queued browser events coalesce before restoring the real origin entry, Keep retains draft/history, and Discard replays the saved traversal or link intent. Canonical replacements retain position. Successful save releases protection before navigation. Dirty reload/close uses beforeunload; pending saves cannot discard. Navigation API current-entry indices supplement genuinely older untagged entries, but routine operation does not require it. Same-document entries fabricated before the earliest synchronous document script cannot be direction-recovered without that API; the normal recording contract begins at that script, not at application mount.
 
+## Progress and adaptive drills
+
+`components/progress/ExerciseProgress` preserves the existing dashboard statistics and IPA chart. `useExerciseAccuracy` re-reads `accuracyByGrammarTag()` on exercise events, ignores stale reads and reports real read errors inline; no material-presence filter is applied. `services/exercises/accuracy` sums correct/total counts by taxonomy area and selects up to three lowest-ratio nonperfect tags, breaking ties in taxonomy order. Only attempted areas appear.
+
+`useAdaptiveDrills` asks `api.generateAdaptiveDrills` with those disclosed targets and recent wrong snapshots limited to the targets and the existing prompt cap. Controls start at B1/eight items. `services/exercises/fromDrills` validates the complete result, rejects off-target tags and passage-dependent reading cloze, and prepares fresh material/unit/item IDs: one empty-text workbook, one mixed-type unit, explicit item types and AI answer provenance, no import source or invented passage. `createImportedMaterial` commits both atomically before `onCreated` updates App and opens the sheet. Failed writes retain the same payload/IDs for a save-only retry; collisions still reject. Prepared unsaved sets reuse `useImportGuard` and its Dialog/beforeunload protection, disable edits until explicitly discarded, and cannot discard while saving. Leaving during AI generation invalidates the session and drops late output before storage; there is no background workbook creation.
+
 ## AI layer (`src/services/ai/`)
 
 Split so each part has one job:

@@ -177,7 +177,7 @@ export function gradeRequest(
 }
 
 /** How many recent mistakes the adaptive prompt shows; more adds cost without new patterns. */
-const MAX_RECENT_MISTAKES = 10;
+export const MAX_RECENT_MISTAKES = 10;
 
 export interface AdaptiveInput {
   /** The weak grammar tags to practise. */

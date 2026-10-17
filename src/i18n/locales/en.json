@@ -809,5 +809,27 @@
     "materialUnavailable": "Material removed",
     "retryHelp": "Opens the saved sheet without changing answers. If already checked, use “Reset this unit” and confirm; attempt history is kept.",
     "emptyWordAnalysis": "The word analysis was empty."
+  },
+  "exerciseProgress": {
+    "title": "Grammar accuracy",
+    "history": "All checked attempts count, including history from deleted material.",
+    "accuracy": "{{percent}}% · {{correct}} / {{total}} correct",
+    "readFailed": "Could not read exercise history: {{reason}}",
+    "loading": "Reading exercise history…",
+    "empty": "Check some exercises to see accuracy by grammar area."
+  },
+  "adaptive": {
+    "title": "Practise weak topics",
+    "targets": "Up to three lowest-accuracy topics with errors: {{tags}}",
+    "noTargets": "No weak topics yet. Only topics with real errors are targeted.",
+    "make": "Make a drill set",
+    "retry": "Retry saving",
+    "discard": "Discard",
+    "saving": "Saving this workbook. Please wait.",
+    "generating": "Making a new workbook…",
+    "unsaved": "Not saved: {{title}} ({{items}}). Retry saving without another AI request, or discard.",
+    "leaveTitle": "Discard this drill set?",
+    "leaveHelp": "This generated set has not been saved. Keep it to retry saving, or discard it before leaving or making another set.",
+    "keep": "Keep this set"
   }
 }

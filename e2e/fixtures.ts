@@ -14,7 +14,17 @@ import {
   CATALOG_OPEN_GRADE,
 } from '../tests/fixtures/exerciseCatalog';
 
-type Task = 'extract' | 'word' | 'sentence' | 'pronunciation' | 'prosody' | 'exercises' | 'hint' | 'explain' | 'grade';
+type Task =
+  | 'adaptive'
+  | 'extract'
+  | 'word'
+  | 'sentence'
+  | 'pronunciation'
+  | 'prosody'
+  | 'exercises'
+  | 'hint'
+  | 'explain'
+  | 'grade';
 /** A fixed answer, or a function of the prompt that returns one (possibly async). */
 type Answer = unknown;
 
@@ -39,6 +49,7 @@ const noCatalogAnswer = (task: Task, about: string): never => {
 };
 
 export const defaultAnswers: Record<Task, Answer> = {
+  adaptive: () => noCatalogAnswer('adaptive', 'these targets'),
   extract: () => noCatalogAnswer('extract', 'this source'),
   word: {
     word: 'chose',
@@ -105,6 +116,7 @@ export const defaultAnswers: Record<Task, Answer> = {
 
 /** Which task a request is for, from the shipped prompt text (src/services/ai/prompts/defaults). */
 function taskOf(body: string): Task {
+  if (/French test curriculum designer|法语.*课程设计/.test(body)) return 'adaptive';
   if (/Turn the French workbook material into an exercise draft|请把下面的法语练习材料整理成一份练习草稿/.test(body))
     return 'extract';
   if (/task: prosody|任务：prosody/i.test(body)) return 'prosody';
@@ -139,6 +151,7 @@ export const test = base.extend<{ ai: MockAi }>({
     const failing = new Set<string>();
     const ai: MockAi = {
       calls: {
+        adaptive: 0,
         extract: 0,
         tts: 0,
         word: 0,
@@ -151,6 +164,7 @@ export const test = base.extend<{ ai: MockAi }>({
         grade: 0,
       },
       prompts: {
+        adaptive: [],
         extract: [],
         word: [],
         sentence: [],

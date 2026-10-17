@@ -366,3 +366,16 @@ export const CATALOG_OPEN_GRADE: OpenGrade = {
   feedback: "Accepted. The answer gives the fox's secret with the same meaning as the article, in other words.",
   correctedVersion: "On ne voit bien qu'avec le cœur.",
 };
+
+/** Adaptive mock reuses the catalogue's standalone items; no passage or article provenance. */
+export const CATALOG_DRILLS: import('../../src/types/exerciseAi').Drills = {
+  drillTitle: 'Focused grammar practice',
+  focusSummary: 'Practise gender, adjective agreement and present forms.',
+  items: CATALOG_EXERCISES.units
+    .slice(0, 3)
+    .flatMap((unit) =>
+      unit.items
+        .filter((item) => ['adjective-agreement', 'present', 'gender-number'].includes(item.grammarTag))
+        .map(({ articleQuote: _quote, ...item }) => ({ ...item, type: unit.type })),
+    ),
+};

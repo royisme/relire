@@ -804,5 +804,27 @@
     "materialUnavailable": "材料已删除",
     "retryHelp": "打开已保存的练习，不更改答案。如果已经检查，请点击“重置本单元”并确认；作答历史会保留。",
     "emptyWordAnalysis": "单词分析为空。"
+  },
+  "exerciseProgress": {
+    "title": "语法正确率",
+    "history": "统计所有已检查的作答，包括已删除材料的历史记录。",
+    "accuracy": "{{percent}}% · 答对 {{correct}} / {{total}}",
+    "readFailed": "无法读取练习记录：{{reason}}",
+    "loading": "正在读取练习记录…",
+    "empty": "完成并检查练习后，这里会显示各语法领域的正确率。"
+  },
+  "adaptive": {
+    "title": "练习薄弱语法",
+    "targets": "最多选取三个有错题且正确率最低的主题：{{tags}}",
+    "noTargets": "暂无薄弱主题。只有实际答错过的主题才会被选中。",
+    "make": "生成一组练习",
+    "retry": "重试保存",
+    "discard": "丢弃",
+    "saving": "正在保存练习册，请稍候。",
+    "generating": "正在生成新练习册…",
+    "unsaved": "尚未保存：{{title}}（{{items}}）。重试保存不会再次请求 AI，也可以丢弃。",
+    "leaveTitle": "丢弃这组练习？",
+    "leaveHelp": "生成的练习尚未保存。保留后可重试保存；离开或生成另一组之前需要先丢弃。",
+    "keep": "保留这组练习"
   }
 }

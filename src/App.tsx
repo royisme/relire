@@ -501,7 +501,14 @@ export default function App() {
 
             {route.name === 'unit' && <UnitView key={route.unitId} unitId={route.unitId} onMissingKey={requestKey} />}
 
-            {route.name === 'progress' && <AnalyticsDashboard stats={stats} vocabList={vocabList} />}
+            {route.name === 'progress' && (
+              <AnalyticsDashboard
+                stats={stats}
+                vocabList={vocabList}
+                onCreated={(article) => setArticles((prev) => [article, ...prev])}
+                onMissingKey={requestKey}
+              />
+            )}
 
             {route.name === 'settings' && (
               <SettingsPage
