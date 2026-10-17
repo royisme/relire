@@ -263,7 +263,11 @@
     "keyMissing": "尚未设置 Key",
     "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 {{provider}}。没有应用服务器。",
     "getKey": "到 {{provider}} 获取 Key",
-    "needsKeyNotice": "请先填写 API Key，才能使用单词和句子解析、朗读和发音反馈。",
+    "needsKeyNotice": {
+      "text": "请先填写 API Key，才能使用单词和句子解析、朗读和发音反馈。",
+      "ocr": "请先填写 API Key，才能读取图片和 PDF。",
+      "speech": "请先填写 API Key，才能把法语朗读出来。"
+    },
     "storageProtected": "已受保护，浏览器不会自动清理",
     "storageNotProtected": "空间不足或长期不使用时，浏览器可能会清掉这些数据",
     "protectStorage": "保护我的数据",
@@ -356,6 +360,7 @@
     "sharedKey": "同一个 Key 也用于{{purposes}}。",
     "modelHelp": "从建议里选一个模型，或直接填写模型 ID。",
     "invalidModel": "请输入不超过 512 个字符的模型 ID，不能为空或包含控制字符。",
+    "modelNotValid": "三个 AI 页面中有模型 ID 无效，请在那里修改后再保存。",
     "fetch": "获取模型列表",
     "fetching": "获取中…",
     "refresh": "刷新模型列表",
@@ -495,24 +500,19 @@
   },
   "models": {
     "gemini-2_5-flash": {
-      "name": "Gemini 2.5 Flash（推荐）",
-      "desc": "速度快，适合日常讲解和评分。"
+      "name": "Gemini 2.5 Flash（推荐）"
     },
     "gemini-2_5-pro": {
-      "name": "Gemini 2.5 Pro",
-      "desc": "较慢，长难句讲得更细。"
+      "name": "Gemini 2.5 Pro"
     },
     "gemini-3_8-flash": {
-      "name": "Gemini 3.8 Flash",
-      "desc": "较新，兼顾速度和深度。"
+      "name": "Gemini 3.8 Flash"
     },
     "gemini-3_1-flash-lite": {
-      "name": "Gemini 3.1 Flash-Lite",
-      "desc": "最轻最快，讲解较简短。"
+      "name": "Gemini 3.1 Flash-Lite"
     },
     "gemini-3_8-flash-lite-tts": {
-      "name": "Gemini 3.8 Flash-Lite TTS（推荐）",
-      "desc": "法语发音自然，包括联诵。"
+      "name": "Gemini 3.8 Flash-Lite TTS（推荐）"
     }
   },
   "providers": {

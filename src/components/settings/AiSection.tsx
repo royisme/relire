@@ -172,7 +172,7 @@ export function AiSection({
 
       {keyRequest && missingKey && (
         <p className="rounded-md border border-accent-200 bg-accent-50 px-3 py-2 text-sm text-accent-900">
-          {t('settings.needsKeyNotice')}
+          {t(`settings.needsKeyNotice.${purpose}`)}
         </p>
       )}
 

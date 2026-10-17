@@ -1,8 +1,14 @@
 /** AI selections and shared provider credentials save together, independently of Practice. */
 import i18n from '../../i18n';
+import { normalizeModelId } from '../../services/ai/catalogue';
 import { getAppSettings, saveAppSettings, type AppSettings } from '../../utils/appSettings';
 
 export type SettingsSlice = 'ai' | 'practice';
+
+const AI_MODEL_FIELDS = ['textModel', 'ocrModel', 'speechModel'] as const;
+
+/** saveAppSettings stores the canonical ID, so the draft is written canonicalized or the read-back never matches. */
+const canonicalModel = (id: string) => normalizeModelId(id) ?? id;
 
 export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
   if (slice === 'practice')
@@ -36,11 +42,11 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
   return {
     ...base,
     textProvider: from.textProvider,
-    textModel: from.textModel,
+    textModel: canonicalModel(from.textModel),
     ocrProvider: from.ocrProvider,
-    ocrModel: from.ocrModel,
+    ocrModel: canonicalModel(from.ocrModel),
     speechProvider: from.speechProvider,
-    speechModel: from.speechModel,
+    speechModel: canonicalModel(from.speechModel),
     speechVoice: from.speechVoice,
     apiKeys: { ...base.apiKeys, ...Object.fromEntries(providers.map((id) => [id, from.apiKeys[id] ?? ''])) },
   };
@@ -48,6 +54,9 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
 
 /** Read back because saveAppSettings catches storage errors. Never mark a failed write as saved. */
 export function saveSlice(draft: AppSettings, slice: SettingsSlice): AppSettings {
+  // A model ID storage cannot keep would be silently replaced by the provider default: refuse the whole save.
+  if (slice === 'ai' && AI_MODEL_FIELDS.some((field) => !normalizeModelId(draft[field])))
+    throw new Error(i18n.t('aiSettings.modelNotValid'));
   const intended = withSlice(getAppSettings(), draft, slice);
   const next = saveAppSettings(intended);
   if (sliceOf(getAppSettings(), slice) !== sliceOf(intended, slice)) throw new Error(i18n.t('settings.notStored'));

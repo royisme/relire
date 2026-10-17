@@ -267,7 +267,11 @@
     "keyMissing": "No key yet",
     "keyPrivacy": "The key is stored only in this browser and sent only to {{provider}} when you use an AI feature. There is no app server.",
     "getKey": "Get a key from {{provider}}",
-    "needsKeyNotice": "Add your API key to use word and sentence analysis, audio and pronunciation feedback.",
+    "needsKeyNotice": {
+      "text": "Add your API key to use word and sentence analysis, audio and pronunciation feedback.",
+      "ocr": "Add your API key to read images and PDFs.",
+      "speech": "Add your API key to have French read aloud."
+    },
     "storageProtected": "Protected from automatic clearing",
     "storageNotProtected": "Browser may clear this data if it runs low on space or you stay away for a while",
     "protectStorage": "Protect my data",
@@ -360,6 +364,7 @@
     "sharedKey": "This key is also used by {{purposes}}.",
     "modelHelp": "Pick a suggested model or type its ID.",
     "invalidModel": "Enter a model ID of at most 512 characters, without control characters.",
+    "modelNotValid": "A model ID on one of the three AI pages is not valid. Fix it there, then save again.",
     "fetch": "Fetch models",
     "fetching": "Fetching…",
     "refresh": "Refresh models",
@@ -500,24 +505,19 @@
   },
   "models": {
     "gemini-2_5-flash": {
-      "name": "Gemini 2.5 Flash (recommended)",
-      "desc": "Fast; good for everyday explanations and scoring."
+      "name": "Gemini 2.5 Flash (recommended)"
     },
     "gemini-2_5-pro": {
-      "name": "Gemini 2.5 Pro",
-      "desc": "Slower; more thorough on long, complex sentences."
+      "name": "Gemini 2.5 Pro"
     },
     "gemini-3_8-flash": {
-      "name": "Gemini 3.8 Flash",
-      "desc": "Newer; balances speed and depth."
+      "name": "Gemini 3.8 Flash"
     },
     "gemini-3_1-flash-lite": {
-      "name": "Gemini 3.1 Flash-Lite",
-      "desc": "Lightest and quickest; shorter explanations."
+      "name": "Gemini 3.1 Flash-Lite"
     },
     "gemini-3_8-flash-lite-tts": {
-      "name": "Gemini 3.8 Flash-Lite TTS (recommended)",
-      "desc": "Natural French speech, including liaisons."
+      "name": "Gemini 3.8 Flash-Lite TTS (recommended)"
     }
   },
   "providers": {

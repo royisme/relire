@@ -1,5 +1,6 @@
 /** One AI slice: the three purpose selections and their provider keys save together; Practice stays apart. */
 import { afterEach, beforeEach, expect, test } from 'bun:test';
+import i18n from '../src/i18n';
 import { getApiKey, getAppSettings, saveAppSettings, type AppSettings } from '../src/utils/appSettings';
 import { saveSlice, sliceOf, withSlice } from '../src/components/settings/slices';
 
@@ -68,6 +69,44 @@ test('one key serves every purpose that uses the same provider', () => {
   const keyed = withSlice(base, draftOf(base, { apiKeys: { gemini: 'new-key' } }), 'ai');
   expect(keyed.apiKeys).toEqual({ gemini: 'new-key' });
   expect(new Set([keyed.textProvider, keyed.ocrProvider, keyed.speechProvider])).toEqual(new Set(['gemini']));
+});
+
+test('a model typed with padding or a models/ prefix saves as its canonical ID', () => {
+  saveAppSettings({});
+  const draft = draftOf(getAppSettings(), {
+    textModel: ' models/gemini-2.5-flash ',
+    ocrModel: 'models/custom-vision-2',
+  });
+  const next = saveSlice(draft, 'ai');
+  expect([next.textModel, next.ocrModel]).toEqual(['gemini-2.5-flash', 'custom-vision-2']);
+  expect([getAppSettings().textModel, getAppSettings().ocrModel]).toEqual(['gemini-2.5-flash', 'custom-vision-2']);
+});
+
+test('an invalid model refuses the AI save with its own message and leaves the stored models unchanged', () => {
+  saveAppSettings({ textModel: 'gemini-2.5-pro' });
+  const draft = draftOf(getAppSettings(), { textModel: 'gemini-2.5-pro' });
+  for (const invalid of ['bad\u0000id', 'x'.repeat(513)]) {
+    expect(() => saveSlice({ ...draft, ocrModel: invalid }, 'ai')).toThrow(i18n.t('aiSettings.modelNotValid'));
+    expect(getAppSettings().textModel).toBe('gemini-2.5-pro');
+  }
+});
+
+test('one shared key saves with all three purposes', () => {
+  saveAppSettings({});
+  const draft = draftOf(getAppSettings(), {
+    textModel: ' custom-text-9 ',
+    ocrModel: ' custom-ocr-9 ',
+    speechModel: ' custom-speech-9 ',
+    apiKeys: { gemini: ' shared-key ' },
+  });
+  const next = saveSlice(draft, 'ai');
+  expect(new Set([next.textProvider, next.ocrProvider, next.speechProvider])).toEqual(new Set(['gemini']));
+  expect(getApiKey(next, 'gemini')).toBe('shared-key');
+  expect([next.textModel, next.ocrModel, next.speechModel]).toEqual([
+    'custom-text-9',
+    'custom-ocr-9',
+    'custom-speech-9',
+  ]);
 });
 
 test('a write the browser refuses is reported, not shown as saved', () => {
