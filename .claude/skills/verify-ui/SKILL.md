@@ -32,7 +32,7 @@ The default prosody answer is source-addressed and unresolved: no invented phone
 - At 360×740 (`@phone`) and 1280×900: no horizontal overflow on the screens you touched, with long content.
 - Themes: set `localStorage.relire_theme` to `light`, `sepia` or `dark` in `page.addInitScript`, then look at screenshots (`page.screenshot({ path: test.info().outputPath('x.png') })`).
 - Transient states (loading, playing, recording, errors) do not change page height or move the content above and below.
-- The flow end to end: the happy path, a failed AI call (error shown inline with the real reason), and repeating or cancelling the action. For exercise sheets, cover answer/check, help, Enter/IME, saved drafts and reset keeping history; unsupported controls remain placeholders.
+- The flow end to end: the happy path, a failed AI call (error shown inline with the real reason), and repeating or cancelling the action. For exercise sheets, cover answer/check, help, Enter/IME, saved drafts and reset keeping history; all 11 exercise types have controls, so answer at least the types you touched.
 
 ## Prove the check
 
