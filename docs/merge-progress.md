@@ -29,7 +29,7 @@ bun run e2e   # installed Chrome; never `playwright install`
 ```
 
 - **Parallel e2e.** Only one e2e run at a time can own port 5174. Agents running e2e in parallel produce load flakes, so re-run a failing spec on its own before calling it a bug.
-- **`impeccable`.** If it is not on PATH, use the installed skill launcher: `~/.agents/skills/impeccable/scripts/impeccable detect --json src index.html`. The P3-A follow-up ran it successfully with `[]`. Context loading also reported a stale `.impeccable/design.json` sidecar; refresh via the skill's `document` command only when requested.
+- **`impeccable`.** If it is not on PATH, use the installed skill launcher: `~/.agents/skills/impeccable/scripts/impeccable detect --json src index.html`. The P3-A follow-up ran it successfully with `[]` and refreshed the `.impeccable/design.json` sidecar against `DESIGN.md`.
 - **Container restarts.** A restart kills running agents. Their committed work survives only in their local worktree branch, and uncommitted edits survive in the worktree directory. Neither is pushed, so check `git worktree list` first and resume from what is there.
 
 ## Done

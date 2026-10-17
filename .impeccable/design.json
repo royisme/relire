@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-13T04:39:05.355605+00:00",
+  "generatedAt": "2026-10-17T00:49:00+00:00",
   "title": "Design System: Relire",
   "extensions": {
     "colorMeta": {
@@ -125,6 +125,10 @@
       {
         "name": "md",
         "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
       }
     ],
     "themes": [
@@ -151,15 +155,15 @@
       "kind": "button",
       "refersTo": "button-primary",
       "description": "The one filled action per view.",
-      "html": "<button class=\"ds-btn ds-btn-primary\">Record</button>",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Check all</button>",
       "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:6px;border:1px solid transparent;font:500 14px 'Public Sans',sans-serif;cursor:pointer;transition:background-color .16s} .ds-btn-primary{background:var(--color-accent-700);color:var(--color-on-fill)} .ds-btn-primary:hover{background:var(--color-accent-800)} .ds-btn:focus-visible{outline:2px solid var(--color-accent-600);outline-offset:2px}"
     },
     {
       "name": "Outline Button",
       "kind": "button",
       "refersTo": "button-outline",
-      "description": "Secondary actions such as Reference or Redo.",
-      "html": "<button class=\"ds-btn-outline\">Reference</button>",
+      "description": "Secondary actions such as Check or Reference.",
+      "html": "<button class=\"ds-btn-outline\">Check</button>",
       "css": ".ds-btn-outline{height:40px;padding:0 16px;border-radius:6px;border:1px solid var(--color-ink-300);background:var(--color-surface);color:var(--color-ink-800);font:500 14px 'Public Sans',sans-serif;cursor:pointer} .ds-btn-outline:hover{background:var(--color-ink-100)} .ds-btn-outline:focus-visible{outline:2px solid var(--color-accent-600);outline-offset:2px}"
     },
     {
@@ -167,7 +171,7 @@
       "kind": "button",
       "refersTo": "button-ghost",
       "description": "Quiet actions inside rows and cards.",
-      "html": "<button class=\"ds-btn-ghost\">Compare</button>",
+      "html": "<button class=\"ds-btn-ghost\">Hint</button>",
       "css": ".ds-btn-ghost{height:36px;padding:0 12px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--color-ink-600);font:500 12px 'Public Sans',sans-serif;cursor:pointer} .ds-btn-ghost:hover{background:var(--color-ink-100);color:var(--color-ink-900)} .ds-btn-ghost:focus-visible{outline:2px solid var(--color-accent-600);outline-offset:2px}"
     },
     {
@@ -179,6 +183,14 @@
       "css": ".ds-input{height:40px;width:100%;padding:0 12px;border-radius:6px;border:1px solid var(--color-ink-300);background:var(--color-surface);color:var(--color-ink-900);font:14px 'Public Sans',sans-serif} .ds-input::placeholder{color:var(--color-ink-400)} .ds-input:focus-visible{outline:2px solid var(--color-accent-600);outline-offset:2px}"
     },
     {
+      "name": "Underline Input",
+      "kind": "input",
+      "refersTo": null,
+      "description": "Inline serif blank on a 2px underline in an exercise sentence: open, right and wrong states with the reference answer beside a wrong check.",
+      "html": "<p class=\"ds-ul-line\" lang=\"fr\">Il <input class=\"ds-ul ds-ul-open\" value=\"demande\" aria-label=\"Blank 1\"> au petit prince de l’<input class=\"ds-ul ds-ul-wrong\" value=\"apprivoisé\" readonly aria-label=\"Blank 2\"> <span class=\"ds-ul-expected\">apprivoiser</span>.</p>",
+      "css": ".ds-ul-line{margin:0;font:18px/1.8 'Source Serif 4',serif;color:var(--color-ink-900)} .ds-ul{width:7rem;padding:2px 6px;border:0;border-bottom:2px solid var(--color-ink-300);background:transparent;color:var(--color-ink-900);font:18px 'Source Serif 4',serif;text-align:center;transition:border-color .16s} .ds-ul-open:focus-visible{border-color:var(--color-accent-700);outline:2px solid var(--color-accent-600);outline-offset:2px} .ds-ul-wrong{border-color:var(--color-bad-600);color:var(--color-bad-700);font-weight:500;text-decoration:line-through} .ds-ul-expected{font:600 16px 'Source Serif 4',serif;color:var(--color-ok-800)}"
+    },
+    {
       "name": "Segmented Control",
       "kind": "chip",
       "refersTo": "segmented",
@@ -187,12 +199,12 @@
       "css": ".ds-seg{display:inline-flex;gap:2px;padding:4px;border-radius:10px;background:var(--color-ink-100)} .ds-seg button{height:32px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:var(--color-ink-600);font:14px 'Public Sans',sans-serif;cursor:pointer} .ds-seg button:hover{color:var(--color-ink-900)} .ds-seg .ds-seg-on{background:var(--color-surface);color:var(--color-ink-900)}"
     },
     {
-      "name": "Navigation Tab",
+      "name": "Sidebar Navigation",
       "kind": "nav",
       "refersTo": null,
-      "description": "Flat underlined tabs from md up.",
-      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-on\">Read</a><a>My study</a><a>Drills</a></nav>",
-      "css": ".ds-nav{display:flex;gap:20px;height:56px;align-items:stretch;font:14px 'Public Sans',sans-serif} .ds-nav a{display:flex;align-items:center;color:var(--color-ink-600);border-bottom:2px solid transparent;cursor:pointer} .ds-nav a:hover{color:var(--color-ink-900)} .ds-nav .ds-nav-on{color:var(--color-ink-900);border-color:var(--color-accent-700)}"
+      "description": "Flat sidebar navigation (240px expanded from lg, 56px icon rail from md) with a 2px accent-700 left bar on the current page.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\">Read</a><a class=\"ds-nav-item\">My study<span class=\"ds-nav-badge\">4</span></a><a class=\"ds-nav-item ds-nav-on\" aria-current=\"page\"><span class=\"ds-nav-bar\"></span>Practice</a><a class=\"ds-nav-item\">Progress</a></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:2px;width:240px;padding:12px 8px;border-right:1px solid var(--color-ink-200);background:var(--color-surface);font:14px 'Public Sans',sans-serif} .ds-nav-item{position:relative;display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:6px;color:var(--color-ink-700);text-decoration:none;cursor:pointer} .ds-nav-item:hover{background:var(--color-ink-100);color:var(--color-ink-950)} .ds-nav-on{background:var(--color-ink-100);color:var(--color-ink-950);font-weight:500} .ds-nav-bar{position:absolute;left:0;top:8px;bottom:8px;width:2px;border-radius:9999px;background:var(--color-accent-700)} .ds-nav-badge{margin-left:auto;min-width:20px;padding:0 6px;border-radius:9999px;background:var(--color-accent-700);color:var(--color-on-fill);font-size:12px;font-weight:500;text-align:center;font-variant-numeric:tabular-nums}"
     },
     {
       "name": "Practice Card",
@@ -251,7 +263,7 @@
       "**Do** show transient state on the control itself, at a fixed size.",
       "**Do** put new fixed reader UI inside `BottomDock`, on the ink panel, and keep the current sentence clear of it.",
       "**Do** check every new screen at 360px and in light, sepia and dark.",
-      "**Do** write plain copy: short noun titles (\"Vocabulary\", \"Drills\", \"Shadowing\") with one quiet line under them; empty states say what to do next in one sentence.",
+      "**Do** write plain copy: short noun titles (\"Vocabulary\", \"Practice\", \"Shadowing\") with one quiet line under them; empty states say what to do next in one sentence.",
       "**Do** use lucide icons at 16px in controls, one stroke weight, `aria-hidden` when decorative."
     ],
     "donts": [
