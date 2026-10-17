@@ -116,7 +116,7 @@ for (const phone of [false, true])
       await page.evaluate((value) => {
         document.documentElement.dataset.theme = value;
       }, theme);
-      await page.screenshot({ path: test.info().outputPath(`sentence-${phone ? 360 : 1280}-${theme}.png`) });
+      expect(await overflowing(page.locator('body'))).toEqual([]);
     }
     while (await built.getByRole('button').count()) {
       await built.getByRole('button').first().click();
@@ -265,7 +265,7 @@ for (const strictAccents of [false, true]) {
         await page.evaluate((value) => {
           document.documentElement.dataset.theme = value;
         }, theme);
-        await page.screenshot({ path: test.info().outputPath(`saved-accent-marks-${theme}.png`), fullPage: true });
+        expect(await overflowing(page.locator('body'))).toEqual([]);
       }
       const backup = await page.evaluate(async () => {
         const { exportData }: ReviewDb = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
@@ -304,7 +304,7 @@ for (const strictAccents of [false, true]) {
         await page.evaluate((value) => {
           document.documentElement.dataset.theme = value;
         }, theme);
-        await page.screenshot({ path: test.info().outputPath(`legacy-neutral-slots-${theme}.png`), fullPage: true });
+        expect(await overflowing(page.locator('body'))).toEqual([]);
       }
     });
 }

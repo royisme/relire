@@ -58,5 +58,4 @@ test('a supplied reading passage appears before the questions', async ({ page })
   await expect(page.getByRole('heading', { name: 'Le souhait du renard' })).toBeVisible();
   await expect(passage).toBeVisible();
   expect((await passage.boundingBox())!.y).toBeLessThan((await row(page, QUESTION).boundingBox())!.y);
-  await page.screenshot({ path: test.info().outputPath('unit-reading-passage.png'), fullPage: true });
 });

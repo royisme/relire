@@ -1,7 +1,6 @@
 /**
  * Layout of the practice screens: nothing sticks out of a phone, checking does not move what is above
- * the pressed button, and long content wraps. Also writes screenshots (light, sepia, dark) that are
- * attached to the report, so the screens can be looked at.
+ * the pressed button, and long content wraps in light, sepia and dark.
  */
 import type { Page } from '@playwright/test';
 import { expect, layout, overflowing, settled, test } from './fixtures';
@@ -45,13 +44,6 @@ const longUnit = {
     },
   ],
 };
-
-async function look(page: Page, name: string) {
-  await settled(page);
-  const path = test.info().outputPath(`${name}.png`);
-  await page.screenshot({ path, fullPage: true });
-  await test.info().attach(name, { path, contentType: 'image/png' });
-}
 
 const theme = (page: Page, value: string) => page.addInitScript((t) => localStorage.setItem('relire_theme', t), value);
 
@@ -159,7 +151,9 @@ for (const phone of [false, true]) {
     expect(await overflowing(page.getByRole('dialog', { name: 'Reset this unit?' }))).toEqual([]);
   });
 
-  test(`looks: the practice page and a unit sheet in light, sepia and dark at ${size}px${suffix}`, async ({ page }) => {
+  test(`themes: the practice page and a unit sheet in light, sepia and dark at ${size}px${suffix}`, async ({
+    page,
+  }) => {
     await seedUnits(page);
     await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
     const wrong = row(page, "Si tu m'");
@@ -178,11 +172,13 @@ for (const phone of [false, true]) {
       await page.evaluate((m) => localStorage.setItem('relire_theme', m), mode);
       await page.reload();
       await expect(page.getByRole('main').getByRole('link', { name: /Conjuguer au présent/ })).toBeVisible();
-      await look(page, `practice-${mode}-${size}`);
+      await settled(page);
+      expect(await overflowing(page.locator('body'))).toEqual([]);
       await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
       await row(page, "Si tu m'").getByRole('textbox').nth(0).focus();
       await page.getByRole('button', { name: 'French characters' }).click();
-      await look(page, `unit-${mode}-${size}`);
+      await settled(page);
+      expect(await overflowing(page.locator('body'))).toEqual([]);
       await page.goto(PRACTICE);
     }
   });
