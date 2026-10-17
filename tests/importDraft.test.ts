@@ -189,3 +189,18 @@ test('answer helpers', () => {
   expect(answerOrigin({ ...item, printedAnswer: ['a'], expectedAnswer: ['b'] })).toBe('ai');
   expect(answerOrigin(item, true)).toBe('user');
 });
+
+test('review must supply reading and dictation context before promotion', () => {
+  const draft = ImportDraftSchema.parse(draftFixture);
+  const item = draft.units[0].items[0];
+  item.expectedAnswer = 'douze';
+  item.type = 'NUMBER_DICTATION';
+  expect(prepareImport(draft, textSource, 'complete', options).errors[0].code).toBe('invalid');
+  item.audioText = 'douze';
+  expect(prepareImport(draft, textSource, 'complete', options).errors).toEqual([]);
+  item.type = 'READING_CLOZE';
+  item.prompt = 'Le nombre est [___].';
+  expect(prepareImport(draft, textSource, 'complete', options).errors[0].code).toBe('invalid');
+  draft.units[0].readingPassage = { content: 'Le nombre est douze.' };
+  expect(prepareImport(draft, textSource, 'complete', options).errors).toEqual([]);
+});

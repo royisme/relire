@@ -7,38 +7,24 @@
 import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { parseRoute, routeHref, type Route } from '../utils/routes';
 
-const CHANGED = 'relire-route';
+import { importAwareNavigate, publishedHash, ROUTE_CHANGED } from '../utils/importNavigation';
+const CHANGED = ROUTE_CHANGED;
 
 function subscribe(listener: () => void) {
-  // Back/forward and typed addresses fire popstate/hashchange; our own pushState and replaceState fire neither.
-  window.addEventListener('popstate', listener);
-  window.addEventListener('hashchange', listener);
+  // The import coordinator publishes committed routes after browser events or explicit navigation.
   window.addEventListener(CHANGED, listener);
   return () => {
-    window.removeEventListener('popstate', listener);
-    window.removeEventListener('hashchange', listener);
     window.removeEventListener(CHANGED, listener);
   };
 }
 
-const currentHash = () => window.location.hash;
-
-/** Go to a route (or a hash such as `#/read/abc`). Pushes history unless `replace`; the same address is a no-op. */
+/** Go to a route; the import guard owns any pending leave decision. */
 export function navigate(to: Route | string, options: { replace?: boolean } = {}) {
-  const href = typeof to === 'string' ? to : routeHref(to);
-  if (href === currentHash()) return;
-  if (options.replace) {
-    window.history.replaceState(null, '', href);
-  } else {
-    window.history.pushState(null, '', href);
-    // A new page starts at its top. Back and forward keep the browser's own scroll restoration.
-    window.scrollTo(0, 0);
-  }
-  window.dispatchEvent(new Event(CHANGED));
+  importAwareNavigate(typeof to === 'string' ? to : routeHref(to), options.replace);
 }
 
 export function useRoute(): Route {
-  const hash = useSyncExternalStore(subscribe, currentHash);
+  const hash = useSyncExternalStore(subscribe, publishedHash);
   const parsed = useMemo(() => parseRoute(hash), [hash]);
   useEffect(() => {
     if (parsed.canonical) navigate(parsed.canonical, { replace: true });

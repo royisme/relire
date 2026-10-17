@@ -3,6 +3,7 @@
  * (history, events) lives in hooks/useRoute.ts. There is no router dependency.
  *
  *   #/read                   library
+ *   #/import                 material import workspace
  *   #/read/:articleId        reader
  *   #/study/words            My study → Words
  *   #/study/shadowing        My study → Shadowing
@@ -21,6 +22,7 @@ export type StudyTab = (typeof STUDY_TABS)[number];
 
 export type Route =
   | { name: 'library' }
+  | { name: 'import' }
   | { name: 'reader'; articleId: string }
   | { name: 'study'; tab: StudyTab }
   /** `articleId` is the material whose units are listed; absent means the app's default (the article read last). */
@@ -42,6 +44,8 @@ export function routeHref(route: Route): string {
     case 'library':
     case 'notFound':
       return '#/read';
+    case 'import':
+      return '#/import';
     case 'reader':
       return `#/read/${encodeURIComponent(route.articleId)}`;
     case 'study':
@@ -70,6 +74,7 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
   const [area, sub, ...extra] = parts;
   if (!area) route = LIBRARY;
   else if (extra.length || parts.some((p) => p === '')) route = { name: 'notFound' };
+  else if (area === 'import' && sub === undefined) route = { name: 'import' };
   else if (area === 'read' && sub === undefined) route = LIBRARY;
   else if (area === 'read') {
     try {
@@ -104,6 +109,7 @@ export type Area = 'read' | 'study' | 'practice' | 'progress' | 'settings';
 export function areaOf(route: Route): Area | null {
   switch (route.name) {
     case 'library':
+    case 'import':
     case 'reader':
       return 'read';
     case 'study':

@@ -42,8 +42,16 @@ export function NavTree({ route, dueCount, rail, onNavigate, footer }: NavTreePr
           icon={BookOpen}
           label={t('nav.reader')}
           // The library and the reader are both "Read"; only the library row is a page of its own.
-          current={area === 'read' ? 'page' : undefined}
+          current={area === 'read' ? (route.name === 'import' && !rail ? 'area' : 'page') : undefined}
         />
+        {!rail && area === 'read' && (
+          <NavItem
+            {...item}
+            to={{ name: 'import' }}
+            label={t('importFlow.heading')}
+            current={route.name === 'import' ? 'page' : undefined}
+          />
+        )}
         <NavItem
           {...item}
           to={{ name: 'study', tab: 'words' }}

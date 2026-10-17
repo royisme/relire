@@ -2,6 +2,34 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <!-- Record same-document positions before deferred application code can be delayed. -->
+    <script>
+      (() => {
+        const key = 'relirePosition';
+        const nativeIndex = () => window.navigation?.currentEntry?.index;
+        let position = history.state?.[key] ?? 0;
+        const offset = (nativeIndex() ?? position) - position;
+        const replace = (href = location.href) => history.replaceState({ ...history.state, [key]: position }, '', href);
+        const record = () => {
+          const tagged = history.state?.[key];
+          position =
+            typeof tagged === 'number' ? tagged : nativeIndex() === undefined ? position + 1 : nativeIndex() - offset;
+          replace();
+        };
+        replace();
+        addEventListener('popstate', record);
+        addEventListener('hashchange', record);
+        window.relireHistory = {
+          read: () => position,
+          replace,
+          push: (href) => {
+            position++;
+            history.pushState({ ...history.state, [key]: position }, '', href);
+          },
+        };
+      })();
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#F7F6F3" />
     <!-- Theme before first paint (same rules as src/theme/theme.ts) -->

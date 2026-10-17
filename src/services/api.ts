@@ -45,8 +45,7 @@ import { validatePronunciationMarkers } from '../utils/pronunciationMarkers';
 export { ImageInputUnsupportedError, InvalidAnswerError, MissingApiKeyError, isAbortError } from './ai/errors';
 export { MAX_GENERATED_ITEMS } from './ai/tasks';
 
-function context(): ai.TextContext & { lang: Lang } {
-  const settings = getAppSettings();
+function context(settings: AppSettings = getAppSettings()): ai.TextContext & { lang: Lang } {
   return {
     provider: getTextProvider(settings.textProvider),
     config: { apiKey: getApiKey(settings, settings.textProvider), model: settings.textModel },
@@ -182,8 +181,8 @@ export function generateAdaptiveDrills(input: AdaptiveInput): Promise<Drills> {
  * see `isAbortError`). Images are refused up front when the chosen model
  * cannot read them (`ImageInputUnsupportedError`).
  */
-export function extractMaterial(input: ExtractInput): Promise<ImportDraft> {
-  return ai.extractMaterial(input, context());
+export function extractMaterial(input: ExtractInput, consentSettings?: AppSettings): Promise<ImportDraft> {
+  return ai.extractMaterial(input, context(consentSettings));
 }
 
 /**

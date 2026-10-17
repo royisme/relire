@@ -7,6 +7,7 @@ import { PageHeader } from './ui/page-header';
 import { Segmented } from './ui/segmented';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import { cleanArticleTitle, formatLevel } from '../utils/i18nHelpers';
+import { navigate } from '../hooks/useRoute';
 import { listShadowing } from '../storage/shadowing';
 
 interface LibraryViewProps {
@@ -34,6 +35,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onRestoreSamples,
 }) => {
   const { t, i18n } = useTranslation();
+  const [adding, setAdding] = useState(false);
   const [query, setQuery] = useState('');
   const [level, setLevel] = useState('all');
   const [sort, setSort] = useState<{ key: SortKey; dir: 'asc' | 'desc' }>({ key: 'createdAt', dir: 'desc' });
@@ -121,7 +123,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         title={t('library.title')}
         subtitle={<span className="tnum">{t('library.count', { count: articles.length })}</span>}
         actions={
-          <Button onClick={onAdd}>
+          <Button onClick={() => setAdding(true)}>
             <FilePlus2 className="w-4 h-4" />
             <span>{t('library.add')}</span>
           </Button>
@@ -155,7 +157,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           <p className="font-serif text-lg text-ink-900">{t('library.emptyTitle')}</p>
           <p className="text-sm text-ink-500 max-w-md mx-auto">{t('library.emptyDesc')}</p>
           <div className="flex items-center justify-center gap-2 flex-wrap">
-            <Button onClick={onAdd}>{t('library.add')}</Button>
+            <Button onClick={() => setAdding(true)}>{t('library.add')}</Button>
             {missingSamples > 0 && (
               <Button variant="outline" onClick={onRestoreSamples}>
                 {t('library.restoreSamples')}
@@ -246,6 +248,35 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             {t('library.restoreSamples')}
           </button>
         </p>
+      )}
+
+      {adding && (
+        <Dialog label={t('library.addTitle')} onClose={() => setAdding(false)} className="max-w-sm">
+          <OverlayHeader
+            title={t('library.addTitle')}
+            closeLabel={t('common.close')}
+            onClose={() => setAdding(false)}
+          />
+          <div className="p-5 flex flex-col gap-3">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setAdding(false);
+                onAdd();
+              }}
+            >
+              {t('importFlow.manual')}
+            </Button>
+            <Button
+              onClick={() => {
+                setAdding(false);
+                navigate({ name: 'import' });
+              }}
+            >
+              {t('importFlow.entry')}
+            </Button>
+          </div>
+        </Dialog>
       )}
 
       {pendingDelete && (

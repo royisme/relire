@@ -30,6 +30,7 @@ test('the article editor shows the article it was opened for', async ({ page }) 
   await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();
 
   await page.getByRole('button', { name: 'Add article' }).first().click();
+  await page.getByRole('button', { name: 'Write or paste an article' }).click();
   await expect(title).toHaveValue('');
   await title.fill('Brouillon');
   await page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click();

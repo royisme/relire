@@ -11,6 +11,7 @@ import { PracticePage } from './components/practice/PracticePage';
 import { UnitView } from './components/practice/UnitView';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { ArticleEditorDialog } from './components/ArticleEditorDialog';
+import { ImportPage } from './components/import/ImportPage';
 import { LibraryView } from './components/LibraryView';
 import { OnboardingDialog } from './components/OnboardingDialog';
 import { SettingsPage } from './components/settings/SettingsPage';
@@ -420,6 +421,9 @@ export default function App() {
           )}
 
           <main className="flex-1 pb-16">
+            {route.name === 'import' && (
+              <ImportPage onCreated={(article) => setArticles((prev) => [article, ...prev])} />
+            )}
             {route.name === 'library' && (
               <LibraryView
                 articles={articles}

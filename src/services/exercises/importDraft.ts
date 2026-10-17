@@ -144,6 +144,17 @@ export function prepareImport(
       fail('missing-answer');
       continue;
     }
+    const missingContext = unit.items.some((item) => {
+      const type = item.type ?? unit.type;
+      return (
+        (type === 'NUMBER_DICTATION' && !item.audioText?.trim()) ||
+        (type === 'READING_CLOZE' && !unit.readingPassage?.content.trim())
+      );
+    });
+    if (missingContext) {
+      fail('invalid', ['Dictation requires audio text; reading cloze requires a reading passage']);
+      continue;
+    }
     const parsed = ExerciseUnitSchema.safeParse({
       ...unit,
       id: `unit-${makeId()}`,

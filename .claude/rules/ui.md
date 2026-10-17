@@ -19,6 +19,7 @@ Read `DESIGN.md` (tokens in `src/index.css`) and `PRODUCT.md` before changing a 
 - Speech: use `SpeakButton` / `SpeakIcon` / `useSpeechPhase` from `ui/speak-button`; never keep your own `isSpeaking` state.
 - Recording and scoring: use `components/shadowing/` and `hooks/useShadowingRecorder`, or in the reader `reader/PracticeCard` with `hooks/usePracticeCard`; screens never hold recorder state. Fixed bottom UI in the reader goes inside `reader/BottomDock` and uses the ink panel classes from `reader/panel.ts`.
 - Exercise controls: one component per exercise type, behind the interface in `practice/controls/types.ts` and registered in `controls/index.ts`. A control draws the answer and registers its text fields (`registerInput`); it never grades, saves, checks or handles Enter. State and persistence live in `hooks/useExerciseUnit`; the row (`ItemRow`) owns keys.
+- Import drafts stay in memory and use the existing route guard/Dialog; only successful atomic save releases protection before navigation. Native reload/close warnings apply only while dirty.
 - Errors appear inline next to what failed, with the real reason. No `alert()` for new code.
 
 ## Visual

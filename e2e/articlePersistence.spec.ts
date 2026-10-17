@@ -63,6 +63,7 @@ for (const suffix of ['', ' @phone']) {
     void ai;
     await page.goto('/');
     await page.getByRole('button', { name: 'Add article', exact: true }).first().click();
+    await page.getByRole('button', { name: 'Write or paste an article' }).click();
     const dialog = page.getByRole('dialog');
     await dialog.getByLabel('Title', { exact: true }).fill('Brouillon conservé');
     await dialog.locator('select').selectOption('A2');

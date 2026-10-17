@@ -34,6 +34,7 @@ import { clearUnitStates, deleteUnitRows, readResetToken } from './exerciseRows'
 import { ArticleGoneError } from './shadowing';
 
 export { subscribeExercises } from './exerciseEvents';
+export { createImportedMaterial } from './import';
 export { ArticleGoneError } from './shadowing';
 export {
   accuracyByGrammarTag,
