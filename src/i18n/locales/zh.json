@@ -686,7 +686,7 @@
     }
   },
   "notFound": {
-    "passage": "这篇短文已不可用。请返回书库选择其他内容。",
+    "passage": "这篇短文已不可用。请返回文章库选择其他内容。",
     "title": "找不到这个页面",
     "page": "这个地址在 Relire 里没有对应的页面。",
     "article": "文章库里没有这篇文章。它可能已被删除，或者链接来自另一个浏览器。",
@@ -795,7 +795,7 @@
     }
   },
   "notebook": {
-    "description": "保留练习中的错误答案。点按单词即可查询并收藏。",
+    "description": "保留练习中的错误答案。点击单词即可查询并加入生词本。",
     "empty": "还没有错题。练习中检查过的错误答案会显示在这里。",
     "loadError": "无法加载错题：{{reason}}",
     "resolved": "已解决",
@@ -804,7 +804,7 @@
     "openMaterial": "打开材料",
     "unitUnavailable": "单元已不可用",
     "materialUnavailable": "材料已删除",
-    "retryHelp": "打开已保存的练习，不更改答案。如果已经检查，请点击“重置本单元”并确认；作答历史会保留。",
+    "retryHelp": "打开已保存的练习，不更改答案。如果已经检查，请点击“重置本组”并确认；作答历史会保留。",
     "emptyWordAnalysis": "单词分析为空。"
   },
   "exerciseProgress": {
