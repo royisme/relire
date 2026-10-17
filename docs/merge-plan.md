@@ -58,7 +58,7 @@ Today Relire has four flat tabs (a left drawer below `md`) and Settings is a cen
 ### Cross-links that make it one app
 
 - Exercise prompts, reading passages (`READING_CLOZE`) and explanations use `ReaderWord`, so any word opens `WordDetailModal` and can be saved.
-- A `READING_CLOZE` passage opens in the reader, with listening, sentence analysis and shadowing.
+- Target: a `READING_CLOZE` passage opens in the reader, with listening, sentence analysis and shadowing. P5-C review confirmed the current link only opens the material's prose; it does not yet read a distinct unit passage, and empty-source materials have no prose there. This remains an explicit P5 gap, not a completed link.
 - Exercises generated from an article are saved as units with `materialId` pointing to that article. Today's drills are thrown away; after the merge they keep their attempts and feed the mistake notebook.
 - A mistake offers "add the word to vocabulary"; vocabulary review then schedules it.
 - Exercise audio (dictation, prompts) goes through `utils/speech` and the IndexedDB `audio` store, replacing FrenchLab's Cache API cache.
@@ -134,7 +134,7 @@ Mapping from FrenchLab: `gender-agreement` → `gender-number`; `nationality-adj
 
 - **P5-A first:** the mistake notebook uses `listMistakes`, including its existing resolved marker, grouped with `grammarAreaOf`. Explanation and vocabulary lookup reuse the existing AI and word-sheet flows. Retry opens the surviving exercise sheet and uses its existing confirmed reset when needed, without silently resetting a unit or deleting attempts. Missing units/materials keep their historical text but offer no broken links.
 - **P5-B, parallel with A:** the user confirmed both product gates: Progress/adaptive targeting includes retained attempts from deleted materials, and each generated adaptive set creates one new workbook saved atomically with its units. Every unit belongs to that workbook, never an arbitrary last-open article. Area accuracy sums correct/total counts, not an unweighted average of tag percentages. No account, new dependency or new persistence schema is required.
-- **P5-C after verified A/B:** add word lookup to exercise prompts, passages and explanations, preserving answer-control keyboard behavior and safe inline markup. The existing reading-passage link is already present and should be extended, not duplicated. Repair the Library entry for empty-text workbooks so it opens their material-specific Practice list, while readable materials continue to open Reader. Synchronize `PRODUCT.md` with the shipped Progress/adaptive behavior.
+- **P5-C after verified A/B:** word lookup, keyboard/safe-markup handling, empty-workbook Library routing and `PRODUCT.md` synchronization are delivered and parent-verified. The existing reading-passage link was preserved; review established that it opens material prose rather than a distinct unit passage. Independent passage reading/listening/shadowing remains incomplete. Before the follow-up, confirm source ownership with the user (recommended: the unit passage is a distinct reading/shadowing source, without overwriting material prose), then keep route, recordings, backup and study links consistent. Do not duplicate Reader or silently defer the promised learning link to P6.
 - **P5-D last:** review the new Chinese copy after these interfaces settle; then run the full integration checks and update completion evidence. Do not mark a task complete before review and verification.
 
 ## 7. Risks
