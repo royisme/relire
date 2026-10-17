@@ -53,8 +53,9 @@ test.describe('sidebar', () => {
     await nav.getByRole('link', { name: 'Progress' }).click();
     await expect(nav.getByRole('link', { name: 'Words' })).toHaveCount(0);
     await nav.getByRole('link', { name: 'Settings', exact: true }).click();
-    for (const name of ['Text AI', 'Speech', 'Prompts', 'Data and backup', 'About'])
+    for (const name of ['Text AI', 'Speech', 'Prompts', 'Data and backup'])
       await expect(nav.getByRole('link', { name })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'About', exact: true })).toHaveAttribute('href', '#/about');
     // "Practice" names both the area and its settings section; the section has its own address.
     await expect(nav.locator('a[href="#/settings/practice"]')).toBeVisible();
   });
@@ -120,13 +121,13 @@ test.describe('routes', () => {
 
   test('the study tab lives in the address, so it survives a reload and Back', async ({ page }) => {
     await page.goto('/#/study/words');
-    await page.getByRole('radio', { name: 'Shadowing' }).click();
+    await page.getByRole('link', { name: 'Shadowing', exact: true }).click();
     await expect(page).toHaveURL(/#\/study\/shadowing$/);
     await page.reload();
-    await expect(page.getByRole('radio', { name: 'Shadowing' })).toBeChecked();
+    await expect(page.getByRole('link', { name: 'Shadowing', exact: true })).toHaveAttribute('aria-current', 'page');
     expect(await stored(page, 'relire_study_tab')).toBeNull();
     await page.goBack();
-    await expect(page.getByRole('radio', { name: 'Words' })).toBeChecked();
+    await expect(page.getByRole('link', { name: 'Words', exact: true })).toHaveAttribute('aria-current', 'page');
   });
 
   test('a settings section can be opened by its address and survives a reload', async ({ page }) => {
@@ -282,6 +283,7 @@ test.describe('layout', () => {
     '#/settings/practice',
     '#/settings/prompts',
     '#/settings/data',
+    '#/about',
     '#/settings/about',
     '#/nowhere',
   ];
@@ -343,7 +345,17 @@ test.describe('phones', () => {
     await expect(page.locator('[data-sidebar]')).toHaveCount(0);
     await page.getByRole('button', { name: 'Menu' }).click();
     const drawer = page.getByRole('dialog', { name: 'Menu' });
-    for (const name of ['Read', 'My study', 'Words', 'Shadowing', 'Practice', 'Progress', 'Settings'])
+    for (const name of [
+      'Read',
+      'My study',
+      'Words',
+      'Shadowing',
+      'Mistakes',
+      'Practice',
+      'Progress',
+      'Settings',
+      'About',
+    ])
       await expect(drawer.getByRole('link', { name, exact: true })).toBeVisible();
     await drawer.getByRole('link', { name: 'Shadowing', exact: true }).click();
     await expect(drawer).toBeHidden();

@@ -13,7 +13,6 @@ import { getAppSettings, type AppSettings } from '../../utils/appSettings';
 import { SETTINGS_SECTIONS, type SettingsSection } from '../../utils/routes';
 import { Link } from '../shell/Link';
 import { PageHeader } from '../ui/page-header';
-import { AboutSection } from './AboutSection';
 import { DataSection } from './DataSection';
 import type { KeyRequest } from './keyRequest';
 import { PracticeSection } from './PracticeSection';
@@ -112,7 +111,6 @@ export function SettingsPage({ section, sectionsInSidebar, keyRequest, onSetting
             />
           )}
           {active === 'data' && <DataSection />}
-          {active === 'about' && <AboutSection />}
         </div>
       </div>
     </div>

@@ -14,10 +14,11 @@
  *   #/practice/:unitId       one exercise unit on one sheet
  *   #/progress               progress
  *   #/settings               section list on phones; desktop resolves it to the first section
- *   #/settings/:section      text-ai | speech | practice | prompts | data | about
+ *   #/settings/:section      text-ai | speech | practice | prompts | data
+ *   #/about                  About (old #/settings/about links redirect here)
  */
 
-export const SETTINGS_SECTIONS = ['text-ai', 'speech', 'practice', 'prompts', 'data', 'about'] as const;
+export const SETTINGS_SECTIONS = ['text-ai', 'speech', 'practice', 'prompts', 'data'] as const;
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
 export const STUDY_TABS = ['words', 'shadowing', 'mistakes'] as const;
@@ -33,6 +34,7 @@ export type Route =
   | { name: 'practice'; articleId?: string }
   | { name: 'unit'; unitId: string }
   | { name: 'progress' }
+  | { name: 'about' }
   /** `section: null` is the section list (phones). */
   | { name: 'settings'; section: SettingsSection | null }
   | { name: 'notFound' };
@@ -64,6 +66,8 @@ export function routeHref(route: Route): string {
       return `#/practice/${encodeURIComponent(route.unitId)}`;
     case 'progress':
       return '#/progress';
+    case 'about':
+      return '#/about';
     case 'settings':
       return route.section ? `#/settings/${route.section}` : '#/settings';
   }
@@ -115,6 +119,8 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
       route = { name: 'notFound' };
     }
   } else if (area === 'progress' && sub === undefined) route = { name: 'progress' };
+  else if ((area === 'about' && sub === undefined) || (area === 'settings' && sub === 'about'))
+    route = { name: 'about' };
   else if (area === 'settings' && sub === undefined) route = { name: 'settings', section: null };
   else if (area === 'settings' && isSection(sub)) route = { name: 'settings', section: sub };
   else route = { name: 'notFound' };
@@ -125,7 +131,7 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
 }
 
 /** Which area of the app a route belongs to (for highlighting the sidebar). */
-export type Area = 'read' | 'study' | 'practice' | 'progress' | 'settings';
+export type Area = 'read' | 'study' | 'practice' | 'progress' | 'settings' | 'about';
 
 export function areaOf(route: Route): Area | null {
   switch (route.name) {
@@ -137,6 +143,7 @@ export function areaOf(route: Route): Area | null {
     case 'study':
     case 'progress':
     case 'settings':
+    case 'about':
       return route.name;
     case 'practice':
     case 'unit':

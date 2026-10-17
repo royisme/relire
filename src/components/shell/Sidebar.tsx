@@ -6,7 +6,7 @@
 import { useTranslation } from 'react-i18next';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import type { Route } from '../../utils/routes';
-import { NavItem } from './NavItem';
+import { Button } from '../ui/button';
 import { NavTree } from './NavTree';
 
 interface SidebarProps {
@@ -27,21 +27,18 @@ export function Sidebar({ route, dueCount, expanded, onToggle }: SidebarProps) {
         expanded ? 'w-60' : 'w-14'
       }`}
     >
-      <NavTree
-        route={route}
-        dueCount={dueCount}
-        rail={!expanded}
-        footer={
-          onToggle && (
-            <NavItem
-              rail={!expanded}
-              icon={expanded ? PanelLeftClose : PanelLeftOpen}
-              label={label}
-              onClick={onToggle}
-            />
-          )
-        }
-      />
+      {onToggle && (
+        <div className={`px-2 pt-3 ${expanded ? 'flex justify-end' : ''}`}>
+          <Button variant="ghost" size="icon" aria-label={label} title={label} onClick={onToggle}>
+            {expanded ? (
+              <PanelLeftClose className="w-4 h-4" aria-hidden="true" />
+            ) : (
+              <PanelLeftOpen className="w-4 h-4" aria-hidden="true" />
+            )}
+          </Button>
+        </div>
+      )}
+      <NavTree route={route} dueCount={dueCount} rail={!expanded} />
     </aside>
   );
 }

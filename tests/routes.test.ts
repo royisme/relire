@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { areaOf, parseRoute, routeHref, type Route } from '../src/utils/routes';
+import { areaOf, parseRoute, routeHref, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../src/utils/routes';
 
 const roundTrip = (route: Route) => parseRoute(routeHref(route));
 
@@ -48,4 +48,31 @@ test('passage routes and durable sentence focus roundtrip without taking article
     expect(parseRoute(hash).route).toEqual({ name: 'passage', materialId: 'm', unitId: 'u' });
     expect(parseRoute(hash).canonical).toBe('#/passage/m/u');
   }
+});
+
+test('About is independent and old Settings About deep links canonicalize to it', () => {
+  const route: Route = { name: 'about' };
+  expect(roundTrip(route)).toEqual({ route, canonical: null });
+  expect(areaOf(route)).toBe('about');
+  for (const hash of ['#/settings/about', '#/settings/about/', '#/about/']) {
+    expect(parseRoute(hash)).toEqual({ route, canonical: '#/about' });
+  }
+  expect(SETTINGS_SECTIONS).toEqual(['text-ai', 'speech', 'practice', 'prompts', 'data']);
+  for (const hash of ['#/about/extra', '#/settings/about/extra', '#/settings/missing']) {
+    expect(parseRoute(hash).route.name).toBe('notFound');
+  }
+});
+
+test('all study and remaining Settings sections keep canonical deep links', () => {
+  for (const tab of STUDY_TABS) {
+    const route: Route = { name: 'study', tab };
+    expect(roundTrip(route)).toEqual({ route, canonical: null });
+  }
+  for (const section of SETTINGS_SECTIONS) {
+    const route: Route = { name: 'settings', section };
+    expect(roundTrip(route)).toEqual({ route, canonical: null });
+    expect(areaOf(route)).toBe('settings');
+  }
+  expect(parseRoute('#/study')).toEqual({ route: { name: 'study', tab: 'words' }, canonical: '#/study/words' });
+  expect(parseRoute('#/settings')).toEqual({ route: { name: 'settings', section: null }, canonical: null });
 });

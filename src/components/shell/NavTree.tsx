@@ -1,11 +1,10 @@
 /**
  * The app's places as one tree, drawn by the sidebar (expanded or as a rail) and by the phone drawer:
- * Read, My study (Words, Shadowing), Practice (with the open article's units) and Progress at the top;
- * install and Settings (with its sections while on a settings page) at the bottom. Owns which row is current; navigation itself is `Link`.
+ * Read, My study (Words, Shadowing, Mistakes), Practice (with the open article's units) and Progress at the top;
+ * install, Settings (with its sections while on a settings page) and About at the bottom. Owns which row is current; navigation itself is `Link`.
  */
-import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, BookmarkCheck, BookOpen, Download, Dumbbell, Settings } from 'lucide-react';
+import { BarChart3, BookmarkCheck, BookOpen, Download, Dumbbell, Info, Settings } from 'lucide-react';
 import { PWAInstallButton } from '../PWAInstallButton';
 import { areaOf, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../../utils/routes';
 import { NavItem } from './NavItem';
@@ -20,11 +19,9 @@ interface NavTreeProps {
   rail?: boolean;
   /** Called after a link is followed, so the phone drawer can close. */
   onNavigate?: () => void;
-  /** Optional row at the very bottom (the sidebar's collapse toggle). */
-  footer?: ReactNode;
 }
 
-export function NavTree({ route, dueCount, rail, onNavigate, footer }: NavTreeProps) {
+export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
   const { t } = useTranslation();
   const area = areaOf(route);
   const unitMaterial = useUnitMaterial(route.name === 'unit' ? route.unitId : null);
@@ -119,7 +116,13 @@ export function NavTree({ route, dueCount, rail, onNavigate, footer }: NavTreePr
               current={route.name === 'settings' && route.section === section ? 'page' : undefined}
             />
           ))}
-        {footer}
+        <NavItem
+          {...item}
+          to={{ name: 'about' }}
+          icon={Info}
+          label={t('settings.about.title')}
+          current={areaState('about', false)}
+        />
       </div>
     </nav>
   );

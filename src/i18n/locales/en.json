@@ -327,13 +327,11 @@
       "data": {
         "title": "Data and backup",
         "desc": "What is stored on this device, and backups."
-      },
-      "about": {
-        "title": "About",
-        "desc": "What Relire is and where your data goes."
       }
     },
     "about": {
+      "title": "About",
+      "desc": "What Relire is and where your data goes.",
       "what": "Relire is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
       "scope": "Relire is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",

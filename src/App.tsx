@@ -15,6 +15,7 @@ import { ImportPage } from './components/import/ImportPage';
 import { LibraryView } from './components/LibraryView';
 import { OnboardingDialog } from './components/OnboardingDialog';
 import { SettingsPage } from './components/settings/SettingsPage';
+import { AboutSection } from './components/settings/AboutSection';
 import type { KeyRequest } from './components/settings/keyRequest';
 
 import { Article, VocabWord, WordAnalysis, SentenceAnalysis, UserStats, PronunciationAssessment } from './types';
@@ -528,6 +529,7 @@ export default function App() {
             {route.name === 'study' && (
               <StudyView
                 tab={route.tab}
+                sectionsInSidebar={expanded}
                 mistakes={{
                   articles,
                   onMissingKey: requestKey,
@@ -589,6 +591,8 @@ export default function App() {
                 onReturn={(hash) => navigate(hash)}
               />
             )}
+
+            {route.name === 'about' && <AboutSection />}
 
             {route.name === 'notFound' && <NotFoundView reason="page" />}
           </main>
