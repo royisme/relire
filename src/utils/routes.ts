@@ -4,7 +4,9 @@
  *
  *   #/read                   library
  *   #/import                 material import workspace
- *   #/read/:articleId        reader
+ *   #/read/:articleId        material reader
+ *   #/passage/:materialId/:unitId  unit passage in the same Reader
+ *   Reader routes accept ?sentence=… for durable shadowing-log focus
  *   #/study/words            My study → Words
  *   #/study/shadowing        My study → Shadowing
  *   #/study/mistakes         My study → Mistakes
@@ -24,7 +26,8 @@ export type StudyTab = (typeof STUDY_TABS)[number];
 export type Route =
   | { name: 'library' }
   | { name: 'import' }
-  | { name: 'reader'; articleId: string }
+  | { name: 'reader'; articleId: string; sentence?: string }
+  | { name: 'passage'; materialId: string; unitId: string; sentence?: string }
   | { name: 'study'; tab: StudyTab }
   /** `articleId` is the material whose units are listed; absent means the app's default (the article read last). */
   | { name: 'practice'; articleId?: string }
@@ -39,6 +42,8 @@ export const LIBRARY: Route = { name: 'library' };
 const isSection = (s: string): s is SettingsSection => (SETTINGS_SECTIONS as readonly string[]).includes(s);
 const isStudyTab = (s: string): s is StudyTab => (STUDY_TABS as readonly string[]).includes(s);
 
+const sentenceQuery = (sentence?: string) => (sentence ? `?sentence=${encodeURIComponent(sentence)}` : '');
+
 /** The address for a route, always in its canonical spelling. */
 export function routeHref(route: Route): string {
   switch (route.name) {
@@ -48,7 +53,9 @@ export function routeHref(route: Route): string {
     case 'import':
       return '#/import';
     case 'reader':
-      return `#/read/${encodeURIComponent(route.articleId)}`;
+      return `#/read/${encodeURIComponent(route.articleId)}${sentenceQuery(route.sentence)}`;
+    case 'passage':
+      return `#/passage/${encodeURIComponent(route.materialId)}/${encodeURIComponent(route.unitId)}${sentenceQuery(route.sentence)}`;
     case 'study':
       return `#/study/${route.tab}`;
     case 'practice':
@@ -73,13 +80,26 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
 
   let route: Route;
   const [area, sub, ...extra] = parts;
-  if (!area) route = LIBRARY;
+  const focus = new URLSearchParams(query).get('sentence');
+  const sentence = focus && focus.trim() && focus.length <= 4000 ? focus : undefined;
+  if (area === 'passage' && parts.length === 3 && parts.every(Boolean)) {
+    try {
+      route = {
+        name: 'passage',
+        materialId: decodeURIComponent(sub),
+        unitId: decodeURIComponent(extra[0]),
+        ...(sentence ? { sentence } : {}),
+      };
+    } catch {
+      route = { name: 'notFound' };
+    }
+  } else if (!area) route = LIBRARY;
   else if (extra.length || parts.some((p) => p === '')) route = { name: 'notFound' };
   else if (area === 'import' && sub === undefined) route = { name: 'import' };
   else if (area === 'read' && sub === undefined) route = LIBRARY;
   else if (area === 'read') {
     try {
-      route = { name: 'reader', articleId: decodeURIComponent(sub) };
+      route = { name: 'reader', articleId: decodeURIComponent(sub), ...(sentence ? { sentence } : {}) };
     } catch {
       route = { name: 'notFound' };
     }
@@ -112,6 +132,7 @@ export function areaOf(route: Route): Area | null {
     case 'library':
     case 'import':
     case 'reader':
+    case 'passage':
       return 'read';
     case 'study':
     case 'progress':

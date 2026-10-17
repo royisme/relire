@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { buttonVariants } from '../ui/button';
 import { Link } from './Link';
 
-export function NotFoundView({ reason }: { reason: 'page' | 'article' | 'unit' }) {
+export function NotFoundView({ reason }: { reason: 'page' | 'article' | 'unit' | 'passage' }) {
   const { t } = useTranslation();
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center space-y-4">

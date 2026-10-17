@@ -34,6 +34,7 @@
     "dark": "深色"
   },
   "reader": {
+    "backToUnit": "返回练习",
     "stop": "停止",
     "tempo": "语速",
     "slowPace": "慢速",
@@ -570,9 +571,9 @@
   },
   "shadowingLog": {
     "title": "跟读本",
-    "subtitle": "你对文章句子的录音，保存在本设备上。每句保留最近三条。",
-    "article": "文章",
-    "allArticles": "全部文章",
+    "subtitle": "保存在本机的文章和练习短文录音，每句保留最近三次。",
+    "source": "来源",
+    "allSources": "全部来源",
     "referenceVoice": "范读使用设置中当前选择的声音，可能与你录音时不同。",
     "recorded": "已录 {{count}} 句",
     "text": "原文",
@@ -585,7 +586,7 @@
     "delete": "删除",
     "deleteTake": "删除你在 {{when}} 的录音",
     "changed": "原文已改动（{{count}}）",
-    "removed": "文章已删除（{{count}}）",
+    "removed": "来源已不可用（{{count}}）",
     "empty": "还没有录音。在阅读页点击句子旁的麦克风即可练习。",
     "loadFailed": "无法读取你的录音：{{msg}}",
     "deleteFailed": "录音没能删除：{{msg}}"
@@ -685,6 +686,7 @@
     }
   },
   "notFound": {
+    "passage": "这篇短文已不可用。请返回书库选择其他内容。",
     "title": "找不到这个页面",
     "page": "这个地址在 Relire 里没有对应的页面。",
     "article": "文章库里没有这篇文章。它可能已被删除，或者链接来自另一个浏览器。",

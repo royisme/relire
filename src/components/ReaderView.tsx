@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, ListChecks, Pause, Play, Mic } from 'lucide-react';
-import { Article } from '../types';
+import { readerIdentity, type ReaderDocument, type ReaderSource } from '../types/readerSource';
 import { usePronunciationMarkers } from '../hooks/usePronunciationMarkers';
 import { readerTokens } from '../utils/readerTokens';
 import { ReaderWord } from './reader/ReaderWord';
@@ -31,13 +31,14 @@ import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {
-  currentArticle: Article;
+  readingDocument: ReaderDocument;
+  source: ReaderSource;
   onBack: () => void;
   onWordClick: (word: string, sentence: string) => void;
   onSentenceClick: (sentence: string) => void;
   onMissingKey: () => void;
-  /** Opens My study → Shadowing at this article. */
-  onOpenShadowingLog: (articleId: string) => void;
+  /** Opens My study → Shadowing at this source. */
+  onOpenShadowingLog: (sourceId: string) => void;
   /** Sentence text to bring into view on opening (from the shadowing log). */
   focusText?: string | null;
   activeWord: string | null;
@@ -45,7 +46,8 @@ interface ReaderViewProps {
 }
 
 export const ReaderView: React.FC<ReaderViewProps> = ({
-  currentArticle,
+  readingDocument,
+  source,
   onBack,
   onWordClick,
   onSentenceClick,
@@ -56,6 +58,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   activeSentence,
 }) => {
   const { t, i18n } = useTranslation();
+  const sourceId = readerIdentity(source);
+  const target = (sentenceId: string, text: string) => ({
+    source,
+    sentenceId,
+    text,
+    ...(source.kind === 'passage' ? { passageContent: readingDocument.content } : {}),
+  });
   // Reading preferences
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('lg');
   // Sentences are identified by position, not text, because the same sentence can repeat ("Oui.").
@@ -164,9 +173,14 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     );
 
   // Paragraphs and sentences, cut the same way for reading and for listening.
-  const paragraphs = useMemo(() => splitArticle(currentArticle.content), [currentArticle.content]);
+  const paragraphs = useMemo(() => splitArticle(readingDocument.content), [readingDocument.content]);
   const flatSentences = useMemo(() => paragraphs.flat(), [paragraphs]);
-  const markers = usePronunciationMarkers(currentArticle.id, currentArticle.content, flatSentences, onMissingKey);
+  const markers = usePronunciationMarkers(
+    source.kind === 'article' ? source.articleId : sourceId,
+    readingDocument.content,
+    flatSentences,
+    onMissingKey,
+  );
   const readingAnchor = useRef<{ id: string; top: number } | null>(null);
   const preserveAnchor = (apply: () => void) => {
     const entry = [...sentenceEls.current.entries()].find(([, { el }]) => {
@@ -184,8 +198,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     if (el) window.scrollBy({ top: el.getBoundingClientRect().top - anchor.top, behavior: 'instant' });
   }, [markers.mode, markers.displayed]);
 
-  // A different article, or leaving the reader, closes the card.
-  useEffect(() => () => cardRef.current.close(), [currentArticle.id]);
+  // Changing the source or its text, or leaving the reader, closes the card.
+  useEffect(() => () => cardRef.current.close(), [sourceId, readingDocument.content]);
   // A lookup sheet's scrim would cover a running take: end it, keep the card.
   useEffect(() => {
     if (activeWord || activeSentence) cardRef.current.interrupt();
@@ -229,18 +243,18 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     if (!entry) return;
     entry[1].el.scrollIntoView({ block: 'center', behavior: 'instant' });
     focusSentence(entry[0]);
-  }, [focusText, currentArticle.id]);
+  }, [focusText, sourceId]);
 
   // Listening to the whole article: one sentence after another, the current one highlighted.
   const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
-  const listening = sequence.id === currentArticle.id;
+  const listening = sequence.id === sourceId;
   const listeningId = listening ? (flatSentences[sequence.index]?.id ?? null) : null;
 
   const toggleListening = () => {
     if (listening) toggleSequence();
     else
       startSequence(
-        currentArticle.id,
+        sourceId,
         flatSentences.map((s) => s.text),
       );
   };
@@ -257,8 +271,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     }
   }, [listeningId]);
 
-  // A different article, or leaving the reader, ends listening.
-  useEffect(() => () => stopSequence(), [currentArticle.id]);
+  // Changing the source or its text, or leaving the reader, ends listening.
+  useEffect(() => () => stopSequence(), [sourceId, readingDocument.content]);
 
   const getFontSizeClass = () => {
     switch (fontSize) {
@@ -369,7 +383,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule);
     };
-  }, [touch, actionId, fontSize, currentArticle.id, currentArticle.content, markers.mode, markers.displayed]);
+  }, [touch, actionId, fontSize, sourceId, readingDocument.content, markers.mode, markers.displayed]);
 
   const toolbarButton = (active: boolean) =>
     active ? 'bg-accent-700 text-on-fill hover:bg-accent-800' : 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
@@ -393,7 +407,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             className="mr-auto -ml-2 h-10 inline-flex items-center gap-1.5 px-2 rounded-md text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>{t('library.back')}</span>
+            <span>{t(source.kind === 'passage' ? 'reader.backToUnit' : 'library.back')}</span>
           </button>
 
           <div
@@ -428,14 +442,16 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             <span>{t('reader.listenAll')}</span>
           </Button>
 
-          <Link
-            to={{ name: 'practice', articleId: currentArticle.id }}
-            className={buttonVariants({ variant: 'outline' })}
-            title={t('reader.makeExercisesHint')}
-          >
-            <ListChecks className="w-4 h-4" aria-hidden="true" />
-            <span>{t('reader.makeExercises')}</span>
-          </Link>
+          {source.kind === 'article' && (
+            <Link
+              to={{ name: 'practice', articleId: source.articleId }}
+              className={buttonVariants({ variant: 'outline' })}
+              title={t('reader.makeExercisesHint')}
+            >
+              <ListChecks className="w-4 h-4" aria-hidden="true" />
+              <span>{t('reader.makeExercises')}</span>
+            </Link>
+          )}
 
           <button
             onClick={() => setIsSpeedControlOpen(!isSpeedControlOpen)}
@@ -451,7 +467,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           </button>
 
           <PronunciationControls
-            key={currentArticle.id}
+            key={sourceId}
             controller={markers}
             onDisplay={() => preserveAnchor(markers.display)}
             onMode={(marked) => preserveAnchor(() => markers.setMode(marked))}
@@ -513,12 +529,12 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           <div className={`reading ${getFontSizeClass()} ${markers.mode ? 'reading-markers' : ''}`}>
             <header className="mb-8">
               <p className="text-xs text-ink-500 font-sans mb-2">
-                {formatLevel(currentArticle.level, i18n.language)}
-                {currentArticle.category ? ` · ${currentArticle.category}` : ''}
-                {currentArticle.source ? ` · ${currentArticle.source}` : ''}
+                {formatLevel(readingDocument.level, i18n.language)}
+                {readingDocument.category ? ` · ${readingDocument.category}` : ''}
+                {readingDocument.source ? ` · ${readingDocument.source}` : ''}
               </p>
               <h1 className="reading-title font-serif font-semibold text-3xl sm:text-4xl leading-tight">
-                {cleanArticleTitle(currentArticle.title)}
+                {cleanArticleTitle(readingDocument.title)}
               </h1>
             </header>
 
@@ -604,9 +620,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                 </button>
                 <button
                   data-practice-entry
-                  onClick={() =>
-                    card.open({ articleId: currentArticle.id, sentenceId: toolbar.id, text: toolbar.text })
-                  }
+                  onClick={() => card.open(target(toolbar.id, toolbar.text))}
                   disabled={cardBusy}
                   aria-label={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
                   title={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
@@ -624,16 +638,14 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       {(listening || card.phase !== 'closed' || barSentence) && (
         <BottomDock>
           {card.phase !== 'closed' && (
-            <PracticeCard card={card} movable={!touch} onOpenLog={() => onOpenShadowingLog(currentArticle.id)} />
+            <PracticeCard card={card} movable={!touch} onOpenLog={() => onOpenShadowingLog(sourceId)} />
           )}
           {barSentence && (
             <SentenceBar
               text={barSentence.text}
               practiseBlocked={cardBusy}
               onExplain={() => onSentenceClick(barSentence.text)}
-              onPractise={() =>
-                card.open({ articleId: currentArticle.id, sentenceId: barSentence.id, text: barSentence.text })
-              }
+              onPractise={() => card.open(target(barSentence.id, barSentence.text))}
               onDismiss={() => setDismissedId(barSentence.id)}
             />
           )}

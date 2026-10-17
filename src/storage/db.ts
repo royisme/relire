@@ -348,6 +348,18 @@ export async function importData(data: RestoreInput) {
       throw err;
     }
   }
+  // Historical absent sources are valid; surviving units must never reassign passage history.
+  try {
+    for (const record of data.shadowing ?? []) {
+      if (!record.passage) continue;
+      const unit = await tx.objectStore('units').get(record.passage.unitId);
+      if (unit && unit.materialId !== record.articleId) throw new Error('recordings: passage material mismatch');
+    }
+  } catch (err) {
+    tx.abort();
+    await tx.done.catch(() => undefined);
+    throw err;
+  }
   await tx.done;
   if (touchesExercises || data.articles) exercisesChanged();
 }

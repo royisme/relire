@@ -114,9 +114,9 @@ async function readingCloze(page: Page, phone: boolean) {
   await expect(two.getByText('ennuie', { exact: true })).toBeVisible();
   await fits(page);
 
-  // The passage leads back into the material it came from.
+  // The passage opens its own stored text, not the parent material’s prose.
   await page.getByRole('link', { name: 'Open in the reader' }).click();
-  await expect(page).toHaveURL(/#\/read\/petit-prince$/);
+  await expect(page).toHaveURL(/#\/passage\/petit-prince\/unit-reading-cloze$/);
   await expect(page.locator('article [data-sentence]').first()).toBeVisible();
 }
 

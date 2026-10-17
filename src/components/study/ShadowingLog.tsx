@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight, ChevronDown, Trash2 } from 'lucide-react';
 import type { Article } from '../../types';
-import type { ShadowingTake } from '../../types/shadowing';
+import type { ExerciseUnit } from '../../types/exercises';
+import type { ShadowingSentence, ShadowingTake } from '../../types/shadowing';
 import { useShadowingLog, type LogRow } from '../../hooks/useShadowingLog';
 import { takeKey } from '../../hooks/usePracticeCard';
 import { deleteTake } from '../../storage/shadowing';
@@ -22,15 +23,17 @@ const clock = (ms: number) => {
 
 interface Props {
   articles: Article[];
-  /** Article to show first (from the practice card's "All recordings"). */
-  initialArticleId: string | null;
-  onOpenSentence: (articleId: string, text: string) => void;
+  units: ExerciseUnit[] | null;
+  unitsError: string | null;
+  /** Source to show first (from the practice card's "All recordings"). */
+  initialSourceId: string | null;
+  onOpenSentence: (record: ShadowingSentence) => void;
 }
 
-export function ShadowingLog({ articles, initialArticleId, onOpenSentence }: Props) {
+export function ShadowingLog({ articles, units, unitsError, initialSourceId, onOpenSentence }: Props) {
   const { t } = useTranslation();
-  const log = useShadowingLog(articles);
-  const [articleId, setArticleId] = useState<string>(initialArticleId ?? 'all');
+  const log = useShadowingLog(articles, units, unitsError);
+  const [sourceId, setSourceId] = useState<string>(initialSourceId ?? 'all');
   const [failure, setFailure] = useState<string | null>(null);
 
   // Leaving the log stops a recording it is playing.
@@ -41,7 +44,7 @@ export function ShadowingLog({ articles, initialArticleId, onOpenSentence }: Pro
     [],
   );
 
-  const groups = articleId === 'all' ? log.groups : log.groups.filter((g) => g.article.id === articleId);
+  const groups = sourceId === 'all' ? log.groups : log.groups.filter((g) => g.id === sourceId);
   const remove = (key: string, take: ShadowingTake) => {
     setFailure(null);
     deleteTake(key, take.id).catch((err) => setFailure(errorMessage(err)));
@@ -56,16 +59,16 @@ export function ShadowingLog({ articles, initialArticleId, onOpenSentence }: Pro
         actions={
           log.groups.length > 1 ? (
             <label className="flex items-center gap-2 text-sm text-ink-700">
-              <span>{t('shadowingLog.article')}</span>
+              <span>{t('shadowingLog.source')}</span>
               <select
-                value={articleId}
-                onChange={(e) => setArticleId(e.target.value)}
+                value={sourceId}
+                onChange={(e) => setSourceId(e.target.value)}
                 className="h-10 max-w-[16rem] rounded-md border border-ink-200 bg-surface px-2 text-sm text-ink-900"
               >
-                <option value="all">{t('shadowingLog.allArticles')}</option>
+                <option value="all">{t('shadowingLog.allSources')}</option>
                 {log.groups.map((g) => (
-                  <option key={g.article.id} value={g.article.id}>
-                    {cleanArticleTitle(g.article.title)}
+                  <option key={g.id} value={g.id}>
+                    {cleanArticleTitle(g.document.title)}
                   </option>
                 ))}
               </select>
@@ -92,9 +95,9 @@ export function ShadowingLog({ articles, initialArticleId, onOpenSentence }: Pro
         <>
           <p className="text-xs text-ink-500">{t('shadowingLog.referenceVoice')}</p>
           {groups.map((group) => (
-            <section key={group.article.id} className="space-y-2">
+            <section key={group.id} className="space-y-2">
               <h3 className="font-serif text-lg font-semibold text-ink-900 break-words">
-                {cleanArticleTitle(group.article.title)}
+                {cleanArticleTitle(group.document.title)}
                 <span className="ml-2 font-sans text-xs font-normal text-ink-500">
                   {t('shadowingLog.recorded', { count: group.rows.length + group.changed.length })}
                 </span>
@@ -106,12 +109,7 @@ export function ShadowingLog({ articles, initialArticleId, onOpenSentence }: Pro
               </div>
               <ul className="divide-y divide-ink-200 border-y border-ink-200">
                 {group.rows.map((row) => (
-                  <Row
-                    key={row.record.key}
-                    row={row}
-                    onOpen={() => onOpenSentence(group.article.id, row.record.text)}
-                    onDelete={remove}
-                  />
+                  <Row key={row.record.key} row={row} onOpen={() => onOpenSentence(row.record)} onDelete={remove} />
                 ))}
               </ul>
               {group.changed.length > 0 && (
@@ -123,7 +121,7 @@ export function ShadowingLog({ articles, initialArticleId, onOpenSentence }: Pro
               )}
             </section>
           ))}
-          {articleId === 'all' && log.removed.length > 0 && (
+          {sourceId === 'all' && log.removed.length > 0 && (
             <Orphans
               title={t('shadowingLog.removed', { count: log.removed.length })}
               rows={log.removed}

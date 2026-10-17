@@ -1,5 +1,5 @@
 /**
- * The learner's shadowing takes: one bounded record per article sentence,
+ * The learner's shadowing takes: one bounded record per source sentence,
  * first in first out past MAX_TAKES. Owns the `shadowing` store, its backup
  * format and validation; never trimmed like synthesized audio.
  */
@@ -7,10 +7,21 @@ import { base64ToBlob, blobToBase64 } from '../utils/binary';
 import { MAX_TAKES, type ShadowingSentence, type ShadowingTake } from '../types/shadowing';
 import { normalizeText } from './audio';
 import { db, requestPersistence } from './db';
+import { materialIdOf, type ReaderSource } from '../types/readerSource';
+import { splitArticle } from '../utils/sentences';
 
 export const shadowingKey = (articleId: string, text: string) => `${articleId}|${normalizeText(text)}`;
 
-/** The article was deleted while a take was being saved. */
+export const sourceOfRecording = (record: Pick<ShadowingSentence, 'articleId' | 'passage'>): ReaderSource =>
+  record.passage
+    ? { kind: 'passage', materialId: record.articleId, unitId: record.passage.unitId }
+    : { kind: 'article', articleId: record.articleId };
+export const sourceSentenceKey = (source: ReaderSource, text: string) =>
+  source.kind === 'article'
+    ? shadowingKey(source.articleId, text)
+    : `passage:${encodeURIComponent(JSON.stringify([source.materialId, source.unitId, normalizeText(text)]))}`;
+
+/** The material or passage is no longer the source of a take being saved. Legacy error name stays valid. */
 export class ArticleGoneError extends Error {
   constructor() {
     super('Article deleted');
@@ -29,35 +40,71 @@ export function subscribeShadowing(listener: () => void): () => void {
 
 let persistenceAsked = false;
 
-/** Appends a take, dropping the oldest past MAX_TAKES, in one transaction. Resolves after commit. */
+/**
+ * Appends a take, dropping the oldest past MAX_TAKES, in one transaction. Resolves after commit.
+ * Reader captures pass their exact passage content so an edit cannot accept a stopped late take.
+ */
 export async function addTake(
-  articleId: string,
+  source: string | ReaderSource,
   text: string,
   take: { blob: Blob; mimeType: string; durationMs: number; recordedAt?: number },
+  expectedPassage?: string,
 ): Promise<ShadowingSentence> {
   const d = await db();
-  const tx = d.transaction(['articles', 'shadowing'], 'readwrite');
-  // Checked inside the transaction: an article deleted meanwhile gets no orphan take.
-  if (!(await tx.objectStore('articles').getKey(articleId))) {
-    tx.abort();
+  const owner: ReaderSource = typeof source === 'string' ? { kind: 'article', articleId: source } : source;
+  const articleId = materialIdOf(owner);
+  const tx = d.transaction(['articles', 'units', 'shadowing'], 'readwrite');
+  let record: ShadowingSentence;
+  try {
+    // Checked inside the transaction: an article deleted meanwhile gets no orphan take.
+    if (!(await tx.objectStore('articles').getKey(articleId))) {
+      throw new ArticleGoneError();
+    }
+    if (owner.kind === 'passage') {
+      const unit = await tx.objectStore('units').get(owner.unitId);
+      const content = unit?.readingPassage?.content;
+      if (
+        unit?.materialId !== articleId ||
+        !content?.trim() ||
+        (expectedPassage !== undefined && expectedPassage !== content) ||
+        !splitArticle(content)
+          .flat()
+          .some((s) => normalizeText(s.text) === normalizeText(text))
+      ) {
+        throw new ArticleGoneError();
+      }
+    }
+    const store = tx.objectStore('shadowing');
+    const key = sourceSentenceKey(owner, text);
+    const existing = await store.get(key);
+    const entry: ShadowingTake = {
+      id: crypto.randomUUID(),
+      recordedAt: take.recordedAt ?? Date.now(),
+      mimeType: take.mimeType,
+      durationMs: take.durationMs,
+      bytes: take.blob.size,
+      blob: take.blob,
+    };
+    const takes = [...(existing?.takes ?? []), entry].slice(-MAX_TAKES);
+    record = {
+      key,
+      articleId,
+      ...(owner.kind === 'passage' ? { passage: { unitId: owner.unitId } } : {}),
+      text: text.trim(),
+      updatedAt: entry.recordedAt,
+      takes,
+    };
+    await store.put(record);
+    await tx.done;
+  } catch (err) {
+    try {
+      tx.abort();
+    } catch {
+      /* The transaction may already have aborted. */
+    }
     await tx.done.catch(() => undefined);
-    throw new ArticleGoneError();
+    throw err;
   }
-  const store = tx.objectStore('shadowing');
-  const key = shadowingKey(articleId, text);
-  const existing = await store.get(key);
-  const entry: ShadowingTake = {
-    id: crypto.randomUUID(),
-    recordedAt: take.recordedAt ?? Date.now(),
-    mimeType: take.mimeType,
-    durationMs: take.durationMs,
-    bytes: take.blob.size,
-    blob: take.blob,
-  };
-  const takes = [...(existing?.takes ?? []), entry].slice(-MAX_TAKES);
-  const record: ShadowingSentence = { key, articleId, text: text.trim(), updatedAt: entry.recordedAt, takes };
-  await store.put(record);
-  await tx.done;
   changed();
   if (!persistenceAsked) {
     persistenceAsked = true;
@@ -66,11 +113,17 @@ export async function addTake(
   return record;
 }
 
-export async function getShadowingSentence(articleId: string, text: string): Promise<ShadowingSentence | undefined> {
-  return (await db()).get('shadowing', shadowingKey(articleId, text));
+export async function getShadowingSentence(
+  source: string | ReaderSource,
+  text: string,
+): Promise<ShadowingSentence | undefined> {
+  return (await db()).get(
+    'shadowing',
+    sourceSentenceKey(typeof source === 'string' ? { kind: 'article', articleId: source } : source, text),
+  );
 }
 
-/** All records, or one article's. Values include their blobs (IndexedDB returns whole records). */
+/** All records, or one material's (prose and passages). Values include their blobs (IndexedDB returns whole records). */
 export async function listShadowing(articleId?: string): Promise<ShadowingSentence[]> {
   const d = await db();
   return articleId ? d.getAllFromIndex('shadowing', 'articleId', articleId) : d.getAll('shadowing');
@@ -130,6 +183,7 @@ interface TakeBackup {
 
 export interface ShadowingBackup {
   articleId: string;
+  passage?: { unitId: string };
   text: string;
   takes: TakeBackup[];
 }
@@ -147,7 +201,12 @@ export async function exportShadowing(): Promise<ShadowingBackup[]> {
         data: await blobToBase64(take.blob),
       });
     }
-    out.push({ articleId: record.articleId, text: record.text, takes });
+    out.push({
+      articleId: record.articleId,
+      ...(record.passage ? { passage: record.passage } : {}),
+      text: record.text,
+      takes,
+    });
   }
   return out;
 }
@@ -177,7 +236,15 @@ export function parseShadowingBackup(value: unknown): ShadowingSentence[] {
       throw new ShadowingBackupError(`${where}: article or text missing`);
     if (!Array.isArray(item.takes) || item.takes.length === 0 || item.takes.length > MAX_TAKES)
       throw new ShadowingBackupError(`${where}: 1 to ${MAX_TAKES} takes expected`);
-    const key = shadowingKey(item.articleId, item.text);
+    if (
+      item.passage !== undefined &&
+      (!item.passage ||
+        typeof item.passage !== 'object' ||
+        !isText(item.passage.unitId, 200) ||
+        Object.keys(item.passage).some((key) => key !== 'unitId'))
+    )
+      throw new ShadowingBackupError(`${where}: malformed passage provenance`);
+    const key = sourceSentenceKey(sourceOfRecording({ articleId: item.articleId, passage: item.passage }), item.text);
     if (records.has(key)) throw new ShadowingBackupError(`${where}: duplicate sentence`);
     const takes = item.takes
       .map((take, at): ShadowingTake => {
@@ -209,6 +276,7 @@ export function parseShadowingBackup(value: unknown): ShadowingSentence[] {
     records.set(key, {
       key,
       articleId: item.articleId,
+      ...(item.passage ? { passage: item.passage } : {}),
       text: item.text.trim(),
       updatedAt: takes[takes.length - 1].recordedAt,
       takes,

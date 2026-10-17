@@ -1,6 +1,6 @@
 # Shadowing log: design
 
-Status: proposal on `feat/shadowing-log`. Revised after a first GPT (Codex) review, redesigned with the user around a record button and a practice card, then revised after a second review. Nothing implemented yet.
+Status: implemented. This document records the original card/log design; current routes, passage sources and storage lifetimes are in `docs/architecture.md`.
 
 ## Problem
 
@@ -36,6 +36,10 @@ Building: the ● button in the sentence pill; the practice card (record/stop/re
 Not building in v1: scoring or any assessment call; the player's automatic shadow mode; static waveforms of takes and reference (they need audio decoding and come with scoring); a mark on recorded sentences in the reader; a "recent" sort; pitch display; simultaneous shadowing; automatic stop; sharing single recordings; sync.
 
 **Cost note.** v1 never calls an assessment. The reference audio is the article's normal synthesized speech: if a sentence's clip is not stored yet (or was trimmed), playing the reference synthesizes it through the configured speech provider, which can cost a request, exactly like pressing play in the reader. The UI never says "free".
+
+## Passage-source extension
+
+The implemented independent unit-passage source is documented in `docs/architecture.md` (“Distinct passage sources and recording compatibility”). It reuses this card/log and the v5 store, adds optional `passage: { unitId }` provenance with a disjoint encoded key, and keeps legacy article keys/backups unchanged. Unit reset retains recordings; unit deletion leaves unavailable history that still roundtrips backups; changed text has no broken open link. Deleting the parent material removes prose and passage takes together. Reader return links include the source and sentence in the hash.
 
 ## Data
 

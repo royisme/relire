@@ -74,7 +74,14 @@ export function NavTree({ route, dueCount, rail, onNavigate, footer }: NavTreePr
           ))}
         <NavItem
           {...item}
-          to={{ name: 'practice', ...(unitMaterial ? { articleId: unitMaterial } : {}) }}
+          to={{
+            name: 'practice',
+            ...(route.name === 'passage'
+              ? { articleId: route.materialId }
+              : unitMaterial
+                ? { articleId: unitMaterial }
+                : {}),
+          }}
           icon={Dumbbell}
           label={t('nav.practice')}
           // The list is a page of its own; an open unit makes Practice its parent.

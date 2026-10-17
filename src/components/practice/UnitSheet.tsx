@@ -5,7 +5,7 @@
  * only what is about this screen: the field the character bar types into, the
  * open explanation and the open reset confirmation. A READING_CLOZE unit's
  * passage sits beside the questions from `md` (stacked above them on phones)
- * and links to the material in the reader.
+ * and opens that exact passage in the reader.
  */
 import { useState } from 'react';
 import { ArrowLeft, ListChecks, Loader2, RotateCcw } from 'lucide-react';
@@ -21,7 +21,7 @@ import { ItemRow } from './ItemRow';
 import { ResetDialog } from './ResetDialog';
 import { InlineMarkup } from './InlineMarkup';
 
-/** The unit's reading passage, and for a cloze unit the way back into the material. */
+/** The unit's reading passage and its distinct Reader address. */
 function PassageSection({
   unit,
   beside,
@@ -48,9 +48,9 @@ function PassageSection({
         <InlineMarkup text={passage.content} onWord={onWord} />
       </p>
       {passage.translation && <p className="text-sm leading-relaxed text-ink-600">{passage.translation}</p>}
-      {beside && (
+      {passage.content.trim() && (
         <Link
-          to={{ name: 'reader', articleId: unit.materialId }}
+          to={{ name: 'passage', materialId: unit.materialId, unitId: unit.id }}
           className="inline-flex h-10 items-center rounded-md text-sm font-medium text-accent-900 hover:underline underline-offset-4"
         >
           {t('practice.openInReader')}

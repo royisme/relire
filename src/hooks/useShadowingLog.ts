@@ -1,12 +1,14 @@
 /**
- * The shadowing log's data: every recorded sentence, ordered by the article's
- * current text. Records whose sentence no longer appears are "changed"; records
- * whose article is gone are "removed". Order is never stored, always derived.
+ * The shadowing log's data: every recorded sentence, ordered by its
+ * current source text. Records whose sentence no longer appears are "changed"; records
+ * whose source is gone are "removed". Order is never stored, always derived.
  */
 import { useEffect, useMemo, useState } from 'react';
 import type { Article } from '../types';
+import type { ExerciseUnit } from '../types/exercises';
+import { passageDocument, readerIdentity, type ReaderDocument } from '../types/readerSource';
 import type { ShadowingSentence } from '../types/shadowing';
-import { listShadowing, subscribeShadowing } from '../storage/shadowing';
+import { listShadowing, subscribeShadowing, sourceOfRecording } from '../storage/shadowing';
 import { normalizeText } from '../storage/audio';
 import { errorMessage } from '../services/ai/errors';
 import { splitArticle } from '../utils/sentences';
@@ -18,12 +20,13 @@ export interface LogRow {
 }
 
 export interface LogGroup {
-  article: Article;
+  id: string;
+  document: ReaderDocument;
   rows: LogRow[];
   changed: LogRow[];
 }
 
-export function useShadowingLog(articles: Article[]) {
+export function useShadowingLog(articles: Article[], units: ExerciseUnit[] | null, unitsError: string | null) {
   const [records, setRecords] = useState<ShadowingSentence[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,16 +50,34 @@ export function useShadowingLog(articles: Article[]) {
   }, []);
 
   const { groups, removed } = useMemo(() => {
-    const byArticle = new Map<string, ShadowingSentence[]>();
-    for (const record of records ?? [])
-      byArticle.set(record.articleId, [...(byArticle.get(record.articleId) ?? []), record]);
+    const bySource = new Map<string, ShadowingSentence[]>();
+    for (const record of records ?? []) {
+      const id = readerIdentity(sourceOfRecording(record));
+      bySource.set(id, [...(bySource.get(id) ?? []), record]);
+    }
     const groups: LogGroup[] = [];
-    for (const article of articles) {
-      const list = byArticle.get(article.id);
+    const sources: { id: string; document: ReaderDocument }[] = articles.map((article) => ({
+      id: readerIdentity({ kind: 'article', articleId: article.id }),
+      document: article,
+    }));
+    for (const unit of units ?? []) {
+      const material = articles.find((a) => a.id === unit.materialId);
+      const document = material && passageDocument(material, unit);
+      if (document)
+        sources.push({
+          id: readerIdentity({ kind: 'passage', materialId: unit.materialId, unitId: unit.id }),
+          document: {
+            ...document,
+            title: unit.title === document.title ? unit.title : `${unit.title} — ${document.title}`,
+          },
+        });
+    }
+    for (const source of sources) {
+      const list = bySource.get(source.id);
       if (!list) continue;
-      byArticle.delete(article.id);
+      bySource.delete(source.id);
       const first = new Map<string, { id: string; index: number }>();
-      splitArticle(article.content)
+      splitArticle(source.document.content)
         .flat()
         .forEach((sentence, index) => {
           const key = normalizeText(sentence.text);
@@ -70,11 +91,16 @@ export function useShadowingLog(articles: Article[]) {
         else changed.push({ record, sentenceId: null });
       }
       rows.sort((a, b) => a.index - b.index);
-      groups.push({ article, rows, changed });
+      groups.push({ ...source, rows, changed });
     }
-    const removed = [...byArticle.values()].flat().map((record): LogRow => ({ record, sentenceId: null }));
+    const removed = [...bySource.values()].flat().map((record): LogRow => ({ record, sentenceId: null }));
     return { groups, removed };
-  }, [records, articles]);
+  }, [records, articles, units]);
 
-  return { loading: records === null && !error, error, groups, removed };
+  return {
+    loading: (records === null && !error) || (units === null && !unitsError),
+    error: error ?? unitsError,
+    groups,
+    removed,
+  };
 }

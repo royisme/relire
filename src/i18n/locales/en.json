@@ -34,6 +34,7 @@
     "dark": "Dark"
   },
   "reader": {
+    "backToUnit": "Back to exercises",
     "stop": "Stop",
     "tempo": "Speed",
     "slowPace": "Slow",
@@ -575,9 +576,9 @@
   },
   "shadowingLog": {
     "title": "Shadowing",
-    "subtitle": "Your recordings of article sentences, kept on this device. The last three of each sentence are kept.",
-    "article": "Article",
-    "allArticles": "All articles",
+    "subtitle": "Your recordings of article and exercise-passage sentences, kept on this device. The last three of each sentence are kept.",
+    "source": "Source",
+    "allSources": "All sources",
     "referenceVoice": "The reference plays in the voice chosen in Settings now, which may differ from when you recorded.",
     "recorded": "Sentences recorded: {{count}}",
     "text": "Text",
@@ -590,7 +591,7 @@
     "delete": "Delete",
     "deleteTake": "Delete your recording from {{when}}",
     "changed": "Original text changed ({{count}})",
-    "removed": "Article removed ({{count}})",
+    "removed": "Source unavailable ({{count}})",
     "empty": "No recordings yet. In the reader, press the microphone next to a sentence to practise it.",
     "loadFailed": "Could not load your recordings: {{msg}}",
     "deleteFailed": "Could not delete the recording: {{msg}}"
@@ -690,6 +691,7 @@
     }
   },
   "notFound": {
+    "passage": "This passage is no longer available. Return to the library to choose another source.",
     "title": "This page is not here",
     "page": "This address does not match a page in Relire.",
     "article": "That article is not in your library. It may have been deleted, or the link comes from another browser.",

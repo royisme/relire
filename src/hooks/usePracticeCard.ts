@@ -5,6 +5,7 @@
  * See docs/shadowing-log-design.md (Recording flow).
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { readerIdentity, type ReaderSource } from '../types/readerSource';
 import type { ShadowingTake } from '../types/shadowing';
 import { addTake, ArticleGoneError, getShadowingSentence, subscribeShadowing } from '../storage/shadowing';
 import { errorMessage } from '../services/ai/errors';
@@ -31,7 +32,8 @@ export type CardPhase = 'closed' | 'acquiring' | 'recording' | 'saving' | 'ready
 export type CardNotice = 'saved' | 'tooShort' | 'listeningEnded' | 'busy' | null;
 
 export interface PracticeTarget {
-  articleId: string;
+  source: ReaderSource;
+  passageContent?: string;
   /** Sentence id in the reader, to return focus and highlight. */
   sentenceId: string;
   text: string;
@@ -85,7 +87,7 @@ export function usePracticeCard() {
 
   const loadLatest = useCallback(async (of: PracticeTarget) => {
     try {
-      const record = await getShadowingSentence(of.articleId, of.text);
+      const record = await getShadowingSentence(of.source, of.text);
       if (targetRef.current !== of) return;
       setLatest(record?.takes.at(-1) ?? null);
       setCount(record?.takes.length ?? 0);
@@ -160,7 +162,7 @@ export function usePracticeCard() {
     async (of: PracticeTarget, result: TakeResult, mine: number) => {
       go('saving');
       try {
-        const record = await addTake(of.articleId, of.text, result);
+        const record = await addTake(of.source, of.text, result, of.passageContent);
         unsaved.current = null;
         if (mine !== session.current) return;
         setLatest(record.takes.at(-1) ?? null);
@@ -216,7 +218,10 @@ export function usePracticeCard() {
     (next: PracticeTarget) => {
       const busy = ['acquiring', 'recording', 'saving', 'unsaved'].includes(phaseRef.current);
       if (busy) return false;
-      const same = targetRef.current?.articleId === next.articleId && targetRef.current.text === next.text;
+      const same =
+        targetRef.current &&
+        readerIdentity(targetRef.current.source) === readerIdentity(next.source) &&
+        targetRef.current.text === next.text;
       const of = same ? targetRef.current! : next;
       if (!same) {
         targetRef.current = of;

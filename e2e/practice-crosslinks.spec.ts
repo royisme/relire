@@ -109,7 +109,10 @@ for (const phone of [false, true]) {
     expect(ai.prompts.word[0]).not.toContain('Un jour, le Petit Prince');
     await page.keyboard.press('Escape');
     await expect(token).toBeFocused();
-    await expect(page.getByRole('link', { name: 'Open in the reader' })).toHaveAttribute('href', '#/read/petit-prince');
+    await expect(page.getByRole('link', { name: 'Open in the reader' })).toHaveAttribute(
+      'href',
+      '#/passage/petit-prince/unit-reading-cloze',
+    );
     const item = row(page, 'Le renard dit');
     await item.getByRole('textbox').nth(0).fill('chassons');
     await item.getByRole('textbox').nth(1).fill('chassent');

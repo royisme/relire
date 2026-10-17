@@ -40,6 +40,9 @@ import { LIBRARY, parseRoute, routeHref } from './utils/routes';
 import { navigate, useRoute } from './hooks/useRoute';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { useSidebar } from './hooks/useSidebar';
+import { useReaderUnits } from './hooks/useReaderUnits';
+import { passageDocument, readerIdentity, type ReaderSource } from './types/readerSource';
+import { sourceOfRecording } from './storage/shadowing';
 
 const ONBOARDING_KEY = 'relire_onboarded';
 const storedFlag = (key: string) => {
@@ -55,11 +58,10 @@ export default function App() {
   // Where the learner is: the address decides the screen (see utils/routes.ts).
   const route = useRoute();
   const breakpoint = useBreakpoint();
-  const sidebar = useSidebar(route.name === 'reader' || route.name === 'unit');
-  // The article the log opens at (set when the reader sends the learner to its recordings).
-  const [logArticleId, setLogArticleId] = useState<string | null>(null);
-  // A sentence to bring into view when the reader opens (from the shadowing log). Shown once.
-  const [readerFocus, setReaderFocus] = useState<{ articleId: string; text: string } | null>(null);
+  const sidebar = useSidebar(route.name === 'reader' || route.name === 'passage' || route.name === 'unit');
+  // The source the log opens at (set when the reader sends the learner to its recordings).
+  const [logSourceId, setLogSourceId] = useState<string | null>(null);
+
   // The article Practice opens on when the address names none: the one read or practised most recently.
   const [lastArticleId, setLastArticleId] = useState<string | null>(null);
   // Set while an AI feature is waiting for a key, so Settings can focus the field and offer the way back.
@@ -71,6 +73,18 @@ export default function App() {
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const currentArticle = route.name === 'reader' ? (articles.find((a) => a.id === route.articleId) ?? null) : null;
+  const readerUnits = useReaderUnits();
+  const passageMaterial = route.name === 'passage' ? articles.find((a) => a.id === route.materialId) : undefined;
+  const passageUnit = route.name === 'passage' ? readerUnits.units?.find((u) => u.id === route.unitId) : undefined;
+  const readerDocument =
+    currentArticle ?? (passageMaterial && passageUnit ? passageDocument(passageMaterial, passageUnit) : null);
+  const readerSource: ReaderSource | null =
+    route.name === 'reader'
+      ? { kind: 'article', articleId: route.articleId }
+      : route.name === 'passage'
+        ? { kind: 'passage', materialId: route.materialId, unitId: route.unitId }
+        : null;
+  const lookupOwner = JSON.stringify([routeHref(route), readerDocument?.content]);
   const [editor, setEditor] = useState<{ article: Article | null } | null>(null);
   const [hasKey, setHasKey] = useState(() => hasTextKey());
   const [onboardingOpen, setOnboardingOpen] = useState(false);
@@ -82,8 +96,8 @@ export default function App() {
   const practisedId = route.name === 'practice' ? route.articleId : undefined;
   if (practisedId && lastArticleId !== practisedId && articles.some((a) => a.id === practisedId))
     setLastArticleId(practisedId);
-  if (readerFocus && readerFocus.articleId !== currentArticle?.id) setReaderFocus(null);
-  if (logArticleId && route.name !== 'study') setLogArticleId(null);
+  if (passageMaterial && lastArticleId !== passageMaterial.id) setLastArticleId(passageMaterial.id);
+  if (logSourceId && route.name !== 'study') setLogSourceId(null);
   if (keyRequest && route.name !== 'settings') setKeyRequest(null);
 
   const reportSave = (name: string, error: unknown) => {
@@ -128,15 +142,15 @@ export default function App() {
   const [wordData, setWordData] = useState<WordAnalysis | null>(null);
   const [isWordLoading, setIsWordLoading] = useState(false);
   const [activeWordSentence, setActiveWordSentence] = useState('');
-  // The address whose reader, exercise or notebook opened the sheet.
-  const [wordSheetHref, setWordSheetHref] = useState<string | null>(null);
+  // The address and exact Reader content whose source opened the sheet.
+  const [wordSheetOwner, setWordSheetOwner] = useState<string | null>(null);
   const wordRequest = useRef(0);
   const wordContext = useRef<string | undefined>(undefined);
   // A lookup belongs to the address that opened it: Back, Forward or a typed address closes the sheet before
   // the new page paints, and the request is dropped so a late answer or failure cannot show on that page,
   // replace a newer lookup or send the learner to Settings from it.
-  if (wordSheetHref && wordSheetHref !== routeHref(route)) {
-    setWordSheetHref(null);
+  if (wordSheetOwner && wordSheetOwner !== lookupOwner) {
+    setWordSheetOwner(null);
     setIsWordModalOpen(false);
     setIsWordLoading(false);
     setActiveWord(null);
@@ -145,7 +159,7 @@ export default function App() {
     () => () => {
       wordRequest.current++;
     },
-    [route],
+    [lookupOwner],
   );
 
   // Sentence Drawer state
@@ -153,6 +167,20 @@ export default function App() {
   const [activeSentence, setActiveSentence] = useState<string | null>(null);
   const [sentenceData, setSentenceData] = useState<SentenceAnalysis | null>(null);
   const [isSentenceLoading, setIsSentenceLoading] = useState(false);
+  const [sentenceSheetOwner, setSentenceSheetOwner] = useState<string | null>(null);
+  const sentenceRequest = useRef(0);
+  if (sentenceSheetOwner && sentenceSheetOwner !== lookupOwner) {
+    setSentenceSheetOwner(null);
+    setIsSentenceDrawerOpen(false);
+    setIsSentenceLoading(false);
+    setActiveSentence(null);
+  }
+  useEffect(
+    () => () => {
+      sentenceRequest.current++;
+    },
+    [lookupOwner],
+  );
 
   // AI failures: a missing key sends the user to Settings, anything else is shown in the sheet.
   const [aiError, setAiError] = useState<string | null>(null);
@@ -175,14 +203,14 @@ export default function App() {
   };
 
   // Word Click Handler
-  const handleWordClick = async (word: string, sentence: string, context = currentArticle?.content) => {
+  const handleWordClick = async (word: string, sentence: string, context = readerDocument?.content) => {
     // Strip leading/trailing punctuation while preserving French accents
     const cleanWord = word.trim().replace(/^[^\p{L}\p{M}]+|[^\p{L}\p{M}]+$/gu, '');
     if (!cleanWord) return;
 
     const request = ++wordRequest.current;
     wordContext.current = context;
-    setWordSheetHref(routeHref(route));
+    setWordSheetOwner(lookupOwner);
     setActiveWord(cleanWord);
     setActiveWordSentence(sentence);
     setIsWordModalOpen(true);
@@ -215,6 +243,8 @@ export default function App() {
   const handleSentenceClick = async (sentence: string) => {
     if (!sentence.trim()) return;
 
+    const request = ++sentenceRequest.current;
+    setSentenceSheetOwner(lookupOwner);
     setActiveSentence(sentence);
     setIsSentenceDrawerOpen(true);
     setIsSentenceLoading(true);
@@ -228,12 +258,12 @@ export default function App() {
     }));
 
     try {
-      const data = await fetchSentenceAnalysis(sentence, currentArticle?.content);
-      setSentenceData(data);
+      const data = await fetchSentenceAnalysis(sentence, readerDocument?.content);
+      if (request === sentenceRequest.current) setSentenceData(data);
     } catch (err) {
-      handleAiError(err, () => setIsSentenceDrawerOpen(false));
+      if (request === sentenceRequest.current) handleAiError(err, () => setIsSentenceDrawerOpen(false));
     } finally {
-      setIsSentenceLoading(false);
+      if (request === sentenceRequest.current) setIsSentenceLoading(false);
     }
   };
 
@@ -261,7 +291,7 @@ export default function App() {
         easeFactor: 2.5,
         nextReviewDate: formatDate(new Date()), // due immediately or tomorrow
         reviewHistory: [],
-        tags: [currentArticle?.category || 'Reading'],
+        tags: [readerDocument?.category || 'Reading'],
       };
 
       setVocabList((prev) => [newWord, ...prev]);
@@ -278,8 +308,7 @@ export default function App() {
     setVocabList((prev) => prev.filter((w) => w.id !== wordId));
   };
 
-  const openArticle = (article: Article, focusText: string | null = null) => {
-    setReaderFocus(focusText ? { articleId: article.id, text: focusText } : null);
+  const openArticle = (article: Article) => {
     navigate(
       article.kind === 'workbook' && !article.content.trim()
         ? { name: 'practice', articleId: article.id }
@@ -463,25 +492,37 @@ export default function App() {
               />
             )}
 
-            {route.name === 'reader' &&
-              (currentArticle ? (
+            {(route.name === 'reader' || route.name === 'passage') &&
+              (readerDocument && readerSource ? (
                 <ReaderView
-                  key={currentArticle.id}
-                  currentArticle={currentArticle}
-                  onBack={() => navigate(LIBRARY)}
+                  key={readerIdentity(readerSource)}
+                  readingDocument={readerDocument}
+                  source={readerSource}
+                  onBack={() =>
+                    navigate(readerSource.kind === 'passage' ? { name: 'unit', unitId: readerSource.unitId } : LIBRARY)
+                  }
                   onWordClick={handleWordClick}
                   onSentenceClick={handleSentenceClick}
                   onMissingKey={requestKey}
-                  onOpenShadowingLog={(articleId) => {
-                    setLogArticleId(articleId);
+                  onOpenShadowingLog={(sourceId) => {
+                    setLogSourceId(sourceId);
                     navigate({ name: 'study', tab: 'shadowing' });
                   }}
-                  focusText={readerFocus?.text ?? null}
+                  focusText={route.sentence ?? null}
                   activeWord={activeWord}
                   activeSentence={activeSentence}
                 />
+              ) : route.name === 'passage' && !readerUnits.units && !readerUnits.error ? (
+                <div className="min-h-40" aria-busy="true" />
               ) : (
-                <NotFoundView reason="article" />
+                <>
+                  <NotFoundView reason={route.name === 'passage' ? 'passage' : 'article'} />
+                  {readerUnits.error && (
+                    <p role="alert" className="px-4 text-sm text-bad-700 break-words">
+                      {t('storage.loadFailed', { msg: readerUnits.error })}
+                    </p>
+                  )}
+                </>
               ))}
 
             {route.name === 'study' && (
@@ -497,10 +538,21 @@ export default function App() {
                 vocabulary={{ vocabList, onUpdateWord: handleUpdateWord, onDeleteWord: handleDeleteWord }}
                 shadowing={{
                   articles,
-                  initialArticleId: logArticleId,
-                  onOpenSentence: (articleId, text) => {
-                    const article = articles.find((a) => a.id === articleId);
-                    if (article) openArticle(article, text);
+                  units: readerUnits.units,
+                  unitsError: readerUnits.error,
+                  initialSourceId: logSourceId,
+                  onOpenSentence: (record) => {
+                    const source = sourceOfRecording(record);
+                    navigate(
+                      source.kind === 'passage'
+                        ? {
+                            name: 'passage',
+                            materialId: source.materialId,
+                            unitId: source.unitId,
+                            sentence: record.text,
+                          }
+                        : { name: 'reader', articleId: source.articleId, sentence: record.text },
+                    );
                   },
                 }}
               />
@@ -548,7 +600,7 @@ export default function App() {
         isOpen={isWordModalOpen}
         onClose={() => {
           wordRequest.current++;
-          setWordSheetHref(null);
+          setWordSheetOwner(null);
           setIsWordModalOpen(false);
           setActiveWord(null);
         }}
@@ -566,6 +618,8 @@ export default function App() {
       <SentenceDrawer
         isOpen={isSentenceDrawerOpen}
         onClose={() => {
+          sentenceRequest.current++;
+          setSentenceSheetOwner(null);
           setIsSentenceDrawerOpen(false);
           setActiveSentence(null);
         }}

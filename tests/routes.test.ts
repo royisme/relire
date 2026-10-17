@@ -33,3 +33,19 @@ test('mistake notebook has a canonical study address', () => {
   expect(roundTrip(route)).toEqual({ route, canonical: null });
   expect(areaOf(route)).toBe('study');
 });
+
+test('passage routes and durable sentence focus roundtrip without taking article ids', () => {
+  const sentence = 'L’oiseau chante ? Oui, près du café & du jardin.';
+  const route: Route = { name: 'passage', materialId: 'm|/é%', unitId: 'u|/é%', sentence };
+  expect(roundTrip(route)).toEqual({ route, canonical: null });
+  expect(areaOf(route)).toBe('read');
+  const article: Route = { name: 'reader', articleId: 'passage', sentence };
+  expect(roundTrip(article)).toEqual({ route: article, canonical: null });
+  for (const hash of ['#/passage/m', '#/passage/m/u/extra', '#/passage//u', '#/passage/m/%E0%A4%A'])
+    expect(parseRoute(hash).route.name).toBe('notFound');
+  for (const value of ['', '   ', 'a'.repeat(4001)]) {
+    const hash = `#/passage/m/u?sentence=${encodeURIComponent(value)}`;
+    expect(parseRoute(hash).route).toEqual({ name: 'passage', materialId: 'm', unitId: 'u' });
+    expect(parseRoute(hash).canonical).toBe('#/passage/m/u');
+  }
+});
