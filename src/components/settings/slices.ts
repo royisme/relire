@@ -1,68 +1,55 @@
-/**
- * Settings sections save on their own, so each one owns a slice of AppSettings. A slice is the
- * handful of fields one section edits: reading it (for "unsaved changes"), and copying it from a
- * draft onto saved settings (so saving Speech never writes a half-typed text key).
- */
+/** AI selections and shared provider credentials save together, independently of Practice. */
 import i18n from '../../i18n';
 import { getAppSettings, saveAppSettings, type AppSettings } from '../../utils/appSettings';
 
-export type SettingsSlice = 'text' | 'speech' | 'practice';
+export type SettingsSlice = 'ai' | 'practice';
 
-/** The fields a section shows, as a comparable string. */
 export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
-  if (slice === 'text') {
-    return JSON.stringify([settings.textProvider, settings.textModel, settings.apiKeys[settings.textProvider] ?? '']);
-  }
-  if (slice === 'practice') {
+  if (slice === 'practice')
     return JSON.stringify([
       settings.practiceStrictAccents,
       settings.practiceDictationSpeed,
       settings.practiceSpeakAfterCheck,
     ]);
-  }
-  const keyed = settings.speechProvider !== settings.textProvider;
+  const providers = [...new Set([settings.textProvider, settings.ocrProvider, settings.speechProvider])].sort();
   return JSON.stringify([
+    settings.textProvider,
+    settings.textModel,
+    settings.ocrProvider,
+    settings.ocrModel,
     settings.speechProvider,
     settings.speechModel,
     settings.speechVoice,
-    keyed ? (settings.apiKeys[settings.speechProvider] ?? '') : '',
+    providers.map((id) => [id, settings.apiKeys[id] ?? '']),
   ]);
 }
 
-/** `base` with the fields of `slice` taken from `from`. */
 export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsSlice): AppSettings {
-  if (slice === 'text') {
-    return {
-      ...base,
-      textProvider: from.textProvider,
-      textModel: from.textModel,
-      apiKeys: { ...base.apiKeys, [from.textProvider]: from.apiKeys[from.textProvider] ?? '' },
-    };
-  }
-  if (slice === 'practice') {
+  if (slice === 'practice')
     return {
       ...base,
       practiceStrictAccents: from.practiceStrictAccents,
       practiceDictationSpeed: from.practiceDictationSpeed,
       practiceSpeakAfterCheck: from.practiceSpeakAfterCheck,
     };
-  }
-  const keyed = from.speechProvider !== from.textProvider;
+  const providers = [from.textProvider, from.ocrProvider, from.speechProvider];
   return {
     ...base,
+    textProvider: from.textProvider,
+    textModel: from.textModel,
+    ocrProvider: from.ocrProvider,
+    ocrModel: from.ocrModel,
     speechProvider: from.speechProvider,
     speechModel: from.speechModel,
     speechVoice: from.speechVoice,
-    apiKeys: keyed ? { ...base.apiKeys, [from.speechProvider]: from.apiKeys[from.speechProvider] ?? '' } : base.apiKeys,
+    apiKeys: { ...base.apiKeys, ...Object.fromEntries(providers.map((id) => [id, from.apiKeys[id] ?? ''])) },
   };
 }
 
-/**
- * Saves one slice of the draft on top of what is stored. `saveAppSettings` swallows storage errors,
- * so the result is read back; a value that did not stick is reported instead of shown as saved.
- */
+/** Read back because saveAppSettings catches storage errors. Never mark a failed write as saved. */
 export function saveSlice(draft: AppSettings, slice: SettingsSlice): AppSettings {
-  const next = saveAppSettings(withSlice(getAppSettings(), draft, slice));
-  if (sliceOf(getAppSettings(), slice) !== sliceOf(next, slice)) throw new Error(i18n.t('settings.notStored'));
+  const intended = withSlice(getAppSettings(), draft, slice);
+  const next = saveAppSettings(intended);
+  if (sliceOf(getAppSettings(), slice) !== sliceOf(intended, slice)) throw new Error(i18n.t('settings.notStored'));
   return next;
 }

@@ -53,9 +53,9 @@ test('expanded, collapsed and tablet study pages keep just one visible set of pa
 });
 
 test('About is the final footer link, not a Settings section, including the old deep link', async ({ page }) => {
-  await page.goto('/#/settings/text-ai');
+  await page.goto('/#/settings/ai/text');
   const sidebar = page.locator('[data-sidebar]');
-  await expect(sidebar.locator('a[href^="#/settings/"]')).toHaveCount(5);
+  await expect(sidebar.locator('a[href^="#/settings/"]')).toHaveCount(4);
   await expect(sidebar.locator('a[href="#/settings/about"]')).toHaveCount(0);
   const about = sidebar.getByRole('link', { name: 'About', exact: true });
   await expect(sidebar.getByRole('link').last()).toHaveAttribute('href', '#/about');

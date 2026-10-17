@@ -9,6 +9,7 @@ export const ROUTE_CHANGED = 'relire-route';
 type Intent = { href: string; replace: boolean } | { delta: number };
 type Guard = (decide: (discard: boolean) => void) => void;
 let guard: Guard | null = null;
+let allowDestination: ((href: string) => boolean) | undefined;
 let published = window.location.hash;
 let position = recorder.read();
 let restoring = false;
@@ -50,7 +51,7 @@ function onBrowserNavigation() {
     return;
   }
   if (target === position && window.location.hash === published) return; // paired hashchange
-  if (replaying || !guard) {
+  if (replaying || !guard || allowDestination?.(window.location.hash)) {
     replaying = false;
     publish();
     return;
@@ -83,18 +84,20 @@ function move(href: string, replace: boolean) {
 }
 export function importAwareNavigate(href: string, replace = false) {
   if (href === published || restoring || replaying) return;
-  if (guard) {
+  if (guard && !allowDestination?.(href)) {
     pending ??= { href, replace };
     ask();
   } else move(href, replace);
 }
 export const publishedHash = () => published;
 /** One mounted import page owns this callback. Release explicitly before successful-save navigation. */
-export function protectImport(next: Guard): () => void {
+export function protectImport(next: Guard, allow?: (href: string) => boolean): () => void {
   guard = next;
+  allowDestination = allow;
   return () => {
     if (guard === next) {
       guard = null;
+      allowDestination = undefined;
       pending = null;
       asking = false;
     }

@@ -37,7 +37,7 @@ import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './
 import { isDueToday, formatDate } from './utils/srs';
 import { prefetchSpeech } from './utils/speech';
 import { hasTextKey } from './utils/appSettings';
-import { LIBRARY, parseRoute, routeHref } from './utils/routes';
+import { LIBRARY, parseRoute, routeHref, type AiPurposeRoute } from './utils/routes';
 import { navigate, useRoute } from './hooks/useRoute';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { useSidebar } from './hooks/useSidebar';
@@ -186,12 +186,13 @@ export default function App() {
   // AI failures: a missing key sends the user to Settings, anything else is shown in the sheet.
   const [aiError, setAiError] = useState<string | null>(null);
 
-  // Settings → Text AI with the key field ready; its way back is wherever the learner is now.
-  const requestKey = () => {
+  // Settings → AI services, on the purpose that needs the key, with the key field ready; its way back is
+  // wherever the learner is now. Lookups, generation and grading use the text purpose.
+  const requestKey = (purpose: AiPurposeRoute = 'text') => {
     const here = window.location.hash || '#/read';
     const inSettings = parseRoute(window.location.hash).route.name === 'settings';
     setKeyRequest({ id: Date.now(), returnTo: inSettings ? null : here });
-    navigate({ name: 'settings', section: 'text-ai' });
+    navigate({ name: 'settings', section: 'ai', purpose, focusKey: true });
   };
 
   const handleAiError = (err: unknown, closeSheet: () => void) => {
@@ -470,7 +471,10 @@ export default function App() {
             <div className="bg-accent-50 border-b border-accent-200 text-accent-900 text-sm">
               <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span>{t('keyBanner.text')}</span>
-                <button className="font-medium underline underline-offset-2 cursor-pointer" onClick={requestKey}>
+                <button
+                  className="font-medium underline underline-offset-2 cursor-pointer"
+                  onClick={() => requestKey()}
+                >
                   {t('keyBanner.action')}
                 </button>
               </div>
@@ -585,8 +589,9 @@ export default function App() {
             {route.name === 'settings' && (
               <SettingsPage
                 section={route.section}
+                purpose={route.purpose ?? 'text'}
                 sectionsInSidebar={expanded}
-                keyRequest={keyRequest}
+                keyRequest={keyRequest ?? (route.focusKey ? { id: 0, returnTo: route.returnTo ?? null } : null)}
                 onSettingsSaved={(newSettings) => setHasKey(hasTextKey(newSettings))}
                 onReturn={(hash) => navigate(hash)}
               />

@@ -23,14 +23,14 @@ test('dirty links, repeated Back cancellation, direct hash and Forward retain dr
     await expect(page.getByLabel('Text to send')).toHaveValue('Texte non enregistré.');
   }
   await page.evaluate(() => {
-    location.hash = '#/settings/text-ai';
+    location.hash = '#/settings/ai/text';
   });
   await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toBeVisible();
   await page.getByRole('button', { name: 'Keep editing' }).click();
   await page.evaluate(() => history.forward());
   await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toBeVisible();
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/settings\/text-ai$/);
+  await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
   await page.goBack();
   await expect(page).toHaveURL(/#\/import$/);
   await expect(page.getByLabel('Text to send')).toHaveValue('');
@@ -73,7 +73,7 @@ test('existing reader id import stays a reader; reload only warns when dirty; de
   await page.getByRole('button', { name: 'Keep editing' }).click();
   await page.getByRole('link', { name: 'Text AI settings' }).click();
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/settings\/text-ai$/);
+  await expect(page).toHaveURL(/#\/settings\/ai\/text\?key=1&return=%23%2Fimport$/);
 });
 
 test('rapid repeated traversal remains at the indexed import entry after Keep', async ({ page, ai }) => {
@@ -135,7 +135,7 @@ test('early bookkeeping without Navigation survives delayed module, native hashe
     await expect(page).toHaveURL(/#\/import$/);
   }
   await page.evaluate(() => {
-    location.hash = '#/settings/text-ai';
+    location.hash = '#/settings/ai/text';
   });
   await page.getByRole('button', { name: 'Keep editing' }).click();
   await page.evaluate(() => {

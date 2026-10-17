@@ -250,13 +250,13 @@ test('consent pins model across asynchronous PDF rendering; unsupported images m
   expect(sentModels[0]).toContain('gemini-2.5-flash:');
   await page.getByRole('button', { name: 'Start over' }).click();
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
-  // All shipped Gemini text models accept images. Exercise the provider-neutral refusal without adding a fake provider.
+  // A speech model is known not to read images: choose it for OCR and the import refuses before sending.
   await page.getByRole('link', { name: 'Text AI settings' }).click();
   await page.evaluate(async () => {
-    const { getTextProvider } = (await import(
-      '/src/services/ai/providers/index.ts' as string
-    )) as typeof import('../src/services/ai/providers');
-    getTextProvider('gemini').supportsImageInput = () => false;
+    const { saveAppSettings } = (await import(
+      '/src/utils/appSettings.ts' as string
+    )) as typeof import('../src/utils/appSettings');
+    saveAppSettings({ ocrModel: 'gemini-3.8-flash-lite-tts' });
     const { navigate } = (await import('/src/hooks/useRoute.ts' as string)) as typeof import('../src/hooks/useRoute');
     navigate({ name: 'import' });
   });

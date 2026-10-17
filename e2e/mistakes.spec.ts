@@ -205,13 +205,13 @@ test('missing key enters the existing Settings return-to flow', async ({ page })
   await notebook(page);
   await page.evaluate(() => localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: {} })));
   await entry(page).getByRole('button', { name: 'Explain', exact: true }).click();
-  await expect(page).toHaveURL(/#\/settings\/text-ai$/);
+  await expect(page).toHaveURL(/#\/settings\/ai\/text\?key=1/);
   await expect(page.getByRole('button', { name: 'Go back to where you were' })).toBeDisabled();
   const key = page.getByLabel('Google Gemini API key', { exact: true });
   await expect(key).toBeFocused();
   await key.fill('TEST-RECONNECTED');
-  await page.getByRole('button', { name: 'Check and save' }).click();
-  await expect(page.getByText('Key works. Saved.')).toBeVisible();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Go back to where you were' }).click();
   await expect(entry(page)).toContainText('To revisit');
 });

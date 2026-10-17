@@ -147,7 +147,7 @@ test('without a key it opens Settings → Text AI', async ({ page }) => {
   await page.reload();
   await waitForArticle(page);
   await make(page).click();
-  await expect(page).toHaveURL(/#\/settings\/text-ai$/);
+  await expect(page).toHaveURL(/#\/settings\/ai\/text\?key=1/);
   await expect(page.getByPlaceholder('Paste your key here')).toBeFocused();
 });
 

@@ -14,11 +14,14 @@
  *   #/practice/:unitId       one exercise unit on one sheet
  *   #/progress               progress
  *   #/settings               section list on phones; desktop resolves it to the first section
- *   #/settings/:section      text-ai | speech | practice | prompts | data
+ *   #/settings/:section      ai/:purpose | practice | prompts | data
  *   #/about                  About (old #/settings/about links redirect here)
  */
 
-export const SETTINGS_SECTIONS = ['text-ai', 'speech', 'practice', 'prompts', 'data'] as const;
+export const SETTINGS_SECTIONS = ['ai', 'practice', 'prompts', 'data'] as const;
+export const AI_PURPOSES = ['text', 'ocr', 'speech'] as const;
+export type AiPurposeRoute = (typeof AI_PURPOSES)[number];
+
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
 export const STUDY_TABS = ['words', 'shadowing', 'mistakes'] as const;
@@ -36,7 +39,13 @@ export type Route =
   | { name: 'progress' }
   | { name: 'about' }
   /** `section: null` is the section list (phones). */
-  | { name: 'settings'; section: SettingsSection | null }
+  | {
+      name: 'settings';
+      section: SettingsSection | null;
+      purpose?: AiPurposeRoute;
+      focusKey?: boolean;
+      returnTo?: string;
+    }
   | { name: 'notFound' };
 
 export const LIBRARY: Route = { name: 'library' };
@@ -69,6 +78,12 @@ export function routeHref(route: Route): string {
     case 'about':
       return '#/about';
     case 'settings':
+      if (route.section === 'ai') {
+        const query = new URLSearchParams();
+        if (route.focusKey) query.set('key', '1');
+        if (route.returnTo) query.set('return', route.returnTo);
+        return `#/settings/ai/${route.purpose ?? 'text'}${query.size ? `?${query}` : ''}`;
+      }
       return route.section ? `#/settings/${route.section}` : '#/settings';
   }
 }
@@ -97,6 +112,20 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
     } catch {
       route = { name: 'notFound' };
     }
+  } else if (
+    area === 'settings' &&
+    sub === 'ai' &&
+    (extra.length === 0 || (extra.length === 1 && (AI_PURPOSES as readonly string[]).includes(extra[0])))
+  ) {
+    const params = new URLSearchParams(query);
+    const returnTo = params.get('return');
+    route = {
+      name: 'settings',
+      section: 'ai',
+      purpose: (extra[0] ?? 'text') as AiPurposeRoute,
+      ...(params.get('key') === '1' ? { focusKey: true } : {}),
+      ...(returnTo?.startsWith('#/') && !returnTo.includes('?return=') ? { returnTo } : {}),
+    };
   } else if (!area) route = LIBRARY;
   else if (extra.length || parts.some((p) => p === '')) route = { name: 'notFound' };
   else if (area === 'import' && sub === undefined) route = { name: 'import' };

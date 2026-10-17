@@ -260,7 +260,6 @@
     "importBackup": "Import backup",
     "exportSuccess": "Backup saved.",
     "importSuccess": "Backup restored. Reloading…",
-    "testBtn": "Test connection and voice",
     "testingBtn": "Testing…",
     "testSuccess": "Connection and voice work.",
     "testFailed": "Test failed: {{msg}}",
@@ -286,7 +285,6 @@
     "providerLabel": "Provider",
     "modelLabel": "Model",
     "keyLabel": "{{provider}} API key",
-    "sameKeyNote": "Uses the same {{provider}} key as above.",
     "promptsDesc": "The instructions sent to the AI, as plain text. Edit them to change how answers are written; reset any prompt to go back to the original. Answers already saved on this device stay as they are; edited prompts get fresh answers.",
     "promptTask": "Prompt",
     "promptLanguage": "Prompt language",
@@ -306,19 +304,17 @@
     "unsaved": "Unsaved changes",
     "saveFailed": "Could not save: {{msg}}",
     "notStored": "The browser did not keep the change. Storage may be blocked or full.",
-    "checkAndSave": "Check and save",
     "checking": "Checking…",
-    "keyChecked": "Key works. Saved.",
     "keyCheckFailed": "Key check failed: {{msg}}",
     "returnToWork": "Go back to where you were",
+    "leaveTitle": "Discard the unsaved AI settings?",
+    "leaveHelp": "Your changes are not saved yet. Leaving now loses them.",
+    "keepEditing": "Keep editing",
+    "discard": "Discard",
     "sections": {
-      "text-ai": {
-        "title": "Text AI",
-        "desc": "Writes word and sentence analyses, exercises, hints and pronunciation feedback."
-      },
-      "speech": {
-        "title": "Speech",
-        "desc": "Reads French aloud. It can be a different provider from the text AI."
+      "ai": {
+        "title": "AI services",
+        "desc": "Your own provider key, and the model each AI task uses."
       },
       "practice": {
         "title": "Practice",
@@ -347,6 +343,40 @@
     "dictationSpeedNote": "How fast a dictation item is read when you press Listen.",
     "speakAfterCheck": "Speak after checking",
     "speakAfterCheckNote": "After a dictation item is checked, its number is spoken again."
+  },
+  "aiSettings": {
+    "purposesLabel": "AI tasks",
+    "purposes": {
+      "text": "Text AI",
+      "ocr": "OCR",
+      "speech": "Speech synthesis"
+    },
+    "purposeDesc": {
+      "text": "Checks and explains words and sentences, makes exercises, and grades open answers.",
+      "ocr": "Reads images and PDFs, and pulls the exercise structure out of imported material. Pasted text still uses Text AI.",
+      "speech": "Reads French aloud with the model and voice you choose."
+    },
+    "purposeSettings": "{{purpose}} settings",
+    "sharedKey": "This key is also used by {{purposes}}.",
+    "modelHelp": "Pick a suggested model or type its ID.",
+    "invalidModel": "Enter a model ID of at most 512 characters, without control characters.",
+    "fetch": "Fetch models",
+    "fetching": "Fetching…",
+    "refresh": "Refresh models",
+    "fetchNeedsKey": "Enter a key above to fetch the model list.",
+    "noDiscovery": "This provider does not offer a model list.",
+    "fetched": "{{count}} models found. Fetching does not test them.",
+    "empty": "The provider returned no models. Your selection is unchanged.",
+    "absent": "The selected model is not in this list. It stays selected.",
+    "capabilitySupported": "This model is known to handle this task.",
+    "capabilityUnknown": "This model's support for this task is unconfirmed. A check or a real request settles it.",
+    "capabilityUnsupported": "This model is known not to handle this task.",
+    "check": "Check key",
+    "checkSuccess": "The key works.",
+    "preview": "Preview voice",
+    "ocrNote": "Images and PDFs read this selection; pasted text uses Text AI.",
+    "unknownOcr": "Image support for this model is unconfirmed. The import may fail with the provider's own error.",
+    "savedNote": "Saving keeps your choices; it does not test them."
   },
   "importer": {
     "articleTitle": "Title",
@@ -740,7 +770,6 @@
     "sentText": "Text: {{count}} characters",
     "exactText": "Read the exact text to be sent",
     "unsupported": "This model cannot read images. Choose an image-capable model in Settings before sending.",
-    "settings": "Text AI settings",
     "analyze": "Send and extract",
     "working": "Working…",
     "pastedText": "Pasted text",

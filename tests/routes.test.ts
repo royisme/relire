@@ -57,7 +57,7 @@ test('About is independent and old Settings About deep links canonicalize to it'
   for (const hash of ['#/settings/about', '#/settings/about/', '#/about/']) {
     expect(parseRoute(hash)).toEqual({ route, canonical: '#/about' });
   }
-  expect(SETTINGS_SECTIONS).toEqual(['text-ai', 'speech', 'practice', 'prompts', 'data']);
+  expect(SETTINGS_SECTIONS).toEqual(['ai', 'practice', 'prompts', 'data']);
   for (const hash of ['#/about/extra', '#/settings/about/extra', '#/settings/missing']) {
     expect(parseRoute(hash).route.name).toBe('notFound');
   }
@@ -69,10 +69,41 @@ test('all study and remaining Settings sections keep canonical deep links', () =
     expect(roundTrip(route)).toEqual({ route, canonical: null });
   }
   for (const section of SETTINGS_SECTIONS) {
-    const route: Route = { name: 'settings', section };
+    const route: Route = { name: 'settings', section, ...(section === 'ai' ? { purpose: 'text' as const } : {}) };
     expect(roundTrip(route)).toEqual({ route, canonical: null });
     expect(areaOf(route)).toBe('settings');
   }
   expect(parseRoute('#/study')).toEqual({ route: { name: 'study', tab: 'words' }, canonical: '#/study/words' });
   expect(parseRoute('#/settings')).toEqual({ route: { name: 'settings', section: null }, canonical: null });
+});
+
+test('AI purpose routes are independent and old AI routes are not aliases', () => {
+  for (const purpose of ['text', 'ocr', 'speech'] as const) {
+    const route: Route = { name: 'settings', section: 'ai', purpose };
+    expect(roundTrip(route)).toEqual({ route, canonical: null });
+  }
+  expect(parseRoute('#/settings/ai').canonical).toBe('#/settings/ai/text');
+  for (const hash of ['#/settings/text-ai', '#/settings/speech', '#/settings/ai/nope'])
+    expect(parseRoute(hash).route.name).toBe('notFound');
+});
+
+test('a missing-key request keeps its purpose and where to return', () => {
+  const route: Route = { name: 'settings', section: 'ai', purpose: 'ocr', focusKey: true, returnTo: '#/import' };
+  expect(roundTrip(route)).toEqual({ route, canonical: null });
+  expect(routeHref(route)).toBe('#/settings/ai/ocr?key=1&return=%23%2Fimport');
+  expect(parseRoute('#/settings/ai/text?key=1').route).toEqual({
+    name: 'settings',
+    section: 'ai',
+    purpose: 'text',
+    focusKey: true,
+  });
+  // A return address outside the app, or one that would nest another return, is dropped.
+  for (const query of ['return=https%3A%2F%2Fexample.com', 'return=%23%2Fread%3Freturn%3D%23%2Fimport']) {
+    expect(parseRoute(`#/settings/ai/speech?key=1&${query}`).route).toEqual({
+      name: 'settings',
+      section: 'ai',
+      purpose: 'speech',
+      focusKey: true,
+    });
+  }
 });

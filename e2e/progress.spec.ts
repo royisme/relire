@@ -245,11 +245,11 @@ test('AI errors stay inline and missing key returns through Settings', async ({ 
   await page.evaluate(() => localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: {} })));
   await page.reload();
   await page.getByRole('button', { name: 'Make a drill set' }).click();
-  await expect(page).toHaveURL(/#\/settings\/text-ai$/);
+  await expect(page).toHaveURL(/#\/settings\/ai\/text\?key=1/);
   const back = page.getByRole('button', { name: 'Go back to where you were' });
   await expect(back).toBeDisabled();
   await page.getByLabel('Google Gemini API key', { exact: true }).fill('TEST-RETURN');
-  await page.getByRole('button', { name: 'Check and save', exact: true }).click();
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(back).toBeEnabled();
   await back.click();
   await expect(page).toHaveURL(/#\/progress$/);

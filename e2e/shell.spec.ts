@@ -53,8 +53,8 @@ test.describe('sidebar', () => {
     await nav.getByRole('link', { name: 'Progress' }).click();
     await expect(nav.getByRole('link', { name: 'Words' })).toHaveCount(0);
     await nav.getByRole('link', { name: 'Settings', exact: true }).click();
-    for (const name of ['Text AI', 'Speech', 'Prompts', 'Data and backup'])
-      await expect(nav.getByRole('link', { name })).toBeVisible();
+    for (const href of ['#/settings/ai/text', '#/settings/practice', '#/settings/prompts', '#/settings/data'])
+      await expect(nav.locator(`a[href="${href}"]`)).toBeVisible();
     await expect(nav.getByRole('link', { name: 'About', exact: true })).toHaveAttribute('href', '#/about');
     // "Practice" names both the area and its settings section; the section has its own address.
     await expect(nav.locator('a[href="#/settings/practice"]')).toBeVisible();
@@ -137,17 +137,19 @@ test.describe('routes', () => {
     await page.reload();
     await expect(page.getByRole('heading', { name: 'Prompts' })).toBeVisible();
 
-    await sidebar(page).getByRole('link', { name: 'Speech' }).click();
-    await expect(page).toHaveURL(/#\/settings\/speech$/);
+    await sidebar(page).getByRole('link', { name: 'AI services' }).click();
+    await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
+    await page.getByRole('link', { name: 'Speech synthesis' }).click();
+    await expect(page).toHaveURL(/#\/settings\/ai\/speech$/);
     await page.goBack();
-    await expect(page).toHaveURL(/#\/settings\/prompts$/);
-    await expect(page.getByRole('heading', { name: 'Prompts' })).toBeVisible();
+    await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
+    await expect(page.getByRole('heading', { name: 'AI services' })).toBeVisible();
   });
 
   test('the bare Settings address opens the first section on a wide screen', async ({ page }) => {
     await page.goto('/#/settings');
-    await expect(page).toHaveURL(/#\/settings\/text-ai$/);
-    await expect(page.getByRole('heading', { name: 'Text AI' })).toBeVisible();
+    await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
+    await expect(page.getByRole('heading', { name: 'AI services' })).toBeVisible();
   });
 
   test('an unknown address and a missing article show a way back to the library', async ({ page }) => {
@@ -165,8 +167,8 @@ test.describe('routes', () => {
 });
 
 test.describe('settings sections save on their own', () => {
-  test('Text AI saves its own changes with a visible result, and Speech stays as it was', async ({ page }) => {
-    await page.goto('/#/settings/text-ai');
+  test('the AI page saves every purpose and the shared key together, with a visible result', async ({ page }) => {
+    await page.goto('/#/settings/ai/text');
     const key = page.getByPlaceholder('Paste your key here');
     const save = page.getByRole('button', { name: 'Save', exact: true });
     await expect(save).toBeDisabled();
@@ -181,21 +183,23 @@ test.describe('settings sections save on their own', () => {
     expect(await layout(page, 'main')).toEqual(before);
     expect(JSON.parse((await stored(page, 'relire_app_settings_v1'))!).apiKeys.gemini).toBe('TEST-2');
 
-    // Edits in one section survive moving to another, and saving it does not save the first.
+    // Edits survive moving between purposes, and one save writes the text and speech selections together.
     await key.fill('TEST-3');
-    await sidebar(page).getByRole('link', { name: 'Speech' }).click();
-    await page.getByRole('button', { name: /Zephyr/ }).click();
+    await page.getByRole('link', { name: 'Speech synthesis' }).click();
+    await page.getByLabel('Voice').selectOption('Zephyr');
     await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(page.getByText('Saved', { exact: true })).toBeVisible();
     const settings = JSON.parse((await stored(page, 'relire_app_settings_v1'))!);
     expect(settings.speechVoice).toBe('Zephyr');
-    expect(settings.apiKeys.gemini).toBe('TEST-2');
-    await sidebar(page).getByRole('link', { name: 'Text AI' }).click();
+    expect(settings.apiKeys.gemini).toBe('TEST-3');
+    await page.getByRole('link', { name: 'Text AI', exact: true }).click();
     await expect(key).toHaveValue('TEST-3');
+    // One key serves every purpose that picks the same provider.
+    await expect(page.getByText('This key is also used by OCR, Speech synthesis.')).toBeVisible();
   });
 
   test('a save the browser refuses is reported as failed, not as saved', async ({ page }) => {
-    await page.goto('/#/settings/text-ai');
+    await page.goto('/#/settings/ai/text');
     await page.evaluate(() => {
       Storage.prototype.setItem = () => {
         throw new Error('quota');
@@ -232,13 +236,16 @@ test.describe('a key request', () => {
     await page.reload();
   });
 
-  test('lands on Settings → Text AI with the key field focused, and leads back after a check', async ({ page, ai }) => {
+  test('lands on Settings → AI services with the key field focused, and leads back after a save', async ({
+    page,
+    ai,
+  }) => {
     await page.getByText('Le Petit Prince').first().click();
     await expect(page.locator('article [data-sentence]').first()).toBeVisible();
     const article = page.url();
 
     await page.locator('article [data-reader-word]').first().click();
-    await expect(page).toHaveURL(/#\/settings\/text-ai$/);
+    await expect(page).toHaveURL(/#\/settings\/ai\/text\?key=1/);
     const key = page.getByPlaceholder('Paste your key here');
     await expect(key).toBeFocused();
     await expect(page.getByText('Add your API key to use word and sentence analysis')).toBeVisible();
@@ -246,9 +253,12 @@ test.describe('a key request', () => {
     await expect(goBack).toBeDisabled();
 
     await key.fill('NEW-KEY');
-    await page.getByRole('button', { name: 'Check and save' }).click();
-    await expect(page.getByText('Key works. Saved.')).toBeVisible();
+    await page.getByRole('button', { name: 'Check key' }).click();
+    await expect(page.getByText('The key works.')).toBeVisible();
     expect(ai.calls.word).toBeGreaterThan(0);
+    // Checking never saves; Save does.
+    await expect(goBack).toBeDisabled();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(goBack).toBeEnabled();
     expect(JSON.parse((await stored(page, 'relire_app_settings_v1'))!).apiKeys.gemini).toBe('NEW-KEY');
 
@@ -261,11 +271,11 @@ test.describe('a key request', () => {
   test('a key that fails the check is not saved, and the real reason is shown', async ({ page, ai }) => {
     ai.fail(['word']);
     await page.getByRole('button', { name: 'Add key' }).click();
-    await expect(page).toHaveURL(/#\/settings\/text-ai$/);
+    await expect(page).toHaveURL(/#\/settings\/ai\/text\?key=1/);
     await expect(page.getByPlaceholder('Paste your key here')).toBeFocused();
 
     await page.getByPlaceholder('Paste your key here').fill('BAD-KEY');
-    await page.getByRole('button', { name: 'Check and save' }).click();
+    await page.getByRole('button', { name: 'Check key' }).click();
     await expect(page.getByRole('alert')).toContainText('Key check failed');
     expect(JSON.parse((await stored(page, 'relire_app_settings_v1'))!).apiKeys).toEqual({});
   });
@@ -278,8 +288,9 @@ test.describe('layout', () => {
     '#/study/shadowing',
     '#/practice',
     '#/progress',
-    '#/settings/text-ai',
-    '#/settings/speech',
+    '#/settings/ai/text',
+    '#/settings/ai/ocr',
+    '#/settings/ai/speech',
     '#/settings/practice',
     '#/settings/prompts',
     '#/settings/data',
@@ -329,7 +340,7 @@ test.describe('between md and lg', () => {
   test.use({ viewport: { width: 900, height: 800 } });
 
   test('the sidebar is a rail that cannot expand; Settings lists its sections beside the page', async ({ page }) => {
-    await page.goto('/#/settings/speech');
+    await page.goto('/#/settings/ai/speech');
     await expect(sidebar(page)).toHaveAttribute('data-sidebar', 'rail');
     await expect(page.getByRole('button', { name: /sidebar/ })).toHaveCount(0);
     expect(await overflowing(page.locator('body'))).toEqual([]);
@@ -367,12 +378,12 @@ test.describe('phones', () => {
     await page.goto('/#/settings');
     await expect(page).toHaveURL(/#\/settings$/);
     await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible();
-    await page.getByRole('link', { name: /^Speech/ }).click();
-    await expect(page).toHaveURL(/#\/settings\/speech$/);
-    await expect(page.getByRole('heading', { name: 'Speech' })).toBeVisible();
+    await page.getByRole('link', { name: /^AI services/ }).click();
+    await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
+    await expect(page.getByRole('heading', { name: 'AI services' })).toBeVisible();
     expect(await overflowing(page.locator('body'))).toEqual([]);
 
     await page.getByRole('link', { name: 'Settings', exact: true }).click();
-    await expect(page.getByRole('link', { name: /^Text AI/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /^AI services/ })).toBeVisible();
   });
 });

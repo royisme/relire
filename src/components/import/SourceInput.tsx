@@ -7,6 +7,8 @@ import { Link } from '../shell/Link';
 export function SourceInput({ source }: { source: ReturnType<typeof useImportSource> }) {
   const { t } = useTranslation();
   const busy = source.phase !== 'idle';
+  // Images and PDFs read the OCR selection; pasted text asks the text selection for its settings.
+  const purpose = source.purpose === 'ocr' ? 'ocr' : 'text';
   return (
     <section className="space-y-4 min-w-0">
       <fieldset disabled={busy} className="space-y-4 min-w-0">
@@ -75,9 +77,15 @@ export function SourceInput({ source }: { source: ReturnType<typeof useImportSou
           <summary className="cursor-pointer text-sm">{t('importFlow.exactText')}</summary>
           <pre className="whitespace-pre-wrap break-words max-h-48 overflow-auto text-sm">{source.text.trim()}</pre>
         </details>
+        {purpose === 'ocr' && source.model.capabilities.imageInput === 'unknown' && (
+          <p className="text-sm text-ink-700">{t('aiSettings.unknownOcr')}</p>
+        )}
         {source.unsupported && <p className="text-sm text-bad-700">{t('importFlow.unsupported')}</p>}
-        <Link className="text-sm underline text-accent-900" to={{ name: 'settings', section: 'text-ai' }}>
-          {t('importFlow.settings')}
+        <Link
+          className="text-sm underline text-accent-900"
+          to={{ name: 'settings', section: 'ai', purpose, focusKey: true, returnTo: '#/import' }}
+        >
+          {t('aiSettings.purposeSettings', { purpose: t(`aiSettings.purposes.${purpose}`) })}
         </Link>
       </section>
       <div className="flex flex-wrap gap-2">

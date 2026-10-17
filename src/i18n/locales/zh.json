@@ -256,7 +256,6 @@
     "importBackup": "导入备份",
     "exportSuccess": "备份已保存。",
     "importSuccess": "备份已恢复，正在重新加载…",
-    "testBtn": "测试连接和朗读",
     "testingBtn": "测试中…",
     "testSuccess": "连接和朗读都正常。",
     "testFailed": "测试失败：{{msg}}",
@@ -282,7 +281,6 @@
     "providerLabel": "提供方",
     "modelLabel": "模型",
     "keyLabel": "{{provider}} API Key",
-    "sameKeyNote": "与上面使用同一个 {{provider}} Key。",
     "promptsDesc": "发给 AI 的指令，是纯文本。修改它们就能改变回答的写法；任何一条都可以恢复默认。已经保存在这台设备上的解析不会变，改过的提示词会得到新的解析。",
     "promptTask": "提示词",
     "promptLanguage": "提示词语言",
@@ -302,19 +300,17 @@
     "unsaved": "有未保存的修改",
     "saveFailed": "没能保存：{{msg}}",
     "notStored": "浏览器没有保存这次修改，可能是存储被禁用或已满。",
-    "checkAndSave": "检查并保存",
     "checking": "检查中…",
-    "keyChecked": "Key 可用，已保存。",
     "keyCheckFailed": "Key 检查没有通过：{{msg}}",
     "returnToWork": "回到刚才的位置",
+    "leaveTitle": "放弃未保存的 AI 设置？",
+    "leaveHelp": "这些改动还没保存，离开后会失去它们。",
+    "keepEditing": "继续编辑",
+    "discard": "放弃",
     "sections": {
-      "text-ai": {
-        "title": "文字 AI",
-        "desc": "负责单词和句子解析、练习题和发音反馈。"
-      },
-      "speech": {
-        "title": "朗读",
-        "desc": "负责朗读法语，可以和文字 AI 选不同的提供方。"
+      "ai": {
+        "title": "AI 服务",
+        "desc": "你自己的提供方 Key，以及每项 AI 任务使用的模型。"
       },
       "practice": {
         "title": "练习",
@@ -343,6 +339,40 @@
     "dictationSpeedNote": "点“播放”时，听写内容朗读的速度。",
     "speakAfterCheck": "检查后再播放",
     "speakAfterCheckNote": "听写题检查后，再播放一遍它的数字。"
+  },
+  "aiSettings": {
+    "purposesLabel": "AI 任务",
+    "purposes": {
+      "text": "文字 AI",
+      "ocr": "图像识别",
+      "speech": "语音合成"
+    },
+    "purposeDesc": {
+      "text": "查词、分析句子、生成练习，并批改开放题。",
+      "ocr": "识别图片和 PDF，并从导入的材料里整理出练习结构；粘贴的文字仍使用文字 AI。",
+      "speech": "用你选择的模型和音色朗读法语。"
+    },
+    "purposeSettings": "{{purpose}}设置",
+    "sharedKey": "同一个 Key 也用于{{purposes}}。",
+    "modelHelp": "从建议里选一个模型，或直接填写模型 ID。",
+    "invalidModel": "请输入不超过 512 个字符的模型 ID，不能为空或包含控制字符。",
+    "fetch": "获取模型列表",
+    "fetching": "获取中…",
+    "refresh": "刷新模型列表",
+    "fetchNeedsKey": "先在上面填写 Key，才能获取模型列表。",
+    "noDiscovery": "此提供方不提供模型列表。",
+    "fetched": "找到 {{count}} 个模型。获取列表不代表已经测试过它们。",
+    "empty": "提供方没有返回任何模型，当前选择保持不变。",
+    "absent": "当前选择的模型不在这个列表里，仍会保留。",
+    "capabilitySupported": "已知这个模型可以完成这项任务。",
+    "capabilityUnknown": "这个模型能否完成这项任务尚未确认，可以通过检查或实际请求来验证。",
+    "capabilityUnsupported": "已知这个模型不能完成这项任务。",
+    "check": "检查 Key",
+    "checkSuccess": "Key 可以使用。",
+    "preview": "试听音色",
+    "ocrNote": "图片和 PDF 使用这里的设置；粘贴的文字使用文字 AI。",
+    "unknownOcr": "这个模型能否读图尚未确认，导入可能会返回提供方自己的错误。",
+    "savedNote": "保存只会保留你的选择，不会测试它们。"
   },
   "importer": {
     "articleTitle": "标题",
@@ -735,7 +765,6 @@
     "sentText": "文字：{{count}} 字符",
     "exactText": "查看将发送的完整文字",
     "unsupported": "此模型无法读取图片。请先在设置中选择支持图片的模型。",
-    "settings": "文字 AI 设置",
     "analyze": "发送并解析",
     "working": "处理中…",
     "pastedText": "粘贴文字",
