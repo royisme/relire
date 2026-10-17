@@ -41,7 +41,10 @@ test.describe('fill in the blanks', () => {
 
     const { attempts, itemStates } = await stored(page);
     expect(itemStates).toHaveLength(2);
-    expect(attempts.map((a: { correct: boolean }) => a.correct).sort()).toEqual([false, true]);
+    expect(attempts.map((a: { correct: boolean }) => a.correct).sort((a, b) => Number(a) - Number(b))).toEqual([
+      false,
+      true,
+    ]);
     expect(attempts.find((a: { itemId: string }) => a.itemId === 'fb3')).toMatchObject({
       userAnswer: 'voie',
       expectedAnswer: 'voit',

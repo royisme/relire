@@ -40,7 +40,7 @@ test('makes exercises from the article, saves them with fresh ids and lists them
     expect(unit.items.every((item: { answerSource?: string }) => item.answerSource === 'ai')).toBe(true);
     expect(JSON.stringify(unit)).not.toContain('articleQuote');
   }
-  expect(units.map((unit: { unitNumber: number }) => unit.unitNumber).sort()).toEqual([1, 2, 3, 4]);
+  expect(units.map((unit: { unitNumber: number }) => unit.unitNumber).sort((a, b) => a - b)).toEqual([1, 2, 3, 4]);
 
   // Progress is counted from stored states: nothing is checked yet.
   const first = main(page).getByRole('link', { name: /Les mots du renard/ });
@@ -51,9 +51,9 @@ test('makes exercises from the article, saves them with fresh ids and lists them
   // A second set continues the numbering instead of colliding with the first.
   await make(page).click();
   await expect(main(page).getByRole('link', { name: /Les mots du renard/ })).toHaveCount(2);
-  expect((await stored(page)).units.map((unit: { unitNumber: number }) => unit.unitNumber).sort()).toEqual([
-    1, 2, 3, 4, 5, 6, 7, 8,
-  ]);
+  expect(
+    (await stored(page)).units.map((unit: { unitNumber: number }) => unit.unitNumber).sort((a, b) => a - b),
+  ).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
 });
 
 test('the button shows the work and keeps its size', async ({ page, ai }) => {
@@ -96,7 +96,7 @@ test('items whose quote is not in the article are left out and counted; the rest
   const { units } = await stored(page);
   expect(units).toHaveLength(3);
   const kept = units.find((unit: { title: string }) => unit.title === 'Les mots du renard');
-  expect(kept.items.map((item: { itemNumber: number }) => item.itemNumber)).toEqual([1, 2]);
+  expect(kept?.items.map((item: { itemNumber: number | string }) => item.itemNumber)).toEqual([1, 2]);
 });
 
 test('when no item can be checked against the article it fails and saves nothing', async ({ page, ai }) => {
