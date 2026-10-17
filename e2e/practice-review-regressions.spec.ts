@@ -169,3 +169,142 @@ test('dictation replays on each check after reset, uses cached playback, and sta
   await check(3);
   expect(ai.calls.tts).toBe(1);
 });
+
+const accentUnit = {
+  ...unitOf('FILL_BLANKS', [
+    {
+      ...ITEMS.CHOICE_SELECT,
+      id: 'accent-choice',
+      type: 'CHOICE_SELECT' as const,
+      itemNumber: 1,
+      prompt: 'Il pense {a|à} elle.',
+      expectedAnswer: 'à',
+    },
+    {
+      ...ITEMS.FILL_BLANKS_MULTI,
+      id: 'accent-blanks',
+      itemNumber: 2,
+      prompt: 'Elle [___] ici et [___] demain.',
+      expectedAnswer: ['arrive', 'répète'],
+    },
+    {
+      ...ITEMS.WORD_TRANSFORM,
+      id: 'accent-single',
+      type: 'WORD_TRANSFORM' as const,
+      itemNumber: 3,
+      prompt: 'intrigué',
+      expectedAnswer: 'intriguée',
+    },
+    {
+      ...ITEMS.DIALOGUE_ORDER,
+      id: 'accent-dialogue',
+      type: 'DIALOGUE_ORDER' as const,
+      itemNumber: 4,
+      prompt: 'Ordonnez les deux répliques.',
+      options: ['a - Au revoir.', 'b - Bonjour.'],
+      expectedAnswer: ['b', 'a'],
+    },
+  ]),
+  title: 'Historical accents',
+};
+
+type ReviewDb = typeof import('../src/storage/db');
+
+for (const strictAccents of [false, true]) {
+  for (const phone of [false, true])
+    test(`checked accents stay at ${strictAccents} through preference changes, reload, backup restore and legacy metadata${phone ? ' @phone' : ''}`, async ({
+      page,
+      ai,
+    }) => {
+      void ai;
+      await seedUnits(page, [accentUnit]);
+      const preference = async (strict: boolean) => {
+        await page.goto('/#/settings/practice');
+        const checkbox = page.getByRole('checkbox', { name: 'Strict accents' });
+        await checkbox.setChecked(strict);
+        const save = page.getByRole('button', { name: 'Save', exact: true });
+        if (await save.isEnabled()) await save.click();
+      };
+      await preference(strictAccents);
+      await openUnit(page, accentUnit.id, accentUnit.title);
+      const choice = row(page, 'Il pense');
+      const blanks = row(page, 'demain.');
+      const single = row(page, 'intrigué');
+      const dialogue = row(page, 'Ordonnez');
+      const chosen = choice.getByRole('button', { name: 'a', exact: true });
+      await chosen.click();
+      await blanks.getByRole('textbox').nth(0).fill('faux');
+      await blanks.getByRole('textbox').nth(1).fill('repete');
+      await single.getByRole('textbox').fill('intriguee');
+      await page.getByRole('button', { name: 'Check all', exact: true }).click();
+      await expect(dialogue.getByText('Incorrect', { exact: true })).toBeAttached();
+      const historicalMarks = async () => {
+        await expect(choice.getByText(strictAccents ? 'Incorrect' : 'Correct', { exact: true })).toBeAttached();
+        await expect(chosen).toHaveCSS('text-decoration-line', strictAccents ? 'line-through' : 'none');
+        await expect(blanks.getByRole('textbox').nth(0)).toHaveAttribute('aria-invalid', 'true');
+        await expect(blanks.getByRole('textbox').nth(1)).toHaveCSS(
+          'text-decoration-line',
+          strictAccents ? 'line-through' : 'none',
+        );
+        await expect(single.getByText(strictAccents ? 'Incorrect' : 'Correct', { exact: true })).toBeAttached();
+        await expect(single.getByRole('textbox')).toHaveCSS(
+          'text-decoration-line',
+          strictAccents ? 'line-through' : 'none',
+        );
+      };
+      await historicalMarks();
+      await preference(!strictAccents);
+      await openUnit(page, accentUnit.id, accentUnit.title);
+      await historicalMarks();
+      await page.reload();
+      await historicalMarks();
+      expect((await stored(page)).itemStates.every((state) => state.checked?.strictAccents === strictAccents)).toBe(
+        true,
+      );
+      for (const theme of ['light', 'sepia', 'dark']) {
+        await page.evaluate((value) => {
+          document.documentElement.dataset.theme = value;
+        }, theme);
+        await page.screenshot({ path: test.info().outputPath(`saved-accent-marks-${theme}.png`), fullPage: true });
+      }
+      const backup = await page.evaluate(async () => {
+        const { exportData }: ReviewDb = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+        return JSON.stringify(await exportData());
+      });
+      const restore = async (data: string) => {
+        await page.evaluate(async (json) => {
+          const { importData }: ReviewDb = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+          await importData({ units: [], itemStates: [], attempts: [] });
+          await importData(JSON.parse(json));
+        }, data);
+        await page.reload();
+      };
+      await restore(backup);
+      await historicalMarks();
+      const legacy = JSON.parse(backup);
+      for (const state of legacy.itemStates) delete state.checked.strictAccents;
+      await restore(JSON.stringify(legacy));
+      await expect(choice.getByText(strictAccents ? 'Incorrect' : 'Correct', { exact: true })).toBeAttached();
+      await expect(chosen).toHaveAttribute('aria-pressed', 'true');
+      await expect(chosen).not.toHaveClass(/bg-ok|bg-bad|line-through/);
+      for (const field of await blanks.getByRole('textbox').all()) {
+        await expect(field).not.toHaveClass(/border-ok|border-bad|line-through/);
+        await expect(field).not.toHaveAttribute('aria-invalid');
+      }
+      await expect(blanks.getByText('Incorrect', { exact: true })).toBeAttached();
+      await expect(dialogue.getByText('a - Au revoir.', { exact: true }).first()).not.toHaveClass(
+        /text-ok|text-bad|line-through/,
+      );
+      await expect(dialogue.getByText('Incorrect', { exact: true })).toBeAttached();
+      await expect(single.getByRole('textbox')).toHaveCSS(
+        'text-decoration-line',
+        strictAccents ? 'line-through' : 'none',
+      );
+      for (const theme of ['light', 'sepia', 'dark']) {
+        await page.evaluate((value) => {
+          document.documentElement.dataset.theme = value;
+        }, theme);
+        await page.screenshot({ path: test.info().outputPath(`legacy-neutral-slots-${theme}.png`), fullPage: true });
+      }
+    });
+}

@@ -122,17 +122,18 @@ test('checking an already checked item returns the committed state and no second
     itemId: FIRST,
     resetToken: 0,
     answer: answered('suis'),
-    result: right,
+    result: { ...right, strictAccents: false },
   });
   const second = await checkItem({
     unitId: unit.id,
     itemId: FIRST,
     resetToken: 0,
     answer: answered('es'),
-    result: wrong,
+    result: { ...wrong, strictAccents: true },
   });
   expect(second.created).toBe(false);
   expect(second.state).toEqual(first.state);
+  expect(second.state.checked?.strictAccents).toBe(false);
   expect(await listAttempts()).toHaveLength(1);
 });
 

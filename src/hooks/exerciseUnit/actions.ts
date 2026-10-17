@@ -67,10 +67,11 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
   const answer = view.answer;
   ctx.patch(itemId, { busy: 'check', error: null });
   try {
-    const graded = gradeUnitItem(ctx.unit, item, answer, practiceGrading());
+    const grading = practiceGrading();
+    const graded = gradeUnitItem(ctx.unit, item, answer, grading);
     let result: CheckedResult;
     if (graded.status === 'graded') {
-      result = { correct: graded.correct };
+      result = { correct: graded.correct, strictAccents: grading.strictAccents };
     } else {
       // An open answer that matched no reference: the verdict and the words come from the AI, never a score.
       const grade = await gradeOpenAnswer({
@@ -82,6 +83,7 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
       if (!ctx.isCurrent()) return;
       result = {
         correct: grade.isCorrect,
+        strictAccents: grading.strictAccents,
         aiFeedback: {
           feedback: grade.feedback,
           ...(grade.correctedVersion ? { correctedVersion: grade.correctedVersion } : {}),

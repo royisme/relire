@@ -44,6 +44,7 @@ test.describe('open answers', () => {
     const { itemStates, attempts } = await stored(page);
     expect(itemStates[0].checked).toEqual({
       correct: true,
+      strictAccents: false,
       aiFeedback: { feedback: CATALOG_OPEN_GRADE.feedback, correctedVersion: CATALOG_OPEN_GRADE.correctedVersion },
     });
     expect(attempts).toHaveLength(1);

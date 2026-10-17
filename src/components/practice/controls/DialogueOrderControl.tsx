@@ -18,6 +18,7 @@ const lineKey = (line: string) => (line.trim()[0] ?? '').toLowerCase();
 export function DialogueOrderControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const order = answer.dialogueOrder;
+  const markSlots = checked?.strictAccents !== undefined;
   const expected = (Array.isArray(item.expectedAnswer) ? item.expectedAnswer : [item.expectedAnswer]).map((key) =>
     key.toLowerCase(),
   );
@@ -48,7 +49,7 @@ export function DialogueOrderControl({ item, answer, onChange, checked, disabled
       <ol aria-label={t('practice.linesLabel', { number: item.itemNumber })} className="min-w-0">
         {order.map((line, at) => {
           const key = lineKey(line);
-          const right = Boolean(checked) && key === expected[at];
+          const right = markSlots && key === expected[at];
           return (
             <li
               key={line}
@@ -60,9 +61,9 @@ export function DialogueOrderControl({ item, answer, onChange, checked, disabled
                 lang="fr"
                 className={cn(
                   'min-w-0 flex-1 break-words font-serif text-base leading-relaxed',
-                  !checked && 'text-ink-900',
-                  checked && right && 'font-medium text-ok-800',
-                  checked && !right && 'font-medium text-bad-700 line-through',
+                  !markSlots && 'text-ink-900',
+                  markSlots && right && 'font-medium text-ok-800',
+                  markSlots && !right && 'font-medium text-bad-700 line-through',
                 )}
               >
                 {line}

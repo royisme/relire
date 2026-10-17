@@ -10,7 +10,6 @@ import { Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { isAnswerFilled } from '../../services/exercises/answer';
 import { effectiveItemType, type ExerciseAnswer, type ExerciseItem, type ExerciseUnit } from '../../types/exercises';
-import { practiceGrading } from '../../utils/appSettings';
 import type { ItemRuntime } from '../../hooks/useExerciseUnit';
 import { CONTROLS } from './controls';
 import type { TextInputElement } from './controls/types';
@@ -88,7 +87,6 @@ export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExpl
             onChange={onAnswer}
             checked={checked}
             disabled={locked}
-            grading={practiceGrading()}
             registerInput={registerInput}
           />
         </div>

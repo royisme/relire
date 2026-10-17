@@ -11,12 +11,14 @@ import { cn } from '../../../lib/utils';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
 
-export function ChoiceSelectControl({ item, answer, onChange, checked, disabled, grading }: ExerciseControlProps) {
+export function ChoiceSelectControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const pieces = choicePieces(item.prompt);
   const expected = Array.isArray(item.expectedAnswer) ? item.expectedAnswer : [item.expectedAnswer];
+  const strictAccents = checked?.strictAccents;
+  const markSlots = strictAccents !== undefined;
   const same = (a: string, b: string) =>
-    normalizeFrench(a, grading.strictAccents) === normalizeFrench(b, grading.strictAccents);
+    normalizeFrench(a, strictAccents ?? true) === normalizeFrench(b, strictAccents ?? true);
 
   const pick = (group: number, option: string) => {
     if (disabled) return;
@@ -28,7 +30,7 @@ export function ChoiceSelectControl({ item, answer, onChange, checked, disabled,
       {pieces.map((piece, at) => {
         if (piece.kind === 'text') return <Fragment key={at}>{piece.text}</Fragment>;
         const chosen = answer.choiceSelections[piece.index] ?? '';
-        const right = Boolean(checked) && same(chosen, expected[piece.index] ?? '');
+        const right = markSlots && same(chosen, expected[piece.index] ?? '');
         return (
           <span key={at} className="mx-1 inline-flex max-w-full flex-wrap items-center gap-x-2 align-middle">
             <span
@@ -50,9 +52,9 @@ export function ChoiceSelectControl({ item, answer, onChange, checked, disabled,
                       disabled ? 'cursor-default' : 'cursor-pointer',
                       !selected && !disabled && 'text-ink-700 hover:bg-ink-100',
                       !selected && disabled && 'text-ink-500',
-                      selected && !checked && 'bg-accent-100 font-medium text-accent-900',
-                      selected && checked && right && 'bg-ok-50 font-medium text-ok-800',
-                      selected && checked && !right && 'bg-bad-50 font-medium text-bad-700 line-through',
+                      selected && !markSlots && 'bg-accent-100 font-medium text-accent-900',
+                      selected && markSlots && right && 'bg-ok-50 font-medium text-ok-800',
+                      selected && markSlots && !right && 'bg-bad-50 font-medium text-bad-700 line-through',
                     )}
                   >
                     {option}
@@ -60,7 +62,7 @@ export function ChoiceSelectControl({ item, answer, onChange, checked, disabled,
                 );
               })}
             </span>
-            {checked && !right && <ExpectedBeside text={expected[piece.index] ?? ''} />}
+            {markSlots && !right && <ExpectedBeside text={expected[piece.index] ?? ''} />}
           </span>
         );
       })}

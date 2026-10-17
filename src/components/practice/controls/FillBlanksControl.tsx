@@ -9,15 +9,7 @@ import { normalizeFrench } from '../../../services/exercises/grading';
 import { ExpectedBeside, UnderlineInput, type BlankState } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
 
-export function FillBlanksControl({
-  item,
-  answer,
-  onChange,
-  checked,
-  disabled,
-  grading,
-  registerInput,
-}: ExerciseControlProps) {
+export function FillBlanksControl({ item, answer, onChange, checked, disabled, registerInput }: ExerciseControlProps) {
   const { t } = useTranslation();
   const parts = item.prompt.split('[___]');
   const blanks = Math.max(1, parts.length - 1);
@@ -33,12 +25,14 @@ export function FillBlanksControl({
 
   const stateOf = (index: number): BlankState => {
     if (!checked) return 'open';
+    if (blanks === 1) return checked.correct ? 'right' : 'wrong';
+    // Legacy checks keep their overall verdict, but cannot establish individual slot markings.
+    if (checked.strictAccents === undefined) return 'open';
     if (checked.correct) return 'right';
-    // A wrong item can still have blanks that were right; mark them the way the grader compared them.
-    if (blanks === 1) return 'wrong';
+    // A wrong item can still have blanks that were right; use the saved comparison preference.
     const same =
-      normalizeFrench(values[index] ?? '', grading.strictAccents) ===
-      normalizeFrench(expected[index] ?? '', grading.strictAccents);
+      normalizeFrench(values[index] ?? '', checked.strictAccents) ===
+      normalizeFrench(expected[index] ?? '', checked.strictAccents);
     return same ? 'right' : 'wrong';
   };
 

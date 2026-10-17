@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
 import { freshDb, putArticle } from './fixtures/storage';
 import { ITEMS, unitOf } from './fixtures/units';
 import * as api from '../src/services/api';
+import * as appSettings from '../src/utils/appSettings';
 import { runCheck, runExplanation, runHint, type ActionContext } from '../src/hooks/exerciseUnit/actions';
 import { emptyItems } from '../src/hooks/exerciseUnit/model';
 import { getUnitSnapshot, listAttempts, resetUnit, saveUnits } from '../src/storage/exercises';
@@ -42,7 +43,7 @@ test('runCheck commits a reference match without AI and an unmatched answer with
   items[id].answer.singleAnswer = String(ITEMS.OPEN_QA.expectedAnswer);
   await runCheck(ctx, id);
   expect(ai).not.toHaveBeenCalled();
-  expect((await getUnitSnapshot(ctx.unit.id)).states[0].checked).toEqual({ correct: true });
+  expect((await getUnitSnapshot(ctx.unit.id)).states[0].checked).toEqual({ correct: true, strictAccents: false });
 
   const nextToken = await resetUnit(ctx.unit.id);
   ctx.token = nextToken;
@@ -51,10 +52,38 @@ test('runCheck commits a reference match without AI and an unmatched answer with
   await runCheck(ctx, id);
   expect(ai).toHaveBeenCalledTimes(1);
   const snapshot = await getUnitSnapshot(ctx.unit.id);
-  expect(snapshot.states[0].checked).toEqual({ correct: true, aiFeedback: { feedback: grade.feedback } });
+  expect(snapshot.states[0].checked).toEqual({
+    correct: true,
+    strictAccents: false,
+    aiFeedback: { feedback: grade.feedback },
+  });
   expect(items[id].checked).toEqual(snapshot.states[0].checked);
   expect(await listAttempts()).toHaveLength(2);
 });
+
+for (const strictAccents of [false, true]) {
+  test(`runCheck snapshots strict accents=${strictAccents} before a local or pending AI grade`, async () => {
+    const settings = spyOn(appSettings, 'practiceGrading').mockReturnValue({ strictAccents });
+    const { ctx, id, items } = await seed();
+    items[id].answer.singleAnswer = String(ITEMS.OPEN_QA.expectedAnswer);
+    await runCheck(ctx, id);
+    expect((await getUnitSnapshot(ctx.unit.id)).states[0].checked).toEqual({ correct: true, strictAccents });
+    ctx.token = await resetUnit(ctx.unit.id);
+    items[id] = emptyItems(ctx.unit)[id];
+    items[id].answer.singleAnswer = 'Une autre réponse.';
+    const pending = Promise.withResolvers<OpenGrade>();
+    spyOn(api, 'gradeOpenAnswer').mockReturnValue(pending.promise);
+    const checking = runCheck(ctx, id);
+    settings.mockReturnValue({ strictAccents: !strictAccents });
+    pending.resolve({ ...grade, isCorrect: !strictAccents });
+    await checking;
+    expect((await getUnitSnapshot(ctx.unit.id)).states[0].checked).toEqual({
+      correct: !strictAccents,
+      strictAccents,
+      aiFeedback: { feedback: grade.feedback },
+    });
+  });
+}
 
 for (const reason of ['reset', 'leave'] as const) {
   test(`runCheck drops an AI grade after ${reason}, without a write or an error`, async () => {

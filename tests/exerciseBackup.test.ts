@@ -43,6 +43,17 @@ test('a backup restores into an empty database with everything intact', async ()
   expect((await loadData())?.articles).toHaveLength(1);
 });
 
+for (const strictAccents of [false, true, undefined]) {
+  test(`backup round-trips checked accent metadata ${String(strictAccents)} without inferring legacy settings`, async () => {
+    const backup = await backupWithData();
+    const checked = { correct: false, ...(strictAccents === undefined ? {} : { strictAccents }) };
+    backup.itemStates[0].checked = checked;
+    await freshDb();
+    await importData(backup);
+    expect((await exportData()).itemStates[0].checked).toEqual(checked);
+  });
+}
+
 test('a backup without the exercise keys keeps the current exercise data', async () => {
   const backup = await backupWithData();
   const { units: _u, itemStates: _s, attempts: _a, ...old } = backup;
@@ -77,6 +88,9 @@ test('malformed exercise data rejects the whole restore and changes nothing', as
     },
     'state with a wrong key': { itemStates: [{ ...state, id: 'x' }] },
     'state with a missing field': { itemStates: [{ ...state, answer: undefined }] },
+    'checked accents metadata is not boolean': {
+      itemStates: [{ ...state, checked: { correct: false, strictAccents: 'yes' } }],
+    },
     'state of an unknown unit': {
       itemStates: [{ ...state, unitId: 'ghost', id: `ghost:${state.itemId}` }],
     },

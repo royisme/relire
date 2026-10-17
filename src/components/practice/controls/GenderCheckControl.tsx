@@ -53,7 +53,7 @@ export function GenderCheckControl({ item, answer, onChange, checked, disabled }
         >
           {options.map((option, at) => {
             const selected = answer.singleAnswer === option;
-            const right = Boolean(checked) && selected && option === expected;
+            const right = checked?.correct;
             return (
               <button
                 key={option}

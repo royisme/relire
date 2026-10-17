@@ -14,12 +14,12 @@ import type { ExerciseControlProps } from './types';
 /** The letter an option is keyed by: its first character, as the grader does. */
 const optionKey = (option: string) => (option.trim()[0] ?? '').toLowerCase();
 
-export function MatchPairsControl({ item, answer, onChange, checked, disabled, grading }: ExerciseControlProps) {
+export function MatchPairsControl({ item, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const options = item.options ?? [];
   const expected = String(item.expectedAnswer);
   const same = (a: string, b: string) =>
-    normalizeFrench(a, grading.strictAccents) === normalizeFrench(b, grading.strictAccents);
+    normalizeFrench(a, checked?.strictAccents ?? true) === normalizeFrench(b, checked?.strictAccents ?? true);
   const rightOption = options.find((option) => same(optionKey(option), expected));
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   const picked = answer.matchSelection;
@@ -64,7 +64,7 @@ export function MatchPairsControl({ item, answer, onChange, checked, disabled, g
         >
           {options.map((option, at) => {
             const selected = picked !== '' && same(optionKey(option), picked);
-            const right = Boolean(checked) && selected && same(optionKey(option), expected);
+            const right = checked?.correct;
             return (
               <button
                 key={option}

@@ -6,7 +6,6 @@
  * To add a control: implement `ExerciseControl`, then point the type at it in `./index.ts`.
  */
 import type { ComponentType } from 'react';
-import type { GradingOptions } from '../../../services/exercises/grading';
 import type { CheckedResult, ExerciseAnswer, ExerciseItem, ExerciseType } from '../../../types/exercises';
 
 /** A text field a control renders. The sheet drives Enter and the character bar through these. */
@@ -23,8 +22,6 @@ export interface ExerciseControlProps {
   checked: CheckedResult | null;
   /** True while the answer cannot be edited: a check is running, or the item is checked. Keep the answer visible. */
   disabled: boolean;
-  /** How answers are compared, so a control marks each slot the way the grader did. */
-  grading: GradingOptions;
   /**
    * Call with each text field when it mounts and with `null` when it unmounts (a ref callback does this),
    * numbering the fields from 0 in reading order. Fields that are not registered get no Enter handling
