@@ -165,25 +165,26 @@ test('a type whose control is not built yet is shown but cannot be answered', as
         section: 'COMPRENDRE',
         unitNumber: 9,
         title: 'Bientôt',
-        instruction: 'Order the lines.',
-        type: 'GENDER_CHECK',
-        grammarTags: ['gender-number'],
+        instruction: 'Write the number you hear.',
+        type: 'NUMBER_DICTATION',
+        grammarTags: ['numbers-time'],
         items: [
           {
-            id: 'g1',
+            id: 'n1',
             itemNumber: 1,
-            prompt: 'le renard',
-            expectedAnswer: 'M',
-            options: ['M', 'F'],
-            grammarTag: 'gender-number',
+            prompt: 'Écoutez et écrivez le nombre.',
+            expectedAnswer: 'cent mille',
+            grammarTag: 'numbers-time',
           },
         ],
       },
     ]);
   });
   await openUnit(page, 'soon', 'Bientôt');
-  const item = row(page, 'le renard');
-  await expect(item.getByText('Gender check exercises are coming. This item cannot be answered yet.')).toBeVisible();
+  const item = row(page, 'Écoutez et écrivez le nombre.');
+  await expect(
+    item.getByText('Number dictation exercises are coming. This item cannot be answered yet.'),
+  ).toBeVisible();
   await expect(item.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Check all' })).toBeDisabled();
 });
