@@ -29,7 +29,7 @@ bun run e2e   # installed Chrome; never `playwright install`
 ```
 
 - **Parallel e2e.** Only one e2e run at a time can own port 5174. Agents running e2e in parallel produce load flakes, so re-run a failing spec on its own before calling it a bug.
-- **`impeccable`.** The detector was unavailable in both the earlier cloud container and the P3-A local session. Say so in reports rather than claiming it ran.
+- **`impeccable`.** If it is not on PATH, use the installed skill launcher: `~/.agents/skills/impeccable/scripts/impeccable detect --json src index.html`. The P3-A follow-up ran it successfully with `[]`. Context loading also reported a stale `.impeccable/design.json` sidecar; refresh via the skill's `document` command only when requested.
 - **Container restarts.** A restart kills running agents. Their committed work survives only in their local worktree branch, and uncommitted edits survive in the worktree directory. Neither is pushed, so check `git worktree list` first and resume from what is there.
 
 ## Done
@@ -45,7 +45,7 @@ bun run e2e   # installed Chrome; never `playwright install`
 | 3 (prep) | Shared 11-type exercise catalogue with right and wrong answers and mock AI answers (`tests/fixtures/exerciseCatalog.ts`) | `888cdba` |
 | 3-A | Exercise core: recovered WIP, four controls, article generation, saved drafts/checks/reset, help, character bar, oral practice retained; review fixes for races, reading context, navigation and source changes | `d3b05e9`, `521a351`, `9ebf40c`, `4d49fb2` |
 
-At `4d49fb2`: parent integration checks passed — typecheck, lint, format, 191 unit tests, i18n, 37 prosody checks, build and all 102 e2e tests in installed Chrome. AI responses were mocked; real providers were not exercised. Layout coverage includes 1280px and 360px in light, sepia and dark, with screenshots inspected. `impeccable` was unavailable; the existing bundle-size warning remains. The integration checkout initially lacked installed Bun types; `bun install --frozen-lockfile` resolved that without dependency-file changes.
+At `4d49fb2`: parent integration checks passed — typecheck, lint, format, 191 unit tests, i18n, 37 prosody checks, build and all 102 e2e tests in installed Chrome. AI responses were mocked; real providers were not exercised. Layout coverage includes 1280px and 360px in light, sepia and dark, with screenshots inspected. The follow-up Impeccable scan of `src` and `index.html` returned `[]` using the skill launcher (the command was absent from PATH, not from the machine). The existing bundle-size warning remains. The integration checkout initially lacked installed Bun types; `bun install --frozen-lockfile` resolved that without dependency-file changes.
 
 ## Current handoff
 
