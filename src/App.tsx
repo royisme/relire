@@ -36,7 +36,7 @@ import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './
 import { isDueToday, formatDate } from './utils/srs';
 import { prefetchSpeech } from './utils/speech';
 import { hasTextKey } from './utils/appSettings';
-import { LIBRARY, parseRoute } from './utils/routes';
+import { LIBRARY, parseRoute, routeHref } from './utils/routes';
 import { navigate, useRoute } from './hooks/useRoute';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { useSidebar } from './hooks/useSidebar';
@@ -128,8 +128,19 @@ export default function App() {
   const [wordData, setWordData] = useState<WordAnalysis | null>(null);
   const [isWordLoading, setIsWordLoading] = useState(false);
   const [activeWordSentence, setActiveWordSentence] = useState('');
+  // The address whose reader or notebook opened the sheet.
+  const [wordSheetHref, setWordSheetHref] = useState<string | null>(null);
   const wordRequest = useRef(0);
   const wordContext = useRef<string | undefined>(undefined);
+  // A lookup belongs to the address that opened it: Back, Forward or a typed address closes the sheet before
+  // the new page paints, and the request is dropped so a late answer or failure cannot show on that page,
+  // replace a newer lookup or send the learner to Settings from it.
+  if (wordSheetHref && wordSheetHref !== routeHref(route)) {
+    setWordSheetHref(null);
+    setIsWordModalOpen(false);
+    setIsWordLoading(false);
+    setActiveWord(null);
+  }
   useEffect(
     () => () => {
       wordRequest.current++;
@@ -171,6 +182,7 @@ export default function App() {
 
     const request = ++wordRequest.current;
     wordContext.current = context;
+    setWordSheetHref(routeHref(route));
     setActiveWord(cleanWord);
     setActiveWordSentence(sentence);
     setIsWordModalOpen(true);
@@ -530,6 +542,7 @@ export default function App() {
         isOpen={isWordModalOpen}
         onClose={() => {
           wordRequest.current++;
+          setWordSheetHref(null);
           setIsWordModalOpen(false);
           setActiveWord(null);
         }}

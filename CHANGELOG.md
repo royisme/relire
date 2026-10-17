@@ -56,6 +56,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- A word lookup that is still loading, or already showing, closes with the page that opened it: browser Back, Forward or a typed address no longer leaves a sheet over the new screen, and a late answer or failure for the old page cannot show up, replace a newer lookup or send you to Settings. A lookup started on the page you are on completes as before.
 - Exercises-only imports can save a workbook with valid exercises and no source text, without inventing a passage. Article imports still require source text.
 - Article startup, saves and sample restores preserve the original storage error when a failed request automatically aborts its transaction, without an extra unhandled error.
 - Saving an article no longer rewrites unrelated articles from a stale tab. Saves finish before the editor closes; a failed save keeps your draft and shows the reason for retry. First-run samples finish saving before the library opens, startup failures offer Reload, an intentionally empty library stays empty, and restoring samples preserves any sample already edited in another tab.
