@@ -6,9 +6,11 @@ import { exercisesChanged } from './exerciseEvents';
 
 /** Never adopts an existing id. A rejected transaction leaves the prepared payload safe to retry unchanged. */
 export async function createImportedMaterial(article: Article, units: ExerciseUnit[]): Promise<void> {
-  if (!article.id.trim() || !article.title.trim() || !article.content.trim())
-    throw new Error('An imported material requires an id, title and source text');
+  if (!article.id.trim() || !article.title.trim()) throw new Error('An imported material requires an id and title');
+  if (article.kind !== 'workbook' && !article.content.trim())
+    throw new Error('An imported article requires source text');
   const rows = units.map((unit) => ExerciseUnitSchema.parse(unit));
+  if (article.kind === 'workbook' && !rows.length) throw new Error('An imported workbook requires initial units');
   if (new Set(rows.map((unit) => unit.id)).size !== rows.length) throw new Error('Duplicate initial unit IDs');
   if (rows.some((unit) => unit.materialId !== article.id))
     throw new Error('Initial units must belong to the imported material');

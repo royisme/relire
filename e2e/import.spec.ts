@@ -54,6 +54,48 @@ for (const phone of [false, true]) {
   });
 }
 
+for (const phone of [false, true]) {
+  test(`empty source text blocks article/both but saves exercises-only workbook ${phone ? '@phone' : ''}`, async ({
+    page,
+    ai,
+  }) => {
+    ai.answer({ extract: { ...draft(), sourceText: '' } });
+    await enter(page);
+    await extractText(page);
+    for (const destination of ['article', 'both']) {
+      await page.getByLabel('Save as', { exact: true }).selectOption(destination);
+      await page.getByLabel('I have reviewed').check();
+      await page.getByRole('button', { name: 'Confirm and save' }).click();
+      await expect(page.getByRole('status')).toContainText('source text');
+      await expect(page).toHaveURL(/#\/import$/);
+    }
+    const before = await page.evaluate(async () => {
+      const { db } = (await import('/src/storage/db.ts' as string)) as typeof import('../src/storage/db');
+      const d = await db();
+      return { articles: await d.getAll('articles'), units: await d.getAll('units') };
+    });
+    expect(before.articles.filter((row) => row.id.startsWith('material-'))).toEqual([]);
+    expect(before.units).toEqual([]);
+    await page.getByLabel('Save as', { exact: true }).selectOption('exercises');
+    await page.getByLabel('I have reviewed').check();
+    expect(await overflowing(page.locator('body'))).toEqual([]);
+    await page.getByRole('button', { name: 'Confirm and save' }).click();
+    await expect(page).toHaveURL(/#\/practice\?article=material-/);
+    const saved = await page.evaluate(async () => {
+      const { db } = (await import('/src/storage/db.ts' as string)) as typeof import('../src/storage/db');
+      const d = await db();
+      return { articles: await d.getAll('articles'), units: await d.getAll('units') };
+    });
+    const workbooks = saved.articles.filter((row) => row.kind === 'workbook');
+    expect(workbooks).toHaveLength(1);
+    expect(workbooks[0].content).toBe('');
+    expect(saved.articles).toHaveLength(before.articles.length + 1);
+    expect(saved.units).toHaveLength(1);
+    expect(saved.units[0].materialId).toBe(workbooks[0].id);
+    expect(saved.units[0].importSource?.extractedText).toBe('');
+  });
+}
+
 test('failed atomic save keeps draft and guard, retry keeps prepared identities', async ({ page, ai }) => {
   ai.answer({ extract: draft() });
   await enter(page);

@@ -63,7 +63,7 @@ export function ImportPage({ onCreated }: { onCreated: (article: Article) => voi
   async function save() {
     if (!draft || !source.result || !confirmed || pendingSave.current) return;
     if (!prepared.current) {
-      if (!draft.materialTitle?.trim() || !draft.sourceText.trim()) {
+      if (!draft.materialTitle?.trim() || (destination !== 'exercises' && !draft.sourceText.trim())) {
         setError(t('importFlow.requiredText'));
         return;
       }

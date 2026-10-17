@@ -761,7 +761,7 @@
     "save": "Confirm and save",
     "saving": "Saving…",
     "restart": "Start over",
-    "requiredText": "Enter a title and meaningful source text before saving.",
+    "requiredText": "Enter a title before saving; articles also require meaningful source text.",
     "selectUnits": "Include at least one playable exercise unit.",
     "saveFailed": "Not saved. Your draft is kept; retry when ready. {{msg}}",
     "leaveTitle": "Discard this import?",

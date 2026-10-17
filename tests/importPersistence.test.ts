@@ -4,6 +4,8 @@ import { article, failure, freshDb, seedUnit } from './fixtures/storage';
 import { ITEMS, unitOf } from './fixtures/units';
 import { db } from '../src/storage/db';
 import { createImportedMaterial } from '../src/storage/exercises';
+import { prepareImport } from '../src/services/exercises/importDraft';
+import { draftFixture } from './fixtures/importDraft';
 
 beforeEach(freshDb);
 const material = article('imported');
@@ -22,6 +24,47 @@ test('creates article, units and started atomically without changing unrelated r
   expect(await d.get('units', existing.id)).toEqual(existing);
   expect(await d.count('itemStates')).toBe(0);
   expect(await d.count('attempts')).toBe(0);
+});
+
+test('creates an exercises-only workbook with empty source text and fully promoted units', async () => {
+  const draft = {
+    ...draftFixture,
+    sourceText: '',
+    units: draftFixture.units.map((unit) => ({
+      ...unit,
+      items: [{ ...unit.items[0], expectedAnswer: ITEMS.WORD_TRANSFORM.expectedAnswer }],
+    })),
+  };
+  const prepared = prepareImport(draft, { kind: 'text', name: 'Worksheet', pages: [] }, 'complete', {
+    materialId: material.id,
+  });
+  expect(prepared.errors).toEqual([]);
+  const workbook = { ...material, kind: 'workbook' as const, content: '' };
+  await createImportedMaterial(workbook, prepared.units);
+  const d = await db();
+  expect(await d.get('articles', material.id)).toEqual(workbook);
+  expect(await d.getAll('units')).toEqual(prepared.units);
+  expect(prepared.units[0].importSource?.extractedText).toBe('');
+  expect(await d.get('meta', 'started')).toBe(true);
+});
+
+test('empty source text still requires a readable article or valid workbook units, and always id/title', async () => {
+  const workbook = { ...material, kind: 'workbook' as const, content: '' };
+  for (const kind of [undefined, 'article'] as const) {
+    for (const content of ['', '   ']) {
+      expect(await failure(createImportedMaterial({ ...material, kind, content }, units()))).toBeInstanceOf(Error);
+    }
+  }
+  expect(await failure(createImportedMaterial(workbook, []))).toBeInstanceOf(Error);
+  expect(await failure(createImportedMaterial(workbook, [{ ...units()[0], items: [] }]))).toBeInstanceOf(Error);
+  for (const kind of ['article', 'workbook'] as const) {
+    expect(await failure(createImportedMaterial({ ...material, kind, id: ' ' }, units()))).toBeInstanceOf(Error);
+    expect(await failure(createImportedMaterial({ ...material, kind, title: ' ' }, units()))).toBeInstanceOf(Error);
+  }
+  const d = await db();
+  expect(await d.count('articles')).toBe(0);
+  expect(await d.count('units')).toBe(0);
+  expect(await d.get('meta', 'started')).toBeUndefined();
 });
 
 test('rejects dangling links and duplicate initial ids before writing', async () => {

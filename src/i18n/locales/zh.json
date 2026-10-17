@@ -756,7 +756,7 @@
     "save": "确认保存",
     "saving": "保存中…",
     "restart": "重新开始",
-    "requiredText": "保存前请填写标题和有实际内容的原文。",
+    "requiredText": "保存前请填写标题；保存为文章时还需填写有实际内容的原文。",
     "selectUnits": "请至少包含一个可练习的单元。",
     "saveFailed": "保存失败，草稿已保留，可重试。{{msg}}",
     "leaveTitle": "放弃本次导入？",
