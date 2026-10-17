@@ -69,6 +69,14 @@ test.beforeEach(async ({ page, ai }) => {
       if (value instanceof Blob) types.set(url, value.type);
       return url;
     };
+    // Keep fixture blobs out of the native decoder; playback events are driven by this spec.
+    const NativeAudio = window.Audio;
+    window.Audio = class extends NativeAudio {
+      constructor(src?: string) {
+        super();
+        Object.defineProperty(this, 'src', { value: src ?? '' });
+      }
+    };
     const state = window as unknown as HistoryPlayback;
     state.historyPlays = [];
     state.historyAudio = [];

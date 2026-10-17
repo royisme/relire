@@ -291,6 +291,7 @@ test.describe('layout', () => {
   async function checkRoutes(page: Page) {
     for (const route of routes) {
       await page.goto('/' + route);
+      await expect(page.getByRole('main').getByRole('heading').first()).toBeVisible();
       await settled(page);
       expect(await overflowing(page.locator('body')), route).toEqual([]);
       const first = await layout(page, 'main');

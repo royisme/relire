@@ -81,7 +81,7 @@ test('Library level filters have one Tab stop, all arrow keys and Home/End', asy
   await page.goto('/#/read');
   const group = page.getByRole('radiogroup');
   const radios = group.getByRole('radio');
-  expect(await radios.count()).toBeGreaterThan(1);
+  await expect(radios.nth(1)).toBeVisible();
   await expect(group.locator('[tabindex="0"]')).toHaveCount(1);
   for (const radio of await radios.all()) await touchTarget(radio);
   const first = radios.first();
@@ -133,6 +133,7 @@ test('phone study links stay local; the drawer has About last and no collapse co
 test('phone Library filters retain 40px radio targets and selection @phone', async ({ page }) => {
   await page.goto('/#/read');
   const radios = page.getByRole('radiogroup').getByRole('radio');
+  await expect(radios.nth(1)).toBeVisible();
   for (const radio of await radios.all()) await touchTarget(radio);
   await radios.nth(1).tap();
   await expect(radios.nth(1)).toBeChecked();

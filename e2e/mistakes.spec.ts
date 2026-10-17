@@ -81,9 +81,9 @@ test('wrong answer → grouped notebook → explanation → actual word saved �
   expect(ai.prompts.word[0]).not.toContain('Un jour, le Petit Prince');
   await page.getByRole('button', { name: 'Save word' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).first().click();
-  await page.getByRole('radio', { name: 'Words', exact: true }).click();
+  await page.getByRole('link', { name: 'Words', exact: true }).click();
   await expect(page.getByText('pain', { exact: true }).first()).toBeVisible();
-  await page.getByRole('radio', { name: 'Mistakes', exact: true }).click();
+  await page.getByRole('link', { name: 'Mistakes', exact: true }).click();
   await entry(page).getByRole('link', { name: 'Retry in unit' }).click();
   await expect(row(page, 'Je ne').getByRole('textbox')).toHaveValue('mangez');
   await expect(row(page, 'Je ne').getByRole('textbox')).not.toBeEditable();
@@ -320,9 +320,9 @@ test('late explanation is dropped after unmount', async ({ page, ai }) => {
   await entry(page).getByRole('button', { name: 'Explain', exact: true }).click();
   await expect.poll(() => ai.calls.explain).toBeGreaterThan(0);
   await page.keyboard.press('Escape');
-  await page.getByRole('radio', { name: 'Words', exact: true }).click();
+  await page.getByRole('link', { name: 'Words', exact: true }).click();
   await pause(900);
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('radio', { name: 'Mistakes', exact: true }).click();
+  await page.getByRole('link', { name: 'Mistakes', exact: true }).click();
   await expect(page.getByText('Unmounted answer')).toHaveCount(0);
 });
