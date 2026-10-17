@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useSyncExternalStore, type CSSProperties } from 'react';
+import React, { useState, useEffect, useRef, useSyncExternalStore, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from './components/shell/Header';
 import { Sidebar } from './components/shell/Sidebar';
@@ -128,6 +128,14 @@ export default function App() {
   const [wordData, setWordData] = useState<WordAnalysis | null>(null);
   const [isWordLoading, setIsWordLoading] = useState(false);
   const [activeWordSentence, setActiveWordSentence] = useState('');
+  const wordRequest = useRef(0);
+  const wordContext = useRef<string | undefined>(undefined);
+  useEffect(
+    () => () => {
+      wordRequest.current++;
+    },
+    [route],
+  );
 
   // Sentence Drawer state
   const [isSentenceDrawerOpen, setIsSentenceDrawerOpen] = useState(false);
@@ -156,11 +164,13 @@ export default function App() {
   };
 
   // Word Click Handler
-  const handleWordClick = async (word: string, sentence: string) => {
+  const handleWordClick = async (word: string, sentence: string, context = currentArticle?.content) => {
     // Strip leading/trailing punctuation while preserving French accents
     const cleanWord = word.trim().replace(/^[^\p{L}\p{M}]+|[^\p{L}\p{M}]+$/gu, '');
     if (!cleanWord) return;
 
+    const request = ++wordRequest.current;
+    wordContext.current = context;
     setActiveWord(cleanWord);
     setActiveWordSentence(sentence);
     setIsWordModalOpen(true);
@@ -169,22 +179,23 @@ export default function App() {
     setAiError(null);
 
     try {
-      const data = await fetchWordAnalysis(cleanWord, sentence, currentArticle?.content);
+      const data = await fetchWordAnalysis(cleanWord, sentence, context);
+      if (request !== wordRequest.current) return;
       if (data && data.word) {
         setWordData(data);
       } else {
-        throw new Error('Empty word analysis returned');
+        throw new Error(t('notebook.emptyWordAnalysis'));
       }
     } catch (err) {
-      handleAiError(err, () => setIsWordModalOpen(false));
+      if (request === wordRequest.current) handleAiError(err, () => setIsWordModalOpen(false));
     } finally {
-      setIsWordLoading(false);
+      if (request === wordRequest.current) setIsWordLoading(false);
     }
   };
 
   const handleRetryWord = () => {
     if (activeWord) {
-      void handleWordClick(activeWord, activeWordSentence);
+      void handleWordClick(activeWord, activeWordSentence, wordContext.current);
     }
   };
 
@@ -460,6 +471,13 @@ export default function App() {
             {route.name === 'study' && (
               <StudyView
                 tab={route.tab}
+                mistakes={{
+                  articles,
+                  onMissingKey: requestKey,
+                  onWord: (word, sentence, context) => {
+                    void handleWordClick(word, sentence, context);
+                  },
+                }}
                 vocabulary={{ vocabList, onUpdateWord: handleUpdateWord, onDeleteWord: handleDeleteWord }}
                 shadowing={{
                   articles,
@@ -504,6 +522,7 @@ export default function App() {
       <WordDetailModal
         isOpen={isWordModalOpen}
         onClose={() => {
+          wordRequest.current++;
           setIsWordModalOpen(false);
           setActiveWord(null);
         }}

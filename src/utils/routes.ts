@@ -7,6 +7,7 @@
  *   #/read/:articleId        reader
  *   #/study/words            My study → Words
  *   #/study/shadowing        My study → Shadowing
+ *   #/study/mistakes         My study → Mistakes
  *   #/practice               practice: an article's exercise units (`?article=:articleId` picks the article)
  *   #/practice/:unitId       one exercise unit on one sheet
  *   #/progress               progress
@@ -17,7 +18,7 @@
 export const SETTINGS_SECTIONS = ['text-ai', 'speech', 'practice', 'prompts', 'data', 'about'] as const;
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
-export const STUDY_TABS = ['words', 'shadowing'] as const;
+export const STUDY_TABS = ['words', 'shadowing', 'mistakes'] as const;
 export type StudyTab = (typeof STUDY_TABS)[number];
 
 export type Route =

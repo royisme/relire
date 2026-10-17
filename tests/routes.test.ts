@@ -27,3 +27,9 @@ test('addresses that are not practice places stay not found', () => {
   expect(parseRoute('#/practice/%E0%A4%A').route.name).toBe('notFound');
   expect(parseRoute('#/read/abc').route).toEqual({ name: 'reader', articleId: 'abc' });
 });
+
+test('mistake notebook has a canonical study address', () => {
+  const route: Route = { name: 'study', tab: 'mistakes' };
+  expect(roundTrip(route)).toEqual({ route, canonical: null });
+  expect(areaOf(route)).toBe('study');
+});

@@ -565,7 +565,8 @@
   "study": {
     "label": "我的学习",
     "words": "生词",
-    "shadowing": "跟读"
+    "shadowing": "跟读",
+    "mistakes": "错题本"
   },
   "shadowingLog": {
     "title": "跟读本",
@@ -790,5 +791,18 @@
       "missing-answer": "{{title}}：请填写缺失的参考答案或排除相关题目。",
       "invalid": "{{title}}：{{msg}}"
     }
+  },
+  "notebook": {
+    "description": "保留练习中的错误答案。点按单词即可查询并收藏。",
+    "empty": "还没有错题。练习中检查过的错误答案会显示在这里。",
+    "loadError": "无法加载错题：{{reason}}",
+    "resolved": "已解决",
+    "unresolved": "待复习",
+    "retryUnit": "回到单元重试",
+    "openMaterial": "打开材料",
+    "unitUnavailable": "单元已不可用",
+    "materialUnavailable": "材料已删除",
+    "retryHelp": "打开已保存的练习，不更改答案。如果已经检查，请点击“重置本单元”并确认；作答历史会保留。",
+    "emptyWordAnalysis": "单词分析为空。"
   }
 }

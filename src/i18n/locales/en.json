@@ -570,7 +570,8 @@
   "study": {
     "label": "My study",
     "words": "Words",
-    "shadowing": "Shadowing"
+    "shadowing": "Shadowing",
+    "mistakes": "Mistakes"
   },
   "shadowingLog": {
     "title": "Shadowing",
@@ -795,5 +796,18 @@
       "missing-answer": "{{title}}: supply missing reference answers or exclude these questions.",
       "invalid": "{{title}}: {{msg}}"
     }
+  },
+  "notebook": {
+    "description": "Wrong answers kept from your practice. Tap a word to look it up and save it.",
+    "empty": "No mistakes yet. Checked wrong answers will appear here.",
+    "loadError": "Could not load mistakes: {{reason}}",
+    "resolved": "Resolved",
+    "unresolved": "To revisit",
+    "retryUnit": "Retry in unit",
+    "openMaterial": "Open in material",
+    "unitUnavailable": "Unit unavailable",
+    "materialUnavailable": "Material removed",
+    "retryHelp": "Opens the saved sheet without changing answers. If already checked, use “Reset this unit” and confirm; attempt history is kept.",
+    "emptyWordAnalysis": "The word analysis was empty."
   }
 }
