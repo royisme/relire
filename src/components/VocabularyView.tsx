@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Download, RotateCw, Search, Trash2 } from 'lucide-react';
 import { VocabWord } from '../types';
@@ -7,6 +7,7 @@ import { SpeakButton } from './ui/speak-button';
 import { Button } from './ui/button';
 import { PageHeader } from './ui/page-header';
 import { Segmented } from './ui/segmented';
+import { Dialog } from './ui/overlay';
 
 interface VocabularyViewProps {
   vocabList: VocabWord[];
@@ -21,35 +22,40 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'due' | 'learning' | 'mastered'>('all');
 
-  // Flashcard review state
   const dueWords = vocabList.filter(isDueToday);
+  // Ratings remove words from the live due list, not from this session's queue.
+  const [reviewQueue, setReviewQueue] = useState<VocabWord[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [reviewedCount, setReviewedCount] = useState(0);
+  const [pendingDelete, setPendingDelete] = useState<VocabWord | null>(null);
+  const deleteOpener = useRef<HTMLButtonElement>(null);
+  const deleteCancel = useRef<HTMLButtonElement>(null);
+  const searchInput = useRef<HTMLInputElement>(null);
 
-  const currentQuizWord = dueWords[currentIndex];
+  useEffect(() => {
+    if (!pendingDelete) return;
+    const opener = deleteOpener.current;
+    const search = searchInput.current;
+    deleteCancel.current?.focus();
+    return () => {
+      (opener?.isConnected ? opener : search)?.focus({ preventScroll: true });
+    };
+  }, [pendingDelete]);
+
+  const currentQuizWord = reviewQueue[currentIndex];
 
   const handleStartReview = () => {
+    setReviewQueue(dueWords);
     setCurrentIndex(0);
     setIsFlipped(false);
-    setReviewedCount(0);
     setViewMode('quiz');
   };
 
   const handleRateWord = (rating: number) => {
     if (!currentQuizWord) return;
-    const updated = calculateNextReview(currentQuizWord, rating);
-    onUpdateWord(updated);
-    setReviewedCount((prev) => prev + 1);
-
-    if (currentIndex + 1 < dueWords.length) {
-      setCurrentIndex((prev) => prev + 1);
-      setIsFlipped(false);
-    } else {
-      // Completed queue
-      setIsFlipped(false);
-      setCurrentIndex(dueWords.length);
-    }
+    onUpdateWord(calculateNextReview(currentQuizWord, rating));
+    setCurrentIndex((prev) => prev + 1);
+    setIsFlipped(false);
   };
 
   // Filter list
@@ -80,10 +86,10 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
   const translationOf = (w: VocabWord) => (isEn && w.translationEn ? w.translationEn : w.translation);
   const guideOf = (w: VocabWord) => (isEn ? w.phoneticsGuideEn || w.phoneticsGuide : w.phoneticsGuide);
   const ratings = [
-    { rating: 1, label: t('vocab.rateHard'), after: '1d' },
-    { rating: 3, label: t('vocab.rateGood'), after: '3d' },
-    { rating: 4, label: t('vocab.rateEasy'), after: '6d' },
-    { rating: 5, label: t('vocab.mastered'), after: '12d+' },
+    { rating: 1, label: t('vocab.rateHard') },
+    { rating: 3, label: t('vocab.rateGood') },
+    { rating: 4, label: t('vocab.rateEasy') },
+    { rating: 5, label: t('vocab.mastered') },
   ];
 
   return (
@@ -127,24 +133,31 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
       {/* Review: one card at a time */}
       {viewMode === 'quiz' && (
         <div className="max-w-xl mx-auto space-y-4">
-          {dueWords.length === 0 || currentIndex >= dueWords.length ? (
+          {currentIndex >= reviewQueue.length ? (
             <div className="px-6 py-12 rounded-lg bg-surface border border-ink-200 text-center space-y-2">
               <h3 className="font-serif font-semibold text-xl text-ink-900">{t('vocab.finishReview')}</h3>
-              <p className="text-sm text-ink-500 tnum">{t('vocab.reviewedCount', { count: reviewedCount })}</p>
+              <p className="text-sm text-ink-500 tnum">{t('vocab.reviewedCount', { count: currentIndex })}</p>
             </div>
           ) : currentQuizWord ? (
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs text-ink-500 tnum">
                   <span>
-                    {currentIndex + 1} / {dueWords.length}
+                    {currentIndex + 1} / {reviewQueue.length}
                   </span>
-                  <span>{t('vocab.reviewedCount', { count: reviewedCount })}</span>
+                  <span>{t('vocab.reviewedCount', { count: currentIndex })}</span>
                 </div>
-                <div className="w-full bg-ink-200 h-1 rounded-full overflow-hidden">
+                <div
+                  role="progressbar"
+                  aria-label={t('vocab.reviewTitle')}
+                  aria-valuemin={0}
+                  aria-valuemax={reviewQueue.length}
+                  aria-valuenow={currentIndex}
+                  className="w-full bg-ink-200 h-1 rounded-full overflow-hidden"
+                >
                   <div
                     className="bg-accent-600 h-full transition-all duration-300"
-                    style={{ width: `${((currentIndex + 1) / dueWords.length) * 100}%` }}
+                    style={{ width: `${(currentIndex / reviewQueue.length) * 100}%` }}
                   />
                 </div>
               </div>
@@ -173,7 +186,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
                       label={t('wordModal.listen')}
                       stopLabel={t('reader.stop')}
                       variant="ghost"
-                      size="iconSm"
+                      size="icon"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
@@ -201,16 +214,21 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
 
               {isFlipped && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {ratings.map((r) => (
-                    <button
-                      key={r.rating}
-                      onClick={() => handleRateWord(r.rating)}
-                      className="h-14 rounded-md border border-ink-300 bg-surface hover:bg-ink-100 text-sm text-ink-900 flex flex-col items-center justify-center gap-0.5 cursor-pointer"
-                    >
-                      <span className="font-medium">{r.label}</span>
-                      <span className="text-xs text-ink-500 tnum">{r.after}</span>
-                    </button>
-                  ))}
+                  {ratings.map((r) => {
+                    const preview = calculateNextReview(currentQuizWord, r.rating);
+                    return (
+                      <button
+                        key={r.rating}
+                        onClick={() => handleRateWord(r.rating)}
+                        className="h-14 rounded-md border border-ink-300 bg-surface hover:bg-ink-100 text-sm text-ink-900 flex flex-col items-center justify-center gap-0.5 cursor-pointer"
+                      >
+                        <span className="font-medium">{r.label}</span>
+                        <span className="text-xs text-ink-500 tnum">
+                          {t('vocab.reviewAfter', { count: preview.intervalDays })}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -226,6 +244,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
               <span className="sr-only">{t('vocab.searchPlaceholder')}</span>
               <Search className="w-4 h-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" aria-hidden="true" />
               <input
+                ref={searchInput}
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -262,7 +281,7 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
 
           {filteredWords.length === 0 ? (
             <div className="px-6 py-12 text-center rounded-lg bg-surface border border-ink-200">
-              <p className="text-ink-500 text-sm">{t('vocab.empty')}</p>
+              <p className="text-ink-500 text-sm">{t(vocabList.length === 0 ? 'vocab.empty' : 'vocab.noResults')}</p>
             </div>
           ) : (
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -285,12 +304,15 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
                           label={t('wordModal.listen')}
                           stopLabel={t('reader.stop')}
                           variant="ghost"
-                          size="iconSm"
+                          size="icon"
                         />
                         <Button
                           variant="ghost"
-                          size="iconSm"
-                          onClick={() => onDeleteWord(item.id)}
+                          size="icon"
+                          onClick={(e) => {
+                            deleteOpener.current = e.currentTarget;
+                            setPendingDelete(item);
+                          }}
                           title={t('library.delete')}
                           aria-label={`${t('library.delete')}: ${item.word}`}
                           className="hover:text-bad-700"
@@ -325,6 +347,44 @@ export const VocabularyView: React.FC<VocabularyViewProps> = ({ vocabList, onUpd
             </ul>
           )}
         </div>
+      )}
+
+      {pendingDelete && (
+        <Dialog label={t('vocab.deleteTitle')} onClose={() => setPendingDelete(null)} className="max-w-sm">
+          <div
+            className="p-5 space-y-4"
+            onKeyDown={(e) => {
+              if (e.key !== 'Tab') return;
+              const buttons = e.currentTarget.querySelectorAll('button');
+              const first = buttons[0];
+              const last = buttons[buttons.length - 1];
+              if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+              } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+              }
+            }}
+          >
+            <h3 className="font-serif text-lg font-semibold text-ink-900">{t('vocab.deleteTitle')}</h3>
+            <p className="text-sm text-ink-700 break-words">{t('vocab.deleteConfirm', { word: pendingDelete.word })}</p>
+            <div className="flex justify-end gap-2">
+              <Button ref={deleteCancel} variant="ghost" onClick={() => setPendingDelete(null)}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  onDeleteWord(pendingDelete.id);
+                  setPendingDelete(null);
+                }}
+              >
+                {t('library.delete')}
+              </Button>
+            </div>
+          </div>
+        </Dialog>
       )}
     </div>
   );

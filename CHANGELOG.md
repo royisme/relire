@@ -61,6 +61,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Fixed
 - Segmented filters now support arrow keys, Home and End with one Tab stop, and have 40px touch targets.
+- Vocabulary review now visits every word in its starting queue without skipping as ratings save, keeps a stable total, and previews the actual scheduled interval for each rating. Deleting a saved word asks for confirmation naming the word and its review history; cancel keeps both. Empty search/filter results no longer say the vocabulary is empty.
 - The Shadowing log opened from a practice card's "All recordings" no longer hides the rest of your recordings: the source list also appears when only unavailable history is left, and a source that is gone shows the other recordings instead of an empty page.
 - Empty-text workbooks reopened from the Library now show their own Practice unit list instead of a blank Reader; readable materials still open Reader.
 - A word lookup that is still loading, or already showing, closes with the page that opened it: browser Back, Forward or a typed address no longer leaves a sheet over the new screen, and a late answer or failure for the old page cannot show up, replace a newer lookup or send you to Settings. A lookup started on the page you are on completes as before.
