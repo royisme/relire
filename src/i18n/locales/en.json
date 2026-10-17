@@ -695,5 +695,21 @@
     "toLibrary": "Go to the library",
     "unit": "That exercise is not here. It may have been deleted, or the link comes from another browser.",
     "toPractice": "Go to Practice"
+  },
+  "importMaterial": {
+    "fileType": "Choose a PNG, JPEG, WebP image or a PDF file.",
+    "pdfSize": "The PDF must be nonempty and no larger than 20 MiB.",
+    "imageSize": "The image must be nonempty and no larger than 10 MiB.",
+    "imageRead": "The image could not be read. Choose the file again.",
+    "imageDecode": "The image could not be decoded. Check that the file is not damaged.",
+    "imagePixels": "The image exceeds 20 million pixels. Resize it first.",
+    "pdfPages": "The PDF must contain 1–100 pages. Split larger files first.",
+    "pageBounds": "Choose valid page numbers, at most 3 pages per analysis. Select cross-page exercises together.",
+    "pageFormat": "Enter page numbers such as 1, 1-3 or 1,3.",
+    "pdfProtected": "Protected PDFs are not supported. Remove the password protection first.",
+    "pdfOpen": "The PDF could not be opened. Check that the file is not damaged.",
+    "pdfRender": "The PDF page could not be rendered. Check the file or try another page.",
+    "disposed": "This material has been closed. Choose the file again.",
+    "pastedImage": "Pasted image"
   }
 }
