@@ -44,13 +44,16 @@ bun run e2e   # installed Chrome; never `playwright install`
 | 2b | App shell: collapsible sidebar, Settings as a page with per-section save, hash routes, not-found view | `247b61c` |
 | 3 (prep) | Shared 11-type exercise catalogue with right and wrong answers and mock AI answers (`tests/fixtures/exerciseCatalog.ts`) | `888cdba` |
 | 3-A | Exercise core: recovered WIP, four controls, article generation, saved drafts/checks/reset, help, character bar, oral practice retained; review fixes for races, reading context, navigation and source changes | `d3b05e9`, `521a351`, `9ebf40c`, `4d49fb2` |
+| 3-B1 | Choice and order controls: `GENDER_CHECK`, `ODD_ONE_OUT`, `MATCH_PAIRS`, `DIALOGUE_ORDER` (radio groups with arrow keys, per-line up/down), catalogue e2e right and wrong at 1280px and 360px | `4c8d9f8`, `e8c5db8` |
 
 At `4d49fb2`: parent integration checks passed — typecheck, lint, format, 191 unit tests, i18n, 37 prosody checks, build and all 102 e2e tests in installed Chrome. AI responses were mocked; real providers were not exercised. Layout coverage includes 1280px and 360px in light, sepia and dark, with screenshots inspected. The follow-up Impeccable scan of `src` and `index.html` returned `[]` using the skill launcher (the command was absent from PATH, not from the machine). The existing bundle-size warning remains. The integration checkout initially lacked installed Bun types; `bun install --frozen-lockfile` resolved that without dependency-file changes.
 
+At `e8c5db8` (3-B1): parent integration checks passed — typecheck, lint, format, 191 unit tests, i18n, 37 prosody checks, build, all 111 e2e tests in installed Chrome, and the Impeccable detector `[]` via the skill launcher. AI responses were mocked; real providers were not exercised.
+
 ## Current handoff
 
-- **P3-A is complete.** The old `77ac92e` WIP on `claude/sleepy-darwin-lt2eck-wip-phase3-core` was recovered and finished; do not cherry-pick it again.
-- **Next: P3-B1 and P3-B2**, in parallel with separate worktrees/file ownership. Seven controls remain placeholders. P3-C catalogue adoption and P3-D whole-phase review are still pending; phase 3 is not complete.
+- **P3-A and P3-B1 are complete.** The old `77ac92e` WIP on `claude/sleepy-darwin-lt2eck-wip-phase3-core` was recovered and finished; do not cherry-pick it again.
+- **Next: P3-B2** (writing and listening controls + Settings Practice section). The first two launches on `openai-codex/gpt-6.1-sol` failed with "usage limit reached" (no changes made); the user is deciding whether to run it on `zai/glm-5.3` or wait for the quota. Its worktree `../relire-p3b2` (branch `merge-p3b2`, at `163eddd`, deps installed) is unused and clean. Three controls remain placeholders (`SENTENCE_BUILD`, `READING_CLOZE`, `NUMBER_DICTATION`); the "not built yet" sheet test currently uses `NUMBER_DICTATION`, so B2 must move or drop it. P3-C catalogue adoption and P3-D whole-phase review are still pending; phase 3 is not complete.
 - The user's pre-existing `.gitignore` addition for `.works/` was left untouched and uncommitted.
 
 ## Next tasks
@@ -68,7 +71,7 @@ Tasks run in order unless marked parallel. Each one ends with the full checks, a
   - **Generation:** items whose `articleQuote` is not in the article are dropped and the learner is told how many. It fails only if nothing is left.
   - **Old drills:** remove the drills (task, `drills.*.txt`, `PracticeDeck` types). Keep the open oral-assessment practice as its own section.
   - **e2e:** extend the mock in `e2e/fixtures.ts` to the exercises, hint, explain and grade tasks.
-- [ ] **P3-B1 Choice and order controls** (Sonnet, parallel with B2). Covers `GENDER_CHECK`, `ODD_ONE_OUT` (strike-through), `MATCH_PAIRS` and `DIALOGUE_ORDER`.
+- [x] **P3-B1 Choice and order controls** (done with GLM; commits `4c8d9f8`, `e8c5db8`). Covers `GENDER_CHECK`, `ODD_ONE_OUT` (strike-through), `MATCH_PAIRS` and `DIALOGUE_ORDER`.
   - Keyboard operable; 40px touch targets; one file per control; swap the placeholders in the registry.
   - e2e uses `CATALOG_EXERCISES` / `CATALOG_ANSWERS` to answer each type right and wrong, at 1280px and 360px.
 - [ ] **P3-B2 Writing and listening controls** (Sonnet, parallel with B1). Covers `SENTENCE_BUILD` (AI-graded when unmatched), `READING_CLOZE` (passage beside the questions on desktop, stacked on phones, opens in the reader) and `NUMBER_DICTATION` (plays `audioText` through `utils/speech`, clips stored in the `audio` store).
