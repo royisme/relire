@@ -1,22 +1,22 @@
 # Relire Plus merge: progress and next steps
 
 Status: living handoff document. Update it at the end of every work session.
-Last updated: 2026-10-16.
+Last updated: 2026-10-17 (UTC).
 Plan and decisions: `docs/merge-plan.md`. Branch: `claude/sleepy-darwin-lt2eck` (all merged work is pushed there; no PR yet).
 
 ## How to resume
 
 Paste this into a new session:
 
-> Continue the Relire Plus merge. Read `docs/merge-progress.md` and `docs/merge-plan.md`, check the state of branch `claude/sleepy-darwin-lt2eck`, then run the next unchecked task in "Next tasks", splitting the work across Sonnet and Haiku subagents as the table suggests. Review, merge, check and push each result, and update this file.
+> Continue the Relire Plus merge. Read `docs/merge-progress.md` and `docs/merge-plan.md`, check the state of branch `claude/sleepy-darwin-lt2eck`, then run the next unchecked tasks in "Next tasks" using `openai-codex/gpt-6.1-sol` and `zai/glm-5.3` subagents. All implementation and fixes belong to subagents; the parent coordinates, reviews, verifies, integrates and pushes. Follow first principles and keep the solution minimal. Review, merge, check and push each result, and update this file.
 
 Working method used so far:
 
-1. **Split** each phase into tasks with clear file boundaries. Sonnet gets logic, state, UI and storage; Haiku gets well-specified text, data and translation work.
-2. **Isolate** parallel agents with `isolation: "worktree"`. Every prompt starts with: "If your worktree branch has no commits of its own, run `git reset --hard claude/sleepy-darwin-lt2eck`, then `bun install`." Worktrees can start from an old commit otherwise.
+1. **Split** each phase into tasks with clear file boundaries. The Sonnet/Haiku labels below describe the original allocation; the user's latest instruction replaces those models with `openai-codex/gpt-6.1-sol` (not Magpie) and `zai/glm-5.3`. P3-A used GPT for logic/fixes and GLM for UI checks, then independent reviews. All code changes go through subagents; avoid unnecessary abstractions, defensive scaffolding and redundant tests.
+2. **Isolate** parallel writers in separate worktrees based on the current integration commit, then run `bun install --frozen-lockfile`. Check branch ancestry and dirty files first; do not reset or discard existing work. Serial writers may share one isolated worktree.
 3. **Commit, don't push.** Agents commit on their worktree branch and report the branch, the sha, the API they exported and the checks they ran.
 4. **Review and merge.** Read the diff, then `git cherry-pick <sha>` onto the branch. Merge locale JSON with a three-way merge of keys, not by hand.
-5. **Run every check** (below), fix anything small yourself, then push and remove the worktree (`git worktree remove -f -f …`, `git branch -D worktree-agent-…`).
+5. **Run every check** (below), send fixes back to subagents, then push. Remove only task-owned worktrees after their results are safely integrated and pushed, and after checking for uncommitted work.
 6. **Add `.claude/worktrees/` to `.git/info/exclude`.** Agent worktrees are not part of the repo.
 
 Checks (all must pass before a push):
@@ -24,11 +24,12 @@ Checks (all must pass before a push):
 ```sh
 bun run typecheck && bun run lint && bun run format:check && bun run test \
   && bun run i18n:check && bun scripts/check-prosody-schema.ts && bun run build
-CHROME_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome bun run e2e   # never `playwright install`
+bun run e2e   # installed Chrome; never `playwright install`
+# In the cloud container only, set CHROME_PATH to its installed Chromium executable.
 ```
 
 - **Parallel e2e.** Only one e2e run at a time can own port 5174. Agents running e2e in parallel produce load flakes, so re-run a failing spec on its own before calling it a bug.
-- **`impeccable`.** The detector is not installed in the cloud container. Say so in reports rather than claiming it ran.
+- **`impeccable`.** The detector was unavailable in both the earlier cloud container and the P3-A local session. Say so in reports rather than claiming it ran.
 - **Container restarts.** A restart kills running agents. Their committed work survives only in their local worktree branch, and uncommitted edits survive in the worktree directory. Neither is pushed, so check `git worktree list` first and resume from what is there.
 
 ## Done
@@ -42,15 +43,15 @@ CHROME_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome bun run e2e   # n
 | 2 | Storage: IndexedDB v5 (`units`, `itemStates`, `attempts`), check/reset transactions with reset tokens, backup; Settings restore passes exercise data | `f7c6f80`, `84bb08f` |
 | 2b | App shell: collapsible sidebar, Settings as a page with per-section save, hash routes, not-found view | `247b61c` |
 | 3 (prep) | Shared 11-type exercise catalogue with right and wrong answers and mock AI answers (`tests/fixtures/exerciseCatalog.ts`) | `888cdba` |
+| 3-A | Exercise core: recovered WIP, four controls, article generation, saved drafts/checks/reset, help, character bar, oral practice retained; review fixes for races, reading context, navigation and source changes | `d3b05e9`, `521a351`, `9ebf40c`, `4d49fb2` |
 
-At `888cdba`: 171 unit tests and 46 e2e specs pass, and so do typecheck, lint, format, translations and build.
+At `4d49fb2`: parent integration checks passed — typecheck, lint, format, 191 unit tests, i18n, 37 prosody checks, build and all 102 e2e tests in installed Chrome. AI responses were mocked; real providers were not exercised. Layout coverage includes 1280px and 360px in light, sepia and dark, with screenshots inspected. `impeccable` was unavailable; the existing bundle-size warning remains. The integration checkout initially lacked installed Bun types; `bun install --frozen-lockfile` resolved that without dependency-file changes.
 
-## In progress when this was written
+## Current handoff
 
-- [ ] **P3-A Exercise core** (Sonnet), unfinished, stopped when the budget ran out.
-  - Its work is pushed as the WIP commit `77ac92e` on branch `claude/sleepy-darwin-lt2eck-wip-phase3-core` (73 files, based on `84bb08f`). Checks were never run on it: it may not typecheck, lint or pass tests.
-  - To resume, start a Sonnet agent from that branch (`git fetch origin claude/sleepy-darwin-lt2eck-wip-phase3-core`, then work on it or cherry-pick `77ac92e` onto the integration branch, resolving conflicts with the shared catalogue commit `888cdba`). It should first run all checks and list what is missing against the P3-A brief below, then finish and commit.
-  - The agent was last writing a script to update the docs, so code changes are likely further along than the docs.
+- **P3-A is complete.** The old `77ac92e` WIP on `claude/sleepy-darwin-lt2eck-wip-phase3-core` was recovered and finished; do not cherry-pick it again.
+- **Next: P3-B1 and P3-B2**, in parallel with separate worktrees/file ownership. Seven controls remain placeholders. P3-C catalogue adoption and P3-D whole-phase review are still pending; phase 3 is not complete.
+- The user's pre-existing `.gitignore` addition for `.works/` was left untouched and uncommitted.
 
 ## Next tasks
 
@@ -58,7 +59,7 @@ Tasks run in order unless marked parallel. Each one ends with the full checks, a
 
 ### Phase 3: Practise
 
-- [ ] **P3-A Exercise core** (Sonnet).
+- [x] **P3-A Exercise core** (completed with GPT + GLM).
   - **Routes:** `#/practice` (pick an article, list its units, "Make exercises from this article" with level and count) and `#/practice/:unitId` (one unit on one sheet).
   - **State:** `useExerciseUnit` (load, autosave drafts with the reset token, `gradeUnitItem` → `checkItem`, `needs-ai` → `gradeOpenAnswer`, drop late results on `StaleResetError`).
   - **Controls:** an interface in `src/components/practice/controls/types.ts` with a registry in `controls/index.ts`. Implement `FILL_BLANKS`, `CHOICE_SELECT`, `WORD_TRANSFORM` and `OPEN_QA`; the other 7 types get placeholders.
@@ -130,8 +131,6 @@ Tasks run in order unless marked parallel. Each one ends with the full checks, a
 
 ## Known gaps to pick up
 
-- **AI error messages:** exercise-task errors are English-only, and the UI must wrap them for `t()` (P3-A covers this for hint, explain and grade).
-- **Saved-answer counts:** `cacheCounts()` in Settings does not count the new cache kinds (`hint`, `explanation`, `exercises`), though Clear removes them.
 - **Sidebar Read link:** it goes to the library, not the last-open article; one-time reader state (`focusText`) is not in the URL. Confirm with the user if it matters.
 - **File length:** `tests/exercises.test.ts` is 310 lines, slightly over the ~300-line guideline.
 - **Build warning:** the existing chunk-size warning remains; consider code-splitting practice and import screens in P4.
