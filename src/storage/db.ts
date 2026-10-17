@@ -178,7 +178,11 @@ export async function initializeData(initialArticles: Article[]): Promise<void> 
       await tx.objectStore('meta').put(true, 'started');
     }
   } catch (err) {
-    tx.abort();
+    try {
+      tx.abort();
+    } catch {
+      // Already finished or aborted.
+    }
     await tx.done.catch(() => undefined);
     throw err;
   }
@@ -193,7 +197,11 @@ export async function saveArticle(article: Article): Promise<void> {
     await tx.objectStore('articles').put(article);
     await tx.objectStore('meta').put(true, 'started');
   } catch (err) {
-    tx.abort();
+    try {
+      tx.abort();
+    } catch {
+      // Already finished or aborted.
+    }
     await tx.done.catch(() => undefined);
     throw err;
   }
@@ -214,7 +222,11 @@ export async function restoreMissingArticles(candidates: Article[]): Promise<Art
     }
     await tx.objectStore('meta').put(true, 'started');
   } catch (err) {
-    tx.abort();
+    try {
+      tx.abort();
+    } catch {
+      // Already finished or aborted.
+    }
     await tx.done.catch(() => undefined);
     throw err;
   }
