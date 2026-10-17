@@ -50,6 +50,9 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- A pending hint no longer lets a check start on the same answer, preventing a late hint from unlocking an answer still being graded.
+- Exercise sheets show their supplied reading passage, start with a collapsed sidebar, and keep the unit's article when opening Practice from the sidebar. Choice buttons are at least 40 px high on phones.
+- Exercises generated from an article's old content are not attached after that article is edited; make a new set from the updated text instead.
 - Exercise sheets stay consistent through resets and restores, recover when another tab resets the unit, and let you check new answers immediately after a reset without waiting for an old AI request. Late draft and reset responses cannot change a newer sheet.
 - Reader pronunciation markers now have a direct toolbar switch and separate settings. Reopening an article restores validated saved results automatically, without Generate or an AI request, and remembers display and layer choices across refreshes and browser restarts. Missing or incomplete results stay plain and guide explicit generation.
 - Pronunciation generation uses a fixed output schema instead of sentence-dependent array limits and ordinal enums that Gemini can reject as too complex. Exact word counts and ranges remain strictly checked locally; saved answers are reused.

@@ -9,7 +9,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { generateExercises, MissingApiKeyError } from '../services/api';
 import { toStoredUnits } from '../services/exercises/fromGenerated';
-import { listUnits, saveUnits } from '../storage/exercises';
+import i18n from '../i18n';
+import { ArticleChangedError, listUnits, saveUnits } from '../storage/exercises';
 import type { Article } from '../types';
 import { aiErrorText } from '../utils/aiErrorText';
 
@@ -50,7 +51,7 @@ export function useExerciseGeneration(article: Article, onMissingKey: () => void
         // Numbers continue after the units the article already has, so the list keeps its order.
         const existing = await listUnits(article.id);
         const firstNumber = existing.reduce((highest, unit) => Math.max(highest, unit.unitNumber), 0) + 1;
-        const saved = await saveUnits(article.id, toStoredUnits(set.units, { firstNumber }));
+        const saved = await saveUnits(article.id, toStoredUnits(set.units, { firstNumber }), article.content);
         if (mine !== session.current) return;
         setState({
           status: 'done',
@@ -65,7 +66,10 @@ export function useExerciseGeneration(article: Article, onMissingKey: () => void
           onMissingKey();
           return;
         }
-        setState({ status: 'error', message: aiErrorText(err) });
+        setState({
+          status: 'error',
+          message: err instanceof ArticleChangedError ? i18n.t('practice.articleChanged') : aiErrorText(err),
+        });
       } finally {
         working.current = false;
       }

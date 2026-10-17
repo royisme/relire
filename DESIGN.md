@@ -282,7 +282,7 @@ Focus goes to Close while the microphone is requested and to Stop while recordin
 
 ### Exercise sheet
 One unit on one sheet (`practice/UnitSheet`): a single `surface` card with a 1px `ink-200` border, as the reader's article is. Inside it, structure comes from rules, never from nested cards. Top to bottom:
-1. A header: the exercise type in `ink-500` (12px), the unit title in the serif headline, the instruction in `ink-700`, an optional example in `ink-500`.
+1. A header: the exercise type in `ink-500` (12px), the unit title in the serif headline, the instruction in `ink-700`, an optional example in `ink-500`. A supplied reading passage follows before the questions, with its title and translation when present.
 2. Numbered rows separated by hairline `ink-200` rules. A row is a 28px marker column (the number in `ink-500`, replaced by a check in `ok-800` or a cross in `bad-700` once checked) and the content: the grammar topic in `ink-500` (12px), the control, a line of buttons, then notes.
 3. A footer after a rule: **Check all** (the one filled button of the page; it checks only what is filled in, so an empty row is never a mistake), **Reset this unit** (ghost; it asks first and says the history of attempts is kept) and one status line, "n of N checked, m right", that turns into the reason when a draft could not be saved.
 
@@ -307,7 +307,7 @@ The sidebar is the one place to switch area. The header keeps only the brand, th
 
 - **Expanded** (from `lg`, 240px): a 40px row per area (Read, My study, Practice, Progress) with a 16px icon and label, `ink-700` at rest. The current page is `ink-950` on an `ink-100` fill with a 2px `accent-700` bar at the row's left edge; the current area lists its sub-pages indented under it (My study: Words, Shadowing; Practice: the open article's exercise units). The due-vocabulary count is an `accent-700` badge on My study. After a rule at the bottom: Install app, Settings (its sections indented under it while on a settings page) and the collapse toggle.
 - **Rail** (56px; from `md`, and the collapsed state from `lg`): icons only, centred in 40px targets. The label is the tooltip (`title`) and the accessible name; the due count is a small badge on the icon's corner. Sub-pages are left out, so pages that have them draw their own list: My study's segmented control, and Settings' section list beside the page.
-- **Remembered choice:** expanded or collapsed is stored in `relire_sidebar`. In the reader the sidebar always starts as a rail so the article stays the page; expanding it there lasts for that visit and is not remembered. The sidebar takes its own column in the page flow, so it never covers text, and the reader's bottom dock centres on the content column.
+- **Remembered choice:** expanded or collapsed is stored in `relire_sidebar`. In the reader and on an exercise sheet the sidebar always starts as a rail so the content stays the page; expanding it there lasts for that visit and is not remembered. The sidebar takes its own column in the page flow, so it never covers text, and the reader's bottom dock centres on the content column.
 - **Phones** (below `md`): the header's menu button opens a left drawer with the same tree, closing when a link is followed.
 - **Flat:** a 1px `ink-200` rule on its right edge, no shadow, and no width animation.
 

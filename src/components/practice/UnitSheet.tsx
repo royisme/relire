@@ -64,6 +64,20 @@ export function UnitSheet({ unit, session }: { unit: ExerciseUnit; session: Exer
           )}
         </header>
 
+        {unit.readingPassage && (
+          <section className="space-y-2 whitespace-pre-wrap break-words border-b border-ink-200 px-4 py-5 sm:px-6">
+            {unit.readingPassage.title && (
+              <h3 className="font-serif text-lg font-semibold text-ink-900">{unit.readingPassage.title}</h3>
+            )}
+            <p lang="fr" className="font-serif text-lg leading-relaxed text-ink-900">
+              {unit.readingPassage.content}
+            </p>
+            {unit.readingPassage.translation && (
+              <p className="text-sm leading-relaxed text-ink-600">{unit.readingPassage.translation}</p>
+            )}
+          </section>
+        )}
+
         <ol className="px-4 sm:px-6">
           {unit.items.map((item) => (
             <ItemRow

@@ -163,6 +163,7 @@
     "countRange": "Choose a whole number from 1 to {{max}}.",
     "make": "Make exercises from this article",
     "making": "Making exercises from the article…",
+    "articleChanged": "The article changed while exercises were being made. Make a new set from the updated text.",
     "made_one": "Made {{count}} item. It is in the list below.",
     "made_other": "Made {{count}} items. They are in the list below.",
     "dropped_one": "{{count}} item could not be checked against the article and was left out.",

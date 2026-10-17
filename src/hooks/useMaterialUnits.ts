@@ -52,7 +52,7 @@ export function useMaterialUnits(materialId: string | null) {
 }
 
 /** The article a unit belongs to, or null while unknown or when there is no such unit. */
-function useUnitMaterial(unitId: string | null) {
+export function useUnitMaterial(unitId: string | null) {
   const [found, setFound] = useState<{ unitId: string; materialId: string | null } | null>(null);
   useEffect(() => {
     if (!unitId) return;

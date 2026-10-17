@@ -69,6 +69,14 @@ export class StaleResetError extends Error {
   }
 }
 
+/** The article was edited while exercises were being generated from its previous content. */
+export class ArticleChangedError extends Error {
+  constructor() {
+    super('Article content changed');
+    this.name = 'ArticleChangedError';
+  }
+}
+
 /** A unit id is already stored; saving never overwrites a unit (that would orphan its states). */
 export class DuplicateUnitError extends Error {
   constructor(unitId: string) {
@@ -104,14 +112,21 @@ const nextStamp = () => (lastStamp = Math.max(Date.now(), lastStamp + 1));
  * Saves units for a material in one transaction that checks the material still
  * exists (`ArticleGoneError` otherwise). Every unit is validated first (a Zod
  * error rejects the whole call) and its id must be new (`DuplicateUnitError`).
+ * When supplied, expectedContent must still match the article; otherwise ArticleChangedError rejects the save.
  * Returns the stored units.
  */
-export async function saveUnits(materialId: string, units: ExtractedUnit[]): Promise<ExerciseUnit[]> {
+export async function saveUnits(
+  materialId: string,
+  units: ExtractedUnit[],
+  expectedContent?: string,
+): Promise<ExerciseUnit[]> {
   const rows = units.map((unit) => ExerciseUnitSchema.parse({ ...unit, materialId }));
   const d = await db();
   const tx = d.transaction(['articles', 'units'], 'readwrite');
   await settle(tx, async () => {
-    if (!(await tx.objectStore('articles').getKey(materialId))) throw new ArticleGoneError();
+    const article = await tx.objectStore('articles').get(materialId);
+    if (!article) throw new ArticleGoneError();
+    if (expectedContent !== undefined && article.content !== expectedContent) throw new ArticleChangedError();
     for (const row of rows) {
       if (await tx.objectStore('units').getKey(row.id)) throw new DuplicateUnitError(row.id);
       await tx.objectStore('units').put(row);

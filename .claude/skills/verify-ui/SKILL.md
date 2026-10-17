@@ -21,7 +21,7 @@ It uses the installed Google Chrome (`channel: 'chrome'`), or `CHROME_PATH` if s
 
 Import from `e2e/fixtures.ts`, not from `@playwright/test`:
 
-- `test('…', async ({ page, ai }) => …)`: the `ai` fixture onboards the app with a fake key and answers every Gemini request by task (`word`, `sentence`, `drills`, `pronunciation`, `prosody`, chosen from the shipped prompt text). `ai.answer({ prosody: (prompt) => … })` replaces an answer (an object or a function of the prompt), `ai.fail(['sentence'])` makes a task return 500, `ai.ttsDelayMs` slows speech to observe loading states. `ai.calls` counts requests and `ai.prompts` keeps their text. The provider's model fallback sends several requests for one failing call, so assert on prompts (which sentence), not raw counts.
+- `test('…', async ({ page, ai }) => …)`: the `ai` fixture onboards the app with a fake key and answers every Gemini request by task (`word`, `sentence`, `pronunciation`, `prosody`, `exercises`, `hint`, `explain`, `grade`, chosen from the shipped prompt text). `ai.answer({ prosody: (prompt) => … })` replaces an answer (an object or a function of the prompt), `ai.fail(['sentence'])` makes a task return 500, `ai.ttsDelayMs` slows speech to observe loading states. `ai.calls` counts requests and `ai.prompts` keeps their text. The provider's model fallback sends several requests for one failing call, so assert on prompts (which sentence), not raw counts.
 - `openArticle(page, title)`, `layout(page, selector)` (page size and an element's top: compare before and after an action to prove nothing moved), `overflowing(locator)` (must be `[]`), `prosodyTokens(prompt)` / `prosodySentence(prompt)`.
 - Tests tagged `@phone` in their title run only at 360×740 with touch; the rest run at 1280×900.
 
@@ -32,7 +32,7 @@ The default prosody answer is source-addressed and unresolved: no invented phone
 - At 360×740 (`@phone`) and 1280×900: no horizontal overflow on the screens you touched, with long content.
 - Themes: set `localStorage.relire_theme` to `light`, `sepia` or `dark` in `page.addInitScript`, then look at screenshots (`page.screenshot({ path: test.info().outputPath('x.png') })`).
 - Transient states (loading, playing, recording, errors) do not change page height or move the content above and below.
-- The flow end to end: the happy path, a failed AI call (error shown inline with the real reason), and repeating or cancelling the action.
+- The flow end to end: the happy path, a failed AI call (error shown inline with the real reason), and repeating or cancelling the action. For exercise sheets, cover answer/check, help, Enter/IME, saved drafts and reset keeping history; unsupported controls remain placeholders.
 
 ## Prove the check
 

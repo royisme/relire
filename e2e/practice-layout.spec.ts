@@ -19,6 +19,11 @@ const longUnit = {
   unitNumber: 9,
   title: `Un titre de série très long pour vérifier que tout passe à la ligne ${LONG}`,
   instruction: `Complétez chaque phrase avec le mot qui convient, puis vérifiez. ${LONG}`,
+  readingPassage: {
+    title: `Le renard et le petit prince ${LONG}`,
+    content: `Le renard attend un ami. ${LONG}\nLe petit prince l'écoute.`,
+    translation: `A supplied translation with a long word: ${LONG}`,
+  },
   type: 'FILL_BLANKS',
   grammarTags: ['present', 'adjective-agreement'],
   items: [

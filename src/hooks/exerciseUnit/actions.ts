@@ -62,7 +62,7 @@ async function saveFlag(ctx: ActionContext, itemId: string, progress: ItemProgre
 export async function runCheck(ctx: ActionContext, itemId: string) {
   const view = ctx.item(itemId);
   const item = findItem(ctx.unit, itemId);
-  if (!view || !item || view.checked || view.busy === 'check') return;
+  if (!view || !item || view.checked || view.busy) return;
   const answer = view.answer;
   ctx.patch(itemId, { busy: 'check', error: null });
   try {

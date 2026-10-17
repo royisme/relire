@@ -6,6 +6,8 @@ import { expect, openArticle, test } from './fixtures';
 import { sampleExercises } from './practiceFixtures';
 import { PRACTICE, openUnit, seedUnits, stored, waitForArticle } from './practice.helpers';
 
+type Db = typeof import('../src/storage/db');
+
 // `ai` onboards the app with a test key and answers every AI request from fixtures.
 test.beforeEach(async ({ ai }) => {
   ai.ttsDelayMs = 50;
@@ -178,6 +180,10 @@ test('the sidebar lists the units of the open article and marks the open one', a
   await nav.getByRole('link', { name: 'Accorder le mot' }).click();
   await expect(page).toHaveURL(/#\/practice\/u3$/);
   await expect(page.getByRole('heading', { name: 'Accorder le mot' })).toBeVisible();
+  await expect(nav).toHaveAttribute('data-sidebar', 'rail');
+  await page.getByRole('button', { name: 'Expand sidebar' }).click();
+  await expect(nav).toHaveAttribute('data-sidebar', 'expanded');
+  expect(await page.evaluate(() => localStorage.getItem('relire_sidebar'))).toBeNull();
   await expect(nav.getByRole('link', { name: 'Accorder le mot' })).toHaveAttribute('aria-current', 'page');
   await expect(nav.getByRole('link', { name: 'Les mots du renard' })).toBeVisible();
 
@@ -205,4 +211,45 @@ test('the open oral assessment stays on the practice page as its own section', a
   await expect(page.getByRole('button', { name: 'Record', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Next sentence' }).click();
   await expect(page.getByText(/^Sentence 2 of \d+$/)).toBeVisible();
+});
+
+test('a deep-linked unit keeps its article in the sidebar Practice link', async ({ page }) => {
+  await seedUnits(page);
+  const materialId = await page.evaluate(async () => {
+    const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+    const d = await db();
+    const article = (await d.getAll('articles')).find((a) => a.id !== 'petit-prince')!;
+    const unit = (await d.get('units', 'u4'))!;
+    await d.put('units', { ...unit, materialId: article.id });
+    return article.id as string;
+  });
+  await openUnit(page, 'u4', 'Questions ouvertes');
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Questions ouvertes' })).toBeVisible();
+  const link = page.locator('[data-sidebar]').getByRole('link', { name: 'Practice', exact: true });
+  await expect(link).toHaveAttribute('href', `#/practice?article=${materialId}`);
+  await link.click();
+  await expect(page.getByLabel('Article')).toHaveValue(materialId);
+});
+
+test('generation refuses to attach exercises when the source article changed', async ({ page, ai }) => {
+  const pending = Promise.withResolvers<typeof sampleExercises>();
+  ai.answer({ exercises: () => pending.promise });
+  await page.goto(PRACTICE);
+  await waitForArticle(page);
+  await make(page).click();
+  await expect.poll(() => ai.calls.exercises).toBe(1);
+  // Another editor committed new content while the request still used the old article.
+  await page.evaluate(async () => {
+    const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+    const d = await db();
+    const article = (await d.get('articles', 'petit-prince'))!;
+    await d.put('articles', { ...article, content: 'Un autre texte.' });
+  });
+  pending.resolve(sampleExercises);
+  await expect(page.getByRole('alert')).toHaveText(
+    'The article changed while exercises were being made. Make a new set from the updated text.',
+  );
+  expect((await stored(page)).units).toEqual([]);
+  await expect(make(page)).toBeEnabled();
 });

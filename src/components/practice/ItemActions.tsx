@@ -30,7 +30,7 @@ export function ItemActions({ runtime, canCheck, onCheck, onHint, onExplain }: I
         size="sm"
         className={`min-w-28 ${small}`}
         onClick={onCheck}
-        disabled={Boolean(checked) || !canCheck || busy === 'check'}
+        disabled={Boolean(checked) || !canCheck || !idle}
       >
         {busy === 'check' ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

@@ -1,8 +1,8 @@
 /**
  * Whether the sidebar is expanded (icon + label) or an icon rail, from `lg` up.
- * The learner's choice is remembered in `relire_sidebar`. In the reader it always starts
- * collapsed so the article stays the page; opening it there lasts for that visit only and is
- * not remembered, so the reader never inherits a wide sidebar.
+ * The learner's choice is remembered in `relire_sidebar`. In a reader or exercise sheet it starts
+ * collapsed so the content stays the page; opening it there lasts for that visit only and is
+ * not remembered, so sheets never inherit a wide sidebar.
  */
 import { useCallback, useState } from 'react';
 
@@ -16,22 +16,22 @@ function readPreference(): boolean {
   }
 }
 
-export function useSidebar(inReader: boolean) {
+export function useSidebar(inSheet: boolean) {
   const [preferred, setPreferred] = useState(readPreference);
-  const [readerOpen, setReaderOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  // Each visit to the reader starts collapsed (adjusted while rendering, as the route changes).
-  const [wasInReader, setWasInReader] = useState(inReader);
-  if (wasInReader !== inReader) {
-    setWasInReader(inReader);
-    if (!inReader) setReaderOpen(false);
+  // Each visit to a sheet starts collapsed (adjusted while rendering, as the route changes).
+  const [wasInSheet, setWasInSheet] = useState(inSheet);
+  if (wasInSheet !== inSheet) {
+    setWasInSheet(inSheet);
+    if (!inSheet) setSheetOpen(false);
   }
 
-  const expanded = inReader ? readerOpen : preferred;
+  const expanded = inSheet ? sheetOpen : preferred;
 
   const toggle = useCallback(() => {
-    if (inReader) {
-      setReaderOpen((open) => !open);
+    if (inSheet) {
+      setSheetOpen((open) => !open);
       return;
     }
     const next = !preferred;
@@ -41,7 +41,7 @@ export function useSidebar(inReader: boolean) {
     } catch {
       // The choice still applies until the page closes.
     }
-  }, [inReader, preferred]);
+  }, [inSheet, preferred]);
 
   return { expanded, toggle };
 }

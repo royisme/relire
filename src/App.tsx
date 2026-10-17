@@ -52,7 +52,7 @@ export default function App() {
   // Where the learner is: the address decides the screen (see utils/routes.ts).
   const route = useRoute();
   const breakpoint = useBreakpoint();
-  const sidebar = useSidebar(route.name === 'reader');
+  const sidebar = useSidebar(route.name === 'reader' || route.name === 'unit');
   // The article the log opens at (set when the reader sends the learner to its recordings).
   const [logArticleId, setLogArticleId] = useState<string | null>(null);
   // A sentence to bring into view when the reader opens (from the shadowing log). Shown once.

@@ -9,6 +9,7 @@ import { BarChart3, BookmarkCheck, BookOpen, Download, Dumbbell, Settings } from
 import { PWAInstallButton } from '../PWAInstallButton';
 import { areaOf, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../../utils/routes';
 import { NavItem } from './NavItem';
+import { useUnitMaterial } from '../../hooks/useMaterialUnits';
 import { PracticeSubnav } from './PracticeSubnav';
 
 interface NavTreeProps {
@@ -26,6 +27,7 @@ interface NavTreeProps {
 export function NavTree({ route, dueCount, rail, onNavigate, footer }: NavTreeProps) {
   const { t } = useTranslation();
   const area = areaOf(route);
+  const unitMaterial = useUnitMaterial(route.name === 'unit' ? route.unitId : null);
   const item = { rail, onNavigate };
   // An area with sub-pages is `area` while one of them is shown; the sub-page itself is `page`.
   const areaState = (name: NonNullable<typeof area>, hasChildren: boolean) =>
@@ -64,7 +66,7 @@ export function NavTree({ route, dueCount, rail, onNavigate, footer }: NavTreePr
           ))}
         <NavItem
           {...item}
-          to={{ name: 'practice' }}
+          to={{ name: 'practice', ...(unitMaterial ? { articleId: unitMaterial } : {}) }}
           icon={Dumbbell}
           label={t('nav.practice')}
           // The list is a page of its own; an open unit makes Practice its parent.

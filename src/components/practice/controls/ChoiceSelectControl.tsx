@@ -46,7 +46,7 @@ export function ChoiceSelectControl({ item, answer, onChange, checked, disabled,
                     aria-disabled={disabled || undefined}
                     onClick={() => pick(piece.index, option)}
                     className={cn(
-                      'min-h-9 max-w-full break-words rounded-md px-3 font-sans text-sm',
+                      'min-h-9 max-sm:min-h-10 max-w-full break-words rounded-md px-3 font-sans text-sm',
                       disabled ? 'cursor-default' : 'cursor-pointer',
                       !selected && !disabled && 'text-ink-700 hover:bg-ink-100',
                       !selected && disabled && 'text-ink-500',
