@@ -7,7 +7,11 @@
 import type { ExerciseType } from '../../../types/exercises';
 import { ChoiceSelectControl } from './ChoiceSelectControl';
 import { ComingSoonControl } from './ComingSoonControl';
+import { DialogueOrderControl } from './DialogueOrderControl';
 import { FillBlanksControl } from './FillBlanksControl';
+import { GenderCheckControl } from './GenderCheckControl';
+import { MatchPairsControl } from './MatchPairsControl';
+import { OddOneOutControl } from './OddOneOutControl';
 import { OpenQaControl } from './OpenQaControl';
 import { WordTransformControl } from './WordTransformControl';
 import type { ExerciseControl } from './types';
@@ -19,10 +23,10 @@ export const CONTROLS: Record<ExerciseType, ExerciseControl> = {
   CHOICE_SELECT: ChoiceSelectControl,
   WORD_TRANSFORM: WordTransformControl,
   OPEN_QA: OpenQaControl,
-  GENDER_CHECK: ComingSoonControl,
-  ODD_ONE_OUT: ComingSoonControl,
-  MATCH_PAIRS: ComingSoonControl,
-  DIALOGUE_ORDER: ComingSoonControl,
+  GENDER_CHECK: GenderCheckControl,
+  ODD_ONE_OUT: OddOneOutControl,
+  MATCH_PAIRS: MatchPairsControl,
+  DIALOGUE_ORDER: DialogueOrderControl,
   SENTENCE_BUILD: ComingSoonControl,
   READING_CLOZE: ComingSoonControl,
   NUMBER_DICTATION: ComingSoonControl,
