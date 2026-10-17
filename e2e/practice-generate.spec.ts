@@ -3,7 +3,7 @@
  * catalogue), the units it lists with real progress, the reader's entry point, the sidebar
  * list, a missing unit and a missing key.
  */
-import { expect, openArticle, test } from './fixtures';
+import { expect, openArticle, settled, test } from './fixtures';
 import { CATALOG_EXERCISES } from '../tests/fixtures/exerciseCatalog';
 import { PRACTICE, openUnit, seedUnits, stored, waitForArticle } from './practice.helpers';
 
@@ -74,6 +74,7 @@ test('the button shows the work and keeps its size', async ({ page, ai }) => {
   await page.goto(PRACTICE);
   await waitForArticle(page);
   const button = make(page);
+  await settled(page);
   const before = await button.boundingBox();
   await button.click();
   await expect(button).toBeDisabled();

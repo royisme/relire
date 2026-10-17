@@ -364,6 +364,7 @@
     "gotIt": "Got it"
   },
   "storage": {
+    "loadFailed": "Could not load your data: {{msg}}",
     "saveFailed": "Your latest changes could not be saved in this browser.",
     "upgradeBlocked": "Relire was updated. Close its other open tabs to finish, and this page will continue.",
     "staleTab": "Relire was updated in another tab. Reload this tab to keep saving your work.",

@@ -31,7 +31,7 @@ export const article = (id = 'material-1', kind?: Article['kind']): Article => (
 export async function putArticle(id = 'material-1') {
   const d = await db();
   await d.put('articles', article(id));
-  await d.put('meta', true, 'started'); // as saveArticles does; without it loadData treats the app as never used
+  await d.put('meta', true, 'started'); // as saveArticle does; without it loadData treats the app as never used
 }
 
 /** A material with one stored FILL_BLANKS unit holding two items. */

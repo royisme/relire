@@ -4,7 +4,7 @@
  * rows back, and find a numbered row of the open sheet.
  */
 import type { Locator, Page } from '@playwright/test';
-import { expect } from './fixtures';
+import { expect, settled } from './fixtures';
 import { CATALOG_EXERCISES } from '../tests/fixtures/exerciseCatalog';
 
 type Storage = typeof import('../src/storage/exercises');
@@ -13,7 +13,7 @@ type Db = typeof import('../src/storage/db');
 export const ARTICLE = 'petit-prince';
 export const PRACTICE = `/#/practice?article=${ARTICLE}`;
 
-/** The sample article reaches IndexedDB with the app's debounced save; units need it to exist. */
+/** Wait for committed sample initialization; units need their material to exist. */
 export async function waitForArticle(page: Page) {
   await expect
     .poll(() =>
@@ -57,4 +57,5 @@ export const checkButton = (item: Locator) => item.getByRole('button', { name: '
 export async function openUnit(page: Page, unitId: string, title: string) {
   await page.goto(`/#/practice/${unitId}`);
   await expect(page.getByRole('heading', { name: title })).toBeVisible();
+  await settled(page);
 }

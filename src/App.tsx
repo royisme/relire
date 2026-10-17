@@ -23,7 +23,9 @@ import {
   EMPTY_STATS,
   getDbNotice,
   loadData,
-  saveArticles,
+  initializeData,
+  saveArticle,
+  restoreMissingArticles,
   saveStats,
   saveVocab,
   subscribeDbNotice,
@@ -61,8 +63,9 @@ export default function App() {
   const [lastArticleId, setLastArticleId] = useState<string | null>(null);
   // Set while an AI feature is waiting for a key, so Settings can focus the field and offer the way back.
   const [keyRequest, setKeyRequest] = useState<KeyRequest | null>(null);
-  // Data lives in IndexedDB (see src/storage). It loads once, then every change is saved.
+  // Articles commit before state changes; vocabulary and stats use debounced persistence.
   const [ready, setReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const dbNotice = useSyncExternalStore(subscribeDbNotice, getDbNotice);
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -89,20 +92,19 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    void loadData()
-      .catch((err) => {
-        reportSave('load', err);
-        return null;
-      })
+    void initializeData(SAMPLE_ARTICLES)
+      .then(() => loadData())
       .then((data) => {
-        if (cancelled) return;
-        const first = data ?? { articles: SAMPLE_ARTICLES, vocab: [], stats: EMPTY_STATS };
-        setArticles(first.articles);
-        setVocabList(first.vocab);
-        setStats(first.stats);
+        if (cancelled || !data) return;
+        setArticles(data.articles);
+        setVocabList(data.vocab);
+        setStats(data.stats);
         setReady(true);
         // First visit with no key: walk the user through setup.
         if (!storedFlag(ONBOARDING_KEY) && !hasTextKey()) setOnboardingOpen(true);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : String(err));
       });
     return () => {
       cancelled = true;
@@ -116,7 +118,6 @@ export default function App() {
       navigate({ name: 'practice', articleId: defaultPracticeId }, { replace: true });
   }, [ready, route, defaultPracticeId]);
 
-  usePersist('articles', articles, saveArticles, ready, reportSave);
   usePersist('vocabulary', vocabList, saveVocab, ready, reportSave);
   usePersist('stats', stats, saveStats, ready, reportSave);
 
@@ -258,10 +259,13 @@ export default function App() {
     navigate({ name: 'reader', articleId: article.id });
   };
 
-  // Add or edit. A new article opens straight away; an edit stays where it is.
-  const handleSaveArticle = (article: Article) => {
+  // Add or edit only after commit. A new article opens; an edit stays where it is.
+  const handleSaveArticle = async (article: Article): Promise<void> => {
+    await saveArticle(article);
     const exists = articles.some((a) => a.id === article.id);
-    setArticles((prev) => (exists ? prev.map((a) => (a.id === article.id ? article : a)) : [article, ...prev]));
+    setArticles((prev) =>
+      prev.some((a) => a.id === article.id) ? prev.map((a) => (a.id === article.id ? article : a)) : [article, ...prev],
+    );
     if (!exists) openArticle(article);
   };
 
@@ -273,13 +277,22 @@ export default function App() {
       reportSave('articles', err);
       return;
     }
+    reportSave('articles', null);
     setArticles((prev) => prev.filter((a) => a.id !== article.id));
     const here = parseRoute(window.location.hash).route;
     if (here.name === 'reader' && here.articleId === article.id) navigate(LIBRARY, { replace: true });
   };
 
   const missingSamples = SAMPLE_ARTICLES.filter((sample) => !articles.some((a) => a.id === sample.id));
-  const handleRestoreSamples = () => setArticles((prev) => [...prev, ...missingSamples]);
+  const handleRestoreSamples = async () => {
+    try {
+      const restored = await restoreMissingArticles(missingSamples);
+      setArticles((prev) => [...prev.filter((a) => !restored.some((row) => row.id === a.id)), ...restored]);
+      reportSave('articles', null);
+    } catch (err) {
+      reportSave('articles', err);
+    }
+  };
 
   const finishOnboarding = () => {
     try {
@@ -323,11 +336,23 @@ export default function App() {
   // An older tab can hold the database open and block an upgrade; say so instead of waiting silently.
   if (!ready) {
     return (
-      <div className="min-h-screen bg-ink-50 grid place-items-center p-6" aria-busy={dbNotice !== 'blocked'}>
-        {dbNotice === 'blocked' && (
-          <p role="alert" className="max-w-sm text-center text-sm text-ink-800">
-            {t('storage.upgradeBlocked')}
-          </p>
+      <div
+        className="min-h-screen bg-ink-50 grid place-items-center p-6"
+        aria-busy={!loadError && dbNotice !== 'blocked'}
+      >
+        {loadError ? (
+          <div role="alert" className="max-w-sm text-center text-sm text-ink-800 space-y-3 break-words">
+            <p>{t('storage.loadFailed', { msg: loadError })}</p>
+            <button className="underline underline-offset-2 cursor-pointer" onClick={() => window.location.reload()}>
+              {t('storage.reload')}
+            </button>
+          </div>
+        ) : (
+          dbNotice === 'blocked' && (
+            <p role="alert" className="max-w-sm text-center text-sm text-ink-800">
+              {t('storage.upgradeBlocked')}
+            </p>
+          )
         )}
       </div>
     );

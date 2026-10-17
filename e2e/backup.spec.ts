@@ -25,7 +25,7 @@ test('a backup restored from Settings brings back exercise units, states and att
   void ai; // onboards the app; nothing here calls the AI
   await page.goto('/#/read');
   await expect(page.getByText('Le Petit Prince').first()).toBeVisible();
-  // The sample articles reach IndexedDB with the app's debounced save.
+  // Sample initialization commits before the library becomes ready.
   await expect
     .poll(() =>
       page.evaluate(async () => {

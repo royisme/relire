@@ -168,21 +168,72 @@ export async function loadData(): Promise<AppData | null> {
   return { articles, vocab, stats: { ...EMPTY_STATS, ...stats } };
 }
 
-async function replaceStore(name: 'articles' | 'vocab', items: { id: string }[]) {
+/** Seeds only a never-started library; the marker and samples commit together. */
+export async function initializeData(initialArticles: Article[]): Promise<void> {
   const d = await db();
-  const tx = d.transaction([name, 'meta'], 'readwrite');
-  const store = tx.objectStore(name as 'articles');
+  const tx = d.transaction(['articles', 'meta'], 'readwrite');
+  try {
+    if (!(await tx.objectStore('meta').get('started'))) {
+      for (const article of initialArticles) await tx.objectStore('articles').put(article);
+      await tx.objectStore('meta').put(true, 'started');
+    }
+  } catch (err) {
+    tx.abort();
+    await tx.done.catch(() => undefined);
+    throw err;
+  }
+  await tx.done;
+}
+
+/** An explicit save owns this row, never the caller's library snapshot. */
+export async function saveArticle(article: Article): Promise<void> {
+  const d = await db();
+  const tx = d.transaction(['articles', 'meta'], 'readwrite');
+  try {
+    await tx.objectStore('articles').put(article);
+    await tx.objectStore('meta').put(true, 'started');
+  } catch (err) {
+    tx.abort();
+    await tx.done.catch(() => undefined);
+    throw err;
+  }
+  await tx.done;
+}
+
+/** Restoring bundled samples must keep any version already stored by another tab. */
+export async function restoreMissingArticles(candidates: Article[]): Promise<Article[]> {
+  const d = await db();
+  const tx = d.transaction(['articles', 'meta'], 'readwrite');
+  const restored: Article[] = [];
+  try {
+    const store = tx.objectStore('articles');
+    for (const candidate of candidates) {
+      const stored = await store.get(candidate.id);
+      if (!stored) await store.put(candidate);
+      restored.push(stored ?? candidate);
+    }
+    await tx.objectStore('meta').put(true, 'started');
+  } catch (err) {
+    tx.abort();
+    await tx.done.catch(() => undefined);
+    throw err;
+  }
+  await tx.done;
+  return restored;
+}
+
+export async function saveVocab(items: VocabWord[]) {
+  const d = await db();
+  const tx = d.transaction(['vocab', 'meta'], 'readwrite');
+  const store = tx.objectStore('vocab');
   const keep = new Set(items.map((i) => i.id));
   for (const key of await store.getAllKeys()) {
     if (!keep.has(key)) await store.delete(key);
   }
-  for (const item of items) await store.put(item as Article);
+  for (const item of items) await store.put(item);
   await tx.objectStore('meta').put(true, 'started');
   await tx.done;
 }
-
-export const saveArticles = (items: Article[]) => replaceStore('articles', items);
-export const saveVocab = (items: VocabWord[]) => replaceStore('vocab', items);
 
 export async function saveStats(stats: UserStats) {
   const d = await db();

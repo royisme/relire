@@ -52,6 +52,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Saving an article no longer rewrites unrelated articles from a stale tab. Saves finish before the editor closes; a failed save keeps your draft and shows the reason for retry. First-run samples finish saving before the library opens, startup failures offer Reload, an intentionally empty library stays empty, and restoring samples preserves any sample already edited in another tab.
 - Checked exercises keep their original accent-comparison setting through preference changes, reloads and backups. Older saved checks keep their overall verdict without guessing individual slot markings.
 - Sentence-building options split into individual word tiles while keeping repeated words; placing and removing tiles keeps keyboard focus and no longer moves the controls below them.
 - Dictation speaks again after each check following a unit reset when “Speak after checking” is enabled, without replaying saved checks on reload.
