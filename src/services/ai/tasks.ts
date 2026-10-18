@@ -1,4 +1,5 @@
 import type { PronunciationAssessment, SentenceAnalysis, WordAnalysis } from '../../types';
+import i18n from '../../i18n';
 import {
   DrillsSchema,
   ExplanationSchema,
@@ -71,7 +72,7 @@ export const assessPronunciation = (input: Parameters<typeof pronunciationReques
 /* ------------------------------ exercise tasks ------------------------------ */
 
 /** Pages of one worksheet that can be read in a single request. */
-export const MAX_EXTRACT_IMAGES = 3;
+export const MAX_EXTRACT_IMAGES = 5;
 /** Longest pasted text one extraction request carries. */
 export const MAX_EXTRACT_TEXT = 40000;
 /** Items one generation request may ask for. */
@@ -88,20 +89,20 @@ function checkLevel(level: string) {
 
 function checkImages(images: ImageInput[]) {
   if (images.length > MAX_EXTRACT_IMAGES)
-    throw new RangeError(`At most ${MAX_EXTRACT_IMAGES} images can be read at once.`);
+    throw new RangeError(i18n.t('importMaterial.requestImageLimit', { limit: MAX_EXTRACT_IMAGES }));
   if (images.some((image) => !image.data || !image.mimeType.startsWith('image/')))
     throw new Error('Every image needs base64 data and an image type.');
 }
 
 /**
- * Reads pasted text or 1-3 page images into a validated import draft. Refuses
+ * Reads pasted text or 1-5 page images into a validated import draft. Refuses
  * before any request when the model cannot read images. One attempt on the
  * chosen model; `input.signal` cancels it.
  */
 export async function extractMaterial(input: ExtractInput, ctx: TextContext): Promise<ImportDraft> {
   const images = input.images ?? [];
   const text = input.text?.trim() ?? '';
-  if (!images.length && !text) throw new Error('There is nothing to read: add text or one to three images.');
+  if (!images.length && !text) throw new Error(i18n.t('importMaterial.nothingToRead'));
   checkImages(images);
   if (text.length > MAX_EXTRACT_TEXT)
     throw new RangeError(`The text is longer than ${MAX_EXTRACT_TEXT} characters; import it in parts.`);
@@ -113,12 +114,12 @@ export async function extractMaterial(input: ExtractInput, ctx: TextContext): Pr
 }
 
 /**
- * Reads 1-3 page images into one article: a title (empty when the pages have
+ * Reads 1-5 page images into one article: a title (empty when the pages have
  * none) and the text. Refuses before any request when the model cannot read
  * images. One attempt on the chosen model; `input.signal` cancels it.
  */
 export async function transcribeMaterial(input: TranscribeInput, ctx: TextContext): Promise<Transcription> {
-  if (!input.images.length) throw new Error('There is nothing to read: add one to three images.');
+  if (!input.images.length) throw new Error(i18n.t('importMaterial.nothingToRead'));
   checkImages(input.images);
   if (ctx.execution.imageInput === 'unsupported') throw new ImageInputUnsupportedError(ctx.execution.model);
 

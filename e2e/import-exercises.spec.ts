@@ -3,6 +3,7 @@ import { test, expect, overflowing } from './fixtures';
 import { draftFixture } from '../tests/fixtures/importDraft';
 import { ITEMS } from '../tests/fixtures/units';
 import { materialPdf, tinyPng } from './materialPdf';
+import { importSourceChecks } from './importSourceChecks';
 const draft = (): import('../src/services/exercises/importDraft').ImportDraft => ({
   ...draftFixture,
   units: draftFixture.units.map((unit) => ({
@@ -11,6 +12,14 @@ const draft = (): import('../src/services/exercises/importDraft').ImportDraft =>
   })),
 });
 const WORKSHEET = 'Exercice 1. Complétez avec être.';
+importSourceChecks({
+  enter,
+  textLabel: 'Text to send',
+  analyze: 'Send and extract',
+  task: 'extract',
+  answer: draft(),
+  review: 'Review and correct',
+});
 async function enter(page: import('@playwright/test').Page) {
   await page.goto('/#/practice');
   await page.getByRole('main').getByRole('link', { name: 'Import exercises', exact: true }).click();
@@ -174,14 +183,16 @@ test('image and PDF selection, cancellation ignores late extraction', async ({ p
   });
   await enter(page);
   await page.getByLabel('Choose an image or PDF').setInputFiles(tinyPng);
-  await expect(page.getByText(/tiny.png · 1 page/)).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Page 1 of tiny.png', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Send and extract' }).click();
   await expect.poll(() => ai.calls.extract).toBe(1);
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.getByRole('button', { name: 'Remove image tiny.png', exact: true }).click();
   await page
     .getByLabel('Choose an image or PDF')
     .setInputFiles({ name: 'pages.pdf', mimeType: 'application/pdf', buffer: Buffer.from(materialPdf()) });
   await expect(page.getByLabel('Pages to send')).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Page 1 of pages.pdf', exact: true })).toBeVisible();
   await page.waitForTimeout(600);
   await expect(page.getByRole('heading', { name: 'Review and correct' })).not.toBeVisible();
   await page.getByRole('button', { name: 'Send and extract' }).click();

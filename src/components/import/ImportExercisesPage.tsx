@@ -54,6 +54,7 @@ export function ImportExercisesPage() {
     canChoose: true,
     clear: () => {
       setDraft(null);
+      setMode('complete');
       setLevel('');
       invalidate();
     },
@@ -113,12 +114,18 @@ export function ImportExercisesPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6 min-w-0" {...session.dropProps}>
       <PageHeader title={t('importExercises.heading')} subtitle={t('importExercises.subtitle')} />
       {!draft ? (
-        <SourceInput kind="exercises" source={source} page={{ name: 'importExercises' }}>
+        <SourceInput
+          kind="exercises"
+          source={source}
+          page={{ name: 'importExercises' }}
+          onDiscard={session.discardSource}
+          leaveOpen={session.leaveOpen}
+        >
           <label className="block text-sm">
             {t('importExercises.mode')}
             <select
               aria-label={t('importExercises.mode')}
-              className={field}
+              className={`${field} h-[40px]`}
               value={mode}
               onChange={(e) => setMode(e.target.value as ImportMode)}
             >

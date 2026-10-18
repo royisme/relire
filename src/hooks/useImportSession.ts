@@ -4,7 +4,7 @@
  * saving and how to clear its own state.
  */
 import { useEffect, useState, type DragEvent } from 'react';
-import { clipboardImage } from '../services/importMaterial';
+import { clipboardFiles } from '../services/importMaterial';
 import { useImportGuard } from './useImportGuard';
 import type { useImportSource } from './useImportSource';
 
@@ -20,7 +20,7 @@ interface ImportSessionOptions {
 
 export function useImportSession({ source, hasDraft, saving, canChoose, clear }: ImportSessionOptions) {
   const [restart, setRestart] = useState(false);
-  const dirty = hasDraft || !!source.material || !!source.text.trim() || source.phase !== 'idle';
+  const dirty = hasDraft || source.hasMaterial || !!source.text || source.phase !== 'idle';
   const guard = useImportGuard(dirty, saving, () => {
     source.dispose();
     clear();
@@ -28,10 +28,10 @@ export function useImportSession({ source, hasDraft, saving, canChoose, clear }:
   const choosable = !hasDraft && !saving && canChoose && source.phase === 'idle';
   useEffect(() => {
     const paste = (event: ClipboardEvent) => {
-      const file = choosable && event.clipboardData && clipboardImage(event.clipboardData);
-      if (file) {
+      const files = choosable && event.clipboardData ? clipboardFiles(event.clipboardData) : [];
+      if (files.length) {
         event.preventDefault();
-        void source.choose(file);
+        void source.choose(files);
       }
     };
     document.addEventListener('paste', paste);
@@ -48,6 +48,11 @@ export function useImportSession({ source, hasDraft, saving, canChoose, clear }:
     startOver: () => setRestart(true),
     release: guard.release,
     keep,
+    /** Source-only discard is immediate; review drafts still use Start over's confirmation. */
+    discardSource: () => {
+      source.reset();
+      clear();
+    },
     discard: () => {
       if (!restart) return guard.decide(true);
       source.reset();
@@ -58,8 +63,7 @@ export function useImportSession({ source, hasDraft, saving, canChoose, clear }:
       onDragOver: (event: DragEvent) => event.preventDefault(),
       onDrop: (event: DragEvent) => {
         event.preventDefault();
-        const file = event.dataTransfer.files[0];
-        if (file && choosable) void source.choose(file);
+        if (choosable) void source.choose(Array.from(event.dataTransfer.files));
       },
     },
   };
