@@ -365,6 +365,10 @@
     "baseUrlHelp": "留空即使用 {{url}}。使用 DeepSeek、通义千问等兼容服务时填写它们的地址。",
     "invalidBaseUrl": "请填写 http 或 https 地址，不要包含 Key、查询参数或片段，最多 2048 个字符。",
     "baseUrlNotValid": "有一个 Base URL 不是可用的地址，请修改后再保存。",
+    "voiceLabel": "音色 ID",
+    "voiceHelp": "可选：粘贴 Fish Audio 的音色 ID；留空则使用模型默认音色。",
+    "invalidVoice": "请填写 Fish Audio 的音色 ID，或留空使用默认音色。",
+    "voiceNotValid": "该音色 ID 不被此服务商接受，请修改后再保存。",
     "fetch": "获取模型列表",
     "fetching": "获取中…",
     "refresh": "刷新模型列表",
@@ -501,7 +505,12 @@
     "invalidBaseUrl": "此提供方的 Base URL 不可用，请在设置中修改。",
     "providerUnavailable": "服务商 {{provider}} 不可用。",
     "purposeUnavailable": "此服务商不支持所选任务。",
-    "speechOutputUnsupported": "模型 {{model}} 无法合成语音，请选择语音模型。"
+    "speechOutputUnsupported": "模型 {{model}} 无法合成语音，请选择语音模型。",
+    "invalidVoice": "这不是 Fish Audio 的音色 ID。留空即可使用模型默认音色。",
+    "invalidSpeechText": "仅支持不超过 {{max}} 个字符、不含标记或链接的纯文本。",
+    "invalidAudio": "语音服务未返回可播放的 MP3 音频。",
+    "speechAudioTooLarge": "合成的音频过大，已拒绝接收。",
+    "speechTimeout": "语音服务未及时响应，请重试。"
   },
   "models": {
     "gemini-2_5-flash": {
@@ -533,11 +542,27 @@
     },
     "o4-mini": {
       "name": "o4-mini"
+    },
+    "fish-audio/s2_1-pro-free": {
+      "name": "Fish Audio S2.1 Pro（免费）"
+    },
+    "fish-audio/s2_1-pro": {
+      "name": "Fish Audio S2.1 Pro"
+    },
+    "fish-audio/s2-pro": {
+      "name": "Fish Audio S2 Pro"
+    },
+    "fish-audio/s1": {
+      "name": "Fish Audio S1"
+    },
+    "fish-audio/transcribe-1": {
+      "name": "Fish Audio Transcribe 1（转写模型，非语音合成）"
     }
   },
   "providers": {
     "gemini": "Google Gemini",
-    "openai": "OpenAI 兼容"
+    "openai": "OpenAI 兼容",
+    "fish-audio": "Fish Audio"
   },
   "prompts": {
     "word": "单词解析",

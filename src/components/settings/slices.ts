@@ -2,6 +2,7 @@
 import i18n from '../../i18n';
 import { normalizeBaseUrl } from '../../services/ai/baseUrl';
 import { normalizeModelId } from '../../services/ai/catalogue';
+import { getProvider } from '../../services/ai/providers';
 import { getAppSettings, saveAppSettings, type AppSettings } from '../../utils/appSettings';
 
 export type SettingsSlice = 'ai' | 'practice';
@@ -18,6 +19,13 @@ const usedProviders = (from: AppSettings) => [from.textProvider, from.ocrProvide
 
 /** An empty endpoint means the provider's default; anything nonempty must be a usable address. */
 const baseUrlRefused = (url: string) => !!url.trim() && !normalizeBaseUrl(url);
+
+/** A provider with its own voice check refuses a voice it cannot take; a fixed list is its own proof. */
+const voiceRefused = (draft: AppSettings) => {
+  const speech = getProvider(draft.speechProvider).speech;
+  const voice = draft.speechVoice.trim();
+  return !!voice && !!speech?.acceptsVoice && !speech.acceptsVoice(voice);
+};
 
 export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
   if (slice === 'practice')
@@ -57,7 +65,7 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
     ocrModel: canonicalModel(from.ocrModel),
     speechProvider: from.speechProvider,
     speechModel: canonicalModel(from.speechModel),
-    speechVoice: from.speechVoice,
+    speechVoice: from.speechVoice.trim(),
     apiKeys: { ...base.apiKeys, ...Object.fromEntries(providers.map((id) => [id, from.apiKeys[id] ?? ''])) },
     baseUrls: {
       ...base.baseUrls,
@@ -74,6 +82,8 @@ export function saveSlice(draft: AppSettings, slice: SettingsSlice): AppSettings
   // Same for an address storage would drop: the learner would silently go back to the provider's host.
   if (slice === 'ai' && usedProviders(draft).some((id) => baseUrlRefused(draft.baseUrls[id] ?? '')))
     throw new Error(i18n.t('aiSettings.baseUrlNotValid'));
+  // And for a voice the provider would refuse: storage would silently replace it with the default.
+  if (slice === 'ai' && voiceRefused(draft)) throw new Error(i18n.t('aiSettings.voiceNotValid'));
   const intended = withSlice(getAppSettings(), draft, slice);
   const next = saveAppSettings(intended);
   if (sliceOf(getAppSettings(), slice) !== sliceOf(intended, slice)) throw new Error(i18n.t('settings.notStored'));

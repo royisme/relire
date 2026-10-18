@@ -101,9 +101,12 @@ export interface TextProvider {
   checkKey(config: TextConfig): Promise<void>;
 }
 
-/** Turns text into a playable clip (WAV). */
+/** Turns text into a playable clip (WAV from Gemini, MP3 from Fish Audio). */
 export interface SpeechProvider {
   synthesize(request: { text: string; style?: string; signal?: AbortSignal }, config: SpeechConfig): Promise<Blob>;
+  /** False for a voice id this provider cannot take; checked before saving and before a request. Absent means
+   * the provider's own fixed voice list is the only limit. */
+  acceptsVoice?(voice: string): boolean;
 }
 
 export interface VoiceInfo {
@@ -120,6 +123,7 @@ export interface ProviderInfo {
   defaultBaseUrl?: string;
   /** `imageModels` are the static `models` known to accept images, a starting hint for Settings; discovery adds the rest. */
   text?: { models: string[]; defaultModel: string; imageModels?: string[] };
+  /** An empty `voices` list means the provider takes any voice id, so Settings shows a text field instead of a select. */
   speech?: { models: string[]; defaultModel: string; voices: VoiceInfo[]; defaultVoice: string };
 }
 

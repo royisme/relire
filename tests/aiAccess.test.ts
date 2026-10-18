@@ -1,11 +1,14 @@
 /** The replaceable AI boundary owns credentials, independent purpose routing, and real speech checks. */
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from 'bun:test';
+import i18n from '../src/i18n';
 import * as accessModule from '../src/services/ai/access';
 import { gemini } from '../src/services/ai/providers/gemini';
 import { geminiText } from '../src/services/ai/providers/gemini/client';
 import { geminiSpeech } from '../src/services/ai/providers/gemini/tts';
 import { openaiText } from '../src/services/ai/providers/openai/client';
 import { openaiCatalogue } from '../src/services/ai/providers/openai/models';
+import { fishSpeech } from '../src/services/ai/providers/fish/tts';
+import { getAudio } from '../src/storage/audio';
 import type { AiAccess, AiPurpose, TextPurpose } from '../src/services/ai/types';
 import { getAppSettings } from '../src/utils/appSettings';
 import { loadSpeech, prefetchSpeech } from '../src/utils/speech/clips';
@@ -236,6 +239,58 @@ describe('feature execution uses AiAccess', () => {
     expect(generate).toHaveBeenLastCalledWith({ prompt: 'Bonjour' }, { apiKey: 'fixture-key', model: 'gpt-4o-mini' });
     await plain.listModels('text');
     expect(list).toHaveBeenLastCalledWith('fixture-key', undefined, undefined);
+  });
+
+  test('Fish Audio speech carries provider, model, voice and key into the request and blocks its transcription model', async () => {
+    const synthesize = spyOn(fishSpeech, 'synthesize').mockResolvedValue(new Blob(['mp3'], { type: 'audio/mpeg' }));
+    const voice = '0123456789abcdef0123456789abcdef';
+    const configured = {
+      ...getAppSettings(),
+      speechProvider: 'fish-audio',
+      speechModel: 'fish-audio/s2.1-pro-free',
+      speechVoice: voice,
+      apiKeys: { 'fish-audio': ' fixture-key ' },
+    };
+    const access = accessModule.createByokAccess(configured);
+    const blocked = accessModule.createByokAccess({ ...configured, speechModel: 'fish-audio/transcribe-1' });
+    // The snapshot is taken at consent time: a later key edit cannot change what is sent.
+    configured.apiKeys['fish-audio'] = 'edited-key';
+
+    expect(access.selection('speech')).toEqual({
+      providerId: 'fish-audio',
+      model: 'fish-audio/s2.1-pro-free',
+      voice,
+      capabilities: { textGeneration: 'unsupported', imageInput: 'unsupported', speechOutput: 'supported' },
+    });
+    expect((await access.synthesize({ text: 'Bonjour' })).type).toBe('audio/mpeg');
+    expect(synthesize).toHaveBeenCalledWith(
+      { text: 'Bonjour' },
+      { apiKey: 'fixture-key', model: 'fish-audio/s2.1-pro-free', voice },
+    );
+    expect(
+      ((await failure(Promise.resolve().then(() => blocked.synthesize({ text: 'Bonjour' })))) as Error).message,
+    ).toBe(i18n.t('errors.speechOutputUnsupported', { model: 'fish-audio/transcribe-1' }));
+    expect(synthesize).toHaveBeenCalledTimes(1);
+  });
+
+  test('a Fish Audio clip is cached by provider, model and voice and keeps its MP3 type', async () => {
+    const synthesize = spyOn(fishSpeech, 'synthesize').mockResolvedValue(new Blob(['mp3'], { type: 'audio/mpeg' }));
+    const voice = '0123456789abcdef0123456789abcdef';
+    const configured = {
+      ...getAppSettings(),
+      speechProvider: 'fish-audio',
+      speechModel: 'fish-audio/s2.1-pro-free',
+      speechVoice: voice,
+      apiKeys: { 'fish-audio': 'fixture-key' },
+    };
+    const first = await loadSpeech('Bonjour', undefined, configured);
+    const second = await loadSpeech('Bonjour', undefined, configured);
+    expect(synthesize).toHaveBeenCalledTimes(1);
+    expect([first.type, second.type]).toEqual(['audio/mpeg', 'audio/mpeg']);
+    expect((await getAudio('fish-audio', 'fish-audio/s2.1-pro-free', voice, 'Bonjour'))?.type).toBe('audio/mpeg');
+    // Another voice is another clip, as the cache key says.
+    await loadSpeech('Bonjour', 'fedcba9876543210fedcba9876543210', configured);
+    expect(synthesize).toHaveBeenCalledTimes(2);
   });
 
   test('unknown provider IDs are not silently redirected', () => {

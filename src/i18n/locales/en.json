@@ -369,6 +369,10 @@
     "baseUrlHelp": "Leave it empty to use {{url}}. Change it for a compatible service such as DeepSeek or Qwen.",
     "invalidBaseUrl": "Enter an http or https address without a key, a query or a fragment, at most 2048 characters.",
     "baseUrlNotValid": "A Base URL is not a usable address. Fix it, then save again.",
+    "voiceLabel": "Voice ID",
+    "voiceHelp": "Optional: paste a voice ID from Fish Audio. Leave it empty to use the model's default voice.",
+    "invalidVoice": "Enter a Fish Audio voice ID, or leave it empty for the default voice.",
+    "voiceNotValid": "The voice ID is not one this provider accepts. Fix it, then save again.",
     "fetch": "Fetch models",
     "fetching": "Fetching…",
     "refresh": "Refresh models",
@@ -506,7 +510,12 @@
     "invalidBaseUrl": "The Base URL for this provider is not usable. Fix it in Settings.",
     "providerUnavailable": "The provider {{provider}} is not available.",
     "purposeUnavailable": "This provider does not support the selected task.",
-    "speechOutputUnsupported": "The model {{model}} cannot synthesize speech. Choose a speech model."
+    "speechOutputUnsupported": "The model {{model}} cannot synthesize speech. Choose a speech model.",
+    "invalidVoice": "This is not a Fish Audio voice ID. Leave the voice empty to use the model's default voice.",
+    "invalidSpeechText": "Plain text only, up to {{max}} characters, without markup or links.",
+    "invalidAudio": "The speech provider did not return playable MP3 audio.",
+    "speechAudioTooLarge": "The synthesized audio was too large to keep.",
+    "speechTimeout": "The speech provider did not answer in time. Try again."
   },
   "models": {
     "gemini-2_5-flash": {
@@ -538,11 +547,27 @@
     },
     "o4-mini": {
       "name": "o4-mini"
+    },
+    "fish-audio/s2_1-pro-free": {
+      "name": "Fish Audio S2.1 Pro (free)"
+    },
+    "fish-audio/s2_1-pro": {
+      "name": "Fish Audio S2.1 Pro"
+    },
+    "fish-audio/s2-pro": {
+      "name": "Fish Audio S2 Pro"
+    },
+    "fish-audio/s1": {
+      "name": "Fish Audio S1"
+    },
+    "fish-audio/transcribe-1": {
+      "name": "Fish Audio Transcribe 1 (transcription, not speech)"
     }
   },
   "providers": {
     "gemini": "Google Gemini",
-    "openai": "OpenAI-compatible"
+    "openai": "OpenAI-compatible",
+    "fish-audio": "Fish Audio"
   },
   "prompts": {
     "word": "Word analysis",

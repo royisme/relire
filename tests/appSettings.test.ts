@@ -80,6 +80,24 @@ describe('appSettings BYOK configuration', () => {
     expect(getAppSettings().baseUrls).toEqual({});
   });
 
+  test('a speech provider with a free-text voice keeps an id it accepts and drops one it refuses', () => {
+    const voice = '0123456789abcdef0123456789abcdef';
+    saveAppSettings({
+      speechProvider: 'fish-audio',
+      speechModel: 'fish-audio/s2.1-pro-free',
+      speechVoice: ` ${voice} `,
+    });
+    expect(getAppSettings().speechVoice).toBe(voice);
+    // An OpenAI preset is not a Fish voice: storage falls back to the provider's default (empty).
+    for (const invalid of ['alloy', 'nova', 'bad voice', 7, null]) {
+      storage.set('relire_app_settings_v1', JSON.stringify({ speechProvider: 'fish-audio', speechVoice: invalid }));
+      expect(getAppSettings().speechVoice).toBe('');
+    }
+    // A fixed voice list stays the whitelist it always was.
+    saveAppSettings({ speechProvider: 'gemini', speechVoice: voice });
+    expect(getAppSettings().speechVoice).toBe('Kore');
+  });
+
   test('an existing install has no endpoint, and a restored backup keeps the endpoint but never a key', () => {
     storage.set('relire_app_settings_v1', JSON.stringify({ textProvider: 'openai', textModel: 'gpt-4o-mini' }));
     expect(getAppSettings().baseUrls).toEqual({});

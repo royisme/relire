@@ -109,6 +109,23 @@ test('one shared key saves with all three purposes', () => {
   ]);
 });
 
+test('a voice id the speech provider refuses never saves silently', () => {
+  saveAppSettings({});
+  const voice = '0123456789abcdef0123456789abcdef';
+  const fish = { speechProvider: 'fish-audio', speechModel: 'fish-audio/s2.1-pro-free' };
+  // The free-text voice is trimmed and kept, and it is part of the AI slice.
+  const kept = saveSlice(draftOf(getAppSettings(), { ...fish, speechVoice: ` ${voice} ` }), 'ai');
+  expect(kept.speechVoice).toBe(voice);
+  expect(getAppSettings().speechVoice).toBe(voice);
+  // An OpenAI preset would be replaced by the default on read-back: refuse the save instead.
+  for (const invalid of ['alloy', 'bad voice']) {
+    expect(() => saveSlice(draftOf(getAppSettings(), { speechVoice: invalid }), 'ai')).toThrow(
+      i18n.t('aiSettings.voiceNotValid'),
+    );
+    expect(getAppSettings().speechVoice).toBe(voice);
+  }
+});
+
 test('an endpoint override is part of the AI slice, saved with it and refused when unusable', () => {
   saveAppSettings({});
   const base = getAppSettings();

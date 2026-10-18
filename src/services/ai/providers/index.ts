@@ -1,5 +1,6 @@
 import type { Provider, SpeechProvider, TextProvider } from '../types';
 import { gemini } from './gemini';
+import { fish } from './fish';
 import { openai } from './openai';
 
 /**
@@ -7,7 +8,7 @@ import { openai } from './openai';
  * speech or both), register it here and add its display name under
  * `providers.<id>` in the locale files; the settings screen picks it up.
  */
-const PROVIDERS: Provider[] = [gemini, openai];
+const PROVIDERS: Provider[] = [gemini, openai, fish];
 
 export const textProviders = () => PROVIDERS.filter((p) => p.text);
 export const speechProviders = () => PROVIDERS.filter((p) => p.speech);

@@ -65,6 +65,9 @@ export function AiSection({
   const dirty = sliceOf(draft, 'ai') !== sliceOf(saved, 'ai');
   const missingKey = !getApiKey(saved, saved[`${purpose}Provider`]);
   const modelReady = !!normalizeModelId(model);
+  // A provider with its own voice check shows a free-text field; the value is refused before it can be saved.
+  const voiceAccepts = (voice: string) => provider.speech?.acceptsVoice?.(voice) ?? true;
+  const voiceValid = voiceAccepts(draft.speechVoice);
   const others = AI_PURPOSES.filter((p) => p !== purpose && draft[`${p}Provider`] === providerId);
   const sharedNote =
     others.length > 0 &&
@@ -210,23 +213,48 @@ export function AiSection({
 
         <ModelField draft={draft} purpose={purpose} catalogue={catalogue} onChange={setModel} />
 
-        {purpose === 'speech' && info && 'voices' in info && (
-          <label className="block">
-            <span className={fieldLabel}>{t('settings.voiceSection')}</span>
-            <select
-              className={selectClass}
-              value={draft.speechVoice}
-              onChange={(event) => edit({ ...draft, speechVoice: event.target.value })}
-            >
-              {info.voices.map((voice) => (
-                <option key={voice.id} value={voice.id}>
-                  {t(`voices.${voice.id}`, { defaultValue: voice.id })} ·{' '}
-                  {t(voice.gender === 'female' ? 'settings.female' : 'settings.male')}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        {purpose === 'speech' &&
+          info &&
+          'voices' in info &&
+          (info.voices.length > 0 ? (
+            <label className="block">
+              <span className={fieldLabel}>{t('settings.voiceSection')}</span>
+              <select
+                className={selectClass}
+                value={draft.speechVoice}
+                onChange={(event) => edit({ ...draft, speechVoice: event.target.value })}
+              >
+                {info.voices.map((voice) => (
+                  <option key={voice.id} value={voice.id}>
+                    {t(`voices.${voice.id}`, { defaultValue: voice.id })} ·{' '}
+                    {t(voice.gender === 'female' ? 'settings.female' : 'settings.male')}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <div>
+              <label htmlFor="speech-voice" className={fieldLabel}>
+                {t('aiSettings.voiceLabel')}
+              </label>
+              <input
+                id="speech-voice"
+                autoComplete="off"
+                spellCheck={false}
+                value={draft.speechVoice}
+                aria-invalid={!voiceValid}
+                aria-describedby="speech-voice-help"
+                onChange={(event) => edit({ ...draft, speechVoice: event.target.value })}
+                className={selectClass}
+              />
+              <p
+                id="speech-voice-help"
+                className={`text-xs mt-1 leading-relaxed ${voiceValid ? 'text-ink-500' : 'text-bad-700'}`}
+              >
+                {t(voiceValid ? 'aiSettings.voiceHelp' : 'aiSettings.invalidVoice')}
+              </p>
+            </div>
+          ))}
 
         {purpose === 'ocr' && <p className="text-xs text-ink-500 leading-relaxed">{t('aiSettings.ocrNote')}</p>}
       </div>

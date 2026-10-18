@@ -45,6 +45,19 @@ const DEFAULT_PROVIDER = 'gemini';
 const textDefaults = (providerId: string) => getProvider(providerId).info.text;
 const speechDefaults = (providerId: string) => getProvider(providerId).info.speech;
 
+/**
+ * A listed voice is the whitelist; a provider with no fixed list (an empty `voices`) keeps any id its own
+ * check accepts. Anything else falls back to the provider's default voice.
+ */
+function storedVoice(providerId: string, value: unknown): string | undefined {
+  const provider = getProvider(providerId);
+  const voices = provider.info.speech?.voices ?? [];
+  const voice = typeof value === 'string' ? value.trim() : '';
+  if (!voice) return undefined;
+  if (voices.length) return voices.some((entry) => entry.id === voice) ? voice : undefined;
+  return provider.speech?.acceptsVoice?.(voice) ? voice : undefined;
+}
+
 function defaults(): AppSettings {
   const text = textDefaults(DEFAULT_PROVIDER)!;
   const speech = speechDefaults(DEFAULT_PROVIDER)!;
@@ -92,7 +105,7 @@ function normalize(value: unknown): AppSettings {
     ocrModel: normalizeModelId(raw.ocrModel) ?? ocr.defaultModel,
     speechProvider: speechProvider.id,
     speechModel: normalizeModelId(raw.speechModel) ?? speech.defaultModel,
-    speechVoice: speech.voices.some((v) => v.id === raw.speechVoice) ? raw.speechVoice! : speech.defaultVoice,
+    speechVoice: storedVoice(speechProvider.id, raw.speechVoice) ?? speech.defaultVoice,
     apiKeys,
     baseUrls,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),

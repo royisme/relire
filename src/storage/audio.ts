@@ -162,7 +162,9 @@ export interface AudioBackup {
   provider?: string;
   voice: string;
   model: string;
-  data: string; // base64 WAV
+  data: string; // base64 audio
+  /** WAV from Gemini, MP3 from Fish Audio; absent in older backups, which were all WAV. */
+  mimeType?: string;
 }
 
 /** Clips that belong to the vocabulary, for a backup. */
@@ -178,6 +180,7 @@ export async function exportProtectedAudio(): Promise<AudioBackup[]> {
         voice: e.voice,
         model: e.model,
         data: await blobToBase64(e.blob),
+        ...(e.blob.type ? { mimeType: e.blob.type } : {}),
       });
   }
   return out;
@@ -190,7 +193,13 @@ export async function importAudio(items: AudioBackup[]): Promise<{ imported: num
   for (const item of items) {
     if (!item?.text || !item.data) continue;
     try {
-      await storeAudio(item.provider ?? 'gemini', item.model, item.voice, item.text, base64ToBlob(item.data));
+      await storeAudio(
+        item.provider ?? 'gemini',
+        item.model,
+        item.voice,
+        item.text,
+        base64ToBlob(item.data, item.mimeType || 'audio/wav'),
+      );
       imported++;
     } catch {
       failed++;
