@@ -20,17 +20,17 @@ export interface RelireDB extends DBSchema {
   cache: { key: string; value: CacheEntry; indexes: { kind: string } };
   /** Synthesized speech. Clips for vocabulary words are kept for good; the rest are trimmed by use. */
   audio: { key: string; value: AudioEntry; indexes: { text: string; lastUsed: number } };
-  /** The learner's shadowing takes, per article sentence. User data: never trimmed, optionally backed up. */
-  shadowing: { key: string; value: ShadowingSentence; indexes: { articleId: string } };
-  /** Exercise units, each bound to a material (article or workbook). Owned by `exercises.ts`. */
-  units: { key: string; value: ExerciseUnit; indexes: { materialId: string } };
+  /** The learner's shadowing takes, per article or unit-passage sentence. User data: never trimmed, optionally backed up. */
+  shadowing: { key: string; value: ShadowingSentence; indexes: { articleId: string; unitId: string } };
+  /** Self-contained exercise units, grouped by the batch (`setId`) they were saved with. Owned by `exercises.ts`. */
+  units: { key: string; value: ExerciseUnit; indexes: { setId: string } };
   /** The learner's current answer per item (`unitId:itemId`). Cleared by a unit reset. */
   itemStates: { key: string; value: ExerciseItemState; indexes: { unitId: string } };
-  /** One row per check, with its own prompt and answer text. Survives resets, unit deletes and material deletes. */
+  /** One row per check, with its own prompt and answer text. Survives resets and unit and set deletes. */
   attempts: {
     key: string;
     value: ExerciseAttempt;
-    indexes: { unitId: string; materialId: string; grammarTag: string; timestamp: number };
+    indexes: { unitId: string; grammarTag: string; timestamp: number };
   };
 }
 
@@ -85,12 +85,13 @@ export function db() {
         const audio = d.createObjectStore('audio', { keyPath: 'key' });
         audio.createIndex('text', 'text');
         audio.createIndex('lastUsed', 'lastUsed');
-        d.createObjectStore('shadowing', { keyPath: 'key' }).createIndex('articleId', 'articleId');
-        d.createObjectStore('units', { keyPath: 'id' }).createIndex('materialId', 'materialId');
+        const shadowing = d.createObjectStore('shadowing', { keyPath: 'key' });
+        shadowing.createIndex('articleId', 'articleId');
+        shadowing.createIndex('unitId', 'passage.unitId');
+        d.createObjectStore('units', { keyPath: 'id' }).createIndex('setId', 'setId');
         d.createObjectStore('itemStates', { keyPath: 'id' }).createIndex('unitId', 'unitId');
         const attempts = d.createObjectStore('attempts', { keyPath: 'id' });
         attempts.createIndex('unitId', 'unitId');
-        attempts.createIndex('materialId', 'materialId');
         attempts.createIndex('grammarTag', 'grammarTag');
         attempts.createIndex('timestamp', 'timestamp');
       },
@@ -211,23 +212,36 @@ export async function saveStats(stats: UserStats) {
 }
 
 /**
- * Deletes an article with its shadowing recordings, exercise units and their item states in
- * one transaction, before the UI forgets it. Attempts stay: they carry their own prompt and
- * answer text, so accuracy and the mistake notebook remain true after the material is gone.
+ * Deletes an article with its shadowing recordings in one transaction, before the UI forgets it.
+ * Exercise units never point at an article, so they are untouched.
  */
 export async function deleteArticleData(articleId: string) {
   const d = await db();
-  const tx = d.transaction(['articles', 'shadowing', 'units', 'itemStates', 'meta'], 'readwrite');
+  const tx = d.transaction(['articles', 'shadowing'], 'readwrite');
   const recordings = tx.objectStore('shadowing');
   for (const key of await recordings.index('articleId').getAllKeys(articleId)) await recordings.delete(key);
-  const unitIds = await tx.objectStore('units').index('materialId').getAllKeys(articleId);
+  await tx.objectStore('articles').delete(articleId);
+  await tx.done;
+}
+
+/**
+ * Deletes a whole batch: its units, their item states and the shadowing recordings of their
+ * passages, in one transaction. Attempts stay: they carry their own prompt and answer text.
+ */
+export async function deleteSetData(setId: string) {
+  const d = await db();
+  const tx = d.transaction(['units', 'itemStates', 'meta', 'shadowing'], 'readwrite');
+  const recordings = tx.objectStore('shadowing');
   const stores = {
     units: tx.objectStore('units'),
     itemStates: tx.objectStore('itemStates'),
     meta: tx.objectStore('meta'),
   };
-  for (const unitId of unitIds) await deleteUnitRows(stores, unitId);
-  await tx.objectStore('articles').delete(articleId);
+  const unitIds = await stores.units.index('setId').getAllKeys(setId);
+  for (const unitId of unitIds) {
+    for (const key of await recordings.index('unitId').getAllKeys(unitId)) await recordings.delete(key);
+    await deleteUnitRows(stores, unitId);
+  }
   await tx.done;
   if (unitIds.length) exercisesChanged();
 }
@@ -263,7 +277,7 @@ export interface RestoreInput extends Partial<AppData> {
  * `ExerciseBackupError` and nothing is written; an absent key keeps the stored rows.
  */
 export async function importData(data: RestoreInput) {
-  const exercises = parseExerciseBackup(data, data.articles && new Set(data.articles.map((a) => a.id)));
+  const exercises = parseExerciseBackup(data);
   const touchesExercises = Boolean(exercises.units || exercises.itemStates || exercises.attempts);
   const d = await db();
   const tx = d.transaction(['articles', 'vocab', 'meta', 'shadowing', 'units', 'itemStates', 'attempts'], 'readwrite');
@@ -284,18 +298,16 @@ export async function importData(data: RestoreInput) {
   }
   if (data.stats) await tx.objectStore('meta').put({ ...EMPTY_STATS, ...data.stats }, 'stats');
   await tx.objectStore('meta').put(true, 'started');
-  if (touchesExercises || data.articles) {
+  if (touchesExercises) {
     try {
       await restoreExerciseRows(
         {
-          articles: tx.objectStore('articles'),
           units: tx.objectStore('units'),
           itemStates: tx.objectStore('itemStates'),
           attempts: tx.objectStore('attempts'),
           meta: tx.objectStore('meta'),
         },
         exercises,
-        Boolean(data.articles),
       );
     } catch (err) {
       tx.abort();
@@ -303,20 +315,8 @@ export async function importData(data: RestoreInput) {
       throw err;
     }
   }
-  // Historical absent sources are valid; surviving units must never reassign passage history.
-  try {
-    for (const record of data.shadowing ?? []) {
-      if (!record.passage) continue;
-      const unit = await tx.objectStore('units').get(record.passage.unitId);
-      if (unit && unit.materialId !== record.articleId) throw new Error('recordings: passage material mismatch');
-    }
-  } catch (err) {
-    tx.abort();
-    await tx.done.catch(() => undefined);
-    throw err;
-  }
   await tx.done;
-  if (touchesExercises || data.articles) exercisesChanged();
+  if (touchesExercises) exercisesChanged();
 }
 
 export interface StorageInfo {

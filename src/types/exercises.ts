@@ -113,9 +113,14 @@ export const ImportSourceKindSchema = z.enum(['image', 'pdf', 'text']);
 export const ImportModeSchema = z.enum(['complete', 'extract', 'generate']);
 export type ImportMode = z.infer<typeof ImportModeSchema>;
 
+/** The levels an exercise batch can be made for. */
+export const ExerciseLevelSchema = z.enum(['A1', 'A2', 'B1', 'B2', 'C1']);
+export type ExerciseLevel = z.infer<typeof ExerciseLevelSchema>;
+export const EXERCISE_LEVELS = ExerciseLevelSchema.options;
+
 /**
- * A unit without its owner: what a model returns and what an import draft
- * reviews. `ExerciseUnitSchema` adds the material it belongs to.
+ * A unit without its batch: what a model returns and what an import draft
+ * reviews. `ExerciseUnitSchema` adds the batch it was saved with.
  */
 export const ExtractedUnitSchema = z
   .object({
@@ -154,8 +159,16 @@ export const ExtractedUnitSchema = z
   });
 export type ExtractedUnit = z.infer<typeof ExtractedUnitSchema>;
 
-/** A playable unit; `materialId` is the article or workbook it belongs to. */
-export const ExerciseUnitSchema = ExtractedUnitSchema.safeExtend({ materialId: text });
+/**
+ * A playable unit, self-contained: `setId` is shared by every unit saved in one
+ * import or generation batch, `setTitle` names the batch when it has a title,
+ * and `level` was chosen once for the batch. A unit never points at an article.
+ */
+export const ExerciseUnitSchema = ExtractedUnitSchema.safeExtend({
+  setId: text,
+  setTitle: text.optional(),
+  level: ExerciseLevelSchema,
+});
 export type ExerciseUnit = z.infer<typeof ExerciseUnitSchema>;
 
 /** The type that governs an item: its own override, else the unit's. */
@@ -201,13 +214,12 @@ export interface ExerciseItemState {
 
 /**
  * One row per check in `attempts`. It carries its own prompt and answer text so
- * history stays meaningful after the material is deleted.
+ * history stays meaningful after the unit is deleted.
  */
 export interface ExerciseAttempt {
   id: string;
   unitId: string;
   itemId: string;
-  materialId: string;
   grammarTag: GrammarTag;
   prompt: string;
   userAnswer: string;

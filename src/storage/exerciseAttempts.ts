@@ -15,24 +15,15 @@ export interface AttemptQuery {
   /** At most this many, newest first. Defaults to DEFAULT_ATTEMPT_LIMIT. */
   limit?: number;
   unitId?: string;
-  materialId?: string;
 }
 
 /** Attempts newest first. */
 export async function listAttempts(query: AttemptQuery = {}): Promise<ExerciseAttempt[]> {
   const limit = query.limit ?? DEFAULT_ATTEMPT_LIMIT;
   const d = await db();
-  if (query.unitId || query.materialId) {
-    const rows = query.unitId
-      ? await d.getAllFromIndex('attempts', 'unitId', query.unitId)
-      : await d.getAllFromIndex('attempts', 'materialId', query.materialId!);
-    return rows
-      .filter(
-        (row) =>
-          (!query.unitId || row.unitId === query.unitId) && (!query.materialId || row.materialId === query.materialId),
-      )
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, limit);
+  if (query.unitId) {
+    const rows = await d.getAllFromIndex('attempts', 'unitId', query.unitId);
+    return rows.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
   }
   const out: ExerciseAttempt[] = [];
   let cursor = await d.transaction('attempts').store.index('timestamp').openCursor(null, 'prev');

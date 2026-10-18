@@ -11,16 +11,18 @@ export interface ShadowingTake {
   blob: Blob;
 }
 
+/** Who owns a recording: an article's prose, or a unit's reading passage. */
+type ShadowingOwner =
+  | { articleId: string; passage?: undefined }
+  | { articleId?: undefined; passage: { unitId: string } };
+
 /** One sentence of one source, keyed by normalized text so edits elsewhere do not move it. */
-export interface ShadowingSentence {
+export type ShadowingSentence = ShadowingOwner & {
   key: string;
-  /** Owning material, retained for the existing cascade index. No passage means the material's own prose. */
-  articleId: string;
-  passage?: { unitId: string };
   /** Trimmed sentence as written when last recorded. */
   text: string;
   /** recordedAt of the newest remaining take. */
   updatedAt: number;
   /** Oldest first, at most MAX_TAKES. */
   takes: ShadowingTake[];
-}
+};

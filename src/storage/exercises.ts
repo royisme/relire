@@ -25,17 +25,13 @@ import {
   type ExerciseAttempt,
   type ExerciseItemState,
   type ExerciseUnit,
-  type ExtractedUnit,
 } from '../types/exercises';
 import { emptyAnswer, expectedAnswerText, recordedAnswerText } from '../services/exercises/answer';
 import { db } from './db';
 import { exercisesChanged } from './exerciseEvents';
 import { clearUnitStates, deleteUnitRows, readResetToken } from './exerciseRows';
-import { ArticleGoneError } from './shadowing';
 
 export { subscribeExercises } from './exerciseEvents';
-export { createImportedMaterial } from './import';
-export { ArticleGoneError } from './shadowing';
 export {
   accuracyByGrammarTag,
   listAttempts,
@@ -67,14 +63,6 @@ export class StaleResetError extends Error {
   constructor(unitId: string) {
     super(`Unit was reset since this work started: ${unitId}`);
     this.name = 'StaleResetError';
-  }
-}
-
-/** The article was edited while exercises were being generated from its previous content. */
-export class ArticleChangedError extends Error {
-  constructor() {
-    super('Article content changed');
-    this.name = 'ArticleChangedError';
   }
 }
 
@@ -110,24 +98,18 @@ const nextStamp = () => (lastStamp = Math.max(Date.now(), lastStamp + 1));
 /* --------------------------------- units --------------------------------- */
 
 /**
- * Saves units for a material in one transaction that checks the material still
- * exists (`ArticleGoneError` otherwise). Every unit is validated first (a Zod
- * error rejects the whole call) and its id must be new (`DuplicateUnitError`).
- * When supplied, expectedContent must still match the article; otherwise ArticleChangedError rejects the save.
- * Returns the stored units.
+ * Saves one batch of units (one import or generation) in one transaction. Every
+ * unit is validated first (a Zod error rejects the whole call), all share one
+ * `setId`, and each id must be new (`DuplicateUnitError`; saving never
+ * overwrites). Returns the stored units.
  */
-export async function saveUnits(
-  materialId: string,
-  units: ExtractedUnit[],
-  expectedContent?: string,
-): Promise<ExerciseUnit[]> {
-  const rows = units.map((unit) => ExerciseUnitSchema.parse({ ...unit, materialId }));
+export async function saveUnits(units: ExerciseUnit[]): Promise<ExerciseUnit[]> {
+  const rows = units.map((unit) => ExerciseUnitSchema.parse(unit));
+  if (new Set(rows.map((unit) => unit.setId)).size > 1) throw new Error('A batch of units shares one set id');
+  if (new Set(rows.map((unit) => unit.id)).size !== rows.length) throw new Error('Duplicate unit IDs in the batch');
   const d = await db();
-  const tx = d.transaction(['articles', 'units'], 'readwrite');
+  const tx = d.transaction('units', 'readwrite');
   await settle(tx, async () => {
-    const article = await tx.objectStore('articles').get(materialId);
-    if (!article) throw new ArticleGoneError();
-    if (expectedContent !== undefined && article.content !== expectedContent) throw new ArticleChangedError();
     for (const row of rows) {
       if (await tx.objectStore('units').getKey(row.id)) throw new DuplicateUnitError(row.id);
       await tx.objectStore('units').put(row);
@@ -137,10 +119,9 @@ export async function saveUnits(
   return rows;
 }
 
-/** Units of one material (insertion-independent: ordered by unit number), or every unit when no material is given. */
-export async function listUnits(materialId?: string): Promise<ExerciseUnit[]> {
-  const d = await db();
-  const rows = materialId ? await d.getAllFromIndex('units', 'materialId', materialId) : await d.getAll('units');
+/** Every unit, ordered by unit number; the UI groups them by `setId`. */
+export async function listUnits(): Promise<ExerciseUnit[]> {
+  const rows = await (await db()).getAll('units');
   return rows.sort((a, b) => a.unitNumber - b.unitNumber);
 }
 
@@ -264,7 +245,7 @@ export interface CheckOutcome {
 
 /**
  * Checks an item: writes its state and its attempt in ONE transaction. The
- * attempt's material, tag, prompt and reference answer come from the stored
+ * attempt's tag, prompt and reference answer come from the stored
  * unit, not from the caller; the learner's answer text is derived from `answer`.
  * Rejects (nothing written) with `StaleResetError`, `UnitGoneError`,
  * `ItemGoneError` or the storage error itself.
@@ -296,7 +277,6 @@ export async function checkItem(input: CheckInput): Promise<CheckOutcome> {
       id: crypto.randomUUID(),
       unitId,
       itemId,
-      materialId: unit.materialId,
       grammarTag: item.grammarTag,
       prompt: item.prompt,
       userAnswer: recordedAnswerText(effectiveItemType(item, unit), item, answer),

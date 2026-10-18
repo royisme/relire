@@ -1,13 +1,13 @@
 /**
  * Low-level row operations on the exercise stores that more than one module
  * needs inside a transaction: the per-unit reset token and removing a unit's
- * rows. `exercises.ts` (public API), `db.ts` (article cascade) and
+ * rows. `exercises.ts` (public API), `db.ts` (set cascade) and
  * `exerciseBackup.ts` (restore) all go through here, so the token rule lives
  * in one place. Opens no transactions of its own and notifies no one.
  *
  * Reset token: a per-unit counter kept in `meta` under `exerciseReset:<unitId>`
  * (absent = 0). Anything that invalidates work in flight for a unit (reset,
- * delete, cascade, restore) increments it in the same transaction as the
+ * delete, set delete, restore) increments it in the same transaction as the
  * change. A writer reads the token before it starts slow work (an AI grade, a
  * hint) and passes it back; the write is rejected when the token has moved.
  * Tokens are bumped, never removed, so a deleted-then-recreated unit id cannot
