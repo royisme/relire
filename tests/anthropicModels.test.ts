@@ -170,19 +170,28 @@ describe('Claude model catalogue', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  test('image hints cover the Claude families and leave every other ID unknown', () => {
+  test('image hints name verified IDs only and leave every other ID unknown', () => {
     for (const id of [
       'claude-3-7-sonnet-latest',
       'claude-3-5-haiku-latest',
-      'claude-3-opus-20240229',
       'claude-sonnet-4-5',
       'claude-opus-4-1',
       'claude-haiku-4-5',
-      'claude-5-sonnet',
       ' models/claude-sonnet-4-5 ',
     ])
       expect(anthropicCapabilities(id).imageInput).toBe('supported');
-    for (const id of ['gpt-4o', 'deepseek-chat', 'claude-my-own-build', '']) {
+    // No family or tier is guessed: an unlisted snapshot, alias or invented id stays unknown, so at worst
+    // the provider's own error answers.
+    for (const id of [
+      'claude-5-sonnet',
+      'claude-5-unconfirmed-audio-only',
+      'claude-3-opus-20240229',
+      'claude-3-7-sonnet-20250219',
+      'gpt-4o',
+      'deepseek-chat',
+      'claude-my-own-build',
+      '',
+    ]) {
       expect(anthropicCapabilities(id).imageInput).toBe('unknown');
       expect(anthropicCapabilities(id).textGeneration).toBe('unknown');
       expect(anthropicCapabilities(id).speechOutput).toBe('unknown');

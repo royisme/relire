@@ -75,6 +75,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- **Model capability hints stay honest.** o3-mini is no longer listed as reading images (it takes text only), and Claude models are marked by their verified IDs instead of a guessed family name, so an unlisted or invented ID stays unconfirmed and is answered by the provider's own error rather than a claim.
 - Vite builds using the native configuration loader now resolve the local PDF asset helper without an extensionless-import warning.
 - Segmented filters now support arrow keys, Home and End with one Tab stop, and have 40px touch targets.
 - Vocabulary review now visits every word in its starting queue without skipping as ratings save, keeps a stable total, and previews the actual scheduled interval for each rating. Deleting a saved word asks for confirmation naming the word and its review history; cancel keeps both. Empty search/filter results no longer say the vocabulary is empty.

@@ -13,19 +13,28 @@ export const ANTHROPIC_VERSION = '2023-06-01';
 /** A starting list for Settings; any other Claude ID can be typed, and it reaches the provider as typed. */
 export const ANTHROPIC_TEXT_MODELS = ['claude-3-7-sonnet-latest', 'claude-3-5-haiku-latest'];
 
-/** Claude families published as accepting images; 3.x names the family first. */
-const IMAGE_MODEL_FAMILIES = ['claude-3', 'claude-4', 'claude-5'];
-/** Claude 4 and later name the tier first, so the version sits after it (`claude-sonnet-4-5`). */
-const TIER_FIRST_IMAGE_MODELS = ['claude-sonnet-4', 'claude-opus-4', 'claude-haiku-4', 'claude-sonnet-5'];
+/** Claude IDs verified as accepting images. No family or tier is guessed: an id outside this list stays
+ *  unknown, so at worst the provider's own error answers (typed IDs always reach the provider unchanged). */
+const ANTHROPIC_IMAGE_MODELS = [
+  'claude-3-7-sonnet-latest',
+  'claude-3-7-sonnet',
+  'claude-3-5-sonnet-latest',
+  'claude-3-5-haiku-latest',
+  'claude-3-5-haiku',
+  'claude-sonnet-4-5',
+  'claude-sonnet-4',
+  'claude-opus-4-5',
+  'claude-opus-4-1',
+  'claude-opus-4',
+  'claude-haiku-4-5',
+];
 
 export function anthropicCapabilities(model: string): ModelCapabilities {
   const id = (normalizeModelId(model) ?? '').toLowerCase();
   const known = ANTHROPIC_TEXT_MODELS.includes(id);
-  // A short family list, never a pattern over every model: an id outside it stays unknown, so at worst the
-  // provider's own error answers.
-  const image =
-    IMAGE_MODEL_FAMILIES.some((family) => id.startsWith(family)) ||
-    TIER_FIRST_IMAGE_MODELS.some((family) => id.startsWith(family));
+  // A short verified list, never a pattern over every model: an id outside it stays unknown, so at worst
+  // the provider's own error answers.
+  const image = ANTHROPIC_IMAGE_MODELS.includes(id);
   return {
     textGeneration: known ? 'supported' : 'unknown',
     imageInput: image ? 'supported' : 'unknown',

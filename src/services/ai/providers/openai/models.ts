@@ -9,7 +9,8 @@ import type { ModelCapabilities, ModelCatalogue, ModelInfo } from '../../types';
 export const OPENAI_DEFAULT_BASE_URL = 'https://api.openai.com/v1';
 /** A starting list for Settings; any other ID can be typed, and it reaches the provider as typed. */
 export const OPENAI_TEXT_MODELS = ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-mini', 'o4-mini'];
-/** Model IDs published as accepting images. Everything else stays unknown, never a guessed refusal. */
+/** Model IDs published as accepting images. Everything else stays unknown, never a guessed refusal
+ *  (o3-mini takes text only, so it is deliberately absent). */
 export const OPENAI_IMAGE_MODELS = [
   'gpt-4o',
   'gpt-4o-mini',
@@ -17,7 +18,6 @@ export const OPENAI_IMAGE_MODELS = [
   'gpt-4.1-mini',
   'gpt-4.1-nano',
   'o3',
-  'o3-mini',
   'o4-mini',
 ];
 

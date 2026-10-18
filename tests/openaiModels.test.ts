@@ -141,10 +141,11 @@ describe('OpenAI-compatible model catalogue', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  test('capability hints cover the image families and leave every other ID unknown', () => {
-    for (const id of ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'o3', 'o3-mini', 'o4-mini'])
+  test('capability hints list the verified image models and leave every other ID unknown', () => {
+    for (const id of ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'o3', 'o4-mini'])
       expect(openaiCapabilities(id).imageInput).toBe('supported');
-    for (const id of ['deepseek-chat', 'qwen-max', 'gpt-4o-transcribe', '']) {
+    // o3-mini takes text only, per the model's own page: not a guessed refusal, but never a false yes.
+    for (const id of ['o3-mini', 'deepseek-chat', 'qwen-max', 'gpt-4o-transcribe', '']) {
       expect(openaiCapabilities(id).imageInput).toBe('unknown');
       expect(openaiCapabilities(id).textGeneration).toBe('unknown');
     }
