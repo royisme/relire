@@ -127,7 +127,7 @@ test('set page lists numbered exercises; deleting one refreshes and deleting the
   await page.locator('main a[href="#/practice/set/set-1"]').click();
   await expect(page).toHaveURL(/#\/practice\/set\/set-1$/);
   await expect(page.getByRole('heading', { name: 'Mon cahier', exact: true })).toBeVisible();
-  await expect(page.getByRole('main')).toContainText('B1 · 14 Nov 2023 · 2 exercises');
+  await expect(page.getByRole('main')).toContainText('B1 · Intermediate · 14 Nov 2023 · 2 exercises');
   for (const name of ['Number', 'Title', 'Type', 'Items', 'Progress'])
     await expect(page.getByRole('columnheader', { name, exact: true })).toBeVisible();
   await expect(page.locator('main tbody tr td:first-child')).toHaveText(['1', '2']);

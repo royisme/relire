@@ -90,6 +90,7 @@ test('generation working state keeps the button size and the underlying page sti
   await page.goto(PRACTICE);
   await waitForArticle(page);
   const heading = page.getByRole('heading', { name: 'Practice', exact: true });
+  await settled(page);
   const beforePage = await heading.boundingBox();
   await openGenerator(page);
   const button = make(page);

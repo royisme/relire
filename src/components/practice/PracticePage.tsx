@@ -72,7 +72,7 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
                   onChange={setLevel}
                   options={['all', ...levels].map((value) => ({
                     value,
-                    label: value === 'all' ? t('library.allLevels') : t(`levels.${value}`),
+                    label: value === 'all' ? t('library.allLevels') : value,
                   }))}
                 />
               </div>

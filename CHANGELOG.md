@@ -80,6 +80,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- **Compact Practice level filters.** Level options show just their codes, matching Library; full level descriptions remain in the set table and set-page subtitle.
 - **A leftover voice preview can no longer stop the sound that replaced it.** Preview voice takes the one sound slot like any other playback, so starting a clip keeps the preview from playing; now its late abort (leaving Settings) leaves the newer sound playing and its state intact instead of cancelling it, and a preview cancelled while the device's voice list is still loading says nothing rather than claiming the device has no French voice.
 - **A long playback failure keeps the article player still.** The failing sentence's reason now fills the player's own 40 px status slot and scrolls inside it, instead of a taller paragraph growing the bottom dock and lifting the centre-aligned play, previous, next and stop buttons.
 - **The real reason of a failed Listen stays readable inside a sheet.** A scrolling side sheet, the practice card and the dock clip their own content, so the reason shown at the control is now placed and sized by the part of them that is actually visible instead of only by the window: a long provider message in a desktop word lookup is no longer cut off at the left of the sheet.
