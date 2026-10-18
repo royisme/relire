@@ -1000,5 +1000,65 @@
     "leaveTitle": "丢弃这组练习？",
     "leaveHelp": "生成的练习尚未保存。保留后可重试保存；离开或生成另一组之前需要先丢弃。",
     "keep": "保留这组练习"
+  },
+  "conjugation": {
+    "tenses": {
+      "present": {
+        "name": "现在时",
+        "use": "用于表达当下发生的动作、客观事实或经常性习惯。",
+        "form": "在动词词干后加上人称词尾，如规则 -er 动词添加 -e、-es、-e、-ons、-ez、-ent。"
+      },
+      "passeCompose": {
+        "name": "复合过去时",
+        "use": "用于表达过去已经完成的具体动作或事件。",
+        "form": "由助动词 avoir 或 être 的直陈式现在时加上动词的过去分词构成。"
+      },
+      "imparfait": {
+        "name": "未完成过去时",
+        "use": "用于描述过去的背景、持续状态以及过去的习惯性动作。",
+        "form": "在词干后加上词尾 -ais、-ais、-ait、-ions、-iez、-aient。"
+      },
+      "futur": {
+        "name": "简单将来时",
+        "use": "用于表达将来会发生或计划进行的动作与事件。",
+        "form": "在以 -r 结尾的将来时词干后加上词尾 -ai、-as、-a、-ons、-ez、-ont。"
+      },
+      "conditionnel": {
+        "name": "条件式",
+        "use": "用于委婉请求、表达愿望、提出建议或假设情况。",
+        "form": "在将来时词干后加上未完成过去时词尾 -ais、-ais、-ait、-ions、-iez、-aient。"
+      },
+      "subjonctif": {
+        "name": "虚拟式",
+        "use": "用于表达必要、怀疑、愿望、情感或主观评价的从句中。",
+        "form": "通常由 que 引出，在虚拟式词干后加上词尾 -e、-es、-e、-ions、-iez、-ent。"
+      },
+      "imperatif": {
+        "name": "命令式",
+        "use": "用于直接给出指令、建议、要求或禁令。",
+        "form": "直接使用现在时的 tu、nous、vous 形式且不加主语代词，其中 -er 动词的 tu 形式省去词尾 -s。"
+      }
+    },
+    "rules": {
+      "er-regular": "规则 -er 动词在所有时态中保持词干不变并使用标准词尾，如 nous parlons。",
+      "er-cer": "以 -cer 结尾的动词在元音 a 和 o 前将 c 改为 ç 以保持发音，如 nous commençons。",
+      "er-ger": "以 -ger 结尾的动词在元音 a 和 o 前在 g 后加上不发音的 e 以保持发音，如 nous mangeons。",
+      "er-yer-i": "以 -yer 结尾的动词在不发音的 e 前将 y 改为 i，如 ils nettoient。",
+      "er-e-grave": "词尾前带有不发音 e 的动词在不发音音节前将 e 改为 è，如 il lève。",
+      "er-eacute-egrave": "倒数第二音节带 é 的动词在不发音音节前将 é 改为 è，但在将来时和条件式中保持 é，如 je préfère。",
+      "er-eler-double": "以 -eler 和 -eter 结尾的双写类动词在不发音音节前及整个将来时和条件式中双写辅音，如 j’appelle。",
+      "ir-issons": "第二组规则 -ir 动词在现在时复数、未完成过去时和虚拟式中加入 -iss-，如 nous choisissons。",
+      "ir-sortir": "类似 sortir 和 partir 的动词在现在时单数人称中去掉词根末尾的辅音，如 je sors。",
+      "ir-ouvrir": "类似 ouvrir 和 offrir 的动词在现在时中使用规则 -er 动词的词尾，如 j’ouvre。",
+      "re-regular": "规则 -re 动词在现在时单数中分别添加词尾 -s、-s 且第三人称不加词尾，如 il vend。"
+    },
+    "persons": {
+      "1sg": "我",
+      "2sg": "你",
+      "3sg": "他/她",
+      "1pl": "我们",
+      "2pl": "你们/您",
+      "3pl": "他们/她们"
+    }
   }
 }

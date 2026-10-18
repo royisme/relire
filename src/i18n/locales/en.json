@@ -1008,5 +1008,65 @@
     "leaveTitle": "Discard this drill set?",
     "leaveHelp": "This generated set has not been saved. Keep it to retry saving, or discard it before leaving or making another set.",
     "keep": "Keep this set"
+  },
+  "conjugation": {
+    "tenses": {
+      "present": {
+        "name": "Present",
+        "use": "Use it for actions happening now, general truths, and regular habits.",
+        "form": "Add the tense endings to the verb stem, such as -e, -es, -e, -ons, -ez, -ent for regular -er verbs."
+      },
+      "passeCompose": {
+        "name": "Passé composé",
+        "use": "Use it for completed actions and specific events in the past.",
+        "form": "Combine the present tense of avoir or être with the past participle."
+      },
+      "imparfait": {
+        "name": "Imparfait",
+        "use": "Use it for ongoing background situations, descriptions, and repeated habits in the past.",
+        "form": "Add the endings -ais, -ais, -ait, -ions, -iez, -aient to the stem."
+      },
+      "futur": {
+        "name": "Future",
+        "use": "Use it for actions or events that will happen in the future.",
+        "form": "Add the endings -ai, -as, -a, -ons, -ez, -ont to the future stem ending in -r."
+      },
+      "conditionnel": {
+        "name": "Conditional",
+        "use": "Use it for polite requests, wishes, hypothetical situations, and advice.",
+        "form": "Add the imparfait endings -ais, -ais, -ait, -ions, -iez, -aient to the future stem."
+      },
+      "subjonctif": {
+        "name": "Subjunctive",
+        "use": "Use it after expressions of necessity, doubt, emotion, wish, and judgment.",
+        "form": "Preceded by que, add the endings -e, -es, -e, -ions, -iez, -ent to the subjunctive stem."
+      },
+      "imperatif": {
+        "name": "Imperative",
+        "use": "Use it to give direct orders, advice, instructions, or prohibitions.",
+        "form": "Use the present tense forms of tu, nous, and vous without subject pronouns, dropping the final -s in the tu form of -er verbs."
+      }
+    },
+    "rules": {
+      "er-regular": "Standard -er verbs keep an unchanged stem throughout all tenses, as in nous parlons.",
+      "er-cer": "Verbs ending in -cer change c to ç before a and o to keep the soft sound, as in nous commençons.",
+      "er-ger": "Verbs ending in -ger insert a silent e after g before a and o to keep the soft sound, as in nous mangeons.",
+      "er-yer-i": "Verbs ending in -yer change y to i before a silent e, as in ils nettoient.",
+      "er-e-grave": "Verbs with a silent e before the ending change e to è before a silent syllable, as in il lève.",
+      "er-eacute-egrave": "Verbs with é in the stem change é to è before a silent syllable except in the future and conditional, as in je préfère.",
+      "er-eler-double": "Doubling verbs in -eler and -eter double l or t before a silent syllable and throughout the future and conditional, as in j’appelle.",
+      "ir-issons": "Regular second-group -ir verbs add the infix -iss- in the plural present, the imparfait, and the subjunctive, as in nous choisissons.",
+      "ir-sortir": "Verbs like sortir and partir drop the stem’s final consonant in the singular present, as in je sors.",
+      "ir-ouvrir": "Verbs like ouvrir and offrir take standard -er verb endings in the present tense, as in j’ouvre.",
+      "re-regular": "Regular -re verbs take -s, -s, and no ending in the singular present, as in il vend."
+    },
+    "persons": {
+      "1sg": "I",
+      "2sg": "you (singular)",
+      "3sg": "he, she",
+      "1pl": "we",
+      "2pl": "you (plural or formal)",
+      "3pl": "they"
+    }
   }
 }

@@ -296,6 +296,7 @@ Source: `/tmp/agy-research/run2.log` (agy report, the lead spot-checked it; not 
 3. The lead conventions: `il/elle` and `ils/elles` as the display form, `qu’il/elle`, and the h list (confirm the h of `s’habiller` is mute and no other verb in the 66 starts with `h`).
 4. `se passer` as third-person only (3sg and 3pl, no imperatif); `falloir` and `pleuvoir` as 3sg only, no imperatif, no present participle for `falloir`.
 5. Variants (`je puis`, `essaie`/`essaye`, `paie`/`paye`) and the 1990 spellings (Q5).
+6. Leads from an agy read of `rules.ts` (2026-10-18; leads, not findings; only the first was checked by the lead, in the printed review table): (a) passé composé of an `être` verb for polite singular `vous` (`vous êtes allé`, `allée`) is not among the variants, which today are `allés` and `allées` only; (b) `re-regular` gives a bare stem in 3sg, which is wrong for `-pre` verbs such as `rompre` (`il rompt`); (c) `er-eler-double` doubles the last letter of the base without checking it is `l` or `t`; (d) the vowel set used for elision omits `æ` and `y`; (e) the participle of `devoir` (`dû`, `due`, `dus`, `dues`) must be an explicit irregular entry. Items (b) to (e) matter before P6 content fill or the open Conjugation screen, where such verbs can appear.
 
 # Part 2: Grammar topics pack (A1 first, design for review)
 
