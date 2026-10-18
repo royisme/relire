@@ -15,7 +15,15 @@ import {
 } from './ai/prompts';
 import type { AiAccess, TextPurpose } from './ai/types';
 import { cachedRequest, readCachedAnswer } from './cachedRequest';
-import { exercisesKey, explanationKey, hintKey, prosodyKey, sentenceKey, wordKey } from '../storage/cache';
+import {
+  conjugationKey,
+  exercisesKey,
+  explanationKey,
+  hintKey,
+  prosodyKey,
+  sentenceKey,
+  wordKey,
+} from '../storage/cache';
 import {
   ExplanationSchema,
   GeneratedSetSchema,
@@ -26,7 +34,9 @@ import {
   type Hint,
   type OpenGrade,
 } from '../types/exerciseAi';
+import { ConjugationAnswerSchema, type ConjugationAnswer } from '../types/conjugationAnswer';
 import type { ImportDraft } from './exercises/importDraft';
+import { engineInfinitive } from './conjugation/assemble';
 import type { Transcription } from '../types/transcription';
 import {
   MAX_PRONUNCIATION_SOURCE,
@@ -62,6 +72,28 @@ export function fetchWordAnalysis(
   const ctx = context();
   return cachedRequest('word', wordKey(ctx.lang, promptFingerprint('word', ctx.lang), word, sentenceContext), () =>
     ai.analyzeWord({ word, sentenceContext, articleContext }, ctx),
+  );
+}
+
+/**
+ * The conjugation of a verb outside the pack, kept per language + prompt fingerprint + infinitive and
+ * revalidated on every hit. The infinitive is put in the engine's form first, so `s'habiller` and `s’habiller`
+ * (or `Parler` and `parler`) are one key and one request; an answer whose infinitive is another one is an error.
+ */
+export function fetchConjugation(infinitive: string): Promise<ConjugationAnswer> {
+  const ctx = context();
+  const verb = engineInfinitive(infinitive);
+  return cachedRequest(
+    'conjugation',
+    conjugationKey(ctx.lang, promptFingerprint('conjugate', ctx.lang), verb),
+    async () => {
+      const answer = await ai.conjugateVerb({ infinitive: verb }, ctx);
+      // An answer for another verb must never be cached or shown under this one.
+      if (answer.infinitive !== verb) throw new Error(`The model answered for ${answer.infinitive}, not ${verb}.`);
+      return answer;
+    },
+    false,
+    (value) => ConjugationAnswerSchema.parse(value),
   );
 }
 

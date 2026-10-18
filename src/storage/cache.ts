@@ -11,6 +11,8 @@ const DAY = 24 * 60 * 60 * 1000;
 const POLICY = {
   // A word in a given sentence has one right answer, so it is kept until cleared.
   word: { ttl: Infinity, max: Infinity },
+  // The conjugation of a verb has one right answer, so it is kept like a word analysis.
+  conjugation: { ttl: Infinity, max: Infinity },
   // Sentence analyses are kept for 30 days.
   sentence: { ttl: 30 * DAY, max: 1000 },
   prosody: { ttl: 30 * DAY, max: 1000 },
@@ -65,6 +67,10 @@ export const exercisesKey = (lang: string, fingerprint: string, level: string, c
 
 export const sentenceKey = (lang: string, fingerprint: string, sentence: string) =>
   `${fingerprint}|${lang}|${normalize(sentence)}`;
+
+/** A conjugation is kept per verb; the caller passes the engine form of the infinitive. */
+export const conjugationKey = (lang: string, fingerprint: string, infinitive: string) =>
+  `${fingerprint}|${lang}|${normalize(infinitive)}`;
 
 export const prosodyKey = (lang: string, fingerprint: string, sentence: string) =>
   `v${PRONUNCIATION_SCHEMA_VERSION}.t${READER_TOKENIZER_VERSION}|${fingerprint}|${lang}|${normalize(sentence)}`;

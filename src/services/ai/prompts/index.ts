@@ -7,6 +7,7 @@ import { prosodySchema } from '../prosodySchema';
 import type { GrammarTag } from '../../../types/grammar';
 import type { ImportMode } from '../../../types/exercises';
 import {
+  conjugationJsonSchema,
   drillsJsonSchema,
   exerciseJsonSchema,
   explanationJsonSchema,
@@ -228,5 +229,12 @@ export function exercisesRequest(
       count: String(input.count),
     }),
     jsonSchema: exerciseJsonSchema(),
+  };
+}
+
+export function conjugateRequest(input: { infinitive: string }, lang: Lang): JsonRequest {
+  return {
+    prompt: render('conjugate', lang, { infinitive: input.infinitive.trim() }),
+    jsonSchema: conjugationJsonSchema(),
   };
 }

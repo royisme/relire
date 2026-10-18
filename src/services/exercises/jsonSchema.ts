@@ -12,6 +12,7 @@ import {
   HintSchema,
   OpenGradeSchema,
 } from '../../types/exerciseAi';
+import { ConjugationAnswerSchema } from '../../types/conjugationAnswer';
 import { TranscriptionSchema } from '../../types/transcription';
 import { ImportDraftSchema } from './importDraft';
 
@@ -61,3 +62,6 @@ export const explanationJsonSchema = () => toProviderJsonSchema(ExplanationSchem
 
 /** Response schema for an open-answer grade. */
 export const openGradeJsonSchema = () => toProviderJsonSchema(OpenGradeSchema);
+
+/** Response schema for the conjugation of one verb. */
+export const conjugationJsonSchema = () => toProviderJsonSchema(ConjugationAnswerSchema);

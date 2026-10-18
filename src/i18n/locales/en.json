@@ -648,7 +648,8 @@
     "grade": "Open answer grading",
     "adaptive": "Adaptive drills",
     "exercises": "Exercises from an article",
-    "transcribe": "Import: read article pages"
+    "transcribe": "Import: read article pages",
+    "conjugate": "Verb conjugation"
   },
   "prosody": {
     "title": "Pronunciation markers",

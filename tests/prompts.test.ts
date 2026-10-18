@@ -8,12 +8,14 @@ import {
   HintSchema,
   OpenGradeSchema,
 } from '../src/types/exerciseAi';
+import { ConjugationAnswerSchema } from '../src/types/conjugationAnswer';
+import { RuleIdSchema } from '../src/types/grammarPack';
 import { ImportDraftSchema } from '../src/services/exercises/importDraft';
 import { TranscriptionSchema } from '../src/types/transcription';
 import { ExerciseTypeSchema } from '../src/types/exercises';
 import { GRAMMAR_TAGS } from '../src/types/grammar';
 
-const NEW_IDS: PromptId[] = ['extract', 'transcribe', 'hint', 'explain', 'grade', 'adaptive', 'exercises'];
+const NEW_IDS: PromptId[] = ['extract', 'transcribe', 'hint', 'explain', 'grade', 'adaptive', 'exercises', 'conjugate'];
 const definition = (id: PromptId) => PROMPTS.find((p) => p.id === id)!;
 const blocks = (template: string) => [...template.matchAll(/\{\{#if [^}]+\}\}|\{\{\/if\}\}/g)].map((m) => m[0]);
 
@@ -159,4 +161,57 @@ test('hint, explain and grade name every field of their schema', () => {
 test('grading asks for no numeric score', () => {
   expect(fieldsOf(OpenGradeSchema)).not.toContain('score');
   for (const lang of ['en', 'zh'] as const) expect(definition('grade').defaults[lang]).not.toMatch(/"score"/);
+});
+
+test('conjugate names every field of its schema, every rule and every person, in both languages', () => {
+  type Shape = { shape: Record<string, unknown> };
+  const shape = (schema: unknown) => schema as Shape;
+  const top = shape(ConjugationAnswerSchema);
+  const forms = shape(top.shape.forms);
+  const participles = shape(top.shape.participles);
+  const past = shape(participles.shape.past);
+  const examples = shape(top.shape.examples);
+  const example = shape(examples.shape.present);
+  expectDescribes('conjugate', [
+    ...fieldsOf(top),
+    ...fieldsOf(forms),
+    ...fieldsOf(participles),
+    ...fieldsOf(past),
+    ...fieldsOf(examples),
+    ...fieldsOf(example),
+    '1sg',
+    '2sg',
+    '3sg',
+    '1pl',
+    '2pl',
+    '3pl',
+  ]);
+  for (const lang of ['en', 'zh'] as const) {
+    const text = definition('conjugate').defaults[lang];
+    for (const rule of RuleIdSchema.options) expect(text, `${lang} misses the rule ${rule}`).toContain(`"${rule}"`);
+    // The model is asked for the typographic apostrophe, and the template carries no sample verb forms.
+    expect(text).toContain('U+2019');
+    expect(text).not.toMatch(/\b(parle|parlons|achète|lève|lavons)\b/);
+  }
+});
+
+test('conjugate: the skeleton is valid JSON of typed placeholders, the same in both languages', () => {
+  const skeleton = (lang: 'en' | 'zh') => {
+    const text = definition('conjugate').defaults[lang];
+    return JSON.parse(text.slice(text.indexOf('{\n  "infinitive"')));
+  };
+  /** Every key path with the kind of value at its end. */
+  const shape = (value: unknown, path = ''): string[] =>
+    value && typeof value === 'object'
+      ? Object.entries(value).flatMap(([key, item]) => shape(item, `${path}.${key}`))
+      : [`${path}:${typeof value === 'string' && /^<.+>$/.test(value) ? 'placeholder' : typeof value}`];
+  const en = shape(skeleton('en'));
+  expect(shape(skeleton('zh'))).toEqual(en);
+  // Only "pronominal" is a literal (a boolean); every other leaf is an <angle-bracket> placeholder.
+  expect(en.filter((leaf) => !leaf.endsWith(':placeholder'))).toEqual(['.pronominal:boolean']);
+  for (const lang of ['en', 'zh'] as const) {
+    const text = definition('conjugate').defaults[lang];
+    for (const copyable of ['"optional"', 'same persons as present', 'avoir or etre', '人称与 present 相同'])
+      expect(text).not.toContain(copyable);
+  }
 });

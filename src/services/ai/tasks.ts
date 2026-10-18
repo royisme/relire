@@ -1,3 +1,4 @@
+import { ConjugationAnswerSchema, foldAnswerApostrophes, type ConjugationAnswer } from '../../types/conjugationAnswer';
 import type { PronunciationAssessment, SentenceAnalysis, WordAnalysis } from '../../types';
 import i18n from '../../i18n';
 import {
@@ -16,6 +17,7 @@ import { parseImportDraft, type ImportDraft } from '../exercises/importDraft';
 import { keepAnswerable } from '../exercises/answerability';
 import {
   adaptiveRequest,
+  conjugateRequest,
   exerciseArticleText,
   exercisesRequest,
   explainRequest,
@@ -184,4 +186,10 @@ export async function generateExercises(
       missing.map((m) => `item ${m.itemId} of unit ${m.unitId} quotes words that are not in the article: "${m.quote}"`),
     );
   return { units, dropped };
+}
+
+/** The simple tenses, participles and examples of one verb, in the structure of `ConjugationAnswerSchema`. */
+export async function conjugateVerb(input: { infinitive: string }, ctx: TextContext): Promise<ConjugationAnswer> {
+  const value = await ctx.execution.generateJson<unknown>(conjugateRequest(input, ctx.lang));
+  return parseAnswer('the conjugation', ConjugationAnswerSchema, foldAnswerApostrophes(value));
 }

@@ -640,7 +640,8 @@
     "grade": "开放题批改",
     "adaptive": "针对性练习",
     "exercises": "由文章生成练习",
-    "transcribe": "导入：识别文章页面"
+    "transcribe": "导入：识别文章页面",
+    "conjugate": "动词变位"
   },
   "prosody": {
     "title": "发音标记",
