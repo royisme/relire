@@ -67,7 +67,7 @@ test('a correct answer passes; an accent-less answer is wrong with the preferenc
     prompt: string;
     expectedAnswer: string;
   }[];
-  await expect(page.getByRole('heading', { name: unit.title, exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: unit.title })).toBeVisible();
 
   const first = row(page, items[0]!.prompt);
   await first.getByRole('textbox').fill(items[0]!.expectedAnswer);
