@@ -6,6 +6,15 @@ export class MissingApiKeyError extends Error {
   }
 }
 
+/** Thrown when a caller asks a `device` speech provider for a clip: the platform's voice speaks directly and
+ * produces none, so playback must use the browser's own speech instead, and nothing is stored. */
+export class DeviceVoiceError extends Error {
+  constructor() {
+    super('The device voice speaks directly; it has no audio clip');
+    this.name = 'DeviceVoiceError';
+  }
+}
+
 /** The human-readable part of a provider error: `error.message` (OpenAI, Anthropic), a plain `error` text
  * (Ollama), or the message itself. */
 export function errorMessage(err: unknown, secret?: string): string {

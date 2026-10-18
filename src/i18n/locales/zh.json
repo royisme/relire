@@ -393,7 +393,8 @@
     "preview": "试听音色",
     "ocrNote": "图片和 PDF 使用这里的设置；粘贴的文字使用文字 AI。",
     "unknownOcr": "这个模型能否读图尚未确认，导入可能会返回提供方自己的错误。",
-    "savedNote": "保存只会保留你的选择，不会测试它们。"
+    "savedNote": "保存只会保留你的选择，不会测试它们。",
+    "deviceNote": "用设备自带的声音朗读：不需要密钥，不产生费用，也不会保存音频。听起来是否自然，取决于设备上安装的法语语音。"
   },
   "importer": {
     "articleTitle": "标题",
@@ -518,7 +519,10 @@
     "invalidSpeechText": "仅支持不超过 {{max}} 个字符、不含标记或链接的纯文本。",
     "invalidAudio": "语音服务未返回可播放的 MP3 音频。",
     "speechAudioTooLarge": "合成的音频过大，已拒绝接收。",
-    "speechTimeout": "语音服务未及时响应，请重试。"
+    "speechTimeout": "语音服务未及时响应，请重试。",
+    "deviceVoiceUnavailable": "这个浏览器无法用设备自带的声音朗读。",
+    "deviceVoiceNoFrench": "设备上没有安装法语语音，无法用本机声音朗读法语。",
+    "deviceVoiceFailed": "本机声音未能播放，请检查系统的语音设置。"
   },
   "models": {
     "gemini-2_5-flash": {
@@ -587,7 +591,8 @@
     "openai": "OpenAI 兼容",
     "fish-audio": "Fish Audio",
     "anthropic": "Anthropic Claude",
-    "ollama": "Ollama（本地）"
+    "ollama": "Ollama（本地）",
+    "device": "本机语音"
   },
   "prompts": {
     "word": "单词解析",

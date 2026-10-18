@@ -1,5 +1,7 @@
 import type { AppSettings } from '../appSettings';
+import i18n from '../../i18n';
 import { getAiAccess } from '../../services/ai/access';
+import { DeviceVoiceError } from '../../services/ai/errors';
 import { loadSpeech } from './clips';
 import { getSpeechState, setSpeechState, speechKey } from './state';
 
@@ -151,7 +153,9 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
     }
     // play() rejects when it is paused before it starts; that is a pause, not a failure.
     if (paused && currentAudio) return;
-    console.warn('Speech provider failed, falling back to browser speech:', err);
+    // A device engine is a choice, not a provider failure: it speaks with the platform's voice below.
+    if (!(err instanceof DeviceVoiceError))
+      console.warn('Speech provider failed, falling back to browser speech:', err);
     // play() can reject after the URL was created; do not leak it.
     if (audioUrl) {
       if (currentUrl === audioUrl) releaseUrl();
@@ -244,7 +248,52 @@ export function toggleSpeech(text: string, options: SpeechOptions = {}) {
   else void speakFrench(text, options);
 }
 
-// Fallback browser speech synthesis if the speech provider fails
+/** The rate the device's own voice speaks at: a touch slower than natural reading. */
+const DEVICE_RATE = 0.88;
+/** How long to wait for a browser that fills its voice list after the first frame. */
+const DEVICE_VOICE_WAIT_MS = 500;
+const TEST_PHRASE = 'Bonjour ! Bienvenue sur Relire.';
+
+/** The platform's French voice, or nothing when the device has none installed. */
+function frenchVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | undefined {
+  return (
+    voices.find(
+      (v) =>
+        v.lang.startsWith('fr') &&
+        (v.name.includes('Google') || v.name.includes('Thomas') || v.name.includes('Audrey')),
+    ) ?? voices.find((v) => v.lang.startsWith('fr'))
+  );
+}
+
+/** What the platform's own voice says: French, at the rate this app speaks it. */
+function deviceUtterance(
+  text: string,
+  rate: number,
+  voice = frenchVoice(window.speechSynthesis.getVoices()),
+): SpeechSynthesisUtterance {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'fr-FR';
+  utterance.rate = rate;
+  if (voice) utterance.voice = voice;
+  return utterance;
+}
+
+/** The device's voices, waiting briefly when the list is still empty (Chrome fills it after the first frame). */
+async function deviceVoices(): Promise<SpeechSynthesisVoice[]> {
+  const synth = window.speechSynthesis;
+  if (synth.getVoices().length) return synth.getVoices();
+  return new Promise((settle) => {
+    const done = () => {
+      clearTimeout(timer);
+      synth.removeEventListener('voiceschanged', done);
+      settle(synth.getVoices());
+    };
+    const timer = setTimeout(done, DEVICE_VOICE_WAIT_MS);
+    synth.addEventListener('voiceschanged', done);
+  });
+}
+
+/** Speaks with the device's own voice: the fallback when a provider fails, and the device engine's playback. */
 function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions, isCurrent: () => boolean) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     setSpeechState('idle');
@@ -252,19 +301,7 @@ function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions
     return;
   }
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'fr-FR';
-  utterance.rate = options.rate ?? 0.88;
-
-  const voices = window.speechSynthesis.getVoices();
-  const frVoice =
-    voices.find(
-      (v) =>
-        v.lang.startsWith('fr') &&
-        (v.name.includes('Google') || v.name.includes('Thomas') || v.name.includes('Audrey')),
-    ) || voices.find((v) => v.lang.startsWith('fr'));
-
-  if (frVoice) utterance.voice = frVoice;
+  const utterance = deviceUtterance(text, options.rate ?? DEVICE_RATE);
 
   // cancel() reports the old utterance as an error; only the current request may change the state.
   const finish = (outcome: SpeechOutcome) => {
@@ -285,13 +322,42 @@ function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions
   }
 }
 
+/** The device voice's own check: speaks the test phrase, or reports that this device cannot speak French. */
+async function previewDeviceVoice(signal?: AbortSignal): Promise<void> {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window))
+    throw new Error(i18n.t('errors.deviceVoiceUnavailable'));
+  const voice = frenchVoice(await deviceVoices());
+  if (!voice) throw new Error(i18n.t('errors.deviceVoiceNoFrench'));
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  const utterance = deviceUtterance(TEST_PHRASE, DEVICE_RATE, voice);
+  await new Promise<void>((resolve, reject) => {
+    const end = (error?: Error) => {
+      signal?.removeEventListener('abort', abort);
+      if (error) reject(error);
+      else resolve();
+    };
+    const abort = () => {
+      synth.cancel();
+      end(new DOMException('Aborted', 'AbortError'));
+    };
+    utterance.onend = () => end();
+    utterance.onerror = () => end(new Error(i18n.t('errors.deviceVoiceFailed')));
+    signal?.addEventListener('abort', abort, { once: true });
+    synth.speak(utterance);
+  });
+}
+
 /**
  * Plays a short phrase with the given (possibly unsaved) settings and reports
  * failure, unlike speakFrench which quietly falls back to the browser voice.
+ * A device engine is its own check: it reports whether this device has a French voice.
  */
 export async function testSpeech(settings: AppSettings, signal?: AbortSignal): Promise<void> {
+  const access = getAiAccess(settings);
+  if (access.selection('speech').device) return previewDeviceVoice(signal);
   // A cached clip cannot verify the current draft key or model.
-  const clip = await getAiAccess(settings).synthesize({ text: 'Bonjour ! Bienvenue sur Relire.', signal });
+  const clip = await access.synthesize({ text: TEST_PHRASE, signal });
   signal?.throwIfAborted();
   const url = URL.createObjectURL(clip);
   const audio = new Audio(url);

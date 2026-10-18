@@ -91,6 +91,16 @@ test('an invalid model refuses the AI save with its own message and leaves the s
   }
 });
 
+test('the device engine saves with an empty speech model, while the text and OCR models stay required', () => {
+  saveAppSettings({});
+  const device = draftOf(getAppSettings(), { speechProvider: 'device', speechModel: '', speechVoice: '' });
+  const saved = saveSlice(device, 'ai');
+  expect([saved.speechProvider, saved.speechModel, saved.speechVoice]).toEqual(['device', '', '']);
+  expect(getAppSettings().speechProvider).toBe('device');
+  // Its empty model is not a refusal, but the other purposes' models still are.
+  expect(() => saveSlice(draftOf(device, { textModel: '' }), 'ai')).toThrow(i18n.t('aiSettings.modelNotValid'));
+});
+
 test('one shared key saves with all three purposes', () => {
   saveAppSettings({});
   const draft = draftOf(getAppSettings(), {

@@ -63,11 +63,13 @@ export function AiSection({
   const model = draft[`${purpose}Model`];
   const key = draft.apiKeys[providerId] ?? '';
   const dirty = sliceOf(draft, 'ai') !== sliceOf(saved, 'ai');
+  // The device voice is a declared kind of engine: no key, no model, no voice, and nothing to preview remotely.
+  const device = purpose === 'speech' && provider.info.speech?.device === true;
   // A local provider needs no key, so nothing here asks for one.
-  const needsKey = providerRequiresKey(providerId);
+  const needsKey = !device && providerRequiresKey(providerId);
   const savedProviderId = saved[`${purpose}Provider`];
   const missingKey = providerRequiresKey(savedProviderId) && !getApiKey(saved, savedProviderId);
-  const modelReady = !!normalizeModelId(model);
+  const modelReady = !!normalizeModelId(model) || device;
   // A provider with its own voice check shows a free-text field; the value is refused before it can be saved.
   const voiceAccepts = (voice: string) => provider.speech?.acceptsVoice?.(voice) ?? true;
   const voiceValid = voiceAccepts(draft.speechVoice);
@@ -194,18 +196,22 @@ export function AiSection({
           </select>
         </label>
 
-        <div className="space-y-1">
-          <KeyBadge saved={saved} providerId={providerId} />
-          <KeyField
-            ref={keyInput}
-            providerId={providerId}
-            value={key}
-            onChange={(value) => edit({ ...draft, apiKeys: { ...draft.apiKeys, [providerId]: value } })}
-          />
-          {sharedNote && <p className="text-xs text-ink-500 leading-relaxed">{sharedNote}</p>}
-        </div>
+        {device ? (
+          <p className="text-sm text-ink-700 leading-relaxed">{t('aiSettings.deviceNote')}</p>
+        ) : (
+          <div className="space-y-1">
+            <KeyBadge saved={saved} providerId={providerId} />
+            <KeyField
+              ref={keyInput}
+              providerId={providerId}
+              value={key}
+              onChange={(value) => edit({ ...draft, apiKeys: { ...draft.apiKeys, [providerId]: value } })}
+            />
+            {sharedNote && <p className="text-xs text-ink-500 leading-relaxed">{sharedNote}</p>}
+          </div>
+        )}
 
-        {provider.info.defaultBaseUrl && (
+        {!device && provider.info.defaultBaseUrl && (
           <BaseUrlField
             providerId={providerId}
             defaultUrl={provider.info.defaultBaseUrl}
@@ -214,9 +220,10 @@ export function AiSection({
           />
         )}
 
-        <ModelField draft={draft} purpose={purpose} catalogue={catalogue} onChange={setModel} />
+        {!device && <ModelField draft={draft} purpose={purpose} catalogue={catalogue} onChange={setModel} />}
 
-        {purpose === 'speech' &&
+        {!device &&
+          purpose === 'speech' &&
           info &&
           'voices' in info &&
           (info.voices.length > 0 ? (

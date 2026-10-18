@@ -397,7 +397,8 @@
     "preview": "Preview voice",
     "ocrNote": "Images and PDFs read this selection; pasted text uses Text AI.",
     "unknownOcr": "Image support for this model is unconfirmed. The import may fail with the provider's own error.",
-    "savedNote": "Saving keeps your choices; it does not test them."
+    "savedNote": "Saving keeps your choices; it does not test them.",
+    "deviceNote": "Speaks with this device’s own voice: no key, no cost, and nothing is stored. Whether it sounds natural depends on the French voices installed on the device."
   },
   "importer": {
     "articleTitle": "Title",
@@ -523,7 +524,10 @@
     "invalidSpeechText": "Plain text only, up to {{max}} characters, without markup or links.",
     "invalidAudio": "The speech provider did not return playable MP3 audio.",
     "speechAudioTooLarge": "The synthesized audio was too large to keep.",
-    "speechTimeout": "The speech provider did not answer in time. Try again."
+    "speechTimeout": "The speech provider did not answer in time. Try again.",
+    "deviceVoiceUnavailable": "This browser cannot speak with the device’s voice.",
+    "deviceVoiceNoFrench": "This device has no French voice installed, so its own voice cannot read French aloud.",
+    "deviceVoiceFailed": "The device voice could not play. Check the system speech settings."
   },
   "models": {
     "gemini-2_5-flash": {
@@ -592,7 +596,8 @@
     "openai": "OpenAI-compatible",
     "fish-audio": "Fish Audio",
     "anthropic": "Anthropic Claude",
-    "ollama": "Ollama (local)"
+    "ollama": "Ollama (local)",
+    "device": "This device"
   },
   "prompts": {
     "word": "Word analysis",

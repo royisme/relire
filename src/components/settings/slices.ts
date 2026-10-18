@@ -9,6 +9,10 @@ export type SettingsSlice = 'ai' | 'practice';
 
 const AI_MODEL_FIELDS = ['textModel', 'ocrModel', 'speechModel'] as const;
 
+/** The models storage must be able to keep. A device speech engine has no model, so its empty one is no refusal. */
+const aiModelFields = (draft: AppSettings) =>
+  getProvider(draft.speechProvider).info.speech?.device ? (['textModel', 'ocrModel'] as const) : AI_MODEL_FIELDS;
+
 /** saveAppSettings stores the canonical ID, so the draft is written canonicalized or the read-back never matches. */
 const canonicalModel = (id: string) => normalizeModelId(id) ?? id;
 /** Same for an endpoint: storage trims it and drops an unusable one, so the draft is written that way. */
@@ -77,7 +81,7 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
 /** Read back because saveAppSettings catches storage errors. Never mark a failed write as saved. */
 export function saveSlice(draft: AppSettings, slice: SettingsSlice): AppSettings {
   // A model ID storage cannot keep would be silently replaced by the provider default: refuse the whole save.
-  if (slice === 'ai' && AI_MODEL_FIELDS.some((field) => !normalizeModelId(draft[field])))
+  if (slice === 'ai' && aiModelFields(draft).some((field) => !normalizeModelId(draft[field])))
     throw new Error(i18n.t('aiSettings.modelNotValid'));
   // Same for an address storage would drop: the learner would silently go back to the provider's host.
   if (slice === 'ai' && usedProviders(draft).some((id) => baseUrlRefused(draft.baseUrls[id] ?? '')))

@@ -8,11 +8,12 @@ import { geminiSpeech } from '../src/services/ai/providers/gemini/tts';
 import { openaiText } from '../src/services/ai/providers/openai/client';
 import { openaiCatalogue } from '../src/services/ai/providers/openai/models';
 import { fishSpeech } from '../src/services/ai/providers/fish/tts';
-import { getAudio } from '../src/storage/audio';
+import { audioStats, getAudio } from '../src/storage/audio';
 import type { AiAccess, AiPurpose, TextPurpose } from '../src/services/ai/types';
 import { getAppSettings } from '../src/utils/appSettings';
 import { loadSpeech, prefetchSpeech } from '../src/utils/speech/clips';
 import { testSpeech } from '../src/utils/speech/playback';
+import { DeviceVoiceError } from '../src/services/ai/errors';
 import * as api from '../src/services/api';
 import { contextOf, fakeProvider } from './fixtures/fakeProvider';
 import { draftFixture } from './fixtures/importDraft';
@@ -44,6 +45,7 @@ function fakeAccess(answer: unknown) {
       providerId: 'gemini',
       model: `custom-${purpose}`,
       voice: 'Charon',
+      device: false,
       capabilities: { textGeneration: 'unknown', imageInput: 'unknown', speechOutput: 'unknown' },
     }),
     text,
@@ -260,6 +262,7 @@ describe('feature execution uses AiAccess', () => {
       providerId: 'fish-audio',
       model: 'fish-audio/s2.1-pro-free',
       voice,
+      device: false,
       capabilities: { textGeneration: 'unsupported', imageInput: 'unsupported', speechOutput: 'supported' },
     });
     expect((await access.synthesize({ text: 'Bonjour' })).type).toBe('audio/mpeg');
@@ -291,6 +294,37 @@ describe('feature execution uses AiAccess', () => {
     // Another voice is another clip, as the cache key says.
     await loadSpeech('Bonjour', 'fedcba9876543210fedcba9876543210', configured);
     expect(synthesize).toHaveBeenCalledTimes(2);
+  });
+
+  test('the device engine is configured without a key, has no model or voice, and never produces a clip', async () => {
+    const deviceSettings = { ...getAppSettings(), speechProvider: 'device', speechModel: '', speechVoice: '' };
+    const access = accessModule.createByokAccess(deviceSettings);
+    expect(access.isConfigured('speech')).toBe(true);
+    expect(access.selection('speech')).toEqual({
+      providerId: 'device',
+      model: '',
+      voice: '',
+      device: true,
+      capabilities: { textGeneration: 'unknown', imageInput: 'unknown', speechOutput: 'unknown' },
+    });
+    expect(await failure(Promise.resolve().then(() => access.synthesize({ text: 'Bonjour' })))).toBeInstanceOf(
+      DeviceVoiceError,
+    );
+    // Playback asks for a clip before it speaks: the device engine answers with the same typed refusal.
+    expect(await failure(loadSpeech('Bonjour', undefined, deviceSettings))).toBeInstanceOf(DeviceVoiceError);
+    expect((await audioStats()).clips).toBe(0);
+    // Prefetch is a remote concern only: it stays quiet and stores nothing.
+    await prefetchSpeech(['Bonjour'], () => true);
+    await prefetchSpeech(['Bonjour']);
+    expect((await audioStats()).clips).toBe(0);
+  });
+
+  test("a device preview reports the platform it runs on, not a provider's voice", async () => {
+    const deviceSettings = { ...getAppSettings(), speechProvider: 'device', speechModel: '', speechVoice: '' };
+    // No platform speech in this environment: the preview says so instead of inventing a success.
+    expect(((await failure(testSpeech(deviceSettings))) as Error).message).toBe(
+      i18n.t('errors.deviceVoiceUnavailable'),
+    );
   });
 
   test('unknown provider IDs are not silently redirected', () => {

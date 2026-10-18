@@ -1,5 +1,6 @@
 import type { Provider, SpeechProvider, TextProvider } from '../types';
 import { anthropic } from './anthropic';
+import { device } from './device';
 import { gemini } from './gemini';
 import { fish } from './fish';
 import { ollama } from './ollama';
@@ -9,8 +10,9 @@ import { openai } from './openai';
  * Every provider the app can use. To add one, implement `Provider` (text,
  * speech or both), register it here and add its display name under
  * `providers.<id>` in the locale files; the settings screen picks it up.
+ * `device` is the platform's own voice, offered beside the remote speech providers.
  */
-const PROVIDERS: Provider[] = [gemini, openai, anthropic, ollama, fish];
+const PROVIDERS: Provider[] = [gemini, openai, anthropic, ollama, fish, device];
 
 export const textProviders = () => PROVIDERS.filter((p) => p.text);
 export const speechProviders = () => PROVIDERS.filter((p) => p.speech);

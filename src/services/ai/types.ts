@@ -76,6 +76,8 @@ export interface AiSelection {
 
 export interface SpeechSelection extends AiSelection {
   voice: string;
+  /** The platform's own voice speaks: `model` and `voice` are empty and no clip is ever produced. */
+  device: boolean;
 }
 
 /** The replaceable access boundary. BYOK is its only implementation today. */
@@ -85,6 +87,8 @@ export interface AiAccess {
   selection(purpose: 'speech'): SpeechSelection;
   selection(purpose: AiPurpose): AiSelection;
   text(purpose: TextPurpose): TextExecution;
+  /** A playable clip. A `device` engine has none: it throws `DeviceVoiceError`, and playback speaks with the
+   * platform's voice instead. */
   synthesize(request: { text: string; style?: string; voice?: string; signal?: AbortSignal }): Promise<Blob>;
   checkConnection(purpose: TextPurpose): Promise<void>;
   listModels(purpose: AiPurpose, signal?: AbortSignal): Promise<ModelInfo[]>;
@@ -117,16 +121,23 @@ export interface VoiceInfo {
 /** What the settings screen needs to know about a provider. Display names live in the locale files. */
 export interface ProviderInfo {
   id: string;
-  /** Where the user creates an API key. */
-  keyUrl: string;
+  /** Where the user creates an API key; absent for a provider that has none. */
+  keyUrl?: string;
   /** The endpoint this provider calls unless the learner overrides it; only such providers show a Base URL field. */
   defaultBaseUrl?: string;
   /** False for a provider that works without a key (a local server). Absent means a key is required. */
   requiresKey?: boolean;
   /** `imageModels` are the static `models` known to accept images, a starting hint for Settings; discovery adds the rest. */
   text?: { models: string[]; defaultModel: string; imageModels?: string[] };
-  /** An empty `voices` list means the provider takes any voice id, so Settings shows a text field instead of a select. */
-  speech?: { models: string[]; defaultModel: string; voices: VoiceInfo[]; defaultVoice: string };
+  /** An empty `voices` list means the provider takes any voice id, so Settings shows a text field instead of a select.
+   * `device` declares the platform's own voice: no key, no model, no voice list, no clip. */
+  speech?: {
+    models: string[];
+    defaultModel: string;
+    voices: VoiceInfo[];
+    defaultVoice: string;
+    device?: boolean;
+  };
 }
 
 /** A provider offers text, speech or both. */

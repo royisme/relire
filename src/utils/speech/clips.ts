@@ -1,4 +1,5 @@
 import { getAiAccess } from '../../services/ai/access';
+import { DeviceVoiceError } from '../../services/ai/errors';
 import { getAudio, putAudio } from '../../storage/audio';
 import type { AppSettings } from '../appSettings';
 
@@ -14,6 +15,8 @@ const synthesizing = new Map<string, Promise<Blob>>();
 export async function loadSpeech(text: string, voice?: string, settings?: AppSettings): Promise<Blob> {
   const access = getAiAccess(settings);
   const selected = access.selection('speech');
+  // The device engine speaks directly: it has no clip to store, and playback uses the platform's voice.
+  if (selected.device) throw new DeviceVoiceError();
   const { providerId: provider, model } = selected;
   const effectiveVoice = voice || selected.voice;
   const trimmed = text.trim();

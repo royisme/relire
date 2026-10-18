@@ -87,6 +87,8 @@ function normalize(value: unknown): AppSettings {
   const text = textProvider.text ?? textDefaults(DEFAULT_PROVIDER)!;
   const ocr = ocrProvider.text ?? textDefaults(DEFAULT_PROVIDER)!;
   const speech = speechProvider.speech ?? speechDefaults(DEFAULT_PROVIDER)!;
+  // A device engine has no model and no voice: storage never keeps one for it, whatever was written.
+  const deviceSpeech = speech.device === true;
   const apiKeys = Object.fromEntries(
     Object.entries(
       raw.apiKeys && typeof raw.apiKeys === 'object' && !Array.isArray(raw.apiKeys) ? raw.apiKeys : {},
@@ -104,8 +106,8 @@ function normalize(value: unknown): AppSettings {
     ocrProvider: ocrProvider.id,
     ocrModel: normalizeModelId(raw.ocrModel) ?? ocr.defaultModel,
     speechProvider: speechProvider.id,
-    speechModel: normalizeModelId(raw.speechModel) ?? speech.defaultModel,
-    speechVoice: storedVoice(speechProvider.id, raw.speechVoice) ?? speech.defaultVoice,
+    speechModel: deviceSpeech ? '' : (normalizeModelId(raw.speechModel) ?? speech.defaultModel),
+    speechVoice: deviceSpeech ? '' : (storedVoice(speechProvider.id, raw.speechVoice) ?? speech.defaultVoice),
     apiKeys,
     baseUrls,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),

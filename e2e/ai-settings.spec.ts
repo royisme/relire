@@ -221,6 +221,66 @@ test('a purpose switch does not pull the focus back to the key', async ({ page, 
   await expect(keyField(page)).not.toBeFocused();
 });
 
+test('the device engine needs no key, model or voice, and its preview speaks on the device itself', async ({
+  page,
+  ai,
+}) => {
+  void ai;
+  // A stand-in platform voice: one French voice and a record of what was asked to be spoken.
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    (window as unknown as { spoken: string[] }).spoken = spoken;
+    const voices = [{ lang: 'fr-FR', name: 'Test French voice', default: true }];
+    const synthesis = {
+      speaking: false,
+      paused: false,
+      getVoices: () => voices,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      cancel: () => {},
+      pause: () => {},
+      resume: () => {},
+      speak: (utterance: { text: string; onend: (() => void) | null }) => {
+        spoken.push(utterance.text);
+        setTimeout(() => utterance.onend?.(), 0);
+      },
+    };
+    Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: synthesis });
+    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+      text: string;
+      lang = '';
+      rate = 1;
+      voice: unknown = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+  });
+  await page.goto('/#/settings/ai/speech');
+  await page.getByLabel('Provider').selectOption('device');
+  // No key, model or voice for it, and a plain sentence about what it does and costs.
+  await expect(keyField(page)).toHaveCount(0);
+  await expect(modelField(page)).toHaveCount(0);
+  await expect(page.getByLabel('Voice')).toHaveCount(0);
+  await expect(page.getByText('Speaks with this device', { exact: false })).toBeVisible();
+  await expect(page.getByText('No key needed')).toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Preview voice' }).click();
+  await expect(page.getByText('Connection and voice work.')).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken))
+    .toEqual(['Bonjour ! Bienvenue sur Relire.']);
+  // Previewing the device voice asks no provider for anything.
+  expect(ai.calls.tts).toBe(0);
+
+  await page.getByRole('button', { name: 'Save', exact: true }).click();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('relire_app_settings_v1')!));
+  expect([stored.speechProvider, stored.speechModel, stored.speechVoice]).toEqual(['device', '', '']);
+});
+
 test('an unconfirmed OCR model stays selectable with honest copy', async ({ page, ai }) => {
   void ai;
   await page.goto('/#/settings/ai/ocr');

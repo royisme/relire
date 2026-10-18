@@ -98,6 +98,25 @@ describe('appSettings BYOK configuration', () => {
     expect(getAppSettings().speechVoice).toBe('Kore');
   });
 
+  test('the device engine stores neither a model nor a voice, and hand-written ones do not survive', () => {
+    saveAppSettings({ speechProvider: 'device' });
+    expect([getAppSettings().speechProvider, getAppSettings().speechModel, getAppSettings().speechVoice]).toEqual([
+      'device',
+      '',
+      '',
+    ]);
+    for (const raw of [
+      { speechModel: 'gemini-2.5-flash', speechVoice: 'Kore' },
+      { speechModel: 'Kore', speechVoice: 7 },
+    ]) {
+      storage.set('relire_app_settings_v1', JSON.stringify({ speechProvider: 'device', ...raw }));
+      expect([getAppSettings().speechModel, getAppSettings().speechVoice]).toEqual(['', '']);
+    }
+    // An unregistered speech provider is not kept either.
+    storage.set('relire_app_settings_v1', JSON.stringify({ speechProvider: 'not-registered' }));
+    expect(getAppSettings().speechProvider).toBe('gemini');
+  });
+
   test('an existing install has no endpoint, and a restored backup keeps the endpoint but never a key', () => {
     storage.set('relire_app_settings_v1', JSON.stringify({ textProvider: 'openai', textModel: 'gpt-4o-mini' }));
     expect(getAppSettings().baseUrls).toEqual({});

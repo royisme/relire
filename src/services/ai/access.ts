@@ -20,18 +20,22 @@ export function createByokAccess(settings: AppSettings): AiAccess {
   function selection(purpose: AiPurpose): AiSelection;
   function selection(purpose: AiPurpose): AiSelection | SpeechSelection {
     const provider = providerFor(purpose);
-    const model = normalizeModelId(snapshot[`${purpose}Model`]);
-    if (!model) throw new Error(i18n.t('errors.invalidModelId'));
+    // The device voice is chosen by its provider alone: it has no model and no voice id to resolve.
+    const deviceVoice = purpose === 'speech' && provider.info.speech?.device === true;
+    const model = deviceVoice ? '' : normalizeModelId(snapshot[`${purpose}Model`]);
+    if (!model && !deviceVoice) throw new Error(i18n.t('errors.invalidModelId'));
     const selected: AiSelection = {
       providerId: provider.info.id,
-      model,
-      capabilities: provider.catalogue?.capabilities(model) ?? {
+      model: model ?? '',
+      capabilities: provider.catalogue?.capabilities(model ?? '') ?? {
         textGeneration: 'unknown',
         imageInput: 'unknown',
         speechOutput: 'unknown',
       },
     };
-    return purpose === 'speech' ? { ...selected, voice: snapshot.speechVoice } : selected;
+    return purpose === 'speech'
+      ? { ...selected, voice: deviceVoice ? '' : snapshot.speechVoice, device: deviceVoice }
+      : selected;
   }
   const textConfig = (purpose: TextPurpose) => {
     const selected = selection(purpose);
@@ -74,6 +78,7 @@ export function createByokAccess(settings: AppSettings): AiAccess {
       // Unknown is not unsupported: only the real synthesis call can confirm a custom model.
       if (selected.capabilities.speechOutput === 'unsupported')
         throw new Error(i18n.t('errors.speechOutputUnsupported', { model: selected.model }));
+      // A device engine throws `DeviceVoiceError` here: it speaks directly and has no clip to return.
       return provider.synthesize(request, { ...speechConfig(), voice: voice || snapshot.speechVoice });
     },
     checkConnection(purpose) {
