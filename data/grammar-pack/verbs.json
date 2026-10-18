@@ -1,0 +1,10 @@
+{
+  "packVersion": "0.1.0",
+  "packDate": "2026-10-18",
+  "verbs": [
+    { "id": "etre", "infinitive": "être", "rule": "irregular", "aux": "avoir" },
+    { "id": "aller", "infinitive": "aller", "rule": "irregular", "aux": "etre" },
+    { "id": "avoir", "infinitive": "avoir", "rule": "irregular", "aux": "avoir" },
+    { "id": "s-appeler", "infinitive": "s’appeler", "base": "appel", "rule": "er-eler-double", "aux": "etre" }
+  ]
+}

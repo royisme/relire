@@ -1,0 +1,1126 @@
+{
+  "schemaVersion": 1,
+  "packVersion": "0.1.0",
+  "verbs": [
+    {
+      "id": "etre",
+      "infinitive": "être",
+      "pronominal": false,
+      "aux": "avoir",
+      "rule": "irregular",
+      "tenses": {
+        "present": {
+          "1sg": {
+            "lead": "je",
+            "forms": [
+              "suis"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "es"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "est"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "sommes"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "êtes"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "sont"
+            ]
+          }
+        },
+        "passeCompose": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "ai été"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "as été"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "a été"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "avons été"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "avez été"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "ont été"
+            ]
+          }
+        },
+        "imparfait": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "étais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "étais"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "était"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "étions"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "étiez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "étaient"
+            ]
+          }
+        },
+        "futur": {
+          "1sg": {
+            "lead": "je",
+            "forms": [
+              "serai"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "seras"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "sera"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "serons"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "serez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "seront"
+            ]
+          }
+        },
+        "conditionnel": {
+          "1sg": {
+            "lead": "je",
+            "forms": [
+              "serais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "serais"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "serait"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "serions"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "seriez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "seraient"
+            ]
+          }
+        },
+        "subjonctif": {
+          "1sg": {
+            "lead": "que je",
+            "forms": [
+              "sois"
+            ]
+          },
+          "2sg": {
+            "lead": "que tu",
+            "forms": [
+              "sois"
+            ]
+          },
+          "3sg": {
+            "lead": "qu’il/elle",
+            "forms": [
+              "soit"
+            ]
+          },
+          "1pl": {
+            "lead": "que nous",
+            "forms": [
+              "soyons"
+            ]
+          },
+          "2pl": {
+            "lead": "que vous",
+            "forms": [
+              "soyez"
+            ]
+          },
+          "3pl": {
+            "lead": "qu’ils/elles",
+            "forms": [
+              "soient"
+            ]
+          }
+        },
+        "imperatif": {
+          "2sg": {
+            "lead": "",
+            "forms": [
+              "sois"
+            ]
+          },
+          "1pl": {
+            "lead": "",
+            "forms": [
+              "soyons"
+            ]
+          },
+          "2pl": {
+            "lead": "",
+            "forms": [
+              "soyez"
+            ]
+          }
+        }
+      },
+      "participles": {
+        "present": "étant",
+        "past": {
+          "ms": "été",
+          "fs": "été",
+          "mp": "été",
+          "fp": "été"
+        }
+      },
+      "prov": {
+        "origin": "irregular-table",
+        "checkedAgainst": [
+          "consistency",
+          "control-verbs",
+          "human"
+        ],
+        "checkedAt": "2026-10-18",
+        "status": "reviewed",
+        "reviewedBy": "Roy Zhu"
+      }
+    },
+    {
+      "id": "aller",
+      "infinitive": "aller",
+      "pronominal": false,
+      "aux": "etre",
+      "rule": "irregular",
+      "tenses": {
+        "present": {
+          "1sg": {
+            "lead": "je",
+            "forms": [
+              "vais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "vas"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "va"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "allons"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "allez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "vont"
+            ]
+          }
+        },
+        "passeCompose": {
+          "1sg": {
+            "lead": "je",
+            "forms": [
+              "suis allé",
+              "suis allée"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "es allé",
+              "es allée"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "est allé",
+              "est allée"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "sommes allés",
+              "sommes allées"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "êtes allés",
+              "êtes allées"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "sont allés",
+              "sont allées"
+            ]
+          }
+        },
+        "imparfait": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "allais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "allais"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "allait"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "allions"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "alliez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "allaient"
+            ]
+          }
+        },
+        "futur": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "irai"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "iras"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "ira"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "irons"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "irez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "iront"
+            ]
+          }
+        },
+        "conditionnel": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "irais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "irais"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "irait"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "irions"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "iriez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "iraient"
+            ]
+          }
+        },
+        "subjonctif": {
+          "1sg": {
+            "lead": "que j’",
+            "forms": [
+              "aille"
+            ]
+          },
+          "2sg": {
+            "lead": "que tu",
+            "forms": [
+              "ailles"
+            ]
+          },
+          "3sg": {
+            "lead": "qu’il/elle",
+            "forms": [
+              "aille"
+            ]
+          },
+          "1pl": {
+            "lead": "que nous",
+            "forms": [
+              "allions"
+            ]
+          },
+          "2pl": {
+            "lead": "que vous",
+            "forms": [
+              "alliez"
+            ]
+          },
+          "3pl": {
+            "lead": "qu’ils/elles",
+            "forms": [
+              "aillent"
+            ]
+          }
+        },
+        "imperatif": {
+          "2sg": {
+            "lead": "",
+            "forms": [
+              "va"
+            ]
+          },
+          "1pl": {
+            "lead": "",
+            "forms": [
+              "allons"
+            ]
+          },
+          "2pl": {
+            "lead": "",
+            "forms": [
+              "allez"
+            ]
+          }
+        }
+      },
+      "participles": {
+        "present": "allant",
+        "past": {
+          "ms": "allé",
+          "fs": "allée",
+          "mp": "allés",
+          "fp": "allées"
+        }
+      },
+      "prov": {
+        "origin": "irregular-table",
+        "checkedAgainst": [
+          "consistency",
+          "control-verbs",
+          "human"
+        ],
+        "checkedAt": "2026-10-18",
+        "status": "reviewed",
+        "reviewedBy": "Roy Zhu"
+      }
+    },
+    {
+      "id": "avoir",
+      "infinitive": "avoir",
+      "pronominal": false,
+      "aux": "avoir",
+      "rule": "irregular",
+      "tenses": {
+        "present": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "ai"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "as"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "a"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "avons"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "avez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "ont"
+            ]
+          }
+        },
+        "passeCompose": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "ai eu"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "as eu"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "a eu"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "avons eu"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "avez eu"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "ont eu"
+            ]
+          }
+        },
+        "imparfait": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "avais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "avais"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "avait"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "avions"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "aviez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "avaient"
+            ]
+          }
+        },
+        "futur": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "aurai"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "auras"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "aura"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "aurons"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "aurez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "auront"
+            ]
+          }
+        },
+        "conditionnel": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "aurais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "aurais"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "aurait"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "aurions"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "auriez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "auraient"
+            ]
+          }
+        },
+        "subjonctif": {
+          "1sg": {
+            "lead": "que j’",
+            "forms": [
+              "aie"
+            ]
+          },
+          "2sg": {
+            "lead": "que tu",
+            "forms": [
+              "aies"
+            ]
+          },
+          "3sg": {
+            "lead": "qu’il/elle",
+            "forms": [
+              "ait"
+            ]
+          },
+          "1pl": {
+            "lead": "que nous",
+            "forms": [
+              "ayons"
+            ]
+          },
+          "2pl": {
+            "lead": "que vous",
+            "forms": [
+              "ayez"
+            ]
+          },
+          "3pl": {
+            "lead": "qu’ils/elles",
+            "forms": [
+              "aient"
+            ]
+          }
+        },
+        "imperatif": {
+          "2sg": {
+            "lead": "",
+            "forms": [
+              "aie"
+            ]
+          },
+          "1pl": {
+            "lead": "",
+            "forms": [
+              "ayons"
+            ]
+          },
+          "2pl": {
+            "lead": "",
+            "forms": [
+              "ayez"
+            ]
+          }
+        }
+      },
+      "participles": {
+        "present": "ayant",
+        "past": {
+          "ms": "eu",
+          "fs": "eue",
+          "mp": "eus",
+          "fp": "eues"
+        }
+      },
+      "prov": {
+        "origin": "irregular-table",
+        "checkedAgainst": [
+          "consistency",
+          "control-verbs",
+          "human"
+        ],
+        "checkedAt": "2026-10-18",
+        "status": "reviewed",
+        "reviewedBy": "Roy Zhu"
+      }
+    },
+    {
+      "id": "s-appeler",
+      "infinitive": "s’appeler",
+      "pronominal": true,
+      "aux": "etre",
+      "rule": "er-eler-double",
+      "tenses": {
+        "present": {
+          "1sg": {
+            "lead": "je m’",
+            "forms": [
+              "appelle"
+            ]
+          },
+          "2sg": {
+            "lead": "tu t’",
+            "forms": [
+              "appelles"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle s’",
+            "forms": [
+              "appelle"
+            ]
+          },
+          "1pl": {
+            "lead": "nous nous",
+            "forms": [
+              "appelons"
+            ]
+          },
+          "2pl": {
+            "lead": "vous vous",
+            "forms": [
+              "appelez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles s’",
+            "forms": [
+              "appellent"
+            ]
+          }
+        },
+        "passeCompose": {
+          "1sg": {
+            "lead": "je me",
+            "forms": [
+              "suis appelé",
+              "suis appelée"
+            ]
+          },
+          "2sg": {
+            "lead": "tu t’",
+            "forms": [
+              "es appelé",
+              "es appelée"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle s’",
+            "forms": [
+              "est appelé",
+              "est appelée"
+            ]
+          },
+          "1pl": {
+            "lead": "nous nous",
+            "forms": [
+              "sommes appelés",
+              "sommes appelées"
+            ]
+          },
+          "2pl": {
+            "lead": "vous vous",
+            "forms": [
+              "êtes appelés",
+              "êtes appelées"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles se",
+            "forms": [
+              "sont appelés",
+              "sont appelées"
+            ]
+          }
+        },
+        "imparfait": {
+          "1sg": {
+            "lead": "je m’",
+            "forms": [
+              "appelais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu t’",
+            "forms": [
+              "appelais"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle s’",
+            "forms": [
+              "appelait"
+            ]
+          },
+          "1pl": {
+            "lead": "nous nous",
+            "forms": [
+              "appelions"
+            ]
+          },
+          "2pl": {
+            "lead": "vous vous",
+            "forms": [
+              "appeliez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles s’",
+            "forms": [
+              "appelaient"
+            ]
+          }
+        },
+        "futur": {
+          "1sg": {
+            "lead": "je m’",
+            "forms": [
+              "appellerai"
+            ]
+          },
+          "2sg": {
+            "lead": "tu t’",
+            "forms": [
+              "appelleras"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle s’",
+            "forms": [
+              "appellera"
+            ]
+          },
+          "1pl": {
+            "lead": "nous nous",
+            "forms": [
+              "appellerons"
+            ]
+          },
+          "2pl": {
+            "lead": "vous vous",
+            "forms": [
+              "appellerez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles s’",
+            "forms": [
+              "appelleront"
+            ]
+          }
+        },
+        "conditionnel": {
+          "1sg": {
+            "lead": "je m’",
+            "forms": [
+              "appellerais"
+            ]
+          },
+          "2sg": {
+            "lead": "tu t’",
+            "forms": [
+              "appellerais"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle s’",
+            "forms": [
+              "appellerait"
+            ]
+          },
+          "1pl": {
+            "lead": "nous nous",
+            "forms": [
+              "appellerions"
+            ]
+          },
+          "2pl": {
+            "lead": "vous vous",
+            "forms": [
+              "appelleriez"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles s’",
+            "forms": [
+              "appelleraient"
+            ]
+          }
+        },
+        "subjonctif": {
+          "1sg": {
+            "lead": "que je m’",
+            "forms": [
+              "appelle"
+            ]
+          },
+          "2sg": {
+            "lead": "que tu t’",
+            "forms": [
+              "appelles"
+            ]
+          },
+          "3sg": {
+            "lead": "qu’il/elle s’",
+            "forms": [
+              "appelle"
+            ]
+          },
+          "1pl": {
+            "lead": "que nous nous",
+            "forms": [
+              "appelions"
+            ]
+          },
+          "2pl": {
+            "lead": "que vous vous",
+            "forms": [
+              "appeliez"
+            ]
+          },
+          "3pl": {
+            "lead": "qu’ils/elles s’",
+            "forms": [
+              "appellent"
+            ]
+          }
+        },
+        "imperatif": {
+          "2sg": {
+            "lead": "",
+            "forms": [
+              "appelle-toi"
+            ]
+          },
+          "1pl": {
+            "lead": "",
+            "forms": [
+              "appelons-nous"
+            ]
+          },
+          "2pl": {
+            "lead": "",
+            "forms": [
+              "appelez-vous"
+            ]
+          }
+        }
+      },
+      "participles": {
+        "present": "appelant",
+        "past": {
+          "ms": "appelé",
+          "fs": "appelée",
+          "mp": "appelés",
+          "fp": "appelées"
+        }
+      },
+      "prov": {
+        "origin": "rule",
+        "checkedAgainst": [
+          "consistency",
+          "control-verbs",
+          "human"
+        ],
+        "checkedAt": "2026-10-18",
+        "status": "reviewed",
+        "reviewedBy": "Roy Zhu"
+      }
+    }
+  ]
+}

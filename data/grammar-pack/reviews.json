@@ -1,0 +1,33 @@
+{
+  "records": [
+    {
+      "verbId": "etre",
+      "rowHash": "44fa046ea0f7423d2232893718306981fbf70a47cb4b8fc0cc90fe402e6d448f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-18",
+      "reference": "Owner confirmed the printed tables in a session on 2026-10-18; no external reference"
+    },
+    {
+      "verbId": "aller",
+      "rowHash": "2a3e10aa66373045439298c57bd92298cfe3016ccd855cad88d2df542aa26f6e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-18",
+      "reference": "Owner confirmed the printed tables in a session on 2026-10-18; no external reference"
+    },
+    {
+      "verbId": "avoir",
+      "rowHash": "a3f16265fabb573212e55f316add54bce5d72834cdac09fe7a28b0e6273fb1de",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-18",
+      "reference": "Owner confirmed the printed tables in a session on 2026-10-18; no external reference"
+    },
+    {
+      "verbId": "s-appeler",
+      "rowHash": "f306a183903149999a2c10cedd86a413c579677291e9dc6d2c766faebc791d9d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-18",
+      "reference": "Owner confirmed the printed tables in a session on 2026-10-18; no external reference"
+    }
+  ],
+  "rejected": []
+}

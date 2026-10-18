@@ -8,6 +8,9 @@ Bun is the only package manager. The delivery checklist (which checks must pass,
 - `bun run dev`: Vite on :5173.
 - `bun run build`: static site in `dist/`, with the PWA service worker.
 - `bun run preview`: serve the built site.
+- `bun scripts/grammar-pack/build.ts`: generate `src/data/grammar-pack/pack.json`; P2 requires matching owner reviews for every included verb. `packDate` in `data/grammar-pack/verbs.json` is hand-set; builds never read the clock.
+- `bun scripts/grammar-pack/build.ts --check`: regenerate in memory and reject any byte difference from the committed pack (also in CI).
+- `bun scripts/grammar-pack/review.ts print <verbId...>`: print the generated tables before review; only the owner runs `record <verbId...> --by "<name>" --ref "<reference>"` to append review records. Owner reviews are currently empty; the lead commits the first pack after review.
 
 ## Static checks
 

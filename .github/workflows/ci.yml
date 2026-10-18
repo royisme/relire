@@ -20,6 +20,8 @@ jobs:
         run: bun run format:check
       - name: Unit tests
         run: bun run test
+      - name: Grammar pack
+        run: bun scripts/grammar-pack/build.ts --check
       - name: Translations
         run: bun run i18n:check
       - name: Build
