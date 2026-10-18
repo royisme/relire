@@ -169,7 +169,7 @@
     "article": "文章",
     "unitsTitle": "练习题",
     "unitsDesc": "导入、由文章生成或根据错题生成的题组。你的作答和进度保存在本机。",
-    "noUnits": "还没有练习题。可以由文章生成一批，或从练习单导入练习。",
+    "noUnits": "还没有练习。可以由文章生成一批，或从练习单导入练习。",
     "fromArticleTitle": "由文章生成",
     "fromArticleDesc": "根据一篇文章生成一组新的练习题。即使删除文章，这组题仍会保留。",
     "level": "难度",
@@ -201,7 +201,7 @@
     "resetBody": "「{{title}}」上的作答会清空，方便你重做。作答记录会保留。",
     "deleteSet": "删除这一批",
     "deleteSetNamed": "删除这一批：{{title}}",
-    "deleteSetTitle": "删除这一批练习？",
+    "deleteSetTitle": "删除这一批？",
     "deleteSetBody": "「{{title}}」和你在上面的作答会从这台设备上删除。作答记录会保留。",
     "deleteSetFailed": "无法删除这一批：{{reason}}",
     "saveFailed": "最近的修改未能保存：{{msg}}",
@@ -874,7 +874,7 @@
     "review": "审阅文章",
     "reviewHelp": "保存前，文字只保留在本页。AI 转录可能有误：请对照原件检查，并在这里修改。",
     "title": "标题",
-    "level": "难度",
+    "level": "等级",
     "body": "文章正文",
     "requiredText": "保存前请填写标题和正文。",
     "save": "保存文章",
@@ -904,28 +904,28 @@
     "audioText": "听写内容（听写题必填）",
     "resolved": "我已补全缺失信息",
     "excludeItem": "排除此题",
-    "level": "这些练习的难度",
-    "chooseLevel": "选择难度",
-    "levelRequired": "保存前请选择这组练习题的难度。",
-    "confirm": "我已核对所选练习和参考答案，确认将这一批保存在此设备上。",
+    "level": "这些练习的等级",
+    "chooseLevel": "选择等级",
+    "levelRequired": "保存前请选择这一批练习的等级。",
+    "confirm": "我已审阅包含的练习和参考答案，确认将这一批保存在这台设备上。",
     "save": "确认保存",
     "selectUnits": "请至少包含一个可练习的单元。",
     "saveFailed": "保存失败，草稿已保留，可重试。{{msg}}",
-    "mode": "解析方式",
+    "mode": "提取模式",
     "sentText": "文字：{{count}} 字符",
     "exactText": "查看将发送的完整文字",
     "text": "发送文字（最多 40000 字符；可作为图片的补充内容）",
-    "analyze": "发送并解析",
+    "analyze": "发送并提取",
     "consent": "发送前确认",
     "modes": {
       "complete": "补全缺失答案",
       "extract": "仅提取原文答案",
-      "generate": "根据材料生成新题"
+      "generate": "生成新练习"
     },
     "modeHelp": {
       "complete": "保留原题和原文答案，由 AI 补全缺失的参考答案。",
       "extract": "只保留原文中印出的答案，缺失答案须在审阅时补全。",
-      "generate": "请 AI 根据材料设计新题，而非提取原有题目。"
+      "generate": "请 AI 根据材料生成新练习，而非提取原有题目。"
     },
     "origin": {
       "material": "原文答案，待核对",
@@ -933,7 +933,7 @@
       "user": "用户修改"
     },
     "errors": {
-      "no-items": "{{title}}：没有题目，请排除此单元。",
+      "no-items": "{{title}}：未包含题目。请排除此单元，或添加有效题目。",
       "blocked": "{{title}}：请补全缺失信息或排除相关题目。",
       "missing-answer": "{{title}}：请填写缺失的参考答案或排除相关题目。",
       "invalid": "{{title}}：{{msg}}"
