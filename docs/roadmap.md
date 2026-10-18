@@ -15,10 +15,11 @@ Principles that shape every item: nothing has shipped, so no compatibility code;
 | Import | Article import (Read) and exercise import (Practise); batches newest first, deletable | `docs/merge-progress.md` |
 | Grammar pack P1 | Schema, generator, machine checks, delivery proof | `docs/grammar-pack.md` section 9 |
 | Grammar pack P2 | Build with publish gate (only `reviewed` rows ship), review CLI, validated lazy loader, first pack of the 4 control verbs (reviewed by the owner 2026-10-18) | `docs/grammar-pack.md` section 9 |
+| Conjugation engine to `src/` (CP1) and Morphalou oracle (P3) | Generator and rule tables live in `src/services/conjugation/`; offline oracle against Morphalou 3.1 (three of four controls attested; `être` waits for an owner decision) | `docs/grammar-pack.md` Part 3 F2, section 5 |
 
 ## Next
 
-1. **Conjugation, framework first (Part 1 P3 and Part 3):** P3 oracle (offline Morphalou); CP1 engine to `src/`; CP2 `conjugateVerb` task and verification; CP3 framework copy; CP4 Conjugation screen, word-sheet change, reverse lookup; CP5 drills from any verb; CP6 sentence patterns (negation, questions, inversion); P6 reviewed irregulars. Owner reviews the language-reviewer lists (Part 1 section 12, Part 3 F9).
+1. **Conjugation, framework first (Part 1 P3 and Part 3):** CP2 `conjugateVerb` task and verification; CP3 framework copy; CP4 Conjugation screen, word-sheet change, reverse lookup; CP5 drills from any verb; CP6 sentence patterns (negation, questions, inversion); P6 reviewed irregulars. Owner reviews the language-reviewer lists (Part 1 section 12, Part 3 F9).
 2. **Grammar topics (Part 2):** schema and builder, generator script (Gemini regenerates each topic from the local reference database; the owner reviews), reader under My study, cross-links from mistakes, practice items and Progress. Owner decides the open questions TQ1 to TQ11.
 3. **Noun gender tendencies (Part 4):** measured rules by ending with real accuracy and exceptions, an A1 noun list, a Gender section, a word-sheet tip and `GENDER_CHECK` drills. Depends on the P3 Morphalou adapter. Owner decides NQ1 to NQ6.
 4. **Integration e2e pass** when a batch of the above is assembled; then the owner's visual acceptance (three themes, 360 px, phone drawer).
