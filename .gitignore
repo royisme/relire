@@ -6,27 +6,40 @@ dist/
 dev-dist/
 build/
 coverage/
-test-results/
-playwright-report/
 *.tsbuildinfo
 .vite/
+vite.config.*.timestamp-*
+
+# Test output (Playwright)
+test-results/
+playwright-report/
 
 # Environment (keep the example)
 .env
 .env.*
 !.env.example
+*.local
 
-# Logs
+# Logs (also covers bun-debug.log*)
 *.log
 npm-debug.log*
 
 # Editors and OS
 .DS_Store
+Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
 *.swp
+*.swo
+*~
 
 # Local tooling state
 .claude/settings.local.json
+# Agent definitions are never committed (rules/ and skills/ stay tracked)
+.claude/agents/
+.works/
+.pi/
 .pi-runs/
+# Local impeccable critique output (design.json stays tracked)
+.impeccable/critique/
