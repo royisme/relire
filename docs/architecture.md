@@ -48,7 +48,8 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 | `tests/` | `bun test` unit tests for the pure logic above (run `bun run test`); `tests/fixtures/` holds sample units and drafts. Browser flows stay in `e2e/` (Playwright). `bunfig.toml` limits `bun test` to `tests/`. |
 | `src/data/` | Static content (sample articles, French IPA chart); `grammar-pack/pack.json` is the generated conjugation artifact, never hand-edited. |
 | `src/types/grammarPack.ts` | Shipped conjugation schema and structural invariants; no generator or linguistic rules. |
-| `data/grammar-pack/`, `scripts/grammar-pack/` | Authored verb specs, irregular tables and owner-only reviews; deterministic generation, machine checks, review sheets and the reviewed-only P2 publish gate (`build.ts`, `review.ts`). No runtime imports. |
+| `data/grammar-pack/`, `scripts/grammar-pack/` | Authored verb specs, irregular tables and owner-only reviews; scripts keep machine checks (`checks.ts`), the reviewed-only P2 publish gate (`build.ts`) and review sheets (`review.ts`), importing generation and rule tables from `src/services/conjugation/`. No runtime imports yet. |
+| `src/services/conjugation/` | Deterministic generation (`generate.ts`) and rule tables (`rules.ts`); imported only by the build scripts and tests until the Conjugation screen exists. |
 | `src/services/grammarPack/load.ts`, `src/hooks/useGrammarPack.ts` | Lazy whole-pack validation with shared promise/retry on failure; mount-scoped loading/ready/error state. No lookup, UI consumer or persistence yet. |
 | `scripts/check-i18n.ts` | The translation check run in CI. |
 | `marketing/` | Static landing page, `robots.txt`, `sitemap.xml`. Not part of the app build. |

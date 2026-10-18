@@ -4,8 +4,8 @@
  * algorithm. Pure data and functions with no I/O. Does not own building a whole
  * verb (generate.ts) or verifying one (checks.ts).
  */
-import type { ImperativePerson, Person, RuleId, Tense, Verb } from '../../src/types/grammarPack';
-import { FINITE_PERSONS } from '../../src/types/grammarPack';
+import type { ImperativePerson, Person, RuleId, Tense, Verb } from '../../types/grammarPack';
+import { FINITE_PERSONS } from '../../types/grammarPack';
 
 /** One simple-tense cell variant; the form is stem + ending + clitic (imperatif of a pronominal verb). */
 export interface Parts {

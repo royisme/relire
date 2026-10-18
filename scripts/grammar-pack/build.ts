@@ -4,7 +4,12 @@ import { z } from 'zod';
 import { GrammarPackSchema, type Verb } from '../../src/types/grammarPack';
 import { GOLDEN } from '../../tests/fixtures/grammarPackGolden';
 import { checkControls, checkVerb } from './checks';
-import { generateVerb, type GeneratedVerb, type IrregularEntry, type VerbSpec } from './generate';
+import {
+  generateVerb,
+  type GeneratedVerb,
+  type IrregularEntry,
+  type VerbSpec,
+} from '../../src/services/conjugation/generate';
 
 export interface VerbSource {
   packVersion: string;

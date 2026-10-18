@@ -10,7 +10,7 @@ import {
   checkStemEnding,
   checkVerb,
 } from '../scripts/grammar-pack/checks';
-import type { GeneratedVerb } from '../scripts/grammar-pack/generate';
+import type { GeneratedVerb } from '../src/services/conjugation/generate';
 import { generate, generateControls } from './fixtures/grammarPackVerbs';
 
 const verbOf = (id: string, infinitive: string, base: string, rule: 'er-cer' | 'er-ger' | 'ir-issons' | 'er-regular') =>

@@ -2,7 +2,7 @@
 import { afterEach, expect, spyOn, test } from 'bun:test';
 import { createHash } from 'node:crypto';
 import { buildPack, publishGate, rowHash, type BuildInputs, type Reviews } from '../scripts/grammar-pack/build';
-import * as generator from '../scripts/grammar-pack/generate';
+import * as generator from '../src/services/conjugation/generate';
 import { GrammarPackSchema } from '../src/types/grammarPack';
 import { CONTROL_SPECS, generateControls, IRREGULARS } from './fixtures/grammarPackVerbs';
 import sourceJson from '../data/grammar-pack/verbs.json';

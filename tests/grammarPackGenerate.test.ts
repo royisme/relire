@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
 import { cellAt, checkControls, checkVerb } from '../scripts/grammar-pack/checks';
-import type { VerbSpec } from '../scripts/grammar-pack/generate';
-import { composeLead } from '../scripts/grammar-pack/rules';
+import type { VerbSpec } from '../src/services/conjugation/generate';
+import { composeLead } from '../src/services/conjugation/rules';
 import {
   FINITE_PERSONS,
   IMPERATIVE_PERSONS,
