@@ -55,8 +55,10 @@ const always = (stems: string[]) => () => stems;
 const when = (test: (person: Person) => boolean, yes: string[], no: string[]) => (person: Person) =>
   test(person) ? yes : no;
 const strongOnly = (strong: string, weak: string) => when((person) => STRONG.has(person), [strong], [weak]);
+// Throws when the letter is absent: a rule that cannot apply is a misfit, never a corrupted stem.
 const replaceLast = (word: string, from: string, to: string) => {
   const at = word.lastIndexOf(from);
+  if (at === -1) throw new Error(`the stem "${word}" has no "${from}" to change`);
   return word.slice(0, at) + to + word.slice(at + from.length);
 };
 

@@ -24,6 +24,8 @@ import adaptiveEn from './defaults/adaptive.en.txt?raw';
 import adaptiveZh from './defaults/adaptive.zh.txt?raw';
 import exercisesEn from './defaults/exercises.en.txt?raw';
 import exercisesZh from './defaults/exercises.zh.txt?raw';
+import conjugateEn from './defaults/conjugate.en.txt?raw';
+import conjugateZh from './defaults/conjugate.zh.txt?raw';
 
 /** The prompts the app sends. Defaults ship as text files in ./defaults and can be overridden by the user. */
 export type PromptId =
@@ -38,7 +40,8 @@ export type PromptId =
   | 'explain'
   | 'grade'
   | 'adaptive'
-  | 'exercises';
+  | 'exercises'
+  | 'conjugate';
 
 export interface PromptDefinition {
   id: PromptId;
@@ -167,6 +170,12 @@ export const PROMPTS: PromptDefinition[] = [
         'Le matin, Léa prend le train pour Lyon. Elle a rendez-vous avec une amie qu’elle n’a pas vue depuis deux ans.',
       count: '6',
     },
+  },
+  {
+    id: 'conjugate',
+    variables: ['infinitive'],
+    defaults: { en: conjugateEn, zh: conjugateZh },
+    sample: { infinitive: 'se lever' },
   },
 ];
 

@@ -47,7 +47,7 @@ export interface AudioEntry {
 
 export interface CacheEntry {
   key: string;
-  kind: 'word' | 'sentence' | 'prosody' | 'hint' | 'explanation' | 'exercises';
+  kind: 'word' | 'sentence' | 'prosody' | 'hint' | 'explanation' | 'exercises' | 'conjugation';
   value: unknown;
   createdAt: number;
 }

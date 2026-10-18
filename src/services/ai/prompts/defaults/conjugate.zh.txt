@@ -1,0 +1,61 @@
+你是一位严谨的法语语法学家。请为学习者给出法语动词“{{infinitive}}”的变位，并按下面的结构输出数据。准确性高于一切：只写你有把握的形式，使用标准的现代法语。
+
+数据的用途：应用会自己拼出主语人称代词、自反代词、命令式的连字符代词和复合过去时，并用自己的规则核对你给出的形式。所以只需给出下面要求的纯动词形式。
+
+字段（除标注“可选”外都必填）：
+- "infinitive"：动词原形，与上面给出的一致。
+- "pronominal"：原形以 "se " 或 "s’" 开头时为 true，否则为 false。
+- "aux"：复合过去时的助动词，"avoir" 或 "etre"。代词式动词一律用 "etre"。
+- "rule"：该动词遵循的变位类型。必须从下列值中选且只选一个：
+  - "er-regular"：规则的 -er 动词，没有拼写变化。
+  - "er-cer"：-cer 动词；c 在 a 或 o 之前变为 ç。
+  - "er-ger"：-ger 动词；g 在 a 或 o 之前保留 e。
+  - "er-yer-i"：-yer 动词；y 在不发音的词尾前变为 i（-ayer 动词也接受保留 y 的形式）。
+  - "er-e-grave"：词干最后一个 e 在不发音的词尾前变为 è 的 -er 动词（-er 前只有一个辅音，以及用重音符而不双写 t 的 -eter 动词）。
+  - "er-eacute-egrave"：词干最后一个 é 在现在时和虚拟式的不发音词尾前变为 è 的 -er 动词；将来时和条件式保留 é。
+  - "er-eler-double"：在不发音的词尾前双写 l 或 t 的 -eler、-eter 动词。
+  - "ir-issons"：规则的 -ir 动词，复数、未完成过去时、虚拟式和现在分词使用 -iss- 词干。
+  - "ir-sortir"：现在时单数使用短词干（词干去掉最后一个辅音）、其余使用长词干的 -ir 动词。
+  - "ir-ouvrir"：现在时使用 -er 词尾（-e、-es、-e、-ons、-ez、-ent）且过去分词不规则的 -ir 动词。
+  - "re-regular"：规则的 -re 动词；现在时词尾为 -s、-s、无词尾、-ons、-ez、-ent。
+  - "irregular"：其他所有动词，包括全部 -oir 动词和不属于以上任何类型的动词。不要把动词硬塞进它并不符合的类型。
+- "defective"（可选）：只用于第三人称单数的动词写 "impersonal"（无人称动词），只用于第三人称单数和复数的动词写 "third-person"。普通动词一律省略此字段。
+- "hAspire"（可选）：仅当原形以有气音的 h 开头时写 true。其他情况（包括哑音 h）一律省略。
+- "forms"：六个简单时态的形式，是一个对象，键为 "present"、"imparfait"、"futur"、"conditionnel"、"subjonctif" 和 "imperatif"。前五个各是一个按人称分键的对象："1sg"、"2sg"、"3sg"、"1pl"、"2pl"、"3pl"，六个人称都要有。每个人称的值是字符串数组，主要形式在前，被接受的变体在后。"imperatif" 只有 "2sg"、"1pl"、"2pl" 三个键。"defective" 动词只给出它实际存在的人称，并省略 "imperatif"。
+  - 每个字符串只写动词部分：即主语之后书写的变位动词本身，不带主语人称代词，不带 "que"，不带自反代词，也不带连字符代词，代词式动词和命令式也一样。代词式动词的命令式只写纯动词形式，不附加任何东西。
+  - 不要在 "forms" 中给出复合过去时或其他复合时态。
+- "participles"："present"（可选：现在分词；动词没有时省略）和 "past"，后者是包含 "ms"、"fs"、"mp"、"fp" 四个形式的对象（阳性单数、阴性单数、阳性复数、阴性复数）。从不变化的分词在四个位置重复同一个形式。
+- "examples"：每个时态一个自然的例句，是一个对象，键为 "passeCompose"、"present"、"imparfait"、"futur"、"conditionnel"、"subjonctif" 和 "imperatif"。每个值是含 "fr"（一个用该时态使用此动词的法语句子）和 "gloss"（它的简体中文翻译）的对象。"defective" 动词省略 "imperatif"。
+
+你写的每个法语字符串都要遵守：
+- 使用弯撇号 ’（U+2019），不要使用直撇号 '。
+- 使用预组合的带音符字母（Unicode NFC），首尾不留空格。
+- 同一个数组内不要重复同一个形式。
+
+只输出 JSON，结构如下，每个值都按上面的说明填写（这里只展示结构，不是内容）：
+{
+  "infinitive": "...",
+  "pronominal": false,
+  "aux": "avoir 或 etre",
+  "rule": "上面列出的值之一",
+  "defective": "可选",
+  "hAspire": "可选",
+  "forms": {
+    "present": { "1sg": ["..."], "2sg": ["..."], "3sg": ["..."], "1pl": ["..."], "2pl": ["..."], "3pl": ["..."] },
+    "imparfait": { "人称与 present 相同": ["..."] },
+    "futur": { "人称与 present 相同": ["..."] },
+    "conditionnel": { "人称与 present 相同": ["..."] },
+    "subjonctif": { "人称与 present 相同": ["..."] },
+    "imperatif": { "2sg": ["..."], "1pl": ["..."], "2pl": ["..."] }
+  },
+  "participles": { "present": "可选", "past": { "ms": "...", "fs": "...", "mp": "...", "fp": "..." } },
+  "examples": {
+    "passeCompose": { "fr": "...", "gloss": "..." },
+    "present": { "fr": "...", "gloss": "..." },
+    "imparfait": { "fr": "...", "gloss": "..." },
+    "futur": { "fr": "...", "gloss": "..." },
+    "conditionnel": { "fr": "...", "gloss": "..." },
+    "subjonctif": { "fr": "...", "gloss": "..." },
+    "imperatif": { "fr": "...", "gloss": "..." }
+  }
+}
