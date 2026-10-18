@@ -20,7 +20,23 @@
       "rowHash": "f306a183903149999a2c10cedd86a413c579677291e9dc6d2c766faebc791d9d",
       "agree": 38,
       "disagree": 0
+    },
+    "etre": {
+      "source": "morphalou-3.1",
+      "ranAt": "2026-10-18T21:39:29.714Z",
+      "rowHash": "44fa046ea0f7423d2232893718306981fbf70a47cb4b8fc0cc90fe402e6d448f",
+      "agree": 37,
+      "disagree": 1
     }
   },
-  "decisions": []
+  "decisions": [
+    {
+      "verbId": "etre",
+      "tense": "present",
+      "person": "3pl",
+      "ourForm": "sont",
+      "decision": "keep",
+      "note": "Extra Morphalou form, from the lefff source only; not adopted as a variant. Owner decision 2026-10-18."
+    }
+  ]
 }
