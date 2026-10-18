@@ -2,9 +2,9 @@
 import i18n from '../i18n';
 import type { ImageInput } from './ai/types';
 import type { ImportSource } from './exercises/importDraft';
+import { MAX_EXTRACT_IMAGES } from './ai/tasks';
 
 const imageTypes = ['image/png', 'image/jpeg', 'image/webp'];
-export const MAX_MATERIAL_PAGES = 3;
 
 export function validateMaterialFile(file: Pick<File, 'name' | 'type' | 'size'>): 'pdf' | 'image' {
   const pdf = file.type === 'application/pdf' || (!file.type && /\.pdf$/i.test(file.name));
@@ -32,10 +32,10 @@ export function validateMaterialPages(pages: readonly number[], count: number): 
     count < 1 ||
     count > 100 ||
     !result.length ||
-    result.length > MAX_MATERIAL_PAGES ||
+    result.length > MAX_EXTRACT_IMAGES ||
     result.some((page) => !Number.isInteger(page) || page < 1 || page > count)
   )
-    throw new Error(i18n.t('importMaterial.pageBounds'));
+    throw new Error(i18n.t('importMaterial.pageBounds', { limit: MAX_EXTRACT_IMAGES }));
   return result;
 }
 
@@ -52,31 +52,35 @@ export function parsePageSelection(value: string, count: number): number[] {
       from < 1 ||
       to < from ||
       to > count ||
-      to - from >= MAX_MATERIAL_PAGES
+      to - from >= MAX_EXTRACT_IMAGES
     )
-      throw new Error(i18n.t('importMaterial.pageBounds'));
+      throw new Error(i18n.t('importMaterial.pageBounds', { limit: MAX_EXTRACT_IMAGES }));
     for (let page = from; page <= to; page++) pages.push(page);
   }
   return validateMaterialPages(pages, count);
 }
 
-export function clipboardImage(data: {
-  items: ArrayLike<Pick<DataTransferItem, 'kind' | 'type' | 'getAsFile'>>;
-}): File | null {
-  for (const item of Array.from(data.items)) {
-    if (item.kind === 'file' && imageTypes.includes(item.type)) {
-      const file = item.getAsFile();
-      if (file) return file;
-    }
-  }
-  return null;
+/** Preserve every clipboard file, including unsupported types so selection reports the real validation error. */
+export function clipboardFiles(data: { items: ArrayLike<Pick<DataTransferItem, 'kind' | 'getAsFile'>> }): File[] {
+  return Array.from(data.items)
+    .filter((item) => item.kind === 'file')
+    .map((item) => item.getAsFile())
+    .filter((file): file is File => file !== null);
+}
+
+/** Additive intake never replaces a held PDF or silently drops an image beyond the request cap. */
+export function validateMaterialAddition(kind: 'pdf' | 'image', held: readonly ImportMaterial[]): void {
+  if (held.length && (kind === 'pdf' || held[0].source.kind === 'pdf'))
+    throw new Error(i18n.t('importMaterial.removeFirst'));
+  if (held.length >= MAX_EXTRACT_IMAGES)
+    throw new Error(i18n.t('importMaterial.imageLimit', { limit: MAX_EXTRACT_IMAGES }));
 }
 
 export interface ImportMaterial {
   /** pages starts empty; the caller records its reviewed selection in the draft's ImportSource. */
   source: ImportSource;
   pageCount: number;
-  /** 1–3 unique pages, returned in document order, ready for extractMaterial (plain base64). */
+  /** Selected pages up to the request cap, in document order, ready for extraction and previews (plain base64). */
   render(pages: readonly number[], signal: AbortSignal): Promise<ImageInput[]>;
   /** Idempotent. Cancels outstanding work and releases local data and PDF workers. */
   dispose(): Promise<void>;

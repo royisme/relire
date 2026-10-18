@@ -45,6 +45,7 @@ export function ImportArticlePage({ onCreated }: { onCreated: (article: Article)
     canChoose: !source.text.trim(),
     clear: () => {
       setDraft(null);
+      setLevel('B1');
       invalidate();
     },
   });
@@ -87,7 +88,13 @@ export function ImportArticlePage({ onCreated }: { onCreated: (article: Article)
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6 min-w-0" {...session.dropProps}>
       <PageHeader title={t('importArticle.heading')} subtitle={t('importArticle.subtitle')} />
       {!draft ? (
-        <SourceInput kind="article" source={source} page={{ name: 'importArticle' }} />
+        <SourceInput
+          kind="article"
+          source={source}
+          page={{ name: 'importArticle' }}
+          onDiscard={session.discardSource}
+          leaveOpen={session.leaveOpen}
+        />
       ) : (
         <>
           <fieldset disabled={saving} className="space-y-4 min-w-0">

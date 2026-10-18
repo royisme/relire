@@ -2,11 +2,21 @@
 import type { Page } from '@playwright/test';
 import { test, expect, overflowing } from './fixtures';
 import { materialPdf, tinyPng } from './materialPdf';
+import { importSourceChecks } from './importSourceChecks';
 
 const TRANSCRIPTION = {
   title: 'Le renard et le prince',
   text: 'Le renard dit au petit prince : « On ne voit bien qu’avec le cœur. »\n\nIl fait déjà nuit.',
 };
+
+importSourceChecks({
+  enter,
+  textLabel: 'Text to import',
+  analyze: 'Send and read',
+  task: 'transcribe',
+  answer: TRANSCRIPTION,
+  review: 'Review the article',
+});
 
 async function enter(page: Page) {
   await page.goto('/#/read');
@@ -37,7 +47,7 @@ for (const phone of [false, true]) {
     await expect(page.getByLabel('Extraction mode')).toHaveCount(0);
     await expect(page.getByText('Pasted text is not sent anywhere.')).toBeVisible();
     await page.getByLabel('Choose an image or PDF').setInputFiles(tinyPng);
-    await expect(page.getByText(/tiny.png · 1 page/)).toBeVisible();
+    await expect(page.getByRole('img', { name: 'Page 1 of tiny.png', exact: true })).toBeVisible();
     await expect(page.getByText('Recipient: Google Gemini · gemini-2.5-flash')).toBeVisible();
     expect(await overflowing(page.locator('body'))).toEqual([]);
     await page.getByRole('button', { name: 'Send and read' }).click();
@@ -103,14 +113,15 @@ test('a file and pasted text exclude each other, and neither is silently ignored
   const text = page.getByLabel('Text to import');
   const file = page.getByLabel('Choose an image or PDF');
   await file.setInputFiles(tinyPng);
-  await expect(page.getByText(/tiny.png · 1 page/)).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Page 1 of tiny.png', exact: true })).toBeVisible();
   await expect(text).toBeDisabled();
-  await page.getByRole('button', { name: 'Remove file' }).click();
+  await page.getByRole('button', { name: 'Remove image tiny.png', exact: true }).click();
   await expect(page.getByText(/tiny.png/)).toHaveCount(0);
   await expect(text).toBeEnabled();
   await text.fill('Du texte.');
   await expect(file).toBeDisabled();
-  await text.fill('');
+  await page.getByRole('button', { name: 'Clear text', exact: true }).click();
+  await expect(text).toHaveValue('');
   await expect(file).toBeEnabled();
 });
 
@@ -124,6 +135,7 @@ test('a PDF asks for pages and sends only the OCR request; a failed read shows t
     .getByLabel('Choose an image or PDF')
     .setInputFiles({ name: 'pages.pdf', mimeType: 'application/pdf', buffer: Buffer.from(materialPdf()) });
   await expect(page.getByLabel('Pages to send')).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Page 1 of pages.pdf', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Send and read' }).click();
   await expect(page.getByRole('status')).toContainText('transcribe failed');
   await expect(page.getByRole('heading', { name: 'Review the article' })).toHaveCount(0);

@@ -281,11 +281,13 @@ describe('transcribeMaterial', () => {
   test('reads page images into a title and text, one attempt, with the abort signal', async () => {
     const provider = fakeProvider(article);
     const controller = new AbortController();
-    const result = await transcribeMaterial({ images: [page, page], signal: controller.signal }, contextOf(provider));
+    const images = Array.from({ length: MAX_EXTRACT_IMAGES }, (_, index) => ({ ...page, data: `page-${index}` }));
+    const result = await transcribeMaterial({ images, signal: controller.signal }, contextOf(provider));
     expect(result).toEqual(article);
     const request = provider.requests[0];
     expectSchemaSent(request);
-    expect(request.images).toEqual([page, page]);
+    expect(request.images).toEqual(images);
+    expect(request.prompt).toContain('up to five pages');
     expect(request.signal).toBe(controller.signal);
     expect(request.singleAttempt).toBe(true);
     expect(request.prompt).toContain('Transcribe the attached images');
@@ -367,8 +369,10 @@ describe('extractMaterial', () => {
   test('sends images to a model that reads them, with the abort signal', async () => {
     const provider = fakeProvider(draftFixture);
     const controller = new AbortController();
-    await extractMaterial({ mode: 'extract', images: [page, page], signal: controller.signal }, contextOf(provider));
-    expect(provider.requests[0].images).toEqual([page, page]);
+    const images = Array.from({ length: MAX_EXTRACT_IMAGES }, (_, index) => ({ ...page, data: `page-${index}` }));
+    await extractMaterial({ mode: 'extract', images, signal: controller.signal }, contextOf(provider));
+    expect(provider.requests[0].images).toEqual(images);
+    expect(provider.requests[0].prompt).toContain('up to five pages');
     expect(provider.requests[0].signal).toBe(controller.signal);
     expect(provider.requests[0].prompt).toContain('one or more images');
   });
