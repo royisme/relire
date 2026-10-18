@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Relire",
+    "appName": "Relire Plus",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
@@ -8,7 +8,7 @@
     "retry": "Retry",
     "success": "Success",
     "error": "Error",
-    "documentTitle": "Relire - French close reading",
+    "documentTitle": "Relire Plus - French close reading",
     "done": "Done",
     "listSeparator": "; "
   },
@@ -345,10 +345,10 @@
     },
     "about": {
       "title": "About",
-      "desc": "What Relire is and where your data goes.",
-      "what": "Relire is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
+      "desc": "What Relire Plus is and where your data goes.",
+      "what": "Relire Plus is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
-      "scope": "Relire is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
+      "scope": "Relire Plus is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
       "source": "Source code on GitHub"
     },
     "strictAccents": "Strict accents",
@@ -417,7 +417,7 @@
   "pwa": {
     "title": "Install as an app",
     "chromeWay": "Chrome or Edge",
-    "chromeDesc": "Click the install icon in the address bar, or open the browser menu and choose Install Relire.",
+    "chromeDesc": "Click the install icon in the address bar, or open the browser menu and choose Install Relire Plus.",
     "safariWay": "Safari (macOS 14 or later)",
     "safariDesc": "Choose File → Add to Dock. On iPhone or iPad, use Share → Add to Home Screen.",
     "noServerWhy": "Works offline",
@@ -427,8 +427,8 @@
   "storage": {
     "loadFailed": "Could not load your data: {{msg}}",
     "saveFailed": "Your latest changes could not be saved in this browser.",
-    "upgradeBlocked": "Relire was updated. Close its other open tabs to finish, and this page will continue.",
-    "staleTab": "Relire was updated in another tab. Reload this tab to keep saving your work.",
+    "upgradeBlocked": "Relire Plus was updated. Close its other open tabs to finish, and this page will continue.",
+    "staleTab": "Relire Plus was updated in another tab. Reload this tab to keep saving your work.",
     "reload": "Reload",
     "openBackup": "Open Settings to export a backup"
   },
@@ -814,7 +814,7 @@
   "notFound": {
     "passage": "This passage is no longer available. Return to the library to choose another source.",
     "title": "This page is not here",
-    "page": "This address does not match a page in Relire.",
+    "page": "This address does not match a page in Relire Plus.",
     "article": "That article is not in your library. It may have been deleted, or the link comes from another browser.",
     "toLibrary": "Go to the library",
     "unit": "That exercise is not here. It may have been deleted, or the link comes from another browser.",

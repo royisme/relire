@@ -1,29 +1,31 @@
-# Relire — French Reading & Pronunciation Trainer
+# Relire Plus — French Reading, Pronunciation & Exercise Practice
 
-**Open-source French close-reading, shadowing and pronunciation practice for TCF Canada.**
+**Open-source French close reading, shadowing, pronunciation and exercise practice for TCF Canada.**
 
-[Try Relire online](https://royisme.github.io/relire/) · **English** · [简体中文](README.zh-CN.md)
+[Try Relire Plus online](https://royisme.github.io/relire/) · **English** · [简体中文](README.zh-CN.md)
 
-Read real French → tap a word or sentence → understand it in context → shadow the sentence → get AI pronunciation feedback.
+Read real French → tap a word or sentence → understand it in context → shadow the sentence → get AI pronunciation feedback → practise with exercises and review your mistakes.
 
-Relire runs entirely in your browser. There is no application server and no account. Bring your own Gemini API key, keep your learning data on your device, and install it as a PWA on desktop or mobile.
+Relire Plus runs entirely in your browser. There is no application server and no account. Bring your own Gemini API key, keep your learning data on your device, and install it as a PWA on desktop or mobile.
 
-**Why Relire**
+**Why Relire Plus**
 
 - Context-aware word explanations with IPA, verb tense and conjugation.
 - Sentence translation, grammar breakdown, collocations and shadowing guidance.
 - Pronunciation feedback on sounds, liaisons and intonation.
+- Exercises generated from your material, including dictation and AI-graded writing.
+- Material import from images, PDFs or text, with a mistake notebook and progress counted from real practice.
 - Spaced-repetition vocabulary review with SM-2.
 - Local-first storage and cached audio/AI results.
 - English and Simplified Chinese interfaces.
 
-> Relire focuses on reading and pronunciation practice. It is not a TCF mock-exam platform, its AI scores are estimates rather than official results, and it is not affiliated with France Éducation international or IRCC.
+> Relire Plus covers reading, pronunciation and exercise practice. It is not a TCF mock-exam platform, its AI scores are estimates rather than official results, and it is not affiliated with France Éducation international or IRCC.
 
 ## A look inside
 
 Read a French article with adjustable text size and playback speed.
 
-![French article in the Relire reader](docs/media/reader.jpg)
+![French article in the Relire Plus reader](docs/media/reader.jpg)
 
 Tap a word to see its meaning in context, IPA, pronunciation guidance and verb conjugations beside the article.
 

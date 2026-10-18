@@ -18,8 +18,8 @@ export default defineConfig(() => {
         includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
         manifest: {
           id: './',
-          name: 'Relire - French close reading',
-          short_name: 'Relire',
+          name: 'Relire Plus - French close reading',
+          short_name: 'Relire Plus',
           description:
             'Close reading for French: tap any word or sentence for an explanation, then read it aloud and get pronunciation feedback.',
           theme_color: '#F7F6F3',

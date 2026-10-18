@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Relire",
+    "appName": "Relire Plus",
     "save": "保存",
     "cancel": "取消",
     "close": "关闭",
@@ -8,7 +8,7 @@
     "retry": "重试",
     "success": "成功",
     "error": "错误",
-    "documentTitle": "Relire - 法语精读",
+    "documentTitle": "Relire Plus - 法语精读",
     "done": "完成",
     "listSeparator": "；"
   },
@@ -341,10 +341,10 @@
     },
     "about": {
       "title": "关于",
-      "desc": "Relire 是什么，数据去了哪里。",
-      "what": "Relire 是为准备 TCF Canada 的法语学习者做的精读助手：读真实的法语文章，点开任何单词或句子查看解析，并开口练习发音。",
+      "desc": "Relire Plus 是什么，数据去了哪里。",
+      "what": "Relire Plus 是为准备 TCF Canada 的法语学习者做的精读助手：读真实的法语文章，点开任何单词或句子查看解析，并开口练习发音。",
       "privacy": "没有账号，也没有应用服务器。文章、生词和录音都保存在这个浏览器里。使用 AI 功能时，文本或录音会用你自己的 Key 从这个浏览器直接发给你选择的提供方。",
-      "scope": "Relire 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
+      "scope": "Relire Plus 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
       "source": "在 GitHub 查看源代码"
     },
     "strictAccents": "严格重音符号",
@@ -413,7 +413,7 @@
   "pwa": {
     "title": "安装为应用",
     "chromeWay": "Chrome 或 Edge",
-    "chromeDesc": "点击地址栏里的安装图标，或打开浏览器菜单选择「安装 Relire」。",
+    "chromeDesc": "点击地址栏里的安装图标，或打开浏览器菜单选择「安装 Relire Plus」。",
     "safariWay": "Safari（macOS 14 及以上）",
     "safariDesc": "选择「文件 → 添加到程序坞」。iPhone 和 iPad 上用「分享 → 添加到主屏幕」。",
     "noServerWhy": "可以离线使用",
@@ -423,8 +423,8 @@
   "storage": {
     "loadFailed": "无法读取你的数据：{{msg}}",
     "saveFailed": "最新的修改没能保存到这个浏览器里。",
-    "upgradeBlocked": "Relire 已更新。请关闭其他打开的 Relire 标签页以完成更新，本页随后会继续。",
-    "staleTab": "Relire 已在另一个标签页更新。请重新加载本页，以便继续保存。",
+    "upgradeBlocked": "Relire Plus 已更新。请关闭其他打开的 Relire Plus 标签页以完成更新，本页随后会继续。",
+    "staleTab": "Relire Plus 已在另一个标签页更新。请重新加载本页，以便继续保存。",
     "reload": "重新加载",
     "openBackup": "打开设置导出备份"
   },
@@ -809,7 +809,7 @@
   "notFound": {
     "passage": "这篇短文已不可用。请返回文章库选择其他内容。",
     "title": "找不到这个页面",
-    "page": "这个地址在 Relire 里没有对应的页面。",
+    "page": "这个地址在 Relire Plus 里没有对应的页面。",
     "article": "文章库里没有这篇文章。它可能已被删除，或者链接来自另一个浏览器。",
     "toLibrary": "回到文章库",
     "unit": "找不到这组练习。它可能已被删除，或者链接来自另一个浏览器。",

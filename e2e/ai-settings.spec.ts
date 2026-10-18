@@ -402,7 +402,7 @@ test('the device engine needs no key, model or voice, and its preview speaks on 
   await expect(page.getByText('Connection and voice work.')).toBeVisible();
   await expect
     .poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken))
-    .toEqual(['Bonjour ! Bienvenue sur Relire.']);
+    .toEqual(['Bonjour ! Bienvenue sur Relire Plus.']);
   // Previewing the device voice asks no provider for anything.
   expect(ai.calls.tts).toBe(0);
 

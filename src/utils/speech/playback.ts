@@ -269,7 +269,7 @@ export function toggleSpeech(text: string, options: SpeechOptions = {}) {
 const DEVICE_RATE = 0.88;
 /** How long to wait for a browser that fills its voice list after the first frame. */
 const DEVICE_VOICE_WAIT_MS = 500;
-const TEST_PHRASE = 'Bonjour ! Bienvenue sur Relire.';
+const TEST_PHRASE = 'Bonjour ! Bienvenue sur Relire Plus.';
 
 /** The platform's French voice, or nothing when the device has none installed. */
 function frenchVoice(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice | undefined {

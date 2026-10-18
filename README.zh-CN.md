@@ -1,29 +1,31 @@
-# Relire — 法语精读与发音训练
+# Relire Plus — 法语精读、发音与练习
 
-**面向 TCF Canada 学习者的开源法语精读、影子跟读与发音训练工具。**
+**面向 TCF Canada 学习者的开源法语精读、影子跟读、发音与练习工具。**
 
-[在线体验 Relire](https://royisme.github.io/relire/) · [English](README.md) · **简体中文**
+[在线体验 Relire Plus](https://royisme.github.io/relire/) · [English](README.md) · **简体中文**
 
-读真实法语文章 → 点单词或句子 → 理解语境和语法 → 跟读 → 获得 AI 发音反馈。
+读真实法语文章 → 点单词或句子 → 理解语境和语法 → 跟读 → 获得 AI 发音反馈 → 做练习并回顾错题。
 
-Relire 完全在浏览器中运行，没有应用服务器，也不用注册账号。你自带 Gemini API Key，学习数据保存在本机，还可以把它安装成电脑或手机上的 PWA。
+Relire Plus 完全在浏览器中运行，没有应用服务器，也不用注册账号。你自带 Gemini API Key，学习数据保存在本机，还可以把它安装成电脑或手机上的 PWA。
 
-**为什么用 Relire**
+**为什么用 Relire Plus**
 
 - 单词语境释义、IPA、时态和动词变位。
 - 句子翻译、语法拆解、常见搭配和跟读指导。
 - 针对音素、联诵和语调的发音反馈。
+- 从你的材料生成练习，包括听写和 AI 批改的开放题。
+- 从图片、PDF 或文本导入材料，错题收进笔记本，进度来自真实练习。
 - 基于 SM-2 的间隔重复生词复习。
 - 本地优先存储，并缓存音频和 AI 结果。
 - 支持英文和简体中文界面。
 
-> Relire 专注阅读和发音训练，不是 TCF 模考平台。AI 打分只是估计值，不是官方成绩；项目与 France Éducation international、IRCC 没有任何关联。
+> Relire Plus 覆盖阅读、发音和练习，不是 TCF 模考平台。AI 打分只是估计值，不是官方成绩；项目与 France Éducation international、IRCC 没有任何关联。
 
 ## 界面预览
 
 阅读法语文章，按自己的习惯调整字号和朗读速度。
 
-![Relire 法语文章精读界面](docs/media/reader.zh-CN.jpg)
+![Relire Plus 法语文章精读界面](docs/media/reader.zh-CN.jpg)
 
 点击单词，在原文旁查看中文释义、音标、发音提示和动词变位。
 

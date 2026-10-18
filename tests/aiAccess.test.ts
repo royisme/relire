@@ -197,7 +197,7 @@ describe('feature execution uses AiAccess', () => {
     const fake = fakeAccess({});
     spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
     const configured = settings();
-    const phrase = 'Bonjour ! Bienvenue sur Relire.';
+    const phrase = 'Bonjour ! Bienvenue sur Relire Plus.';
     await loadSpeech(phrase, undefined, configured);
     const controller = new AbortController();
     fake.synthesize.mockImplementationOnce(async () => {
