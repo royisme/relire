@@ -1,6 +1,6 @@
 /**
  * The app's places as one tree, drawn by the sidebar (expanded or as a rail) and by the phone drawer:
- * Read (with its article import while in Read), My study (Words, Shadowing, Mistakes), Practice (with its exercise import
+ * Read (with its article import while in Read), My study (Words, Shadowing, Mistakes, Grammar), Practice (with its exercise import
  * and the units of the open unit's batch) and Progress at the top;
  * install, Settings (with its sections while on a settings page) and About at the bottom. Owns which row is current,
  * and the counts on Words (due today) and Mistakes (still unresolved); navigation itself is `Link`.

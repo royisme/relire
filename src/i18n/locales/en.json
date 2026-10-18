@@ -726,7 +726,8 @@
     "label": "My study",
     "words": "Words",
     "shadowing": "Shadowing",
-    "mistakes": "Mistakes"
+    "mistakes": "Mistakes",
+    "grammar": "Grammar"
   },
   "shadowingLog": {
     "title": "Shadowing",
@@ -1010,6 +1011,48 @@
     "keep": "Keep this set"
   },
   "conjugation": {
+    "page": {
+      "title": "Conjugation",
+      "subtitle": "Every tense of a French verb, with when to use it and how it is formed.",
+      "inputLabel": "Verb in the infinitive",
+      "button": "Conjugate",
+      "working": "Working…",
+      "empty": "Type a verb in the infinitive, such as parler or se lever, to see its tenses.",
+      "auxiliary": {
+        "avoir": "Auxiliary: avoir",
+        "etre": "Auxiliary: être"
+      },
+      "status": {
+        "pack-reviewed": {
+          "label": "Reviewed",
+          "note": "These forms come from the app’s own reviewed list; no AI was involved."
+        },
+        "rule-checked": {
+          "label": "Matches the rule (not human-reviewed)",
+          "note": "The AI’s forms agree with the rule it named. That is a check, not a review, so a consistent mistake could still pass."
+        },
+        "partly-differs": {
+          "label": "Some forms differ from the rule",
+          "note": "In the cells marked Model and Rule, the AI’s form and the rule’s form disagree; check them before you rely on them."
+        },
+        "ai-only": {
+          "label": "AI-made, not checked",
+          "note": "The AI wrote these forms and nothing here could check them, so treat them with care."
+        }
+      },
+      "model": "Model",
+      "rule": "Rule",
+      "aiOnly": "AI-made, not checked",
+      "example": "AI-made example",
+      "participles": "Participles",
+      "participle": {
+        "present": "Present participle",
+        "ms": "Past, masculine singular",
+        "fs": "Past, feminine singular",
+        "mp": "Past, masculine plural",
+        "fp": "Past, feminine plural"
+      }
+    },
     "tenses": {
       "present": {
         "name": "Present",

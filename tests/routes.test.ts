@@ -144,3 +144,28 @@ test('a missing-key request keeps its purpose and where to return', () => {
     });
   }
 });
+
+test('the Grammar tab is the Conjugation page, with an optional verb that survives the round trip', () => {
+  expect(STUDY_TABS).toEqual(['words', 'shadowing', 'mistakes', 'grammar']);
+  const bare: Route = { name: 'study', tab: 'grammar' };
+  expect(routeHref(bare)).toBe('#/study/grammar/conjugation');
+  expect(roundTrip(bare)).toEqual({ route: bare, canonical: null });
+  expect(areaOf(bare)).toBe('study');
+  expect(parseRoute('#/study/grammar')).toEqual({ route: bare, canonical: '#/study/grammar/conjugation' });
+  for (const verb of ['s’habiller', 'se lever', "s'appeler", 'éternuer']) {
+    const route: Route = { name: 'study', tab: 'grammar', verb };
+    expect(roundTrip(route)).toEqual({ route, canonical: null });
+  }
+  // The generic tab branch must not drop the verb, and an empty one is no verb.
+  expect(parseRoute('#/study/grammar?verb=parler')).toEqual({
+    route: { name: 'study', tab: 'grammar', verb: 'parler' },
+    canonical: '#/study/grammar/conjugation?verb=parler',
+  });
+  expect(parseRoute('#/study/grammar/conjugation?verb=')).toEqual({
+    route: bare,
+    canonical: '#/study/grammar/conjugation',
+  });
+  expect(parseRoute('#/study/grammar/conjugation?verb=%20').route).toEqual(bare);
+  for (const hash of ['#/study/grammar/x', '#/study/grammar/conjugation/y', '#/study/grammar//'])
+    expect(parseRoute(hash).route.name).toBe('notFound');
+});

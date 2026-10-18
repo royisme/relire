@@ -718,7 +718,8 @@
     "label": "我的学习",
     "words": "生词",
     "shadowing": "跟读",
-    "mistakes": "错题本"
+    "mistakes": "错题本",
+    "grammar": "语法"
   },
   "shadowingLog": {
     "title": "跟读本",
@@ -1002,6 +1003,48 @@
     "keep": "保留这组练习"
   },
   "conjugation": {
+    "page": {
+      "title": "变位",
+      "subtitle": "查看法语动词的各个时态，以及何时使用、如何构成。",
+      "inputLabel": "动词原形",
+      "button": "变位",
+      "working": "处理中…",
+      "empty": "输入一个动词原形，例如 parler 或 se lever，即可查看它的各个时态。",
+      "auxiliary": {
+        "avoir": "助动词：avoir",
+        "etre": "助动词：être"
+      },
+      "status": {
+        "pack-reviewed": {
+          "label": "已审核",
+          "note": "这些变位来自应用自带的已审核动词表，没有使用 AI。"
+        },
+        "rule-checked": {
+          "label": "符合规则（未经人工审核）",
+          "note": "AI 给出的变位与它所说的规则一致。这只是核对，不是审核，一致的错误仍可能通过。"
+        },
+        "partly-differs": {
+          "label": "部分形式与规则不一致",
+          "note": "在标有“模型”和“规则”的格子里，AI 的形式与规则给出的形式不同，使用前请自行核对。"
+        },
+        "ai-only": {
+          "label": "AI 生成，未核对",
+          "note": "这些变位由 AI 写出，这里无法核对，使用时请多加留意。"
+        }
+      },
+      "model": "模型",
+      "rule": "规则",
+      "aiOnly": "AI 生成，未核对",
+      "example": "AI 生成的例句",
+      "participles": "分词",
+      "participle": {
+        "present": "现在分词",
+        "ms": "过去分词，阳性单数",
+        "fs": "过去分词，阴性单数",
+        "mp": "过去分词，阳性复数",
+        "fp": "过去分词，阴性复数"
+      }
+    },
     "tenses": {
       "present": {
         "name": "现在时",

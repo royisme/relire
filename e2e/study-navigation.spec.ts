@@ -15,17 +15,20 @@ async function touchTarget(control: Locator) {
 async function studyLinks(page: Page, location: 'sidebar' | 'page', active: string) {
   const sidebar = page.locator('[data-sidebar]');
   const main = page.getByRole('main');
-  for (const name of ['Words', 'Shadowing', 'Mistakes']) {
+  for (const name of ['Words', 'Shadowing', 'Mistakes', 'Grammar']) {
     const link = page.getByRole('link', { name, exact: true });
     await expect(link).toHaveCount(1);
     await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('href', `#/study/${name.toLowerCase()}`);
+    await expect(link).toHaveAttribute(
+      'href',
+      name === 'Grammar' ? '#/study/grammar/conjugation' : `#/study/${name.toLowerCase()}`,
+    );
     await expect((location === 'sidebar' ? sidebar : main).getByRole('link', { name, exact: true })).toBeVisible();
     if (name === active) await expect(link).toHaveAttribute('aria-current', 'page');
     else await expect(link).not.toHaveAttribute('aria-current');
     await touchTarget(link);
   }
-  await expect(main.getByRole('radio', { name: /^(Words|Shadowing|Mistakes)$/ })).toHaveCount(0);
+  await expect(main.getByRole('radio', { name: /^(Words|Shadowing|Mistakes|Grammar)$/ })).toHaveCount(0);
   expect(await overflowing(page.locator('body'))).toEqual([]);
 }
 
@@ -50,6 +53,19 @@ test('expanded, collapsed and tablet study pages keep just one visible set of pa
   await studyLinks(page, 'sidebar', 'Mistakes');
   await page.setViewportSize({ width: 900, height: 800 });
   await studyLinks(page, 'page', 'Mistakes');
+});
+
+test('Grammar is a study tab whose address names the Conjugation page', async ({ page }) => {
+  await page.goto('/#/study/grammar');
+  await expect(page).toHaveURL(/#\/study\/grammar\/conjugation$/);
+  await expect(page.getByRole('heading', { name: 'Conjugation', exact: true })).toBeVisible();
+  await studyLinks(page, 'sidebar', 'Grammar');
+  await page.getByRole('link', { name: 'Words', exact: true }).click();
+  await expect(page).toHaveURL(/#\/study\/words$/);
+  await page.getByRole('link', { name: 'Grammar', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Conjugation', exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/#\/study\/words$/);
 });
 
 test('About is the final footer link, not a Settings section', async ({ page }) => {
@@ -111,6 +127,11 @@ test('phone study links stay local; the drawer has About last and no collapse co
   await expect(page).toHaveURL(/#\/study\/mistakes$/);
   await page.reload();
   await studyLinks(page, 'page', 'Mistakes');
+  await page.goBack();
+  await studyLinks(page, 'page', 'Words');
+  await page.getByRole('link', { name: 'Grammar', exact: true }).click();
+  await expect(page).toHaveURL(/#\/study\/grammar\/conjugation$/);
+  await studyLinks(page, 'page', 'Grammar');
   await page.goBack();
   await studyLinks(page, 'page', 'Words');
   await page.getByRole('button', { name: 'Menu', exact: true }).click();

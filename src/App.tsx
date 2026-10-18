@@ -491,6 +491,7 @@ export default function App() {
             {route.name === 'study' && (
               <StudyView
                 tab={route.tab}
+                verb={route.verb}
                 sectionsInSidebar={expanded}
                 mistakes={{
                   onMissingKey: requestKey,
