@@ -112,7 +112,7 @@ Each phase is shippable on its own, with e2e coverage, both locales and a CHANGE
 | 3. Practise (complete, including review fixes) | Exercise sheet with the 11 types, keyboard and character bar, hints, explanations, open-answer grading, dictation audio; article → generated unit; today's drills replaced. | E2E: each type answered right and wrong, Enter flow, reset keeps history, phone width without overflow. |
 | 4. Import (complete, including review fixes) | Image, PDF (local rendering, up to 3 pages) and text import; draft review and editing; save as exercises and/or article. | E2E with mocked extraction: edit, exclude, block on missing context, cancel, failed save keeps the draft. |
 | 5. Review loop | Mistakes in My study, accuracy by grammar area in Progress, adaptive drills, mistake → vocabulary, cross-links to the reader. | E2E: a wrong answer appears in Mistakes, its drill is generated, its word is saved. |
-| 6. Launch | The Relire Plus name across app, manifest, marketing and READMEs, additional providers, FrenchLab repository archived with a pointer here. | The name is consistent across the app, manifest, marketing and READMEs. |
+| 6. Migration and launch | The Relire Plus name across app, manifest, marketing and READMEs, additional providers, FrenchLab repository archived with a pointer here. | The name is consistent across the app, manifest, marketing and READMEs. |
 
 ## 6. Grammar taxonomy (implemented in phase 2)
 
