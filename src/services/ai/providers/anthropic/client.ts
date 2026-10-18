@@ -70,12 +70,14 @@ export const anthropicText: TextProvider = {
     }
   },
 
-  async checkKey(config: TextConfig): Promise<void> {
+  async checkKey(config: TextConfig, signal?: AbortSignal): Promise<void> {
     const key = config.apiKey?.trim();
     if (!key) throw new MissingApiKeyError();
     try {
-      await post(`${anthropicBaseUrl(config.baseUrl)}/v1/models`, { headers: anthropicHeaders(key) });
+      await post(`${anthropicBaseUrl(config.baseUrl)}/v1/models`, { headers: anthropicHeaders(key), signal });
     } catch (err) {
+      // A cancelled check is the learner's choice: never report it as a failure.
+      if (signal?.aborted) throw cancelled();
       throw new Error(errorMessage(err, key));
     }
   },

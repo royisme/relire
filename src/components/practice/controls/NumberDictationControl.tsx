@@ -3,13 +3,14 @@
  * through `utils/speech` — the clip is stored like every other, so a number is
  * synthesized once — at the learner's dictation speed, and one typed line for
  * what was heard. With "Speak after checking" on, the item is spoken again
- * once its check lands (not on every reload of an already-checked one), and a
- * remote engine only once the Practice opt-in allows automatic playback.
+ * once its check lands (not on every reload of an already-checked one): with
+ * the selected engine once the Practice opt-in allows remote synthesis, and
+ * with the device's voice otherwise.
  */
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { expectedAnswerText } from '../../../services/exercises/answer';
-import { getAppSettings, maySpeakAfterCheck } from '../../../utils/appSettings';
+import { getAppSettings, speechAfterCheck } from '../../../utils/appSettings';
 import { speakFrench } from '../../../utils/speech';
 import { SpeakButton } from '../../ui/speak-button';
 import { ExpectedBeside, UnderlineInput } from './UnderlineInput';
@@ -38,7 +39,13 @@ export function NumberDictationControl({
     if (wasChecked.current) return;
     wasChecked.current = true;
     const settings = getAppSettings();
-    if (maySpeakAfterCheck(settings)) void speakFrench(audio, { rate: settings.practiceDictationSpeed });
+    const source = speechAfterCheck(settings);
+    if (!source) return;
+    // Without the remote opt-in the replay uses the device voice: it costs nothing and synthesizes nothing.
+    void speakFrench(audio, {
+      rate: settings.practiceDictationSpeed,
+      ...(source === 'device' ? { engine: 'device' as const } : {}),
+    });
   }, [checked, audio]);
 
   return (

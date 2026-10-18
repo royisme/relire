@@ -63,6 +63,9 @@
     "progress": "第 {{current}} / {{total}} 句",
     "failed": "这一句没能播放，按播放键重试。"
   },
+  "speech": {
+    "listenFailed": "播放失败：{{msg}}"
+  },
   "wordModal": {
     "lemma": "原型",
     "otherMeanings": "其他意思：",
@@ -507,6 +510,7 @@
   "errors": {
     "badResponse": "AI 返回的内容无法解析，请重试。",
     "noAudio": "没能生成语音。",
+    "speechPlayback": "这段语音没能播放。",
     "allModelsFailed": "所有模型都失败了，请重试。",
     "invalidAnswer": "无法使用 AI 的回答：{{msg}}",
     "modelListMalformed": "服务商返回的模型列表格式有误。",

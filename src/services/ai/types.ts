@@ -90,7 +90,7 @@ export interface AiAccess {
   /** A playable clip. A `device` engine has none: it throws `DeviceVoiceError`, and playback speaks with the
    * platform's voice instead. */
   synthesize(request: { text: string; style?: string; voice?: string; signal?: AbortSignal }): Promise<Blob>;
-  checkConnection(purpose: TextPurpose): Promise<void>;
+  checkConnection(purpose: TextPurpose, signal?: AbortSignal): Promise<void>;
   listModels(purpose: AiPurpose, signal?: AbortSignal): Promise<ModelInfo[]>;
 }
 
@@ -101,8 +101,8 @@ export interface TextProvider {
   /** Only confirmed incompatibility blocks a request; unknown models reach the provider. */
   imageInputCapability(model: string): Capability;
   generateJson<T>(request: JsonRequest, config: TextConfig): Promise<T>;
-  /** Makes one tiny request so a pasted key can be checked before it is saved. */
-  checkKey(config: TextConfig): Promise<void>;
+  /** Makes one tiny request so a pasted key can be checked before it is saved. The signal cancels it. */
+  checkKey(config: TextConfig, signal?: AbortSignal): Promise<void>;
 }
 
 /** Turns text into a playable clip (WAV from Gemini, MP3 from Fish Audio). */

@@ -81,10 +81,10 @@ export function createByokAccess(settings: AppSettings): AiAccess {
       // A device engine throws `DeviceVoiceError` here: it speaks directly and has no clip to return.
       return provider.synthesize(request, { ...speechConfig(), voice: voice || snapshot.speechVoice });
     },
-    checkConnection(purpose) {
+    checkConnection(purpose, signal) {
       const provider = providerFor(purpose).text;
       if (!provider) throw new Error(i18n.t('errors.purposeUnavailable'));
-      return provider.checkKey(textConfig(purpose));
+      return provider.checkKey(textConfig(purpose), signal);
     },
     listModels(purpose, signal) {
       const provider = providerFor(purpose);

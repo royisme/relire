@@ -26,6 +26,137 @@ const modelField = (page: Page) => page.getByLabel('Model', { exact: true });
 const keyField = (page: Page) => page.getByPlaceholder('Paste your key here');
 const saveButton = (page: Page) => page.getByRole('button', { name: 'Save', exact: true });
 
+/** Records the audio elements the app creates, so a test can see which are paused. */
+async function recordAudios(page: Page) {
+  await page.addInitScript(() => {
+    const audios: HTMLAudioElement[] = [];
+    (window as unknown as { audios: HTMLAudioElement[] }).audios = audios;
+    const real = window.Audio;
+    window.Audio = class extends real {
+      constructor(src?: string) {
+        super(src);
+        audios.push(this);
+      }
+    } as typeof Audio;
+  });
+}
+/** The paused state of every audio element the app created, in order (elements cannot cross the bridge). */
+const pausedAudios = (page: Page) =>
+  page.evaluate(() => (window as unknown as { audios: HTMLAudioElement[] }).audios.map((audio) => audio.paused));
+
+test('a check that lands after its key was edited never answers for the new one', async ({ page, ai }) => {
+  void ai;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const sentKeys: string[] = [];
+  await page.route('**/api.openai.com/v1/models', async (route) => {
+    sentKeys.push(route.request().headers()['authorization'] ?? '');
+    await gate;
+    try {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: [] }) });
+    } catch {
+      // The key edit cancelled the request; nothing to answer.
+    }
+  });
+  await page.goto('/#/settings/ai/text');
+  await page.getByLabel('Provider').selectOption('openai');
+  await keyField(page).fill('KEY-A');
+  await modelField(page).fill('gpt-4o-mini');
+  const check = page.getByRole('button', { name: /check/i });
+  await check.click();
+  await expect(check).toBeDisabled(); // Checking…
+  await keyField(page).fill('KEY-B');
+  release();
+  // The edit cancelled the check: no stale success or failure for the key on screen, button free again.
+  await expect(check).toBeEnabled();
+  await expect(page.getByText('The key works.')).toHaveCount(0);
+  await expect(page.getByText(/Key check failed/)).toHaveCount(0);
+  // The current key can be checked again, and its own answer lands.
+  await check.click();
+  await expect(page.getByText('The key works.')).toBeVisible();
+  expect(sentKeys.at(-1)).toContain('KEY-B');
+});
+
+test('a preview sound stops with its request when Settings is left', async ({ page, ai }) => {
+  void ai;
+  ai.ttsDelayMs = 0;
+  await recordAudios(page);
+  await page.goto('/#/settings/ai/speech');
+  await page.getByRole('button', { name: 'Preview voice' }).click();
+  await expect.poll(() => pausedAudios(page)).toHaveLength(1);
+  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await expect.poll(async () => (await pausedAudios(page))[0]).toBe(true);
+});
+
+test('starting a preview again interrupts the sound of the one before it', async ({ page, ai }) => {
+  void ai;
+  ai.ttsDelayMs = 0;
+  await recordAudios(page);
+  await page.goto('/#/settings/ai/speech');
+  const preview = page.getByRole('button', { name: 'Preview voice' });
+  await preview.click();
+  await expect.poll(() => pausedAudios(page)).toHaveLength(1);
+  await preview.click();
+  await expect.poll(() => pausedAudios(page)).toHaveLength(2);
+  await expect.poll(async () => (await pausedAudios(page))[0]).toBe(true);
+  await expect.poll(async () => (await pausedAudios(page))[1]).toBe(false);
+});
+
+test('leaving Settings cancels a device preview that is still speaking', async ({ page, ai }) => {
+  void ai;
+  // A stand-in platform voice that speaks until something cancels it.
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    let cancelled = 0;
+    const standin = window as unknown as { spoken: string[]; cancelled: number };
+    standin.spoken = spoken;
+    standin.cancelled = cancelled;
+    const voices = [{ lang: 'fr-FR', name: 'Test French voice', default: true }];
+    const synthesis = {
+      speaking: false,
+      paused: false,
+      getVoices: () => voices,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      cancel: () => {
+        cancelled++;
+        standin.cancelled = cancelled;
+      },
+      pause: () => {},
+      resume: () => {},
+      speak: (utterance: { text: string }) => {
+        spoken.push(utterance.text);
+      },
+    };
+    Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: synthesis });
+    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+      text: string;
+      lang = '';
+      rate = 1;
+      voice: unknown = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+  });
+  const counter = (page: Page) => page.evaluate(() => (window as unknown as { cancelled: number }).cancelled);
+  await page.goto('/#/settings/ai/speech');
+  await page.getByLabel('Provider').selectOption('device');
+  // An unsaved draft would ask before leaving; save so leaving Settings really happens.
+  await saveButton(page).click();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Preview voice' }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toHaveLength(1);
+  // The preview's own setup cancels once; leaving the page must cancel the speaking preview itself.
+  const before = await counter(page);
+  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await expect.poll(() => counter(page)).toBeGreaterThan(before);
+});
+
 test('AI services is one Settings destination with three real purpose links', async ({ page, ai }) => {
   void ai;
   await page.goto('/#/settings/ai/text');

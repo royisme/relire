@@ -1,6 +1,6 @@
 /** BYOK settings keep independent purpose selections and custom model IDs, never a legacy inheritance rule. */
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { getApiKey, getAppSettings, getBaseUrl, maySpeakAfterCheck, saveAppSettings } from '../src/utils/appSettings';
+import { getApiKey, getAppSettings, getBaseUrl, saveAppSettings, speechAfterCheck } from '../src/utils/appSettings';
 
 const storage = new Map<string, string>();
 const original = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
@@ -154,16 +154,19 @@ describe('appSettings BYOK configuration', () => {
     expect(saveAppSettings({ speechChoices: { gemini: 'nope' } as never }).speechChoices).toEqual({});
   });
 
-  test('a check speaks automatically only with the dictation preference and, for a remote engine, the opt-in', () => {
+  test('a check replays with the selected engine only after the remote opt-in, else with the device voice', () => {
     const base = getAppSettings();
-    // Gemini is a remote engine: without the opt-in, a checked dictation stays silent.
-    expect(maySpeakAfterCheck({ ...base, practiceSpeakAfterCheck: true })).toBe(false);
-    expect(maySpeakAfterCheck({ ...base, practiceSpeakAfterCheck: true, practiceRemoteAutoSpeak: true })).toBe(true);
-    // The opt-in never overrides the dictation preference itself.
-    expect(maySpeakAfterCheck({ ...base, practiceSpeakAfterCheck: false, practiceRemoteAutoSpeak: true })).toBe(false);
-    // The device voice costs nothing, so it may speak without the opt-in.
-    expect(maySpeakAfterCheck({ ...base, speechProvider: 'device', practiceSpeakAfterCheck: true })).toBe(true);
-    expect(maySpeakAfterCheck({ ...base, speechProvider: 'device', practiceSpeakAfterCheck: false })).toBe(false);
+    // Gemini is a remote engine: without the opt-in, a checked dictation replays with the device voice,
+    // at no cost and without synthesizing or storing anything remotely.
+    expect(speechAfterCheck({ ...base, practiceSpeakAfterCheck: true })).toBe('device');
+    expect(speechAfterCheck({ ...base, practiceSpeakAfterCheck: true, practiceRemoteAutoSpeak: true })).toBe(
+      'selected',
+    );
+    // The opt-in never overrides the dictation preference itself: master off, nothing speaks.
+    expect(speechAfterCheck({ ...base, practiceSpeakAfterCheck: false, practiceRemoteAutoSpeak: true })).toBe(null);
+    // The device voice costs nothing, so the selected engine speaks without the opt-in.
+    expect(speechAfterCheck({ ...base, speechProvider: 'device', practiceSpeakAfterCheck: true })).toBe('selected');
+    expect(speechAfterCheck({ ...base, speechProvider: 'device', practiceSpeakAfterCheck: false })).toBe(null);
   });
 
   test('an existing install has no endpoint, and a restored backup keeps the endpoint but never a key', () => {

@@ -189,15 +189,65 @@ test('Enter places and takes back a tile', async ({ page }) => {
   await expect(sentence).toContainText('Build the sentence with the tiles below.');
 });
 
-test('speak after checking replays the dictation once the remote opt-in is on', async ({ page, ai }) => {
-  // Written straight into storage: opening the unit only changes the hash, so an init script would not run.
-  await page.evaluate(() => {
-    const raw: Record<string, unknown> = JSON.parse(localStorage.getItem('relire_app_settings_v1') || '{}');
-    raw.practiceSpeakAfterCheck = true;
-    // A remote engine synthesizes only after this explicit opt-in, so the replay needs both.
-    raw.practiceRemoteAutoSpeak = true;
-    localStorage.setItem('relire_app_settings_v1', JSON.stringify(raw));
+/** A stand-in platform voice that records what it was asked to speak (the provider stays untouched).
+ *  Drops the page first: a hash-only move from here on is a same-document navigation, which would not
+ *  run a newly added init script. */
+async function mockDeviceVoice(page: Page) {
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    (window as unknown as { spoken: string[] }).spoken = spoken;
+    const voices = [{ lang: 'fr-FR', name: 'Test French voice', default: true }];
+    const synthesis = {
+      speaking: false,
+      paused: false,
+      getVoices: () => voices,
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      cancel: () => {},
+      pause: () => {},
+      resume: () => {},
+      speak: (utterance: { text: string; onend: (() => void) | null }) => {
+        spoken.push(utterance.text);
+        setTimeout(() => utterance.onend?.(), 0);
+      },
+    };
+    Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: synthesis });
+    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+      text: string;
+      lang = '';
+      rate = 1;
+      voice: unknown = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
   });
+  await page.goto('about:blank');
+}
+
+const spokenByDevice = (page: Page) => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken);
+
+/** Writes the automatic-playback preferences straight into storage, before the sheet opens. */
+const setAutoSpeak = (page: Page, speak: boolean, remote: boolean, provider = 'gemini') =>
+  page.evaluate(
+    ({ speak, remote, provider }) => {
+      const raw: Record<string, unknown> = JSON.parse(localStorage.getItem('relire_app_settings_v1') || '{}');
+      raw.practiceSpeakAfterCheck = speak;
+      raw.practiceRemoteAutoSpeak = remote;
+      raw.speechProvider = provider;
+      if (provider === 'device') {
+        raw.speechModel = '';
+        raw.speechVoice = '';
+      }
+      localStorage.setItem('relire_app_settings_v1', JSON.stringify(raw));
+    },
+    { speak, remote, provider },
+  );
+
+test('speak after checking replays the dictation once the remote opt-in is on', async ({ page, ai }) => {
+  await setAutoSpeak(page, true, true);
   await openUnit(page, 'unit-number-dictation', 'Les nombres');
   const one = row(page, 'Écoutez et écrivez').first();
   await one.getByRole('textbox').fill('cent mille');
@@ -206,25 +256,59 @@ test('speak after checking replays the dictation once the remote opt-in is on', 
   await expect.poll(() => ai.calls.tts).toBe(1);
 });
 
-test('a check stays silent with the remote opt-in off, whatever the dictation preference says', async ({
-  page,
-  ai,
-}) => {
-  await page.evaluate(() => {
-    const raw: Record<string, unknown> = JSON.parse(localStorage.getItem('relire_app_settings_v1') || '{}');
-    raw.practiceSpeakAfterCheck = true;
-    raw.practiceRemoteAutoSpeak = false;
-    localStorage.setItem('relire_app_settings_v1', JSON.stringify(raw));
-  });
+test('with the remote opt-in off, a check replays the dictation with the device voice', async ({ page, ai }) => {
+  await setAutoSpeak(page, true, false);
+  await mockDeviceVoice(page);
   await openUnit(page, 'unit-number-dictation', 'Les nombres');
   const one = row(page, 'Écoutez et écrivez').first();
   await one.getByRole('textbox').fill('cent mille');
   await checkButton(one).click();
   await expect(one.getByText('Correct', { exact: true })).toBeAttached();
-  // No remote request follows the check, and no clip was stored for it.
-  await page.waitForTimeout(400);
+  // The device voice says the number; the provider synthesized nothing and no clip was stored.
+  await expect.poll(() => spokenByDevice(page)).toEqual(['cent mille']);
+  await page.waitForTimeout(300);
   expect(ai.calls.tts).toBe(0);
   expect(await audioClips(page)).toBe(0);
+});
+
+test('with the master preference off, a check says nothing at all', async ({ page, ai }) => {
+  await setAutoSpeak(page, false, true);
+  await mockDeviceVoice(page);
+  await openUnit(page, 'unit-number-dictation', 'Les nombres');
+  const one = row(page, 'Écoutez et écrivez').first();
+  await one.getByRole('textbox').fill('cent mille');
+  await checkButton(one).click();
+  await expect(one.getByText('Correct', { exact: true })).toBeAttached();
+  await page.waitForTimeout(300);
+  expect(await spokenByDevice(page)).toEqual([]);
+  expect(ai.calls.tts).toBe(0);
+  expect(await audioClips(page)).toBe(0);
+});
+
+test('the device engine replays after a check with no opt-in at all', async ({ page, ai }) => {
+  await setAutoSpeak(page, true, false, 'device');
+  await mockDeviceVoice(page);
+  await openUnit(page, 'unit-number-dictation', 'Les nombres');
+  const one = row(page, 'Écoutez et écrivez').first();
+  await one.getByRole('textbox').fill('cent mille');
+  await checkButton(one).click();
+  await expect(one.getByText('Correct', { exact: true })).toBeAttached();
+  await expect.poll(() => spokenByDevice(page)).toEqual(['cent mille']);
+  await page.waitForTimeout(300);
+  expect(ai.calls.tts).toBe(0);
+});
+
+test('a failed remote Listen shows its real reason and never speaks the device voice', async ({ page, ai }) => {
+  await mockDeviceVoice(page);
+  ai.fail(['tts']);
+  await openUnit(page, 'unit-number-dictation', 'Les nombres');
+  const one = row(page, 'Écoutez et écrivez').first();
+  await one.getByRole('button', { name: 'Listen' }).click();
+  // The control itself reports the provider's real error, at its fixed size, and no engine is substituted.
+  await expect(one.getByRole('alert')).toContainText('Listen failed');
+  await expect(one.getByRole('alert')).toContainText('tts failed');
+  await page.waitForTimeout(300);
+  expect(await spokenByDevice(page)).toEqual([]);
 });
 
 test('the Practice section saves its own slice and strict accents changes the verdict', async ({ page }) => {

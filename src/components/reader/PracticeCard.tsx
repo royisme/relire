@@ -19,7 +19,7 @@ import { cancelCapture } from '../../utils/speech/recorder';
 import { stopSpeech } from '../../utils/speech';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
-import { SpeakIcon, useSpeechPhase } from '../ui/speak-button';
+import { SpeakIcon, useSpeechFailure, useSpeechPhase } from '../ui/speak-button';
 import { Waveform } from './Waveform';
 import { panelDanger, panelGhost, panelOutline, panelPrimary, panelSurface } from './panel';
 
@@ -47,6 +47,8 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
   const floating = useFloatingCard(movable, section);
   const referencePhase = useSpeechPhase(card.target?.text ?? '');
   const latestPhase = useSpeechPhase(card.latest ? takeKey(card.latest) : '');
+  // The real reason a reference clip could not play, on its control (recordings never fall back either).
+  const referenceFailure = useSpeechFailure(card.target?.text ?? '');
   const recording = card.phase === 'recording';
   const busy = card.phase === 'acquiring' || recording || card.phase === 'saving';
   const ready = card.phase === 'ready';
@@ -261,9 +263,17 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
           disabled={!ready}
           onClick={() => (referencePhase === 'idle' ? card.playReference() : stopSpeech())}
           aria-label={t('practiceCard.reference')}
-          title={t('practiceCard.reference')}
+          title={
+            referencePhase === 'idle' && referenceFailure
+              ? t('speech.listenFailed', { msg: referenceFailure })
+              : t('practiceCard.reference')
+          }
         >
-          <SpeakIcon phase={referencePhase} className="w-4 h-4" />
+          <SpeakIcon
+            phase={referencePhase}
+            failed={referencePhase === 'idle' && referenceFailure !== null}
+            className={cn('w-4 h-4', referencePhase === 'idle' && referenceFailure && 'text-panel-bad-ink')}
+          />
           <span className="hidden sm:inline">{t('practiceCard.reference')}</span>
         </Button>
         {recording ? (

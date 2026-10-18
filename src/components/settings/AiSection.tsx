@@ -57,6 +57,7 @@ export function AiSection({
   const [checking, setChecking] = useState(false);
   const [checked, setChecked] = useState<{ ok: boolean; message: string } | null>(null);
   const checkToken = useRef(0);
+  const checkRequest = useRef<AbortController | null>(null);
 
   const providerId = draft[`${purpose}Provider`];
   const provider = getProvider(providerId);
@@ -81,17 +82,28 @@ export function AiSection({
       purposes: others.map((p) => t(`aiSettings.purposes.${p}`)).join(', '),
     });
 
-  // A check that finishes after the page is left, or after a newer one started, is ignored.
+  // A check that finishes after the page or purpose is left is ignored, cancelled with its request (so a
+  // preview sound stops with it) and cannot leave the button stuck in its checking state.
   useEffect(
     () => () => {
-      checkToken.current++;
+      invalidateCheck();
     },
     [],
   );
 
+  /** Drops a check in flight: its result can no longer land, its request is cancelled, the button is free. */
+  function invalidateCheck() {
+    checkToken.current++;
+    checkRequest.current?.abort();
+    checkRequest.current = null;
+    setChecking(false);
+  }
+
   const edit = (next: AppSettings) => {
     clear();
     setChecked(null);
+    // A result about the previous provider, key, endpoint, model or voice must never answer for the new one.
+    invalidateCheck();
     onChange(next);
   };
   // Changing the provider resets only this purpose's model (and the speech voice); other purposes stay.
@@ -133,12 +145,15 @@ export function AiSection({
   const check = async () => {
     if ((needsKey && !key.trim()) || checking || !modelReady) return;
     const token = ++checkToken.current;
+    checkRequest.current?.abort();
+    const request = new AbortController();
+    checkRequest.current = request;
     setChecking(true);
     setChecked(null);
     clear();
     try {
-      if (purpose === 'speech') await testSpeech(draft);
-      else await getAiAccess(draft).checkConnection(purpose);
+      if (purpose === 'speech') await testSpeech(draft, request.signal);
+      else await getAiAccess(draft).checkConnection(purpose, request.signal);
       if (token === checkToken.current)
         setChecked({
           ok: true,

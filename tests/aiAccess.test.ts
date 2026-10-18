@@ -94,8 +94,10 @@ describe('BYOK access', () => {
     const check = spyOn(geminiText, 'checkKey').mockResolvedValue();
     const configured = settings();
     const access = accessModule.createByokAccess(configured);
-    await access.checkConnection('ocr');
-    expect(check).toHaveBeenCalledWith({ apiKey: 'fixture-key', model: 'custom-ocr' });
+    const controller = new AbortController();
+    await access.checkConnection('ocr', controller.signal);
+    // The signal travels to the provider, so an edited setting can cancel a check that is already running.
+    expect(check).toHaveBeenCalledWith({ apiKey: 'fixture-key', model: 'custom-ocr' }, controller.signal);
     expect(configured.textModel).toBe('custom-text');
     expect(configured.ocrModel).toBe('custom-ocr');
   });
@@ -228,11 +230,14 @@ describe('feature execution uses AiAccess', () => {
       { apiKey: 'fixture-key', model: 'gpt-4o-mini', baseUrl: 'https://api.deepseek.com/v1' },
     );
     await access.checkConnection('ocr');
-    expect(check).toHaveBeenCalledWith({
-      apiKey: 'fixture-key',
-      model: 'gpt-4o',
-      baseUrl: 'https://api.deepseek.com/v1',
-    });
+    expect(check).toHaveBeenCalledWith(
+      {
+        apiKey: 'fixture-key',
+        model: 'gpt-4o',
+        baseUrl: 'https://api.deepseek.com/v1',
+      },
+      undefined,
+    );
     await access.listModels('text');
     expect(list).toHaveBeenCalledWith('fixture-key', undefined, 'https://api.deepseek.com/v1');
 

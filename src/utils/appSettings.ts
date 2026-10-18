@@ -192,10 +192,14 @@ export const hasSpeechKey = (settings: AppSettings = getAppSettings()) => keyRea
 export const practiceGrading = (): GradingOptions => ({ strictAccents: getAppSettings().practiceStrictAccents });
 
 /**
- * Whether something may speak by itself (a dictation item after its check). Automatic playback may synthesize
- * remotely only after the learner's explicit opt-in, because it spends their provider's quota; the device voice
- * costs nothing and needs no consent.
+ * Whether something may speak by itself (a dictation item after its check), and with which engine: the
+ * Practice preference is the master switch; on, the selected engine speaks once the learner has opted
+ * into remote synthesis (or when that engine is the device voice itself), and with the device voice
+ * otherwise, because it costs nothing and synthesizes nothing. Explicit Listen always uses the selection.
  */
-export const maySpeakAfterCheck = (settings: AppSettings = getAppSettings()) =>
-  settings.practiceSpeakAfterCheck &&
-  (settings.practiceRemoteAutoSpeak || getProvider(settings.speechProvider).info.speech?.device === true);
+export const speechAfterCheck = (settings: AppSettings = getAppSettings()): 'selected' | 'device' | null =>
+  !settings.practiceSpeakAfterCheck
+    ? null
+    : settings.practiceRemoteAutoSpeak || getProvider(settings.speechProvider).info.speech?.device === true
+      ? 'selected'
+      : 'device';

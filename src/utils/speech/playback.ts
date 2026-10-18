@@ -1,16 +1,18 @@
 import type { AppSettings } from '../appSettings';
 import i18n from '../../i18n';
 import { getAiAccess } from '../../services/ai/access';
-import { DeviceVoiceError } from '../../services/ai/errors';
+import { DeviceVoiceError, errorMessage } from '../../services/ai/errors';
 import { loadSpeech } from './clips';
-import { getSpeechState, setSpeechState, speechKey } from './state';
+import { getSpeechFailure, getSpeechState, setSpeechFailure, setSpeechState, speechKey } from './state';
 
 /**
- * Playback of French speech (stored or synthesized clips, browser voice as a fallback) and its shared rate.
+ * Playback of French speech (stored or synthesized clips, the device engine's own voice) and its shared rate.
  * Progress (loading, playing, paused) is published through `state.ts`; UI reads it from there. `onSettled`
  * chains clips: `sequence.ts` for an article, the practice card for reference → recording.
  * The learner's own recordings play through the same machinery (`playRecording`), so only one sound
- * plays at a time and every button shows the right state.
+ * plays at a time and every button shows the right state. A remote engine that fails settles `failed`
+ * with its real reason on the control that started it; the device voice is an engine choice, never a
+ * silent substitute for one.
  */
 
 export type SpeechOutcome = 'ended' | 'interrupted' | 'failed';
@@ -19,6 +21,9 @@ export interface SpeechOptions {
   rate?: number; // 0.5 - 1.5
   /** Defaults to the voice in Settings. */
   voice?: string;
+  /** Speaks with the device's own voice whatever engine is selected: the free automatic replay of a
+   * checked dictation when the learner has not allowed remote synthesis. Nothing is synthesized or stored. */
+  engine?: 'device';
   /**
    * Called once when this clip is done: it played to the end, it was stopped or replaced by another clip,
    * or neither the provider nor the browser voice could play it. Used to chain clips (`sequence.ts`).
@@ -88,7 +93,16 @@ export function stopSpeech() {
   setSpeechState('idle');
 }
 
-/** Plays French speech: a stored clip if there is one, else the speech provider, else the browser voice. */
+/** A clip that could not be played settles failed and puts its real reason on the control that started it. */
+function failSpeech(key: string, message: string) {
+  setSpeechFailure({ key, message });
+  setSpeechState('idle');
+  settleWith('failed');
+}
+
+/** Plays French speech: a stored clip if there is one, else the speech provider; the device engine speaks
+ *  with the platform's voice. A failure of either engine settles `failed` with its real reason — one engine
+ *  is never silently substituted for the other. */
 export async function speakFrench(text: string, options: SpeechOptions = {}) {
   const cleanText = text.trim();
   if (!cleanText) return;
@@ -99,11 +113,15 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
   const isCurrent = () => id === requestId;
   const key = speechKey(cleanText);
   settle = options.onSettled ?? null;
+  // Retrying this clip is the one thing that clears its failure.
+  if (getSpeechFailure()?.key === key) setSpeechFailure(null);
   setSpeechState('loading', key);
 
   let audioUrl: string | null = null;
 
   try {
+    // An explicit device source speaks directly: no clip, no synthesis, nothing stored.
+    if (options.engine === 'device') return deviceSpeech(cleanText, key, options, isCurrent);
     const clip = await loadSpeech(cleanText, options.voice);
     if (!isCurrent()) return; // stopped or replaced while loading; the clip is already stored for next time
 
@@ -134,9 +152,9 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
 
     audio.onerror = (e) => {
       if (!isCurrent()) return;
-      console.warn('Audio playback error, falling back to browser speech:', e);
       currentAudio = null;
-      fallbackBrowserSpeech(cleanText, key, options, isCurrent);
+      console.warn('Audio playback error:', e);
+      failSpeech(key, i18n.t('errors.speechPlayback'));
     };
 
     // Paused while loading: keep the clip ready; resumeSpeech starts it.
@@ -154,15 +172,14 @@ export async function speakFrench(text: string, options: SpeechOptions = {}) {
     // play() rejects when it is paused before it starts; that is a pause, not a failure.
     if (paused && currentAudio) return;
     // A device engine is a choice, not a provider failure: it speaks with the platform's voice below.
-    if (!(err instanceof DeviceVoiceError))
-      console.warn('Speech provider failed, falling back to browser speech:', err);
+    if (err instanceof DeviceVoiceError) return deviceSpeech(cleanText, key, options, isCurrent);
     // play() can reject after the URL was created; do not leak it.
     if (audioUrl) {
       if (currentUrl === audioUrl) releaseUrl();
       else URL.revokeObjectURL(audioUrl);
       currentAudio = null;
     }
-    fallbackBrowserSpeech(cleanText, key, options, isCurrent);
+    failSpeech(key, errorMessage(err));
   }
 }
 
@@ -293,19 +310,29 @@ async function deviceVoices(): Promise<SpeechSynthesisVoice[]> {
   });
 }
 
-/** Speaks with the device's own voice: the fallback when a provider fails, and the device engine's playback. */
-function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions, isCurrent: () => boolean) {
+/**
+ * Speaks with the device's own voice: the playback path of the device engine (chosen in Settings) and of
+ * an explicit device source. It is an engine, not a fallback: with no platform speech or no French voice
+ * it fails honestly instead of substituting another engine.
+ */
+async function deviceSpeech(text: string, key: string, options: SpeechOptions, isCurrent: () => boolean) {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-    setSpeechState('idle');
-    settleWith('failed');
+    failSpeech(key, i18n.t('errors.deviceVoiceUnavailable'));
+    return;
+  }
+  const voice = frenchVoice(await deviceVoices());
+  if (!isCurrent()) return; // stopped or replaced while the voice list was loading
+  if (!voice) {
+    failSpeech(key, i18n.t('errors.deviceVoiceNoFrench'));
     return;
   }
 
-  const utterance = deviceUtterance(text, options.rate ?? DEVICE_RATE);
+  const utterance = deviceUtterance(text, options.rate ?? DEVICE_RATE, voice);
 
   // cancel() reports the old utterance as an error; only the current request may change the state.
   const finish = (outcome: SpeechOutcome) => {
     if (!isCurrent()) return;
+    if (outcome === 'failed') setSpeechFailure({ key, message: i18n.t('errors.deviceVoiceFailed') });
     setSpeechState('idle');
     settleWith(outcome);
   };
@@ -313,7 +340,7 @@ function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions
   utterance.onerror = () => finish('failed');
 
   window.speechSynthesis.speak(utterance);
-  // Paused while the provider was failing: the browser voice waits too.
+  // Paused while the engine was starting: the browser voice waits too.
   if (paused) {
     window.speechSynthesis.pause();
     setSpeechState('paused', key);
@@ -323,11 +350,14 @@ function fallbackBrowserSpeech(text: string, key: string, options: SpeechOptions
 }
 
 /** The device voice's own check: speaks the test phrase, or reports that this device cannot speak French. */
-async function previewDeviceVoice(signal?: AbortSignal): Promise<void> {
+async function previewDeviceVoice(signal?: AbortSignal, isCurrent: () => boolean = () => true): Promise<void> {
   if (typeof window === 'undefined' || !('speechSynthesis' in window))
     throw new Error(i18n.t('errors.deviceVoiceUnavailable'));
   const voice = frenchVoice(await deviceVoices());
   if (!voice) throw new Error(i18n.t('errors.deviceVoiceNoFrench'));
+  signal?.throwIfAborted();
+  // Another sound took over the single slot while the voice list loaded: the preview is moot, not failed.
+  if (!isCurrent()) return;
   const synth = window.speechSynthesis;
   synth.cancel();
   const utterance = deviceUtterance(TEST_PHRASE, DEVICE_RATE, voice);
@@ -342,26 +372,40 @@ async function previewDeviceVoice(signal?: AbortSignal): Promise<void> {
       end(new DOMException('Aborted', 'AbortError'));
     };
     utterance.onend = () => end();
-    utterance.onerror = () => end(new Error(i18n.t('errors.deviceVoiceFailed')));
+    // Another sound interrupting the preview is a cancellation, not a failure to report.
+    utterance.onerror = () => (isCurrent() ? end(new Error(i18n.t('errors.deviceVoiceFailed'))) : end());
     signal?.addEventListener('abort', abort, { once: true });
     synth.speak(utterance);
   });
 }
 
 /**
- * Plays a short phrase with the given (possibly unsaved) settings and reports
- * failure, unlike speakFrench which quietly falls back to the browser voice.
+ * Plays a short phrase with the given (possibly unsaved) settings and reports failure; a cached clip
+ * cannot stand in for a check. The preview is a sound like any other: it interrupts whatever plays, is
+ * interrupted by any new playback or stop, and is cancelled with its request when Settings is left.
  * A device engine is its own check: it reports whether this device has a French voice.
  */
 export async function testSpeech(settings: AppSettings, signal?: AbortSignal): Promise<void> {
   const access = getAiAccess(settings);
-  if (access.selection('speech').device) return previewDeviceVoice(signal);
+  const device = access.selection('speech').device;
+  beforePlay?.();
+  halt();
+  const id = requestId;
+  const isCurrent = () => id === requestId;
+  if (device) return previewDeviceVoice(signal, isCurrent);
   // A cached clip cannot verify the current draft key or model.
   const clip = await access.synthesize({ text: TEST_PHRASE, signal });
   signal?.throwIfAborted();
+  // Superseded by other playback while the clip was synthesized: nothing plays, and no sound overlaps.
+  if (!isCurrent()) return;
   const url = URL.createObjectURL(clip);
   const audio = new Audio(url);
+  // Registered as the current sound, so stopSpeech and any new playback interrupt the preview too.
+  currentAudio = audio;
+  currentUrl = url;
   const release = () => {
+    if (currentUrl === url) currentUrl = null;
+    if (currentAudio === audio) currentAudio = null;
     URL.revokeObjectURL(url);
     signal?.removeEventListener('abort', abort);
   };

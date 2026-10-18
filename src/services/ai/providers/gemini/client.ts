@@ -75,11 +75,17 @@ export const geminiText: TextProvider = {
     throw new Error(lastError ? errorMessage(lastError, config.apiKey) : i18n.t('errors.allModelsFailed'));
   },
 
-  async checkKey(config: TextConfig): Promise<void> {
+  async checkKey(config: TextConfig, signal?: AbortSignal): Promise<void> {
     const ai = geminiClient(config.apiKey);
     try {
-      await ai.models.generateContent({ model: config.model || FALLBACK_MODELS[0], contents: 'Reply with OK.' });
+      await ai.models.generateContent({
+        model: config.model || FALLBACK_MODELS[0],
+        contents: 'Reply with OK.',
+        config: signal ? { abortSignal: signal } : undefined,
+      });
     } catch (err) {
+      // A cancelled check is the learner's choice: never report it as a failure.
+      if (signal?.aborted) throw cancelled();
       throw new Error(errorMessage(err, config.apiKey));
     }
   },
