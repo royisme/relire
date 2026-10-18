@@ -31,6 +31,7 @@ Relire is a static, browser-only PWA for French close reading and pronunciation 
 | Product intent, audience, claims to avoid | `PRODUCT.md` |
 | UI work: tokens, type, spacing, overlays | `DESIGN.md`, skill `verify-ui` |
 | Module ownership, data flow, storage | `docs/architecture.md` |
+| What is done, next, later and deferred | `docs/roadmap.md` |
 | Merging FrenchLab AI | `docs/merge-plan.md`, then `docs/merge-progress.md` |
 | Grammar pack (verified conjugation data, word-sheet table, reverse lookup, drills) | `docs/grammar-pack.md` |
 | Adding an AI provider | skill `add-ai-provider` |

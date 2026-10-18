@@ -7,7 +7,7 @@ How a lead Claude Code session hands work to other agents and takes it back. Rea
 | Role | Who | Does | Does not |
 | --- | --- | --- | --- |
 | Lead | This Claude Code session | Writes the plan and the acceptance criteria, writes the worker prompt, dispatches, re-runs every check, reviews the diff, merges a reviewed worker branch into the current designated feature branch, locally and without asking (owner decision 2026-10-18) | Write the implementation itself |
-| Implementer | `pi` (GPT/GLM via `scripts/pi-dispatch.sh`) or the `implementer` subagent (Sonnet) | Executes an agreed plan inside a stated scope, in its own worktree, and reports | Change the plan, widen the scope, merge, push |
+| Implementer | `pi` with `openai-codex/gpt-6.1-sol` via `scripts/pi-dispatch.sh` (default since 2026-10-18, owner decision to spare Claude tokens), or the `implementer` subagent (Sonnet) only as a fallback | Executes an agreed plan inside a stated scope, in its own worktree, and reports | Change the plan, widen the scope, merge, push |
 | Reviewer | The `reviewer` subagent (Opus, read-only), or a read-only `pi` run on another model family (Gemini 4 Argon, quota-gated: section 2) | Accepts or rejects against the plan, with `file:line` findings | Edit anything. A reviewer that fixes what it finds destroys the evidence and reviews its own work next round |
 | Research / copy / mechanical | `agy` (`antigravity/gemini-3.8-flash`, always through `pi`) | Web search and cited research, gathering reference material, copy and corpus drafts (en, zh, fr), marketing and README copy, simple tasks whose result a machine can check | Multi-file code implementation; anything that needs a design decision |
 
@@ -51,6 +51,10 @@ Rules for `agy` output:
 
 Whoever did it, verification is the same (section 5), and `agy` output gets the stricter review.
 
+### Checking budgets before dispatching (`magpie quota`)
+
+`magpie quota [<provider>]` (read-only, instant) shows what is left of every subscription, plan and key balance; `--json` for scripts, `magpie quota history` for trends, `magpie usage 7d` and `magpie sessions` for what was spent. **The percentages are how much of a window is USED**, with `↻` marking when it resets. Check it before a large dispatch and before any Opus-heavy review round: when the Claude windows are nearly used, route implementation to pi (`openai-codex/gpt-6.1-sol`, the `codex` lines), research and copy to agy (Gemini, checked with `agy -p "/usage"`), and keep the lead's own turns short. Snapshot 2026-10-18: Claude Pro 5h 0% / 7d 100% used (resets Wed 07:59); Codex Plus 5h 0% / 7d 35%; z.ai lite 5h 1%; DeepSeek balance 7.83 CNY. The Claude Team account is the one the lead session runs on. Magpie shows a saved Claude account that is not the one in use from a cache only and does not re-read it on a timer, so the Team line can be a day old (`readDeferred`, `asOf`); the owner refreshes it by naming the account in the Magpie app, after which `magpie quota claude` shows the fresh reading (2026-10-18 16:39: Team 5h 23% used, resets 21:10; 7d 21% used, resets Oct 25 00:00). Check the `as of` time before trusting a Claude line, and cross-check spend with `magpie usage today` (today: this lead session made 934 calls, about 40 USD at list price, with cache reads of 166M tokens dominating; Sonnet 623 calls, Opus 79 calls from subagents). The lead's own long context is the biggest Claude cost: keep turns short, hand off with `docs/HANDOFF.md` and start a fresh session per phase instead of letting one session grow. A zero here means the subscription is exhausted for that window, not that the tool is broken.
+
 ### External reviewer: Gemini 4 Argon
 
 Owner decision 2026-10-18.
@@ -76,8 +80,8 @@ The owner's rules, reconciled with `pi --list-models` on 2026-10-18 (pi 1.3.0, a
 
 | Use | Model ID | Listed | Notes |
 | --- | --- | --- | --- |
-| First choice for review and implementation | `openai-codex/gpt-5.6-sol` | yes | The recorded rule |
-| Same, newer | `openai-codex/gpt-6.1-sol` | yes | Used for later implementation and review work in the sibling project. Which of the two is first choice is the owner's call; ask |
+| First choice for implementation (owner decision 2026-10-18, to spare Claude tokens) | `openai-codex/gpt-6.1-sol` | yes | Smoke-tested 2026-10-18 through `scripts/pi-dispatch.sh`: answered "smoke ok" in about 6 s, exit 0. Default for every implementation worker; the Claude `implementer` subagent (Sonnet) is the fallback when pi is rate-limited or for tiny doc edits |
+| Previous recorded choice | `openai-codex/gpt-5.6-sol` | yes | Still listed; use it if gpt-6.1-sol is unavailable |
 | Second choice | `zai/glm-5.3` | yes | |
 | Usable, not preferred | `minimax-cn/MiniMax-M3`, `minimax-cn/MiniMax-M2.7` | yes | |
 | Simple / research work | `antigravity/gemini-3.8-flash` | yes | Only through `scripts/pi-dispatch.sh` (it loads the agy-lean extension) |
@@ -94,7 +98,7 @@ Always pass `--model <provider>/<id>`. pi's own default is `antigravity/gemini-3
 ### Read-only review (non-agy models)
 
 ```bash
-pi -p -ne --no-session --model openai-codex/gpt-5.6-sol --tools read,grep,find,ls "<review task>"
+pi -p -ne --no-session --model openai-codex/gpt-6.1-sol --tools read,grep,find,ls "<review task>"
 ```
 
 Run from the checkout to be reviewed. `--tools read,grep,find,ls` restricts pi's own tools. It does **not** make an `agy` run read-only: agy executes its native tools (including `run_command`) itself, outside pi's tool layer. Also, under `-ne` the antigravity provider is not loaded at all. So agy research goes through the script below, in a throwaway worktree.
@@ -108,7 +112,7 @@ git worktree add -b pi/$task ../relire-wt/$task HEAD
 git -C ../relire-wt/$task log -1   # must be the commit you expect
 ln -s "$PWD/node_modules" ../relire-wt/$task/node_modules
 # write the prompt to .pi-runs/$task/prompt.md (template in section 6)
-nohup scripts/pi-dispatch.sh ../relire-wt/$task openai-codex/gpt-5.6-sol \
+nohup scripts/pi-dispatch.sh ../relire-wt/$task openai-codex/gpt-6.1-sol \
   "$PWD/.pi-runs/$task/prompt.md" "$PWD/.pi-runs/$task/log" 5400 >/dev/null 2>&1 &
 # agy: same, with antigravity/gemini-3.8-flash; another effort: PI_THINKING=medium scripts/pi-dispatch.sh ...
 ```
@@ -180,6 +184,7 @@ For a reviewer, replace the task with: the plan path, the diff (or the branch to
 - **Create worktrees by hand from the current HEAD** (`git worktree add -b <branch> ../relire-wt/<task> HEAD`), check `git log -1` there, and give the worker the absolute path. Do not rely on the Agent tool's `isolation: "worktree"` (section 8).
 - No `.env` or secret file is needed in a worktree; Relire's keys live in the user's browser. Symlink `node_modules` from the main checkout. Because it is shared, nothing may install into it from a worktree.
 - **Never two executors on the same file at the same time.** Split tasks by file before dispatching.
+- **E2E runs at integration milestones only (owner decision 2026-10-18): not per unit, not per worker, not after every cherry-pick.** A unit of work is gated by its unit tests (`bun run test`) plus typecheck, lint, format, i18n and build; workers never run Playwright unless their task is the integration task itself. The lead runs the full suite once when a feature batch or phase is assembled, before pushing that batch. A failing spec is re-run alone first (load flakes are common) before it is called a bug.
 - **The lead runs e2e by default; a worker only when its task explicitly allows it, with the port check and `CI=1`. One run at a time across all checkouts.** `playwright.config.ts` serves on port 5174 with `reuseExistingServer: !process.env.CI`, so a dev server left on 5174 by another checkout gets tested silently instead of yours. Before e2e: `lsof -iTCP:5174 -sTCP:LISTEN` must print nothing. Workers do not run Playwright unless their task explicitly allows it, and then with the port check and `CI=1` (template, section 6).
 - Untracked user files in the main checkout (such as `.impeccable/critique/` or `.pi/`) do not exist in a worktree; do not copy them in unless the task needs them.
 

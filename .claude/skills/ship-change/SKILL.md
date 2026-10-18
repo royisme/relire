@@ -14,10 +14,10 @@ bun run test                              # unit tests in tests/: grading, contr
 bun run i18n:check
 bun run build
 bun scripts/check-prosody-schema.ts       # when markers, the prosody prompt or its parser changed
-bun run e2e                               # browser flows, AI mocked
+bun run e2e                               # browser flows, AI mocked; at integration milestones only (see below)
 impeccable detect --json src index.html   # must print []
 ```
-For UI changes, add or extend a spec in `e2e/` for the flow you changed (`verify-ui` skill). Report which specs ran; never claim the real provider was exercised.
+For UI changes, add or extend a spec in `e2e/` for the flow you changed (`verify-ui` skill). Run the e2e suite when a feature batch or phase is assembled, not after every unit of work; a unit is gated by `bun run test` plus the static checks (owner decision 2026-10-18). Report which specs ran; never claim the real provider was exercised.
 
 ## 2. Re-read your diff
 - Unrelated edits, debug output, screenshots or scratch files in the repo? Remove them.
