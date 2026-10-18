@@ -15,10 +15,12 @@ import { Dialog, OverlayHeader } from '../ui/overlay';
 interface DeleteSetDialogProps {
   setId: string;
   title: string;
+  count: number;
   onClose: () => void;
+  onDeleted: () => void;
 }
 
-export function DeleteSetDialog({ setId, title, onClose }: DeleteSetDialogProps) {
+export function DeleteSetDialog({ setId, title, count, onClose, onDeleted }: DeleteSetDialogProps) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export function DeleteSetDialog({ setId, title, onClose }: DeleteSetDialogProps)
     setError(null);
     try {
       await deleteSetData(setId);
-      onClose();
+      onDeleted();
     } catch (err) {
       setError(t('practice.deleteSetFailed', { reason: errorMessage(err) }));
       setBusy(false);
@@ -40,7 +42,7 @@ export function DeleteSetDialog({ setId, title, onClose }: DeleteSetDialogProps)
     <Dialog onClose={cancel} label={t('practice.deleteSetTitle')} className="max-w-sm">
       <OverlayHeader title={t('practice.deleteSetTitle')} onClose={cancel} closeLabel={t('common.close')} />
       <div className="space-y-4 p-5">
-        <p className="break-words text-sm text-ink-700">{t('practice.deleteSetBody', { title })}</p>
+        <p className="break-words text-sm text-ink-700">{t('practice.deleteSetBody', { title, count })}</p>
         {error && (
           <p role="alert" className="break-words text-sm text-bad-700">
             {error}

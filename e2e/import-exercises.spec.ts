@@ -22,7 +22,11 @@ importSourceChecks({
 });
 async function enter(page: import('@playwright/test').Page) {
   await page.goto('/#/practice');
-  await page.getByRole('main').getByRole('link', { name: 'Import exercises', exact: true }).click();
+  await page.getByRole('button', { name: 'Add exercises', exact: true }).click();
+  await page
+    .getByRole('dialog', { name: 'Add exercises' })
+    .getByRole('button', { name: 'Import a worksheet', exact: true })
+    .click();
   await expect(page).toHaveURL(/#\/import\/exercises$/);
 }
 const chooseLevel = (page: import('@playwright/test').Page, level = 'B2') =>
@@ -55,7 +59,7 @@ for (const phone of [false, true]) {
     expect(await overflowing(page.locator('body'))).toEqual([]);
     // Saving as an article is not offered here: this page makes exercises only.
     await expect(page.getByLabel('Save as')).toHaveCount(0);
-    await page.getByLabel('Batch title', { exact: true }).fill('Imported workbook');
+    await page.getByLabel('Exercise set title', { exact: true }).fill('Imported workbook');
     await page.locator('summary').filter({ hasText: ITEMS.WORD_TRANSFORM.prompt }).click();
     await page.getByLabel('Reference answer', { exact: true }).fill('française');
     await expect(page.getByText('Edited by you')).toBeVisible();
@@ -78,7 +82,7 @@ for (const phone of [false, true]) {
     expect(saved.units[0]).not.toHaveProperty('materialId');
     await expect(page).toHaveURL(new RegExp(`#/practice/${saved.units[0].id}$`));
     await page.goto('/#/practice');
-    await expect(page.getByRole('main').getByRole('heading', { name: /^Imported workbook/ })).toContainText('B2');
+    await expect(page.locator('main tbody tr').filter({ hasText: 'Imported workbook' })).toContainText('B2');
   });
 }
 
@@ -119,7 +123,7 @@ for (const phone of [false, true]) {
     await expect(page.getByRole('status')).toContainText('Enter a title');
     await expect(page).toHaveURL(/#\/import\/exercises$/);
     expect((await savedRows(page)).units).toEqual([]);
-    await page.getByLabel('Batch title', { exact: true }).fill('Mon lot');
+    await page.getByLabel('Exercise set title', { exact: true }).fill('Mon lot');
     await page.getByLabel('I have reviewed').check();
     await page.getByRole('button', { name: 'Confirm and save' }).click();
     await expect(page).toHaveURL(unitUrl);
@@ -165,7 +169,7 @@ test('failed atomic save keeps draft and guard, retry keeps prepared identities'
     hold();
   });
   await page.getByRole('button', { name: 'Confirm and save' }).click();
-  await expect(page.getByLabel('Batch title', { exact: true })).toBeDisabled();
+  await expect(page.getByLabel('Exercise set title', { exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Saving…', exact: true })).toBeDisabled();
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toBeVisible();

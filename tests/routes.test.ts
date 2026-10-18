@@ -14,6 +14,26 @@ test('practice addresses: the list and one unit; a stray query is dropped', () =
   expect(areaOf({ name: 'unit', unitId: 'x' })).toBe('practice');
 });
 
+test('exercise sets have a distinct Practice route before unit matching', () => {
+  const route: Route = { name: 'practiceSet', setId: 'set-1' };
+  expect(roundTrip(route)).toEqual({ route, canonical: null });
+  expect(areaOf(route)).toBe('practice');
+  expect(parseRoute('#/practice/set/set-1/').canonical).toBe('#/practice/set/set-1');
+  for (const id of ['a b', 'é/ü?&=', 'x#y', '100%', 'unit-1']) {
+    expect(roundTrip({ name: 'practiceSet', setId: id }).route).toEqual({ name: 'practiceSet', setId: id });
+  }
+  for (const hash of [
+    '#/practice/set',
+    '#/practice/set/',
+    '#/practice/set/a/b',
+    '#/practice/set/%E0%A4%A',
+    '#/practice/set/a?x=1',
+  ]) {
+    expect(parseRoute(hash).route.name).toBe('notFound');
+  }
+  expect(parseRoute('#/practice/unit-set').route).toEqual({ name: 'unit', unitId: 'unit-set' });
+});
+
 test('the two import pages have their own addresses and areas; the bare import address is not a place', () => {
   expect(parseRoute('#/import/article')).toEqual({ route: { name: 'importArticle' }, canonical: null });
   expect(parseRoute('#/import/exercises')).toEqual({ route: { name: 'importExercises' }, canonical: null });

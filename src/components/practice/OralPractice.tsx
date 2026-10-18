@@ -65,7 +65,7 @@ export function OralPractice({ article, onAssessed }: OralPracticeProps) {
         showLabel
       />
 
-      <ShadowingRecorder key={current.id} referenceText={current.text} onAssessed={onAssessed} />
+      <ShadowingRecorder key={current.id} referenceText={current.text} onAssessed={onAssessed} quiet />
     </div>
   );
 }

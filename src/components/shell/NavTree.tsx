@@ -79,9 +79,11 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
           to={{ name: 'practice' }}
           icon={Dumbbell}
           label={t('nav.practice')}
-          // The list is a page of its own; an open unit or the import makes Practice its parent.
+          // The list is a page of its own; an open set, unit or import makes Practice its parent.
           current={
-            (route.name === 'unit' || route.name === 'importExercises') && !rail ? 'area' : areaState('practice', false)
+            (route.name === 'unit' || route.name === 'practiceSet' || route.name === 'importExercises') && !rail
+              ? 'area'
+              : areaState('practice', false)
           }
         />
         {!rail && area === 'practice' && (

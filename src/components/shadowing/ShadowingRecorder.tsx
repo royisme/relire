@@ -16,10 +16,11 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2,
 
 interface Props {
   referenceText: string;
+  quiet?: boolean;
   onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void;
 }
 
-export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }) => {
+export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed, quiet = false }) => {
   const { t } = useTranslation();
   const r = useShadowingRecorder(referenceText, onAssessed);
   const hasRecording = r.phase === 'recorded';
@@ -28,7 +29,7 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         {r.phase === 'recording' ? (
-          <Button variant="destructive" onClick={r.stop}>
+          <Button variant={quiet ? 'outline' : 'destructive'} onClick={r.stop}>
             <Square className="w-4 h-4 fill-current" aria-hidden="true" />
             <span>{t('shadowing.stop')}</span>
             <span className="tnum" aria-hidden="true">
@@ -36,14 +37,14 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }
             </span>
           </Button>
         ) : (
-          <Button variant={hasRecording ? 'outline' : 'default'} onClick={r.start}>
+          <Button variant={quiet || hasRecording ? 'outline' : 'default'} onClick={r.start}>
             <Mic className="w-4 h-4" aria-hidden="true" />
             <span>{hasRecording ? t('shadowing.recordAgain') : t('shadowing.record')}</span>
           </Button>
         )}
 
         {hasRecording && (
-          <Button onClick={r.assess} disabled={r.isEvaluating}>
+          <Button variant={quiet ? 'outline' : 'default'} onClick={r.assess} disabled={r.isEvaluating}>
             {r.isEvaluating ? (
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
             ) : (

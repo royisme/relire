@@ -118,8 +118,9 @@ for (const phone of [false, true]) {
     expect(after.units[0]).toMatchObject({ setTitle: CATALOG_DRILLS.drillTitle, level: 'B1' });
     expect(after.units[0]).not.toHaveProperty('materialId');
     await page.goto('/#/practice');
-    await expect(page.getByRole('main').getByRole('heading', { name: CATALOG_DRILLS.drillTitle })).toBeVisible();
+    await expect(page.locator('main tbody a').filter({ hasText: CATALOG_DRILLS.drillTitle })).toBeVisible();
     await page.reload();
+    await page.locator(`main a[href="#/practice/set/${after.units[0].setId}"]`).click();
     await page.locator(`main a[href="#/practice/${after.units[0].id}"]`).click();
     await page.reload();
     await expect(page.getByRole('heading', { name: CATALOG_DRILLS.drillTitle })).toBeVisible();

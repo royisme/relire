@@ -30,10 +30,29 @@ export async function seedUnits(page: Page, units: unknown[] = CATALOG_EXERCISES
   await waitForArticle(page);
   await page.evaluate(async (list) => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
-    await storage.saveUnits(
-      list.map((unit) => ({ setId: 'set-1', level: 'B1', createdAt: 1_700_000_000_000, ...(unit as object) })) as never,
-    );
+    const groups = new Map<string, object[]>();
+    for (const candidate of list) {
+      const unit = { setId: 'set-1', level: 'B1', createdAt: 1_700_000_000_000, ...(candidate as object) };
+      const group = groups.get(unit.setId) ?? [];
+      group.push(unit);
+      groups.set(unit.setId, group);
+    }
+    for (const group of groups.values()) await storage.saveUnits(group as never);
   }, units);
+}
+
+/** Opens the Add dialog's article generation choice, leaving its form ready. */
+export async function openGenerator(page: Page) {
+  await page.getByRole('button', { name: 'Add exercises', exact: true }).click();
+  const dialog = page.getByRole('dialog', { name: 'Add exercises' });
+  await dialog.getByRole('button', { name: 'Make from an article', exact: true }).click();
+  return dialog;
+}
+
+/** Opens a set from the Practice table, then its requested exercise. */
+export async function openListedUnit(page: Page, setId: string, unitId: string) {
+  await page.locator(`main a[href="#/practice/set/${setId}"]`).click();
+  await page.locator(`main a[href="#/practice/${unitId}"]`).click();
 }
 
 /** Every exercise row in IndexedDB. */

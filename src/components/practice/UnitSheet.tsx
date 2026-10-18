@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { ArrowLeft, ListChecks, Loader2, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ExerciseUnitSession } from '../../hooks/useExerciseUnit';
+import { setLabel } from '../../services/exercises/setLabel';
 import { effectiveItemType, type ExerciseUnit } from '../../types/exercises';
 import { Button } from '../ui/button';
 import { Link } from '../shell/Link';
@@ -118,11 +119,11 @@ export function UnitSheet({
   return (
     <div className="mx-auto max-w-3xl space-y-4 px-4 pb-28 pt-6 sm:px-6">
       <Link
-        to={{ name: 'practice' }}
-        className="-ml-2 inline-flex h-10 items-center gap-1.5 rounded-md px-2 text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900"
+        to={{ name: 'practiceSet', setId: unit.setId }}
+        className="-ml-2 inline-flex min-h-10 max-w-full items-center gap-1.5 rounded-md px-2 py-2 text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900"
       >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        <span>{t('practice.title')}</span>
+        <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span className="min-w-0 break-words">{t('practice.backToSet', { title: setLabel(t, unit) })}</span>
       </Link>
 
       <section aria-labelledby="unit-title" className="rounded-lg border border-ink-200 bg-surface">
