@@ -50,7 +50,7 @@ function PassageSection({
       {passage.translation && <p className="text-sm leading-relaxed text-ink-600">{passage.translation}</p>}
       {passage.content.trim() && (
         <Link
-          to={{ name: 'passage', materialId: unit.materialId, unitId: unit.id }}
+          to={{ name: 'passage', unitId: unit.id }}
           className="inline-flex h-10 items-center rounded-md text-sm font-medium text-accent-900 hover:underline underline-offset-4"
         >
           {t('practice.openInReader')}
@@ -74,7 +74,7 @@ export function UnitSheet({
   const [explainId, setExplainId] = useState<string | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const { items, progress } = session;
-  // Empty is explicit: a workbook must never inherit the last reader's context.
+  // Empty is explicit: a unit must never inherit the last reader's context.
   const context = [unit.instruction, unit.readingPassage?.content].filter(Boolean).join('\n');
   const lookup = (word: string, sentence: string) => onWord(word, sentence, context);
   const explained = unit.items.find((item) => item.id === explainId);
@@ -118,7 +118,7 @@ export function UnitSheet({
   return (
     <div className="mx-auto max-w-3xl space-y-4 px-4 pb-28 pt-6 sm:px-6">
       <Link
-        to={{ name: 'practice', articleId: unit.materialId }}
+        to={{ name: 'practice' }}
         className="-ml-2 inline-flex h-10 items-center gap-1.5 rounded-md px-2 text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />

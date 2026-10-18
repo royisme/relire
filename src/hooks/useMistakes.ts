@@ -24,11 +24,7 @@ export function useMistakes() {
           const unit = units.get(entry.attempt.unitId);
           return {
             ...entry,
-            unit:
-              unit?.materialId === entry.attempt.materialId &&
-              unit.items.some((item) => item.id === entry.attempt.itemId)
-                ? unit
-                : undefined,
+            unit: unit?.items.some((item) => item.id === entry.attempt.itemId) ? unit : undefined,
           };
         });
         if (live && request === sequence) setLoaded({ rows, error: null });

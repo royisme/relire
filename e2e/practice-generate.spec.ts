@@ -1,6 +1,6 @@
 /**
- * Practice page: making exercises from an article (the AI is mocked with the shared
- * catalogue), the units it lists with real progress, the reader's entry point, the sidebar
+ * Practice page: making a new batch from an article (the AI is mocked with the shared
+ * catalogue), the batches it lists with real progress, the reader's entry point, the sidebar
  * list, a missing unit and a missing key.
  */
 import { expect, openArticle, settled, test } from './fixtures';
@@ -24,7 +24,7 @@ test('makes exercises from the article, saves them with fresh ids and lists them
   await page.goto(PRACTICE);
   await waitForArticle(page);
   await expect(page.getByRole('heading', { name: 'Practice' })).toBeVisible();
-  await expect(page.getByText('No exercises from this article yet.')).toBeVisible();
+  await expect(page.getByText('No exercises yet.')).toBeVisible();
 
   await make(page).click();
   await expect(main(page).getByRole('link', { name: /Le féminin des adjectifs/ })).toBeVisible();
@@ -40,8 +40,12 @@ test('makes exercises from the article, saves them with fresh ids and lists them
 
   const { units } = await stored(page);
   expect(units).toHaveLength(11);
+  // One new batch, titled with the article and levelled from the form, with no link back to the article.
+  expect(new Set(units.map((unit: { setId: string }) => unit.setId)).size).toBe(1);
   for (const unit of units) {
-    expect(unit.materialId).toBe('petit-prince');
+    expect(unit.setTitle).toBe('Le Petit Prince et le Secret du Renard');
+    expect(unit.level).toBe('B1');
+    expect(unit).not.toHaveProperty('materialId');
     expect(catalogueIds).not.toContain(unit.id);
     expect(unit.items.every((item: { answerSource?: string }) => item.answerSource === 'ai')).toBe(true);
     expect(JSON.stringify(unit)).not.toContain('articleQuote');
@@ -56,12 +60,15 @@ test('makes exercises from the article, saves them with fresh ids and lists them
   await expect(first).toContainText('1 item');
   await expect(first).toContainText('Not started');
 
-  // A second set continues the numbering instead of colliding with the first.
+  // A second set is a new batch of its own, numbered from 1 again.
   await make(page).click();
   await expect(main(page).getByRole('link', { name: /Le féminin des adjectifs/ })).toHaveCount(2);
-  expect(
-    (await stored(page)).units.map((unit: { unitNumber: number }) => unit.unitNumber).sort((a, b) => a - b),
-  ).toEqual(Array.from({ length: 22 }, (_, index) => index + 1));
+  const both = (await stored(page)).units;
+  expect(new Set(both.map((unit: { setId: string }) => unit.setId)).size).toBe(2);
+  expect(both.map((unit: { unitNumber: number }) => unit.unitNumber).sort((a, b) => a - b)).toEqual(
+    Array.from({ length: 22 }, (_, index) => Math.floor(index / 2) + 1),
+  );
+  await expect(main(page).getByRole('heading', { name: /^Le Petit Prince et le Secret du Renard/ })).toHaveCount(2);
 });
 
 test('the button shows the work and keeps its size', async ({ page, ai }) => {
@@ -151,32 +158,24 @@ test('without a key it opens Settings → Text AI', async ({ page }) => {
   await expect(page.getByPlaceholder('Paste your key here')).toBeFocused();
 });
 
-test('the reader has an entry that goes to the practice page for that article', async ({ page }) => {
+test('the reader has an entry that goes to the practice page', async ({ page }) => {
   await openArticle(page);
   await page.getByRole('link', { name: 'Make exercises' }).click();
-  await expect(page).toHaveURL(/#\/practice\?article=petit-prince$/);
+  await expect(page).toHaveURL(/#\/practice$/);
   await expect(page.getByRole('heading', { name: 'Practice' })).toBeVisible();
-  await expect(page.getByLabel('Article')).toHaveValue('petit-prince');
 });
 
-test('#/practice names the article read last, and the picker changes it', async ({ page }) => {
-  await page.goto('/#/practice');
-  await expect(page).toHaveURL(/#\/practice\?article=/);
+test('#/practice is one address; the article picker only feeds the generator and stays off the address', async ({
+  page,
+}) => {
+  await page.goto('/#/practice?x=1');
+  await expect(page).toHaveURL(/#\/practice$/);
   await expect(page.getByRole('heading', { name: 'Practice' })).toBeVisible();
-  const options = await page.getByLabel('Article').locator('option').count();
-  expect(options).toBeGreaterThan(1);
-  await page.getByLabel('Article').selectOption({ index: 1 });
-  const chosen = await page.getByLabel('Article').inputValue();
-  await expect(page).toHaveURL(new RegExp(`article=${chosen}$`));
-  // Practice from the sidebar returns to the article chosen last.
-  await page.locator('[data-sidebar]').getByRole('link', { name: 'Read', exact: true }).click();
-  await page.locator('[data-sidebar]').getByRole('link', { name: 'Practice', exact: true }).click();
-  await expect(page.getByLabel('Article')).toHaveValue(chosen);
-});
-
-test('an article that is not in the library is a not-found page', async ({ page }) => {
-  await page.goto('/#/practice?article=nope');
-  await expect(page.getByRole('heading', { name: 'This page is not here' })).toBeVisible();
+  await expect(page.getByRole('combobox', { name: 'Article', exact: true }).locator('option')).toHaveCount(3);
+  await page.getByRole('combobox', { name: 'Article', exact: true }).selectOption({ index: 1 });
+  const chosen = await page.getByRole('combobox', { name: 'Article', exact: true }).inputValue();
+  await expect(page).toHaveURL(/#\/practice$/);
+  await expect(page.getByRole('combobox', { name: 'Article', exact: true })).toHaveValue(chosen);
 });
 
 test('a unit that does not exist is a not-found page that leads back to Practice', async ({ page }) => {
@@ -184,14 +183,30 @@ test('a unit that does not exist is a not-found page that leads back to Practice
   await expect(page.getByRole('heading', { name: 'This page is not here' })).toBeVisible();
   await expect(page.getByText('That exercise is not here.')).toBeVisible();
   await page.getByRole('link', { name: 'Go to Practice' }).click();
-  await expect(page).toHaveURL(/#\/practice\?article=/);
+  await expect(page).toHaveURL(/#\/practice$/);
 });
 
-test('the sidebar lists the units of the open article and marks the open one', async ({ page }) => {
+test('the sidebar lists the units of the open unit’s batch only, and marks the open one', async ({ page }) => {
   await seedUnits(page);
+  await page.evaluate(async () => {
+    const storage: typeof import('../src/storage/exercises') = await import(
+      /* @vite-ignore */ '/src/storage/exercises.ts' as string
+    );
+    const [unit] = await storage.listUnits();
+    await storage.saveUnits([{ ...unit, id: 'other-batch-unit', setId: 'set-2', title: 'Un autre lot' }]);
+  });
   await page.goto(PRACTICE);
   const nav = page.locator('[data-sidebar]');
   await expect(nav.getByRole('link', { name: 'Practice', exact: true })).toHaveAttribute('aria-current', 'page');
+  // On the list itself no batch is open, so the sidebar lists no units.
+  await expect(nav.getByRole('link', { name: 'Le genre des noms' })).toHaveCount(0);
+  await main(page).getByRole('link', { name: 'Le genre des noms' }).click();
+  await expect(page).toHaveURL(/#\/practice\/unit-gender-check$/);
+  await expect(page.getByRole('heading', { name: 'Le genre des noms' })).toBeVisible();
+  await expect(nav).toHaveAttribute('data-sidebar', 'rail');
+  await page.getByRole('button', { name: 'Expand sidebar' }).click();
+  await expect(nav).toHaveAttribute('data-sidebar', 'expanded');
+  expect(await page.evaluate(() => localStorage.getItem('relire_sidebar'))).toBeNull();
   for (const title of [
     'Le féminin des adjectifs',
     'Conjuguer au présent et au futur',
@@ -206,20 +221,31 @@ test('the sidebar lists the units of the open article and marks the open one', a
     'Questions sur le texte',
   ])
     await expect(nav.getByRole('link', { name: title })).toBeVisible();
-
-  await nav.getByRole('link', { name: 'Le genre des noms' }).click();
-  await expect(page).toHaveURL(/#\/practice\/unit-gender-check$/);
-  await expect(page.getByRole('heading', { name: 'Le genre des noms' })).toBeVisible();
-  await expect(nav).toHaveAttribute('data-sidebar', 'rail');
-  await page.getByRole('button', { name: 'Expand sidebar' }).click();
-  await expect(nav).toHaveAttribute('data-sidebar', 'expanded');
-  expect(await page.evaluate(() => localStorage.getItem('relire_sidebar'))).toBeNull();
+  await expect(nav.getByRole('link', { name: 'Un autre lot' })).toHaveCount(0);
   await expect(nav.getByRole('link', { name: 'Le genre des noms' })).toHaveAttribute('aria-current', 'page');
-  await expect(nav.getByRole('link', { name: 'Le féminin des adjectifs' })).toBeVisible();
 
-  // Progress shows on the list from stored states.
   await page.getByRole('link', { name: 'Practice', exact: true }).first().click();
-  await expect(page).toHaveURL(/#\/practice\?article=petit-prince$/);
+  await expect(page).toHaveURL(/#\/practice$/);
+});
+
+test('batches are listed by their title or, without one, by type and set id, each with its level', async ({ page }) => {
+  await seedUnits(
+    page,
+    CATALOG_EXERCISES.units.filter((unit) => unit.id === 'unit-open-qa'),
+  );
+  await page.evaluate(async () => {
+    const storage: typeof import('../src/storage/exercises') = await import(
+      /* @vite-ignore */ '/src/storage/exercises.ts' as string
+    );
+    const [unit] = await storage.listUnits();
+    await storage.saveUnits([
+      { ...unit, id: 'titled', setId: 'bbbb-set', setTitle: 'Leçon 1', level: 'C1', title: 'Dans le titre' },
+    ]);
+  });
+  await page.goto(PRACTICE);
+  await expect(main(page).getByRole('heading', { name: 'Leçon 1' })).toContainText('C1');
+  await expect(main(page).getByRole('heading', { name: /^Open questions · set-/ })).toContainText('B1');
+  await expect(main(page).getByRole('link', { name: /Dans le titre/ })).toBeVisible();
 });
 
 test('progress on the list comes from the checked items', async ({ page }) => {
@@ -245,43 +271,16 @@ test('the open oral assessment stays on the practice page as its own section', a
   await expect(page.getByText(/^Sentence 2 of \d+$/)).toBeVisible();
 });
 
-test('a deep-linked unit keeps its article in the sidebar Practice link', async ({ page }) => {
-  await seedUnits(page);
-  const materialId = await page.evaluate(async () => {
-    const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    const d = await db();
-    const article = (await d.getAll('articles')).find((a) => a.id !== 'petit-prince')!;
-    const unit = (await d.get('units', 'unit-open-qa'))!;
-    await d.put('units', { ...unit, materialId: article.id });
-    return article.id as string;
-  });
-  await openUnit(page, 'unit-open-qa', 'Questions sur le texte');
-  await page.reload();
-  await expect(page.getByRole('heading', { name: 'Questions sur le texte' })).toBeVisible();
-  const link = page.locator('[data-sidebar]').getByRole('link', { name: 'Practice', exact: true });
-  await expect(link).toHaveAttribute('href', `#/practice?article=${materialId}`);
-  await link.click();
-  await expect(page.getByLabel('Article')).toHaveValue(materialId);
-});
-
-test('generation refuses to attach exercises when the source article changed', async ({ page, ai }) => {
-  const pending = Promise.withResolvers<typeof CATALOG_EXERCISES>();
-  ai.answer({ exercises: () => pending.promise });
+test('a generated batch stays when its source article is deleted', async ({ page }) => {
   await page.goto(PRACTICE);
   await waitForArticle(page);
   await make(page).click();
-  await expect.poll(() => ai.calls.exercises).toBe(1);
-  // Another editor committed new content while the request still used the old article.
+  await expect(main(page).getByRole('link', { name: /Le féminin des adjectifs/ })).toBeVisible();
   await page.evaluate(async () => {
-    const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    const d = await db();
-    const article = (await d.get('articles', 'petit-prince'))!;
-    await d.put('articles', { ...article, content: 'Un autre texte.' });
+    const { deleteArticleData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+    await deleteArticleData('petit-prince');
   });
-  pending.resolve(CATALOG_EXERCISES);
-  await expect(page.getByRole('alert')).toHaveText(
-    'The article changed while exercises were being made. Make a new set from the updated text.',
-  );
-  expect((await stored(page)).units).toEqual([]);
-  await expect(make(page)).toBeEnabled();
+  await page.reload();
+  await expect(main(page).getByRole('link', { name: /Le féminin des adjectifs/ })).toBeVisible();
+  expect((await stored(page)).units).toHaveLength(11);
 });

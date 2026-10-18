@@ -21,7 +21,7 @@ interface Props {
 
 export function MistakeExplanationSheet({ attempt, onClose, onMissingKey, onWord }: Props) {
   const { t } = useTranslation();
-  const { unitId, materialId, itemId, prompt, userAnswer, expectedAnswer, grammarTag } = attempt;
+  const { unitId, itemId, prompt, userAnswer, expectedAnswer, grammarTag } = attempt;
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState<{ explanation?: Explanation; error?: string } | null>(null);
   // Callbacks are event handlers, not request identities. The mounted sheet owns every reply.
@@ -32,10 +32,9 @@ export function MistakeExplanationSheet({ attempt, onClose, onMissingKey, onWord
       try {
         const unit = await getUnit(unitId);
         if (!live) return;
-        const context =
-          unit?.materialId === materialId && unit.items.some((item) => item.id === itemId)
-            ? [unit.instruction, unit.readingPassage?.content].filter(Boolean).join('\n') || undefined
-            : undefined;
+        const context = unit?.items.some((item) => item.id === itemId)
+          ? [unit.instruction, unit.readingPassage?.content].filter(Boolean).join('\n') || undefined
+          : undefined;
         const explanation = await fetchExplanation({
           prompt,
           userAnswer,
@@ -54,7 +53,7 @@ export function MistakeExplanationSheet({ attempt, onClose, onMissingKey, onWord
     return () => {
       live = false;
     };
-  }, [unitId, materialId, itemId, prompt, userAnswer, expectedAnswer, grammarTag, revision, callbacks]);
+  }, [unitId, itemId, prompt, userAnswer, expectedAnswer, grammarTag, revision, callbacks]);
   return (
     <Sheet onClose={onClose} label={t('practice.explanationTitle')}>
       <OverlayHeader

@@ -2,18 +2,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { generateAdaptiveDrills, MissingApiKeyError } from '../services/api';
 import { MAX_RECENT_MISTAKES } from '../services/ai/prompts';
-import { prepareDrills, type PreparedDrills } from '../services/exercises/fromDrills';
-import { createImportedMaterial, listMistakes } from '../storage/exercises';
-import type { Article } from '../types';
+import { prepareDrills } from '../services/exercises/fromDrills';
+import { listMistakes, saveUnits } from '../storage/exercises';
+import type { ExerciseLevel, ExerciseUnit } from '../types/exercises';
 import type { GrammarTag } from '../types/grammar';
 import { aiErrorText } from '../utils/aiErrorText';
 import { useImportGuard } from './useImportGuard';
 import { navigate } from './useRoute';
 
-export function useAdaptiveDrills(onCreated: (article: Article) => void, onMissingKey: () => void) {
+export function useAdaptiveDrills(onMissingKey: () => void) {
   const [phase, setPhase] = useState<'idle' | 'generating' | 'saving'>('idle');
-  const [prepared, setPrepared] = useState<PreparedDrills | null>(null);
-  const payload = useRef<PreparedDrills | null>(null);
+  const [prepared, setPrepared] = useState<ExerciseUnit | null>(null);
+  const payload = useRef<ExerciseUnit | null>(null);
   const [error, setError] = useState('');
   const busy = useRef(false);
   const session = useRef(0);
@@ -31,21 +31,20 @@ export function useAdaptiveDrills(onCreated: (article: Article) => void, onMissi
     setError('');
   }
   const guard = useImportGuard(!!prepared, phase === 'saving', discard);
-  async function persist(mine: number, result: PreparedDrills) {
+  async function persist(mine: number, result: ExerciseUnit) {
     setPhase('saving');
     try {
-      await createImportedMaterial(result.article, [result.unit]);
+      await saveUnits([result]);
       if (mine !== session.current) return;
       guard.release();
       payload.current = null;
       setPrepared(null);
-      onCreated(result.article);
-      navigate({ name: 'unit', unitId: result.unit.id });
+      navigate({ name: 'unit', unitId: result.id });
     } catch (err) {
       if (mine === session.current) setError(aiErrorText(err));
     }
   }
-  async function make(targets: GrammarTag[], level: string, count: number) {
+  async function make(targets: GrammarTag[], level: ExerciseLevel, count: number) {
     if (busy.current || payload.current || !targets.length) return;
     busy.current = true;
     const mine = session.current;

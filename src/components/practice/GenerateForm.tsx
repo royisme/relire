@@ -10,20 +10,21 @@ import { useTranslation } from 'react-i18next';
 import { useExerciseGeneration } from '../../hooks/useExerciseGeneration';
 import { MAX_GENERATED_ITEMS } from '../../services/api';
 import type { Article } from '../../types';
+import { EXERCISE_LEVELS, type ExerciseLevel } from '../../types/exercises';
 import { Button } from '../ui/button';
 
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'] as const;
 const DEFAULT_COUNT = 8;
 const field =
   'h-10 rounded-md border border-ink-300 bg-surface px-3 text-sm text-ink-900 focus:border-accent-600 focus:outline-none';
 
 /** The article's own level when it names one of ours; otherwise the middle of the range. */
-const startLevel = (article: Article) => LEVELS.find((level) => article.level.toUpperCase().includes(level)) ?? 'B1';
+const startLevel = (article: Article): ExerciseLevel =>
+  EXERCISE_LEVELS.find((level) => article.level.toUpperCase().includes(level)) ?? 'B1';
 
 export function GenerateForm({ article, onMissingKey }: { article: Article; onMissingKey: () => void }) {
   const { t } = useTranslation();
   const { state, make } = useExerciseGeneration(article, onMissingKey);
-  const [level, setLevel] = useState<string>(() => startLevel(article));
+  const [level, setLevel] = useState<ExerciseLevel>(() => startLevel(article));
   const [count, setCount] = useState(String(DEFAULT_COUNT));
   const number = Number(count);
   const valid = count.trim() !== '' && Number.isInteger(number) && number >= 1 && number <= MAX_GENERATED_ITEMS;
@@ -41,10 +42,10 @@ export function GenerateForm({ article, onMissingKey }: { article: Article; onMi
           <span className="mb-1 block text-sm font-medium text-ink-800">{t('practice.level')}</span>
           <select
             value={level}
-            onChange={(event) => setLevel(event.target.value)}
+            onChange={(event) => setLevel(event.target.value as ExerciseLevel)}
             className={`${field} cursor-pointer`}
           >
-            {LEVELS.map((value) => (
+            {EXERCISE_LEVELS.map((value) => (
               <option key={value} value={value}>
                 {t(`levels.${value}`)}
               </option>

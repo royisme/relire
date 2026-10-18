@@ -116,7 +116,7 @@ async function readingCloze(page: Page, phone: boolean) {
 
   // The passage opens its own stored text, not the parent material’s prose.
   await page.getByRole('link', { name: 'Open in the reader' }).click();
-  await expect(page).toHaveURL(/#\/passage\/petit-prince\/unit-reading-cloze$/);
+  await expect(page).toHaveURL(/#\/passage\/unit-reading-cloze$/);
   await expect(page.locator('article [data-sentence]').first()).toBeVisible();
 }
 

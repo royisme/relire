@@ -111,7 +111,7 @@ for (const phone of [false, true]) {
     await expect(token).toBeFocused();
     await expect(page.getByRole('link', { name: 'Open in the reader' })).toHaveAttribute(
       'href',
-      '#/passage/petit-prince/unit-reading-cloze',
+      '#/passage/unit-reading-cloze',
     );
     const item = row(page, 'Le renard dit');
     await item.getByRole('textbox').nth(0).fill('chassons');

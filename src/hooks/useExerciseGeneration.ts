@@ -1,7 +1,8 @@
 /**
- * "Make exercises from this article": asks for a set (always a new one, since
+ * "Make exercises from this article": asks for a set (always a new batch, since
  * the learner pressed the button), turns it into stored units with fresh ids
- * and saves them. The screen shows the state on the button and in one status
+ * and saves them. The batch is titled with the article's title and keeps no
+ * link to it. The screen shows the state on the button and in one status
  * line; a missing key is handed to the caller, which opens Settings. Late
  * results after the learner moved on are still saved (the AI call was paid
  * for) but touch no screen state.
@@ -9,13 +10,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { generateExercises, MissingApiKeyError } from '../services/api';
 import { toStoredUnits } from '../services/exercises/fromGenerated';
-import i18n from '../i18n';
-import { ArticleChangedError, listUnits, saveUnits } from '../storage/exercises';
+import { saveUnits } from '../storage/exercises';
 import type { Article } from '../types';
+import type { ExerciseLevel } from '../types/exercises';
 import { aiErrorText } from '../utils/aiErrorText';
+import { cleanArticleTitle } from '../utils/i18nHelpers';
 
 export interface GenerationOptions {
-  level: string;
+  level: ExerciseLevel;
   count: number;
 }
 
@@ -48,10 +50,13 @@ export function useExerciseGeneration(article: Article, onMissingKey: () => void
       setState({ status: 'working' });
       try {
         const set = await generateExercises({ articleText: article.content, count, level }, true);
-        // Numbers continue after the units the article already has, so the list keeps its order.
-        const existing = await listUnits(article.id);
-        const firstNumber = existing.reduce((highest, unit) => Math.max(highest, unit.unitNumber), 0) + 1;
-        const saved = await saveUnits(article.id, toStoredUnits(set.units, { firstNumber }), article.content);
+        const saved = await saveUnits(
+          toStoredUnits(set.units, {
+            setId: crypto.randomUUID(),
+            setTitle: cleanArticleTitle(article.title) || undefined,
+            level,
+          }),
+        );
         if (mine !== session.current) return;
         setState({
           status: 'done',
@@ -66,15 +71,12 @@ export function useExerciseGeneration(article: Article, onMissingKey: () => void
           onMissingKey();
           return;
         }
-        setState({
-          status: 'error',
-          message: err instanceof ArticleChangedError ? i18n.t('practice.articleChanged') : aiErrorText(err),
-        });
+        setState({ status: 'error', message: aiErrorText(err) });
       } finally {
         working.current = false;
       }
     },
-    [article.content, article.id, onMissingKey],
+    [article.content, article.title, onMissingKey],
   );
 
   return { state, make };

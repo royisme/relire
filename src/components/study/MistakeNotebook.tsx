@@ -1,8 +1,7 @@
-/** The latest wrong snapshot of each item, including those later answered correctly or whose source was removed. */
+/** The latest wrong snapshot of each item, including those later answered correctly or whose unit was removed. */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMistakes } from '../../hooks/useMistakes';
-import type { Article } from '../../types';
 import { GRAMMAR_AREA_IDS, GRAMMAR_TAGS, grammarAreaOf } from '../../types/grammar';
 import { Button } from '../ui/button';
 import { Link } from '../shell/Link';
@@ -20,12 +19,11 @@ const areaLabel = {
 } as const;
 
 interface Props {
-  articles: Article[];
   onMissingKey: () => void;
   onWord: (word: string, sentence: string, context?: string) => void;
 }
 
-export function MistakeNotebook({ articles, onMissingKey, onWord }: Props) {
+export function MistakeNotebook({ onMissingKey, onWord }: Props) {
   const { t } = useTranslation();
   const { rows, loading, error, retry } = useMistakes();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -71,7 +69,6 @@ export function MistakeNotebook({ articles, onMissingKey, onWord }: Props) {
               <h2 className="font-serif text-lg font-semibold text-ink-900">{t(`grammarAreas.${areaLabel[area]}`)}</h2>
               <ul className="mt-3 divide-y divide-ink-200 border-y border-ink-200">
                 {entries.map(({ attempt, resolved, unit }) => {
-                  const material = articles.find((article) => article.id === attempt.materialId);
                   const context = unit
                     ? [unit.instruction, unit.readingPassage?.content].filter(Boolean).join('\n')
                     : undefined;
@@ -103,7 +100,7 @@ export function MistakeNotebook({ articles, onMissingKey, onWord }: Props) {
                         <Button variant="outline" onClick={() => setSelectedId(attempt.id)}>
                           {t('practice.explain')}
                         </Button>
-                        {unit && material ? (
+                        {unit ? (
                           <Link
                             to={{ name: 'unit', unitId: unit.id }}
                             className="inline-flex min-h-10 items-center px-3 text-sm text-accent-900 underline"
@@ -113,22 +110,8 @@ export function MistakeNotebook({ articles, onMissingKey, onWord }: Props) {
                         ) : (
                           <span className="text-xs text-ink-500">{t('notebook.unitUnavailable')}</span>
                         )}
-                        {material ? (
-                          <Link
-                            to={
-                              material.kind === 'workbook' && !material.content.trim()
-                                ? { name: 'practice', articleId: material.id }
-                                : { name: 'reader', articleId: material.id }
-                            }
-                            className="inline-flex min-h-10 items-center px-3 text-sm text-accent-900 underline"
-                          >
-                            {t('notebook.openMaterial')}
-                          </Link>
-                        ) : (
-                          <span className="text-xs text-ink-500">{t('notebook.materialUnavailable')}</span>
-                        )}
                       </div>
-                      {unit && material && <p className="text-xs text-ink-500">{t('notebook.retryHelp')}</p>}
+                      {unit && <p className="text-xs text-ink-500">{t('notebook.retryHelp')}</p>}
                     </li>
                   );
                 })}

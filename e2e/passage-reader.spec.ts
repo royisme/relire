@@ -14,57 +14,49 @@ test.beforeEach(async ({ page, ai }) => {
   ai.ttsDelayMs = 30;
   await trackPlayback(page);
 });
-/** Opening words of the material's own prose (`src/data/sampleArticles.ts`): a passage prompt must never carry them. */
+/** Opening words of a sample article's prose (`src/data/sampleArticles.ts`): a passage prompt must never carry them. */
 const materialProse = "C'est une chose trop oubliée, dit le renard.";
 for (const phone of [false, true]) {
-  for (const blank of [false, true]) {
-    test(`passage link reads the exact distinct stored text with ${blank ? 'empty' : 'different'} material, Back and reload ${phone ? '@phone' : ''}`, async ({
-      page,
-      ai,
-    }) => {
-      await page.addInitScript(
-        (theme) => localStorage.setItem('relire_theme', theme),
-        blank ? 'dark' : phone ? 'sepia' : 'light',
-      );
-      await prepare(page, blank);
-      const storedSource = () =>
-        page.evaluate(async () => {
-          const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-          const d = await db();
-          return JSON.stringify([await d.getAll('articles'), await d.getAll('units')]);
-        });
-      const sourceBefore = await storedSource();
-      await page.getByRole('link', { name: 'Open in the reader' }).click();
-      await expect(page).toHaveURL(/#\/passage\/petit-prince\/unit-reading-cloze$/);
-      await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
-      const text = page.locator('article [data-sentence]');
-      await expect(text).toHaveText(['Nous visitons le jardin. ', 'Les oiseaux chantent dans les arbres.']);
-      await expect(page.getByRole('link', { name: 'Make exercises' })).toHaveCount(0);
-      await settled(page);
-      const before = await layout(page, 'article');
-      await page.getByRole('button', { name: 'Listen', exact: true }).click();
-      await expect.poll(() => ai.calls.tts).toBeGreaterThan(0);
-      await expect.poll(() => plays(page)).toContain('reference');
-      await page.keyboard.press('Escape');
-      expect((await layout(page, 'article')).top).toBe(before.top);
-      expect(await overflowing(page.locator('body'))).toEqual([]);
-      await page.reload();
-      await expect(text).toHaveCount(2);
-      await page.goBack();
-      await expect(page.getByRole('heading', { name: 'Compléter le passage', exact: true })).toBeVisible();
-      await page.goForward();
-      await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
-      await page.getByRole('button', { name: 'Back to exercises' }).click();
-      await expect(page).toHaveURL(/#\/practice\/unit-reading-cloze$/);
-      expect(await storedSource()).toBe(sourceBefore);
-    });
-  }
+  test(`passage link reads the exact stored text, Back and reload ${phone ? '@phone' : ''}`, async ({ page, ai }) => {
+    await page.addInitScript((theme) => localStorage.setItem('relire_theme', theme), phone ? 'sepia' : 'light');
+    await prepare(page);
+    const storedSource = () =>
+      page.evaluate(async () => {
+        const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+        const d = await db();
+        return JSON.stringify([await d.getAll('articles'), await d.getAll('units')]);
+      });
+    const sourceBefore = await storedSource();
+    await page.getByRole('link', { name: 'Open in the reader' }).click();
+    await expect(page).toHaveURL(/#\/passage\/unit-reading-cloze$/);
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+    const text = page.locator('article [data-sentence]');
+    await expect(text).toHaveText(['Nous visitons le jardin. ', 'Les oiseaux chantent dans les arbres.']);
+    await expect(page.getByRole('link', { name: 'Make exercises' })).toHaveCount(0);
+    await settled(page);
+    const before = await layout(page, 'article');
+    await page.getByRole('button', { name: 'Listen', exact: true }).click();
+    await expect.poll(() => ai.calls.tts).toBeGreaterThan(0);
+    await expect.poll(() => plays(page)).toContain('reference');
+    await page.keyboard.press('Escape');
+    expect((await layout(page, 'article')).top).toBe(before.top);
+    expect(await overflowing(page.locator('body'))).toEqual([]);
+    await page.reload();
+    await expect(text).toHaveCount(2);
+    await page.goBack();
+    await expect(page.getByRole('heading', { name: 'Compléter le passage', exact: true })).toBeVisible();
+    await page.goForward();
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Back to exercises' }).click();
+    await expect(page).toHaveURL(/#\/practice\/unit-reading-cloze$/);
+    expect(await storedSource()).toBe(sourceBefore);
+  });
 
   test(`passage word and sentence analyses use only passage context and discard late source replies ${phone ? '@phone' : ''}`, async ({
     page,
     ai,
   }) => {
-    // The material keeps its own (different) prose, so "not the material" below can actually fail.
+    // The library keeps its own (different) prose, so "not the article" below can actually fail.
     await prepare(page);
     await page.getByRole('link', { name: 'Open in the reader' }).click();
     await page.locator('article').getByRole('button', { name: 'jardin', exact: true }).click();
@@ -99,20 +91,16 @@ for (const phone of [false, true]) {
   });
 }
 
-test('missing, deleted and mismatched passage routes never fall back to material or the last reader', async ({
-  page,
-}) => {
+test('missing and deleted passage routes never fall back to an article or the last reader', async ({ page }) => {
   await prepare(page);
-  for (const path of ['petit-prince/missing', 'cafe-parisien/unit-reading-cloze']) {
-    await page.goto(`/#/passage/${path}`);
-    await expect(page.getByText('This passage is no longer available.', { exact: false })).toBeVisible();
-    await expect(page.locator('article')).toHaveCount(0);
-  }
+  await page.goto('/#/passage/missing');
+  await expect(page.getByText('This passage is no longer available.', { exact: false })).toBeVisible();
+  await expect(page.locator('article')).toHaveCount(0);
   await page.evaluate(async () => {
     const { deleteUnit }: Exercises = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
     await deleteUnit('unit-reading-cloze');
   });
-  await page.goto('/#/passage/petit-prince/unit-reading-cloze');
+  await page.goto('/#/passage/unit-reading-cloze');
   await expect(page.getByText('This passage is no longer available.', { exact: false })).toBeVisible();
   await expect(page.getByRole('link', { name: /library/i })).toBeVisible();
 });

@@ -2,9 +2,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Article } from '../../types';
-import type { ExerciseUnit } from '../../types/exercises';
+import { EXERCISE_LEVELS, type ExerciseLevel, type ExerciseUnit } from '../../types/exercises';
 import { prepareImport, type ImportDraft } from '../../services/exercises/importDraft';
-import { createImportedMaterial } from '../../storage/exercises';
+import { saveArticle } from '../../storage/db';
+import { saveUnits } from '../../storage/exercises';
 import { clipboardImage } from '../../services/importMaterial';
 import { useImportSource } from '../../hooks/useImportSource';
 import { useImportGuard } from '../../hooks/useImportGuard';
@@ -15,15 +16,16 @@ import { Button } from '../ui/button';
 import { Dialog, OverlayHeader } from '../ui/overlay';
 import { PageHeader } from '../ui/page-header';
 import { field } from './fields';
-type Destination = 'exercises' | 'article' | 'both';
-type Prepared = { article: Article; units: ExerciseUnit[] };
+type Destination = 'exercises' | 'article';
+type Prepared = { article: Article } | { units: ExerciseUnit[] };
 export function ImportPage({ onCreated }: { onCreated: (article: Article) => void }) {
   const { t } = useTranslation();
   const source = useImportSource();
   const [draft, setDraft] = useState<ImportDraft | null>(null);
   const [selected, setSelected] = useState(new Set<string>());
   const [edited, setEdited] = useState(new Set<string>());
-  const [destination, setDestination] = useState<Destination>('both');
+  const [destination, setDestination] = useState<Destination>('exercises');
+  const [level, setLevel] = useState<ExerciseLevel | ''>('');
   const [confirmed, setConfirmed] = useState(false);
   const [saving, setSaving] = useState(false);
   const pendingSave = useRef(false);
@@ -63,59 +65,63 @@ export function ImportPage({ onCreated }: { onCreated: (article: Article) => voi
   async function save() {
     if (!draft || !source.result || !confirmed || pendingSave.current) return;
     if (!prepared.current) {
-      if (!draft.materialTitle?.trim() || (destination !== 'exercises' && !draft.sourceText.trim())) {
+      if (!draft.materialTitle?.trim() || (destination === 'article' && !draft.sourceText.trim())) {
         setError(t('importFlow.requiredText'));
         return;
       }
-      const article: Article = {
-        id: `material-${crypto.randomUUID()}`,
-        title: draft.materialTitle.trim(),
-        content: draft.sourceText.trim(),
-        kind: destination === 'exercises' ? 'workbook' : 'article',
-        level: '',
-        category: '',
-        source: source.result.source.name,
-        createdAt: new Date().toISOString(),
-      };
-      const result =
-        destination === 'article'
-          ? { units: [], errors: [] }
-          : prepareImport(
-              { ...draft, units: draft.units.filter((unit) => selected.has(unit.id)) },
-              source.result.source,
-              source.result.mode,
-              { materialId: article.id, editedAnswers: edited },
-            );
-      if (result.errors.length) {
-        setError(
-          result.errors
-            .map((issue) =>
-              t(`importFlow.errors.${issue.code}`, { title: issue.unitTitle, msg: issue.issues.join('; ') }),
-            )
-            .join('\n'),
+      if (destination === 'article') {
+        prepared.current = {
+          article: {
+            id: `material-${crypto.randomUUID()}`,
+            title: draft.materialTitle.trim(),
+            content: draft.sourceText.trim(),
+            level: '',
+            category: '',
+            source: source.result.source.name,
+            createdAt: new Date().toISOString(),
+          },
+        };
+      } else {
+        if (!level) {
+          setError(t('importFlow.levelRequired'));
+          return;
+        }
+        const result = prepareImport(
+          { ...draft, units: draft.units.filter((unit) => selected.has(unit.id)) },
+          source.result.source,
+          source.result.mode,
+          { setId: crypto.randomUUID(), level, editedAnswers: edited },
         );
-        return;
+        if (result.errors.length) {
+          setError(
+            result.errors
+              .map((issue) =>
+                t(`importFlow.errors.${issue.code}`, { title: issue.unitTitle, msg: issue.issues.join('; ') }),
+              )
+              .join('\n'),
+          );
+          return;
+        }
+        if (!result.units.length) {
+          setError(t('importFlow.selectUnits'));
+          return;
+        }
+        prepared.current = { units: result.units };
       }
-      if (destination !== 'article' && !result.units.length) {
-        setError(t('importFlow.selectUnits'));
-        return;
-      }
-      prepared.current = { article, units: result.units };
     }
     pendingSave.current = true;
     setSaving(true);
     setError('');
     try {
       const payload = prepared.current;
-      await createImportedMaterial(payload.article, payload.units);
+      if ('article' in payload) await saveArticle(payload.article);
+      else await saveUnits(payload.units);
       guard.release();
       source.dispose();
-      onCreated(payload.article);
-      navigate(
-        payload.units.length
-          ? { name: 'practice', articleId: payload.article.id }
-          : { name: 'reader', articleId: payload.article.id },
-      );
+      if ('article' in payload) {
+        onCreated(payload.article);
+        navigate({ name: 'reader', articleId: payload.article.id });
+      } else navigate({ name: 'practice' });
     } catch (err) {
       setError(t('importFlow.saveFailed', { msg: err instanceof Error ? err.message : String(err) }));
     } finally {
@@ -172,9 +178,32 @@ export function ImportPage({ onCreated }: { onCreated: (article: Article) => voi
                   setDestination(e.target.value as Destination);
                 }}
               >
-                {(['exercises', 'article', 'both'] as const).map((value) => (
+                {(['exercises', 'article'] as const).map((value) => (
                   <option key={value} value={value}>
                     {t(`importFlow.destinations.${value}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm">
+              {t('importFlow.level')}
+              <select
+                aria-label={t('importFlow.level')}
+                className={field}
+                value={level}
+                disabled={destination === 'article'}
+                aria-required={destination === 'exercises'}
+                onChange={(e) => {
+                  invalidate();
+                  setLevel(e.target.value as ExerciseLevel);
+                }}
+              >
+                <option value="" disabled>
+                  {t('importFlow.chooseLevel')}
+                </option>
+                {EXERCISE_LEVELS.map((value) => (
+                  <option key={value} value={value}>
+                    {t(`levels.${value}`)}
                   </option>
                 ))}
               </select>

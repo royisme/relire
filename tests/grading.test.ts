@@ -266,7 +266,6 @@ describe('attempts', () => {
       id: 'a1',
       unitId: unit.id,
       itemId: 'fb-2',
-      materialId: 'material-1',
       grammarTag: 'present',
       prompt: 'Tu [___] polonais et elle [___] belge.',
       userAnswer: 'es / sont',

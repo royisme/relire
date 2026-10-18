@@ -1,9 +1,8 @@
 import { beforeEach, expect, spyOn, test } from 'bun:test';
 import { answered, answeredMulti, failure, freshDb, putArticle, right, seedUnit, wrong } from './fixtures/storage';
 import { ITEMS, unitOf } from './fixtures/units';
-import { db, deleteArticleData } from '../src/storage/db';
+import { db, deleteArticleData, deleteSetData } from '../src/storage/db';
 import {
-  ArticleGoneError,
   DuplicateUnitError,
   ItemGoneError,
   StaleResetError,
@@ -30,29 +29,32 @@ const CLASH = 'clash-0-0-0-0';
 const FIRST = ITEMS.FILL_BLANKS.id;
 const SECOND = ITEMS.FILL_BLANKS_MULTI.id;
 
-test('saveUnits stores units for an existing material and lists them in unit order', async () => {
-  await putArticle();
-  const later = { ...unitOf('OPEN_QA'), id: 'b', unitNumber: 2 };
-  const earlier = { ...unitOf('WORD_TRANSFORM'), id: 'a', unitNumber: 1 };
-  await saveUnits('material-1', [later, earlier]);
-  expect((await listUnits('material-1')).map((unit) => unit.id)).toEqual(['a', 'b']);
-  expect((await getUnit('a'))?.materialId).toBe('material-1');
-  expect(await listUnits('other')).toEqual([]);
+test('saveUnits stores a batch and lists every unit in unit order, each keeping its set id, title and level', async () => {
+  const later = { ...unitOf('OPEN_QA'), id: 'b', unitNumber: 2, setTitle: 'Lesson 1', level: 'B2' as const };
+  const earlier = { ...unitOf('WORD_TRANSFORM'), id: 'a', unitNumber: 1, setTitle: 'Lesson 1', level: 'B2' as const };
+  await saveUnits([later, earlier]);
+  await saveUnits([{ ...unitOf('GENDER_CHECK'), id: 'c', unitNumber: 3, setId: 'set-2' }]);
+  expect((await listUnits()).map((unit) => unit.id)).toEqual(['a', 'b', 'c']);
+  expect(await getUnit('a')).toMatchObject({ setId: 'set-1', setTitle: 'Lesson 1', level: 'B2' });
+  expect((await getUnit('c'))?.setTitle).toBeUndefined();
+  expect(await (await db()).getAllKeysFromIndex('units', 'setId', 'set-1')).toEqual(['a', 'b']);
 });
 
-test('saveUnits rejects a deleted material, a duplicate id and an invalid unit without storing anything', async () => {
-  expect(await failure(saveUnits('gone', [unitOf('FILL_BLANKS')]))).toBeInstanceOf(ArticleGoneError);
-  expect(await listUnits()).toEqual([]);
-
+test('saveUnits rejects a duplicate id, a mixed batch, a missing level and an invalid unit without storing anything', async () => {
   await seedUnit();
   const fresh = { ...unitOf('OPEN_QA'), id: 'fresh' };
-  expect(await failure(saveUnits('material-1', [fresh, { ...fresh, id: 'unit-material-1' }]))).toBeInstanceOf(
-    DuplicateUnitError,
-  );
+  expect(await failure(saveUnits([fresh, { ...fresh, id: 'unit-set-1' }]))).toBeInstanceOf(DuplicateUnitError);
+  expect(await getUnit('fresh')).toBeUndefined();
+
+  expect(await failure(saveUnits([fresh, { ...fresh, id: 'other', setId: 'set-9' }]))).toBeInstanceOf(Error);
+  expect(await getUnit('fresh')).toBeUndefined();
+
+  const { level: _level, ...unleveled } = fresh;
+  expect(await failure(saveUnits([unleveled as typeof fresh]))).toBeInstanceOf(Error);
   expect(await getUnit('fresh')).toBeUndefined();
 
   const broken = { ...unitOf('FILL_BLANKS'), id: 'broken', items: [] };
-  expect(await failure(saveUnits('material-1', [broken]))).toBeInstanceOf(Error);
+  expect(await failure(saveUnits([broken]))).toBeInstanceOf(Error);
   expect(await getUnit('broken')).toBeUndefined();
 });
 
@@ -74,7 +76,6 @@ test('checking an item writes the state and the attempt together, deriving the a
   expect(attempt).toMatchObject({
     unitId: unit.id,
     itemId: FIRST,
-    materialId: 'material-1',
     grammarTag: 'present',
     prompt: 'Je [___] française.',
     userAnswer: 'suis',
@@ -105,7 +106,6 @@ async function seedAttempt(unitId: string) {
     id: 'seed',
     unitId,
     itemId: FIRST,
-    materialId: 'material-1',
     grammarTag: 'present' as const,
     prompt: 'p',
     userAnswer: 'a',
@@ -215,25 +215,40 @@ test('deleting a unit removes its states, keeps its attempts and invalidates its
   expect(await listAttempts()).toHaveLength(1);
 
   // The same id saved again must not accept a writer from the deleted unit.
-  await saveUnits('material-1', [{ ...unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]), id: unit.id }]);
+  await saveUnits([{ ...unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]), id: unit.id }]);
   expect(await failure(saveItemProgress(unit.id, FIRST, 0, { hintShown: true }))).toBeInstanceOf(StaleResetError);
 });
 
-test('deleting an article deletes its units and states in one go, and keeps attempts', async () => {
-  const mine = await seedUnit('material-1');
-  const other = await seedUnit('material-2');
-  await checkItem({ unitId: mine.id, itemId: FIRST, resetToken: 0, answer: answered('suis'), result: right });
-  await checkItem({ unitId: other.id, itemId: FIRST, resetToken: 0, answer: answered('es'), result: wrong });
+test('deleting an article leaves generated units, their states and attempts untouched', async () => {
+  await putArticle('material-1');
+  const unit = await seedUnit();
+  await checkItem({ unitId: unit.id, itemId: FIRST, resetToken: 0, answer: answered('suis'), result: right });
 
   await deleteArticleData('material-1');
   expect(await (await db()).get('articles', 'material-1')).toBeUndefined();
-  expect(await listUnits('material-1')).toEqual([]);
-  expect(await listItemStates(mine.id)).toEqual([]);
-  expect((await listAttempts({ materialId: 'material-1' })).length).toBe(1);
+  expect(await getUnit(unit.id)).toEqual(unit);
+  expect(await listItemStates(unit.id)).toHaveLength(1);
+  expect(await listAttempts()).toHaveLength(1);
+});
 
-  expect(await listUnits('material-2')).toHaveLength(1);
-  expect(await listItemStates(other.id)).toHaveLength(1);
+test('deleting a set removes its units and states, keeps attempts and invalidates its writers', async () => {
+  const mine = await seedUnit('set-1');
+  const other = await seedUnit('set-2');
+  await checkItem({ unitId: mine.id, itemId: FIRST, resetToken: 0, answer: answered('suis'), result: right });
+  await checkItem({ unitId: other.id, itemId: FIRST, resetToken: 0, answer: answered('es'), result: wrong });
+  let calls = 0;
+  const stop = subscribeExercises(() => calls++);
+
+  await deleteSetData('set-1');
+  stop();
+  expect(calls).toBe(1);
+  expect(await getUnit(mine.id)).toBeUndefined();
+  expect(await listItemStates(mine.id)).toEqual([]);
+  expect(await listAttempts({ unitId: mine.id })).toHaveLength(1);
   expect(await failure(saveItemProgress(mine.id, FIRST, 0, {}))).toBeInstanceOf(UnitGoneError);
+
+  expect(await getUnit(other.id)).toEqual(other);
+  expect(await listItemStates(other.id)).toHaveLength(1);
 });
 
 test('accuracy per tag counts real attempts only, in taxonomy order', async () => {
@@ -246,7 +261,7 @@ test('accuracy per tag counts real attempts only, in taxonomy order', async () =
 
   // Both items are tagged `present`; a third attempt on another tag shows up separately.
   const gender = { ...unitOf('GENDER_CHECK'), id: 'gender' };
-  await saveUnits('material-1', [gender]);
+  await saveUnits([gender]);
   await checkItem({
     unitId: 'gender',
     itemId: ITEMS.GENDER_CHECK.id,
@@ -280,14 +295,14 @@ test('the mistake notebook lists the latest wrong attempt per item, newest first
 
 test('listAttempts returns the newest first and honours the limit and filters', async () => {
   const unit = await seedUnit();
-  const other = await seedUnit('material-2');
+  const other = await seedUnit('set-2');
   await checkItem({ unitId: unit.id, itemId: FIRST, resetToken: 0, answer: answered('1'), result: wrong });
   await checkItem({ unitId: other.id, itemId: FIRST, resetToken: 0, answer: answered('2'), result: wrong });
   await checkItem({ unitId: unit.id, itemId: SECOND, resetToken: 0, answer: answeredMulti('3'), result: wrong });
   expect((await listAttempts()).map((a) => a.userAnswer)).toEqual(['3 / 3', '2', '1']);
   expect((await listAttempts({ limit: 2 })).map((a) => a.userAnswer)).toEqual(['3 / 3', '2']);
   expect((await listAttempts({ unitId: unit.id })).map((a) => a.userAnswer)).toEqual(['3 / 3', '1']);
-  expect((await listAttempts({ materialId: 'material-2' })).map((a) => a.userAnswer)).toEqual(['2']);
+  expect((await listAttempts({ unitId: other.id })).map((a) => a.userAnswer)).toEqual(['2']);
 });
 
 test('listeners are told after commits and not after a rejected write', async () => {
@@ -303,7 +318,7 @@ test('listeners are told after commits and not after a rejected write', async ()
   expect(calls).toBe(3);
   expect(await failure(saveItemProgress(unit.id, FIRST, 0, {}))).toBeInstanceOf(StaleResetError);
   expect(calls).toBe(3);
-  await deleteArticleData('material-1');
+  await deleteSetData('set-1');
   expect(calls).toBe(4);
   stop();
   await deleteUnit('nothing');

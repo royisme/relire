@@ -37,11 +37,10 @@ test('a backup restored from Settings brings back exercise units, states and att
 
   const backup = await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
-    const { db, exportData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+    const { exportData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     const { ITEMS, unitOf }: Units = await import(/* @vite-ignore */ '/tests/fixtures/units.ts' as string);
     const { emptyAnswer }: Answers = await import(/* @vite-ignore */ '/src/services/exercises/answer.ts' as string);
-    const [article] = await (await db()).getAll('articles');
-    const [unit] = await storage.saveUnits(article.id, [{ ...unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]), id: 'u1' }]);
+    const [unit] = await storage.saveUnits([{ ...unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]), id: 'u1' }]);
     const item = unit.items[0];
     await storage.checkItem({
       unitId: unit.id,

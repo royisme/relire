@@ -1,21 +1,15 @@
-/** Promote a complete drill set into one standalone workbook and one validated mixed sheet. No invented source text. */
-import type { Article } from '../../types';
+/** Promote a complete drill set into one new batch holding one validated mixed sheet. No invented source text. */
 import { DrillsSchema, type Drills } from '../../types/exerciseAi';
-import { ExerciseUnitSchema, type ExerciseUnit } from '../../types/exercises';
+import { ExerciseUnitSchema, type ExerciseLevel, type ExerciseUnit } from '../../types/exercises';
 import type { GrammarTag } from '../../types/grammar';
 import { InvalidAnswerError } from '../ai/errors';
-
-export interface PreparedDrills {
-  article: Article;
-  unit: ExerciseUnit;
-}
 
 export function prepareDrills(
   value: Drills,
   targets: readonly GrammarTag[],
-  level: string,
+  level: ExerciseLevel,
   makeId: () => string = () => crypto.randomUUID(),
-): PreparedDrills {
+): ExerciseUnit {
   const drills = DrillsSchema.parse(value);
   for (const item of drills.items) {
     if (!targets.includes(item.grammarTag))
@@ -25,18 +19,11 @@ export function prepareDrills(
         `Item ${item.id} requires a reading passage, which drills do not supply`,
       ]);
   }
-  const article: Article = {
-    id: `material-${makeId()}`,
-    title: drills.drillTitle,
-    content: '',
-    kind: 'workbook',
-    level,
-    category: '',
-    createdAt: new Date().toISOString(),
-  };
-  const unit = ExerciseUnitSchema.parse({
+  return ExerciseUnitSchema.parse({
     id: `unit-${makeId()}`,
-    materialId: article.id,
+    setId: makeId(),
+    setTitle: drills.drillTitle,
+    level,
     section: 'EXTRA',
     unitNumber: 1,
     title: drills.drillTitle,
@@ -50,5 +37,4 @@ export function prepareDrills(
       answerSource: 'ai',
     })),
   });
-  return { article, unit };
 }

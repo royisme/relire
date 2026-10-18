@@ -1,6 +1,6 @@
 /**
  * The app's places as one tree, drawn by the sidebar (expanded or as a rail) and by the phone drawer:
- * Read, My study (Words, Shadowing, Mistakes), Practice (with the open article's units) and Progress at the top;
+ * Read, My study (Words, Shadowing, Mistakes), Practice (with the units of the open unit's batch) and Progress at the top;
  * install, Settings (with its sections while on a settings page) and About at the bottom. Owns which row is current,
  * and the counts on Words (due today) and Mistakes (still unresolved); navigation itself is `Link`.
  */
@@ -9,7 +9,6 @@ import { BarChart3, BookmarkCheck, BookOpen, Download, Dumbbell, Info, Settings 
 import { PWAInstallButton } from '../PWAInstallButton';
 import { areaOf, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../../utils/routes';
 import { NavItem } from './NavItem';
-import { useUnitMaterial } from '../../hooks/useMaterialUnits';
 import { useMistakes } from '../../hooks/useMistakes';
 import { PracticeSubnav } from './PracticeSubnav';
 
@@ -26,7 +25,6 @@ interface NavTreeProps {
 export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
   const { t } = useTranslation();
   const area = areaOf(route);
-  const unitMaterial = useUnitMaterial(route.name === 'unit' ? route.unitId : null);
   // Resolved mistakes stay in the notebook as history, so only the unresolved ones are counted.
   const mistakes = useMistakes().rows.filter((row) => !row.resolved).length;
   const item = { rail, onNavigate };
@@ -77,14 +75,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
           ))}
         <NavItem
           {...item}
-          to={{
-            name: 'practice',
-            ...(route.name === 'passage'
-              ? { articleId: route.materialId }
-              : unitMaterial
-                ? { articleId: unitMaterial }
-                : {}),
-          }}
+          to={{ name: 'practice' }}
           icon={Dumbbell}
           label={t('nav.practice')}
           // The list is a page of its own; an open unit makes Practice its parent.

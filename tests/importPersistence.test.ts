@@ -1,32 +1,41 @@
-/** Imported materials and their initial units commit together, with add-only retry identities. */
+/** An import saves either an article or one batch of units; a batch commits whole or not at all, with add-only retry identities. */
 import { beforeEach, expect, test } from 'bun:test';
 import { article, failure, freshDb, seedUnit } from './fixtures/storage';
 import { ITEMS, unitOf } from './fixtures/units';
-import { db } from '../src/storage/db';
-import { createImportedMaterial } from '../src/storage/exercises';
+import { db, saveArticle } from '../src/storage/db';
+import { listUnits, saveUnits } from '../src/storage/exercises';
 import { prepareImport } from '../src/services/exercises/importDraft';
 import { draftFixture } from './fixtures/importDraft';
 
 beforeEach(freshDb);
-const material = article('imported');
-const units = () => [{ ...unitOf('WORD_TRANSFORM', [ITEMS.WORD_TRANSFORM]), id: 'new-unit', materialId: material.id }];
+const batch = () => [
+  { ...unitOf('WORD_TRANSFORM', [ITEMS.WORD_TRANSFORM]), id: 'new-1', unitNumber: 1, setId: 'import-1' },
+  { ...unitOf('OPEN_QA'), id: 'new-2', unitNumber: 2, setId: 'import-1' },
+];
 
-test('creates article, units and started atomically without changing unrelated rows', async () => {
+test('an article import writes the article and started, and touches no unit', async () => {
   const existing = await seedUnit();
+  await saveArticle(article('imported'));
   const d = await db();
-  const before = await d.get('articles', existing.materialId);
-  const prepared = units();
-  await createImportedMaterial(material, prepared);
-  expect(await d.get('articles', material.id)).toEqual(material);
-  expect(await d.get('units', prepared[0].id)).toEqual(prepared[0]);
+  expect(await d.get('articles', 'imported')).toEqual(article('imported'));
   expect(await d.get('meta', 'started')).toBe(true);
-  expect(await d.get('articles', existing.materialId)).toEqual(before);
+  expect(await d.get('units', existing.id)).toEqual(existing);
+});
+
+test('an exercises import saves one batch without any article and leaves unrelated rows alone', async () => {
+  const existing = await seedUnit();
+  const prepared = batch();
+  await saveUnits(prepared);
+  const d = await db();
+  expect(await d.getAll('articles')).toEqual([]);
+  expect((await listUnits()).map((unit) => unit.id).sort()).toEqual(['new-1', 'new-2', existing.id].sort());
+  expect(await d.getAllFromIndex('units', 'setId', 'import-1')).toHaveLength(2);
   expect(await d.get('units', existing.id)).toEqual(existing);
   expect(await d.count('itemStates')).toBe(0);
   expect(await d.count('attempts')).toBe(0);
 });
 
-test('creates an exercises-only workbook with empty source text and fully promoted units', async () => {
+test('a prepared import keeps the set id, the draft title, the chosen level and an empty source text', async () => {
   const draft = {
     ...draftFixture,
     sourceText: '',
@@ -36,95 +45,36 @@ test('creates an exercises-only workbook with empty source text and fully promot
     })),
   };
   const prepared = prepareImport(draft, { kind: 'text', name: 'Worksheet', pages: [] }, 'complete', {
-    materialId: material.id,
+    setId: 'set-import',
+    level: 'C1',
   });
   expect(prepared.errors).toEqual([]);
-  const workbook = { ...material, kind: 'workbook' as const, content: '' };
-  await createImportedMaterial(workbook, prepared.units);
+  await saveUnits(prepared.units);
   const d = await db();
-  expect(await d.get('articles', material.id)).toEqual(workbook);
   expect(await d.getAll('units')).toEqual(prepared.units);
+  expect(prepared.units[0]).toMatchObject({ setId: 'set-import', setTitle: 'Mon document', level: 'C1' });
   expect(prepared.units[0].importSource?.extractedText).toBe('');
-  expect(await d.get('meta', 'started')).toBe(true);
 });
 
-test('empty source text still requires a readable article or valid workbook units, and always id/title', async () => {
-  const workbook = { ...material, kind: 'workbook' as const, content: '' };
-  for (const content of ['', '   ']) {
-    expect(await failure(createImportedMaterial({ ...material, kind: 'article', content }, units()))).toBeInstanceOf(
-      Error,
-    );
-  }
-  expect(await failure(createImportedMaterial(workbook, []))).toBeInstanceOf(Error);
-  expect(await failure(createImportedMaterial(workbook, [{ ...units()[0], items: [] }]))).toBeInstanceOf(Error);
-  for (const kind of ['article', 'workbook'] as const) {
-    expect(await failure(createImportedMaterial({ ...material, kind, id: ' ' }, units()))).toBeInstanceOf(Error);
-    expect(await failure(createImportedMaterial({ ...material, kind, title: ' ' }, units()))).toBeInstanceOf(Error);
-  }
-  const d = await db();
-  expect(await d.count('articles')).toBe(0);
-  expect(await d.count('units')).toBe(0);
-  expect(await d.get('meta', 'started')).toBeUndefined();
+test('rejects an empty unit, a duplicate id and a mixed batch before writing', async () => {
+  const prepared = batch();
+  expect(await failure(saveUnits([{ ...prepared[0], items: [] }]))).toBeInstanceOf(Error);
+  expect(await failure(saveUnits([...prepared, ...prepared]))).toBeInstanceOf(Error);
+  expect(await failure(saveUnits([prepared[0], { ...prepared[1], setId: 'other' }]))).toBeInstanceOf(Error);
+  expect(await (await db()).count('units')).toBe(0);
 });
 
-test('rejects dangling links and duplicate initial ids before writing', async () => {
-  const prepared = units();
-  expect(await failure(createImportedMaterial(material, [{ ...prepared[0], materialId: 'other' }]))).toBeInstanceOf(
-    Error,
-  );
-  expect(await failure(createImportedMaterial(material, [...prepared, ...prepared]))).toBeInstanceOf(Error);
-  const d = await db();
-  expect(await d.count('articles')).toBe(0);
-  expect(await d.count('units')).toBe(0);
-  expect(await d.get('meta', 'started')).toBeUndefined();
-});
-
-test('unit collision rolls back article; unchanged prepared identities succeed after removing collision', async () => {
+test('a collision rolls the whole batch back; unchanged prepared identities succeed after removing it', async () => {
   const existing = await seedUnit();
   const d = await db();
-  const prepared = [{ ...units()[0], id: existing.id }];
-  const error = await failure(createImportedMaterial(material, prepared));
-  expect(error).toBeInstanceOf(DOMException);
-  expect(await d.get('articles', material.id)).toBeUndefined();
+  const prepared = batch();
+  prepared[1].id = existing.id;
+  expect(await failure(saveUnits(prepared))).toBeInstanceOf(Error);
+  expect(await d.get('units', 'new-1')).toBeUndefined();
   expect(await d.get('units', existing.id)).toEqual(existing);
   await d.delete('units', existing.id);
-  await createImportedMaterial(material, prepared);
-  expect(await d.get('units', existing.id)).toEqual(prepared[0]);
+  await saveUnits(prepared);
+  expect(await d.get('units', existing.id)).toEqual(prepared[1]);
   // Even identical existing data is a collision, never evidence of a successful retry.
-  expect(await failure(createImportedMaterial(material, prepared))).toBeInstanceOf(DOMException);
-});
-
-test('asynchronous failure preserves original error, consumes tx.done, rolls back started and permits stable retry', async () => {
-  const d = await db();
-  await d.put('meta', true, 'collision');
-  // oxlint-disable-next-line typescript/unbound-method -- Called with the active store and restored below.
-  const put = IDBObjectStore.prototype.put;
-  const errors: (DOMException | null)[] = [];
-  const unhandled: unknown[] = [];
-  const onUnhandled = (reason: unknown) => unhandled.push(reason);
-  process.on('unhandledRejection', onUnhandled);
-  IDBObjectStore.prototype.put = function (value, key) {
-    if (this.name !== 'meta' || key !== 'started') return put.call(this, value, key);
-    const request = this.add(value, 'collision');
-    request.addEventListener('error', () => errors.push(request.error));
-    return request;
-  };
-  const prepared = units();
-  try {
-    const error = await failure(createImportedMaterial(material, prepared));
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(errors).toHaveLength(1);
-    expect(errors[0]?.name).toBe('ConstraintError');
-    expect(error).toBe(errors[0]);
-    expect(unhandled).toEqual([]);
-    expect(await d.count('articles')).toBe(0);
-    expect(await d.count('units')).toBe(0);
-    expect(await d.get('meta', 'started')).toBeUndefined();
-  } finally {
-    IDBObjectStore.prototype.put = put;
-    process.off('unhandledRejection', onUnhandled);
-  }
-  await createImportedMaterial(material, prepared);
-  expect(await d.get('articles', material.id)).toEqual(material);
-  expect(await d.get('units', prepared[0].id)).toEqual(prepared[0]);
+  expect(await failure(saveUnits(prepared))).toBeInstanceOf(Error);
 });

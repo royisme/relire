@@ -33,7 +33,6 @@ async function history(page: Page) {
         id: `history-${index}`,
         unitId: 'deleted-unit',
         itemId: `item-${index}`,
-        materialId: 'deleted-material',
         ...row,
         timestamp: index + 1,
       });
@@ -55,15 +54,17 @@ async function stored(page: Page) {
 async function failSaving(page: Page) {
   await page.evaluate(() => {
     // oxlint-disable-next-line typescript/unbound-method -- Invoked with its store below.
-    const original = IDBObjectStore.prototype.add;
-    const state = window as unknown as { restoreAdd: () => void; preparedWrites: { store: string; value: unknown }[] };
+    const original = IDBObjectStore.prototype.put;
+    const state = window as unknown as { restorePut: () => void; preparedWrites: { store: string; value: unknown }[] };
     state.preparedWrites = [];
-    state.restoreAdd = () => {
-      IDBObjectStore.prototype.add = original;
+    state.restorePut = () => {
+      IDBObjectStore.prototype.put = original;
     };
-    IDBObjectStore.prototype.add = function (value, key) {
-      if (this.name === 'articles' || this.name === 'units') state.preparedWrites.push({ store: this.name, value });
-      if (this.name === 'units') throw new Error('Adaptive storage failure');
+    IDBObjectStore.prototype.put = function (value, key) {
+      if (this.name === 'units') {
+        state.preparedWrites.push({ store: this.name, value });
+        throw new Error('Adaptive storage failure');
+      }
       return original.call(this, value, key);
     };
   });
@@ -111,17 +112,14 @@ for (const phone of [false, true]) {
     expect(ai.calls.adaptive).toBe(1);
     expect(ai.prompts.adaptive[0]).toContain(CATALOG_DRILLS.items[0].prompt);
     const after = await stored(page);
-    expect(after.articles).toHaveLength(before.articles.length + 1);
+    // One self-contained unit: no article row, the drill title as its batch title, the form's level.
+    expect(after.articles).toHaveLength(before.articles.length);
     expect(after.units).toHaveLength(1);
-    expect(after.articles.find((row) => row.id === after.units[0].materialId)).toMatchObject({
-      kind: 'workbook',
-      content: '',
-    });
-    await page.goto('/#/read');
-    await page.getByRole('button', { name: new RegExp(CATALOG_DRILLS.drillTitle) }).click();
-    await expect(page).toHaveURL(new RegExp(`#/practice\\?article=${after.units[0].materialId}$`));
+    expect(after.units[0]).toMatchObject({ setTitle: CATALOG_DRILLS.drillTitle, level: 'B1' });
+    expect(after.units[0]).not.toHaveProperty('materialId');
+    await page.goto('/#/practice');
+    await expect(page.getByRole('main').getByRole('heading', { name: CATALOG_DRILLS.drillTitle })).toBeVisible();
     await page.reload();
-    await expect(page.getByRole('combobox', { name: 'Article', exact: true })).toHaveValue(after.units[0].materialId);
     await page.locator(`main a[href="#/practice/${after.units[0].id}"]`).click();
     await page.reload();
     await expect(page.getByRole('heading', { name: CATALOG_DRILLS.drillTitle })).toBeVisible();
@@ -158,7 +156,6 @@ test('failed save keeps IDs, blocks edits, guards leave, retry makes no AI reque
   await expect(page.getByRole('spinbutton', { name: 'Items', exact: true })).toBeDisabled();
   const failed = await stored(page);
   expect(failed.units).toEqual([]);
-  expect(failed.articles.filter((row) => row.kind === 'workbook')).toEqual([]);
   const writes = await page.evaluate(
     () => (window as unknown as { preparedWrites: { store: string; value: { id: string } }[] }).preparedWrites,
   );
@@ -167,11 +164,11 @@ test('failed save keeps IDs, blocks edits, guards leave, retry makes no AI reque
   await page.getByRole('button', { name: 'Keep this set' }).click();
   await expect(page).toHaveURL(/#\/progress$/);
   await page.evaluate(async () => {
-    (window as unknown as { restoreAdd: () => void }).restoreAdd();
+    (window as unknown as { restorePut: () => void }).restorePut();
     const { db } = (await import('/src/storage/db.ts' as string)) as typeof import('../src/storage/db');
-    const tx = (await db()).transaction('articles', 'readwrite');
+    const tx = (await db()).transaction('units', 'readwrite');
     const hold = () => {
-      void tx.store.get('petit-prince').then(() => {
+      void tx.store.get('held').then(() => {
         if (!sessionStorage.getItem('releaseAdaptiveWrite')) hold();
       });
     };
@@ -187,7 +184,6 @@ test('failed save keeps IDs, blocks edits, guards leave, retry makes no AI reque
   const after = await stored(page);
   expect(after.units).toHaveLength(1);
   expect(after.units[0]).toEqual(writes.find((row) => row.store === 'units')!.value);
-  expect(after.units[0].materialId).toBe(writes.find((row) => row.store === 'articles')!.value.id);
   expect(ai.calls.adaptive).toBe(1);
 });
 

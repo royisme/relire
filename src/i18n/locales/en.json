@@ -51,7 +51,7 @@
     "listenAll": "Listen",
     "sentenceActions": "Sentence actions",
     "makeExercises": "Make exercises",
-    "makeExercisesHint": "Make exercises from this article"
+    "makeExercisesHint": "Make exercises from an article"
   },
   "player": {
     "label": "Article player",
@@ -160,20 +160,21 @@
   },
   "practice": {
     "title": "Practice",
-    "subtitle": "Exercises made from your articles, and reading aloud.",
+    "subtitle": "Your exercise sets, and reading aloud.",
     "noArticleTitle": "Add an article first",
     "noArticleDesc": "Exercises are made from an article in your library.",
     "openLibrary": "Go to library",
     "article": "Article",
     "unitsTitle": "Exercises",
-    "unitsDesc": "Sets of questions made from this article. Your answers and progress are saved on this device.",
-    "noUnits": "No exercises from this article yet. Make a set below.",
+    "unitsDesc": "Sets of questions, from an import, an article or your mistakes. Your answers and progress are saved on this device.",
+    "noUnits": "No exercises yet. Make a set from an article, or import a worksheet.",
+    "fromArticleTitle": "From an article",
+    "fromArticleDesc": "Make a new set of exercises from an article. The set stays here even if you delete the article.",
     "level": "Level",
     "count": "Items",
     "countRange": "Choose a whole number from 1 to {{max}}.",
     "make": "Make exercises from this article",
     "making": "Making exercises from the article…",
-    "articleChanged": "The article changed while exercises were being made. Make a new set from the updated text.",
     "made_one": "Made {{count}} item. It is in the list below.",
     "made_other": "Made {{count}} items. They are in the list below.",
     "dropped_one": "{{count}} item could not be checked against the article and was left out.",
@@ -878,6 +879,9 @@
     "resolved": "I have supplied the missing information",
     "excludeItem": "Exclude",
     "saveAs": "Save as",
+    "level": "Level (exercises)",
+    "chooseLevel": "Choose a level",
+    "levelRequired": "Choose the level of these exercises before saving.",
     "confirm": "I have reviewed the text, included exercises and reference answers. Save this material on this device.",
     "save": "Confirm and save",
     "saving": "Saving…",
@@ -906,9 +910,8 @@
       "user": "Edited by you"
     },
     "destinations": {
-      "exercises": "Exercises only (workbook)",
-      "article": "Article only",
-      "both": "Article with exercises (one material)"
+      "exercises": "Exercises only",
+      "article": "Article only"
     },
     "errors": {
       "no-items": "{{title}}: no included questions. Exclude the unit or add valid questions.",
@@ -924,9 +927,7 @@
     "resolved": "Resolved",
     "unresolved": "To revisit",
     "retryUnit": "Retry in unit",
-    "openMaterial": "Open in material",
     "unitUnavailable": "Unit unavailable",
-    "materialUnavailable": "Material removed",
     "retryHelp": "Opens the saved sheet without changing answers. If already checked, use “Reset this unit” and confirm; attempt history is kept.",
     "emptyWordAnalysis": "The word analysis was empty."
   },

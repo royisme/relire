@@ -40,7 +40,7 @@ test('a backup restores into an empty database with everything intact', async ()
   await freshDb();
   await importData(backup);
   expect(await snapshot()).toBe(JSON.stringify(backup));
-  expect((await loadData())?.articles).toHaveLength(1);
+  expect((await loadData())?.articles).toEqual([]);
 });
 
 for (const strictAccents of [false, true]) {
@@ -59,7 +59,7 @@ test('a backup without the exercise keys keeps the current exercise data', async
   const { units: _u, itemStates: _s, attempts: _a, ...old } = backup;
   await importData(old);
   expect(await listUnits()).toHaveLength(1);
-  expect(await listItemStates('unit-material-1')).toHaveLength(1);
+  expect(await listItemStates('unit-set-1')).toHaveLength(1);
   expect(await listAttempts()).toHaveLength(1);
 });
 
@@ -67,7 +67,7 @@ test('empty arrays clear the exercise data', async () => {
   const backup = await backupWithData();
   await importData({ ...backup, units: [], itemStates: [], attempts: [] });
   expect(await listUnits()).toEqual([]);
-  expect(await listItemStates('unit-material-1')).toEqual([]);
+  expect(await listItemStates('unit-set-1')).toEqual([]);
   expect(await listAttempts()).toEqual([]);
 });
 
@@ -82,10 +82,9 @@ test('malformed exercise data rejects the whole restore and changes nothing', as
     'unit without items': { units: [{ ...unit, items: [] }] },
     'unit with an unknown tag': { units: [{ ...unit, grammarTags: ['nope'] }] },
     'duplicate unit ids': { units: [unit, unit] },
-    'unit of a material the backup does not hold': {
-      articles: [article('replacement')],
-      units: [{ ...unit, materialId: 'elsewhere' }],
-    },
+    'unit without a set id': { units: [{ ...unit, setId: undefined }] },
+    'unit without a level': { units: [{ ...unit, level: undefined }] },
+    'unit with an unknown level': { units: [{ ...unit, level: 'C2' }] },
     'state with a wrong key': { itemStates: [{ ...state, id: 'x' }] },
     'state with a missing field': { itemStates: [{ ...state, answer: undefined }] },
     'checked accents metadata is not boolean': {
@@ -125,27 +124,29 @@ test('a state pointing at a stored unit that does not exist aborts the transacti
   expect(await snapshot()).toBe(before);
 });
 
-test('replacing the articles removes the units of vanished articles with their states and keeps attempts', async () => {
+test('replacing the articles leaves units, their states and attempts untouched', async () => {
   const backup = await backupWithData();
+  const before = await snapshot();
   await importData({ articles: [article('other')], vocab: [], stats: { ...EMPTY_STATS } });
-  expect(await listUnits()).toEqual([]);
-  expect(await listItemStates('unit-material-1')).toEqual([]);
+  expect(await listUnits()).toHaveLength(1);
+  expect(await listItemStates('unit-set-1')).toHaveLength(1);
   expect(await listAttempts()).toHaveLength(backup.attempts.length);
+  expect(JSON.parse(await snapshot()).units).toEqual(JSON.parse(before).units);
 });
 
 test('a restore invalidates writers that started before it, and tells listeners', async () => {
   const backup = await backupWithData();
-  const token = await getResetToken('unit-material-1');
+  const token = await getResetToken('unit-set-1');
   let calls = 0;
   const stop = subscribeExercises(() => calls++);
   await importData(backup);
   expect(calls).toBe(1);
-  expect(await failure(saveItemProgress('unit-material-1', FIRST, token, {}))).toBeInstanceOf(StaleResetError);
+  expect(await failure(saveItemProgress('unit-set-1', FIRST, token, {}))).toBeInstanceOf(StaleResetError);
   // A restore without exercise keys but with the same articles leaves tokens alone.
-  const fresh = await getResetToken('unit-material-1');
+  const fresh = await getResetToken('unit-set-1');
   const { units: _u, itemStates: _s, attempts: _a, articles: _articles, ...rest } = backup;
   await importData(rest);
-  expect(await getResetToken('unit-material-1')).toBe(fresh);
+  expect(await getResetToken('unit-set-1')).toBe(fresh);
   stop();
 });
 

@@ -55,7 +55,6 @@ test.describe('fill in the blanks', () => {
       userAnswer: 'apprivoise / auron',
       expectedAnswer: 'apprivoises / aurons',
       grammarTag: 'hypothesis-si',
-      materialId: 'petit-prince',
     });
   });
 

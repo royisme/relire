@@ -30,17 +30,10 @@ export async function trackPlayback(page: Page) {
 export const plays = (page: Page) =>
   page.evaluate(() => (window as unknown as { passagePlays: string[] }).passagePlays);
 
-export async function prepare(page: Page, blank = false) {
+export async function prepare(page: Page) {
   const unit = structuredClone(CATALOG_EXERCISES.units.find((u) => u.id === unitId)!);
   unit.readingPassage = { title, content };
   await seedUnits(page, [unit]);
-  if (blank)
-    await page.evaluate(async () => {
-      const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-      const d = await db();
-      const article = (await d.get('articles', 'petit-prince'))!;
-      await d.put('articles', { ...article, kind: 'workbook', content: '' });
-    });
   await openUnit(page, unitId, 'Compléter le passage');
 }
 

@@ -1,10 +1,10 @@
 /**
- * An article's exercise units as plain rows separated by rules: title, type and
+ * A batch's exercise units as plain rows separated by rules: title, type and
  * number of items on the left, how far the learner is on the right (counted
  * from the stored item states). A row is a link to the unit's sheet.
  */
 import { useTranslation } from 'react-i18next';
-import type { UnitRow } from '../../hooks/useMaterialUnits';
+import type { UnitRow } from '../../hooks/useUnitRows';
 import { Link } from '../shell/Link';
 
 export function UnitList({ rows }: { rows: UnitRow[] }) {

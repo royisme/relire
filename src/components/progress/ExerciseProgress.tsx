@@ -1,6 +1,5 @@
 /** Honest weighted grammar-area totals beside the adaptive action; existing dashboard surfaces stay separate. */
 import { useTranslation } from 'react-i18next';
-import type { Article } from '../../types';
 import type { GrammarAreaId } from '../../types/grammar';
 import { useExerciseAccuracy } from '../../hooks/useExerciseAccuracy';
 import { accuracyByArea, weakGrammarTags } from '../../services/exercises/accuracy';
@@ -16,13 +15,7 @@ const AREA_LABELS: Record<GrammarAreaId, string> = {
   skills: 'skills',
 };
 
-export function ExerciseProgress({
-  onCreated,
-  onMissingKey,
-}: {
-  onCreated: (article: Article) => void;
-  onMissingKey: () => void;
-}) {
+export function ExerciseProgress({ onMissingKey }: { onMissingKey: () => void }) {
   const { t } = useTranslation();
   const { tags, loading, error } = useExerciseAccuracy();
   const areas = accuracyByArea(tags);
@@ -57,12 +50,7 @@ export function ExerciseProgress({
               ? t('exerciseProgress.empty')
               : ''}
       </p>
-      <AdaptiveDrills
-        targets={weakGrammarTags(tags)}
-        disabled={loading || !!error}
-        onCreated={onCreated}
-        onMissingKey={onMissingKey}
-      />
+      <AdaptiveDrills targets={weakGrammarTags(tags)} disabled={loading || !!error} onMissingKey={onMissingKey} />
     </section>
   );
 }

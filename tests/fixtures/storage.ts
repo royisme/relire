@@ -1,6 +1,6 @@
 /**
  * Storage test helpers: a fresh in-memory IndexedDB per test (fake-indexeddb),
- * a seeded material, and shorthand for the answers the exercise tests check.
+ * a seeded unit, and shorthand for the answers the exercise tests check.
  * Import this module before any `src/storage` module is used.
  */
 import 'fake-indexeddb/auto';
@@ -18,14 +18,13 @@ export async function freshDb() {
   globalThis.indexedDB = new IDBFactory();
 }
 
-export const article = (id = 'material-1', kind: Article['kind'] = 'article'): Article => ({
+export const article = (id = 'material-1'): Article => ({
   id,
   title: `Material ${id}`,
   level: 'A1',
   category: 'test',
   content: 'Je suis française.',
   createdAt: '2026-01-01T00:00:00.000Z',
-  kind,
 });
 
 export async function putArticle(id = 'material-1') {
@@ -34,11 +33,10 @@ export async function putArticle(id = 'material-1') {
   await d.put('meta', true, 'started'); // as saveArticle does; without it loadData treats the app as never used
 }
 
-/** A material with one stored FILL_BLANKS unit holding two items. */
-export async function seedUnit(materialId = 'material-1'): Promise<ExerciseUnit> {
-  await putArticle(materialId);
+/** One stored FILL_BLANKS unit holding two items, in the batch `setId`. */
+export async function seedUnit(setId = 'set-1'): Promise<ExerciseUnit> {
   const base = unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS, ITEMS.FILL_BLANKS_MULTI]);
-  const [unit] = await saveUnits(materialId, [{ ...base, id: `unit-${materialId}` }]);
+  const [unit] = await saveUnits([{ ...base, id: `unit-${setId}`, setId }]);
   return unit;
 }
 

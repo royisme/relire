@@ -167,7 +167,11 @@ describe('generateAdaptiveDrills', () => {
 describe('generateExercises', () => {
   const article = 'Le matin, Léa prend le train pour Lyon. Elle a rendez-vous avec une amie.';
   const input = { articleText: article, count: 2, level: 'A2' };
-  const { materialId: _materialId, ...unit } = unitOf('FILL_BLANKS', [
+  const {
+    setId: _setId,
+    level: _level,
+    ...unit
+  } = unitOf('FILL_BLANKS', [
     {
       ...ITEMS.FILL_BLANKS,
       prompt: 'Léa [___] le train.',

@@ -19,8 +19,8 @@ import { ITEM_BY_TYPE, ITEMS, unitOf } from './fixtures/units';
 
 const base = unitOf('WORD_TRANSFORM');
 const item = ITEMS.WORD_TRANSFORM;
-// The playable units, without the material they belong to (what a model returns).
-const { materialId: _materialId, ...extracted } = base;
+// The playable units, without the batch they were saved with (what a model returns).
+const { setId: _setId, level: _level, ...extracted } = base;
 
 test('every exercise type has a valid sample unit', () => {
   for (const type of ExerciseTypeSchema.options) {
@@ -29,19 +29,24 @@ test('every exercise type has a valid sample unit', () => {
   expect(ExerciseTypeSchema.options).toHaveLength(11);
 });
 
-test('a playable unit needs a material; a model answer does not carry one', () => {
+test('a playable unit needs a set id and a level, and may have a title; a model answer carries none of them', () => {
   expect(ExerciseUnitSchema.safeParse(extracted).success).toBe(false);
-  expect(ExerciseUnitSchema.safeParse({ ...base, materialId: '  ' }).success).toBe(false);
+  expect(ExerciseUnitSchema.safeParse({ ...base, setId: '  ' }).success).toBe(false);
+  expect(ExerciseUnitSchema.safeParse({ ...base, level: undefined }).success).toBe(false);
+  expect(ExerciseUnitSchema.safeParse({ ...base, level: 'C2' }).success).toBe(false);
+  expect(ExerciseUnitSchema.safeParse({ ...base, setTitle: '  ' }).success).toBe(false);
   expect(ExtractedUnitSchema.safeParse(extracted).success).toBe(true);
-  expect(ExerciseUnitSchema.parse(base).materialId).toBe('material-1');
+  expect(ExerciseUnitSchema.parse(base)).toMatchObject({ setId: 'set-1', level: 'A1' });
+  expect(ExerciseUnitSchema.parse({ ...base, setTitle: 'Leçon 1' }).setTitle).toBe('Leçon 1');
 });
 
 test('per-item type override is preserved and governs validation', () => {
   const mixed = { ...base, items: [{ ...item, type: 'GENDER_CHECK', options: ['M', 'F'], expectedAnswer: 'M' }] };
   expect(ExerciseUnitSchema.parse(mixed).items[0].type).toBe('GENDER_CHECK');
-  expect(GeneratedExercisesSchema.parse({ units: [{ ...mixed, materialId: undefined }] }).units[0].items[0].type).toBe(
-    'GENDER_CHECK',
-  );
+  expect(
+    GeneratedExercisesSchema.parse({ units: [{ ...mixed, setId: undefined, level: undefined }] }).units[0].items[0]
+      .type,
+  ).toBe('GENDER_CHECK');
 
   const overridden = {
     ...base,
@@ -169,8 +174,8 @@ test('refinement issues point at the offending field', () => {
 test('duplicate item and unit IDs are rejected', () => {
   expect(ExerciseUnitSchema.safeParse(unitOf('WORD_TRANSFORM', [item, item])).success).toBe(false);
   const unit = unitOf('WORD_TRANSFORM');
-  const { materialId: _m, ...noMaterial } = unit;
-  expect(GeneratedExercisesSchema.safeParse({ units: [noMaterial, noMaterial] }).success).toBe(false);
+  const { setId: _set, level: _level, ...extractedUnit } = unit;
+  expect(GeneratedExercisesSchema.safeParse({ units: [extractedUnit, extractedUnit] }).success).toBe(false);
   const drill = { ...item, type: 'WORD_TRANSFORM' };
   expect(DrillsSchema.safeParse({ drillTitle: 'T', focusSummary: 'G', items: [drill, drill] }).success).toBe(false);
 });

@@ -51,7 +51,7 @@
     "listenAll": "通听",
     "sentenceActions": "句子操作",
     "makeExercises": "出题",
-    "makeExercisesHint": "用这篇文章出题"
+    "makeExercisesHint": "用文章出题"
   },
   "player": {
     "label": "全文朗读",
@@ -160,20 +160,21 @@
   },
   "practice": {
     "title": "练习",
-    "subtitle": "根据文章生成的练习，以及朗读评分。",
+    "subtitle": "你的练习题组，以及朗读评分。",
     "noArticleTitle": "请先添加一篇文章",
     "noArticleDesc": "练习是根据文章库里的文章生成的。",
     "openLibrary": "去文章库",
     "article": "文章",
     "unitsTitle": "练习题",
-    "unitsDesc": "根据这篇文章生成的题组。你的作答和进度保存在本机。",
-    "noUnits": "这篇文章还没有练习题。在下面生成一组。",
+    "unitsDesc": "导入、由文章生成或根据错题生成的题组。你的作答和进度保存在本机。",
+    "noUnits": "还没有练习题。可以由文章生成一组，或导入一份练习册。",
+    "fromArticleTitle": "由文章生成",
+    "fromArticleDesc": "根据一篇文章生成一组新的练习题。即使删除文章，这组题仍会保留。",
     "level": "难度",
     "count": "题数",
     "countRange": "请输入 1 到 {{max}} 之间的整数。",
     "make": "用这篇文章出题",
     "making": "正在根据文章出题…",
-    "articleChanged": "出题期间文章已修改。请根据更新后的内容重新出题。",
     "made_other": "已生成 {{count}} 道题，见下方列表。",
     "dropped_other": "有 {{count}} 道题无法与文章核对，已略去。",
     "items_other": "{{count}} 题",
@@ -873,6 +874,9 @@
     "resolved": "我已补全缺失信息",
     "excludeItem": "排除此题",
     "saveAs": "保存为",
+    "level": "难度（练习题）",
+    "chooseLevel": "选择难度",
+    "levelRequired": "保存前请选择这组练习题的难度。",
     "confirm": "我已核对原文、所选练习和参考答案，确认将材料保存在此设备上。",
     "save": "确认保存",
     "saving": "保存中…",
@@ -901,9 +905,8 @@
       "user": "用户修改"
     },
     "destinations": {
-      "exercises": "仅练习（练习册）",
-      "article": "仅文章",
-      "both": "文章与练习（同一份材料）"
+      "exercises": "仅练习",
+      "article": "仅文章"
     },
     "errors": {
       "no-items": "{{title}}：没有题目，请排除此单元。",
@@ -919,9 +922,7 @@
     "resolved": "已解决",
     "unresolved": "待复习",
     "retryUnit": "回到单元重试",
-    "openMaterial": "打开材料",
     "unitUnavailable": "单元已不可用",
-    "materialUnavailable": "材料已删除",
     "retryHelp": "打开已保存的练习，不更改答案。如果已经检查，请点击“重置本组”并确认；作答历史会保留。",
     "emptyWordAnalysis": "单词分析为空。"
   },

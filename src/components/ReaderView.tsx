@@ -446,7 +446,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
           {source.kind === 'article' && (
             <Link
-              to={{ name: 'practice', articleId: source.articleId }}
+              to={{ name: 'practice' }}
               className={buttonVariants({ variant: 'outline' })}
               title={t('reader.makeExercisesHint')}
             >

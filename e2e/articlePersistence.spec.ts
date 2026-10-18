@@ -2,8 +2,6 @@
 import { expect, test, layout, overflowing, settled } from './fixtures';
 
 type Db = typeof import('../src/storage/db');
-type Storage = typeof import('../src/storage/exercises');
-type Units = typeof import('../tests/fixtures/units');
 
 test('a stale tab saving one article preserves unrelated creation, edit and deletion', async ({ page, ai }) => {
   void ai;
@@ -14,14 +12,11 @@ test('a stale tab saving one article preserves unrelated creation, edit and dele
   await expect(other.getByText('Le Petit Prince').first()).toBeVisible();
   const changed = await other.evaluate(async () => {
     const { db, deleteArticleData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
-    const { ITEMS, unitOf }: Units = await import(/* @vite-ignore */ '/tests/fixtures/units.ts' as string);
     const d = await db();
     const rows = await d.getAll('articles');
     const [edited, deleted] = rows.filter((a) => a.id !== 'petit-prince');
     const created = { ...edited, id: 'new-material', title: 'New material' };
     await d.put('articles', created);
-    await storage.saveUnits(created.id, [{ ...unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]), id: 'new-unit' }]);
     await d.put('articles', { ...edited, content: 'Texte modifié ailleurs.' });
     await deleteArticleData(deleted.id);
     return { edited: edited.id, deleted: deleted.id };
@@ -43,13 +38,12 @@ test('a stale tab saving one article preserves unrelated creation, edit and dele
         const d = await db();
         return {
           created: !!(await d.get('articles', 'new-material')),
-          unitMaterial: (await d.get('units', 'new-unit'))?.materialId,
           edited: (await d.get('articles', edited))?.content,
           deleted: !!(await d.get('articles', deleted)),
         };
       }, changed),
     )
-    .toEqual({ created: true, unitMaterial: 'new-material', edited: 'Texte modifié ailleurs.', deleted: false });
+    .toEqual({ created: true, edited: 'Texte modifié ailleurs.', deleted: false });
   await page.reload();
   await expect(page.getByText('New material', { exact: true })).toBeVisible();
   await other.close();

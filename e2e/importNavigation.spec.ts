@@ -52,7 +52,6 @@ test('existing reader id import stays a reader; reload only warns when dirty; de
       content: 'Un vrai article.',
       level: 'A1',
       category: '',
-      kind: 'article',
       createdAt: '2026-01-01',
     });
   });

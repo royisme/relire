@@ -10,10 +10,9 @@ import { CATALOG_EXERCISES } from '../tests/fixtures/exerciseCatalog';
 type Storage = typeof import('../src/storage/exercises');
 type Db = typeof import('../src/storage/db');
 
-export const ARTICLE = 'petit-prince';
-export const PRACTICE = `/#/practice?article=${ARTICLE}`;
+export const PRACTICE = '/#/practice';
 
-/** Wait for committed sample initialization; units need their material to exist. */
+/** Wait for committed sample initialization (the app has started and the database exists). */
 export async function waitForArticle(page: Page) {
   await expect
     .poll(() =>
@@ -25,13 +24,13 @@ export async function waitForArticle(page: Page) {
     .toBeGreaterThan(0);
 }
 
-/** Saves units for the sample article and leaves the app on the library (the catalogue by default). */
+/** Saves the units as one batch (`set-1`, B1 unless a unit says otherwise) and leaves the app on the library (the catalogue by default). */
 export async function seedUnits(page: Page, units: unknown[] = CATALOG_EXERCISES.units) {
   await page.goto('/#/read');
   await waitForArticle(page);
   await page.evaluate(async (list) => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
-    await storage.saveUnits('petit-prince', list as never);
+    await storage.saveUnits(list.map((unit) => ({ setId: 'set-1', level: 'B1', ...(unit as object) })) as never);
   }, units);
 }
 

@@ -2,29 +2,26 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2, ListPlus } from 'lucide-react';
-import type { Article } from '../../types';
+import { EXERCISE_LEVELS, type ExerciseLevel } from '../../types/exercises';
 import type { GrammarTag } from '../../types/grammar';
 import { MAX_GENERATED_ITEMS } from '../../services/api';
 import { useAdaptiveDrills } from '../../hooks/useAdaptiveDrills';
 import { Button } from '../ui/button';
 import { Dialog, OverlayHeader } from '../ui/overlay';
 
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'] as const;
 const field = 'h-10 rounded-md border border-ink-300 bg-surface px-3 text-sm text-ink-900';
 export function AdaptiveDrills({
   targets,
   disabled,
-  onCreated,
   onMissingKey,
 }: {
   targets: GrammarTag[];
   disabled: boolean;
-  onCreated: (article: Article) => void;
   onMissingKey: () => void;
 }) {
   const { t } = useTranslation();
-  const drills = useAdaptiveDrills(onCreated, onMissingKey);
-  const [level, setLevel] = useState('B1');
+  const drills = useAdaptiveDrills(onMissingKey);
+  const [level, setLevel] = useState<ExerciseLevel>('B1');
   const [count, setCount] = useState('8');
   const [discarding, setDiscarding] = useState(false);
   const pending = drills.phase !== 'idle';
@@ -56,8 +53,8 @@ export function AdaptiveDrills({
         <fieldset disabled={pending || !!drills.prepared} className="flex flex-wrap gap-3">
           <label className="block text-sm text-ink-800">
             <span className="block mb-1">{t('practice.level')}</span>
-            <select value={level} onChange={(event) => setLevel(event.target.value)} className={field}>
-              {LEVELS.map((value) => (
+            <select value={level} onChange={(event) => setLevel(event.target.value as ExerciseLevel)} className={field}>
+              {EXERCISE_LEVELS.map((value) => (
                 <option key={value} value={value}>
                   {t(`levels.${value}`)}
                 </option>
@@ -104,10 +101,10 @@ export function AdaptiveDrills({
           {drills.prepared && !pending && (
             <p className="text-ink-700">
               {t('adaptive.unsaved', {
-                title: drills.prepared.unit.title,
-                items: t('practice.items', { count: drills.prepared.unit.items.length }),
+                title: drills.prepared.title,
+                items: t('practice.items', { count: drills.prepared.items.length }),
               })}{' '}
-              {drills.prepared.unit.instruction}
+              {drills.prepared.instruction}
             </p>
           )}
           {!valid && !drills.prepared && (

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExerciseProgress } from './progress/ExerciseProgress';
-import { Article, VocabWord, UserStats } from '../types';
+import { VocabWord, UserStats } from '../types';
 import { toggleSpeech } from '../utils/speech';
 import { SpeakIcon, useSpeechPhase } from './ui/speak-button';
 import { PageHeader } from './ui/page-header';
@@ -10,7 +10,6 @@ import { FRENCH_IPA, IpaGroup } from '../data/frenchIpa';
 interface AnalyticsDashboardProps {
   stats: UserStats;
   vocabList: VocabWord[];
-  onCreated: (article: Article) => void;
   onMissingKey: () => void;
 }
 
@@ -35,12 +34,7 @@ const IpaTile: React.FC<{ symbol: string; word: string; label: string }> = ({ sy
   );
 };
 
-export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
-  stats,
-  vocabList,
-  onCreated,
-  onMissingKey,
-}) => {
+export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, vocabList, onMissingKey }) => {
   const { t } = useTranslation();
   const masteredCount = vocabList.filter((w) => w.repetitions >= 4).length;
   const history = stats.pronunciationHistory ?? [];
@@ -75,7 +69,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </div>
       </dl>
 
-      <ExerciseProgress onCreated={onCreated} onMissingKey={onMissingKey} />
+      <ExerciseProgress onMissingKey={onMissingKey} />
 
       {history.length > 0 && (
         <section className="space-y-3">

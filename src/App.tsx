@@ -42,6 +42,7 @@ import { useSidebar } from './hooks/useSidebar';
 import { useReaderUnits } from './hooks/useReaderUnits';
 import { passageDocument, readerIdentity, type ReaderSource } from './types/readerSource';
 import { sourceOfRecording } from './storage/shadowing';
+import { setLabel } from './services/exercises/setLabel';
 
 const ONBOARDING_KEY = 'relire_onboarded';
 const storedFlag = (key: string) => {
@@ -61,8 +62,6 @@ export default function App() {
   // The source the log opens at (set when the reader sends the learner to its recordings).
   const [logSourceId, setLogSourceId] = useState<string | null>(null);
 
-  // The article Practice opens on when the address names none: the one read or practised most recently.
-  const [lastArticleId, setLastArticleId] = useState<string | null>(null);
   // Set while an AI feature is waiting for a key, so Settings can focus the field and offer the way back.
   const [keyRequest, setKeyRequest] = useState<KeyRequest | null>(null);
   // Articles commit before state changes; vocabulary and stats use debounced persistence.
@@ -72,15 +71,14 @@ export default function App() {
   const [articles, setArticles] = useState<Article[]>([]);
   const currentArticle = route.name === 'reader' ? (articles.find((a) => a.id === route.articleId) ?? null) : null;
   const readerUnits = useReaderUnits();
-  const passageMaterial = route.name === 'passage' ? articles.find((a) => a.id === route.materialId) : undefined;
   const passageUnit = route.name === 'passage' ? readerUnits.units?.find((u) => u.id === route.unitId) : undefined;
   const readerDocument =
-    currentArticle ?? (passageMaterial && passageUnit ? passageDocument(passageMaterial, passageUnit) : null);
+    currentArticle ?? (passageUnit ? passageDocument(passageUnit, setLabel(t, passageUnit)) : null);
   const readerSource: ReaderSource | null =
     route.name === 'reader'
       ? { kind: 'article', articleId: route.articleId }
       : route.name === 'passage'
-        ? { kind: 'passage', materialId: route.materialId, unitId: route.unitId }
+        ? { kind: 'passage', unitId: route.unitId }
         : null;
   const lookupOwner = JSON.stringify([routeHref(route), readerDocument?.content]);
   const [editor, setEditor] = useState<{ article: Article | null } | null>(null);
@@ -90,11 +88,6 @@ export default function App() {
   const [stats, setStats] = useState<UserStats>(EMPTY_STATS);
 
   // State that belongs to one place is dropped when the learner leaves it (adjusted while rendering, not in an effect).
-  if (currentArticle && lastArticleId !== currentArticle.id) setLastArticleId(currentArticle.id);
-  const practisedId = route.name === 'practice' ? route.articleId : undefined;
-  if (practisedId && lastArticleId !== practisedId && articles.some((a) => a.id === practisedId))
-    setLastArticleId(practisedId);
-  if (passageMaterial && lastArticleId !== passageMaterial.id) setLastArticleId(passageMaterial.id);
   if (logSourceId && route.name !== 'study') setLogSourceId(null);
   if (keyRequest && route.name !== 'settings') setKeyRequest(null);
 
@@ -123,13 +116,6 @@ export default function App() {
       cancelled = true;
     };
   }, []);
-
-  // `#/practice` always names an article, so the address, the sidebar and Back agree on which one.
-  const defaultPracticeId = (articles.find((a) => a.id === lastArticleId) ?? articles[0])?.id ?? null;
-  useEffect(() => {
-    if (ready && route.name === 'practice' && !route.articleId && defaultPracticeId)
-      navigate({ name: 'practice', articleId: defaultPracticeId }, { replace: true });
-  }, [ready, route, defaultPracticeId]);
 
   usePersist('vocabulary', vocabList, saveVocab, ready, reportSave);
   usePersist('stats', stats, saveStats, ready, reportSave);
@@ -308,11 +294,7 @@ export default function App() {
   };
 
   const openArticle = (article: Article) => {
-    navigate(
-      article.kind === 'workbook' && !article.content.trim()
-        ? { name: 'practice', articleId: article.id }
-        : { name: 'reader', articleId: article.id },
-    );
+    navigate({ name: 'reader', articleId: article.id });
   };
 
   // Add or edit only after commit. A new article opens; an edit stays where it is.
@@ -508,7 +490,6 @@ export default function App() {
                 tab={route.tab}
                 sectionsInSidebar={expanded}
                 mistakes={{
-                  articles,
                   onMissingKey: requestKey,
                   onWord: (word, sentence, context) => {
                     void handleWordClick(word, sentence, context);
@@ -524,12 +505,7 @@ export default function App() {
                     const source = sourceOfRecording(record);
                     navigate(
                       source.kind === 'passage'
-                        ? {
-                            name: 'passage',
-                            materialId: source.materialId,
-                            unitId: source.unitId,
-                            sentence: record.text,
-                          }
+                        ? { name: 'passage', unitId: source.unitId, sentence: record.text }
                         : { name: 'reader', articleId: source.articleId, sentence: record.text },
                     );
                   },
@@ -538,12 +514,7 @@ export default function App() {
             )}
 
             {route.name === 'practice' && (
-              <PracticePage
-                articles={articles}
-                articleId={route.articleId ?? defaultPracticeId}
-                onMissingKey={requestKey}
-                onAssessed={handleRecordAssessmentComplete}
-              />
+              <PracticePage articles={articles} onMissingKey={requestKey} onAssessed={handleRecordAssessmentComplete} />
             )}
 
             {route.name === 'unit' && (
@@ -551,12 +522,7 @@ export default function App() {
             )}
 
             {route.name === 'progress' && (
-              <AnalyticsDashboard
-                stats={stats}
-                vocabList={vocabList}
-                onCreated={(article) => setArticles((prev) => [article, ...prev])}
-                onMissingKey={requestKey}
-              />
+              <AnalyticsDashboard stats={stats} vocabList={vocabList} onMissingKey={requestKey} />
             )}
 
             {route.name === 'settings' && (

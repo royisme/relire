@@ -99,7 +99,7 @@ test('wrong answer → grouped notebook → explanation → actual word saved �
   await expect(entry(page)).toContainText('Resolved');
 });
 
-test('taxonomy order, deep links, reload and Back; deleting unit then material retains readable snapshots and removes links', async ({
+test('taxonomy order, deep links, reload and Back; deleting the unit retains a readable snapshot and removes the retry link', async ({
   page,
   ai,
 }) => {
@@ -108,8 +108,9 @@ test('taxonomy order, deep links, reload and Back; deleting unit then material r
   await notebook(page);
   const headings = await page.locator('main h2').allTextContents();
   expect(headings).toEqual(['Adjectives and adverbs', 'Verbs: forms']);
-  await entry(page).getByRole('link', { name: 'Open in material' }).click();
-  await expect(page).toHaveURL(/#\/read\/petit-prince$/);
+  await expect(page.getByRole('link', { name: 'Open in material' })).toHaveCount(0);
+  await entry(page).getByRole('link', { name: 'Retry in unit' }).click();
+  await expect(page).toHaveURL(/#\/practice\/unit-fill-blanks$/);
   await page.goBack();
   await expect(entry(page)).toBeVisible();
   await page.reload();
@@ -119,15 +120,6 @@ test('taxonomy order, deep links, reload and Back; deleting unit then material r
     await storage.deleteUnit('unit-fill-blanks');
   });
   await expect(entry(page)).toContainText('Unit unavailable');
-  await expect(entry(page).getByRole('link', { name: 'Retry in unit' })).toHaveCount(0);
-  await expect(entry(page).getByRole('link', { name: 'Open in material' })).toBeVisible();
-  await page.evaluate(async () => {
-    const storage: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    await storage.deleteArticleData('petit-prince');
-  });
-  // App publishes article deletion through its own explicit state updates; reload obtains that state.
-  await page.reload();
-  await expect(entry(page)).toContainText('Material removed');
   await expect(entry(page).getByRole('link')).toHaveCount(0);
   await entry(page).getByRole('button', { name: 'Explain', exact: true }).click();
   await expect(page.getByText(CATALOG_EXPLANATION.summary)).toBeVisible();
@@ -291,21 +283,6 @@ test('older query cannot overwrite a refreshed resolution', async ({ page }) => 
   await expect(entry(page)).toContainText('Resolved');
   await pause(1000);
   await expect(entry(page)).toContainText('Resolved');
-});
-
-test('workbook without prose links to its own Practice, not an empty reader', async ({ page }) => {
-  await page.evaluate(async () => {
-    const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    const d = await db();
-    const material = await d.get('articles', 'petit-prince');
-    await d.put('articles', { ...material!, kind: 'workbook', content: '' });
-  });
-  await wrong(page);
-  await notebook(page);
-  await page.reload();
-  await entry(page).getByRole('link', { name: 'Open in material' }).click();
-  await expect(page).toHaveURL(/#\/practice\?article=petit-prince$/);
-  await expect(page.getByRole('heading', { name: 'Practice', exact: true })).toBeVisible();
 });
 
 test('late explanation is dropped after unmount', async ({ page, ai }) => {

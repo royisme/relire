@@ -29,7 +29,7 @@ for (const phone of [false, true]) {
     ai,
   }) => {
     ai.ttsDelayMs = 20;
-    await prepare(page, true);
+    await prepare(page);
     await page.getByRole('link', { name: 'Open in the reader' }).click();
     await chooseSentence(page);
     await page.getByRole('button', { name: 'Practise this sentence', exact: true }).click();
@@ -60,7 +60,7 @@ for (const phone of [false, true]) {
     await page.reload();
     await expect(page.getByRole('heading', { name: `Compléter le passage — ${title}` })).toBeVisible();
     await page.getByRole('button', { name: 'Les oiseaux chantent dans les arbres.', exact: true }).click();
-    await expect(page).toHaveURL(/#\/passage\/petit-prince\/unit-reading-cloze\?sentence=/);
+    await expect(page).toHaveURL(/#\/passage\/unit-reading-cloze\?sentence=/);
     await page.reload();
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
     await expect(page.locator('article [data-sentence]').nth(1)).toHaveClass(/bg-accent-100|bg-accent-50/);
@@ -73,15 +73,11 @@ for (const phone of [false, true]) {
       const { db, exportData, importData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
       const [record] = await shadowing.listShadowing();
       const original = await storage.getUnit('unit-reading-cloze');
-      await storage.saveUnits(record.articleId, [{ ...original!, id: 'removed-passage', unitNumber: 99 }]);
-      await shadowing.addTake(
-        { kind: 'passage', materialId: record.articleId, unitId: 'removed-passage' },
-        record.text,
-        record.takes[0],
-      );
+      await storage.saveUnits([{ ...original!, id: 'removed-passage', unitNumber: 99 }]);
+      await shadowing.addTake({ kind: 'passage', unitId: 'removed-passage' }, record.text, record.takes[0]);
       await storage.deleteUnit('removed-passage');
       // Article-owned recordings keep their own backup shape; same sentence does not share the passage key.
-      await shadowing.addTake(record.articleId, record.text, record.takes[0]);
+      await shadowing.addTake('petit-prince', record.text, record.takes[0]);
       const app = await exportData();
       const backup = await shadowing.exportShadowing();
       await shadowing.clearShadowing();
@@ -148,7 +144,7 @@ for (const phone of [false, true]) {
   });
 }
 
-for (const deletion of ['unit', 'material'] as const) {
+for (const deletion of ['unit', 'set'] as const) {
   test(`a stopped take finishing after ${deletion} deletion cannot create orphan passage recordings`, async ({
     page,
   }) => {
@@ -182,9 +178,9 @@ for (const deletion of ['unit', 'material'] as const) {
       .toBe('function');
     await page.evaluate(async (mode) => {
       const { deleteUnit }: Exercises = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
-      const { deleteArticleData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+      const { deleteSetData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
       if (mode === 'unit') await deleteUnit('unit-reading-cloze');
-      else await deleteArticleData('petit-prince');
+      else await deleteSetData('set-1');
     }, deletion);
     // The delayed take's save opens its own shadowing write; that transaction ending is the signal that the
     // attempt is over, so the assertion below needs no arbitrary delay.
@@ -235,7 +231,7 @@ test('the log reaches unavailable history from the practice card and follows the
     const { readerIdentity }: typeof import('../src/types/readerSource') = await import(
       /* @vite-ignore */ '/src/types/readerSource.ts' as string
     );
-    return readerIdentity({ kind: 'passage', materialId: 'petit-prince', unitId: 'unit-reading-cloze' });
+    return readerIdentity({ kind: 'passage', unitId: 'unit-reading-cloze' });
   });
   // One live source plus a recording whose passage no longer exists.
   await page.evaluate(async () => {
@@ -245,9 +241,9 @@ test('the log reaches unavailable history from the practice card and follows the
     const storage: Exercises = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
     const [record] = await shadowing.listShadowing();
     const unit = await storage.getUnit('unit-reading-cloze');
-    await storage.saveUnits(record.articleId, [{ ...unit!, id: 'removed-passage', unitNumber: 99 }]);
+    await storage.saveUnits([{ ...unit!, id: 'removed-passage', unitNumber: 99 }]);
     await shadowing.addTake(
-      { kind: 'passage', materialId: record.articleId, unitId: 'removed-passage' },
+      { kind: 'passage', unitId: 'removed-passage' },
       'Nous visitons le jardin.',
       record.takes[0],
     );
@@ -264,7 +260,7 @@ test('the log reaches unavailable history from the practice card and follows the
   await page.getByText('Source unavailable (1)', { exact: true }).click();
   await expect(page.getByText('Nous visitons le jardin.', { exact: true })).toBeVisible();
 
-  // A second source with recordings: the material's own prose, read in the article reader.
+  // A second source with recordings: an article's own prose, read in the article reader.
   await page.goto('/#/read/petit-prince');
   const materialSentence = page.locator('article [data-sentence]').first();
   await materialSentence.getByRole('button').first().focus();
@@ -275,7 +271,7 @@ test('the log reaches unavailable history from the practice card and follows the
   await expect(card(page).getByText('Saved.', { exact: true })).toBeVisible();
   const materialText = (await materialSentence.textContent())?.trim();
   // Enter the log again on the passage, then take it away under the open log.
-  await page.goto('/#/passage/petit-prince/unit-reading-cloze');
+  await page.goto('/#/passage/unit-reading-cloze');
   await chooseSentence(page);
   await page.getByRole('button', { name: 'Practise this sentence', exact: true }).click();
   await expect(card(page).getByRole('button', { name: 'Stop', exact: true })).toBeVisible();

@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 import { choicePieces, restoreAnswer } from '../src/services/exercises/answer';
 import { toStoredUnits } from '../src/services/exercises/fromGenerated';
 import { unitProgress } from '../src/services/exercises/progress';
-import { ExtractedUnitSchema, type ExerciseItemState } from '../src/types/exercises';
+import { ExerciseUnitSchema, type ExerciseItemState } from '../src/types/exercises';
 import { ITEMS, unitOf } from './fixtures/units';
 
 const state = (itemId: string, correct: boolean | null): ExerciseItemState => ({
@@ -49,23 +49,25 @@ test('a sentence with choices is cut into text and numbered groups', () => {
   expect(choicePieces('Pas de choix.')).toEqual([{ kind: 'text', text: 'Pas de choix.' }]);
 });
 
-test('generated units become storable: fresh ids, continued numbers, AI answer source, no quote', () => {
-  const { materialId: _owner, ...base } = unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]);
+test('generated units become one storable batch: fresh ids, numbers from 1, set id, title and level, AI answer source, no quote', () => {
+  const { setId: _set, level: _level, ...base } = unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]);
   const generated = [
     { ...base, id: 'u1', unitNumber: 1, items: [{ ...ITEMS.FILL_BLANKS, articleQuote: 'Je suis' }] },
     { ...base, id: 'u2', unitNumber: 2 },
   ];
   let n = 0;
-  const stored = toStoredUnits(generated, { firstNumber: 4, makeId: () => `fresh-${++n}` });
+  const batch = { setId: 'set-9', setTitle: 'Le matin', level: 'A2' as const };
+  const stored = toStoredUnits(generated, { ...batch, makeId: () => `fresh-${++n}` });
   expect(stored.map((unit) => [unit.id, unit.unitNumber])).toEqual([
-    ['fresh-1', 4],
-    ['fresh-2', 5],
+    ['fresh-1', 1],
+    ['fresh-2', 2],
   ]);
+  for (const unit of stored) expect(unit).toMatchObject(batch);
   expect(stored[0].items[0].answerSource).toBe('ai');
   expect('articleQuote' in stored[0].items[0]).toBe(false);
-  for (const unit of stored) expect(ExtractedUnitSchema.safeParse(unit).success).toBe(true);
+  for (const unit of stored) expect(ExerciseUnitSchema.safeParse(unit).success).toBe(true);
   // Without an injected id source, ids are unique.
-  const real = toStoredUnits(generated, { firstNumber: 1 });
+  const real = toStoredUnits(generated, batch);
   expect(new Set(real.map((unit) => unit.id)).size).toBe(2);
   expect(real[0].id).not.toBe('u1');
 });

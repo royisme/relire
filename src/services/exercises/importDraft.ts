@@ -12,6 +12,7 @@ import {
   ExtractedUnitSchema,
   ImportModeSchema,
   ImportSourceKindSchema,
+  type ExerciseLevel,
   type ExerciseUnit,
   type ImportMode,
 } from '../../types/exercises';
@@ -108,8 +109,10 @@ export interface ImportUnitError {
 }
 
 export interface PrepareImportOptions {
-  /** The article or workbook the units will belong to. */
-  materialId: string;
+  /** Shared by every unit of this import. */
+  setId: string;
+  /** The level the learner chose for the whole import. */
+  level: ExerciseLevel;
   /** Answers the learner edited during review (see `answerKey`). */
   editedAnswers?: ReadonlySet<string>;
   /** Id source; replaceable so tests can be deterministic. */
@@ -125,7 +128,7 @@ export function prepareImport(
   draft: ImportDraft,
   source: ImportSource,
   mode: ImportMode,
-  { materialId, editedAnswers = new Set<string>(), makeId = () => crypto.randomUUID() }: PrepareImportOptions,
+  { setId, level, editedAnswers = new Set<string>(), makeId = () => crypto.randomUUID() }: PrepareImportOptions,
 ) {
   const units: ExerciseUnit[] = [];
   const errors: ImportUnitError[] = [];
@@ -158,7 +161,9 @@ export function prepareImport(
     const parsed = ExerciseUnitSchema.safeParse({
       ...unit,
       id: `unit-${makeId()}`,
-      materialId,
+      setId,
+      setTitle: draft.materialTitle?.trim() || undefined,
+      level,
       importSource: { ...source, mode, extractedText: draft.sourceText },
       items: unit.items.map((item) => ({
         ...item,

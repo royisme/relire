@@ -1,6 +1,6 @@
 /** Exercise button actions: real storage transactions, mocked AI, and late-result boundaries. */
 import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
-import { freshDb, putArticle } from './fixtures/storage';
+import { freshDb } from './fixtures/storage';
 import { ITEMS, unitOf } from './fixtures/units';
 import * as api from '../src/services/api';
 import * as appSettings from '../src/utils/appSettings';
@@ -16,8 +16,7 @@ afterEach(() => mock.restore());
 const grade: OpenGrade = { isCorrect: true, feedback: 'Another valid wording.' };
 
 async function seed(type: ExerciseUnit['type'] = 'OPEN_QA') {
-  await putArticle();
-  const [unit] = await saveUnits('material-1', [unitOf(type)]);
+  const [unit] = await saveUnits([unitOf(type)]);
   const items = emptyItems(unit);
   const id = unit.items[0].id;
   items[id].answer.singleAnswer = 'Une autre réponse.';

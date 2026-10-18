@@ -4,6 +4,7 @@
  * whose source is gone are "removed". Order is never stored, always derived.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Article } from '../types';
 import type { ExerciseUnit } from '../types/exercises';
 import { passageDocument, readerIdentity, type ReaderDocument } from '../types/readerSource';
@@ -11,6 +12,7 @@ import type { ShadowingSentence } from '../types/shadowing';
 import { listShadowing, subscribeShadowing, sourceOfRecording } from '../storage/shadowing';
 import { normalizeText } from '../storage/audio';
 import { errorMessage } from '../services/ai/errors';
+import { setLabel } from '../services/exercises/setLabel';
 import { splitArticle } from '../utils/sentences';
 
 export interface LogRow {
@@ -27,6 +29,7 @@ export interface LogGroup {
 }
 
 export function useShadowingLog(articles: Article[], units: ExerciseUnit[] | null, unitsError: string | null) {
+  const { t } = useTranslation();
   const [records, setRecords] = useState<ShadowingSentence[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,11 +64,10 @@ export function useShadowingLog(articles: Article[], units: ExerciseUnit[] | nul
       document: article,
     }));
     for (const unit of units ?? []) {
-      const material = articles.find((a) => a.id === unit.materialId);
-      const document = material && passageDocument(material, unit);
+      const document = passageDocument(unit, setLabel(t, unit));
       if (document)
         sources.push({
-          id: readerIdentity({ kind: 'passage', materialId: unit.materialId, unitId: unit.id }),
+          id: readerIdentity({ kind: 'passage', unitId: unit.id }),
           document: {
             ...document,
             title: unit.title === document.title ? unit.title : `${unit.title} — ${document.title}`,
@@ -95,7 +97,7 @@ export function useShadowingLog(articles: Article[], units: ExerciseUnit[] | nul
     }
     const removed = [...bySource.values()].flat().map((record): LogRow => ({ record, sentenceId: null }));
     return { groups, removed };
-  }, [records, articles, units]);
+  }, [records, articles, units, t]);
 
   return {
     loading: (records === null && !error) || (units === null && !unitsError),

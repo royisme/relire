@@ -5,12 +5,12 @@
  *   #/read                   library
  *   #/import                 material import workspace
  *   #/read/:articleId        material reader
- *   #/passage/:materialId/:unitId  unit passage in the same Reader
+ *   #/passage/:unitId        a unit's reading passage in the same Reader
  *   Reader routes accept ?sentence=… for durable shadowing-log focus
  *   #/study/words            My study → Words
  *   #/study/shadowing        My study → Shadowing
  *   #/study/mistakes         My study → Mistakes
- *   #/practice               practice: an article's exercise units (`?article=:articleId` picks the article)
+ *   #/practice               practice: the exercise batches and their units
  *   #/practice/:unitId       one exercise unit on one sheet
  *   #/progress               progress
  *   #/settings               section list on phones; desktop resolves it to the first section
@@ -31,10 +31,9 @@ export type Route =
   | { name: 'library' }
   | { name: 'import' }
   | { name: 'reader'; articleId: string; sentence?: string }
-  | { name: 'passage'; materialId: string; unitId: string; sentence?: string }
+  | { name: 'passage'; unitId: string; sentence?: string }
   | { name: 'study'; tab: StudyTab }
-  /** `articleId` is the material whose units are listed; absent means the app's default (the article read last). */
-  | { name: 'practice'; articleId?: string }
+  | { name: 'practice' }
   | { name: 'unit'; unitId: string }
   | { name: 'progress' }
   | { name: 'about' }
@@ -66,11 +65,11 @@ export function routeHref(route: Route): string {
     case 'reader':
       return `#/read/${encodeURIComponent(route.articleId)}${sentenceQuery(route.sentence)}`;
     case 'passage':
-      return `#/passage/${encodeURIComponent(route.materialId)}/${encodeURIComponent(route.unitId)}${sentenceQuery(route.sentence)}`;
+      return `#/passage/${encodeURIComponent(route.unitId)}${sentenceQuery(route.sentence)}`;
     case 'study':
       return `#/study/${route.tab}`;
     case 'practice':
-      return route.articleId ? `#/practice?article=${encodeURIComponent(route.articleId)}` : '#/practice';
+      return '#/practice';
     case 'unit':
       return `#/practice/${encodeURIComponent(route.unitId)}`;
     case 'progress':
@@ -101,14 +100,9 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
   const [area, sub, ...extra] = parts;
   const focus = new URLSearchParams(query).get('sentence');
   const sentence = focus && focus.trim() && focus.length <= 4000 ? focus : undefined;
-  if (area === 'passage' && parts.length === 3 && parts.every(Boolean)) {
+  if (area === 'passage' && parts.length === 2 && parts.every(Boolean)) {
     try {
-      route = {
-        name: 'passage',
-        materialId: decodeURIComponent(sub),
-        unitId: decodeURIComponent(extra[0]),
-        ...(sentence ? { sentence } : {}),
-      };
+      route = { name: 'passage', unitId: decodeURIComponent(sub), ...(sentence ? { sentence } : {}) };
     } catch {
       route = { name: 'notFound' };
     }
@@ -138,10 +132,8 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
     }
   } else if (area === 'study' && sub === undefined) route = { name: 'study', tab: 'words' };
   else if (area === 'study' && isStudyTab(sub)) route = { name: 'study', tab: sub };
-  else if (area === 'practice' && sub === undefined) {
-    const articleId = new URLSearchParams(query).get('article');
-    route = articleId ? { name: 'practice', articleId } : { name: 'practice' };
-  } else if (area === 'practice' && !query) {
+  else if (area === 'practice' && sub === undefined) route = { name: 'practice' };
+  else if (area === 'practice' && !query) {
     try {
       route = { name: 'unit', unitId: decodeURIComponent(sub) };
     } catch {
