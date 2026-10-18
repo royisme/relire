@@ -6,26 +6,31 @@
  * Never calls `generateVerb`, and does not decide whether the AI is right
  * (verify.ts).
  */
-import type { ConjugationAnswer } from '../../types/conjugationAnswer';
-import type { Cell, ImperativePerson, Person, Tense, Verb } from '../../types/grammarPack';
+import { foldApostrophes, type ConjugationAnswer } from '../../types/conjugationAnswer';
+import {
+  PRONOMINAL_PREFIX,
+  isPronominalInfinitive,
+  type Cell,
+  type ImperativePerson,
+  type Person,
+  type Tense,
+  type Verb,
+} from '../../types/grammarPack';
 import { IMPERATIVE_CLITICS, composeLead, passeComposeForms } from './rules';
 
 /** What the Conjugation screen renders: a pack row without its id and provenance. */
 export type VerbView = Omit<Verb, 'id' | 'prov'>;
 
 /**
- * The learner's infinitive in the engine's form: NFC, trimmed, single spaces and the typographic apostrophe
- * (`isPronominal` in generate.ts and the pack schema accept only U+2019).
+ * The learner's infinitive in the engine's form: NFC, trimmed, lowercase (French infinitives are), single spaces
+ * and the typographic apostrophe (`isPronominalInfinitive` and the pack schema accept only U+2019). The cache key
+ * lowercases too, so a request and its key always agree.
  */
 export const engineInfinitive = (typed: string) =>
-  typed
-    .normalize('NFC')
-    .trim()
-    .replace(/\s+/g, ' ')
-    .replace(/['‘]/g, '’');
+  foldApostrophes(typed.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' '));
 
 /** The infinitive without a leading `se ` or `s’`. */
-export const bareInfinitive = (infinitive: string) => infinitive.replace(/^(se |s’)/, '');
+export const bareInfinitive = (infinitive: string) => infinitive.replace(PRONOMINAL_PREFIX, '');
 
 /**
  * The `base` of a `VerbSpec` for the regular rule families: the bare infinitive without its `-er`, `-ir` or
@@ -50,7 +55,10 @@ function cellsOf<P extends string>(
 }
 
 export function assembleVerb(answer: ConjugationAnswer): VerbView {
-  const { pronominal, defective, hAspire, aux, participles } = answer;
+  const { defective, aux, participles } = answer;
+  // Derived from the infinitive, as generate.ts does: the AI's own flag is never trusted (the schema rejects a contradiction).
+  const pronominal = isPronominalInfinitive(answer.infinitive);
+  const hAspire = answer.hAspire || undefined;
   const cell = (tense: Tense, person: Person, forms: string[]): Cell => ({
     lead: composeLead(tense, person, { pronominal, defective, hAspire }, forms[0]),
     forms,

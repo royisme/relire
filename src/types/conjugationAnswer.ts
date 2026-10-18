@@ -7,7 +7,7 @@
  * these fields), nor the prompt that asks for it.
  */
 import { z } from 'zod';
-import { FINITE_PERSONS, RuleIdSchema, TENSES, type Person } from './grammarPack';
+import { FINITE_PERSONS, RuleIdSchema, TENSES, isPronominalInfinitive, type Person } from './grammarPack';
 
 const text = z.string().trim().min(1);
 
@@ -43,8 +43,8 @@ export const ConjugationAnswerSchema = z
     aux: z.enum(['avoir', 'etre']),
     rule: RuleIdSchema,
     defective: z.enum(['impersonal', 'third-person']).optional(),
-    /** True only for a verb that starts with an aspirated h; absent otherwise. */
-    hAspire: z.literal(true).optional(),
+    /** True only for a verb that starts with an aspirated h; absent (or false) otherwise. */
+    hAspire: z.boolean().optional(),
     forms: z.object({
       present: finite,
       imparfait: finite,
@@ -70,6 +70,8 @@ export const ConjugationAnswerSchema = z
   .superRefine((answer, ctx) => {
     const fail = (path: (string | number)[], message: string) => ctx.addIssue({ code: 'custom', path, message });
 
+    if (answer.pronominal !== isPronominalInfinitive(answer.infinitive))
+      fail(['pronominal'], 'pronominal must be true exactly when the infinitive starts with se or s’');
     if (answer.pronominal && answer.aux !== 'etre') fail(['aux'], 'a pronominal verb takes être');
 
     const persons: readonly Person[] =
@@ -104,3 +106,19 @@ export const ConjugationAnswerSchema = z
     }
   });
 export type ConjugationAnswer = z.infer<typeof ConjugationAnswerSchema>;
+
+/** ASCII `'` and U+2018 to the typographic apostrophe U+2019, which French text here uses everywhere. */
+export const foldApostrophes = (text: string) => text.replace(/['\u2018]/g, '\u2019');
+
+/**
+ * Folds the apostrophes of every string in a raw model answer before it is parsed: models write `'`, and the
+ * schema (which still rejects it) is for what the app stores. `gloss` is in the UI language, where `'` is
+ * ordinary English, so it is left alone.
+ */
+export function foldAnswerApostrophes(value: unknown, key?: string): unknown {
+  if (typeof value === 'string') return key === 'gloss' ? value : foldApostrophes(value);
+  if (Array.isArray(value)) return value.map((item) => foldAnswerApostrophes(item, key));
+  if (value && typeof value === 'object')
+    return Object.fromEntries(Object.entries(value).map(([name, item]) => [name, foldAnswerApostrophes(item, name)]));
+  return value;
+}

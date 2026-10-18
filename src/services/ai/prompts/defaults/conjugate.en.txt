@@ -32,30 +32,28 @@ Rules for every French string you write:
 - Use precomposed accented letters (Unicode NFC) and no leading or trailing spaces.
 - Never repeat a form inside one array.
 
-Output only JSON in this shape, with every value filled in as described above (the shape shows structure, not content):
+Output only JSON in this shape. Every <angle-bracket> item stands for a value you write and is never a value itself; "pronominal" is true or false as described above. Leave out "defective", "hAspire" and, for a verb without a present participle, "participles.present" unless they apply; for a "defective" verb also leave out "imperatif" in "forms" and in "examples". Keep the same persons in every tense, as described above.
 {
-  "infinitive": "...",
+  "infinitive": "<infinitive>",
   "pronominal": false,
-  "aux": "avoir or etre",
-  "rule": "one of the values above",
-  "defective": "optional",
-  "hAspire": "optional",
+  "aux": "<auxiliary>",
+  "rule": "<rule>",
   "forms": {
-    "present": { "1sg": ["..."], "2sg": ["..."], "3sg": ["..."], "1pl": ["..."], "2pl": ["..."], "3pl": ["..."] },
-    "imparfait": { "same persons as present": ["..."] },
-    "futur": { "same persons as present": ["..."] },
-    "conditionnel": { "same persons as present": ["..."] },
-    "subjonctif": { "same persons as present": ["..."] },
-    "imperatif": { "2sg": ["..."], "1pl": ["..."], "2pl": ["..."] }
+    "present": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "imparfait": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "futur": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "conditionnel": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "subjonctif": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "imperatif": { "2sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"] }
   },
-  "participles": { "present": "optional", "past": { "ms": "...", "fs": "...", "mp": "...", "fp": "..." } },
+  "participles": { "present": "<present participle>", "past": { "ms": "<past participle ms>", "fs": "<past participle fs>", "mp": "<past participle mp>", "fp": "<past participle fp>" } },
   "examples": {
-    "passeCompose": { "fr": "...", "gloss": "..." },
-    "present": { "fr": "...", "gloss": "..." },
-    "imparfait": { "fr": "...", "gloss": "..." },
-    "futur": { "fr": "...", "gloss": "..." },
-    "conditionnel": { "fr": "...", "gloss": "..." },
-    "subjonctif": { "fr": "...", "gloss": "..." },
-    "imperatif": { "fr": "...", "gloss": "..." }
+    "passeCompose": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "present": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "imparfait": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "futur": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "conditionnel": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "subjonctif": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "imperatif": { "fr": "<French sentence>", "gloss": "<translation>" }
   }
 }

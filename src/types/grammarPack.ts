@@ -40,6 +40,10 @@ export const RuleIdSchema = z.enum([
 ]);
 export type RuleId = z.infer<typeof RuleIdSchema>;
 
+/** A pronominal infinitive starts with `se ` or `s’` (U+2019 only; callers fold other apostrophes first). */
+export const PRONOMINAL_PREFIX = /^(se |s’)/;
+export const isPronominalInfinitive = (infinitive: string) => PRONOMINAL_PREFIX.test(infinitive);
+
 export const ProvenanceSchema = z
   .object({
     origin: z.enum(['rule', 'irregular-table', 'clarte-seed', 'human']),

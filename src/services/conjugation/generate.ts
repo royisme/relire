@@ -8,6 +8,7 @@
 import {
   FINITE_PERSONS,
   IMPERATIVE_PERSONS,
+  isPronominalInfinitive,
   type Cell,
   type ImperativePerson,
   type Person,
@@ -70,8 +71,6 @@ export interface GeneratedVerb {
   /** The imperatif came from the irregular table, not from the present. */
   imperatifExplicit: boolean;
 }
-
-const isPronominal = (infinitive: string) => /^(se |s’)/.test(infinitive);
 
 const personsOf = (defective: Verb['defective']): readonly Person[] =>
   defective === 'impersonal' ? ['3sg'] : defective === 'third-person' ? ['3sg', '3pl'] : FINITE_PERSONS;
@@ -139,7 +138,7 @@ function irregularParts(spec: VerbSpec, persons: readonly Person[], entry?: Irre
 }
 
 export function generateVerb(spec: VerbSpec, irregulars: Record<string, IrregularEntry>): GeneratedVerb {
-  const pronominal = isPronominal(spec.infinitive);
+  const pronominal = isPronominalInfinitive(spec.infinitive);
   const persons = personsOf(spec.defective);
   const entry = irregulars[spec.id];
   const built = spec.rule === 'irregular' ? irregularParts(spec, persons, entry) : regularParts(spec, persons, entry);

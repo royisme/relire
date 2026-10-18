@@ -78,7 +78,7 @@ export function fetchWordAnalysis(
 /**
  * The conjugation of a verb outside the pack, kept per language + prompt fingerprint + infinitive and
  * revalidated on every hit. The infinitive is put in the engine's form first, so `s'habiller` and `s’habiller`
- * are one key and one request.
+ * (or `Parler` and `parler`) are one key and one request; an answer whose infinitive is another one is an error.
  */
 export function fetchConjugation(infinitive: string): Promise<ConjugationAnswer> {
   const ctx = context();
@@ -86,7 +86,12 @@ export function fetchConjugation(infinitive: string): Promise<ConjugationAnswer>
   return cachedRequest(
     'conjugation',
     conjugationKey(ctx.lang, promptFingerprint('conjugate', ctx.lang), verb),
-    () => ai.conjugateVerb({ infinitive: verb }, ctx),
+    async () => {
+      const answer = await ai.conjugateVerb({ infinitive: verb }, ctx);
+      // An answer for another verb must never be cached or shown under this one.
+      if (answer.infinitive !== verb) throw new Error(`The model answered for ${answer.infinitive}, not ${verb}.`);
+      return answer;
+    },
     false,
     (value) => ConjugationAnswerSchema.parse(value),
   );

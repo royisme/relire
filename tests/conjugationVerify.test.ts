@@ -1,3 +1,4 @@
+/** Owns the verb and cell statuses of an AI answer against the engine and of a pack row; not the view (conjugationAssemble) or the schema. */
 import { describe, expect, test } from 'bun:test';
 import { verifyAnswer, verifyPackVerb, type VerifiedVerb } from '../src/services/conjugation/verify';
 import { REGULAR_RULES } from '../src/services/conjugation/rules';
@@ -147,6 +148,20 @@ describe('ai-only verbs: nothing independent is left to compare with', () => {
     expect(verified.rule).toBeUndefined();
   });
 
+  test('a verb in -oir has no engine family, whatever -ir rule the AI names', () => {
+    for (const infinitive of ['pouvoir', 'devoir', 'voir'])
+      for (const rule of ['ir-issons', 'ir-sortir', 'ir-ouvrir'] as const) {
+        const base = infinitive.slice(0, -2);
+        const verified = verifyAnswer(erAnswer(infinitive, rule, { plain: base, strong: base, fut: `${infinitive}r` }));
+        allAiOnly(verified);
+        expect(verified.rule).toBeUndefined();
+      }
+    // A real -ir verb still fits.
+    expect(
+      verifyAnswer(erAnswer('couvrir', 'ir-ouvrir', { plain: 'couvr', strong: 'couvr', fut: 'couvrir' })).rule,
+    ).toBe('ir-ouvrir');
+  });
+
   test('a defective flag from the AI', () => {
     const answer = parlerAnswer();
     answer.defective = 'impersonal';
@@ -167,6 +182,17 @@ describe('ai-only verbs: nothing independent is left to compare with', () => {
       'rule-checked',
     );
   });
+});
+
+test('the pronominal flag of the AI cannot change the clitic or the rule forms', () => {
+  const lie = {
+    ...erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' }),
+    pronominal: false,
+  };
+  const verified = verifyAnswer(lie);
+  expect(verified.pronominal).toBe(true);
+  expect(verified.status).toBe('rule-checked');
+  expect(verified.tenses.imperatif['2sg']).toEqual({ lead: '', forms: ['lave-toi'], status: 'match' });
 });
 
 describe('ir-ouvrir: the engine takes the participle from the AI', () => {

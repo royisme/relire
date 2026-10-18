@@ -194,3 +194,24 @@ test('conjugate names every field of its schema, every rule and every person, in
     expect(text).not.toMatch(/\b(parle|parlons|achète|lève|lavons)\b/);
   }
 });
+
+test('conjugate: the skeleton is valid JSON of typed placeholders, the same in both languages', () => {
+  const skeleton = (lang: 'en' | 'zh') => {
+    const text = definition('conjugate').defaults[lang];
+    return JSON.parse(text.slice(text.indexOf('{\n  "infinitive"')));
+  };
+  /** Every key path with the kind of value at its end. */
+  const shape = (value: unknown, path = ''): string[] =>
+    value && typeof value === 'object'
+      ? Object.entries(value).flatMap(([key, item]) => shape(item, `${path}.${key}`))
+      : [`${path}:${typeof value === 'string' && /^<.+>$/.test(value) ? 'placeholder' : typeof value}`];
+  const en = shape(skeleton('en'));
+  expect(shape(skeleton('zh'))).toEqual(en);
+  // Only "pronominal" is a literal (a boolean); every other leaf is an <angle-bracket> placeholder.
+  expect(en.filter((leaf) => !leaf.endsWith(':placeholder'))).toEqual(['.pronominal:boolean']);
+  for (const lang of ['en', 'zh'] as const) {
+    const text = definition('conjugate').defaults[lang];
+    for (const copyable of ['"optional"', 'same persons as present', 'avoir or etre', '人称与 present 相同'])
+      expect(text).not.toContain(copyable);
+  }
+});

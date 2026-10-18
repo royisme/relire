@@ -32,30 +32,29 @@
 - 使用预组合的带音符字母（Unicode NFC），首尾不留空格。
 - 同一个数组内不要重复同一个形式。
 
-只输出 JSON，结构如下，每个值都按上面的说明填写（这里只展示结构，不是内容）：
+只输出 JSON，结构如下。每个 <尖括号> 项都代表需要你自己写出的值，本身不是值；"pronominal" 按上面的说明写 true 或 false。"defective"、"hAspire" 以及（动词没有现在分词时的）"participles.present" 不适用时就不要写；"defective" 动词还要在 "forms" 和 "examples" 中省略 "imperatif"。每个时态使用上面说明的同样的人称。
 {
-  "infinitive": "...",
+  "infinitive": "<原形>",
   "pronominal": false,
-  "aux": "avoir 或 etre",
-  "rule": "上面列出的值之一",
-  "defective": "可选",
-  "hAspire": "可选",
+  "aux": "<助动词>",
+  "rule": "<类型>",
   "forms": {
-    "present": { "1sg": ["..."], "2sg": ["..."], "3sg": ["..."], "1pl": ["..."], "2pl": ["..."], "3pl": ["..."] },
-    "imparfait": { "人称与 present 相同": ["..."] },
-    "futur": { "人称与 present 相同": ["..."] },
-    "conditionnel": { "人称与 present 相同": ["..."] },
-    "subjonctif": { "人称与 present 相同": ["..."] },
-    "imperatif": { "2sg": ["..."], "1pl": ["..."], "2pl": ["..."] }
+    "present": { "1sg": ["<动词部分>"], "2sg": ["<动词部分>"], "3sg": ["<动词部分>"], "1pl": ["<动词部分>"], "2pl": ["<动词部分>"], "3pl": ["<动词部分>"] },
+    "imparfait": { "1sg": ["<动词部分>"], "2sg": ["<动词部分>"], "3sg": ["<动词部分>"], "1pl": ["<动词部分>"], "2pl": ["<动词部分>"], "3pl": ["<动词部分>"] },
+    "futur": { "1sg": ["<动词部分>"], "2sg": ["<动词部分>"], "3sg": ["<动词部分>"], "1pl": ["<动词部分>"], "2pl": ["<动词部分>"], "3pl": ["<动词部分>"] },
+    "conditionnel": { "1sg": ["<动词部分>"], "2sg": ["<动词部分>"], "3sg": ["<动词部分>"], "1pl": ["<动词部分>"], "2pl": ["<动词部分>"], "3pl": ["<动词部分>"] },
+    "subjonctif": { "1sg": ["<动词部分>"], "2sg": ["<动词部分>"], "3sg": ["<动词部分>"], "1pl": ["<动词部分>"], "2pl": ["<动词部分>"], "3pl": ["<动词部分>"] },
+    "imperatif": { "2sg": ["<动词部分>"], "1pl": ["<动词部分>"], "2pl": ["<动词部分>"] }
   },
-  "participles": { "present": "可选", "past": { "ms": "...", "fs": "...", "mp": "...", "fp": "..." } },
+  "participles": { "present": "<现在分词>", "past": { "ms": "<过去分词 ms>", "fs": "<过去分词 fs>", "mp": "<过去分词 mp>", "fp": "<过去分词 fp>" } },
   "examples": {
-    "passeCompose": { "fr": "...", "gloss": "..." },
-    "present": { "fr": "...", "gloss": "..." },
-    "imparfait": { "fr": "...", "gloss": "..." },
-    "futur": { "fr": "...", "gloss": "..." },
-    "conditionnel": { "fr": "...", "gloss": "..." },
-    "subjonctif": { "fr": "...", "gloss": "..." },
-    "imperatif": { "fr": "...", "gloss": "..." }
+    "passeCompose": { "fr": "<法语句子>", "gloss": "<简体中文翻译>" },
+    "present": { "fr": "<法语句子>", "gloss": "<简体中文翻译>" },
+    "imparfait": { "fr": "<法语句子>", "gloss": "<简体中文翻译>" },
+    "futur": { "fr": "<法语句子>", "gloss": "<简体中文翻译>" },
+    "conditionnel": { "fr": "<法语句子>", "gloss": "<简体中文翻译>" },
+    "subjonctif": { "fr": "<法语句子>", "gloss": "<简体中文翻译>" },
+    "imperatif": { "fr": "<法语句子>", "gloss": "<简体中文翻译>" }
   }
 }
+

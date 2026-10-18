@@ -1,10 +1,11 @@
+/** Owns the conjugateVerb task, its request and its cache key with a fake provider; no network, not the schema, the engine or api.fetchConjugation (conjugationApi). */
 import { describe, expect, test } from 'bun:test';
 import { InvalidAnswerError } from '../src/services/ai/errors';
 import { conjugateRequest, promptFingerprint } from '../src/services/ai/prompts';
 import { conjugateVerb } from '../src/services/ai/tasks';
 import { conjugationKey } from '../src/storage/cache';
 import { contextOf, fakeProvider } from './fixtures/fakeProvider';
-import { parlerAnswer } from './fixtures/conjugationAnswer';
+import { erAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
 
 const rejection = async (promise: Promise<unknown>) => {
   try {
@@ -36,6 +37,9 @@ describe('conjugateVerb', () => {
       'rule',
     ]);
     expect(JSON.stringify(request.jsonSchema)).not.toContain('"const"');
+    // A plain boolean: no singleton enum, which a provider's response-schema subset might refuse.
+    expect(request.jsonSchema?.properties).toMatchObject({ hAspire: { type: 'boolean' } });
+    expect(JSON.stringify(request.jsonSchema)).not.toContain('"enum":[true]');
     expect(request.images).toBeUndefined();
   });
 
@@ -48,13 +52,36 @@ describe('conjugateVerb', () => {
   test('a malformed answer throws the schema’s reasons and nothing is substituted', async () => {
     const bad = parlerAnswer();
     delete bad.forms.present['3pl'];
-    bad.examples.present.fr = "J'en parle.";
+    bad.participles.past.ms = 'parle\u0301';
     const err = await rejection(conjugateVerb({ infinitive: 'parler' }, contextOf(fakeProvider(bad))));
     expect(err).toBeInstanceOf(InvalidAnswerError);
     expect((err as InvalidAnswerError).issues).toEqual([
-      'examples.present.fr: use the typographic apostrophe U+2019',
+      'participles.past.ms: string is not NFC',
       'forms.present.3pl: cell is missing',
     ]);
+  });
+
+  test('straight apostrophes in the French strings are folded before the parse; a gloss is left alone', async () => {
+    // The model says pronominal and writes the straight apostrophe, as models do.
+    const raw = erAnswer(
+      "s'habiller",
+      'er-regular',
+      { plain: 'habill', strong: 'habill', fut: 'habiller' },
+      { pronominal: true, aux: 'etre' },
+    );
+    raw.examples.present = { fr: "Je m'habille.", gloss: "I'm getting dressed." };
+    const result = await conjugateVerb({ infinitive: 's’habiller' }, contextOf(fakeProvider(raw)));
+    expect(result.infinitive).toBe('s’habiller');
+    expect(result.examples.present).toEqual({ fr: 'Je m’habille.', gloss: "I'm getting dressed." });
+  });
+
+  test('an answer whose pronominal flag contradicts its infinitive fails with that reason', async () => {
+    const err = await rejection(
+      conjugateVerb({ infinitive: 'parler' }, contextOf(fakeProvider({ ...parlerAnswer(), pronominal: true }))),
+    );
+    expect((err as InvalidAnswerError).issues).toContain(
+      'pronominal: pronominal must be true exactly when the infinitive starts with se or s’',
+    );
   });
 
   test('an answer that is not an object fails the same way', async () => {

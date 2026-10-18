@@ -1,7 +1,13 @@
+/** Owns the answer contract of the conjugateVerb task: what the schema accepts, rejects and folds; not the task, the engine or the prompt. */
 import { describe, expect, test } from 'bun:test';
 import { InvalidAnswerError } from '../src/services/ai/errors';
 import { parseAnswer } from '../src/services/ai/validate';
-import { ConjugationAnswerSchema, type ConjugationAnswer } from '../src/types/conjugationAnswer';
+import {
+  ConjugationAnswerSchema,
+  foldAnswerApostrophes,
+  foldApostrophes,
+  type ConjugationAnswer,
+} from '../src/types/conjugationAnswer';
 import { answerFromGolden, erAnswer, falloirAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
 
 /** The schema's reasons, one `path: message` per issue. */
@@ -83,14 +89,32 @@ describe('what the schema rejects, with readable reasons', () => {
   });
 
   test('a pronominal verb with avoir, and a missing present participle', () => {
-    expect(rejected((a) => ((a.pronominal = true), (a.aux = 'avoir')))).toEqual(['aux: a pronominal verb takes être']);
+    const pronominal = erAnswer(
+      'se laver',
+      'er-regular',
+      { plain: 'lav', strong: 'lav', fut: 'laver' },
+      { aux: 'avoir' },
+    );
+    expect(reasons(pronominal)).toEqual(['aux: a pronominal verb takes être']);
     expect(rejected((a) => delete a.participles.present)).toEqual([
       'participles.present: present participle is missing',
     ]);
   });
 
-  test('hAspire is true or absent, never false', () => {
-    expect(rejected((a) => ((a as { hAspire?: boolean }).hAspire = false)).join()).toContain('hAspire');
+  test('hAspire may be false, which means the same as absent', () => {
+    expect(rejected((a) => (a.hAspire = false))).toEqual([]);
+  });
+
+  test('pronominal must agree with the infinitive, in both directions', () => {
+    const message = 'pronominal: pronominal must be true exactly when the infinitive starts with se or s’';
+    expect(rejected((a) => (a.pronominal = true))).toContain(message);
+    const verb = erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' });
+    expect(reasons(verb)).toEqual([]);
+    verb.pronominal = false;
+    expect(reasons(verb)).toEqual([message]);
+    expect(
+      reasons(erAnswer('s’habiller', 'er-regular', { plain: 'habill', strong: 'habill', fut: 'habiller' })),
+    ).toEqual([]);
   });
 
   test('a failed parse reaches the caller as an InvalidAnswerError that names each reason', () => {
@@ -100,5 +124,36 @@ describe('what the schema rejects, with readable reasons', () => {
     expect(() => parseAnswer('the conjugation', ConjugationAnswerSchema, answer)).toThrow(
       'forms.present.1sg: cell is missing',
     );
+  });
+});
+
+describe('folding apostrophes before the parse', () => {
+  test('ASCII and left quotes become U+2019 in every French string', () => {
+    expect(foldApostrophes("j'aime l\u2018eau")).toBe('j’aime l’eau');
+    const raw = {
+      infinitive: "s'habiller",
+      forms: { present: { '1sg': ["m'habille"] } },
+      examples: { present: { fr: "J'aime ça.", gloss: "I don't mind." } },
+    };
+    expect(foldAnswerApostrophes(raw)).toEqual({
+      infinitive: 's’habiller',
+      forms: { present: { '1sg': ['m’habille'] } },
+      examples: { present: { fr: 'J’aime ça.', gloss: "I don't mind." } },
+    });
+  });
+
+  test('a folded answer parses, while the schema itself still rejects the straight apostrophe', () => {
+    const answer = erAnswer(
+      "s'habiller",
+      'er-regular',
+      { plain: 'habill', strong: 'habill', fut: 'habiller' },
+      { pronominal: true, aux: 'etre' },
+    );
+    answer.examples.present.fr = "J'aime ça.";
+    answer.examples.present.gloss = "I don't mind.";
+    expect(reasons(answer)).not.toEqual([]);
+    const parsed = ConjugationAnswerSchema.parse(foldAnswerApostrophes(answer));
+    expect(parsed.infinitive).toBe('s’habiller');
+    expect(parsed.examples.present).toEqual({ fr: 'J’aime ça.', gloss: "I don't mind." });
   });
 });

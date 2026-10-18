@@ -51,6 +51,7 @@ export interface VerifiedVerb {
   participles: Partial<Record<FormKey, CheckedForm>>;
 }
 
+// An `-ir` rule does not fit a verb in `-oir` (voir, pouvoir): they have no engine family.
 const SUFFIX: Record<Exclude<RuleId, 'irregular'>, RegExp> = {
   'er-regular': /er$/,
   'er-cer': /cer$/,
@@ -59,9 +60,9 @@ const SUFFIX: Record<Exclude<RuleId, 'irregular'>, RegExp> = {
   'er-e-grave': /er$/,
   'er-eacute-egrave': /er$/,
   'er-eler-double': /e[lt]er$/,
-  'ir-issons': /ir$/,
-  'ir-sortir': /ir$/,
-  'ir-ouvrir': /ir$/,
+  'ir-issons': /[^o]ir$/,
+  'ir-sortir': /[^o]ir$/,
+  'ir-ouvrir': /[^o]ir$/,
   're-regular': /re$/,
 };
 
@@ -159,7 +160,7 @@ export function verifyAnswer(answer: ConjugationAnswer): VerifiedVerb {
     (tense, person, cell) => {
       // Passé composé rests on the AI's auxiliary and agreement claims, which the engine cannot check.
       if (!generated || tense === 'passeCompose') return { status: 'ai-only' };
-      const ruleForms = ruleFormsOf(generated, tense, person, answer.pronominal);
+      const ruleForms = ruleFormsOf(generated, tense, person, view.pronominal);
       return sameForms(cell.forms, ruleForms) ? { status: 'match' } : { status: 'differs', ruleForms };
     },
     (key, form) => {

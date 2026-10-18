@@ -5,7 +5,7 @@
  * small variations. Test data, not reviewed pack data.
  */
 import type { ConjugationAnswer } from '../../src/types/conjugationAnswer';
-import { TENSES, type Person } from '../../src/types/grammarPack';
+import { TENSES, isPronominalInfinitive, type Person } from '../../src/types/grammarPack';
 import { GOLDEN } from './grammarPackGolden';
 
 type Forms = Record<Person, string[]>;
@@ -36,8 +36,8 @@ export function erAnswer(
   const ms = `${plain}é`;
   return {
     infinitive,
-    pronominal: /^(se |s’)/.test(infinitive),
-    aux: /^(se |s’)/.test(infinitive) ? 'etre' : 'avoir',
+    pronominal: isPronominalInfinitive(infinitive),
+    aux: isPronominalInfinitive(infinitive) ? 'etre' : 'avoir',
     rule,
     forms: {
       present: six(`${strong}e`, `${strong}es`, `${strong}e`, `${plain}ons`, `${plain}ez`, `${strong}ent`),

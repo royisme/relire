@@ -1,3 +1,4 @@
+/** Owns the view built from an AI answer and the infinitive helpers; not verification statuses (conjugationVerify) or the schema. */
 import { describe, expect, test } from 'bun:test';
 import { assembleVerb, engineBase, engineInfinitive } from '../src/services/conjugation/assemble';
 import { generateVerb } from '../src/services/conjugation/generate';
@@ -19,6 +20,11 @@ describe('engineInfinitive', () => {
     expect(generateVerb(spec, {}).verb.pronominal).toBe(true);
     // The unfolded form would not be pronominal: this is why the fold is needed.
     expect(generateVerb({ ...spec, infinitive: "s'habiller" }, {}).verb.pronominal).toBe(false);
+  });
+
+  test('lowercase: Parler and parler are one verb', () => {
+    expect(engineInfinitive('Parler')).toBe('parler');
+    expect(engineInfinitive("S'Habiller")).toBe('s’habiller');
   });
 
   test('NFC, trim and single spaces', () => {
@@ -87,6 +93,23 @@ describe('assembleVerb composes what the AI is never asked for', () => {
     const hurler = erAnswer('hurler', 'er-regular', { plain: 'hurl', strong: 'hurl', fut: 'hurler' });
     expect(assembleVerb({ ...hurler, hAspire: true }).tenses.present['1sg']?.lead).toBe('je');
     expect(assembleVerb(hurler).tenses.present['1sg']?.lead).toBe('j’');
+    // false means absent.
+    expect(assembleVerb({ ...hurler, hAspire: false }).tenses.present['1sg']?.lead).toBe('j’');
+  });
+
+  test('pronominal comes from the infinitive, never from the AI flag', () => {
+    const lie = {
+      ...erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' }),
+      pronominal: false,
+    };
+    const view = assembleVerb(lie);
+    expect(view.pronominal).toBe(true);
+    expect(view.tenses.present['1sg']).toEqual({ lead: 'je me', forms: ['lave'] });
+    expect(view.tenses.imperatif?.['2sg']?.forms).toEqual(['lave-toi']);
+    const other = assembleVerb({ ...parlerAnswer(), pronominal: true });
+    expect(other.pronominal).toBe(false);
+    expect(other.tenses.present['1sg']).toEqual({ lead: 'je', forms: ['parle'] });
+    expect(other.tenses.imperatif?.['2sg']?.forms).toEqual(['parle']);
   });
 
   test('passé composé takes the AI participles, not a derivation', () => {
