@@ -8,7 +8,7 @@ export type ReaderSource =
 
 export type ReaderDocument = Pick<Article, 'title' | 'content' | 'level' | 'category' | 'source'>;
 
-/** Explicit source namespaces for Reader ownership; recording keys keep their separate legacy format. */
+/** Explicit source namespaces for Reader ownership; article recording keys keep the plain `articleId|sentence` format. */
 export const passageIdentity = (materialId: string, unitId: string) =>
   `passage:${encodeURIComponent(JSON.stringify([materialId, unitId]))}`;
 export const readerIdentity = (source: ReaderSource) =>

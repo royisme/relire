@@ -10,7 +10,7 @@ const state = (itemId: string, correct: boolean | null): ExerciseItemState => ({
   unitId: 'u',
   itemId,
   answer: {} as ExerciseItemState['answer'],
-  checked: correct === null ? null : { correct },
+  checked: correct === null ? null : { correct, strictAccents: false },
   hintShown: false,
   explanationShown: false,
   updatedAt: 0,

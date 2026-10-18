@@ -74,72 +74,27 @@ export const EMPTY_STATS: UserStats = {
 
 let dbPromise: Promise<IDBPDatabase<RelireDB>> | null = null;
 
-/**
- * Version-change trouble between tabs: `blocked` means another open tab keeps
- * this one from upgrading; `stale` means this tab closed its connection so a
- * newer tab could upgrade, and must be reloaded.
- */
-export type DbNotice = 'blocked' | 'stale' | null;
-let notice: DbNotice = null;
-const noticeListeners = new Set<() => void>();
-const setNotice = (next: DbNotice) => {
-  notice = next;
-  noticeListeners.forEach((listener) => listener());
-};
-export const getDbNotice = () => notice;
-export function subscribeDbNotice(listener: () => void): () => void {
-  noticeListeners.add(listener);
-  return () => {
-    noticeListeners.delete(listener);
-  };
-}
-
 export function db() {
   if (!dbPromise) {
-    dbPromise = openDB<RelireDB>('relire', 5, {
-      upgrade(d, oldVersion) {
-        if (oldVersion < 1) {
-          d.createObjectStore('articles', { keyPath: 'id' });
-          d.createObjectStore('vocab', { keyPath: 'id' });
-          d.createObjectStore('meta');
-        }
-        if (oldVersion < 2) {
-          d.createObjectStore('cache', { keyPath: 'key' }).createIndex('kind', 'kind');
-        }
-        if (oldVersion < 3) {
-          const audio = d.createObjectStore('audio', { keyPath: 'key' });
-          audio.createIndex('text', 'text');
-          audio.createIndex('lastUsed', 'lastUsed');
-        }
-        if (oldVersion < 4) {
-          d.createObjectStore('shadowing', { keyPath: 'key' }).createIndex('articleId', 'articleId');
-        }
-        if (oldVersion < 5) {
-          d.createObjectStore('units', { keyPath: 'id' }).createIndex('materialId', 'materialId');
-          d.createObjectStore('itemStates', { keyPath: 'id' }).createIndex('unitId', 'unitId');
-          const attempts = d.createObjectStore('attempts', { keyPath: 'id' });
-          attempts.createIndex('unitId', 'unitId');
-          attempts.createIndex('materialId', 'materialId');
-          attempts.createIndex('grammarTag', 'grammarTag');
-          attempts.createIndex('timestamp', 'timestamp');
-        }
-      },
-      blocked() {
-        setNotice('blocked');
-      },
-      blocking() {
-        // A newer tab wants to upgrade: step aside instead of stalling it.
-        void dbPromise?.then((open) => open.close());
-        dbPromise = null;
-        setNotice('stale');
+    dbPromise = openDB<RelireDB>('relire', 1, {
+      upgrade(d) {
+        d.createObjectStore('articles', { keyPath: 'id' });
+        d.createObjectStore('vocab', { keyPath: 'id' });
+        d.createObjectStore('meta');
+        d.createObjectStore('cache', { keyPath: 'key' }).createIndex('kind', 'kind');
+        const audio = d.createObjectStore('audio', { keyPath: 'key' });
+        audio.createIndex('text', 'text');
+        audio.createIndex('lastUsed', 'lastUsed');
+        d.createObjectStore('shadowing', { keyPath: 'key' }).createIndex('articleId', 'articleId');
+        d.createObjectStore('units', { keyPath: 'id' }).createIndex('materialId', 'materialId');
+        d.createObjectStore('itemStates', { keyPath: 'id' }).createIndex('unitId', 'unitId');
+        const attempts = d.createObjectStore('attempts', { keyPath: 'id' });
+        attempts.createIndex('unitId', 'unitId');
+        attempts.createIndex('materialId', 'materialId');
+        attempts.createIndex('grammarTag', 'grammarTag');
+        attempts.createIndex('timestamp', 'timestamp');
       },
     });
-    dbPromise.then(
-      () => {
-        if (notice === 'blocked') setNotice(null);
-      },
-      () => undefined,
-    );
     dbPromise.catch(() => {
       dbPromise = null;
     });

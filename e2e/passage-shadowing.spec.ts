@@ -80,7 +80,7 @@ for (const phone of [false, true]) {
         record.takes[0],
       );
       await storage.deleteUnit('removed-passage');
-      // Legacy article backup shape remains unchanged; same sentence does not share the passage key.
+      // Article-owned recordings keep their own backup shape; same sentence does not share the passage key.
       await shadowing.addTake(record.articleId, record.text, record.takes[0]);
       const app = await exportData();
       const backup = await shadowing.exportShadowing();
@@ -92,16 +92,16 @@ for (const phone of [false, true]) {
       return {
         identical: JSON.stringify(restored) === JSON.stringify(backup),
         count: (await shadowing.listShadowing()).length,
-        legacy: backup.some((r) => !r.passage),
+        articleOwned: backup.some((r) => !r.passage),
         removed: !(await storage.getUnit('removed-passage')),
         version: d.version,
       };
     });
     expect(roundtrip.identical).toBe(true);
     expect(roundtrip.count).toBe(3);
-    expect(roundtrip.legacy).toBe(true);
+    expect(roundtrip.articleOwned).toBe(true);
     expect(roundtrip.removed).toBe(true);
-    expect(roundtrip.version).toBe(5);
+    expect(roundtrip.version).toBe(1);
     await page.goto('/#/study/shadowing');
     await expect(page.getByText('Source unavailable (1)', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: `Compléter le passage — ${title}` })).toBeVisible();

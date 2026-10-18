@@ -34,7 +34,7 @@ const ExerciseAnswerSchema = z.object({
 
 const CheckedResultSchema = z.object({
   correct: z.boolean(),
-  strictAccents: z.boolean().optional(),
+  strictAccents: z.boolean(),
   aiFeedback: z.object({ feedback: z.string(), correctedVersion: z.string().optional() }).optional(),
 });
 

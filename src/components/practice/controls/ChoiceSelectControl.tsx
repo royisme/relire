@@ -16,10 +16,9 @@ export function ChoiceSelectControl({ item, onWord, answer, onChange, checked, d
   const { t } = useTranslation();
   const pieces = choicePieces(item.prompt);
   const expected = Array.isArray(item.expectedAnswer) ? item.expectedAnswer : [item.expectedAnswer];
-  const strictAccents = checked?.strictAccents;
-  const markSlots = strictAccents !== undefined;
-  const same = (a: string, b: string) =>
-    normalizeFrench(a, strictAccents ?? true) === normalizeFrench(b, strictAccents ?? true);
+  const strictAccents = checked?.strictAccents ?? true;
+  const markSlots = checked !== null;
+  const same = (a: string, b: string) => normalizeFrench(a, strictAccents) === normalizeFrench(b, strictAccents);
 
   const pick = (group: number, option: string) => {
     if (disabled) return;

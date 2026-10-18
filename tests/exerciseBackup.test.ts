@@ -43,10 +43,10 @@ test('a backup restores into an empty database with everything intact', async ()
   expect((await loadData())?.articles).toHaveLength(1);
 });
 
-for (const strictAccents of [false, true, undefined]) {
-  test(`backup round-trips checked accent metadata ${String(strictAccents)} without inferring legacy settings`, async () => {
+for (const strictAccents of [false, true]) {
+  test(`backup round-trips checked accent metadata ${String(strictAccents)}`, async () => {
     const backup = await backupWithData();
-    const checked = { correct: false, ...(strictAccents === undefined ? {} : { strictAccents }) };
+    const checked = { correct: false, strictAccents };
     backup.itemStates[0].checked = checked;
     await freshDb();
     await importData(backup);

@@ -14,10 +14,10 @@ One application in which a learner does all of their French study: read real mat
 | --- | --- | --- |
 | 1 | No server. Every AI call goes from the browser with the learner's own key (BYOK). | FrenchLab's Express server (`server.ts`, `src/server/*`), its endpoint allowlist and its request-cancellation registry are dropped. OCR, tutoring, grading, drills and TTS become `src/services/ai` tasks. Cancellation is a browser `AbortController`. |
 | 2 | Product scope widens to exercises, including listening (dictation) and writing (AI-graded open answers). | `CLAUDE.md`, `PRODUCT.md` and the READMEs stop saying "reading and speaking only". Still no mock exams and no official scores; AI grades are estimates. |
-| 3 | A new grammar taxonomy that covers A1–C1 (section 6). | FrenchLab's 14 textbook-specific categories are mapped onto it when old data is imported. |
+| 3 | A new grammar taxonomy that covers A1–C1 (section 6). | FrenchLab's textbook-specific categories are not mapped: importing FrenchLab backups is not planned. |
 | 4 | New dependencies: `zod` (exercise contracts, import drafts, AI answer validation) and `pdfjs-dist` (local PDF page rendering, loaded on demand). Linting and formatting move to oxlint and oxfmt. | `bun run lint` becomes oxlint; type checking moves to `bun run typecheck`; `bun run format:check` joins CI. |
 | 5 | The merged product is called **Relire Plus**. | The display name (title, manifest, header, marketing, READMEs) changes in phase 6, after the learning loop and migration are ready. Internal identifiers stay `relire`: the IndexedDB database `relire`, the `relire_*` localStorage keys, the package and the repository. Renaming them would lose learners' data. |
-| 6 | A checked result retains the strict-accent preference used when it was graded, including through backup/restore. | Changing the preference does not reinterpret saved checks. Legacy results without this metadata retain their overall verdict; multi-slot controls show no guessed per-slot verdicts. |
+| 6 | A checked result retains the strict-accent preference used when it was graded, including through backup/restore. | Changing the preference does not reinterpret saved checks. Every checked result carries the preference, so per-slot markings are never guessed. |
 | 7 | An import saved as both article and exercises creates one readable material with attached units, not two library entries. | Save opens Practice when exercises were saved, otherwise Reader. Unconfirmed drafts stay in memory, block navigation, and trigger the browser warning on reload/close; leaving after confirmation loses the draft. |
 
 Dropped from FrenchLab: TanStack AI and its four adapters (Relire's provider registry replaces them), Dexie and `dexie-react-hooks` (Relire's `idb` storage stays), TanStack Query (no server metadata to cache), Express and dotenv, and its three themes (Relire's design system and themes stay).
@@ -76,7 +76,7 @@ Today Relire has four flat tabs (a left drawer below `md`) and Settings is a cen
 
 ### Storage (`src/storage`)
 
-`relire` IndexedDB version 5 adds:
+`relire` IndexedDB (a single schema at version 1) holds:
 
 | Store | Key | Indexes | Holds |
 | --- | --- | --- | --- |
@@ -84,13 +84,13 @@ Today Relire has four flat tabs (a left drawer below `md`) and Settings is a cen
 | `itemStates` | `id` (`unitId:itemId`) | `unitId` | Current answer, checked result, hint/explanation shown |
 | `attempts` | `id` | `unitId`, `grammarTag`, `timestamp` | One row per check: prompt, answer, expected, correct, grammar tag, time |
 
-Articles stay in `articles`; an imported workbook is an `Article` with `kind: 'workbook'` (default `'article'` for existing rows) so the library, deletion and backup have one material list. Rules carried over from FrenchLab: checking an answer writes the item state and the attempt in one transaction; reset clears current states and keeps attempts; a write failure shows an error and never a fake success; late AI answers are dropped when their unit was reset or left (token check).
+Articles stay in `articles`; an imported workbook is an `Article` with `kind: 'workbook'` (required on every row) so the library, deletion and backup have one material list. Rules carried over from FrenchLab: checking an answer writes the item state and the attempt in one transaction; reset clears current states and keeps attempts; a write failure shows an error and never a fake success; late AI answers are dropped when their unit was reset or left (token check).
 
 Import saves its material and initial units through `createImportedMaterial(article, units)` in one IndexedDB transaction over articles, units and meta, with no optimistic library success and no separate article-then-units writes. Prepare once and retain stable identities for retry after a rejected write. Creation is add-only: any existing id is a collision, never evidence of success; there are no recovery receipts or schema metadata. The Phase 4 prerequisite removed App's article snapshot autosave: initialization, editor saves and sample restores now commit explicit storage operations before React state updates, so an old library snapshot cannot delete a committed import. Vocabulary/stats autosave stays unchanged; concurrent explicit same-article operations remain last-write-wins. Exercises-only creates a workbook with valid units and may keep source text empty; article/both require source text, and both creates one readable material with attached units.
 
 The import workspace uses `#/import` in the Read area; `#/read/import` remains a valid reader route for an existing article id. A synchronous `index.html` recorder indexes normal same-document entries before deferred application code. The import coordinator restores the real import entry before asking Keep/Discard and replays an accepted traversal without replacing history entries. Reload/close warns through beforeunload; pending saves cannot discard. Navigation API indices supplement older untagged entries, but normal operation does not require that API. Direction recovery for untagged entries fabricated before the earliest synchronous script without Navigation API is outside the recording contract.
 
-Backups gain `units`, `itemStates` and `attempts`. Restore also accepts a FrenchLab `frenchlab-backup` v1 file: lessons become workbooks and units, states and attempts are kept, grammar tags are mapped (section 6), and FrenchLab settings are ignored except prompt overrides, which are offered for review rather than applied silently. FrenchLab runs on another origin, so this file is the only way to bring its data over.
+Backups gain `units`, `itemStates` and `attempts`. Restoring a FrenchLab `frenchlab-backup` file is not planned.
 
 ### UI
 
@@ -98,7 +98,7 @@ FrenchLab components are rewritten against Relire's primitives (`ui/overlay`, `u
 
 ### Tooling
 
-`bun run typecheck` (tsc), `bun run lint` (oxlint, type-aware, React Hooks rules, warnings denied), `bun run format:check` (oxfmt), `bun run i18n:check`, `bun run build`, `bun run e2e`, `impeccable detect`. Pure logic (grading, contracts, import draft promotion, taxonomy mapping, backup parsing) gets `bun test` unit tests ported from FrenchLab's `tests/`; flows get Playwright specs with mocked AI as today.
+`bun run typecheck` (tsc), `bun run lint` (oxlint, type-aware, React Hooks rules, warnings denied), `bun run format:check` (oxfmt), `bun run i18n:check`, `bun run build`, `bun run e2e`, `impeccable detect`. Pure logic (grading, contracts, import draft promotion, taxonomy, backup parsing) gets `bun test` unit tests ported from FrenchLab's `tests/`; flows get Playwright specs with mocked AI as today.
 
 ## 5. Phases
 
@@ -107,12 +107,12 @@ Each phase is shippable on its own, with e2e coverage, both locales and a CHANGE
 | Phase | Delivers | Done when |
 | --- | --- | --- |
 | 1. Direction and tooling | This plan; scope and name recorded in `CLAUDE.md` and `PRODUCT.md`; oxlint and oxfmt with a clean baseline. | CI runs typecheck, lint, format, translations and build. |
-| 2. Foundation | Zod exercise contracts and grading (`exercise-comparison`), taxonomy, DB v5 stores and transactions, backup fields, new AI tasks and templates, `bun test` for the logic. No UI. | Unit tests cover grading for all 11 types, contract refinements, DB upgrade from v4 keeps data. |
+| 2. Foundation | Zod exercise contracts and grading (`exercise-comparison`), taxonomy, DB stores and transactions, backup fields, new AI tasks and templates, `bun test` for the logic. No UI. | Unit tests cover grading for all 11 types, contract refinements, DB upgrade from v4 keeps data. |
 | 2b. App shell | Collapsible sidebar, Settings as a page with sections, hash routes; no new features, today's screens move into it. | E2E: collapse and expand persist, Back and reload keep the place, a key request lands on AI services on the purpose that needs it, 360 px and 1280 px without overflow or layout shift. |
 | 3. Practise (complete, including review fixes) | Exercise sheet with the 11 types, keyboard and character bar, hints, explanations, open-answer grading, dictation audio; article → generated unit; today's drills replaced. | E2E: each type answered right and wrong, Enter flow, reset keeps history, phone width without overflow. |
 | 4. Import (complete, including review fixes) | Image, PDF (local rendering, up to 3 pages) and text import; draft review and editing; save as exercises and/or article. | E2E with mocked extraction: edit, exclude, block on missing context, cancel, failed save keeps the draft. |
 | 5. Review loop | Mistakes in My study, accuracy by grammar area in Progress, adaptive drills, mistake → vocabulary, cross-links to the reader. | E2E: a wrong answer appears in Mistakes, its drill is generated, its word is saved. |
-| 6. Migration and launch | FrenchLab backup import, the Relire Plus name across app, manifest, marketing and READMEs, additional providers, FrenchLab repository archived with a pointer here. | A real FrenchLab backup restores with every attempt kept. |
+| 6. Launch | The Relire Plus name across app, manifest, marketing and READMEs, additional providers, FrenchLab repository archived with a pointer here. | The name is consistent across the app, manifest, marketing and READMEs. |
 
 ## 6. Grammar taxonomy (implemented in phase 2)
 
@@ -127,8 +127,6 @@ Grouped by area; each attempt carries exactly one tag. Names are stable IDs; lab
 | Pronouns | `subject-object-pronouns`, `y-en`, `relative-pronouns`, `other-pronouns` |
 | Sentence | `negation`, `questions`, `prepositions`, `connectors`, `word-order` |
 | Skills | `numbers-time`, `vocabulary-usage`, `reading-comprehension`, `listening-dictation`, `written-expression` |
-
-Mapping from FrenchLab: `gender-agreement` → `gender-number`; `nationality-adjectives` → `adjective-agreement`; `country-prepositions` → `prepositions`; `verb-conjugation-etre`, `verb-conjugation-sappeler`, `verb-conjugation-aller-avoir` → `present`; `pronouns-subject` → `subject-object-pronouns`; `definite-articles` → `articles`; `possessive-adjectives` → `possessive-demonstrative`; `numbers-time` → `numbers-time`; `question-formulation` → `questions`; `dialogue-comprehension`, `reading-comprehension` → `reading-comprehension`; `professions-vocabulary` → `vocabulary-usage`.
 
 ### Phase 5 execution gates
 

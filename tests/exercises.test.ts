@@ -122,7 +122,7 @@ test('checking an already checked item returns the committed state and no second
     itemId: FIRST,
     resetToken: 0,
     answer: answered('suis'),
-    result: { ...right, strictAccents: false },
+    result: right,
   });
   const second = await checkItem({
     unitId: unit.id,

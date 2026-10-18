@@ -35,8 +35,6 @@ export function FillBlanksControl({
   const stateOf = (index: number): BlankState => {
     if (!checked) return 'open';
     if (blanks === 1) return checked.correct ? 'right' : 'wrong';
-    // Legacy checks keep their overall verdict, but cannot establish individual slot markings.
-    if (checked.strictAccents === undefined) return 'open';
     if (checked.correct) return 'right';
     // A wrong item can still have blanks that were right; use the saved comparison preference.
     const same =

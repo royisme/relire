@@ -295,7 +295,6 @@ test.describe('layout', () => {
     '#/settings/prompts',
     '#/settings/data',
     '#/about',
-    '#/settings/about',
     '#/nowhere',
   ];
 

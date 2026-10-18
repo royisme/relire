@@ -50,15 +50,15 @@ test('passage routes and durable sentence focus roundtrip without taking article
   }
 });
 
-test('About is independent and old Settings About deep links canonicalize to it', () => {
+test('About is its own route', () => {
   const route: Route = { name: 'about' };
   expect(roundTrip(route)).toEqual({ route, canonical: null });
   expect(areaOf(route)).toBe('about');
-  for (const hash of ['#/settings/about', '#/settings/about/', '#/about/']) {
+  for (const hash of ['#/about/']) {
     expect(parseRoute(hash)).toEqual({ route, canonical: '#/about' });
   }
   expect(SETTINGS_SECTIONS).toEqual(['ai', 'practice', 'prompts', 'data']);
-  for (const hash of ['#/about/extra', '#/settings/about/extra', '#/settings/missing']) {
+  for (const hash of ['#/about/extra', '#/settings/about', '#/settings/missing']) {
     expect(parseRoute(hash).route.name).toBe('notFound');
   }
 });

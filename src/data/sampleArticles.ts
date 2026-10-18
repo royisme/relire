@@ -5,6 +5,7 @@ export const SAMPLE_ARTICLES: Article[] = [
     id: 'petit-prince',
     title: 'Le Petit Prince et le Secret du Renard',
     level: 'B1',
+    kind: 'article',
     category: 'Littérature',
     source: 'Antoine de Saint-Exupéry',
     content: `— C'est une chose trop oubliée, dit le renard. Ça signifie « créer des liens... »
@@ -38,6 +39,7 @@ Le renard se tut et regarda longtemps le petit prince :
     id: 'cafe-parisien',
     title: "L'Art de Vivre dans un Café Parisien",
     level: 'B2',
+    kind: 'article',
     category: 'Culture & Société',
     source: 'Chronique Parisienne',
     content: `À Paris, le café n'est point un simple lieu où l'on consomme une boisson chaude avant d'affronter la cadence effrénée du métro. C'est un véritable théâtre à ciel ouvert, une institution séculaire où s'entremêlent les arômes de torréfaction et les éclats de conversations animées.
@@ -50,6 +52,7 @@ Bien que le rythme de la capitale se soit considérablement accéléré au fil d
     id: 'tech-ecologie',
     title: "L'Intelligence Artificielle et la Transition Écologique",
     level: 'C1',
+    kind: 'article',
     category: 'Science & Avenir',
     source: 'Revue Prospective',
     content: `Face à l'urgence climatique sans précédent qui bouleverse notre planète, l'essor fulgurant des technologies d'intelligence artificielle suscite autant d'espoirs que d'interrogations légitimes.

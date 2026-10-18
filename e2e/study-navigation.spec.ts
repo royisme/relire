@@ -52,7 +52,7 @@ test('expanded, collapsed and tablet study pages keep just one visible set of pa
   await studyLinks(page, 'page', 'Mistakes');
 });
 
-test('About is the final footer link, not a Settings section, including the old deep link', async ({ page }) => {
+test('About is the final footer link, not a Settings section', async ({ page }) => {
   await page.goto('/#/settings/ai/text');
   const sidebar = page.locator('[data-sidebar]');
   await expect(sidebar.locator('a[href^="#/settings/"]')).toHaveCount(4);
@@ -66,9 +66,6 @@ test('About is the final footer link, not a Settings section, including the old 
   await expect(page.getByText('There is no account and no app server.', { exact: false })).toBeVisible();
   await expect(sidebar.getByRole('link', { name: 'Settings', exact: true })).not.toHaveAttribute('aria-current');
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'About', exact: true })).toBeVisible();
-  await page.goto('/#/settings/about');
-  await expect(page).toHaveURL(/#\/about$/);
   await expect(page.getByRole('heading', { name: 'About', exact: true })).toBeVisible();
   await about.click();
   await sidebar.getByRole('link', { name: 'Settings', exact: true }).click();
@@ -125,8 +122,6 @@ test('phone study links stay local; the drawer has About last and no collapse co
   await expect(page.getByRole('heading', { name: 'About', exact: true })).toBeVisible();
   await page.goto('/#/settings');
   await expect(page.getByRole('main').getByRole('link', { name: /About/ })).toHaveCount(0);
-  await page.goto('/#/settings/about');
-  await expect(page).toHaveURL(/#\/about$/);
   expect(await overflowing(page.locator('body'))).toEqual([]);
 });
 

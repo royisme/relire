@@ -135,8 +135,8 @@ export interface Article {
   source?: string;
   content: string;
   createdAt: string;
-  /** What the material is. Absent means 'article'; an imported workbook is 'workbook'. */
-  kind?: 'article' | 'workbook';
+  /** What the material is: a reading article, or an imported workbook with exercises. */
+  kind: 'article' | 'workbook';
 }
 
 export interface UserStats {

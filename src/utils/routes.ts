@@ -15,7 +15,7 @@
  *   #/progress               progress
  *   #/settings               section list on phones; desktop resolves it to the first section
  *   #/settings/:section      ai/:purpose | practice | prompts | data
- *   #/about                  About (old #/settings/about links redirect here)
+ *   #/about                  About
  */
 
 export const SETTINGS_SECTIONS = ['ai', 'practice', 'prompts', 'data'] as const;
@@ -148,8 +148,7 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
       route = { name: 'notFound' };
     }
   } else if (area === 'progress' && sub === undefined) route = { name: 'progress' };
-  else if ((area === 'about' && sub === undefined) || (area === 'settings' && sub === 'about'))
-    route = { name: 'about' };
+  else if (area === 'about' && sub === undefined) route = { name: 'about' };
   else if (area === 'settings' && sub === undefined) route = { name: 'settings', section: null };
   else if (area === 'settings' && isSection(sub)) route = { name: 'settings', section: sub };
   else route = { name: 'notFound' };

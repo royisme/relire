@@ -50,10 +50,10 @@ test('creates an exercises-only workbook with empty source text and fully promot
 
 test('empty source text still requires a readable article or valid workbook units, and always id/title', async () => {
   const workbook = { ...material, kind: 'workbook' as const, content: '' };
-  for (const kind of [undefined, 'article'] as const) {
-    for (const content of ['', '   ']) {
-      expect(await failure(createImportedMaterial({ ...material, kind, content }, units()))).toBeInstanceOf(Error);
-    }
+  for (const content of ['', '   ']) {
+    expect(await failure(createImportedMaterial({ ...material, kind: 'article', content }, units()))).toBeInstanceOf(
+      Error,
+    );
   }
   expect(await failure(createImportedMaterial(workbook, []))).toBeInstanceOf(Error);
   expect(await failure(createImportedMaterial(workbook, [{ ...units()[0], items: [] }]))).toBeInstanceOf(Error);

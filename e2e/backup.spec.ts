@@ -48,7 +48,7 @@ test('a backup restored from Settings brings back exercise units, states and att
       itemId: item.id,
       resetToken: await storage.getResetToken(unit.id),
       answer: { ...emptyAnswer(item), singleAnswer: 'faux' },
-      result: { correct: false },
+      result: { correct: false, strictAccents: false },
     });
     return JSON.stringify(await exportData());
   });

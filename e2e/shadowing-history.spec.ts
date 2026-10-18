@@ -35,6 +35,7 @@ async function prepareHistory(page: Page) {
         content: `${soleSentence} ${longSentence}`,
         level: 'B1',
         category: 'test',
+        kind: 'article',
         createdAt: '2026-10-17T00:00:00.000Z',
       });
       for (const [text, count] of [

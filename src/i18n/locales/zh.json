@@ -423,8 +423,6 @@
   "storage": {
     "loadFailed": "无法读取你的数据：{{msg}}",
     "saveFailed": "最新的修改没能保存到这个浏览器里。",
-    "upgradeBlocked": "Relire Plus 已更新。请关闭其他打开的 Relire Plus 标签页以完成更新，本页随后会继续。",
-    "staleTab": "Relire Plus 已在另一个标签页更新。请重新加载本页，以便继续保存。",
     "reload": "重新加载",
     "openBackup": "打开设置导出备份"
   },

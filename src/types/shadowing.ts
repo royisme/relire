@@ -14,7 +14,7 @@ export interface ShadowingTake {
 /** One sentence of one source, keyed by normalized text so edits elsewhere do not move it. */
 export interface ShadowingSentence {
   key: string;
-  /** Owning material, retained for the existing cascade index. No passage means legacy article prose. */
+  /** Owning material, retained for the existing cascade index. No passage means the material's own prose. */
   articleId: string;
   passage?: { unitId: string };
   /** Trimmed sentence as written when last recorded. */

@@ -21,7 +21,7 @@ async function wrong(page: Page, unitId = UNIT, itemId = 'fb-1') {
         itemId,
         answer: answer as never,
         resetToken: await storage.getResetToken(unitId),
-        result: { correct: false },
+        result: { correct: false, strictAccents: false },
       });
     },
     { unitId, itemId, answer: CATALOG_ANSWERS[itemId].wrong },
@@ -285,7 +285,7 @@ test('older query cannot overwrite a refreshed resolution', async ({ page }) => 
       itemId: 'fb-1',
       resetToken: await storage.getResetToken('unit-fill-blanks'),
       answer: { singleAnswer: 'mange', answers: [], selectedOptions: [], orderedItems: [] } as never,
-      result: { correct: true },
+      result: { correct: true, strictAccents: false },
     });
   });
   await expect(entry(page)).toContainText('Resolved');

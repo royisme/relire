@@ -427,8 +427,6 @@
   "storage": {
     "loadFailed": "Could not load your data: {{msg}}",
     "saveFailed": "Your latest changes could not be saved in this browser.",
-    "upgradeBlocked": "Relire Plus was updated. Close its other open tabs to finish, and this page will continue.",
-    "staleTab": "Relire Plus was updated in another tab. Reload this tab to keep saving your work.",
     "reload": "Reload",
     "openBackup": "Open Settings to export a backup"
   },

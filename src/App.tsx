@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useSyncExternalStore, type CSSProperties } from 'react';
+import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from './components/shell/Header';
 import { Sidebar } from './components/shell/Sidebar';
@@ -23,14 +23,12 @@ import { SAMPLE_ARTICLES } from './data/sampleArticles';
 import {
   deleteArticleData,
   EMPTY_STATS,
-  getDbNotice,
   loadData,
   initializeData,
   saveArticle,
   restoreMissingArticles,
   saveStats,
   saveVocab,
-  subscribeDbNotice,
 } from './storage/db';
 import { usePersist } from './storage/usePersist';
 import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
@@ -70,7 +68,6 @@ export default function App() {
   // Articles commit before state changes; vocabulary and stats use debounced persistence.
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const dbNotice = useSyncExternalStore(subscribeDbNotice, getDbNotice);
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const currentArticle = route.name === 'reader' ? (articles.find((a) => a.id === route.articleId) ?? null) : null;
@@ -392,13 +389,9 @@ export default function App() {
   const dueCount = vocabList.filter(isDueToday).length;
 
   // IndexedDB answers in a few milliseconds; render nothing until then so saved data never flashes as samples.
-  // An older tab can hold the database open and block an upgrade; say so instead of waiting silently.
   if (!ready) {
     return (
-      <div
-        className="min-h-screen bg-ink-50 grid place-items-center p-6"
-        aria-busy={!loadError && dbNotice !== 'blocked'}
-      >
+      <div className="min-h-screen bg-ink-50 grid place-items-center p-6" aria-busy={!loadError}>
         {loadError ? (
           <div role="alert" className="max-w-sm text-center text-sm text-ink-800 space-y-3 break-words">
             <p>{t('storage.loadFailed', { msg: loadError })}</p>
@@ -406,13 +399,7 @@ export default function App() {
               {t('storage.reload')}
             </button>
           </div>
-        ) : (
-          dbNotice === 'blocked' && (
-            <p role="alert" className="max-w-sm text-center text-sm text-ink-800">
-              {t('storage.upgradeBlocked')}
-            </p>
-          )
-        )}
+        ) : null}
       </div>
     );
   }
@@ -439,20 +426,6 @@ export default function App() {
         )}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          {dbNotice === 'stale' && (
-            <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
-              <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span>{t('storage.staleTab')}</span>
-                <button
-                  className="underline underline-offset-2 cursor-pointer"
-                  onClick={() => window.location.reload()}
-                >
-                  {t('storage.reload')}
-                </button>
-              </div>
-            </div>
-          )}
-
           {failedSaves.length > 0 && (
             <div role="alert" className="bg-bad-50 border-b border-bad-200 text-bad-900 text-sm">
               <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">

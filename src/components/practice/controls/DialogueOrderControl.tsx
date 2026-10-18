@@ -19,7 +19,7 @@ const lineKey = (line: string) => (line.trim()[0] ?? '').toLowerCase();
 export function DialogueOrderControl({ item, onWord, answer, onChange, checked, disabled }: ExerciseControlProps) {
   const { t } = useTranslation();
   const order = answer.dialogueOrder;
-  const markSlots = checked?.strictAccents !== undefined;
+  const markSlots = checked !== null;
   const expected = (Array.isArray(item.expectedAnswer) ? item.expectedAnswer : [item.expectedAnswer]).map((key) =>
     key.toLowerCase(),
   );

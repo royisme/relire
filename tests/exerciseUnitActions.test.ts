@@ -125,7 +125,7 @@ for (const action of ['hint', 'explanation'] as const) {
     spyOn(api, 'fetchHint').mockReturnValue(hint.promise);
     spyOn(api, 'fetchExplanation').mockReturnValue(explanation.promise);
     const { ctx, id, items, leave } = await seed();
-    if (action === 'explanation') items[id].checked = { correct: false };
+    if (action === 'explanation') items[id].checked = { correct: false, strictAccents: false };
     const work = action === 'hint' ? runHint(ctx, id) : runExplanation(ctx, id);
     leave();
     const patches = mock(() => {});

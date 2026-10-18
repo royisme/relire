@@ -21,7 +21,7 @@ export const sourceSentenceKey = (source: ReaderSource, text: string) =>
     ? shadowingKey(source.articleId, text)
     : `passage:${encodeURIComponent(JSON.stringify([source.materialId, source.unitId, normalizeText(text)]))}`;
 
-/** The material or passage is no longer the source of a take being saved. Legacy error name stays valid. */
+/** The material or passage is no longer the source of a take being saved. The name predates passage sources and is kept. */
 export class ArticleGoneError extends Error {
   constructor() {
     super('Article deleted');

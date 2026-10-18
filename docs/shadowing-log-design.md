@@ -39,7 +39,7 @@ Not building in v1: scoring or any assessment call; the player's automatic shado
 
 ## Passage-source extension
 
-The implemented independent unit-passage source is documented in `docs/architecture.md` (“Distinct passage sources and recording compatibility”). It reuses this card/log and the v5 store, adds optional `passage: { unitId }` provenance with a disjoint encoded key, and keeps legacy article keys/backups unchanged. Unit reset retains recordings; unit deletion leaves unavailable history that still roundtrips backups; changed text has no broken open link. Deleting the parent material removes prose and passage takes together. Reader return links include the source and sentence in the hash.
+The implemented independent unit-passage source is documented in `docs/architecture.md` (“Distinct passage sources and recording compatibility”). It reuses this card/log and the `shadowing` store, adds optional `passage: { unitId }` provenance with a disjoint encoded key, and keeps article keys/backups unchanged. Unit reset retains recordings; unit deletion leaves unavailable history that still roundtrips backups; changed text has no broken open link. Deleting the parent material removes prose and passage takes together. Reader return links include the source and sentence in the hash.
 
 ## Data
 
@@ -185,16 +185,12 @@ Desktop (≥ md): one table per article, rows in current article order.
   4. Recordings whose article is missing after import appear under "article removed".
 - **Deleting an article** deletes the article and its recordings in one `articles`+`shadowing` transaction, then updates React state. This does not go through the generic `saveArticles()` sync (which also runs on restore, where orphans must survive). A take whose save completes after its article was deleted is dropped (the save checks the article still exists inside its transaction).
 
-## IndexedDB upgrade
-
-`openDB` gets `blocked` and `blocking` handlers: an old tab holding version 3 is asked to close its connection (`blocking` → `db.close()` and a "Relire was updated, reload this tab" notice); the new tab shows "Close other Relire tabs to finish updating" instead of waiting silently. The app is not released yet, but the upgrade path is still tested (fresh install and v3 → v4 with existing data).
-
 ## Module responsibilities
 
 | Module | Owns |
 | --- | --- |
 | `storage/shadowing.ts` | Store, FIFO, queries, stats, backup (de)serialization and validation |
-| `storage/db.ts` | v4 upgrade, blocked/blocking handling, atomic article+recordings delete, transactional import |
+| `storage/db.ts` | Atomic article+recordings delete, transactional import |
 | `utils/speech/recorder.ts` | Stream session, per-take recording, owner-token capture lock |
 | `utils/speech/sequence.ts` | `suspendSequence()` keeping position for resume |
 | `utils/speech/playback.ts` | Take playback and comparison chain in the shared request-id/state machinery |

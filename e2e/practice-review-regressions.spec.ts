@@ -216,7 +216,7 @@ type ReviewDb = typeof import('../src/storage/db');
 
 for (const strictAccents of [false, true]) {
   for (const phone of [false, true])
-    test(`checked accents stay at ${strictAccents} through preference changes, reload, backup restore and legacy metadata${phone ? ' @phone' : ''}`, async ({
+    test(`checked accents stay at ${strictAccents} through preference changes, reload, backup restore${phone ? ' @phone' : ''}`, async ({
       page,
       ai,
     }) => {
@@ -285,25 +285,6 @@ for (const strictAccents of [false, true]) {
       };
       await restore(backup);
       await historicalMarks();
-      const legacy = JSON.parse(backup);
-      for (const state of legacy.itemStates) delete state.checked.strictAccents;
-      await restore(JSON.stringify(legacy));
-      await expect(choice.getByText(strictAccents ? 'Incorrect' : 'Correct', { exact: true })).toBeAttached();
-      await expect(chosen).toHaveAttribute('aria-pressed', 'true');
-      await expect(chosen).not.toHaveClass(/bg-ok|bg-bad|line-through/);
-      for (const field of await blanks.getByRole('textbox').all()) {
-        await expect(field).not.toHaveClass(/border-ok|border-bad|line-through/);
-        await expect(field).not.toHaveAttribute('aria-invalid');
-      }
-      await expect(blanks.getByText('Incorrect', { exact: true })).toBeAttached();
-      await expect(dialogue.getByText('a - Au revoir.', { exact: true }).first()).not.toHaveClass(
-        /text-ok|text-bad|line-through/,
-      );
-      await expect(dialogue.getByText('Incorrect', { exact: true })).toBeAttached();
-      await expect(single.getByRole('textbox')).toHaveCSS(
-        'text-decoration-line',
-        strictAccents ? 'line-through' : 'none',
-      );
       for (const theme of ['light', 'sepia', 'dark']) {
         await page.evaluate((value) => {
           document.documentElement.dataset.theme = value;

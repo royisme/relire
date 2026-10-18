@@ -181,8 +181,8 @@ export interface ExerciseAnswer {
 /** The result of a check. `aiFeedback` is present when an AI grader decided it. */
 export interface CheckedResult {
   correct: boolean;
-  /** Check-time comparison preference; absent on legacy results, whose slot markings are unknown. */
-  strictAccents?: boolean;
+  /** The accent preference the item was graded with, so per-slot markings stay as graded. */
+  strictAccents: boolean;
   aiFeedback?: { feedback: string; correctedVersion?: string };
 }
 

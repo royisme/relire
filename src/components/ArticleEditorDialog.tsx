@@ -50,6 +50,7 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
         category: category.trim(),
         source: source.trim() || undefined,
         content: content.trim(),
+        kind: article?.kind ?? 'article',
       });
       onClose();
     } catch (err) {

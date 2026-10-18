@@ -18,14 +18,14 @@ export async function freshDb() {
   globalThis.indexedDB = new IDBFactory();
 }
 
-export const article = (id = 'material-1', kind?: Article['kind']): Article => ({
+export const article = (id = 'material-1', kind: Article['kind'] = 'article'): Article => ({
   id,
   title: `Material ${id}`,
   level: 'A1',
   category: 'test',
   content: 'Je suis française.',
   createdAt: '2026-01-01T00:00:00.000Z',
-  ...(kind ? { kind } : {}),
+  kind,
 });
 
 export async function putArticle(id = 'material-1') {
@@ -53,8 +53,8 @@ export const answeredMulti = (text: string): ExerciseAnswer => ({
   multiAnswers: [text, text],
 });
 
-export const right = { correct: true };
-export const wrong = { correct: false };
+export const right = { correct: true, strictAccents: false };
+export const wrong = { correct: false, strictAccents: false };
 
 /** The error a promise rejects with, or undefined when it resolves (Bun's `.rejects` types trip the lint rules). */
 export async function failure(promise: Promise<unknown>): Promise<unknown> {
