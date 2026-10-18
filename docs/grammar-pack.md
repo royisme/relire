@@ -2,7 +2,9 @@
 
 Status: approved design. P1 and P2 are built and integrated (`84a396e`, `a9e7fcd`); the first pack (4 control verbs) is `reviewed` by the owner (2026-10-18, no external reference); P3 onwards are not built. Revised after an external review (Argon); the lead checked every code claim against the repo. Paths marked **(new)** do not exist yet; every other path was checked. Clarte material lives outside this repo under `/Users/royzhu/software/myproject/ts/studypro/clarte-analysis/` (`repo/src/data/frenchData.ts`, `repo/src/types/grammar.ts`, `verbs/input.json`, `verbs/out-glm.json`, `verbs/out-gpt.json`, `out/glm.md`, `out/gpt.md`); `clarte-analysis/...` below means that directory. Inherited owner decisions (2026-10-18, `docs/merge-progress.md` "Grammar tier") are stated once in section 1 and not reopened. Open points are in section 12 as `Q1` to `Q15`, each with a default or marked resolved. French-grammar claims the author could not verify are listed in section 12 under "For the human language reviewer" and must not be read as facts.
 
-Part 2 (`# Part 2: Grammar topics pack`, at the end of this file) specifies the grammar knowledge side (readable topics, not conjugation tables). It reuses the conventions of sections 3 to 5 and has its own ids (`T1` to `T11`, `TQ1` to `TQ11`, `TP1` to `TP5`); nothing in Part 1 changes.
+Revision (owner, 2026-10-18): Part 3 makes the conjugation framework the main content (any verb through an AI-filled, engine-checked grid) and Part 4 adds noun-gender tendencies. Where Part 3 disagrees with sections 1, 3, 6a, 7 or 9, Part 3 wins; each such place below carries a note.
+
+Part 2 (`# Part 2: Grammar topics pack`, further down) specifies the grammar knowledge side (readable topics, not conjugation tables). It reuses the conventions of sections 3 to 5 and has its own ids (`T1` to `T11`, `TQ1` to `TQ11`, `TP1` to `TP5`); nothing in Part 1 changes.
 
 ## 1. Goals, non-goals, inherited decisions
 
@@ -14,9 +16,9 @@ Goals
 Non-goals (phase 1)
 - No server, D1, API or accounts; no hosted delivery (the loader is the one seam, section 4).
 - No bundled third-party data: no Wiktionnaire, Lexique, Morphalou, Verbiste-derived or Clarte-derived tables. Morphalou is an offline oracle only.
-- No calculators, example sentences, noun gender or preposition content, daily-verb features, mastery stats, streaks, pronunciation scores, 12-colour token system.
+- No calculators, example sentences in the pack (AI examples appear only on the Part 3 screen), noun gender (now Part 4) or preposition content, daily-verb features, mastery stats, streaks, pronunciation scores, 12-colour token system.
 - No IPA (no phase-1 consumer; a future addition when a real consumer exists, Q13), no new grammar tags, no new exercise type, no AI call in the corpus path at runtime or in drills.
-- No participle drills, no inversion or negation forms (`va-t-il`, `ne mange pas`), no compound tenses other than passé composé, no spelling-by-sound logic.
+- No participle drills, no inversion or negation forms (`va-t-il`, `ne mange pas`; reversed by Part 3 F6), no compound tenses other than passé composé, no spelling-by-sound logic.
 - The word sheet still needs an AI key to open: `handleAiError` in `src/App.tsx` closes it on `MissingApiKeyError`, so pack data stays invisible without a key (Q9). Drills do not need a key.
 
 Inherited (owner): static pack, clean-room generation with our own deterministic generator, offline Morphalou 3.1 diff as checking oracle, Clarte (the owner's work) only as requirements list and seed for rows that pass verification, per-row provenance, no compatibility code (`docs/conventions.md` "Nothing has shipped"), Zod validation at load with whole-pack rejection, French as content language. The pack is language-neutral: Chinese and English UI text live in the locale files (section 3, Q1).
@@ -98,7 +100,7 @@ Invariants checked at load by `superRefine` (cheap, structural; linguistic check
 
 Rule captions and labels are locale keys in `src/i18n/locales/en.json` and `zh.json`: `grammarPack.rules.<ruleId>` (the 11 regular `RuleId`s), `grammarPack.tenses.<tense>`, `grammarPack.persons.<person>`, plus the drill title, instruction and set title keys. They are resolved with `t()` at render time. `agy` may draft the 11 caption strings once as an ordinary copy task; they are reviewed like any locale copy (`.claude/rules/i18n.md`), no pipeline.
 
-Existing types stay as they are. `src/types/index.ts` `ConjugationTense`/`ConjugationForm` (`person`, `form`) is what the word sheet already renders for AI data; the pack gets its own cell shape in the sheet (section 6a). Passé composé is stored expanded (not derived at runtime) so the app contains no conjugation logic at all; the logic lives only in `scripts/`.
+Existing types stay as they are. `src/types/index.ts` `ConjugationTense`/`ConjugationForm` (`person`, `form`) is what the word sheet already renders for AI data; the pack gets its own cell shape in the sheet (section 6a). Passé composé is stored expanded (not derived at runtime) so the pack reader needs no logic. Superseded in part by Part 3 F2: the generator moves to `src/services/conjugation/` and also runs in the app for verbs outside the pack.
 
 ## 4. Files, delivery, versioning
 
@@ -170,6 +172,8 @@ Review gate and record:
 ## 6. Integration points
 
 ### 6a. Word-sheet conjugation table
+Note (Part 3 F5): the unknown-verb branch and the saved-vocabulary rule below are replaced: the AI `conjugationTable` is removed from the word task and an unknown verb gets a button to the Conjugation screen. The known-verb pack table, `FormTile` change and states stand.
+
 Today `handleWordClick` in `src/App.tsx` calls `fetchWordAnalysis` (`src/services/api.ts`), which asks `analyzeWord` (`src/services/ai/tasks.ts`) with `src/services/ai/prompts/defaults/word.en.txt` and `word.zh.txt`; the model fills `conjugationTable` (optional in `WordAnalysis`, `src/types/index.ts`), and `src/components/WordDetailModal.tsx` renders it with `FormTile`. The answer is cached by language, prompt fingerprint, word and sentence (`docs/architecture.md`).
 - Resolve the entry from `wordData.lemma` (AI free text, unvalidated): exact `infinitive` match only, after NFC, lowercase, trim, whitespace collapse and apostrophe folding (`s'appeler` equals `s’appeler`). The pronoun is never added or removed: a transitive `lever` never resolves to `se lever`, and there is no `base` fallback. An unknown lemma stays unknown (Q2). The reverse hits of 6b are shown separately, so a disagreement stays visible and the pack never overrides the sheet.
 - Known: render the pack table (tense heading from `grammarPack.tenses.<tense>`, one caption line from `grammarPack.rules.<rule>` for regular rules) through a pack cell shape `{ lead, forms: string[] }`; the AI `conjugationTable` is ignored for that word. Unknown: default per Q2, keep the AI table with a visible note that it is AI-made and not verified (no fallback is invented; the model really produced it); the AI cells enter the same tile as `{ lead: person, forms: [form] }`.
@@ -189,6 +193,8 @@ Today `handleWordClick` in `src/App.tsx` calls `fetchWordAnalysis` (`src/service
 See section 7. Entry point: a new section in `src/components/practice/PracticePage.tsx` below the article generator, form in `src/components/practice/ConjugationDrillForm.tsx` (new). `src/hooks/useAdaptiveDrills.ts` and `src/services/exercises/fromDrills.ts` are the model for saving (`saveUnits` in `src/storage/exercises.ts`, retry with the same prepared payload).
 
 ## 7. Drill generation (`src/services/exercises/fromConjugation.ts` (new), pure)
+Note (Part 3 F7): the input becomes a verb view with cell statuses, not only the pack; items come from `reviewed` and `match` cells. The rest of this section stands.
+
 
 `prepareConjugationDrills({ pack, tenses, verbIds, level, perUnit = 8, maxPerVerb = 2, rng, makeId, now, t }) => ExerciseUnit[]`, every unit validated with `ExerciseUnitSchema` (`src/types/exercises.ts`).
 - One batch, one unit per selected tense. Unit fields: `id = <setId>:<tense>`, `section: 'CONJUGAISON'`, `unitNumber` 1..n, `title` and `instruction` from locale keys (`grammarPack.drill.*`, tense label interpolated), `type: 'WORD_TRANSFORM'`, `items` (at least 1), `grammarTags = [tense tag]` (at least 1); batch fields `setId` from `makeId`, `setTitle` from `t`, `level` from the learner's choice (`ExerciseLevelSchema`), `createdAt = now()` identical on every unit; no `importSource`, no article.
@@ -237,6 +243,8 @@ Playwright (`e2e/grammar-pack-word.spec.ts`, `grammar-pack-reverse.spec.ts`, `gr
 | P6 content fill (repeat per batch of about 15 verbs) | irregular rows, `pcInvariable` list after the Q15 review, oracle run, reviews | each batch merges only at the gate; pack covers the Q4 list; reviewer effort logged |
 
 Baseline for the P1 delivery proof, measured on this branch (`bun run build`): main chunk `index-*.js` 1,269.81 kB (342.40 kB gzip), `importPdf-*.js` 431.70 kB, precache 217 entries, 6404.61 KiB.
+
+Note (Part 3 F9): P4 and P5 are replaced by CP1 to CP6 (engine to `src/`, the `conjugateVerb` task, framework copy, the Conjugation screen with the word-sheet change and reverse lookup, drills, sentence patterns); P3 and P6 stand, P6 shrinks to the reviewed irregulars.
 
 P3, P4 and P5 are independent after P2 and may run in parallel (P3 needs the real Morphalou file). P6 can start after P2 and runs alongside the others; its oracle step needs P3.
 
@@ -402,3 +410,117 @@ Order: TP1 after Part 1 P2 (default); TP2 after TP1's schema; TP3 and TP4 after 
 - **TQ11 Ids.** Default: a worker proposes the 93 slugs from the English titles, the owner approves; never changed after release.
 
 Not verified by the author: that pi and agy run in a non-git temporary directory (`scripts/pi-dispatch.sh` only changes into it), that agy writes the requested `out/` files, and that the child still works with the environment scrubbed; that `z.toJSONSchema` handles this union (the repo uses it for other schemas); the dev-server URL for the e2e interception; that `Sheet` closes on navigation; that Vite emits and precaches the JSON chunks (TP1 proves it); the size estimates; the tag defaults, which rest on the titles of about 70 topics and a partial reading of about 23 (T2), and which no one with French expertise has reviewed.
+
+# Part 3: Framework-first conjugation (revision of Part 1, owner decision 2026-10-18)
+
+Status: design for review, nothing built. Where Part 3 and Part 1 sections 1, 3, 6a, 7 and 9 disagree, Part 3 wins; Part 1 keeps everything it does not mention (schema, generator, checks, the review gate, the pack and its loader). Ids: `F1` to `F9`, `FQ1` to `FQ6`, `CP1` to `CP6`. Paths marked **(new)** do not exist yet; every other path was checked. French-grammar claims the author could not verify are listed at the end (F9) and must not be read as facts.
+
+## F1. Decision and what it changes
+The owner's point: conjugation is one framework (tenses, persons, endings, auxiliary, agreement, imperative and sentence patterns) applied to any verb the learner types, and the framework is the content. A static pack of 66 verbs cannot be the main path (Part 1 risk R9 said so: the unknown verb is the common case). Revised design:
+- **Framework (ours, static):** what the learner must understand. Shown for every verb.
+- **Engine (ours, deterministic):** the Part 1 generator moves into `src/` and runs in the browser. It composes every lead, the passé composé, the imperative clitics, and the regular forms of the 11 rule families.
+- **AI (the learner's key):** fills the forms of any verb the pack does not hold, in the framework's structure.
+- **Pack (Part 1, unchanged):** human-reviewed rows for the irregular verbs and the owner's list; a pack verb needs no AI call and no key.
+- **Reverses:** Part 1 "the app contains no conjugation logic" (section 3, last paragraph) and "no inversion or negation forms" (section 1). Part 1's "no AI call in the corpus path" stays true: AI output never enters the pack.
+
+## F2. The engine moves to `src/` (CP1)
+`scripts/grammar-pack/rules.ts` and `generate.ts` move with `git mv` to `src/services/conjugation/` (new); `checks.ts`, `build.ts` and `review.ts` stay in `scripts/` and import from there. This is the second real caller, so the move is justified (`CLAUDE.md`: no abstraction before a second caller); nothing else moves and no behaviour changes: the P1 and P2 tests pass with only import paths changed. The conjugation screen loads the engine and the pack lazily, so the main chunk does not grow (measured like P1, baseline in section 9).
+
+## F3. The AI task `conjugateVerb` (CP2)
+- Input: the infinitive the learner typed, normalised with `normalizeLookupToken` (section 6b); a verb in the pack is answered from the pack and makes no AI call.
+- Output, Zod-validated and sent as JSON schema like the other exercise tasks (`src/services/exercises/jsonSchema.ts`; `src/types/conjugationAnswer.ts` (new)): `infinitive`, `pronominal`, `aux`, `rule` (`RuleIdSchema` of Part 1, `irregular` allowed), optional `defective`, `hAspire` (true only for a verb that starts with an aspirated h), `forms` per simple tense and person (`string[]`, verb group only, primary first; no pronouns and no imperative clitic: the model writes `lève`, `levons`, `levez` and the engine adds the hyphenated clitic as the generator does), `participles` (`present?`, past `ms fs mp fp`), and one example sentence per tense (`fr` plus a gloss in the UI language). The model is never asked for a lead or for passé composé: the engine composes both from `aux` and the participles (Part 1 section 3), which closes the audit's glued-pronoun defect class for AI data too. For `ir-ouvrir` (`couvrir`, `offrir`) the engine takes the past participle from the AI answer, where the generator reads it from the irregulars entry.
+- Template `src/services/ai/prompts/defaults/conjugate.en.txt` and `conjugate.zh.txt` (new), variable declared in `registry.ts`, task in `tasks.ts`, cached like the word analysis (language, prompt fingerprint, normalised infinitive; `docs/architecture.md` caching table gets a row). A schema failure throws with the schema's reasons; a missing key throws `MissingApiKeyError`; no fallback content.
+- Rule-suffix check (deterministic, no inference): the named `rule` must fit the infinitive (`er-*` needs `-er`, `ir-*` needs `-ir`, `re-regular` needs `-re`, `er-cer`, `er-ger`, `er-yer-i`, `er-eler-double` need `-cer`, `-ger`, `-yer`, `-eler` or `-eter`). A misfit is not an error: the rule is discarded and the verb is `ai-only`.
+
+## F4. Verification statuses (pure module `src/services/conjugation/verify.ts` (new))
+The engine generates the verb under the AI's named rule (the `VerbSpec` `base` is the infinitive without `se `/`s’` and its ending) and compares cell by cell with the AI forms (NFC; primary form and the set of variants).
+- Verb status: `pack-reviewed` (in the pack), `rule-checked` (rule not `irregular`, suffix fits, every simple cell matches), `partly-differs` (some cells differ), `ai-only` (`irregular`, a misfit, or an infinitive that starts with `h`: the elision of the lead then rests on the AI's `hAspire`, which nothing checks).
+- Cell status: `reviewed`, `match`, `differs`, `ai-only`. Simple-tense cells are compared as above. Passé composé cells outside the pack are always `ai-only`: the auxiliary, and for pronominal verbs whether the participle agrees (Part 1 Q15), are AI claims the engine cannot check. The four past participle forms are still compared with the engine's derivation and a difference is shown. A `differs` cell shows both the AI form and the form the rule gives, labelled, never silently one of them.
+- What `match` means and does not: two independent derivations agree under a rule the AI itself named. It is evidence, not proof (an AI that is consistently wrong in both the rule and the grid, for example `achete` under `er-regular`, matches itself). The UI says "matches the rule", never "verified"; only `reviewed` is called reviewed.
+- Gradable cells (drills): `reviewed` and `match` only (FQ2). `differs` and `ai-only` cells, which includes every passé composé cell outside the pack, are shown, never graded.
+
+## F5. UI: the Conjugation screen and the word sheet (CP4)
+- Route `#/study/grammar/conjugation`, optional `?verb=<infinitive>`; one Grammar tab in My study holds Topics (Part 2), Conjugation and Gender (Part 4) behind a segmented control, so My study gains one tab, not three, and fits at 360 px (FQ1, NQ1 and Part 2 TQ1 are one question). Part 2 topic ids may not be `conjugation` or `gender`. Input plus one button; loading and errors show on the button and in place inside the result region (`.claude/rules/ui.md`: controls never move the page).
+- Result: header (infinitive, auxiliary, the rule caption `conjugation.rules.<ruleId>`, the verb status badge), then one card per tense: its name, one line "when it is used" and one line "how it is formed" (keys `conjugation.tenses.<tense>.use` and `.form`, en and zh, drafted by agy and reviewed like locale copy, FQ6), then the six persons (three for the imperative). Where the engine produced stem and ending the ending is highlighted; irregular cells show no split. Each form is speakable through the existing tile.
+- The ending table of the verb's rule is rendered from the engine's own tables (one source, cannot drift from the generator).
+- Word sheet: the `word` task stops asking for `conjugationTable` (both templates, `WordAnalysis`, the `ConjugationTense` and `ConjugationForm` types, the AI branch of `FormTile`, the `e2e/fixtures.ts` word fixtures change together; nothing has shipped, so no migration, and old cached answers are bypassed by the fingerprint). A verb in the pack shows its pack table as in Part 1 6a. Any other verb shows a "Conjugate this verb" button to `#/study/grammar/conjugation?verb=<lemma>`, shown when the lemma ends in `-er`, `-ir`, `-re` or `-oir` (or starts with `se `/`s’`) and `partOfSpeech` matches `/\bverbe?\b|动词/i` (word boundary, so `adverb` does not match). The AI example sentences on the Conjugation screen are labelled AI-made; a pack verb shows none. Part 1's save-step rule (drop `conjugationTable` from saved vocabulary) disappears with the field. Reverse lookup (6b) stays as written.
+- Without a key: pack verbs work; any other verb shows the real `MissingApiKeyError` text in place (Part 1 Q9 stays out of scope).
+
+## F6. Sentence patterns (CP6; negation, questions, inversion)
+Pure functions in `src/services/conjugation/patterns.ts` (new) over a cell: negation, `est-ce que` question, inversion question, each with goldens. A "Patterns" section under the grid with a tense control and a person control showing exactly three fixed rows. A pattern inherits the cell's status; the pattern rules themselves are ours and are on the reviewer list (F9). Scope: negation in all seven tenses (`ne` or `n’` before a vowel or mute h; compound: `ne` aux `pas` participle; pronominal: reflexive between `ne` and the verb); `est-ce que` and inversion for the indicatif and conditionnel tenses only (no question forms for subjonctif or imperatif); inversion is not offered for 1sg (use `est-ce que`), inserts `-t-` after a verb ending in a vowel before il, elle, on and keeps `il/elle`, `ils/elles` as the displayed subject. Tags: `negation` and `questions` (existing).
+
+## F7. Drills (revises section 7)
+`prepareConjugationDrills` takes a verb view (pack row or AI-backed row with cell statuses) instead of the pack. Items come only from gradable cells (F4). Item `meta` adds `source: 'grammar-pack' | 'conjugation-engine'` and `verification: 'reviewed' | 'match'`; everything else in section 7 (one unit per tense, prompts stating tense and person, `strictAccents`, `effectiveStrictAccents`, no AI at drill time) stands. Entry points: Practise (pack verbs, no key) and a "Practise this verb" button on the Conjugation screen. A saved unit is self-contained, so it is gradable offline later.
+
+## F8. Pack and content scope after the revision
+The pack no longer aims at coverage: it holds the controls, the owner's list and the irregular verbs, each `reviewed`. The Part 1 gate and the P3 oracle are unchanged, and the oracle gets a second use: checking the engine itself (rule families against Morphalou). P6 content fill shrinks to the reviewed irregulars. Part 1 risk R9 is resolved by design, not by size.
+
+## F9. Phases, tests, risks, questions
+| Phase | Scope | Acceptance |
+| --- | --- | --- |
+| P3 | Oracle (Part 1), unchanged | as Part 1 |
+| CP1 | Engine to `src/services/conjugation/` (F2) | tests green with only import changes; main chunk not larger; `bun scripts/grammar-pack/build.ts --check` clean |
+| CP2 | `conjugateVerb` task, answer schema, templates, `verify.ts`, pure view builder (AI mocked) | schema test; verify tests for each status (match, differs, misfit, irregular); engine composes leads and passé composé from AI participles |
+| CP3 | Framework copy: tense use and form lines, rule captions, en and zh (agy drafts, owner reviews) | `i18n:check`; a test asserts every tense and rule has keys in both locales |
+| CP4 | Route, tab, screen, word sheet change, reverse lookup (6b), e2e blocks | pack verb and AI verb render, `differs` shows both forms, no key shows the real error, word sheet button, 360 px, three themes; `impeccable detect` `[]` |
+| CP5 | Drills from views (F7) | unit tests; e2e: set from a looked-up verb, no AI call at drill time |
+| CP6 | Sentence patterns (F6) | goldens for each pattern and tense family; reviewer list answered |
+
+Order: CP1, then CP2 and CP3 in parallel, then CP4, then CP5 and CP6. P3 is independent. One e2e pass when CP4 to CP6 are assembled, then the owner's visual acceptance.
+
+Risks: an AI grid and rule that are wrong in the same way match each other (F4; the UI wording and the reviewed pack for the irregulars are the answer); the rule-suffix check cannot separate `er-regular`, `er-e-grave`, `er-eacute-egrave` and `er-eler-double`; cost and latency of a call per new verb (cached); the engine in the browser makes its tables part of the product's correctness (goldens, family checks and the oracle run on the same code).
+
+Questions (default in brackets):
+- **FQ1 Placement (with NQ1 and TQ1, one question).** Default: one Grammar tab in My study with a segmented control Topics, Conjugation, Gender. Alternative: separate tabs, or Conjugation as a Practise section.
+- **FQ2 Grading `match` cells.** Raised for an explicit owner decision because it differs from what the owner was told ("only verified cells are graded"). Default: grade `reviewed` and `match` simple-tense cells; `match` means "matches the rule", not reviewed (F4). Alternative: reviewed cells only, which limits drills to the pack verbs.
+- **FQ3 Pattern scope.** Default: negation, `est-ce que`, inversion. Alternative: negation only.
+- **FQ4 Word sheet.** Default: drop the AI `conjugationTable`, add the button (reverses Part 1 Q2's default). Alternative: keep the labelled AI table.
+- **FQ5 Key.** Default: an unknown verb needs the key; no pack-only mode.
+- **FQ6 Framework copy.** Default: agy drafts the tense lines and captions, the owner reviews them as locale copy.
+
+Not verified by the author, for the language reviewer: the tense "use" and "form" lines (F5); the negation, `est-ce que` and inversion rules including `-t-` and the 1sg exclusion (F6); that the 11 rule families cover the verbs a beginner meets; the pronominal negation order; that `il/elle` display is acceptable in inversion rows.
+
+# Part 4: Noun gender tendencies (owner decision 2026-10-18)
+
+Status: design for review, nothing built. Ids: `N1` to `N7`, `NQ1` to `NQ6`, `NP1` to `NP4`. It reuses Part 1's conventions (schema validation at load, provenance, the review gate, the offline Morphalou oracle) and Part 2's tab pattern. Paths marked **(new)** do not exist yet.
+
+## N1. Goals and non-goals
+- Goal: the learner gets rules of thumb for the gender of French nouns by ending, with the real accuracy of each rule and its exceptions, and drills that teach the rule after each answer. The owner's argument: a rule that is right 80% of the time still raises a beginner's score; Part 1 wrongly listed noun gender as a non-goal.
+- Non-goals: no percentage that was not computed; no claim of "all" or "only N exceptions"; no plural rules (Part 2 K002); no semantic rules (days, trees) in v1 because they cannot be measured by ending (NQ3); no new tag (`gender-number` exists); no new exercise type (`GENDER_CHECK` exists: `prompt` is the noun, options default `['M','F']`, `expectedAnswer` one of them).
+- Known Clarte defects not carried over (`clarte-analysis/out/gpt.md` 1.4): the unsourced "99%", "only plage, cage, page" (`image`, `rage`, `nage` also break it), "-onde is masculine" (`onde`, `sonde`, `fronde`, `seconde`), "-ine nearly always" (`magazine`), "-ail always `-aux`" (plural, not gender).
+
+## N2. What a rule says, and where its numbers come from
+- A rule: an ending, the gender it predicts, two measured figures, examples and exceptions. The figures are computed, never typed: (a) dictionary accuracy: the share of noun lemmas with that ending that have the predicted gender in the offline Morphalou file, with the count (`n`); (b) A1 accuracy: the same over our reviewed A1 noun list, with its count. The UI shows both with their counts ("feminine in 94% of 1,200 dictionary nouns; 12 of 13 A1 nouns").
+- Exceptions: the A1-list nouns that break the rule. The dictionary exceptions are only counted, not shipped.
+- Publish threshold (NQ2): a rule ships only when its dictionary accuracy is at least 80% with `n >= 30` and the build recomputes the A1 figures itself. A candidate below it is dropped, not softened. The owner may lower the threshold knowingly.
+- Licence: as Part 1 section 10 and Q12: only our own examples and aggregate counts ship, no Morphalou text and no per-word data from it; the attest records versions and counts only.
+
+## N3. Data (`data/noun-gender/` (new), `src/types/nounGender.ts` (new))
+```
+nouns.json        A1 noun list: { id, lemma, gender: 'm'|'f', ... } reviewed by the owner; origin clarte-seed | agy-drafted | human
+candidates.json   endings to measure, written by hand: { id, ending, gender }   (a candidate list, not a claim)
+oracle-attest.json dictionary counts per candidate { ending, gender, n, agree, morphalouVersion, ranAt } and the hash of the candidate row
+```
+Shipped: `src/data/noun-gender/pack.json` (build artifact, committed, lazily loaded like Part 1): `{ schemaVersion, packVersion, nouns[], rules[] }`, each rule `{ id, ending, gender, dictionary: { n, agree }, a1: { n, agree }, examples: string[] (min 3, from nouns[]), exceptions: string[] (from nouns[]), prov }`; the schema re-derives `a1` from `nouns` at load, so the shipped numbers cannot disagree with the list. Rule text is a locale key `nounGender.rules.<id>` (en and zh), not stored. Candidate endings to measure (a list to be measured, not asserted): `-tion`, `-sion`, `-té`, `-ure`, `-ette`, `-ance`, `-ence`, `-ie`, `-age`, `-ment`, `-isme`, `-eau`, `-oir`, `-ier`, `-eur`, `-e`, `-ée`.
+
+## N4. Pipeline (`scripts/noun-gender/` (new))
+`measure.ts` reads `MORPHALOU_DIR` (the adapter is the one written for Part 1 P3, so NP1 depends on P3), counts per candidate over single-gender noun lemmas and writes `oracle-attest.json` with no Morphalou strings; `build.ts` assembles the pack, recomputes the A1 figures, drops candidates below the threshold, refuses a changed candidate whose attest hash lapsed, and runs `--check` in CI like Part 1. Status per rule follows Part 1: `reviewed` by the owner is required to ship.
+
+## N5. UI and drills (NP3)
+- The "Gender" section of the Grammar tab (NQ1; route `#/study/grammar/gender`): rules grouped by predicted gender, each with its two figures, examples and exceptions.
+- Word sheet: for a noun whose ending matches a shipped rule, one line "Ending -tion: usually feminine (94%)"; if the word is in the A1 list as an exception, say so.
+- Drills: standalone `GENDER_CHECK` units built from the A1 list (`prepareGenderDrills`, pure, like `fromConjugation.ts`): `prompt` the bare noun, `expectedAnswer` `M` or `F`, `grammarTag: 'gender-number'`, `meta { source: 'noun-gender', nounId, rules: [{ id, percent, n }], exception: boolean }`; exceptions are included on purpose. After checking, `GenderCheckControl` shows the rule line from `meta.rules` through locale keys, so a unit stays self-contained and follows the UI language; the explanation text is not stored. No AI, no key.
+
+## N6. Phases
+| Phase | Scope | Acceptance |
+| --- | --- | --- |
+| NP1 | Schema, `measure.ts`, `build.ts`, seed list from the owner's earlier demo nouns, tests | counts reproducible; a candidate below the threshold is dropped; the shipped `a1` figures equal the recomputed ones; no Morphalou string committed |
+| NP2 | A1 noun list fill (agy drafts about 300 nouns with gender, checked against Morphalou, owner reviews) | each noun has provenance; disagreements with Morphalou listed for the owner |
+| NP3 | Tab, word-sheet line, drills, control feedback, locale keys, e2e | e2e: tab lists rules with figures, a drill shows the rule after the answer, an exception drill; `i18n:check`; `impeccable detect` `[]` |
+| NP4 | Candidate list review and publish | owner marks `reviewed`; only rules above the threshold appear |
+
+## N7. Risks and questions
+- Dictionary accuracy over all lemmas is not accuracy over what a beginner meets: both figures and their counts are shown, and the A1 list is the honest small sample.
+- Morphalou's gender field for nouns with both genders or senses (`livre`) needs a decision in the adapter (single-gender lemmas only in v1).
+- Questions (default in brackets): **NQ1** placement [the Grammar tab's segmented control, FQ1]; **NQ2** threshold [80% and n at least 30]; **NQ3** semantic rules such as days, months and languages [out of v1; they carry no percentage]; **NQ4** A1 list source [the owner's demo nouns as seed plus an agy-drafted list]; **NQ5** show both figures [yes]; **NQ6** licence of the noun data [MIT as Part 1, owner confirms].
+- Not verified by the author, for the owner: that every candidate ending is worth measuring, and every example and exception in the A1 list (nothing here is asserted as French fact until the owner reviews it).
