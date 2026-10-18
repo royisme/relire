@@ -5,7 +5,7 @@
  * are test inputs, not reviewed pack data.
  */
 import irregularsJson from '../../data/grammar-pack/irregulars.json';
-import { generateVerb, type IrregularEntry, type VerbSpec } from '../../scripts/grammar-pack/generate';
+import { generateVerb, type IrregularEntry, type VerbSpec } from '../../src/services/conjugation/generate';
 
 export const IRREGULARS: Record<string, IrregularEntry> = {
   ...irregularsJson,

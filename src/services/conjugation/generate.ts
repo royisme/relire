@@ -14,7 +14,7 @@ import {
   type RuleId,
   type Tense,
   type Verb,
-} from '../../src/types/grammarPack';
+} from '../../types/grammarPack';
 import {
   CONDITIONNEL_ENDINGS,
   FUTUR_ENDINGS,

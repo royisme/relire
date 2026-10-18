@@ -16,8 +16,15 @@ import {
   type Verb,
 } from '../../src/types/grammarPack';
 import { GOLDEN } from '../../tests/fixtures/grammarPackGolden';
-import type { GeneratedVerb, SimpleTense } from './generate';
-import { IMPERATIVE_CLITICS, composeLead, joinParts, passeComposeForms, pastParticiples, type Parts } from './rules';
+import type { GeneratedVerb, SimpleTense } from '../../src/services/conjugation/generate';
+import {
+  IMPERATIVE_CLITICS,
+  composeLead,
+  joinParts,
+  passeComposeForms,
+  pastParticiples,
+  type Parts,
+} from '../../src/services/conjugation/rules';
 
 const SIMPLE_TENSES = TENSES.filter((tense): tense is SimpleTense => tense !== 'passeCompose');
 
