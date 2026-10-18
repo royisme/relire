@@ -44,7 +44,7 @@ const savedRows = (page: import('@playwright/test').Page) =>
     return { articles: await d.getAll('articles'), units: await d.getAll('units') };
   });
 
-const unitUrl = /#\/practice\/unit-[0-9a-f-]+$/;
+const setUrl = /#\/practice\/set\/[0-9a-f-]+$/;
 
 for (const phone of [false, true]) {
   test(`text review, blocker exclusion, required level and a durable exercises batch ${phone ? '@phone' : ''}`, async ({
@@ -73,14 +73,16 @@ for (const phone of [false, true]) {
     await chooseLevel(page, 'B2');
     await page.getByLabel('I have reviewed').check();
     await page.getByRole('button', { name: 'Confirm and save' }).click();
-    // The first unit of the new batch opens.
-    await expect(page).toHaveURL(unitUrl);
+    // The new exercise set opens.
+    await expect(page).toHaveURL(setUrl);
     const saved = await savedRows(page);
     expect(saved.articles.filter((row) => row.title === 'Imported workbook')).toEqual([]);
     expect(saved.units).toHaveLength(1);
     expect(saved.units[0]).toMatchObject({ setTitle: 'Imported workbook', level: 'B2' });
     expect(saved.units[0]).not.toHaveProperty('materialId');
-    await expect(page).toHaveURL(new RegExp(`#/practice/${saved.units[0].id}$`));
+    await expect(page).toHaveURL(new RegExp(`#/practice/set/${saved.units[0].setId}$`));
+    await expect(page.getByRole('heading', { name: 'Imported workbook' })).toBeVisible();
+    await expect(page.locator('main').getByRole('link', { name: saved.units[0].title })).toBeVisible();
     await page.goto('/#/practice');
     await expect(page.locator('main tbody tr').filter({ hasText: 'Imported workbook' })).toContainText('B2');
   });
@@ -98,17 +100,20 @@ test('one batch: every unit shares the set id, the level and the creation time',
   const before = Date.now();
   await page.getByLabel('I have reviewed').check();
   await page.getByRole('button', { name: 'Confirm and save' }).click();
-  await expect(page).toHaveURL(unitUrl);
+  await expect(page).toHaveURL(setUrl);
   const { units } = await savedRows(page);
   expect(units).toHaveLength(2);
   expect(new Set(units.map((unit) => unit.setId)).size).toBe(1);
   expect(new Set(units.map((unit) => unit.level))).toEqual(new Set(['A2']));
   expect(new Set(units.map((unit) => unit.createdAt)).size).toBe(1);
   expect(units[0].createdAt).toBeGreaterThanOrEqual(before);
-  // It opens on the batch's first unit (the lowest unit number).
-  const first = units.find((unit) => unit.unitNumber === 1)!;
-  await expect(page).toHaveURL(new RegExp(`#/practice/${first.id}$`));
-  await expect(page.getByRole('heading', { name: 'Deuxième unité' })).toBeVisible();
+  // It opens on the new set, which lists every exercise of the batch.
+  await expect(page).toHaveURL(new RegExp(`#/practice/set/${units[0].setId}$`));
+  await expect(page.getByRole('heading', { name: 'Mon document' })).toBeVisible();
+  await expect(page.locator('main').getByRole('link', { name: 'Deuxième unité' })).toBeVisible();
+  await expect(
+    page.locator('main').getByRole('link', { name: units.find((unit) => unit.title !== 'Deuxième unité')!.title }),
+  ).toBeVisible();
 });
 
 for (const phone of [false, true]) {
@@ -126,12 +131,13 @@ for (const phone of [false, true]) {
     await page.getByLabel('Exercise set title', { exact: true }).fill('Mon lot');
     await page.getByLabel('I have reviewed').check();
     await page.getByRole('button', { name: 'Confirm and save' }).click();
-    await expect(page).toHaveURL(unitUrl);
+    await expect(page).toHaveURL(setUrl);
     const saved = await savedRows(page);
     expect(saved.units).toHaveLength(1);
     expect(saved.units[0]).toMatchObject({ setTitle: 'Mon lot', level: 'A2' });
     await page.reload();
-    await expect(page.getByRole('heading', { name: saved.units[0].title })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Mon lot' })).toBeVisible();
+    await expect(page.locator('main').getByRole('link', { name: saved.units[0].title })).toBeVisible();
   });
 }
 
@@ -175,7 +181,7 @@ test('failed atomic save keeps draft and guard, retry keeps prepared identities'
   await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Discard', exact: true })).toBeDisabled();
   await page.evaluate(() => sessionStorage.setItem('releaseImportWrite', '1'));
-  await expect(page).toHaveURL(unitUrl);
+  await expect(page).toHaveURL(setUrl);
 });
 
 test('image and PDF selection, cancellation ignores late extraction', async ({ page, ai }) => {
@@ -229,7 +235,7 @@ test('blockers cannot partially save; explicit exclusion lets the rest through',
     .click();
   await page.getByLabel('I have reviewed').check();
   await page.getByRole('button', { name: 'Confirm and save' }).click();
-  await expect(page).toHaveURL(unitUrl);
+  await expect(page).toHaveURL(setUrl);
   expect((await savedRows(page)).units).toMatchObject([{ setTitle: 'Mon document', level: 'C1' }]);
 });
 

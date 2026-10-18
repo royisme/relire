@@ -101,8 +101,7 @@ export function ImportExercisesPage() {
       await saveUnits(units);
       session.release();
       source.dispose();
-      const [first] = [...units].sort((a, b) => a.unitNumber - b.unitNumber);
-      navigate({ name: 'unit', unitId: first.id });
+      navigate({ name: 'practiceSet', setId: units[0].setId });
     } catch (err) {
       setError(t('importExercises.saveFailed', { msg: err instanceof Error ? err.message : String(err) }));
     } finally {
