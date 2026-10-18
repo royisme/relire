@@ -14,10 +14,11 @@ Principles that shape every item: nothing has shipped, so no compatibility code;
 | Exercise model | Self-contained units (`setId`, `setTitle?`, `level`, `createdAt`); no material binding | `docs/merge-progress.md` |
 | Import | Article import (Read) and exercise import (Practise); batches newest first, deletable | `docs/merge-progress.md` |
 | Grammar pack P1 | Schema, generator, machine checks, delivery proof | `docs/grammar-pack.md` section 9 |
+| Grammar pack P2 | Build with publish gate (only `reviewed` rows ship), review CLI, validated lazy loader, first pack of the 4 control verbs (reviewed by the owner 2026-10-18) | `docs/grammar-pack.md` section 9 |
 
 ## Next
 
-1. **Grammar pack, conjugation (Part 1):** P2 build, review gate, loader, first pack; then P3 oracle (offline Morphalou), P4 word sheet and reverse lookup, P5 conjugation drills, P6 content fill (about 66 verbs). Owner reviews the language-reviewer list (section 12).
+1. **Grammar pack, conjugation (Part 1):** then P3 oracle (offline Morphalou), P4 word sheet and reverse lookup, P5 conjugation drills, P6 content fill (about 66 verbs). Owner reviews the language-reviewer list (section 12).
 2. **Grammar topics (Part 2):** schema and builder, generator script (Gemini regenerates each topic from the local reference database; the owner reviews), reader under My study, cross-links from mistakes, practice items and Progress. Owner decides the open questions TQ1 to TQ11.
 3. **Integration e2e pass** when a batch of the above is assembled; then the owner's visual acceptance (three themes, 360 px, phone drawer).
 
