@@ -169,7 +169,7 @@
     "article": "Article",
     "unitsTitle": "Exercises",
     "unitsDesc": "Sets of questions, from an import, an article or your mistakes. Your answers and progress are saved on this device.",
-    "noUnits": "No exercises yet. Make a set from an article, or import a worksheet.",
+    "noUnits": "No exercises yet. Make a batch from an article, or import exercises from a worksheet.",
     "fromArticleTitle": "From an article",
     "fromArticleDesc": "Make a new set of exercises from an article. The set stays here even if you delete the article.",
     "level": "Level",

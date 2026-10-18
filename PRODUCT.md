@@ -16,7 +16,7 @@ Relire (French for "to read again") is a close-reading assistant for French lear
 
 ## Direction: Relire Plus
 
-Relire is absorbing FrenchLab AI so a learner does all of their study in one app: self-contained exercise sets, each with its own level and an optional title (11 types, including dictation and AI-graded open answers), importing worksheet pages from images, PDFs or text, a mistake notebook, and drills for weak grammar areas, beside reading and shadowing. Scope therefore widens to listening and writing practice; there are still no mock exams and no official scores. The audience widens to A1–C1. The display name becomes Relire Plus in phase 6. Everything stays static and BYOK. The approved plan, its phases and the decisions behind them are in `docs/merge-plan.md`; until a phase ships, the sections below describe the product as it is.
+Relire is absorbing FrenchLab AI so a learner does all of their study in one app: self-contained exercise sets, each with its own level and an optional title (11 types, including dictation and AI-graded open answers), importing articles from images, PDFs or text and exercises from worksheet pages, a mistake notebook, and drills for weak grammar areas, beside reading and shadowing. Scope therefore widens to listening and writing practice; there are still no mock exams and no official scores. The audience widens to A1–C1. The display name becomes Relire Plus in phase 6. Everything stays static and BYOK. The approved plan, its phases and the decisions behind them are in `docs/merge-plan.md`; until a phase ships, the sections below describe the product as it is.
 
 ## Positioning
 
@@ -41,7 +41,8 @@ First run: a three-step guide (welcome, connect Gemini with a checked key, try a
 
 
 - **Library** (the Read tab's home): a table of articles with search, level filter, sortable columns, add, edit and delete. An article opens Reader.
-- **Import**: image, PDF or pasted worksheet text, explicit model/content consent, editable question review and inclusion, then atomic save as exercises (one new set, with the level the learner chooses) or as an article. Drafts are in memory and warn before leaving.
+- **Import an article** (Read): an image or PDF is read into a title and text by the OCR model (explicit model/page consent), pasted text uses no AI; the learner corrects the title, level and text, then saves one article that opens in the Reader. Drafts are in memory and warn before leaving.
+- **Import exercises** (Practice): image, PDF or pasted worksheet text, explicit model/content consent, editable question review and inclusion, then atomic save as one batch with the level the learner chooses (required), opening on its first unit. Never saved as an article. Drafts are in memory and warn before leaving.
 - **Reader**: an article or a distinct exercise-unit passage, back to the library or its exercise sheet, reading settings (font size, playback speed), "Make exercises" (opens Practice, where an article is picked), listen to the whole article, optional pronunciation markers, tap-to-analyse words, sentence toolbar (play, analyse, record). Record opens a closable practice card docked at the bottom: reference, record/stop, redo, input level, latest take with play and compare.
 - **Word detail**: translation, IPA, tense, conjugation table, usage examples, save to vocabulary.
 - **Sentence drawer**: translation, syntax, grammar points, collocations, shadowing record and score.
