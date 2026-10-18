@@ -555,6 +555,7 @@
         "checkedAgainst": [
           "consistency",
           "control-verbs",
+          "morphalou-3.1",
           "human"
         ],
         "checkedAt": "2026-10-18",
@@ -832,6 +833,7 @@
         "checkedAgainst": [
           "consistency",
           "control-verbs",
+          "morphalou-3.1",
           "human"
         ],
         "checkedAt": "2026-10-18",
@@ -1115,6 +1117,7 @@
         "checkedAgainst": [
           "consistency",
           "control-verbs",
+          "morphalou-3.1",
           "human"
         ],
         "checkedAt": "2026-10-18",

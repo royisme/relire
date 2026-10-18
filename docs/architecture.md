@@ -49,6 +49,8 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 | `src/data/` | Static content (sample articles, French IPA chart); `grammar-pack/pack.json` is the generated conjugation artifact, never hand-edited. |
 | `src/types/grammarPack.ts` | Shipped conjugation schema and structural invariants; no generator or linguistic rules. |
 | `data/grammar-pack/`, `scripts/grammar-pack/` | Authored verb specs, irregular tables and owner-only reviews; scripts keep machine checks (`checks.ts`), the reviewed-only P2 publish gate (`build.ts`) and review sheets (`review.ts`), importing generation and rule tables from `src/services/conjugation/`. No runtime imports yet. |
+| `scripts/grammar-pack/oracle-morphalou.ts` | Offline-only Morphalou 3.1 CSV adapter, lemma-block merging, form deduplication and cell mapping; no app imports or real-dataset CI access (tests use invented fixtures). |
+| `scripts/grammar-pack/oracle-diff.ts` | Offline-only comparisons and ignored local reports; hash-bound `oracle-attest.json` metadata for the build, with disagreement decisions written only by the owner. No oracle text is shipped. |
 | `src/services/conjugation/` | Deterministic generation (`generate.ts`) and rule tables (`rules.ts`); imported only by the build scripts and tests until the Conjugation screen exists. |
 | `src/services/grammarPack/load.ts`, `src/hooks/useGrammarPack.ts` | Lazy whole-pack validation with shared promise/retry on failure; mount-scoped loading/ready/error state. No lookup, UI consumer or persistence yet. |
 | `scripts/check-i18n.ts` | The translation check run in CI. |

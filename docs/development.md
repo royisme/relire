@@ -10,7 +10,11 @@ Bun is the only package manager. The delivery checklist (which checks must pass,
 - `bun run preview`: serve the built site.
 - `bun scripts/grammar-pack/build.ts`: generate `src/data/grammar-pack/pack.json`; P2 requires matching owner reviews for every included verb. `packDate` in `data/grammar-pack/verbs.json` is hand-set; builds never read the clock.
 - `bun scripts/grammar-pack/build.ts --check`: regenerate in memory and reject any byte difference from the committed pack (also in CI).
-- `bun scripts/grammar-pack/review.ts print <verbId...>`: print the generated tables before review; only the owner runs `record <verbId...> --by "<name>" --ref "<reference>"` to append review records. Owner reviews are currently empty; the lead commits the first pack after review.
+- `bun scripts/grammar-pack/review.ts print <verbId...>`: print the generated tables before review; only the owner runs `record <verbId...> --by "<name>" --ref "<reference>"` to append review records. `data/grammar-pack/reviews.json` holds the owner's records for the four controls.
+
+- `bun scripts/grammar-pack/oracle-diff.ts [verbId...]`: offline-only simple-tense/participle comparison, stdout and ignored `.local/oracle/<verb>.txt` reports; never run in CI or bundle the oracle.
+- `bun scripts/grammar-pack/oracle-diff.ts attest [verbId...]`: record current row hashes only for verbs with zero uncovered disagreements; only the owner writes disagreement decisions in `data/grammar-pack/oracle-attest.json`.
+- `MORPHALOU_DIR`: oracle directory, default `.local/morphalou/csv/Morphalou3.1_formatCSV` relative to the repository root; stale attestations are ignored and reported by the build.
 
 ## Static checks
 

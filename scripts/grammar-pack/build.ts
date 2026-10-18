@@ -31,10 +31,36 @@ export const ReviewsSchema = z.object({
   rejected: z.array(z.string()),
 });
 export type Reviews = z.infer<typeof ReviewsSchema>;
+/** Strict metadata only: oracle forms belong in ignored reports, never in this file. */
+export const OracleAttestSchema = z.strictObject({
+  verbs: z.record(
+    z.string(),
+    z.strictObject({
+      source: z.literal('morphalou-3.1'),
+      ranAt: z.iso.datetime(),
+      rowHash: z.string().regex(/^[a-f0-9]{64}$/),
+      agree: z.number().int().nonnegative(),
+      disagree: z.number().int().nonnegative(),
+    }),
+  ),
+  decisions: z.array(
+    z.strictObject({
+      verbId: z.string().min(1),
+      tense: z.string().min(1),
+      person: z.string().min(1),
+      ourForm: z.string().min(1),
+      decision: z.enum(['keep', 'fix', 'variant']),
+      note: z.string().trim().min(1),
+    }),
+  ),
+});
+export type OracleAttest = z.infer<typeof OracleAttestSchema>;
+
 export interface BuildInputs {
   source: VerbSource;
   irregulars: Record<string, IrregularEntry>;
   reviews: Reviews;
+  oracleAttest?: OracleAttest;
 }
 
 function canonical(value: unknown): unknown {
@@ -86,15 +112,16 @@ export function generateRows(source: VerbSource, irregulars: BuildInputs['irregu
   return { generated, failures, failedIds };
 }
 
-/** P2 requires human review until P3 supplies an independent oracle. */
+/** Owner review remains required; oracle attestations do not replace it. */
 export function publishGate(verbs: Verb[]): string[] {
   return verbs
     .filter((verb) => verb.prov.status !== 'reviewed')
     .map((verb) => `${verb.id}: publish gate refuses ${verb.prov.status}; human review required`);
 }
 
-export function buildPack({ source, irregulars, reviews: rawReviews }: BuildInputs) {
+export function buildPack({ source, irregulars, reviews: rawReviews, oracleAttest }: BuildInputs) {
   const reviews = ReviewsSchema.parse(rawReviews);
+  const attest = OracleAttestSchema.parse(oracleAttest ?? { verbs: {}, decisions: [] });
   z.iso.date().parse(source.packDate);
   const { generated, failures, failedIds } = generateRows(source, irregulars);
   const verbs: Verb[] = [];
@@ -110,6 +137,10 @@ export function buildPack({ source, irregulars, reviews: rawReviews }: BuildInpu
     if (review && review.rowHash !== hash) failures.push(`${verb.id}: review lapsed (row hash changed)`);
     const checkedAgainst: Verb['prov']['checkedAgainst'] = ['consistency'];
     if (Object.hasOwn(GOLDEN, verb.id)) checkedAgainst.push('control-verbs');
+    const oracle = attest.verbs[verb.id];
+    const oracleMatches = oracle?.rowHash === hash;
+    if (oracleMatches) checkedAgainst.push('morphalou-3.1');
+    else if (oracle) report.push(`${verb.id}: stale Morphalou attestation ignored (row hash changed)`);
     const matching = review?.rowHash === hash ? review : undefined;
     verb.prov = matching
       ? {
@@ -125,6 +156,9 @@ export function buildPack({ source, irregulars, reviews: rawReviews }: BuildInpu
           checkedAt: source.packDate,
           status: failedIds.has(verb.id) ? 'draft' : 'auto-checked',
         };
+    if (oracleMatches && oracle.ranAt.slice(0, 10) > verb.prov.checkedAt!) {
+      verb.prov.checkedAt = oracle.ranAt.slice(0, 10);
+    }
     verbs.push(verb);
   }
   failures.push(...publishGate(verbs));
@@ -137,12 +171,13 @@ export function buildPack({ source, irregulars, reviews: rawReviews }: BuildInpu
 }
 
 export async function readInputs(): Promise<BuildInputs> {
-  const [source, irregulars, reviews] = await Promise.all([
+  const [source, irregulars, reviews, oracleAttest] = await Promise.all([
     Bun.file(new URL('../../data/grammar-pack/verbs.json', import.meta.url)).json(),
     Bun.file(new URL('../../data/grammar-pack/irregulars.json', import.meta.url)).json(),
     Bun.file(new URL('../../data/grammar-pack/reviews.json', import.meta.url)).json(),
+    Bun.file(new URL('../../data/grammar-pack/oracle-attest.json', import.meta.url)).json(),
   ]);
-  return { source, irregulars, reviews };
+  return { source, irregulars, reviews, oracleAttest: OracleAttestSchema.parse(oracleAttest) };
 }
 
 if (import.meta.main) {
