@@ -1,7 +1,7 @@
 # Relire Plus merge: progress and next steps
 
 Status: living handoff document. Update it at the end of every work session.
-Last updated: 2026-10-18 (UTC): P6-B done, P6-A cancelled, cleanup and import split pending owner answers.
+Last updated: 2026-10-18 (UTC): P6-B done, P6-A cancelled, compatibility cleanup done; import split next; grammar tier awaiting owner decisions.
 Plan and decisions: `docs/merge-plan.md`. Branch: `claude/sleepy-darwin-lt2eck` (all merged work is pushed there; no PR yet).
 
 ## How to resume
@@ -165,8 +165,8 @@ Parent verification for `0aec88f`'s exact committed tree: typecheck, lint, forma
 
 Baseline set by the owner: nothing has shipped, so no compatibility code and no needless abstraction (`docs/conventions.md`). A read-only audit found these removable items; none is done yet.
 
-- **Compatibility cleanup** (one worker, before the split): collapse the IndexedDB v1 to v5 upgrade branches into one schema creation and drop `e2e/upgrade.spec.ts` (local browsers then need their site data cleared); drop the multi-tab `blocked`/`stale` upgrade handling until a real upgrade exists; make `Article.kind` and `CheckedResult.strictAccents` required and delete their absent-value paths and tests; delete the `#/settings/about` redirect; delete the unused FrenchLab tag map. Keep the real browser-capability fallbacks (Navigation API recorder, `navigator.storage` guards, keyCode, model-output fence tolerance).
-- **Import split** (one worker, after the cleanup): the shared intake (`importMaterial`, `importPdf`, source input, consent, leave guard) stays; Read gets an article import (a new text-only `transcribeMaterial` task on the OCR selection, review of title and text); Practise gets the exercise import (existing flow without the destination select and without `sourceText`); the `both` destination goes. Routes proposed: `#/import/article` and `#/import/exercises`. Then the entry copy is drafted by agy in en and zh and checked by the lead. Awaiting the owner's answers on the three open points (one-shot database, blocked/stale removal, route names).
+- **Compatibility cleanup: done** (`a3b4270`, `be3829e`; net -389 lines). The IndexedDB upgrade branches are one schema at version 1 (a browser holding the old v5 database must clear its site data), the multi-tab `blocked`/`stale` handling is removed until a real upgrade exists, `Article.kind` and `CheckedResult.strictAccents` are required, the `#/settings/about` redirect and the FrenchLab tag map are gone, and restore now rejects checked results without `strictAccents`. Parent checks: typecheck, lint, format, **380 unit tests**, i18n, prosody 37/37, build, Impeccable `[]`, **245 full mocked e2e tests** (two upgrade tests removed with the code). Logs: `/tmp/cleanup-parent-checks.log`, `/tmp/cleanup-parent-e2e.log`.
+- **Import split** (one worker, after the cleanup): the shared intake (`importMaterial`, `importPdf`, source input, consent, leave guard) stays; Read gets an article import (a new text-only `transcribeMaterial` task on the OCR selection, review of title and text); Practise gets the exercise import (existing flow without the destination select and without `sourceText`); the `both` destination goes. Routes proposed: `#/import/article` and `#/import/exercises`. Then the entry copy is drafted by agy in en and zh and checked by the lead. The owner approved the one-shot database and the blocked/stale removal; the route names `#/import/article` and `#/import/exercises` were proposed and not objected to.
 
 ## Decisions log
 
