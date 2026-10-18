@@ -10,6 +10,7 @@ Relire is a static, browser-only PWA for French close reading and pronunciation 
 - AI calls go through `src/services/ai`; prompt wording lives in template files, never in TypeScript.
 - Nothing has shipped. Until a release is documented in `CHANGELOG.md`, no data shape, route, key or behaviour is "existing": no backward-compatibility shims, legacy fallbacks or migrations for unreleased states. Change the shape and the code together.
 - Solve from first principles with the smallest design (Occam). No defensive code for cases that cannot happen, no abstraction until a second real caller exists, no speculative options or config.
+- Use a shadcn/ui (Base UI) component first via `bunx shadcn@latest add <name>`; write a custom component only when none exists, and compose data tables from `ui/table` and `@tanstack/react-table`.
 - Controls never move the page: transient states show on the control itself or in an overlay.
 - Docs, comments, commit messages and PR text are in English; Chinese only where `docs/conventions.md` allows.
 - A user-noticeable change gets a `CHANGELOG.md` (Unreleased) line in the same commit.

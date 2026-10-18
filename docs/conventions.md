@@ -18,6 +18,10 @@ Technical documentation, code comments, commit messages and PR text are in Engli
 - API keys live only in the user's browser. Never commit one; backups never contain them (`.claude/rules/storage.md`).
 - Never invent data: no sample stats, fake scores or fallback AI answers. Empty means empty; failures show the real error.
 
+## UI components
+
+Use a shadcn/ui component (Base UI) first: `bunx shadcn@latest add <name>`. Generated files live in `src/components/ui/` and are edited only to fit our tokens. Write a custom component only when no library component exists. Data tables compose `ui/table` with `@tanstack/react-table` at the page that needs them, not through a shared DataTable abstraction. Existing hand-written components are not migrated by this setup. Owner decision 2026-10-18.
+
 ## Controls never move the page
 
 A transient state (loading, playing, recording, an error) shows on the control itself or in an overlay, never as a row that appears and disappears. The full UI form is in `.claude/rules/ui.md`; `verify-ui` checks it with before/after layout assertions.
