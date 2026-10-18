@@ -3,7 +3,7 @@ import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { normalizeBaseUrl } from '../../services/ai/baseUrl';
-import { getProvider } from '../../services/ai/providers';
+import { getProvider, providerRequiresKey } from '../../services/ai/providers';
 import { getApiKey, type AppSettings } from '../../utils/appSettings';
 
 export const selectClass =
@@ -24,16 +24,17 @@ interface KeyFieldProps {
   onChange: (value: string) => void;
 }
 
-/** The API key input for one provider, with where the key goes and where to get one. */
+/** The API key input for one provider, with where the key goes and where to get one. A local provider's is optional. */
 export const KeyField = forwardRef<HTMLInputElement, KeyFieldProps>(({ providerId, value, onChange }, ref) => {
   const { t } = useTranslation();
   const { providerName } = useProviderNames();
   const name = providerName(providerId);
   const inputId = `key-${providerId}`;
+  const requiresKey = providerRequiresKey(providerId);
   return (
     <div>
       <label htmlFor={inputId} className={fieldLabel}>
-        {t('settings.keyLabel', { provider: name })}
+        {t(requiresKey ? 'settings.keyLabel' : 'settings.keyLabelOptional', { provider: name })}
       </label>
       <input
         id={inputId}
@@ -46,14 +47,14 @@ export const KeyField = forwardRef<HTMLInputElement, KeyFieldProps>(({ providerI
         className="w-full h-10 px-3 rounded-md bg-surface border border-ink-300 text-sm font-mono focus:outline-none focus:border-accent-600"
       />
       <p className="text-xs text-ink-500 mt-1 leading-relaxed">
-        {t('settings.keyPrivacy', { provider: name })}{' '}
+        {t(requiresKey ? 'settings.keyPrivacy' : 'aiSettings.keylessHelp', { provider: name })}{' '}
         <a
           href={getProvider(providerId).info.keyUrl}
           target="_blank"
           rel="noreferrer"
           className="text-accent-900 underline underline-offset-2"
         >
-          {t('settings.getKey', { provider: name })}
+          {t(requiresKey ? 'settings.getKey' : 'settings.providerDocs', { provider: name })}
         </a>
       </p>
     </div>
@@ -99,13 +100,14 @@ export function BaseUrlField({ providerId, defaultUrl, value, onChange }: BaseUr
   );
 }
 
-/** "Key saved in this browser" or "No key yet", for the settings that are stored (not the draft). */
+/** "Key saved in this browser", "No key yet", or "No key needed", for the settings that are stored (not the draft). */
 export function KeyBadge({ saved, providerId }: { saved: AppSettings; providerId: string }) {
   const { t } = useTranslation();
-  return getApiKey(saved, providerId) ? (
+  const requiresKey = providerRequiresKey(providerId);
+  return !requiresKey || getApiKey(saved, providerId) ? (
     <span className="text-ok-800 flex items-center gap-1 text-xs">
       <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
-      <span>{t('settings.keySet')}</span>
+      <span>{t(requiresKey ? 'settings.keySet' : 'settings.keyNotNeeded')}</span>
     </span>
   ) : (
     <span className="text-ink-500 flex items-center gap-1 text-xs">

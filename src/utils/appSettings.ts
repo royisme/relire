@@ -1,5 +1,5 @@
 import type { GradingOptions } from '../services/exercises/grading';
-import { getProvider } from '../services/ai/providers';
+import { getProvider, providerRequiresKey } from '../services/ai/providers';
 import { normalizeModelId } from '../services/ai/catalogue';
 import { normalizeBaseUrl } from '../services/ai/baseUrl';
 
@@ -138,15 +138,18 @@ export const getApiKey = (settings: AppSettings, providerId: string) => settings
 /** The provider's endpoint override, or '' for its default. */
 export const getBaseUrl = (settings: AppSettings, providerId: string) => settings.baseUrls[providerId] ?? '';
 
-/** True when the provider that writes the answers has a key. */
-export const hasTextKey = (settings: AppSettings = getAppSettings()) => !!getApiKey(settings, settings.textProvider);
+/** True when the provider needs no key (a local server) or the learner has saved one. */
+const keyReady = (settings: AppSettings, providerId: string) =>
+  !providerRequiresKey(providerId) || !!getApiKey(settings, providerId);
+
+/** True when the provider that writes the answers has a key, or needs none. */
+export const hasTextKey = (settings: AppSettings = getAppSettings()) => keyReady(settings, settings.textProvider);
 
 /** OCR has its own selection, never inherited from Text AI. */
-export const hasOcrKey = (settings: AppSettings = getAppSettings()) => !!getApiKey(settings, settings.ocrProvider);
+export const hasOcrKey = (settings: AppSettings = getAppSettings()) => keyReady(settings, settings.ocrProvider);
 
 /** True when the provider that speaks has a key (otherwise the browser's own voice is used). */
-export const hasSpeechKey = (settings: AppSettings = getAppSettings()) =>
-  !!getApiKey(settings, settings.speechProvider);
+export const hasSpeechKey = (settings: AppSettings = getAppSettings()) => keyReady(settings, settings.speechProvider);
 
 /** How the sheet compares answers: strict accents from the Practice settings. */
 export const practiceGrading = (): GradingOptions => ({ strictAccents: getAppSettings().practiceStrictAccents });

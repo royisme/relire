@@ -121,6 +121,8 @@ export interface ProviderInfo {
   keyUrl: string;
   /** The endpoint this provider calls unless the learner overrides it; only such providers show a Base URL field. */
   defaultBaseUrl?: string;
+  /** False for a provider that works without a key (a local server). Absent means a key is required. */
+  requiresKey?: boolean;
   /** `imageModels` are the static `models` known to accept images, a starting hint for Settings; discovery adds the rest. */
   text?: { models: string[]; defaultModel: string; imageModels?: string[] };
   /** An empty `voices` list means the provider takes any voice id, so Settings shows a text field instead of a select. */

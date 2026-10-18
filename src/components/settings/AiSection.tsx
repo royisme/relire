@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { getAiAccess } from '../../services/ai/access';
 import { normalizeModelId } from '../../services/ai/catalogue';
 import { errorMessage } from '../../services/ai/errors';
-import { getProvider, speechProviders, textProviders } from '../../services/ai/providers';
+import { getProvider, providerRequiresKey, speechProviders, textProviders } from '../../services/ai/providers';
 import { getApiKey, type AppSettings } from '../../utils/appSettings';
 import { AI_PURPOSES, type AiPurposeRoute } from '../../utils/routes';
 import { testSpeech } from '../../utils/speech';
@@ -63,7 +63,10 @@ export function AiSection({
   const model = draft[`${purpose}Model`];
   const key = draft.apiKeys[providerId] ?? '';
   const dirty = sliceOf(draft, 'ai') !== sliceOf(saved, 'ai');
-  const missingKey = !getApiKey(saved, saved[`${purpose}Provider`]);
+  // A local provider needs no key, so nothing here asks for one.
+  const needsKey = providerRequiresKey(providerId);
+  const savedProviderId = saved[`${purpose}Provider`];
+  const missingKey = providerRequiresKey(savedProviderId) && !getApiKey(saved, savedProviderId);
   const modelReady = !!normalizeModelId(model);
   // A provider with its own voice check shows a free-text field; the value is refused before it can be saved.
   const voiceAccepts = (voice: string) => provider.speech?.acceptsVoice?.(voice) ?? true;
@@ -119,7 +122,7 @@ export function AiSection({
 
   // Checks the key (or previews the voice) with the settings on screen. Never saves.
   const check = async () => {
-    if (!key.trim() || checking || !modelReady) return;
+    if ((needsKey && !key.trim()) || checking || !modelReady) return;
     const token = ++checkToken.current;
     setChecking(true);
     setChecked(null);
@@ -265,7 +268,7 @@ export function AiSection({
             type="button"
             variant="outline"
             onClick={() => void check()}
-            disabled={checking || !key.trim() || !modelReady}
+            disabled={checking || (needsKey && !key.trim()) || !modelReady}
           >
             {t(
               checking
@@ -274,7 +277,9 @@ export function AiSection({
                   : 'settings.checking'
                 : purpose === 'speech'
                   ? 'aiSettings.preview'
-                  : 'aiSettings.check',
+                  : needsKey
+                    ? 'aiSettings.check'
+                    : 'aiSettings.checkServer',
             )}
           </Button>
           <Button type="button" onClick={save} disabled={!dirty}>

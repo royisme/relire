@@ -265,8 +265,10 @@
     "testFailed": "Test failed: {{msg}}",
     "keySet": "Key saved in this browser",
     "keyMissing": "No key yet",
+    "keyNotNeeded": "No key needed",
     "keyPrivacy": "The key is stored only in this browser and sent only to {{provider}} when you use an AI feature. There is no app server.",
     "getKey": "Get a key from {{provider}}",
+    "providerDocs": "{{provider}} documentation",
     "needsKeyNotice": {
       "text": "Add your API key to use word and sentence analysis, audio and pronunciation feedback.",
       "ocr": "Add your API key to read images and PDFs.",
@@ -289,6 +291,7 @@
     "providerLabel": "Provider",
     "modelLabel": "Model",
     "keyLabel": "{{provider}} API key",
+    "keyLabelOptional": "{{provider}} API key (optional)",
     "promptsDesc": "The instructions sent to the AI, as plain text. Edit them to change how answers are written; reset any prompt to go back to the original. Answers already saved on this device stay as they are; edited prompts get fresh answers.",
     "promptTask": "Prompt",
     "promptLanguage": "Prompt language",
@@ -373,6 +376,7 @@
     "voiceHelp": "Optional: paste a voice ID from Fish Audio. Leave it empty to use the model's default voice.",
     "invalidVoice": "Enter a Fish Audio voice ID, or leave it empty for the default voice.",
     "voiceNotValid": "The voice ID is not one this provider accepts. Fix it, then save again.",
+    "keylessHelp": "No key is needed: the request goes to the server you run. Ollama must allow this page's origin, so start it with OLLAMA_ORIGINS set to this address (OLLAMA_ORIGINS=* allows any).",
     "fetch": "Fetch models",
     "fetching": "Fetching…",
     "refresh": "Refresh models",
@@ -385,6 +389,7 @@
     "capabilityUnknown": "This model's support for this task is unconfirmed. A check or a real request settles it.",
     "capabilityUnsupported": "This model is known not to handle this task.",
     "check": "Check key",
+    "checkServer": "Check server",
     "checkSuccess": "The key works.",
     "preview": "Preview voice",
     "ocrNote": "Images and PDFs read this selection; pasted text uses Text AI.",
@@ -562,12 +567,29 @@
     },
     "fish-audio/transcribe-1": {
       "name": "Fish Audio Transcribe 1 (transcription, not speech)"
+    },
+    "claude-3-7-sonnet-latest": {
+      "name": "Claude 3.7 Sonnet (recommended)"
+    },
+    "claude-3-5-haiku-latest": {
+      "name": "Claude 3.5 Haiku"
+    },
+    "llama3_1": {
+      "name": "Llama 3.1 (recommended)"
+    },
+    "qwen2_5:14b": {
+      "name": "Qwen 2.5 14B"
+    },
+    "llama3_2-vision": {
+      "name": "Llama 3.2 Vision"
     }
   },
   "providers": {
     "gemini": "Google Gemini",
     "openai": "OpenAI-compatible",
-    "fish-audio": "Fish Audio"
+    "fish-audio": "Fish Audio",
+    "anthropic": "Anthropic Claude",
+    "ollama": "Ollama (local)"
   },
   "prompts": {
     "word": "Word analysis",

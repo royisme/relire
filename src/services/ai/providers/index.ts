@@ -1,6 +1,8 @@
 import type { Provider, SpeechProvider, TextProvider } from '../types';
+import { anthropic } from './anthropic';
 import { gemini } from './gemini';
 import { fish } from './fish';
+import { ollama } from './ollama';
 import { openai } from './openai';
 
 /**
@@ -8,7 +10,7 @@ import { openai } from './openai';
  * speech or both), register it here and add its display name under
  * `providers.<id>` in the locale files; the settings screen picks it up.
  */
-const PROVIDERS: Provider[] = [gemini, openai, fish];
+const PROVIDERS: Provider[] = [gemini, openai, anthropic, ollama, fish];
 
 export const textProviders = () => PROVIDERS.filter((p) => p.text);
 export const speechProviders = () => PROVIDERS.filter((p) => p.speech);
@@ -16,6 +18,9 @@ export const speechProviders = () => PROVIDERS.filter((p) => p.speech);
 export function getProvider(id: string): Provider {
   return PROVIDERS.find((p) => p.info.id === id) ?? PROVIDERS[0];
 }
+
+/** A local provider works without a key; every other provider needs one before its features can run. */
+export const providerRequiresKey = (id: string) => getProvider(id).info.requiresKey !== false;
 
 export const getTextProvider = (id: string): TextProvider => {
   const provider = getProvider(id);

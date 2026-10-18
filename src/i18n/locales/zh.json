@@ -261,8 +261,10 @@
     "testFailed": "测试失败：{{msg}}",
     "keySet": "Key 已保存在此浏览器",
     "keyMissing": "尚未设置 Key",
+    "keyNotNeeded": "无需密钥",
     "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 {{provider}}。没有应用服务器。",
     "getKey": "到 {{provider}} 获取 Key",
+    "providerDocs": "{{provider}} 文档",
     "needsKeyNotice": {
       "text": "请先填写 API Key，才能使用单词和句子解析、朗读和发音反馈。",
       "ocr": "请先填写 API Key，才能读取图片和 PDF。",
@@ -285,6 +287,7 @@
     "providerLabel": "提供方",
     "modelLabel": "模型",
     "keyLabel": "{{provider}} API Key",
+    "keyLabelOptional": "{{provider}} API 密钥（可选）",
     "promptsDesc": "发给 AI 的指令，是纯文本。修改它们就能改变回答的写法；任何一条都可以恢复默认。已经保存在这台设备上的解析不会变，改过的提示词会得到新的解析。",
     "promptTask": "提示词",
     "promptLanguage": "提示词语言",
@@ -369,6 +372,7 @@
     "voiceHelp": "可选：粘贴 Fish Audio 的音色 ID；留空则使用模型默认音色。",
     "invalidVoice": "请填写 Fish Audio 的音色 ID，或留空使用默认音色。",
     "voiceNotValid": "该音色 ID 不被此服务商接受，请修改后再保存。",
+    "keylessHelp": "无需密钥：请求只发送到你在本机运行的服务器。Ollama 需要允许本页面的来源，请启动时把 OLLAMA_ORIGINS 设为本页面地址（OLLAMA_ORIGINS=* 表示全部允许）。",
     "fetch": "获取模型列表",
     "fetching": "获取中…",
     "refresh": "刷新模型列表",
@@ -381,6 +385,7 @@
     "capabilityUnknown": "这个模型能否完成这项任务尚未确认，可以通过检查或实际请求来验证。",
     "capabilityUnsupported": "已知这个模型不能完成这项任务。",
     "check": "检查 Key",
+    "checkServer": "检查服务器",
     "checkSuccess": "Key 可以使用。",
     "preview": "试听音色",
     "ocrNote": "图片和 PDF 使用这里的设置；粘贴的文字使用文字 AI。",
@@ -557,12 +562,29 @@
     },
     "fish-audio/transcribe-1": {
       "name": "Fish Audio Transcribe 1（转写模型，非语音合成）"
+    },
+    "claude-3-7-sonnet-latest": {
+      "name": "Claude 3.7 Sonnet（推荐）"
+    },
+    "claude-3-5-haiku-latest": {
+      "name": "Claude 3.5 Haiku"
+    },
+    "llama3_1": {
+      "name": "Llama 3.1（推荐）"
+    },
+    "qwen2_5:14b": {
+      "name": "Qwen 2.5 14B"
+    },
+    "llama3_2-vision": {
+      "name": "Llama 3.2 Vision"
     }
   },
   "providers": {
     "gemini": "Google Gemini",
     "openai": "OpenAI 兼容",
-    "fish-audio": "Fish Audio"
+    "fish-audio": "Fish Audio",
+    "anthropic": "Anthropic Claude",
+    "ollama": "Ollama（本地）"
   },
   "prompts": {
     "word": "单词解析",

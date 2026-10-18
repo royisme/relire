@@ -1,7 +1,7 @@
 /** Model ID entry: native suggestions, provider discovery, and honest capability notes. */
 import { useTranslation } from 'react-i18next';
 import { normalizeModelId, purposeCapability } from '../../services/ai/catalogue';
-import { getProvider } from '../../services/ai/providers';
+import { getProvider, providerRequiresKey } from '../../services/ai/providers';
 import type { AiPurpose, ModelCapabilities, ModelInfo } from '../../services/ai/types';
 import { getApiKey, type AppSettings } from '../../utils/appSettings';
 import { Button } from '../ui/button';
@@ -26,6 +26,8 @@ export function ModelField({
   const provider = getProvider(draft[`${purpose}Provider`]);
   const model = draft[`${purpose}Model`];
   const key = getApiKey(draft, provider.info.id);
+  // A local provider can fetch its list without one.
+  const needsKey = providerRequiresKey(provider.info.id);
   const capabilities = (id: string) => provider.catalogue?.capabilities(id) ?? UNKNOWN;
   const defaults = (purpose === 'speech' ? provider.info.speech : provider.info.text)?.models ?? [];
   // Fetched entries carry the provider's own hints; the shipped list is only a starting point.
@@ -40,7 +42,7 @@ export function ModelField({
   /** What the last discovery attempt says: a real error, why it cannot run, or how many models came back. */
   const outcome = () => {
     if (catalogue.error) return { text: catalogue.error, failed: true };
-    if (!key) return { text: t('aiSettings.fetchNeedsKey'), failed: false };
+    if (!key && needsKey) return { text: t('aiSettings.fetchNeedsKey'), failed: false };
     if (!provider.catalogue) return { text: t('aiSettings.noDiscovery'), failed: false };
     if (!catalogue.models) return null;
     return {
@@ -80,7 +82,7 @@ export function ModelField({
         type="button"
         variant="outline"
         onClick={() => void catalogue.fetchModels()}
-        disabled={!key || catalogue.loading || !provider.catalogue}
+        disabled={(needsKey && !key) || catalogue.loading || !provider.catalogue}
       >
         {t(
           catalogue.loading

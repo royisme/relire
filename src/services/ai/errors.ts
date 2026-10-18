@@ -6,15 +6,18 @@ export class MissingApiKeyError extends Error {
   }
 }
 
-/** The human-readable part of an SDK error (providers often wrap a JSON body in `message`). */
+/** The human-readable part of a provider error: `error.message` (OpenAI, Anthropic), a plain `error` text
+ * (Ollama), or the message itself. */
 export function errorMessage(err: unknown, secret?: string): string {
+  const error = (err as { error?: unknown })?.error;
   const detail =
-    (err as { error?: { message?: unknown }; message?: unknown })?.error?.message ||
+    (typeof error === 'string' ? error : (error as { message?: unknown } | undefined)?.message) ||
     (err as { message?: unknown })?.message;
   let msg = typeof detail === 'string' ? detail : String(err);
   try {
     const parsed = JSON.parse(msg);
     if (typeof parsed?.error?.message === 'string') msg = parsed.error.message;
+    else if (typeof parsed?.error === 'string') msg = parsed.error;
   } catch {
     // message was not JSON
   }

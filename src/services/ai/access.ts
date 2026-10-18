@@ -50,7 +50,11 @@ export function createByokAccess(settings: AppSettings): AiAccess {
     };
   };
   return {
-    isConfigured: (purpose) => !!getApiKey(snapshot, providerFor(purpose).info.id),
+    // A local provider needs no key, so its features are ready as soon as it is selected.
+    isConfigured: (purpose) => {
+      const provider = providerFor(purpose).info;
+      return provider.requiresKey === false || !!getApiKey(snapshot, provider.id);
+    },
     selection,
     text(purpose) {
       const provider = providerFor(purpose).text;
