@@ -35,6 +35,15 @@ export interface GradingOptions {
 export const DEFAULT_GRADING: GradingOptions = { strictAccents: false };
 
 /**
+ * Whether accents are significant for one item: an item may require them
+ * (`meta.strictAccents === true`, conjugation drills do) on top of the
+ * learner's preference, never against it. The stored `CheckedResult.strictAccents`
+ * must come from here too, so the saved boolean always equals the one used to grade.
+ */
+export const effectiveStrictAccents = (item: Pick<ExerciseItem, 'meta'>, { strictAccents }: GradingOptions) =>
+  item.meta?.strictAccents === true || strictAccents;
+
+/**
  * - `graded`: the verdict is final.
  * - `needs-ai`: a free-text answer that matched no reference; only an AI
  *   grader can say whether it is acceptable. Until then it is neither right nor wrong.
@@ -70,8 +79,9 @@ export function gradeItem(
   type: ExerciseType,
   item: ExerciseItem,
   answer: ExerciseAnswer,
-  { strictAccents }: GradingOptions,
+  options: GradingOptions,
 ): GradeResult {
+  const strictAccents = effectiveStrictAccents(item, options);
   const recordedAnswer = recordedAnswerText(type, item, answer);
   const graded = (correct: boolean): GradeResult => ({ status: 'graded', correct, recordedAnswer });
   const expected = item.expectedAnswer;
