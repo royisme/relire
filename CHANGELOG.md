@@ -79,6 +79,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- **Import controls stay put while fonts load.** The exercise import's extraction mode keeps a fixed height, so adding or removing images and discarding a source no longer shift the controls below it by a pixel.
 - **See and discard import sources in place.** Both import pages accept up to five images in reading order or five selected PDF pages, show thumbnails, let you remove images or a PDF and clear pasted text, and discard unsaved input and errors immediately without leaving the page.
 - **A leftover voice preview can no longer stop the sound that replaced it.** Preview voice takes the one sound slot like any other playback, so starting a clip keeps the preview from playing; now its late abort (leaving Settings) leaves the newer sound playing and its state intact instead of cancelling it, and a preview cancelled while the device's voice list is still loading says nothing rather than claiming the device has no French voice.
 - **A long playback failure keeps the article player still.** The failing sentence's reason now fills the player's own 40 px status slot and scrolls inside it, instead of a taller paragraph growing the bottom dock and lifting the centre-aligned play, previous, next and stop buttons.

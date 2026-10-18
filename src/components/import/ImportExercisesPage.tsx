@@ -125,7 +125,7 @@ export function ImportExercisesPage() {
             {t('importExercises.mode')}
             <select
               aria-label={t('importExercises.mode')}
-              className={field}
+              className={`${field} h-[40px]`}
               value={mode}
               onChange={(e) => setMode(e.target.value as ImportMode)}
             >
