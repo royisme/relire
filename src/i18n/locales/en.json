@@ -352,7 +352,9 @@
     "dictationSpeed": "Dictation speed",
     "dictationSpeedNote": "How fast a dictation item is read when you press Listen.",
     "speakAfterCheck": "Speak dictation after checking",
-    "speakAfterCheckNote": "After a dictation item is checked, its number is spoken again."
+    "speakAfterCheckNote": "After a dictation item is checked, its number is spoken again.",
+    "remoteAutoSpeak": "Let checks speak with my speech provider",
+    "remoteAutoSpeakNote": "Off, automatic playback uses this device’s voice. On, a check may synthesize a clip with your Speech synthesis provider, which can cost money. Pressing Listen or Preview always uses it."
   },
   "aiSettings": {
     "purposesLabel": "AI tasks",

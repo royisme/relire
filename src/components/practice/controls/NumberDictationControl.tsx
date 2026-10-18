@@ -3,12 +3,13 @@
  * through `utils/speech` — the clip is stored like every other, so a number is
  * synthesized once — at the learner's dictation speed, and one typed line for
  * what was heard. With "Speak after checking" on, the item is spoken again
- * once its check lands (not on every reload of an already-checked one).
+ * once its check lands (not on every reload of an already-checked one), and a
+ * remote engine only once the Practice opt-in allows automatic playback.
  */
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { expectedAnswerText } from '../../../services/exercises/answer';
-import { getAppSettings } from '../../../utils/appSettings';
+import { getAppSettings, maySpeakAfterCheck } from '../../../utils/appSettings';
 import { speakFrench } from '../../../utils/speech';
 import { SpeakButton } from '../../ui/speak-button';
 import { ExpectedBeside, UnderlineInput } from './UnderlineInput';
@@ -37,7 +38,7 @@ export function NumberDictationControl({
     if (wasChecked.current) return;
     wasChecked.current = true;
     const settings = getAppSettings();
-    if (settings.practiceSpeakAfterCheck) void speakFrench(audio, { rate: settings.practiceDictationSpeed });
+    if (maySpeakAfterCheck(settings)) void speakFrench(audio, { rate: settings.practiceDictationSpeed });
   }, [checked, audio]);
 
   return (

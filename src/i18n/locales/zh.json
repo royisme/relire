@@ -348,7 +348,9 @@
     "dictationSpeed": "听写播放速度",
     "dictationSpeedNote": "点“播放”时，听写内容朗读的速度。",
     "speakAfterCheck": "听写检查后再播放",
-    "speakAfterCheckNote": "听写题检查后，再播放一遍它的数字。"
+    "speakAfterCheckNote": "听写题检查后，再播放一遍它的数字。",
+    "remoteAutoSpeak": "允许检查后用语音服务商朗读",
+    "remoteAutoSpeakNote": "关闭时，检查后的自动播放只用本机语音。开启后，检查可能用你选定的语音服务商合成音频，会产生费用。手动点按播放或试听始终使用它。"
   },
   "aiSettings": {
     "purposesLabel": "AI 任务",

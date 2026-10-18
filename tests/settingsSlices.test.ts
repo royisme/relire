@@ -136,6 +136,51 @@ test('a voice id the speech provider refuses never saves silently', () => {
   }
 });
 
+test('each speech engine comes back with its own model and voice after a save and a reload', () => {
+  saveAppSettings({});
+  const voice = '0123456789abcdef0123456789abcdef';
+  // Gemini's choice is saved first.
+  saveSlice(draftOf(getAppSettings(), { speechModel: 'gemini-3.8-flash-tts', speechVoice: 'Zephyr' }), 'ai');
+  // Switching to Fish keeps Gemini's choice in the draft, as the AI page does, and saves both.
+  const fish = draftOf(getAppSettings(), {
+    speechProvider: 'fish-audio',
+    speechModel: 'fish-audio/s2.1-pro',
+    speechVoice: voice,
+    speechChoices: { gemini: { model: 'gemini-3.8-flash-tts', voice: 'Zephyr' } },
+  });
+  saveSlice(fish, 'ai');
+
+  // A reload keeps both engines' choices, so switching back reads Gemini's own instead of a default.
+  const reloaded = getAppSettings();
+  expect(reloaded.speechChoices).toEqual({
+    gemini: { model: 'gemini-3.8-flash-tts', voice: 'Zephyr' },
+    'fish-audio': { model: 'fish-audio/s2.1-pro', voice },
+  });
+  expect(reloaded.speechProvider).toBe('fish-audio');
+  expect([reloaded.speechModel, reloaded.speechVoice]).toEqual(['fish-audio/s2.1-pro', voice]);
+
+  // Changing one engine's memory is an AI change, so it needs a save like the selection itself.
+  const unsaved = draftOf(reloaded, {
+    speechChoices: { ...reloaded.speechChoices, gemini: { model: 'gemini-3.8-flash-tts', voice: 'Puck' } },
+  });
+  expect(sliceOf(unsaved, 'ai')).not.toBe(sliceOf(reloaded, 'ai'));
+  expect(saveSlice(unsaved, 'ai').speechChoices.gemini).toEqual({ model: 'gemini-3.8-flash-tts', voice: 'Puck' });
+});
+
+test('a remembered model or voice storage would replace refuses the AI save', () => {
+  saveAppSettings({});
+  const base = getAppSettings();
+  const remembered = (choice: { model: string; voice: string }) =>
+    draftOf(base, { speechChoices: { 'fish-audio': choice } });
+  expect(() => saveSlice(remembered({ model: 'fish-audio/s2.1-pro', voice: 'alloy' }), 'ai')).toThrow(
+    i18n.t('aiSettings.voiceNotValid'),
+  );
+  expect(() => saveSlice(remembered({ model: 'bad\u0000id', voice: '' }), 'ai')).toThrow(
+    i18n.t('aiSettings.modelNotValid'),
+  );
+  expect(getAppSettings().speechChoices).toEqual({});
+});
+
 test('an endpoint override is part of the AI slice, saved with it and refused when unusable', () => {
   saveAppSettings({});
   const base = getAppSettings();

@@ -281,6 +281,44 @@ test('the device engine needs no key, model or voice, and its preview speaks on 
   expect([stored.speechProvider, stored.speechModel, stored.speechVoice]).toEqual(['device', '', '']);
 });
 
+test('each speech engine keeps its own model and voice when you switch, even after a reload', async ({ page, ai }) => {
+  void ai;
+  const fishVoice = '0123456789abcdef0123456789abcdef';
+  await page.goto('/#/settings/ai/speech');
+  await modelField(page).fill('gemini-3.8-flash-tts');
+  await page.getByLabel('Voice').selectOption('Zephyr');
+  await saveButton(page).click();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+
+  // Fish Audio starts from its own defaults and keeps its own model and voice.
+  await page.getByLabel('Provider').selectOption('fish-audio');
+  await expect(modelField(page)).toHaveValue('fish-audio/s2.1-pro-free');
+  await modelField(page).fill('fish-audio/s2.1-pro');
+  await page.getByLabel('Voice ID').fill(fishVoice);
+  await saveButton(page).click();
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+
+  // Coming back to Gemini restores what it had, not the defaults.
+  await page.getByLabel('Provider').selectOption('gemini');
+  await expect(modelField(page)).toHaveValue('gemini-3.8-flash-tts');
+  await expect(page.getByLabel('Voice')).toHaveValue('Zephyr');
+  // Fish Audio kept its own in the same draft.
+  await page.getByLabel('Provider').selectOption('fish-audio');
+  await expect(modelField(page)).toHaveValue('fish-audio/s2.1-pro');
+  await expect(page.getByLabel('Voice ID')).toHaveValue(fishVoice);
+
+  await page.reload();
+  await expect(modelField(page)).toHaveValue('fish-audio/s2.1-pro');
+  await page.getByLabel('Provider').selectOption('gemini');
+  await expect(modelField(page)).toHaveValue('gemini-3.8-flash-tts');
+  await expect(page.getByLabel('Voice')).toHaveValue('Zephyr');
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('relire_app_settings_v1')!));
+  expect(stored.speechChoices).toEqual({
+    gemini: { model: 'gemini-3.8-flash-tts', voice: 'Zephyr' },
+    'fish-audio': { model: 'fish-audio/s2.1-pro', voice: fishVoice },
+  });
+});
+
 test('an unconfirmed OCR model stays selectable with honest copy', async ({ page, ai }) => {
   void ai;
   await page.goto('/#/settings/ai/ocr');

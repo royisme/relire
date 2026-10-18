@@ -130,7 +130,11 @@ test('dictation replays on each check after reset, uses cached playback, and sta
 }) => {
   await page.addInitScript(() => {
     const settings = JSON.parse(localStorage.getItem('relire_app_settings_v1') || '{}');
-    localStorage.setItem('relire_app_settings_v1', JSON.stringify({ ...settings, practiceSpeakAfterCheck: true }));
+    // Both preferences: a remote engine replays automatically only after the explicit opt-in.
+    localStorage.setItem(
+      'relire_app_settings_v1',
+      JSON.stringify({ ...settings, practiceSpeakAfterCheck: true, practiceRemoteAutoSpeak: true }),
+    );
     // oxlint-disable-next-line typescript/unbound-method
     const play = HTMLMediaElement.prototype.play;
     HTMLMediaElement.prototype.play = function () {

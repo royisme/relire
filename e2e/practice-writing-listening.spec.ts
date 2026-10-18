@@ -189,11 +189,13 @@ test('Enter places and takes back a tile', async ({ page }) => {
   await expect(sentence).toContainText('Build the sentence with the tiles below.');
 });
 
-test('speak after checking replays the dictation when a check lands', async ({ page, ai }) => {
+test('speak after checking replays the dictation once the remote opt-in is on', async ({ page, ai }) => {
   // Written straight into storage: opening the unit only changes the hash, so an init script would not run.
   await page.evaluate(() => {
     const raw: Record<string, unknown> = JSON.parse(localStorage.getItem('relire_app_settings_v1') || '{}');
     raw.practiceSpeakAfterCheck = true;
+    // A remote engine synthesizes only after this explicit opt-in, so the replay needs both.
+    raw.practiceRemoteAutoSpeak = true;
     localStorage.setItem('relire_app_settings_v1', JSON.stringify(raw));
   });
   await openUnit(page, 'unit-number-dictation', 'Les nombres');
@@ -202,6 +204,27 @@ test('speak after checking replays the dictation when a check lands', async ({ p
   await checkButton(one).click();
   await expect(one.getByText('Correct', { exact: true })).toBeAttached();
   await expect.poll(() => ai.calls.tts).toBe(1);
+});
+
+test('a check stays silent with the remote opt-in off, whatever the dictation preference says', async ({
+  page,
+  ai,
+}) => {
+  await page.evaluate(() => {
+    const raw: Record<string, unknown> = JSON.parse(localStorage.getItem('relire_app_settings_v1') || '{}');
+    raw.practiceSpeakAfterCheck = true;
+    raw.practiceRemoteAutoSpeak = false;
+    localStorage.setItem('relire_app_settings_v1', JSON.stringify(raw));
+  });
+  await openUnit(page, 'unit-number-dictation', 'Les nombres');
+  const one = row(page, 'Écoutez et écrivez').first();
+  await one.getByRole('textbox').fill('cent mille');
+  await checkButton(one).click();
+  await expect(one.getByText('Correct', { exact: true })).toBeAttached();
+  // No remote request follows the check, and no clip was stored for it.
+  await page.waitForTimeout(400);
+  expect(ai.calls.tts).toBe(0);
+  expect(await audioClips(page)).toBe(0);
 });
 
 test('the Practice section saves its own slice and strict accents changes the verdict', async ({ page }) => {

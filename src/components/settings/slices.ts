@@ -3,7 +3,7 @@ import i18n from '../../i18n';
 import { normalizeBaseUrl } from '../../services/ai/baseUrl';
 import { normalizeModelId } from '../../services/ai/catalogue';
 import { getProvider } from '../../services/ai/providers';
-import { getAppSettings, saveAppSettings, type AppSettings } from '../../utils/appSettings';
+import { getAppSettings, saveAppSettings, type AppSettings, type SpeechChoice } from '../../utils/appSettings';
 
 export type SettingsSlice = 'ai' | 'practice';
 
@@ -24,6 +24,29 @@ const usedProviders = (from: AppSettings) => [from.textProvider, from.ocrProvide
 /** An empty endpoint means the provider's default; anything nonempty must be a usable address. */
 const baseUrlRefused = (url: string) => !!url.trim() && !normalizeBaseUrl(url);
 
+/** Every engine's last model and voice, the selected engine's entry being its current choice. */
+const speechChoicesOf = (from: AppSettings): Record<string, SpeechChoice> => ({
+  ...from.speechChoices,
+  [from.speechProvider]: { model: canonicalModel(from.speechModel), voice: from.speechVoice.trim() },
+});
+
+/**
+ * A remembered engine's model or voice that storage would silently replace: refused with that field's own
+ * message, like the current selection. The selected engine is checked by the rules above instead.
+ */
+function rememberedRefusal(draft: AppSettings): string | null {
+  for (const [id, choice] of Object.entries(draft.speechChoices)) {
+    if (id === draft.speechProvider) continue;
+    const provider = getProvider(id);
+    if (provider.info.speech?.device) continue;
+    if (!normalizeModelId(choice.model)) return i18n.t('aiSettings.modelNotValid');
+    const voice = choice.voice.trim();
+    if (voice && provider.speech?.acceptsVoice && !provider.speech.acceptsVoice(voice))
+      return i18n.t('aiSettings.voiceNotValid');
+  }
+  return null;
+}
+
 /** A provider with its own voice check refuses a voice it cannot take; a fixed list is its own proof. */
 const voiceRefused = (draft: AppSettings) => {
   const speech = getProvider(draft.speechProvider).speech;
@@ -37,6 +60,7 @@ export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
       settings.practiceStrictAccents,
       settings.practiceDictationSpeed,
       settings.practiceSpeakAfterCheck,
+      settings.practiceRemoteAutoSpeak,
     ]);
   const providers = [...new Set(usedProviders(settings))].sort();
   return JSON.stringify([
@@ -47,6 +71,7 @@ export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
     settings.speechProvider,
     settings.speechModel,
     settings.speechVoice,
+    speechChoicesOf(settings),
     providers.map((id) => [id, settings.apiKeys[id] ?? '']),
     providers.map((id) => [id, settings.baseUrls[id] ?? '']),
   ]);
@@ -59,6 +84,7 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
       practiceStrictAccents: from.practiceStrictAccents,
       practiceDictationSpeed: from.practiceDictationSpeed,
       practiceSpeakAfterCheck: from.practiceSpeakAfterCheck,
+      practiceRemoteAutoSpeak: from.practiceRemoteAutoSpeak,
     };
   const providers = usedProviders(from);
   return {
@@ -70,6 +96,12 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
     speechProvider: from.speechProvider,
     speechModel: canonicalModel(from.speechModel),
     speechVoice: from.speechVoice.trim(),
+    speechChoices: Object.fromEntries(
+      Object.entries(speechChoicesOf(from)).map(([id, choice]) => [
+        id,
+        { model: canonicalModel(choice.model), voice: choice.voice.trim() },
+      ]),
+    ),
     apiKeys: { ...base.apiKeys, ...Object.fromEntries(providers.map((id) => [id, from.apiKeys[id] ?? ''])) },
     baseUrls: {
       ...base.baseUrls,
@@ -88,6 +120,9 @@ export function saveSlice(draft: AppSettings, slice: SettingsSlice): AppSettings
     throw new Error(i18n.t('aiSettings.baseUrlNotValid'));
   // And for a voice the provider would refuse: storage would silently replace it with the default.
   if (slice === 'ai' && voiceRefused(draft)) throw new Error(i18n.t('aiSettings.voiceNotValid'));
+  // A remembered choice for another engine follows the same rules.
+  const remembered = slice === 'ai' ? rememberedRefusal(draft) : null;
+  if (remembered) throw new Error(remembered);
   const intended = withSlice(getAppSettings(), draft, slice);
   const next = saveAppSettings(intended);
   if (sliceOf(getAppSettings(), slice) !== sliceOf(intended, slice)) throw new Error(i18n.t('settings.notStored'));

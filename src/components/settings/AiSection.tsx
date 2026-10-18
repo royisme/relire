@@ -95,16 +95,23 @@ export function AiSection({
     onChange(next);
   };
   // Changing the provider resets only this purpose's model (and the speech voice); other purposes stay.
+  // For speech, the engine being left is remembered and the one being entered comes back with what it had,
+  // or with its defaults until the learner chooses something for it.
   const pickProvider = (id: string) => {
     const chosen = getProvider(id).info;
     if (purpose === 'speech') {
-      if (chosen.speech)
-        edit({
-          ...draft,
-          speechProvider: id,
-          speechModel: chosen.speech.defaultModel,
-          speechVoice: chosen.speech.defaultVoice,
-        });
+      if (!chosen.speech) return;
+      const remembered = normalizeModelId(draft.speechModel);
+      const entry = draft.speechChoices[id];
+      edit({
+        ...draft,
+        speechProvider: id,
+        speechModel: entry?.model ?? chosen.speech.defaultModel,
+        speechVoice: entry?.voice ?? chosen.speech.defaultVoice,
+        speechChoices: remembered
+          ? { ...draft.speechChoices, [providerId]: { model: remembered, voice: draft.speechVoice.trim() } }
+          : draft.speechChoices,
+      });
     } else if (chosen.text) {
       edit(
         purpose === 'ocr'

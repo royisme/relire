@@ -10,6 +10,12 @@ import { normalizeBaseUrl } from '../services/ai/baseUrl';
  * dictation is played). Display names live in the locale files (providers.*, models.*, voices.*).
  */
 
+/** The model and voice last used with one speech engine, so switching back to it restores them. */
+export interface SpeechChoice {
+  model: string;
+  voice: string;
+}
+
 export interface AppSettings {
   textProvider: string;
   textModel: string;
@@ -18,6 +24,9 @@ export interface AppSettings {
   speechProvider: string;
   speechModel: string;
   speechVoice: string;
+  /** Model and voice per speech engine, by provider id; the selected engine's own choice is `speechModel` /
+   * `speechVoice`, and its entry here is kept in step when the AI slice saves. */
+  speechChoices: Record<string, SpeechChoice>;
   /** API keys by provider id. Never part of a backup. */
   apiKeys: Record<string, string>;
   /** Endpoint overrides by provider id; absent means the provider's default. Part of a backup. */
@@ -28,6 +37,8 @@ export interface AppSettings {
   practiceDictationSpeed: number;
   /** Speak a dictation item again once it is checked. */
   practiceSpeakAfterCheck: boolean;
+  /** Let automatic playback synthesize remotely; off, it may only use the device voice. */
+  practiceRemoteAutoSpeak: boolean;
 }
 
 /** The playback rates the Practice section offers, as the reader's speed control does. */
@@ -58,6 +69,26 @@ function storedVoice(providerId: string, value: unknown): string | undefined {
   return provider.speech?.acceptsVoice?.(voice) ? voice : undefined;
 }
 
+/**
+ * Last model and voice per speech engine. Only a registered speech engine is kept, which bounds the map; an
+ * entry whose model storage cannot keep is dropped entirely, and a voice it cannot take falls back to the
+ * engine's default, so a bad remembered value is never stored or restored.
+ */
+function storedSpeechChoices(value: unknown): Record<string, SpeechChoice> {
+  const kept: Record<string, SpeechChoice> = {};
+  const raw = value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+  for (const [id, entry] of Object.entries(raw)) {
+    const provider = getProvider(id);
+    const speech = provider.info.speech;
+    if (provider.info.id !== id || !speech) continue;
+    const choice = (entry && typeof entry === 'object' ? entry : {}) as Partial<SpeechChoice>;
+    const model = speech.device ? '' : normalizeModelId(choice.model);
+    if (model === undefined) continue;
+    kept[id] = { model, voice: speech.device ? '' : (storedVoice(id, choice.voice) ?? speech.defaultVoice) };
+  }
+  return kept;
+}
+
 function defaults(): AppSettings {
   const text = textDefaults(DEFAULT_PROVIDER)!;
   const speech = speechDefaults(DEFAULT_PROVIDER)!;
@@ -69,11 +100,13 @@ function defaults(): AppSettings {
     speechProvider: DEFAULT_PROVIDER,
     speechModel: speech.defaultModel,
     speechVoice: speech.defaultVoice,
+    speechChoices: {},
     apiKeys: {},
     baseUrls: {},
     practiceStrictAccents: false,
     practiceDictationSpeed: DEFAULT_DICTATION_SPEED,
     practiceSpeakAfterCheck: false,
+    practiceRemoteAutoSpeak: false,
   };
 }
 
@@ -108,11 +141,13 @@ function normalize(value: unknown): AppSettings {
     speechProvider: speechProvider.id,
     speechModel: deviceSpeech ? '' : (normalizeModelId(raw.speechModel) ?? speech.defaultModel),
     speechVoice: deviceSpeech ? '' : (storedVoice(speechProvider.id, raw.speechVoice) ?? speech.defaultVoice),
+    speechChoices: storedSpeechChoices(raw.speechChoices),
     apiKeys,
     baseUrls,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),
     practiceDictationSpeed: speedOr(raw.practiceDictationSpeed),
     practiceSpeakAfterCheck: boolOr(raw.practiceSpeakAfterCheck, false),
+    practiceRemoteAutoSpeak: boolOr(raw.practiceRemoteAutoSpeak, false),
   };
 }
 
@@ -155,3 +190,12 @@ export const hasSpeechKey = (settings: AppSettings = getAppSettings()) => keyRea
 
 /** How the sheet compares answers: strict accents from the Practice settings. */
 export const practiceGrading = (): GradingOptions => ({ strictAccents: getAppSettings().practiceStrictAccents });
+
+/**
+ * Whether something may speak by itself (a dictation item after its check). Automatic playback may synthesize
+ * remotely only after the learner's explicit opt-in, because it spends their provider's quota; the device voice
+ * costs nothing and needs no consent.
+ */
+export const maySpeakAfterCheck = (settings: AppSettings = getAppSettings()) =>
+  settings.practiceSpeakAfterCheck &&
+  (settings.practiceRemoteAutoSpeak || getProvider(settings.speechProvider).info.speech?.device === true);
