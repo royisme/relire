@@ -35,10 +35,9 @@ test('an exercises import saves one batch without any article and leaves unrelat
   expect(await d.count('attempts')).toBe(0);
 });
 
-test('a prepared import keeps the set id, the draft title, the chosen level and an empty source text', async () => {
+test('a prepared import keeps the set id, the draft title, the chosen level and creation time', async () => {
   const draft = {
     ...draftFixture,
-    sourceText: '',
     units: draftFixture.units.map((unit) => ({
       ...unit,
       items: [{ ...unit.items[0], expectedAnswer: ITEMS.WORD_TRANSFORM.expectedAnswer }],
@@ -53,8 +52,12 @@ test('a prepared import keeps the set id, the draft title, the chosen level and 
   await saveUnits(prepared.units);
   const d = await db();
   expect(await d.getAll('units')).toEqual(prepared.units);
-  expect(prepared.units[0]).toMatchObject({ setId: 'set-import', setTitle: 'Mon document', level: 'C1' });
-  expect(prepared.units[0].importSource?.extractedText).toBe('');
+  expect(prepared.units[0]).toMatchObject({
+    setId: 'set-import',
+    setTitle: 'Mon document',
+    level: 'C1',
+    createdAt: 1_700_000_000_000,
+  });
 });
 
 test('rejects an empty unit, a duplicate id and a mixed batch before writing', async () => {

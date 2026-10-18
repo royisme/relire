@@ -22,24 +22,17 @@ export function DraftReview({
   const editUnit = (index: number, update: Partial<ImportDraft['units'][number]>) =>
     onChange({ ...draft, units: draft.units.map((unit, i) => (i === index ? { ...unit, ...update } : unit)) });
   return (
-    <section className="space-y-4 min-w-0" aria-label={t('importFlow.review')}>
-      <h2 className="font-serif text-xl font-semibold">{t('importFlow.review')}</h2>
-      <p className="text-sm text-ink-700">{t('importFlow.reviewHelp')}</p>
+    <section className="space-y-4 min-w-0" aria-label={t('importExercises.review')}>
+      <h2 className="font-serif text-xl font-semibold">{t('importExercises.review')}</h2>
+      <p className="text-sm text-ink-700">{t('importExercises.reviewHelp')}</p>
       <TextField
-        label={t('importFlow.title')}
+        label={t('importExercises.title')}
         value={draft.materialTitle ?? ''}
         onChange={(materialTitle) => onChange({ ...draft, materialTitle })}
       />
-      <TextField
-        label={t('importFlow.sourceText')}
-        multiline
-        maxLength={80000}
-        value={draft.sourceText}
-        onChange={(sourceText) => onChange({ ...draft, sourceText })}
-      />
       {draft.warnings.map((warning, i) => (
         <p key={i} className="text-sm text-ink-700 break-words">
-          {t('importFlow.warning', { msg: warning })}
+          {t('importExercises.warning', { msg: warning })}
         </p>
       ))}
       {draft.units.map((unit, ui) => (
@@ -50,21 +43,21 @@ export function DraftReview({
               checked={selected.has(unit.id)}
               onChange={(e) => onSelect(unit.id, e.target.checked)}
             />
-            {t('importFlow.includeUnit', { title: unit.title })}
+            {t('importExercises.includeUnit', { title: unit.title })}
           </label>
           <TextField
-            label={t('importFlow.unitTitle')}
+            label={t('importExercises.unitTitle')}
             value={unit.title}
             onChange={(title) => editUnit(ui, { title })}
           />
           <TextField
-            label={t('importFlow.instruction')}
+            label={t('importExercises.instruction')}
             multiline
             value={unit.instruction}
             onChange={(instruction) => editUnit(ui, { instruction })}
           />
           <TextField
-            label={t('importFlow.passage')}
+            label={t('importExercises.passage')}
             multiline
             value={unit.readingPassage?.content ?? ''}
             onChange={(content) =>

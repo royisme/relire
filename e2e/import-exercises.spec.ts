@@ -1,8 +1,8 @@
-/** Import workspace with explicit per-source AI answers; no real provider calls. */
+/** Exercise import (Practice) with explicit per-source AI answers; no real provider calls. */
 import { test, expect, overflowing } from './fixtures';
 import { draftFixture } from '../tests/fixtures/importDraft';
 import { ITEMS } from '../tests/fixtures/units';
-import { materialPdf } from './materialPdf';
+import { materialPdf, tinyPng } from './materialPdf';
 const draft = (): import('../src/services/exercises/importDraft').ImportDraft => ({
   ...draftFixture,
   units: draftFixture.units.map((unit) => ({
@@ -10,16 +10,16 @@ const draft = (): import('../src/services/exercises/importDraft').ImportDraft =>
     items: [{ ...unit.items[0], expectedAnswer: ITEMS.WORD_TRANSFORM.expectedAnswer }],
   })),
 });
+const WORKSHEET = 'Exercice 1. Complétez avec être.';
 async function enter(page: import('@playwright/test').Page) {
-  await page.goto('/#/read');
-  await page.getByRole('button', { name: 'Add article', exact: true }).click();
-  await page.getByRole('button', { name: 'Import from image, PDF or text' }).click();
-  await expect(page).toHaveURL(/#\/import$/);
+  await page.goto('/#/practice');
+  await page.getByRole('main').getByRole('link', { name: 'Import exercises', exact: true }).click();
+  await expect(page).toHaveURL(/#\/import\/exercises$/);
 }
 const chooseLevel = (page: import('@playwright/test').Page, level = 'B2') =>
-  page.getByLabel('Level (exercises)', { exact: true }).selectOption(level);
+  page.getByLabel('Level of these exercises', { exact: true }).selectOption(level);
 async function extractText(page: import('@playwright/test').Page) {
-  await page.getByLabel('Text to send').fill(draftFixture.sourceText);
+  await page.getByLabel('Text to send').fill(WORKSHEET);
   await expect(page.getByText('Recipient: Google Gemini · gemini-2.5-flash')).toBeVisible();
   await page.getByRole('button', { name: 'Send and extract' }).click();
   await expect(page.getByRole('heading', { name: 'Review and correct' })).toBeVisible();
@@ -30,6 +30,8 @@ const savedRows = (page: import('@playwright/test').Page) =>
     const d = await db();
     return { articles: await d.getAll('articles'), units: await d.getAll('units') };
   });
+
+const unitUrl = /#\/practice\/unit-[0-9a-f-]+$/;
 
 for (const phone of [false, true]) {
   test(`text review, blocker exclusion, required level and a durable exercises batch ${phone ? '@phone' : ''}`, async ({
@@ -42,7 +44,9 @@ for (const phone of [false, true]) {
     await extractText(page);
     await expect(page.locator('main')).toBeVisible();
     expect(await overflowing(page.locator('body'))).toEqual([]);
-    await page.getByLabel('Material title', { exact: true }).fill('Imported workbook');
+    // Saving as an article is not offered here: this page makes exercises only.
+    await expect(page.getByLabel('Save as')).toHaveCount(0);
+    await page.getByLabel('Batch title', { exact: true }).fill('Imported workbook');
     await page.locator('summary').filter({ hasText: ITEMS.WORD_TRANSFORM.prompt }).click();
     await page.getByLabel('Reference answer', { exact: true }).fill('française');
     await expect(page.getByText('Edited by you')).toBeVisible();
@@ -50,62 +54,69 @@ for (const phone of [false, true]) {
     await page.getByRole('button', { name: 'Confirm and save' }).click();
     // The level is chosen once per import and is required; nothing is saved without it.
     await expect(page.getByRole('status')).toContainText('Choose the level');
-    await expect(page).toHaveURL(/#\/import$/);
+    await expect(page).toHaveURL(/#\/import\/exercises$/);
     expect((await savedRows(page)).units).toEqual([]);
+    await expect(page.getByLabel('Level of these exercises', { exact: true })).toHaveValue('');
     await chooseLevel(page, 'B2');
     await page.getByLabel('I have reviewed').check();
     await page.getByRole('button', { name: 'Confirm and save' }).click();
-    await expect(page).toHaveURL(/#\/practice$/);
+    // The first unit of the new batch opens.
+    await expect(page).toHaveURL(unitUrl);
     const saved = await savedRows(page);
     expect(saved.articles.filter((row) => row.title === 'Imported workbook')).toEqual([]);
     expect(saved.units).toHaveLength(1);
     expect(saved.units[0]).toMatchObject({ setTitle: 'Imported workbook', level: 'B2' });
     expect(saved.units[0]).not.toHaveProperty('materialId');
+    await expect(page).toHaveURL(new RegExp(`#/practice/${saved.units[0].id}$`));
+    await page.goto('/#/practice');
     await expect(page.getByRole('main').getByRole('heading', { name: /^Imported workbook/ })).toContainText('B2');
   });
 }
 
-test('saving as an article stores the article and no unit', async ({ page, ai }) => {
-  ai.answer({ extract: draft() });
+test('one batch: every unit shares the set id, the level and the creation time', async ({ page, ai }) => {
+  const two = draft();
+  two.units.push({ ...two.units[0], id: 'u2', unitNumber: 2, title: 'Deuxième unité' });
+  two.units[0].unitNumber = 2;
+  two.units[1].unitNumber = 1;
+  ai.answer({ extract: two });
   await enter(page);
   await extractText(page);
-  await page.getByLabel('Material title', { exact: true }).fill('Imported article');
-  await page.getByLabel('Save as', { exact: true }).selectOption('article');
+  await chooseLevel(page, 'A2');
+  const before = Date.now();
   await page.getByLabel('I have reviewed').check();
   await page.getByRole('button', { name: 'Confirm and save' }).click();
-  await expect(page).toHaveURL(/#\/read\/material-/);
-  const saved = await savedRows(page);
-  expect(saved.articles.filter((row) => row.title === 'Imported article')).toHaveLength(1);
-  expect(saved.units).toEqual([]);
+  await expect(page).toHaveURL(unitUrl);
+  const { units } = await savedRows(page);
+  expect(units).toHaveLength(2);
+  expect(new Set(units.map((unit) => unit.setId)).size).toBe(1);
+  expect(new Set(units.map((unit) => unit.level))).toEqual(new Set(['A2']));
+  expect(new Set(units.map((unit) => unit.createdAt)).size).toBe(1);
+  expect(units[0].createdAt).toBeGreaterThanOrEqual(before);
+  // It opens on the batch's first unit (the lowest unit number).
+  const first = units.find((unit) => unit.unitNumber === 1)!;
+  await expect(page).toHaveURL(new RegExp(`#/practice/${first.id}$`));
+  await expect(page.getByRole('heading', { name: 'Deuxième unité' })).toBeVisible();
 });
 
 for (const phone of [false, true]) {
-  test(`empty source text blocks an article but saves exercises ${phone ? '@phone' : ''}`, async ({ page, ai }) => {
-    ai.answer({ extract: { ...draft(), sourceText: '' } });
+  test(`a title is required; the batch saves once it has one ${phone ? '@phone' : ''}`, async ({ page, ai }) => {
+    ai.answer({ extract: { ...draft(), materialTitle: undefined } });
     await enter(page);
     await extractText(page);
-    await page.getByLabel('Save as', { exact: true }).selectOption('article');
-    await page.getByLabel('I have reviewed').check();
-    await page.getByRole('button', { name: 'Confirm and save' }).click();
-    await expect(page.getByRole('status')).toContainText('source text');
-    await expect(page).toHaveURL(/#\/import$/);
-    const before = await savedRows(page);
-    expect(before.articles.filter((row) => row.id.startsWith('material-'))).toEqual([]);
-    expect(before.units).toEqual([]);
-    await page.getByLabel('Save as', { exact: true }).selectOption('exercises');
     await chooseLevel(page, 'A2');
     await page.getByLabel('I have reviewed').check();
     expect(await overflowing(page.locator('body'))).toEqual([]);
     await page.getByRole('button', { name: 'Confirm and save' }).click();
-    await expect(page).toHaveURL(/#\/practice$/);
+    await expect(page.getByRole('status')).toContainText('Enter a title');
+    await expect(page).toHaveURL(/#\/import\/exercises$/);
+    expect((await savedRows(page)).units).toEqual([]);
+    await page.getByLabel('Batch title', { exact: true }).fill('Mon lot');
+    await page.getByLabel('I have reviewed').check();
+    await page.getByRole('button', { name: 'Confirm and save' }).click();
+    await expect(page).toHaveURL(unitUrl);
     const saved = await savedRows(page);
-    expect(saved.articles).toHaveLength(before.articles.length);
     expect(saved.units).toHaveLength(1);
-    expect(saved.units[0]).toMatchObject({ setTitle: 'Mon document', level: 'A2' });
-    expect(saved.units[0].importSource?.extractedText).toBe('');
-    await page.reload();
-    await page.locator(`main a[href="#/practice/${saved.units[0].id}"]`).click();
-    await expect(page.getByRole('heading', { name: saved.units[0].title })).toBeVisible();
+    expect(saved.units[0]).toMatchObject({ setTitle: 'Mon lot', level: 'A2' });
     await page.reload();
     await expect(page.getByRole('heading', { name: saved.units[0].title })).toBeVisible();
   });
@@ -145,13 +156,13 @@ test('failed atomic save keeps draft and guard, retry keeps prepared identities'
     hold();
   });
   await page.getByRole('button', { name: 'Confirm and save' }).click();
-  await expect(page.getByLabel('Material title', { exact: true })).toBeDisabled();
+  await expect(page.getByLabel('Batch title', { exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Saving…', exact: true })).toBeDisabled();
   await page.getByRole('link', { name: 'Settings', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Discard', exact: true })).toBeDisabled();
   await page.evaluate(() => sessionStorage.setItem('releaseImportWrite', '1'));
-  await expect(page).toHaveURL(/#\/practice$/);
+  await expect(page).toHaveURL(unitUrl);
 });
 
 test('image and PDF selection, cancellation ignores late extraction', async ({ page, ai }) => {
@@ -162,14 +173,7 @@ test('image and PDF selection, cancellation ignores late extraction', async ({ p
     },
   });
   await enter(page);
-  await page.getByLabel('Choose an image or PDF').setInputFiles({
-    name: 'tiny.png',
-    mimeType: 'image/png',
-    buffer: Buffer.from(
-      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=',
-      'base64',
-    ),
-  });
+  await page.getByLabel('Choose an image or PDF').setInputFiles(tinyPng);
   await expect(page.getByText(/tiny.png · 1 page/)).toBeVisible();
   await page.getByRole('button', { name: 'Send and extract' }).click();
   await expect.poll(() => ai.calls.extract).toBe(1);
@@ -182,9 +186,11 @@ test('image and PDF selection, cancellation ignores late extraction', async ({ p
   await expect(page.getByRole('heading', { name: 'Review and correct' })).not.toBeVisible();
   await page.getByRole('button', { name: 'Send and extract' }).click();
   await expect(page.getByRole('heading', { name: 'Review and correct' })).toBeVisible();
+  // This page never reads an article: no transcription request was made.
+  expect(ai.calls.transcribe).toBe(0);
 });
 
-test('blockers cannot partially save; explicit exclusion and exercises/article destinations', async ({ page, ai }) => {
+test('blockers cannot partially save; explicit exclusion lets the rest through', async ({ page, ai }) => {
   const blocked = draft();
   blocked.units[0].items.push({
     ...blocked.units[0].items[0],
@@ -195,12 +201,11 @@ test('blockers cannot partially save; explicit exclusion and exercises/article d
   ai.answer({ extract: blocked });
   await enter(page);
   await extractText(page);
-  await page.getByLabel('Save as', { exact: true }).selectOption('exercises');
   await chooseLevel(page, 'C1');
   await page.getByLabel('I have reviewed').check();
   await page.getByRole('button', { name: 'Confirm and save' }).click();
   await expect(page.getByRole('status')).toContainText('resolve or exclude');
-  await expect(page).toHaveURL(/#\/import$/);
+  await expect(page).toHaveURL(/#\/import\/exercises$/);
   await page
     .locator('details')
     .filter({ has: page.locator('summary', { hasText: 'Question illisible' }) })
@@ -209,15 +214,21 @@ test('blockers cannot partially save; explicit exclusion and exercises/article d
     .click();
   await page.getByLabel('I have reviewed').check();
   await page.getByRole('button', { name: 'Confirm and save' }).click();
-  await expect(page).toHaveURL(/#\/practice$/);
+  await expect(page).toHaveURL(unitUrl);
   expect((await savedRows(page)).units).toMatchObject([{ setTitle: 'Mon document', level: 'C1' }]);
-  await page.goto('/#/import');
+});
+
+test('the mode decides the request, and a draft with no unit cannot be saved', async ({ page, ai }) => {
   ai.answer({ extract: { ...draftFixture, units: [] } });
+  await enter(page);
+  await page.getByLabel('Extraction mode').selectOption('extract');
   await extractText(page);
-  await page.getByLabel('Save as', { exact: true }).selectOption('article');
+  expect(ai.prompts.extract[0]).toContain('Extract only.');
+  await chooseLevel(page, 'B1');
   await page.getByLabel('I have reviewed').check();
   await page.getByRole('button', { name: 'Confirm and save' }).click();
-  await expect(page).toHaveURL(/#\/read\/material-/);
+  await expect(page.getByRole('status')).toContainText('at least one playable exercise unit');
+  expect((await savedRows(page)).units).toEqual([]);
 });
 
 test('consent pins model across asynchronous PDF rendering; unsupported images make no request', async ({
@@ -255,7 +266,7 @@ test('consent pins model across asynchronous PDF rendering; unsupported images m
     )) as typeof import('../src/utils/appSettings');
     saveAppSettings({ ocrModel: 'gemini-3.8-flash-lite-tts' });
     const { navigate } = (await import('/src/hooks/useRoute.ts' as string)) as typeof import('../src/hooks/useRoute');
-    navigate({ name: 'import' });
+    navigate({ name: 'importExercises' });
   });
   await page
     .getByLabel('Choose an image or PDF')

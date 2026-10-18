@@ -1,6 +1,7 @@
 /**
  * The app's places as one tree, drawn by the sidebar (expanded or as a rail) and by the phone drawer:
- * Read, My study (Words, Shadowing, Mistakes), Practice (with the units of the open unit's batch) and Progress at the top;
+ * Read (with its article import while in Read), My study (Words, Shadowing, Mistakes), Practice (with its exercise import
+ * and the units of the open unit's batch) and Progress at the top;
  * install, Settings (with its sections while on a settings page) and About at the bottom. Owns which row is current,
  * and the counts on Words (due today) and Mistakes (still unresolved); navigation itself is `Link`.
  */
@@ -41,14 +42,14 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
           icon={BookOpen}
           label={t('nav.reader')}
           // The library and the reader are both "Read"; only the library row is a page of its own.
-          current={area === 'read' ? (route.name === 'import' && !rail ? 'area' : 'page') : undefined}
+          current={area === 'read' ? (route.name === 'importArticle' && !rail ? 'area' : 'page') : undefined}
         />
         {!rail && area === 'read' && (
           <NavItem
             {...item}
-            to={{ name: 'import' }}
-            label={t('importFlow.heading')}
-            current={route.name === 'import' ? 'page' : undefined}
+            to={{ name: 'importArticle' }}
+            label={t('nav.importArticle')}
+            current={route.name === 'importArticle' ? 'page' : undefined}
           />
         )}
         <NavItem
@@ -78,10 +79,22 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
           to={{ name: 'practice' }}
           icon={Dumbbell}
           label={t('nav.practice')}
-          // The list is a page of its own; an open unit makes Practice its parent.
-          current={route.name === 'unit' && !rail ? 'area' : areaState('practice', false)}
+          // The list is a page of its own; an open unit or the import makes Practice its parent.
+          current={
+            (route.name === 'unit' || route.name === 'importExercises') && !rail ? 'area' : areaState('practice', false)
+          }
         />
-        {!rail && area === 'practice' && <PracticeSubnav route={route} onNavigate={onNavigate} />}
+        {!rail && area === 'practice' && (
+          <>
+            <NavItem
+              {...item}
+              to={{ name: 'importExercises' }}
+              label={t('nav.importExercises')}
+              current={route.name === 'importExercises' ? 'page' : undefined}
+            />
+            <PracticeSubnav route={route} onNavigate={onNavigate} />
+          </>
+        )}
         <NavItem
           {...item}
           to={{ name: 'progress' }}

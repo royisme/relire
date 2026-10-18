@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import { Button } from './ui/button';
-import { Article } from '../types';
+import { ARTICLE_LEVELS, Article } from '../types';
 import { formatLevel } from '../utils/i18nHelpers';
 
 interface ArticleEditorDialogProps {
@@ -13,7 +13,6 @@ interface ArticleEditorDialogProps {
   onSave: (article: Article) => Promise<void>;
 }
 
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const CATEGORIES = ['Littérature', 'Actualités', 'Culture', 'Science', 'Société'];
 
 const field =
@@ -89,7 +88,7 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
               value={level}
               onChange={(e) => setLevel(e.target.value)}
             >
-              {LEVELS.map((l) => (
+              {ARTICLE_LEVELS.map((l) => (
                 <option key={l} value={l}>
                   {formatLevel(l, i18n.language)}
                 </option>

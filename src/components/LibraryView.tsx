@@ -265,15 +265,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 onAdd();
               }}
             >
-              {t('importFlow.manual')}
+              {t('library.addManual')}
             </Button>
             <Button
               onClick={() => {
                 setAdding(false);
-                navigate({ name: 'import' });
+                navigate({ name: 'importArticle' });
               }}
             >
-              {t('importFlow.entry')}
+              {t('library.addImport')}
             </Button>
           </div>
         </Dialog>

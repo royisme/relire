@@ -12,6 +12,8 @@ import prosodyEn from './defaults/prosody.en.txt?raw';
 import prosodyZh from './defaults/prosody.zh.txt?raw';
 import extractEn from './defaults/extract.en.txt?raw';
 import extractZh from './defaults/extract.zh.txt?raw';
+import transcribeEn from './defaults/transcribe.en.txt?raw';
+import transcribeZh from './defaults/transcribe.zh.txt?raw';
 import hintEn from './defaults/hint.en.txt?raw';
 import hintZh from './defaults/hint.zh.txt?raw';
 import explainEn from './defaults/explain.en.txt?raw';
@@ -31,6 +33,7 @@ export type PromptId =
   | 'pronunciationText'
   | 'prosody'
   | 'extract'
+  | 'transcribe'
   | 'hint'
   | 'explain'
   | 'grade'
@@ -101,6 +104,12 @@ export const PROMPTS: PromptDefinition[] = [
       rawText: 'Exercice 1. Complétez avec être.\n1. Je [___] étudiante.\n2. Tu [___] polonais.',
       customTitle: 'Unité 1',
     },
+  },
+  {
+    id: 'transcribe',
+    variables: [],
+    defaults: { en: transcribeEn, zh: transcribeZh },
+    sample: {},
   },
   {
     id: 'hint',

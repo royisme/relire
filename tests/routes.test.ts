@@ -14,6 +14,18 @@ test('practice addresses: the list and one unit; a stray query is dropped', () =
   expect(areaOf({ name: 'unit', unitId: 'x' })).toBe('practice');
 });
 
+test('the two import pages have their own addresses and areas; the bare import address is not a place', () => {
+  expect(parseRoute('#/import/article')).toEqual({ route: { name: 'importArticle' }, canonical: null });
+  expect(parseRoute('#/import/exercises')).toEqual({ route: { name: 'importExercises' }, canonical: null });
+  expect(parseRoute('#/import/exercises/').canonical).toBe('#/import/exercises');
+  expect(areaOf({ name: 'importArticle' })).toBe('read');
+  expect(areaOf({ name: 'importExercises' })).toBe('practice');
+  for (const hash of ['#/import', '#/import/', '#/import/other', '#/import/article/x'])
+    expect(parseRoute(hash).route.name).toBe('notFound');
+  // The reader still owns every article id, including `import`.
+  expect(parseRoute('#/read/import').route).toEqual({ name: 'reader', articleId: 'import' });
+});
+
 test('ids with odd characters survive the round trip', () => {
   for (const id of ['a b', 'é/ü?&=', 'x#y', '100%']) {
     expect(roundTrip({ name: 'unit', unitId: id }).route).toEqual({ name: 'unit', unitId: id });
@@ -87,9 +99,15 @@ test('AI purpose routes are independent and old AI routes are not aliases', () =
 });
 
 test('a missing-key request keeps its purpose and where to return', () => {
-  const route: Route = { name: 'settings', section: 'ai', purpose: 'ocr', focusKey: true, returnTo: '#/import' };
+  const route: Route = {
+    name: 'settings',
+    section: 'ai',
+    purpose: 'ocr',
+    focusKey: true,
+    returnTo: '#/import/article',
+  };
   expect(roundTrip(route)).toEqual({ route, canonical: null });
-  expect(routeHref(route)).toBe('#/settings/ai/ocr?key=1&return=%23%2Fimport');
+  expect(routeHref(route)).toBe('#/settings/ai/ocr?key=1&return=%23%2Fimport%2Farticle');
   expect(parseRoute('#/settings/ai/text?key=1').route).toEqual({
     name: 'settings',
     section: 'ai',
@@ -97,7 +115,7 @@ test('a missing-key request keeps its purpose and where to return', () => {
     focusKey: true,
   });
   // A return address outside the app, or one that would nest another return, is dropped.
-  for (const query of ['return=https%3A%2F%2Fexample.com', 'return=%23%2Fread%3Freturn%3D%23%2Fimport']) {
+  for (const query of ['return=https%3A%2F%2Fexample.com', 'return=%23%2Fread%3Freturn%3D%23%2Fimport%2Farticle']) {
     expect(parseRoute(`#/settings/ai/speech?key=1&${query}`).route).toEqual({
       name: 'settings',
       section: 'ai',

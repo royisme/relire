@@ -311,7 +311,7 @@ test('the import link names the OCR purpose, shows its own model and keeps the d
     // A text model that cannot read images must not change what the import advertises.
     saveAppSettings({ textModel: 'gemini-3.8-flash', ocrModel: 'gemini-2.5-pro' });
   });
-  await page.goto('/#/import');
+  await page.goto('/#/import/article');
   await page
     .getByLabel('Choose an image or PDF')
     .setInputFiles({ name: 'pages.pdf', mimeType: 'application/pdf', buffer: Buffer.from(materialPdf()) });
@@ -330,15 +330,15 @@ test('the import link names the OCR purpose, shows its own model and keeps the d
   await link.click();
   await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toBeVisible();
   await page.getByRole('button', { name: 'Keep editing' }).click();
-  await expect(page).toHaveURL(/#\/import$/);
+  await expect(page).toHaveURL(/#\/import\/article$/);
   await expect(page.getByText('Recipient: Google Gemini · gemini-2.5-pro')).toBeVisible();
 
   await link.click();
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/settings\/ai\/ocr\?key=1&return=%23%2Fimport$/);
+  await expect(page).toHaveURL(/#\/settings\/ai\/ocr\?key=1&return=%23%2Fimport%2Farticle$/);
   await expect(keyField(page)).toBeFocused();
   await page.getByRole('button', { name: 'Go back to where you were' }).click();
-  await expect(page).toHaveURL(/#\/import$/);
+  await expect(page).toHaveURL(/#\/import\/article$/);
 });
 
 test('a purpose switch does not pull the focus back to the key', async ({ page, ai }) => {

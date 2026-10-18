@@ -3,7 +3,8 @@
  * (history, events) lives in hooks/useRoute.ts. There is no router dependency.
  *
  *   #/read                   library
- *   #/import                 material import workspace
+ *   #/import/article         import an article from an image, a PDF or pasted text (Read)
+ *   #/import/exercises       import exercises from a worksheet (Practice)
  *   #/read/:articleId        material reader
  *   #/passage/:unitId        a unit's reading passage in the same Reader
  *   Reader routes accept ?sentence=… for durable shadowing-log focus
@@ -29,7 +30,8 @@ export type StudyTab = (typeof STUDY_TABS)[number];
 
 export type Route =
   | { name: 'library' }
-  | { name: 'import' }
+  | { name: 'importArticle' }
+  | { name: 'importExercises' }
   | { name: 'reader'; articleId: string; sentence?: string }
   | { name: 'passage'; unitId: string; sentence?: string }
   | { name: 'study'; tab: StudyTab }
@@ -60,8 +62,10 @@ export function routeHref(route: Route): string {
     case 'library':
     case 'notFound':
       return '#/read';
-    case 'import':
-      return '#/import';
+    case 'importArticle':
+      return '#/import/article';
+    case 'importExercises':
+      return '#/import/exercises';
     case 'reader':
       return `#/read/${encodeURIComponent(route.articleId)}${sentenceQuery(route.sentence)}`;
     case 'passage':
@@ -122,7 +126,8 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
     };
   } else if (!area) route = LIBRARY;
   else if (extra.length || parts.some((p) => p === '')) route = { name: 'notFound' };
-  else if (area === 'import' && sub === undefined) route = { name: 'import' };
+  else if (area === 'import' && sub === 'article') route = { name: 'importArticle' };
+  else if (area === 'import' && sub === 'exercises') route = { name: 'importExercises' };
   else if (area === 'read' && sub === undefined) route = LIBRARY;
   else if (area === 'read') {
     try {
@@ -156,7 +161,7 @@ export type Area = 'read' | 'study' | 'practice' | 'progress' | 'settings' | 'ab
 export function areaOf(route: Route): Area | null {
   switch (route.name) {
     case 'library':
-    case 'import':
+    case 'importArticle':
     case 'reader':
     case 'passage':
       return 'read';
@@ -166,6 +171,7 @@ export function areaOf(route: Route): Area | null {
     case 'about':
       return route.name;
     case 'practice':
+    case 'importExercises':
     case 'unit':
       return 'practice';
     case 'notFound':

@@ -1,23 +1,39 @@
-/** Local material ownership and cancellable extraction; never saves drafts or follows a missing-key redirect. */
+/**
+ * Local material ownership and one cancellable analysis run for an import page; the page supplies what the run
+ * does with the text and images (extract exercises, or read an article). Never saves drafts or follows a
+ * missing-key redirect.
+ */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openMaterial, parsePageSelection, type ImportMaterial } from '../services/importMaterial';
-import { extractMaterial, MissingApiKeyError } from '../services/api';
+import { MissingApiKeyError } from '../services/api';
 import { getAiAccess } from '../services/ai/access';
-import type { ImportDraft, ImportMode, ImportSource } from '../services/exercises/importDraft';
+import type { AiAccess, ImageInput } from '../services/ai/types';
+import type { ImportSource } from '../services/exercises/importDraft';
 
-export function useImportSource() {
+/** What a page's run gets: the pasted text, the rendered pages when a file was chosen, and the pinned access. */
+export interface ImportRun {
+  text: string;
+  images?: ImageInput[];
+  signal: AbortSignal;
+  access: AiAccess;
+}
+
+/**
+ * `pastedTextUsesAi` says whether pasted text goes to the text AI (exercise import) or is used as it is
+ * (article import); it decides which selection the consent panel shows when no file is chosen.
+ */
+export function useImportSource<R>(run: (input: ImportRun) => Promise<R>, pastedTextUsesAi: boolean) {
   const { t } = useTranslation();
   const [text, setText] = useState('');
   const [material, setMaterial] = useState<ImportMaterial | null>(null);
   const [pages, setPages] = useState('1');
-  const [mode, setMode] = useState<ImportMode>('complete');
   const [phase, setPhase] = useState<'idle' | 'opening' | 'extracting'>('idle');
   const [error, setError] = useState('');
-  const [result, setResult] = useState<{ draft: ImportDraft; source: ImportSource; mode: ImportMode } | null>(null);
+  const [result, setResult] = useState<{ source: ImportSource; output: R } | null>(null);
   // Consent pins the settings including the key in memory, even if another tab changes settings while pages render.
   const [access] = useState(() => getAiAccess());
-  const purpose = material ? 'ocr' : 'text';
+  const purpose: 'ocr' | 'text' = material || !pastedTextUsesAi ? 'ocr' : 'text';
   const model = access.selection(purpose);
   const lifetime = useRef<AbortController | null>(null);
   const request = useRef<AbortController | null>(null);
@@ -73,6 +89,12 @@ export function useImportSource() {
       }
     }
   }
+  function clearMaterial() {
+    dispose();
+    setMaterial(null);
+    setResult(null);
+    setError('');
+  }
   let selectedPages: number[] = [];
   let pageError = '';
   if (material) {
@@ -97,8 +119,8 @@ export function useImportSource() {
     try {
       const images = material ? await material.render(selectedPages, controller.signal) : undefined;
       controller.signal.throwIfAborted();
-      const draft = await extractMaterial({ mode, text, images, signal: controller.signal }, access);
-      if (version === revision.current && !controller.signal.aborted) setResult({ draft, source, mode });
+      const output = await run({ text, images, signal: controller.signal, access });
+      if (version === revision.current && !controller.signal.aborted) setResult({ source, output });
     } catch (err) {
       if (version === revision.current && !controller.signal.aborted)
         setError(
@@ -119,8 +141,6 @@ export function useImportSource() {
     material,
     pages,
     setPages,
-    mode,
-    setMode,
     phase,
     error,
     result,
@@ -133,12 +153,11 @@ export function useImportSource() {
     pageError,
     unsupported,
     analyze,
+    /** Drops the chosen file and keeps the pasted text. */
+    clearMaterial,
     reset: () => {
-      dispose();
+      clearMaterial();
       setText('');
-      setMaterial(null);
-      setResult(null);
-      setError('');
     },
   };
 }

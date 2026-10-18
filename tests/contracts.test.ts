@@ -197,7 +197,6 @@ test('answerSource and importSource round-trip; unknown fields are stripped', ()
     name: 'a.pdf',
     pages: [1, 2],
     mode: 'complete',
-    extractedText: 'texte',
   };
   const unit = ExerciseUnitSchema.parse({
     ...base,

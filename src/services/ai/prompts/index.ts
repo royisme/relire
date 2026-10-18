@@ -13,6 +13,7 @@ import {
   hintJsonSchema,
   importDraftJsonSchema,
   openGradeJsonSchema,
+  transcriptionJsonSchema,
 } from '../../exercises/jsonSchema';
 
 /**
@@ -121,6 +122,22 @@ export function extractRequest(input: ExtractInput, lang: Lang): JsonRequest {
     }),
     jsonSchema: importDraftJsonSchema(),
     images,
+    signal: input.signal,
+    // The learner is shown which model reads their pages; it must be that one, once.
+    singleAttempt: true,
+  };
+}
+
+export interface TranscribeInput {
+  images: ImageInput[];
+  signal?: AbortSignal;
+}
+
+export function transcribeRequest(input: TranscribeInput, lang: Lang): JsonRequest {
+  return {
+    prompt: render('transcribe', lang, {}),
+    jsonSchema: transcriptionJsonSchema(),
+    images: input.images,
     signal: input.signal,
     // The learner is shown which model reads their pages; it must be that one, once.
     singleAttempt: true,

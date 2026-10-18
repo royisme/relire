@@ -17,6 +17,7 @@ import {
 type Task =
   | 'adaptive'
   | 'extract'
+  | 'transcribe'
   | 'word'
   | 'sentence'
   | 'pronunciation'
@@ -51,6 +52,7 @@ const noCatalogAnswer = (task: Task, about: string): never => {
 export const defaultAnswers: Record<Task, Answer> = {
   adaptive: () => noCatalogAnswer('adaptive', 'these targets'),
   extract: () => noCatalogAnswer('extract', 'this source'),
+  transcribe: () => noCatalogAnswer('transcribe', 'these pages'),
   word: {
     word: 'chose',
     lemma: 'chose',
@@ -119,6 +121,8 @@ function taskOf(body: string): Task {
   if (/French test curriculum designer|法语.*课程设计/.test(body)) return 'adaptive';
   if (/Turn the French workbook material into an exercise draft|请把下面的法语练习材料整理成一份练习草稿/.test(body))
     return 'extract';
+  if (/Transcribe the attached images into one French article|请把附图转录成一篇法语文章/.test(body))
+    return 'transcribe';
   if (/task: prosody|任务：prosody/i.test(body)) return 'prosody';
   if (/phonetics (professor|coach)|语音学教授/i.test(body)) return 'pronunciation';
   if (/Create practice from an article that a learner is reading|根据学习者正在阅读的一篇法语文章/.test(body))
@@ -153,6 +157,7 @@ export const test = base.extend<{ ai: MockAi }>({
       calls: {
         adaptive: 0,
         extract: 0,
+        transcribe: 0,
         tts: 0,
         word: 0,
         sentence: 0,
@@ -166,6 +171,7 @@ export const test = base.extend<{ ai: MockAi }>({
       prompts: {
         adaptive: [],
         extract: [],
+        transcribe: [],
         word: [],
         sentence: [],
         pronunciation: [],

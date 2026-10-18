@@ -1,5 +1,16 @@
-/** Self-contained PDF fixtures for local rendering, protection and page-limit checks. */
+/** Self-contained PDF and image fixtures for local rendering, protection and page-limit checks. */
 import { createHash } from 'node:crypto';
+
+/** A one-pixel PNG as a file the import pages accept. */
+export const tinyPng = {
+  name: 'tiny.png',
+  mimeType: 'image/png',
+  buffer: Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=',
+    'base64',
+  ),
+};
+
 export function materialPdf(pageCount = 1): string {
   const pageIds = Array.from({ length: pageCount }, (_, index) => index + 5);
   const stream = '0.1 0.3 0.6 rg 20 20 160 100 re f BT /F1 24 Tf 20 160 Td (Bonjour Relire) Tj ET';

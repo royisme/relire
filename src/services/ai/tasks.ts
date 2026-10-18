@@ -24,14 +24,18 @@ import {
   pronunciationRequest,
   prosodyRequest,
   sentenceRequest,
+  transcribeRequest,
   wordRequest,
   type AdaptiveInput,
   type ExtractInput,
   type ItemContext,
+  type TranscribeInput,
 } from './prompts';
 import { ImageInputUnsupportedError, InvalidAnswerError } from './errors';
 import { guardAnswer, parseAnswer } from './validate';
 import type { Lang, TextExecution } from './types';
+import { TranscriptionSchema, type Transcription } from '../../types/transcription';
+import type { ImageInput } from './types';
 import { parseProsodyResponse } from '../../utils/prosodyResponse';
 
 /**
@@ -68,7 +72,7 @@ export const assessPronunciation = (input: Parameters<typeof pronunciationReques
 
 /** Pages of one worksheet that can be read in a single request. */
 export const MAX_EXTRACT_IMAGES = 3;
-/** Pasted text longer than this cannot be copied back whole (the draft's `sourceText` is capped). */
+/** Longest pasted text one extraction request carries. */
 export const MAX_EXTRACT_TEXT = 40000;
 /** Items one generation request may ask for. */
 export const MAX_GENERATED_ITEMS = 20;
@@ -82,6 +86,13 @@ function checkLevel(level: string) {
   if (!level.trim()) throw new Error('A CEFR level is required.');
 }
 
+function checkImages(images: ImageInput[]) {
+  if (images.length > MAX_EXTRACT_IMAGES)
+    throw new RangeError(`At most ${MAX_EXTRACT_IMAGES} images can be read at once.`);
+  if (images.some((image) => !image.data || !image.mimeType.startsWith('image/')))
+    throw new Error('Every image needs base64 data and an image type.');
+}
+
 /**
  * Reads pasted text or 1-3 page images into a validated import draft. Refuses
  * before any request when the model cannot read images. One attempt on the
@@ -91,10 +102,7 @@ export async function extractMaterial(input: ExtractInput, ctx: TextContext): Pr
   const images = input.images ?? [];
   const text = input.text?.trim() ?? '';
   if (!images.length && !text) throw new Error('There is nothing to read: add text or one to three images.');
-  if (images.length > MAX_EXTRACT_IMAGES)
-    throw new RangeError(`At most ${MAX_EXTRACT_IMAGES} images can be read at once.`);
-  if (images.some((image) => !image.data || !image.mimeType.startsWith('image/')))
-    throw new Error('Every image needs base64 data and an image type.');
+  checkImages(images);
   if (text.length > MAX_EXTRACT_TEXT)
     throw new RangeError(`The text is longer than ${MAX_EXTRACT_TEXT} characters; import it in parts.`);
   if (images.length && ctx.execution.imageInput === 'unsupported')
@@ -102,6 +110,20 @@ export async function extractMaterial(input: ExtractInput, ctx: TextContext): Pr
 
   const value = await ctx.execution.generateJson<unknown>(extractRequest(input, ctx.lang));
   return guardAnswer('the material', () => parseImportDraft(value, input.mode));
+}
+
+/**
+ * Reads 1-3 page images into one article: a title (empty when the pages have
+ * none) and the text. Refuses before any request when the model cannot read
+ * images. One attempt on the chosen model; `input.signal` cancels it.
+ */
+export async function transcribeMaterial(input: TranscribeInput, ctx: TextContext): Promise<Transcription> {
+  if (!input.images.length) throw new Error('There is nothing to read: add one to three images.');
+  checkImages(input.images);
+  if (ctx.execution.imageInput === 'unsupported') throw new ImageInputUnsupportedError(ctx.execution.model);
+
+  const value = await ctx.execution.generateJson<unknown>(transcribeRequest(input, ctx.lang));
+  return parseAnswer('the transcription', TranscriptionSchema, value);
 }
 
 /** A hint that points at the rule without giving the answer away. */

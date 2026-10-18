@@ -12,6 +12,7 @@ import {
   HintSchema,
   OpenGradeSchema,
 } from '../../types/exerciseAi';
+import { TranscriptionSchema } from '../../types/transcription';
 import { ImportDraftSchema } from './importDraft';
 
 /** A plain JSON-schema document. */
@@ -48,6 +49,9 @@ export const drillsJsonSchema = () => toProviderJsonSchema(DrillsSchema);
 
 /** Response schema for reading a worksheet into a draft. */
 export const importDraftJsonSchema = () => toProviderJsonSchema(ImportDraftSchema);
+
+/** Response schema for the text read from page images. */
+export const transcriptionJsonSchema = () => toProviderJsonSchema(TranscriptionSchema);
 
 /** Response schema for a hint. */
 export const hintJsonSchema = () => toProviderJsonSchema(HintSchema);

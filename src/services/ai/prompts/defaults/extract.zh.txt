@@ -5,7 +5,7 @@
 第二步，梳理练习结构：单独识别真正的练习题，只把这些题目映射为 items、options、expectedAnswer 和 acceptableAnswers。如果页面只有答案，请重建可供练习的题目，并与印出的答案清楚区分。如果版式较复杂，请把说明文字和选项对应到正确的练习，且不要丢掉原文的阅读材料。
 {{/if}}
 {{#if source=text}}材料是粘贴进来的文字，来自练习册、阅读材料或练习单。请分两步处理。
-第一步，忠实转录：按阅读顺序保留完整原文。连贯的文章、书信、对话或散文段落必须原样出现在 sourceText 和 readingPassage.content 中，不得把其中的句子拆成练习题，也不得改写成问题。
+第一步，忠实转录：按阅读顺序保留完整原文。连贯的文章、书信、对话或散文段落必须原样出现在 readingPassage.content 中，不得把其中的句子拆成练习题，也不得改写成问题。
 第二步，梳理练习结构：把真正的问题映射为 items、options、expectedAnswer 和 acceptableAnswers。如果输入只有答案，请重建可供练习的题目。如果有问题但没有答案，请给出准确的答案和讲解。如果只是一篇文章或一段对话，请将其保留为阅读材料，并据此设计一个 READING_CLOZE 单元。
 {{/if}}
 {{#if rawText}}用户粘贴的材料如下：
@@ -30,7 +30,6 @@
 
 字段说明（应用会另行提供完整的结构）：
 - materialTitle：课程标题，或课外测试的标题。材料没有标题时不要填写此字段。
-- sourceText：材料的完整转录，而不是摘要。
 - warnings：你注意到的问题，例如无法辨认的文字或不清晰的版式。没有问题时留空。
 - units：练习单元。如果材料中没有问题，则留空。
 - 每个单元包含：id（在草稿内唯一，例如 u1）、section（GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber（正整数）、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，单元需要阅读材料时；标题和译文可以省略）、type（上面的题型之一）、grammarTags（其练习题使用的标签，至少一个）以及 items。
@@ -69,6 +68,6 @@
 {{/if}}
 {{#if mode=extract}}仅提取。绝不补全缺失的答案，也不创建新问题。材料中没有印出答案时，expectedAnswer 必须为 null。
 {{/if}}
-{{#if mode=generate}}用户明确要求基于本材料生成新的练习。请逐字保留 sourceText，然后生成练习题和参考答案。不要编造材料中缺失的事实。
+{{#if mode=generate}}用户明确要求基于本材料生成新的练习。请逐字保留 readingPassage.content 中的阅读材料，然后生成练习题和参考答案。不要编造材料中缺失的事实。
 {{/if}}
 请返回符合所提供结构的 JSON。只输出 JSON。

@@ -5,7 +5,7 @@ Pass 1, faithful transcription: read every page completely before classifying an
 Pass 2, exercise structure: identify the actual exercise prompts separately, and map only those prompts to items, options, expectedAnswer and acceptableAnswers. For a page that has answers only, rebuild practicable prompts and keep them clearly apart from the printed answers. For mixed layouts, match captions and options to the right exercise, and do not drop the source reading passage.
 {{/if}}
 {{#if source=text}}The material is pasted text from a workbook, a reading passage or a worksheet. Work in two passes.
-Pass 1, faithful transcription: keep the complete source text in reading order. A continuous article, letter, dialogue or prose passage must appear verbatim in sourceText and in readingPassage.content. Never split its sentences into exercise items or turn them into questions.
+Pass 1, faithful transcription: keep the complete source text in reading order. A continuous article, letter, dialogue or prose passage must appear verbatim in readingPassage.content. Never split its sentences into exercise items or turn them into questions.
 Pass 2, exercise structure: map the actual questions to items, options, expectedAnswer and acceptableAnswers. If the input has answers only, rebuild practicable prompts. If it has questions without answers, work out accurate answers and explanations. If it is only an article or a dialogue, keep it as the reading passage and design one READING_CLOZE unit from it.
 {{/if}}
 {{#if rawText}}The user pasted this material:
@@ -30,7 +30,6 @@ Exercise types (use these type IDs exactly):
 
 Fields (the app sends the exact schema):
 - materialTitle: the title of the lesson or of the extracurricular test. Leave it out when the source has none.
-- sourceText: the complete transcription of the source, not a summary.
 - warnings: problems you noticed, such as illegible text or an unclear layout. Empty when there are none.
 - units: the exercise units. Empty when the source has no questions.
 - Each unit has: id (unique in the draft, such as u1), section (GRAMMAIRE, VOCABULAIRE, CONJUGAISON, COMPRENDRE or EXTRA), unitNumber (a positive whole number), subPart (A or B, when the source uses them), title (French), instruction (English), example (when the source gives one), isExtracurricular (true for material from outside the workbook), readingPassage (title, content and English translation, when the unit reads a passage; title and translation may be left out), type (one of the exercise types above), grammarTags (the tags its items use, at least one), and items.
@@ -69,6 +68,6 @@ Task for this run (it overrides any conflicting instruction above):
 {{/if}}
 {{#if mode=extract}}Extract only. Never solve missing answers or create new questions. expectedAnswer must be null when no answer is printed.
 {{/if}}
-{{#if mode=generate}}The user has asked for NEW practice based on this material. Preserve sourceText verbatim, then generate exercises and reference answers. Do not invent missing source facts.
+{{#if mode=generate}}The user has asked for NEW practice based on this material. Keep any reading passage verbatim in readingPassage.content, then generate exercises and reference answers. Do not invent missing source facts.
 {{/if}}
 Return JSON matching the provided schema. Output only the JSON.

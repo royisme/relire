@@ -11,6 +11,7 @@ import {
   type AdaptiveInput,
   type ExtractInput,
   type ItemContext,
+  type TranscribeInput,
 } from './ai/prompts';
 import type { AiAccess, TextPurpose } from './ai/types';
 import { cachedRequest, readCachedAnswer } from './cachedRequest';
@@ -26,6 +27,7 @@ import {
   type OpenGrade,
 } from '../types/exerciseAi';
 import type { ImportDraft } from './exercises/importDraft';
+import type { Transcription } from '../types/transcription';
 import {
   MAX_PRONUNCIATION_SOURCE,
   PRONUNCIATION_SCHEMA_VERSION,
@@ -186,6 +188,18 @@ export function extractionPurpose(input: Pick<ExtractInput, 'images'>): TextPurp
 
 export function extractMaterial(input: ExtractInput, consentAccess: AiAccess = getAiAccess()): Promise<ImportDraft> {
   return ai.extractMaterial(input, context(consentAccess, extractionPurpose(input)));
+}
+
+/**
+ * Reads page images into an article's title and text on the OCR selection. Not
+ * cached, one attempt, cancellable like `extractMaterial`; images are refused
+ * up front when the chosen model cannot read them.
+ */
+export function transcribeMaterial(
+  input: TranscribeInput,
+  consentAccess: AiAccess = getAiAccess(),
+): Promise<Transcription> {
+  return ai.transcribeMaterial(input, context(consentAccess, 'ocr'));
 }
 
 /**

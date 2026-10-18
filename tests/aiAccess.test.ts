@@ -129,6 +129,12 @@ describe('BYOK access', () => {
 });
 
 describe('feature execution uses AiAccess', () => {
+  test('article transcription asks for the OCR selection', async () => {
+    const fake = fakeAccess({ title: 'Titre', text: 'Un texte.' });
+    await api.transcribeMaterial({ images: [page] }, fake.access);
+    expect(fake.text.mock.calls.map(([purpose]) => purpose)).toEqual(['ocr']);
+  });
+
   test('image extraction asks for OCR while pasted text always asks for Text AI', async () => {
     const fake = fakeAccess(draftFixture);
     await api.extractMaterial({ mode: 'complete', text: 'Bonjour' }, fake.access);

@@ -12,14 +12,14 @@ test('dirty links, repeated Back cancellation, direct hash and Forward retain dr
       /* @vite-ignore */ '/src/hooks/useRoute.ts' as string
     )) as typeof import('../src/hooks/useRoute');
     navigate({ name: 'progress' });
-    navigate({ name: 'import' });
+    navigate({ name: 'importExercises' });
   });
   await page.getByLabel('Text to send').fill('Texte non enregistré.');
   for (let i = 0; i < 2; i++) {
     await page.evaluate(() => history.back());
     await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toBeVisible();
     await page.getByRole('button', { name: 'Keep editing' }).click();
-    await expect(page).toHaveURL(/#\/import$/);
+    await expect(page).toHaveURL(/#\/import\/exercises$/);
     await expect(page.getByLabel('Text to send')).toHaveValue('Texte non enregistré.');
   }
   await page.evaluate(() => {
@@ -32,7 +32,7 @@ test('dirty links, repeated Back cancellation, direct hash and Forward retain dr
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
   await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
   await page.goBack();
-  await expect(page).toHaveURL(/#\/import$/);
+  await expect(page).toHaveURL(/#\/import\/exercises$/);
   await expect(page.getByLabel('Text to send')).toHaveValue('');
   await page.goBack();
   await expect(page).toHaveURL(/#\/progress$/);
@@ -58,7 +58,7 @@ test('existing reader id import stays a reader; reload only warns when dirty; de
   await page.goto('/#/read/import');
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Existing import id' })).toBeVisible();
-  await page.goto('/#/import');
+  await page.goto('/#/import/exercises');
   await page.reload();
   await page.getByLabel('Text to send').fill('Mon texte.');
   const warning = page.waitForEvent('dialog');
@@ -73,7 +73,7 @@ test('existing reader id import stays a reader; reload only warns when dirty; de
   await page.getByRole('button', { name: 'Keep editing' }).click();
   await page.getByRole('link', { name: 'Text AI settings' }).click();
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/settings\/ai\/text\?key=1&return=%23%2Fimport$/);
+  await expect(page).toHaveURL(/#\/settings\/ai\/text\?key=1&return=%23%2Fimport%2Fexercises$/);
 });
 
 test('rapid repeated traversal remains at the indexed import entry after Keep', async ({ page, ai }) => {
@@ -83,7 +83,7 @@ test('rapid repeated traversal remains at the indexed import entry after Keep', 
     const { navigate } = (await import('/src/hooks/useRoute.ts' as string)) as typeof import('../src/hooks/useRoute');
     navigate({ name: 'progress' });
     navigate({ name: 'study', tab: 'words' });
-    navigate({ name: 'import' });
+    navigate({ name: 'importExercises' });
   });
   await page.getByLabel('Text to send').fill('Texte à garder.');
   for (let i = 0; i < 3; i++) {
@@ -93,7 +93,7 @@ test('rapid repeated traversal remains at the indexed import entry after Keep', 
     });
     await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toBeVisible();
     await page.getByRole('button', { name: 'Keep editing' }).click();
-    await expect(page).toHaveURL(/#\/import$/);
+    await expect(page).toHaveURL(/#\/import\/exercises$/);
     await expect(page.getByLabel('Text to send')).toHaveValue('Texte à garder.');
   }
   await page.evaluate(() => history.back());
@@ -124,7 +124,7 @@ test('early bookkeeping without Navigation survives delayed module, native hashe
   });
   await page.waitForTimeout(20);
   await page.evaluate(() => {
-    location.hash = '#/import';
+    location.hash = '#/import/exercises';
   });
   await page.waitForTimeout(20);
   release();
@@ -132,7 +132,7 @@ test('early bookkeeping without Navigation survives delayed module, native hashe
   for (let i = 0; i < 2; i++) {
     await page.evaluate(() => history.back());
     await page.getByRole('button', { name: 'Keep editing' }).click();
-    await expect(page).toHaveURL(/#\/import$/);
+    await expect(page).toHaveURL(/#\/import\/exercises$/);
   }
   await page.evaluate(() => {
     location.hash = '#/settings/ai/text';
@@ -147,7 +147,7 @@ test('early bookkeeping without Navigation survives delayed module, native hashe
   await expect(page).toHaveURL(/#\/study\/words$/);
   await page.reload();
   await page.goBack();
-  await expect(page).toHaveURL(/#\/import$/);
+  await expect(page).toHaveURL(/#\/import\/exercises$/);
   await page.goBack();
   await expect(page).toHaveURL(/#\/progress$/);
 });

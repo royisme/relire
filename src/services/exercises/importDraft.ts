@@ -19,7 +19,7 @@ import {
 
 export { ImportModeSchema, type ImportMode };
 
-/** Which file the draft came from; the mode and extracted text are added on promotion. */
+/** Which file the draft came from; the mode is added on promotion. */
 export const ImportSourceSchema = z.object({
   kind: ImportSourceKindSchema,
   name: z.string().trim().min(1),
@@ -46,7 +46,6 @@ export const ImportDraftSchema = z
   .object({
     /** Name of the material; absent when the model found none (the caller picks a fallback). */
     materialTitle: z.string().trim().min(1).optional(),
-    sourceText: z.string().max(80000).default(''),
     warnings: z.array(z.string()).default([]),
     units: z.array(
       z.object({
@@ -173,7 +172,7 @@ export function prepareImport(
       setTitle: draft.materialTitle?.trim() || undefined,
       level,
       createdAt,
-      importSource: { ...source, mode, extractedText: draft.sourceText },
+      importSource: { ...source, mode },
       items: unit.items.map((item) => ({
         ...item,
         id: `item-${makeId()}`,

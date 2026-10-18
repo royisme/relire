@@ -52,7 +52,7 @@ test('confirmed AI answers keep their provenance and never persist original file
     level: 'B1',
     createdAt: options.createdAt,
   });
-  expect(result.units[0].importSource).toEqual({ ...source, mode: 'complete', extractedText: draft.sourceText });
+  expect(result.units[0].importSource).toEqual({ ...source, mode: 'complete' });
   expect(JSON.stringify(result)).not.toContain('SECRET');
 
   const item = draft.units[0].items[0];
@@ -159,7 +159,6 @@ test('model output omitting draft-only fields is normalized instead of rejected'
     ],
   };
   const draft = ImportDraftSchema.parse(sparse);
-  expect(draft.sourceText).toBe('');
   expect(draft.warnings).toEqual([]);
   expect(draft.materialTitle).toBeUndefined();
   expect(draft.units[0].items[0].printedAnswer).toBeNull();

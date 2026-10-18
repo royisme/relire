@@ -10,7 +10,6 @@ const {
 
 export const draftFixture = {
   materialTitle: 'Mon document',
-  sourceText: 'Un exercice sans corrigé.',
   warnings: [],
   units: [
     {

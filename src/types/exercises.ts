@@ -147,7 +147,6 @@ export const ExtractedUnitSchema = z
         name: text,
         pages: z.array(z.number().int().positive()),
         mode: ImportModeSchema,
-        extractedText: z.string(),
       })
       .optional(),
     isExtracurricular: z.boolean().optional(),

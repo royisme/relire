@@ -86,11 +86,16 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
       )}
 
       <section aria-labelledby="practice-units" className="space-y-4">
-        <div>
-          <h3 id="practice-units" className="font-serif text-lg font-semibold text-ink-900">
-            {t('practice.unitsTitle')}
-          </h3>
-          <p className="text-sm text-ink-500">{t('practice.unitsDesc')}</p>
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div className="min-w-0">
+            <h3 id="practice-units" className="font-serif text-lg font-semibold text-ink-900">
+              {t('practice.unitsTitle')}
+            </h3>
+            <p className="text-sm text-ink-500">{t('practice.unitsDesc')}</p>
+          </div>
+          <Link to={{ name: 'importExercises' }} className={buttonVariants({ variant: 'outline' })}>
+            {t('practice.importExercises')}
+          </Link>
         </div>
         {error && (
           <p role="alert" className="break-words text-sm text-bad-700">

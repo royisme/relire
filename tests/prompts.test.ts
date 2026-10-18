@@ -9,14 +9,15 @@ import {
   OpenGradeSchema,
 } from '../src/types/exerciseAi';
 import { ImportDraftSchema } from '../src/services/exercises/importDraft';
+import { TranscriptionSchema } from '../src/types/transcription';
 import { ExerciseTypeSchema } from '../src/types/exercises';
 import { GRAMMAR_TAGS } from '../src/types/grammar';
 
-const NEW_IDS: PromptId[] = ['extract', 'hint', 'explain', 'grade', 'adaptive', 'exercises'];
+const NEW_IDS: PromptId[] = ['extract', 'transcribe', 'hint', 'explain', 'grade', 'adaptive', 'exercises'];
 const definition = (id: PromptId) => PROMPTS.find((p) => p.id === id)!;
 const blocks = (template: string) => [...template.matchAll(/\{\{#if [^}]+\}\}|\{\{\/if\}\}/g)].map((m) => m[0]);
 
-test('the six exercise prompts are registered', () => {
+test('the exercise and transcription prompts are registered', () => {
   for (const id of NEW_IDS) expect(definition(id)).toBeDefined();
   expect(new Set(PROMPTS.map((p) => p.id)).size).toBe(PROMPTS.length);
 });
@@ -95,6 +96,15 @@ function expectDescribes(id: PromptId, fields: string[], skip: string[] = []) {
       expect(text, `${id}.${lang} does not describe "${field}"`).toMatch(new RegExp(`\\b${field}\\b`));
   }
 }
+
+test('transcribe describes the fields the transcription accepts and asks for nothing else', () => {
+  expectDescribes('transcribe', fieldsOf(TranscriptionSchema));
+  for (const lang of ['en', 'zh'] as const) {
+    const text = definition('transcribe').defaults[lang];
+    expect(text).not.toMatch(/\bsourceText\b/);
+    expect(text).not.toMatch(/\bunits?\b/);
+  }
+});
 
 test('extract describes exactly the fields the import draft accepts', () => {
   const draft = ImportDraftSchema as unknown as { shape: Record<string, never> };

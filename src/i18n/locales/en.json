@@ -25,7 +25,9 @@
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
     "due": "{{count}} due",
-    "toReview": "{{count}} to review"
+    "toReview": "{{count}} to review",
+    "importArticle": "Import an article",
+    "importExercises": "Import exercises"
   },
   "theme": {
     "label": "Theme",
@@ -245,7 +247,8 @@
     "sentenceLabel": "Item {{number}}, your sentence",
     "tilesLabel": "Item {{number}}, word tiles",
     "sentenceEmpty": "Build the sentence with the tiles below.",
-    "removeWord": "Remove {{word}}"
+    "removeWord": "Remove {{word}}",
+    "importExercises": "Import exercises"
   },
   "analytics": {
     "title": "Progress",
@@ -465,7 +468,9 @@
     "clearFilters": "Clear filters",
     "count_one": "{{count}} article",
     "count_other": "{{count}} articles",
-    "deleteRecordings": "Your recordings of {{count}} sentences in it are deleted too."
+    "deleteRecordings": "Your recordings of {{count}} sentences in it are deleted too.",
+    "addManual": "Write or paste an article",
+    "addImport": "Import from image, PDF or text"
   },
   "onboarding": {
     "label": "Getting started",
@@ -621,7 +626,8 @@
     "explain": "Mistake explanation",
     "grade": "Open answer grading",
     "adaptive": "Adaptive drills",
-    "exercises": "Exercises from an article"
+    "exercises": "Exercises from an article",
+    "transcribe": "Import: read article pages"
   },
   "prosody": {
     "title": "Pronunciation markers",
@@ -841,31 +847,51 @@
     "pastedImage": "Pasted image"
   },
   "importFlow": {
-    "heading": "Import material",
-    "entry": "Import from image, PDF or text",
-    "manual": "Write or paste an article",
     "choose": "Choose an image or PDF",
     "dropHelp": "Or drop a file here, or paste an image from the clipboard. Images: up to 10 MiB / 20 MP. PDF: up to 20 MiB / 100 pages.",
     "localFile": "{{name}} · {{count}} page(s), local only until you send",
     "pages": "Pages to send (up to 3, e.g. 1,3-4)",
-    "text": "Text to send (up to 40,000 characters; optional context with images)",
-    "mode": "Extraction mode",
-    "consent": "Before you send",
     "recipient": "Recipient: {{provider}} · {{model}}",
     "sentPages": "Images: {{name}} · pages {{pages}}",
     "none": "none",
-    "sentText": "Text: {{count}} characters",
-    "exactText": "Read the exact text to be sent",
     "unsupported": "This model cannot read images. Choose an image-capable model in Settings before sending.",
-    "analyze": "Send and extract",
     "working": "Working…",
     "pastedText": "Pasted text",
     "missingKey": "No API key is set. Your input is kept here; open Settings only when you are ready to discard it.",
-    "failed": "Extraction failed: {{msg}}",
+    "failed": "The request failed: {{msg}}",
+    "saving": "Saving…",
+    "restart": "Start over",
+    "leaveTitle": "Discard this import?",
+    "leaveHelp": "Your unsaved input and draft will be lost. A request in progress will be cancelled.",
+    "savingWait": "Wait for the save to finish before leaving.",
+    "keep": "Keep editing",
+    "discard": "Discard"
+  },
+  "importArticle": {
+    "heading": "Import an article",
+    "subtitle": "Turn a photo, a PDF or pasted text into an article you can read here.",
+    "text": "Text to import (up to 40,000 characters)",
+    "consent": "What is sent",
+    "localOnly": "Pasted text is not sent anywhere. You review and save it on this device.",
+    "removeFile": "Remove file",
+    "analyze": "Send and read",
+    "continue": "Continue",
+    "review": "Review the article",
+    "reviewHelp": "The text stays only on this page until you save. AI transcription can contain mistakes: check it against the original and correct it here.",
+    "title": "Title",
+    "level": "Level",
+    "body": "Article text",
+    "requiredText": "Enter a title and some text before saving.",
+    "save": "Save article",
+    "saveFailed": "Not saved. Your text is kept; retry when ready. {{msg}}"
+  },
+  "importExercises": {
+    "heading": "Import exercises",
+    "subtitle": "Turn a worksheet, a page of questions or pasted text into a batch of exercises.",
+    "title": "Batch title",
+    "requiredTitle": "Enter a title for this batch before saving.",
     "review": "Review and correct",
     "reviewHelp": "Drafts stay only on this page. AI reference answers may be wrong. Open a question to edit it; exclude any unit or question you do not want to save. Blockers must be resolved or excluded.",
-    "title": "Material title",
-    "sourceText": "Source text (editable)",
     "warning": "Check: {{msg}}",
     "includeUnit": "Include unit: {{title}}",
     "unitTitle": "Unit title",
@@ -883,22 +909,19 @@
     "audioText": "Dictation text (required for dictation)",
     "resolved": "I have supplied the missing information",
     "excludeItem": "Exclude",
-    "saveAs": "Save as",
-    "level": "Level (exercises)",
+    "level": "Level of these exercises",
     "chooseLevel": "Choose a level",
     "levelRequired": "Choose the level of these exercises before saving.",
-    "confirm": "I have reviewed the text, included exercises and reference answers. Save this material on this device.",
+    "confirm": "I have reviewed the included exercises and reference answers. Save this batch on this device.",
     "save": "Confirm and save",
-    "saving": "Saving…",
-    "restart": "Start over",
-    "requiredText": "Enter a title before saving; articles also require meaningful source text.",
     "selectUnits": "Include at least one playable exercise unit.",
     "saveFailed": "Not saved. Your draft is kept; retry when ready. {{msg}}",
-    "leaveTitle": "Discard this import?",
-    "leaveHelp": "Your unsaved input and draft will be lost. Pending extraction will be cancelled.",
-    "savingWait": "Wait for the save to finish before leaving.",
-    "keep": "Keep editing",
-    "discard": "Discard",
+    "mode": "Extraction mode",
+    "sentText": "Text: {{count}} characters",
+    "exactText": "Read the exact text to be sent",
+    "text": "Text to send (up to 40,000 characters; optional context with images)",
+    "analyze": "Send and extract",
+    "consent": "Before you send",
     "modes": {
       "complete": "Complete missing answers",
       "extract": "Extract printed answers only",
@@ -913,10 +936,6 @@
       "material": "Printed answer — check it",
       "ai": "AI reference answer",
       "user": "Edited by you"
-    },
-    "destinations": {
-      "exercises": "Exercises only",
-      "article": "Article only"
     },
     "errors": {
       "no-items": "{{title}}: no included questions. Exclude the unit or add valid questions.",
@@ -951,8 +970,8 @@
     "make": "Make a drill set",
     "retry": "Retry saving",
     "discard": "Discard",
-    "saving": "Saving this workbook. Please wait.",
-    "generating": "Making a new workbook…",
+    "saving": "Saving this drill set. Please wait.",
+    "generating": "Making a new drill set…",
     "unsaved": "Not saved: {{title}} ({{items}}). Retry saving without another AI request, or discard.",
     "leaveTitle": "Discard this drill set?",
     "leaveHelp": "This generated set has not been saved. Keep it to retry saving, or discard it before leaving or making another set.",

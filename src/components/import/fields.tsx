@@ -7,24 +7,29 @@ export function TextField({
   onChange,
   multiline = false,
   maxLength,
+  disabled,
+  rows = 4,
 }: {
   label: ReactNode;
   value: string;
   onChange: (value: string) => void;
   multiline?: boolean;
   maxLength?: number;
+  disabled?: boolean;
+  rows?: number;
 }) {
   const props = {
     'aria-label': typeof label === 'string' ? label : undefined,
     className: field,
     value,
     maxLength,
+    disabled,
     onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(event.target.value),
   };
   return (
     <label className="block space-y-1 text-sm min-w-0">
       <span>{label}</span>
-      {multiline ? <textarea {...props} rows={4} /> : <input {...props} />}
+      {multiline ? <textarea {...props} rows={rows} /> : <input {...props} />}
     </label>
   );
 }

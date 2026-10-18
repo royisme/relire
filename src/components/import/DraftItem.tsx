@@ -45,17 +45,17 @@ export function DraftItem({
         <details className="min-w-0 flex-1">
           <summary className="cursor-pointer py-2 break-words">
             <span className="text-xs text-ink-600">
-              {t(`exerciseTypes.${type}.name`)} · {t(`importFlow.origin.${answerOrigin(item, edited)}`)}
+              {t(`exerciseTypes.${type}.name`)} · {t(`importExercises.origin.${answerOrigin(item, edited)}`)}
             </span>
             <span className="block font-serif">{item.prompt}</span>
-            <span className="block text-sm text-ink-700">{answer || t('importFlow.noAnswer')}</span>
+            <span className="block text-sm text-ink-700">{answer || t('importExercises.noAnswer')}</span>
             {item.blockers.length > 0 && <span className="block text-sm text-bad-700">{item.blockers.join('; ')}</span>}
           </summary>
           <div className="space-y-3 py-3">
             <label className="block text-sm">
-              {t('importFlow.type')}
+              {t('importExercises.type')}
               <select
-                aria-label={t('importFlow.type')}
+                aria-label={t('importExercises.type')}
                 className={field}
                 value={type}
                 onChange={(e) => {
@@ -71,7 +71,7 @@ export function DraftItem({
               </select>
             </label>
             <TextField
-              label={t('importFlow.prompt')}
+              label={t('importExercises.prompt')}
               multiline
               value={item.prompt}
               onChange={(prompt) => {
@@ -83,13 +83,13 @@ export function DraftItem({
               }}
             />
             <TextField
-              label={t('importFlow.options')}
+              label={t('importExercises.options')}
               multiline
               value={(item.options ?? []).join('\n')}
               onChange={(value) => onChange({ options: value ? value.split('\n') : undefined })}
             />
             <TextField
-              label={t(arrayAnswer(item.prompt, type) ? 'importFlow.answers' : 'importFlow.answer')}
+              label={t(arrayAnswer(item.prompt, type) ? 'importExercises.answers' : 'importExercises.answer')}
               multiline
               value={answer}
               onChange={(value) =>
@@ -97,15 +97,15 @@ export function DraftItem({
               }
             />
             <TextField
-              label={t('importFlow.alternatives')}
+              label={t('importExercises.alternatives')}
               multiline
               value={(item.acceptableAnswers ?? []).join('\n')}
               onChange={(value) => onChange({ acceptableAnswers: value ? value.split('\n') : undefined }, true)}
             />
             <label className="block text-sm">
-              {t('importFlow.grammar')}
+              {t('importExercises.grammar')}
               <select
-                aria-label={t('importFlow.grammar')}
+                aria-label={t('importExercises.grammar')}
                 className={field}
                 value={item.grammarTag}
                 onChange={(e) => onChange({ grammarTag: GrammarTagSchema.parse(e.target.value) })}
@@ -118,13 +118,13 @@ export function DraftItem({
               </select>
             </label>
             <TextField
-              label={t('importFlow.secondaryPrompt')}
+              label={t('importExercises.secondaryPrompt')}
               multiline
               value={item.secondaryPrompt ?? ''}
               onChange={(secondaryPrompt) => onChange({ secondaryPrompt })}
             />
             <TextField
-              label={t('importFlow.audioText')}
+              label={t('importExercises.audioText')}
               multiline
               value={item.audioText ?? ''}
               onChange={(audioText) => onChange({ audioText })}
@@ -132,13 +132,13 @@ export function DraftItem({
             {item.blockers.length > 0 && (
               <label className="flex gap-2 text-sm">
                 <input type="checkbox" onChange={() => onChange({ blockers: [] })} />
-                {t('importFlow.resolved')}
+                {t('importExercises.resolved')}
               </label>
             )}
           </div>
         </details>
         <Button variant="ghost" onClick={onRemove}>
-          {t('importFlow.excludeItem')}
+          {t('importExercises.excludeItem')}
         </Button>
       </div>
     </div>

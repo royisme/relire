@@ -8,6 +8,7 @@ import {
   generateExercises,
   gradeOpenAnswer,
   hint,
+  transcribeMaterial,
 } from '../src/services/ai/tasks';
 import { geminiText } from '../src/services/ai/providers/gemini/client';
 import { gemini } from '../src/services/ai/providers/gemini';
@@ -270,6 +271,81 @@ describe('generateExercises', () => {
     await rejection(generateExercises({ ...input, articleText: '  ' }, contextOf(provider)));
     await rejection(generateExercises({ ...input, count: 2.5 }, contextOf(provider)));
     expect(provider.requests).toHaveLength(0);
+  });
+});
+
+describe('transcribeMaterial', () => {
+  const page = { data: 'AAAA', mimeType: 'image/png' };
+  const article = { title: 'Le renard', text: 'Le renard dit au petit prince : « Adieu. »' };
+
+  test('reads page images into a title and text, one attempt, with the abort signal', async () => {
+    const provider = fakeProvider(article);
+    const controller = new AbortController();
+    const result = await transcribeMaterial({ images: [page, page], signal: controller.signal }, contextOf(provider));
+    expect(result).toEqual(article);
+    const request = provider.requests[0];
+    expectSchemaSent(request);
+    expect(request.images).toEqual([page, page]);
+    expect(request.signal).toBe(controller.signal);
+    expect(request.singleAttempt).toBe(true);
+    expect(request.prompt).toContain('Transcribe the attached images');
+    expect(provider.requests).toHaveLength(1);
+  });
+
+  test('uses the language of the interface', async () => {
+    const provider = fakeProvider(article);
+    await transcribeMaterial({ images: [page] }, contextOf(provider, 'vision', 'zh'));
+    expect(provider.requests[0].prompt).toContain('转录');
+  });
+
+  test('accepts a page without a title', async () => {
+    const result = await transcribeMaterial(
+      { images: [page] },
+      contextOf(fakeProvider({ title: '', text: 'Un texte sans titre.' })),
+    );
+    expect(result.title).toBe('');
+  });
+
+  test('refuses images for a model that cannot read them, before any request', async () => {
+    const provider = fakeProvider(article);
+    const err = await rejection(transcribeMaterial({ images: [page] }, contextOf(provider, 'text-only')));
+    expect(err).toBeInstanceOf(ImageInputUnsupportedError);
+    expect(err.message).toContain('text-only');
+    expect(provider.requests).toHaveLength(0);
+  });
+
+  test('an unknown image model reaches the provider and surfaces its real error', async () => {
+    const failure = new Error('The selected model does not accept image input.');
+    const provider = fakeProvider(failure);
+    const err = await rejection(transcribeMaterial({ images: [page] }, contextOf(provider, 'unknown')));
+    expect(err).toBe(failure);
+    expect(provider.requests).toHaveLength(1);
+  });
+
+  test('refuses no images, too many pages and bad images', async () => {
+    const provider = fakeProvider(article);
+    const ctx = contextOf(provider);
+    await rejection(transcribeMaterial({ images: [] }, ctx));
+    await rejection(transcribeMaterial({ images: new Array(MAX_EXTRACT_IMAGES + 1).fill(page) }, ctx));
+    await rejection(transcribeMaterial({ images: [{ data: '', mimeType: 'image/png' }] }, ctx));
+    await rejection(transcribeMaterial({ images: [{ data: 'AAAA', mimeType: 'application/pdf' }] }, ctx));
+    expect(provider.requests).toHaveLength(0);
+  });
+
+  test('a malformed or empty transcription throws with the schema reason', async () => {
+    const empty = await rejection(
+      transcribeMaterial({ images: [page] }, contextOf(fakeProvider({ title: 'Titre', text: '   ' }))),
+    );
+    expect(empty).toBeInstanceOf(InvalidAnswerError);
+    expect(empty.message).toContain('text');
+    const notAnObject = await rejection(transcribeMaterial({ images: [page] }, contextOf(fakeProvider('oops'))));
+    expect(notAnObject).toBeInstanceOf(InvalidAnswerError);
+  });
+
+  test('a cancelled request surfaces as an abort, not a bad answer', async () => {
+    const abort = new DOMException('The request was cancelled.', 'AbortError');
+    const err = await rejection(transcribeMaterial({ images: [page] }, contextOf(fakeProvider(abort))));
+    expect(isAbortError(err)).toBe(true);
   });
 });
 

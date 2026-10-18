@@ -127,6 +127,9 @@ export interface VocabWord {
   analysis?: WordAnalysis;
 }
 
+/** The levels an article can carry, as the article editor and the article import offer them. */
+export const ARTICLE_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
+
 export interface Article {
   id: string;
   title: string;
