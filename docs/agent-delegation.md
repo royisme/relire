@@ -1,0 +1,165 @@
+# Delegating work to pi, agy and Claude subagents
+
+How a lead Claude Code session hands work to other agents and takes it back. Read this before dispatching anything. The dispatch script is `scripts/pi-dispatch.sh`.
+
+## 1. Roles
+
+| Role | Who | Does | Does not |
+| --- | --- | --- | --- |
+| Lead | This Claude Code session | Writes the plan and the acceptance criteria, writes the worker prompt, dispatches, re-runs every check, reviews the diff, merges a reviewed worker branch into the current designated feature branch, locally and without asking (owner decision 2026-10-18) | Write the implementation itself |
+| Implementer | `pi` (GPT/GLM via `scripts/pi-dispatch.sh`) or the `implementer` subagent (Sonnet) | Executes an agreed plan inside a stated scope, in its own worktree, and reports | Change the plan, widen the scope, merge, push |
+| Reviewer | The `reviewer` subagent (Opus, read-only), or a read-only `pi` run on another model family | Accepts or rejects against the plan, with `file:line` findings | Edit anything. A reviewer that fixes what it finds destroys the evidence and reviews its own work next round |
+| Mechanical / research | `agy` (`antigravity/gemini-3.8-flash`, always through `pi`) | Simple tasks whose result a machine can check; cited read-only research | Anything that needs a design decision |
+
+By owner decision 2026-10-18, the lead may merge a reviewed worker branch into the current designated feature branch locally without asking. Merging into `main`, pushing and opening PRs still happen only when the user asks, each time (CLAUDE.md: "Do not open PRs, merge or force-push unless asked"). Keep the gradient: the reviewer is never weaker than the implementer.
+
+### Claude subagents and model cost
+
+The built-in `Explore` and `general-purpose` agents inherit the lead's model (Opus) unless a model is set, which spends Opus on small jobs. Forks always inherit the lead's model. Relire has project agents in `.claude/agents/`:
+
+| Agent | Model | For |
+| --- | --- | --- |
+| `scout` | `haiku` | Read-only lookups: files, symbols, usages, config values, doc passages |
+| `implementer` | `sonnet` | Edits plus checks, inside an agreed scope |
+| `reviewer` | `opus` | Read-only review gate |
+
+Always pick one of these or pass an explicit `model` on the `Agent` call. Use Opus only for review and architecture. On this machine `~/.claude/settings.json` maps the aliases: `haiku` to `zai/glm5.3` (via `ANTHROPIC_DEFAULT_HAIKU_MODEL`), `sonnet` to `claude-sonnet-5-5`, `opus` to `claude-opus-5-5`. So `scout` and any `model: haiku` task actually run on GLM 5.3.
+
+The three agent definitions (`scout`, `implementer`, `reviewer`) live in `.claude/agents/`, which is local-only on the owner's machine: it is excluded via `.git/info/exclude` and never committed (owner decision 2026-10-18). A fresh clone must recreate them or pass an explicit `model` on every `Agent` call.
+
+The owner's global `~/.claude/settings.json` also sets `CLAUDE_CODE_SUBAGENT_MODEL=sonnet` (2026-10-18). Per the Claude Code docs (https://code.claude.com/docs/en/sub-agents, "Choose a model"), the model resolution order on v2.1.251+ is: the per-invocation `model` parameter, then the agent's `model` frontmatter, then `CLAUDE_CODE_SUBAGENT_MODEL`, then the main conversation's model. So the variable only catches subagents with no model of their own (for example `general-purpose`) and does not override `scout` or `reviewer`. It does NOT change the built-in `Explore` and `Plan`: they follow the main model unless `CLAUDE_CODE_SUBAGENT_MODEL_FORCE=1` is set, which would also flatten the custom agents, so do not set it. The rule stands: prefer the project agents or an explicit model, and do not use the built-in `Explore` or `Plan`.
+
+Use this loop only when a mistake would surface late: work that spans several files, touches a data shape, or sits near a red line (AI layer, keys, storage, grading). A one-file copy change is faster to do than to delegate.
+
+## 2. Which agent for which task
+
+1. **Hard or complex work goes to `pi` (GPT) or a Sonnet subagent.** Concurrency, state machines, design trade-offs, multi-file changes without an existing machine check (anything like the audio player).
+2. **Simple, machine-checkable work goes to `agy` `gemini-3.8-flash` through `pi`.** Mechanical replacements, doc lines, edits from given source text, moving i18n keys: work where a byte comparison, `i18n:check`, a test or a build decides right or wrong. Before dispatching, write down what "done right" means as something a script can check.
+3. **Cited research on `agy` runs at `high` thinking** (the script's default), with concrete questions. At `medium` it has produced claims without sources.
+4. **Never `gemini-3.1-pro`.** Unverified, and hard tasks belong to `pi` or Sonnet anyway.
+5. **If `pi` is rate-limited, wait for it or give the task to Sonnet. Never downgrade a hard task to `agy`.** Simple tasks are already on `agy` and are unaffected.
+6. **No multi-file implementation on `agy`.** There is no evidence it does that well.
+
+Whoever did it, verification is the same (section 5), and `agy` output gets the stricter review.
+
+## 3. Models
+
+The owner's rules, reconciled with `pi --list-models` on 2026-10-18 (pi 1.3.0, agy 1.4.2). "Listed" means the catalog shows the ID. It does not mean the credentials work; smoke-test before relying on one (section 8).
+
+| Use | Model ID | Listed | Notes |
+| --- | --- | --- | --- |
+| First choice for review and implementation | `openai-codex/gpt-5.6-sol` | yes | The recorded rule |
+| Same, newer | `openai-codex/gpt-6.1-sol` | yes | Used for later implementation and review work in the sibling project. Which of the two is first choice is the owner's call; ask |
+| Second choice | `zai/glm-5.3` | yes | |
+| Usable, not preferred | `minimax-cn/MiniMax-M3`, `minimax-cn/MiniMax-M2.7` | yes | |
+| Simple / research work | `antigravity/gemini-3.8-flash` | yes | Only through `scripts/pi-dispatch.sh` (it loads the agy-lean extension) |
+| Never | anything `deepseek/*`; `commandcode/*` | deepseek yes, commandcode no | commandcode had no balance and is no longer listed |
+| Never | `gemini-3.1-pro` | only as `google/gemini-3.1-pro-preview` | |
+| Ask before using | `magpie/*`, `antigravity/claude-*`, `antigravity/gemini-4-argon`, `antigravity/gpt-oss-120b`, `huggingface/*` | yes | Listed, but no owner rule covers them |
+
+Always pass `--model <provider>/<id>`. pi's own default is `antigravity/gemini-3.8-flash`, so a call without `--model` silently runs Gemini.
+
+## 4. Commands
+
+### Read-only review (non-agy models)
+
+```bash
+pi -p -ne --no-session --model openai-codex/gpt-5.6-sol --tools read,grep,find,ls "<review task>"
+```
+
+Run from the checkout to be reviewed. `--tools read,grep,find,ls` restricts pi's own tools. It does **not** make an `agy` run read-only: agy executes its native tools (including `run_command`) itself, outside pi's tool layer. Also, under `-ne` the antigravity provider is not loaded at all. So agy research goes through the script below, in a throwaway worktree.
+
+### Implementation, and every agy task: an isolated worktree plus the script
+
+```bash
+task=<short-name>
+mkdir -p .pi-runs/$task
+git worktree add ../relire-wt/$task -b pi/$task
+ln -s "$PWD/node_modules" ../relire-wt/$task/node_modules
+# write the prompt to .pi-runs/$task/prompt.md (template in section 6)
+nohup scripts/pi-dispatch.sh ../relire-wt/$task openai-codex/gpt-5.6-sol \
+  "$PWD/.pi-runs/$task/prompt.md" "$PWD/.pi-runs/$task/log" 5400 >/dev/null 2>&1 &
+# agy: same, with antigravity/gemini-3.8-flash; another effort: PI_THINKING=medium scripts/pi-dispatch.sh ...
+```
+
+What the script does: runs `pi -p -ne --no-session --model <id> --thinking ${PI_THINKING:-high}` inside the worktree under `timeout` (default 5400 s). If no process in pi's tree holds an established TCP connection within 48 s it kills and retries, at most 5 times (exit 124 when it gives up). It refuses an empty prompt file and a model without `<provider>/`. For `antigravity/*` it adds `-e ~/.pi/agent/extensions/agy-lean.ts`. `PI_EXT=1` allows extensions; only use it on a task you can afford to see hijacked.
+
+Clean up after merging or discarding: `git worktree remove ../relire-wt/$task && git branch -D pi/$task`.
+
+## 5. How results come back, and the merge gate
+
+- **pi's own output appears only at the end** (`-p` prints the final answer when it finishes). The script writes `[watchdog] attempt N` lines before pi starts and exit/kill lines after, so a log with only watchdog lines is normal while it runs. Judge liveness by sockets in the process tree, CPU time and worktree file changes (section 8).
+- **The truth is the worktree, not the log:** `git -C ../relire-wt/$task log main..HEAD`, `git -C ../relire-wt/$task status`, and the uncommitted report file the prompt asked for. A run that ended early (rate limit, timeout) may still have valid commits and uncommitted edits. Look before assuming nothing was done.
+- **Prompts, logs and reports live in the lead's checkout under `.pi-runs/<task>/`** (gitignored), passed as absolute paths. Do not put them inside the worktree: a new worktree checks out the committed `.gitignore`, and anything there can be committed by a worker.
+- **The lead never merges worker output without re-running the checks itself**, in the worktree, from the lead's own shell:
+
+```bash
+bun run typecheck && bun run lint && bun run test && bun run i18n:check && bun run format:check && bun run build
+~/.agents/skills/impeccable/scripts/impeccable detect --json src index.html   # must print []
+bun run e2e   # lead by default; a worker only when its task explicitly allows it, with the port check and CI=1. One run at a time across all checkouts, port 5174 free first (section 7)
+```
+
+  Then read the full diff against the plan: does it match the plan, did docs and `CHANGELOG.md` change with the behaviour, is a rule met in letter but broken in spirit, did the scope grow, is claimed evidence real evidence. For a new assertion, break the code on purpose and watch it fail.
+- **Two review rounds, then escalate.** If implementer and reviewer have not converged after two rounds, stop and give the user both sides verbatim plus your own judgment. A dispute that does not converge usually means the plan is ambiguous, and changing the plan is the user's decision.
+- `agy` reports are leads, not findings. Verify every claim against the source before using it.
+
+## 6. Worker prompt template
+
+pi loads relire's `CLAUDE.md` (context-file discovery covers `AGENTS.md` and `CLAUDE.md`), but **not** `.claude/rules/*.md`, which only Claude Code auto-loads. agy-lean is told to read repo rules, but does not inherit them. Name the rule files in the prompt. In the template, `<worktree>` is the absolute path of the task's worktree and `<lead-checkout>` the absolute path of the lead's own checkout; fill both in before dispatching.
+
+```markdown
+You are the implementer for one task in Relire, working in the git worktree <worktree> on branch pi/<task>.
+
+## Read first
+- CLAUDE.md, then: <docs/merge-plan.md §N, docs/architecture.md section, ...>
+- Area rules for the files you touch: .claude/rules/<ui|ai-layer|storage|speech|i18n|typescript>.md
+- The plan: <path>. Do exactly these steps: <steps>. Scope: only <files/dirs>.
+
+## Red lines
+- Every user-visible string goes through t(), with the key in both src/locales/en.json and zh.json.
+- Never write, print or commit an API key, token or credential. Do not read .env files or ~/.pi, ~/.gemini, ~/.config credentials.
+- Never invent data: no sample stats, fake scores or fallback AI answers. Empty means empty; failures show the real error.
+- AI calls go through src/services/ai; prompt wording lives in template files, never in TypeScript.
+- Comments and commit messages in English. Chinese only in zh.json and *.zh.txt prompts.
+- A change a user could notice gets one line in CHANGELOG.md (Unreleased) in the same commit.
+- Bun only. Do not run bun install / bun add; node_modules is a symlink to the main checkout. A new dependency needs the user: stop and report.
+- Commit on this branch only, staging files by name (never git add -A or git add .). Do not push, open a PR or merge. This overrides the ship-change skill's push step.
+- Do not run Playwright and do not start a dev server on 5173 or 5174, unless the task allows an e2e run below; the lead runs e2e by default. Stop any server you start.
+- [Include only if the task explicitly allows one e2e run:] Playwright starts its own dev server on 5174 (playwright.config.ts webServer), and port 5174 may belong to another checkout. This run is permitted only after `lsof -iTCP:5174 -sTCP:LISTEN` prints nothing; run it as `CI=1 bunx playwright test -g "<name>"` so it never reuses a foreign server. If the port is busy, stop and report.
+- If the plan is ambiguous or wrong, stop and report. Out-of-scope problems: write them down, do not fix them.
+
+## Checks to run
+bun run typecheck, bun run lint, bun run test, bun run i18n:check, bun run format:check.
+
+## Report
+Write <lead-checkout>/.pi-runs/<task>/report.md (never inside <worktree>; do not commit it):
+1. Steps done and not done, with commit hashes.
+2. Files changed.
+3. Raw output of each check, not a summary. Failures shown as failures.
+4. What you did not run or could not verify. Say it plainly; never imply a check ran.
+5. Anything you noticed and left alone.
+```
+
+For a reviewer, replace the task with: the plan path, the diff (or the branch to diff), the raw check output, and "Answer `Verdict: pass` or `Verdict: fail`. For each failure give `file:line`, the rule or plan step it breaks, and what it will cause. Do not propose fixes and do not edit files. A pass with zero findings is a valid outcome."
+
+## 7. Worktree rules for Relire
+
+- Worktrees go **outside** the repo (`../relire-wt/<task>`). `bun test` and `oxlint .` scan recursively, so a nested worktree gets swept into the lead's checks. `.works/` belongs to the user; do not reuse it without asking.
+- No `.env` or secret file is needed in a worktree; Relire's keys live in the user's browser. Symlink `node_modules` from the main checkout. Because it is shared, nothing may install into it from a worktree.
+- **Never two executors on the same file at the same time.** Split tasks by file before dispatching.
+- **The lead runs e2e by default; a worker only when its task explicitly allows it, with the port check and `CI=1`. One run at a time across all checkouts.** `playwright.config.ts` serves on port 5174 with `reuseExistingServer: !process.env.CI`, so a dev server left on 5174 by another checkout gets tested silently instead of yours. Before e2e: `lsof -iTCP:5174 -sTCP:LISTEN` must print nothing. Workers do not run Playwright unless their task explicitly allows it, and then with the port check and `CI=1` (template, section 6).
+- Untracked user files in the main checkout (such as `.impeccable/critique/` or `.pi/`) do not exist in a worktree; do not copy them in unless the task needs them.
+
+## 8. Pitfalls
+
+- **Extensions hijack tasks. Always use `-ne`** (the script does). Installed delegation extensions have taken over a real implementation task, launched a child agent that failed, and implemented nothing. A small smoke task never triggers the delegation, so "a small task worked" proves nothing about a large one.
+- **`pi auth check` can lie.** It only checks that a local credential exists; the server can still reject it, and a rejection can also be temporary. Smoke-test before concluding either way: `pi -p -ne --no-session --model <id> --tools read "Reply with one word: ready"`. A run that exits 1 within seconds with no changes is the symptom.
+- **Never print API keys or tokens.** Do not run `pi auth print-api-key` or `pi auth print-bearer-token`. Error output can contain partly masked credentials; delete such logs after reading them.
+- **Two kinds of stall:**
+  - *Startup hang:* process alive, CPU time barely moving, no network connection, no file changes in the worktree. The script's 48 s watchdog catches this; for anything outside the script, wrap it in `timeout`.
+  - *Usage limit:* a message such as "You have hit your usage limit… try again in N min", exit 1, possibly before the report was written. Committed work stands; uncommitted edits stay in the worktree.
+- **Judge liveness by evidence, not by the process existing or the log.** Under the script the log holds only `[watchdog]` lines until pi exits, so it says nothing about progress. Look at established TCP sockets anywhere in the process tree (`lsof -a -i TCP -p <pid>` for each descendant; agy opens its sockets in a grandchild with its own process group, so `lsof -g` misses them), CPU time rising (`ps -o time= -p <pid>`), and files changing in the worktree (`git status`, mtimes).
+- **Prompt paths must be absolute** (the script resolves them; a hand-written command may not). An empty prompt can make pi exit 0 having done nothing; the script refuses an empty file.
+- **Nothing is sandboxed.** agy's headless mode runs with `--dangerously-skip-permissions`; its four-tool allowlist trims features, it is not a sandbox, and `run_command` can run any shell command as the user. pi's `bash` is unrestricted too. A worktree isolates file edits, not reads: either agent can reach any absolute path. Do not hand them tasks near credentials. Official `agy --sandbox` is untested here.
+- **Launch background runs with `nohup` from the top-level session, not from a subagent.** A subagent's background process can die when the subagent ends.
+- **Model aliases can mislead.** `~/.claude/settings.json` env such as `ANTHROPIC_DEFAULT_HAIKU_MODEL` remaps what a Claude subagent's `model: haiku` actually runs (today: GLM 5.3, section 1). Check the env before trusting a subagent's model name or the name in its commit trailer.

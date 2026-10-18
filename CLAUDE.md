@@ -47,4 +47,5 @@ Bun is the only package manager.
 | Checking a change in the browser | skill `verify-ui` |
 | Adding an AI provider | skill `add-ai-provider` |
 | Finishing a change (checks, changelog, commit, report) | skill `ship-change` |
+| Delegating work to pi / agy / Claude subagents | `docs/agent-delegation.md` |
 | Launch and deployment notes | `docs/LAUNCH.md`, `.github/workflows/` |
