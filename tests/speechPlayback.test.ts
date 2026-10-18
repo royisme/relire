@@ -64,6 +64,9 @@ class FakeUtterance {
 const frenchVoices = [{ lang: 'fr-FR', name: 'Test French voice', default: true }];
 let spoken: FakeUtterance[] = [];
 let cancelled = 0;
+/** Cancelled utterances whose error event the platform still owes, as a real engine queues it. */
+const queuedErrors: (() => void)[] = [];
+let queueCancelledErrors = false;
 
 const synth = {
   speaking: false,
@@ -74,8 +77,11 @@ const synth = {
   cancel: () => {
     cancelled++;
     const current = spoken.at(-1);
-    if (current) current.onerror?.();
     synth.speaking = false;
+    if (!current) return;
+    // A real engine reports the cancelled utterance in an event queued after cancel() returns.
+    if (queueCancelledErrors) queuedErrors.push(() => current.onerror?.());
+    else current.onerror?.();
   },
   pause: () => {},
   resume: () => {},
@@ -120,6 +126,8 @@ beforeEach(async () => {
   FakeAudio.instances = [];
   spoken = [];
   cancelled = 0;
+  queuedErrors.length = 0;
+  queueCancelledErrors = false;
   synth.speaking = false;
   (globalThis as { window?: unknown }).window = { speechSynthesis: synth };
   (globalThis as { Audio?: unknown }).Audio = FakeAudio;
@@ -296,5 +304,44 @@ describe('the settings preview', () => {
     await speakFrench('Une autre phrase');
     expect(cancelled).toBeGreaterThan(0);
     expect(await failure(preview)).toBeUndefined();
+  });
+
+  test('a stale device preview abort cannot cancel the device speech that replaced it', async () => {
+    const fake = fakeAccess(() => {
+      throw new Error('never called');
+    }, true);
+    spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
+    queueCancelledErrors = true;
+    const controller = new AbortController();
+    const preview = testSpeech(deviceSettings(), controller.signal);
+    await tick();
+    expect(spoken).toHaveLength(1);
+    // A newer device clip takes the single slot; the platform still owes the preview's cancellation event.
+    await speakFrench('Une autre phrase', { engine: 'device' });
+    expect(spoken).toHaveLength(2);
+    expect(queuedErrors).toHaveLength(1);
+    // Settings is left after the preview was already replaced: the abort is stale and must leave B playing.
+    controller.abort();
+    queuedErrors.splice(0).forEach((fire) => fire());
+    expect(getSpeechState()).toEqual({ phase: 'playing', key: 'Une autre phrase' });
+    expect(getSpeechFailure()).toBeNull();
+    // The replaced preview had already settled, so the stale abort changes nothing about it either.
+    expect(await failure(preview)).toBeUndefined();
+  });
+
+  test('cancelling a device preview while the voice list is still loading speaks nothing and reports nothing', async () => {
+    const fake = fakeAccess(() => {
+      throw new Error('never called');
+    }, true);
+    spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
+    frenchVoices.length = 0; // the platform fills its list after the first frame; here it never arrives
+    const controller = new AbortController();
+    const preview = testSpeech(deviceSettings(), controller.signal);
+    await tick();
+    controller.abort();
+    expect(await failure(preview)).toMatchObject({ name: 'AbortError' });
+    expect(spoken).toHaveLength(0);
+    expect(getSpeechFailure()).toBeNull();
+    frenchVoices.push({ lang: 'fr-FR', name: 'Test French voice', default: true });
   });
 });

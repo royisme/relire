@@ -354,23 +354,33 @@ async function previewDeviceVoice(signal?: AbortSignal, isCurrent: () => boolean
   if (typeof window === 'undefined' || !('speechSynthesis' in window))
     throw new Error(i18n.t('errors.deviceVoiceUnavailable'));
   const voice = frenchVoice(await deviceVoices());
-  if (!voice) throw new Error(i18n.t('errors.deviceVoiceNoFrench'));
+  // Cancelled or replaced while the voice list loaded: nothing is spoken, so nothing is reported either.
   signal?.throwIfAborted();
-  // Another sound took over the single slot while the voice list loaded: the preview is moot, not failed.
   if (!isCurrent()) return;
+  if (!voice) throw new Error(i18n.t('errors.deviceVoiceNoFrench'));
   const synth = window.speechSynthesis;
   synth.cancel();
   const utterance = deviceUtterance(TEST_PHRASE, DEVICE_RATE, voice);
   await new Promise<void>((resolve, reject) => {
+    let done = false;
     const end = (error?: Error) => {
+      if (done) return;
+      done = true;
       signal?.removeEventListener('abort', abort);
+      if (settle === interrupted) settle = null;
       if (error) reject(error);
       else resolve();
     };
+    // Aborting a preview whose slot a newer sound already took must never cancel that sound: the
+    // platform reports the old cancellation in an event queued for later, not at the moment it happens.
     const abort = () => {
-      synth.cancel();
+      if (isCurrent()) synth.cancel();
       end(new DOMException('Aborted', 'AbortError'));
     };
+    // Any new sound or stop takes the slot: the preview ends quietly instead of waiting for an event
+    // the platform may never send for an utterance it already dropped.
+    const interrupted = () => end();
+    settle = interrupted;
     utterance.onend = () => end();
     // Another sound interrupting the preview is a cancellation, not a failure to report.
     utterance.onerror = () => (isCurrent() ? end(new Error(i18n.t('errors.deviceVoiceFailed'))) : end());
