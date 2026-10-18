@@ -16,6 +16,10 @@ Bun is the only package manager. The delivery checklist (which checks must pass,
 - `bun scripts/grammar-pack/oracle-diff.ts attest [verbId...]`: record current row hashes only for verbs with zero uncovered disagreements; only the owner writes disagreement decisions in `data/grammar-pack/oracle-attest.json`.
 - `MORPHALOU_DIR`: oracle directory, default `.local/morphalou/csv/Morphalou3.1_formatCSV` relative to the repository root; stale attestations are ignored and reported by the build.
 
+## Add a UI component
+
+Run `bunx shadcn@latest add <name> --yes` from the project root. `components.json` selects the Base UI variant and generates files in `src/components/ui/`. The `@/*` alias resolves to `src/*` in `tsconfig.json` (TypeScript and Bun tests) and `vite.config.ts` (Vite). Keep our tokens and themes in `src/index.css`, our `cn` utility and existing components; do not overwrite them as part of adding another component. New dependencies installed by `add` are allowed only for components the owner asked for.
+
 ## Static checks
 
 - `bun run typecheck`: `tsc --noEmit`.
