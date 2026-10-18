@@ -42,6 +42,60 @@ async function expectReadable(reason: Locator) {
   expect(box!.height).toBeGreaterThan(10);
 }
 
+/** A provider reason long enough to wrap to several lines, as a real one does. */
+const LONG_REASON = 'Provider rejected speech because quota is unavailable; retry later. '.repeat(12).trim();
+
+/**
+ * A reason's box, its text lines, and the band it can show: the viewport intersected with every ancestor
+ * that scrolls in x. A sheet clips its content whatever the overlay's z-index, so `toBeVisible` and a
+ * nonzero box are not enough.
+ */
+async function reasonGeometry(reason: Locator) {
+  return reason.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    let left = 0;
+    let right = window.innerWidth;
+    for (let node = el.parentElement; node; node = node.parentElement) {
+      if (getComputedStyle(node).overflowX === 'visible') continue;
+      const clip = node.getBoundingClientRect();
+      left = Math.max(left, clip.left);
+      right = Math.min(right, clip.right);
+    }
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const rect = (r: DOMRect) => ({ left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+    return { band: { left, right }, box: rect(box), lines: [...range.getClientRects()].map(rect) };
+  });
+}
+
+/** The reason is readable where it is: no clipping ancestor cuts off a side of its box or of its text. */
+async function expectUnclipped(reason: Locator) {
+  const { band, box, lines } = await reasonGeometry(reason);
+  // Half a pixel of tolerance: sub-pixel layout may land one rounding step outside.
+  for (const part of [box, ...lines]) {
+    expect(part.left, 'the reason starts inside the band that is shown').toBeGreaterThanOrEqual(band.left - 0.5);
+    expect(part.right, 'the reason ends inside the band that is shown').toBeLessThanOrEqual(band.right + 0.5);
+  }
+}
+
+/** The last line of a reason is reachable inside its own scrolling box. */
+async function expectWholeReason(reason: Locator) {
+  const read = await reason.evaluate((el) => {
+    el.scrollTop = el.scrollHeight;
+    const box = el.getBoundingClientRect();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const lines = [...range.getClientRects()];
+    return {
+      scrolls: el.scrollHeight > el.clientHeight,
+      last: lines[lines.length - 1]?.bottom ?? NaN,
+      bottom: box.bottom,
+    };
+  });
+  expect(read.scrolls, 'a long reason scrolls instead of being cut off').toBe(true);
+  expect(read.last).toBeLessThanOrEqual(read.bottom + 0.5);
+}
+
 const units = CATALOG_EXERCISES.units.filter((unit) => unit.id === 'unit-word-transform');
 const card = (page: Page) => page.locator('[data-practice-card]');
 
@@ -141,4 +195,33 @@ test('a long failed sentence in the article player stays inside a 360 px phone @
   await expect(player).toContainText('très long');
   await fitsViewport(page);
   expect(await overflowing(page.locator('body'))).toEqual([]);
+});
+
+test('a long failed word Listen stays inside the sheet that clips it on a desktop', async ({ page }) => {
+  await openArticle(page);
+  await page.locator('article [data-sentence]').first().locator('[data-reader-word="2"]').click();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet.getByRole('heading', { name: 'chose' })).toBeVisible();
+  await failTtsWith(page, LONG_REASON);
+  await sheet.getByRole('button', { name: 'Listen', exact: true }).click();
+  const reason = sheet.getByRole('alert');
+  await expectReadable(reason);
+  await expect(reason).toContainText('quota is unavailable');
+  // The side sheet scrolls, so it clips what an overlay puts beside it: the reason must stay in the band.
+  await expectUnclipped(reason);
+  await expectWholeReason(reason);
+});
+
+test('a long failed word Listen stays inside the sheet that clips it on a phone @phone', async ({ page }) => {
+  await openArticle(page);
+  await page.locator('article [data-sentence]').first().locator('[data-reader-word="2"]').tap();
+  const sheet = page.getByRole('dialog');
+  await expect(sheet.getByRole('heading', { name: 'chose' })).toBeVisible();
+  await failTtsWith(page, LONG_REASON);
+  await sheet.getByRole('button', { name: 'Listen', exact: true }).tap();
+  const reason = sheet.getByRole('alert');
+  await expectReadable(reason);
+  await expectUnclipped(reason);
+  await expectWholeReason(reason);
+  await fitsViewport(page);
 });

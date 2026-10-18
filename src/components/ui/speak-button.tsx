@@ -68,25 +68,47 @@ interface SpeakButtonProps extends Omit<ButtonProps, 'children'> {
 /**
  * The reason a Listen failed, as a small overlay under (or, near the bottom of the screen, over) the
  * control: visible on touch, which has no tooltips, outside the button's semantics so it is announced,
- * and clamped inside the viewport however long the provider's message is. The page never grows a row
- * for it, and pressing the control retries and clears it.
+ * and clamped inside whatever a scrolling sheet, card or the viewport actually shows however long the
+ * provider's message is. The page never grows a row for it, and pressing the control retries and clears it.
  */
 function SpeechFailureBubble({ message, host }: { message: string; host: React.RefObject<HTMLSpanElement | null> }) {
   const bubble = React.useRef<HTMLSpanElement>(null);
   // Unclamped until measured, one layout pass before the browser paints.
-  const [pos, setPos] = React.useState<{ left: number; above: boolean } | null>(null);
+  const [pos, setPos] = React.useState<{ left: number; width: number; above: boolean } | null>(null);
   React.useLayoutEffect(() => {
     const control = host.current;
     const box = bubble.current;
     if (!control || !box) return;
     const anchor = control.getBoundingClientRect();
-    const width = box.getBoundingClientRect().width;
+    const measured = box.getBoundingClientRect();
     const margin = 8;
-    // Clamp the bubble's centre inside the viewport, then translate to the wrapper's own coordinates
-    // (`left` positions against the wrapper, which is the containing block).
+    // A sheet, a card or the dock clips what sticks out of its scrolling box, whatever the overlay's
+    // z-index, so the reason may only use the band the viewport and every clipping ancestor still show.
+    let bandLeft = 0;
+    let bandRight = window.innerWidth;
+    let bandTop = 0;
+    let bandBottom = window.innerHeight;
+    for (let ancestor = control.parentElement; ancestor; ancestor = ancestor.parentElement) {
+      const style = getComputedStyle(ancestor);
+      const rect = ancestor.getBoundingClientRect();
+      if (style.overflowX !== 'visible') {
+        bandLeft = Math.max(bandLeft, rect.left);
+        bandRight = Math.min(bandRight, rect.right);
+      }
+      if (style.overflowY !== 'visible') {
+        bandTop = Math.max(bandTop, rect.top);
+        bandBottom = Math.min(bandBottom, rect.bottom);
+      }
+    }
+    // `w-max` under its own max-width: the rendered width is this one, so position with it.
+    const width = Math.max(Math.min(measured.width, bandRight - bandLeft - margin * 2), 0);
+    // Centre it on the control, then keep it inside that band; `left` is against the wrapper.
     const center = anchor.left + anchor.width / 2;
-    const left = Math.min(Math.max(center - width / 2, margin), window.innerWidth - width - margin) - anchor.left;
-    setPos({ left, above: anchor.top > window.innerHeight / 2 });
+    const left = Math.min(Math.max(center - width / 2, bandLeft + margin), bandRight - margin - width) - anchor.left;
+    // Below the control when that fits, otherwise above it, so a nearby edge cannot hide it.
+    const fitsBelow = anchor.bottom + margin + measured.height <= bandBottom;
+    const fitsAbove = anchor.top - margin - measured.height >= bandTop;
+    setPos({ left, width, above: !fitsBelow && (fitsAbove || anchor.top > window.innerHeight / 2) });
   }, [host, message]);
   return (
     <span
@@ -95,7 +117,9 @@ function SpeechFailureBubble({ message, host }: { message: string; host: React.R
       // Until measured the bubble sits far off-screen left (negative offsets never create scroll
       // overflow), so the measuring layout cannot stretch the page sideways on a phone.
       style={
-        pos ? { left: pos.left, ...(pos.above ? { top: 'auto', bottom: '100%' } : { top: '100%' }) } : { left: -9999 }
+        pos
+          ? { left: pos.left, maxWidth: pos.width, ...(pos.above ? { top: 'auto', bottom: '100%' } : { top: '100%' }) }
+          : { left: -9999 }
       }
       className="absolute left-0 top-full z-40 mt-1 mb-1 w-max max-w-[min(20rem,calc(100vw-1rem))] max-h-24 overflow-y-auto rounded-md border border-ink-200 bg-surface px-2 py-1 text-left text-xs leading-snug font-normal whitespace-normal break-words text-bad-700 shadow-lg anim-fade"
     >
