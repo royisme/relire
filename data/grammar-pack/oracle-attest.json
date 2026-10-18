@@ -1,0 +1,26 @@
+{
+  "verbs": {
+    "aller": {
+      "source": "morphalou-3.1",
+      "ranAt": "2026-10-18T21:30:52.929Z",
+      "rowHash": "2a3e10aa66373045439298c57bd92298cfe3016ccd855cad88d2df542aa26f6e",
+      "agree": 38,
+      "disagree": 0
+    },
+    "avoir": {
+      "source": "morphalou-3.1",
+      "ranAt": "2026-10-18T21:30:52.929Z",
+      "rowHash": "a3f16265fabb573212e55f316add54bce5d72834cdac09fe7a28b0e6273fb1de",
+      "agree": 38,
+      "disagree": 0
+    },
+    "s-appeler": {
+      "source": "morphalou-3.1",
+      "ranAt": "2026-10-18T21:30:52.929Z",
+      "rowHash": "f306a183903149999a2c10cedd86a413c579677291e9dc6d2c766faebc791d9d",
+      "agree": 38,
+      "disagree": 0
+    }
+  },
+  "decisions": []
+}
