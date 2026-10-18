@@ -16,6 +16,7 @@
     "bun.lock",
     "*.md",
     "src/services/ai/prompts/defaults/**",
-    "marketing/**"
+    "marketing/**",
+    "src/data/grammar-pack/pack.json"
   ]
 }

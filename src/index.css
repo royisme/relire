@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* Corpus text is not a source of utility classes. */
+@source not '../data/grammar-pack';
+@source not './data/grammar-pack';
+
 @theme {
   --font-serif: 'Source Serif 4', Georgia, 'Songti SC', serif;
   --font-sans: 'Public Sans', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Segoe UI', sans-serif;
