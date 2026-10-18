@@ -50,13 +50,13 @@ test('a sentence with choices is cut into text and numbered groups', () => {
 });
 
 test('generated units become one storable batch: fresh ids, numbers from 1, set id, title and level, AI answer source, no quote', () => {
-  const { setId: _set, level: _level, ...base } = unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]);
+  const { setId: _set, level: _level, createdAt: _created, ...base } = unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS]);
   const generated = [
     { ...base, id: 'u1', unitNumber: 1, items: [{ ...ITEMS.FILL_BLANKS, articleQuote: 'Je suis' }] },
     { ...base, id: 'u2', unitNumber: 2 },
   ];
   let n = 0;
-  const batch = { setId: 'set-9', setTitle: 'Le matin', level: 'A2' as const };
+  const batch = { setId: 'set-9', setTitle: 'Le matin', level: 'A2' as const, createdAt: 1_700_000_000_123 };
   const stored = toStoredUnits(generated, { ...batch, makeId: () => `fresh-${++n}` });
   expect(stored.map((unit) => [unit.id, unit.unitNumber])).toEqual([
     ['fresh-1', 1],

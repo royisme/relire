@@ -52,6 +52,7 @@ async function seed(setId = 'set-1', ids = ['passage-1', 'passage-2']) {
       unitNumber: i + 1,
       setId,
       level: 'B1' as const,
+      createdAt: 1_700_000_000_000,
       readingPassage: { title: 'Le jardin', content },
     })),
   );

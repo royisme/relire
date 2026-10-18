@@ -113,6 +113,8 @@ export interface PrepareImportOptions {
   setId: string;
   /** The level the learner chose for the whole import. */
   level: ExerciseLevel;
+  /** When the batch was made (epoch milliseconds); every unit of it carries this value. */
+  createdAt: number;
   /** Answers the learner edited during review (see `answerKey`). */
   editedAnswers?: ReadonlySet<string>;
   /** Id source; replaceable so tests can be deterministic. */
@@ -128,7 +130,13 @@ export function prepareImport(
   draft: ImportDraft,
   source: ImportSource,
   mode: ImportMode,
-  { setId, level, editedAnswers = new Set<string>(), makeId = () => crypto.randomUUID() }: PrepareImportOptions,
+  {
+    setId,
+    level,
+    createdAt,
+    editedAnswers = new Set<string>(),
+    makeId = () => crypto.randomUUID(),
+  }: PrepareImportOptions,
 ) {
   const units: ExerciseUnit[] = [];
   const errors: ImportUnitError[] = [];
@@ -164,6 +172,7 @@ export function prepareImport(
       setId,
       setTitle: draft.materialTitle?.trim() || undefined,
       level,
+      createdAt,
       importSource: { ...source, mode, extractedText: draft.sourceText },
       items: unit.items.map((item) => ({
         ...item,

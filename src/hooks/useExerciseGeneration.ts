@@ -55,6 +55,7 @@ export function useExerciseGeneration(article: Article, onMissingKey: () => void
             setId: crypto.randomUUID(),
             setTitle: cleanArticleTitle(article.title) || undefined,
             level,
+            createdAt: Date.now(),
           }),
         );
         if (mine !== session.current) return;

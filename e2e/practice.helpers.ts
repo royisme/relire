@@ -24,13 +24,15 @@ export async function waitForArticle(page: Page) {
     .toBeGreaterThan(0);
 }
 
-/** Saves the units as one batch (`set-1`, B1 unless a unit says otherwise) and leaves the app on the library (the catalogue by default). */
+/** Saves the units as one batch (`set-1`, B1, a fixed creation time, unless a unit says otherwise) and leaves the app on the library (the catalogue by default). */
 export async function seedUnits(page: Page, units: unknown[] = CATALOG_EXERCISES.units) {
   await page.goto('/#/read');
   await waitForArticle(page);
   await page.evaluate(async (list) => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
-    await storage.saveUnits(list.map((unit) => ({ setId: 'set-1', level: 'B1', ...(unit as object) })) as never);
+    await storage.saveUnits(
+      list.map((unit) => ({ setId: 'set-1', level: 'B1', createdAt: 1_700_000_000_000, ...(unit as object) })) as never,
+    );
   }, units);
 }
 

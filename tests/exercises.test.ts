@@ -40,7 +40,7 @@ test('saveUnits stores a batch and lists every unit in unit order, each keeping 
   expect(await (await db()).getAllKeysFromIndex('units', 'setId', 'set-1')).toEqual(['a', 'b']);
 });
 
-test('saveUnits rejects a duplicate id, a mixed batch, a missing level and an invalid unit without storing anything', async () => {
+test('saveUnits rejects a duplicate id, a mixed batch, a missing level or creation time and an invalid unit without storing anything', async () => {
   await seedUnit();
   const fresh = { ...unitOf('OPEN_QA'), id: 'fresh' };
   expect(await failure(saveUnits([fresh, { ...fresh, id: 'unit-set-1' }]))).toBeInstanceOf(DuplicateUnitError);
@@ -51,6 +51,10 @@ test('saveUnits rejects a duplicate id, a mixed batch, a missing level and an in
 
   const { level: _level, ...unleveled } = fresh;
   expect(await failure(saveUnits([unleveled as typeof fresh]))).toBeInstanceOf(Error);
+  expect(await getUnit('fresh')).toBeUndefined();
+
+  const { createdAt: _created, ...undated } = fresh;
+  expect(await failure(saveUnits([undated as typeof fresh]))).toBeInstanceOf(Error);
   expect(await getUnit('fresh')).toBeUndefined();
 
   const broken = { ...unitOf('FILL_BLANKS'), id: 'broken', items: [] };

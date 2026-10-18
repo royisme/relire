@@ -14,8 +14,9 @@ import { setLabel } from '../../services/exercises/setLabel';
 import type { Article, PronunciationAssessment } from '../../types';
 import { cleanArticleTitle } from '../../utils/i18nHelpers';
 import { Link } from '../shell/Link';
-import { buttonVariants } from '../ui/button';
+import { Button, buttonVariants } from '../ui/button';
 import { PageHeader } from '../ui/page-header';
+import { DeleteSetDialog } from './DeleteSetDialog';
 import { GenerateForm } from './GenerateForm';
 import { OralPractice } from './OralPractice';
 import { UnitList } from './UnitList';
@@ -34,7 +35,8 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
   const [pickedId, setPickedId] = useState<string | null>(null);
   const article = articles.find((candidate) => candidate.id === pickedId) ?? articles[0] ?? null;
   const { rows, loading, error } = useUnitRows();
-  // No creation time is stored, so batches are ordered by name; units inside a batch by their number.
+  const [deleting, setDeleting] = useState<{ setId: string; label: string } | null>(null);
+  // Newest batch first (every unit of a batch carries its creation time); units inside a batch by their number.
   const sets = useMemo(() => {
     const bySet = new Map<string, typeof rows>();
     for (const row of rows) bySet.set(row.unit.setId, [...(bySet.get(row.unit.setId) ?? []), row]);
@@ -43,9 +45,10 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
         setId,
         label: setLabel(t, group[0].unit),
         level: group[0].unit.level,
+        createdAt: group[0].unit.createdAt,
         rows: group,
       }))
-      .sort((a, b) => a.label.localeCompare(b.label) || a.setId.localeCompare(b.setId));
+      .sort((a, b) => b.createdAt - a.createdAt || a.setId.localeCompare(b.setId));
   }, [rows, t]);
 
   return (
@@ -99,13 +102,23 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
         ) : sets.length > 0 ? (
           sets.map((set) => (
             <section key={set.setId} aria-labelledby={`practice-set-${set.setId}`} className="space-y-2">
-              <h4
-                id={`practice-set-${set.setId}`}
-                className="break-words font-serif text-base font-semibold text-ink-900"
-              >
-                {set.label}
-                <span className="ml-2 text-xs font-normal text-ink-500">{t(`levels.${set.level}`)}</span>
-              </h4>
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <h4
+                  id={`practice-set-${set.setId}`}
+                  className="min-w-0 break-words font-serif text-base font-semibold text-ink-900"
+                >
+                  {set.label}
+                  <span className="ml-2 text-xs font-normal text-ink-500">{t(`levels.${set.level}`)}</span>
+                </h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label={t('practice.deleteSetNamed', { title: set.label })}
+                  onClick={() => setDeleting({ setId: set.setId, label: set.label })}
+                >
+                  {t('practice.deleteSet')}
+                </Button>
+              </div>
               <UnitList rows={set.rows} />
             </section>
           ))
@@ -125,6 +138,7 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
           <OralPractice key={article.id} article={article} onAssessed={onAssessed} />
         </section>
       )}
+      {deleting && <DeleteSetDialog setId={deleting.setId} title={deleting.label} onClose={() => setDeleting(null)} />}
     </div>
   );
 }

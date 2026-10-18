@@ -90,7 +90,7 @@ export function ImportPage({ onCreated }: { onCreated: (article: Article) => voi
           { ...draft, units: draft.units.filter((unit) => selected.has(unit.id)) },
           source.result.source,
           source.result.mode,
-          { setId: crypto.randomUUID(), level, editedAnswers: edited },
+          { setId: crypto.randomUUID(), level, createdAt: Date.now(), editedAnswers: edited },
         );
         if (result.errors.length) {
           setError(

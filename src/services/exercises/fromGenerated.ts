@@ -1,7 +1,7 @@
 /**
  * Turns the units a model wrote for an article into one new batch that can be
- * stored: fresh unit ids, numbers from 1, the batch's set id, title and level
- * (no link to the article), and no `articleQuote` (it has done its job in the
+ * stored: fresh unit ids, numbers from 1, the batch's set id, title, level
+ * and creation time (no link to the article), and no `articleQuote` (it has done its job in the
  * answerability check). Pure. Does not call the model or storage.
  */
 import type { GeneratedSet } from '../../types/exerciseAi';
@@ -13,6 +13,7 @@ export function toStoredUnits(
     setId: string;
     setTitle?: string;
     level: ExerciseLevel;
+    createdAt: number;
     makeId?: () => string;
   },
 ): ExerciseUnit[] {
@@ -24,6 +25,7 @@ export function toStoredUnits(
     setId: options.setId,
     setTitle: options.setTitle,
     level: options.level,
+    createdAt: options.createdAt,
     items: unit.items.map(({ articleQuote: _quote, ...item }) => ({
       ...item,
       // The reference answer was written by the model, not printed in a book.

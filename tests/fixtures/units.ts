@@ -121,6 +121,7 @@ export function unitOf(type: ExerciseType, items: ExerciseItem[] = [ITEM_BY_TYPE
     id: `unit-${type.toLowerCase()}`,
     setId: 'set-1',
     level: 'A1',
+    createdAt: 1_700_000_000_000,
     section: 'GRAMMAIRE',
     unitNumber: 1,
     title: 'Exercice',

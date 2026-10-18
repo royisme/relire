@@ -84,6 +84,7 @@ test('malformed exercise data rejects the whole restore and changes nothing', as
     'duplicate unit ids': { units: [unit, unit] },
     'unit without a set id': { units: [{ ...unit, setId: undefined }] },
     'unit without a level': { units: [{ ...unit, level: undefined }] },
+    'unit without a creation time': { units: [{ ...unit, createdAt: undefined }] },
     'unit with an unknown level': { units: [{ ...unit, level: 'C2' }] },
     'state with a wrong key': { itemStates: [{ ...state, id: 'x' }] },
     'state with a missing field': { itemStates: [{ ...state, answer: undefined }] },

@@ -162,12 +162,15 @@ export type ExtractedUnit = z.infer<typeof ExtractedUnitSchema>;
 /**
  * A playable unit, self-contained: `setId` is shared by every unit saved in one
  * import or generation batch, `setTitle` names the batch when it has a title,
- * and `level` was chosen once for the batch. A unit never points at an article.
+ * `level` was chosen once for the batch and `createdAt` (epoch milliseconds) is
+ * the moment the batch was made, the same on every unit of it. A unit never
+ * points at an article.
  */
 export const ExerciseUnitSchema = ExtractedUnitSchema.safeExtend({
   setId: text,
   setTitle: text.optional(),
   level: ExerciseLevelSchema,
+  createdAt: z.number().int().positive(),
 });
 export type ExerciseUnit = z.infer<typeof ExerciseUnitSchema>;
 

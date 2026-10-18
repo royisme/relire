@@ -24,6 +24,7 @@ export function prepareDrills(
     setId: makeId(),
     setTitle: drills.drillTitle,
     level,
+    createdAt: Date.now(),
     section: 'EXTRA',
     unitNumber: 1,
     title: drills.drillTitle,

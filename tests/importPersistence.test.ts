@@ -47,6 +47,7 @@ test('a prepared import keeps the set id, the draft title, the chosen level and 
   const prepared = prepareImport(draft, { kind: 'text', name: 'Worksheet', pages: [] }, 'complete', {
     setId: 'set-import',
     level: 'C1',
+    createdAt: 1_700_000_000_000,
   });
   expect(prepared.errors).toEqual([]);
   await saveUnits(prepared.units);

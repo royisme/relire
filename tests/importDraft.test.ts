@@ -11,7 +11,7 @@ import {
 import { draftFixture } from './fixtures/importDraft';
 
 const textSource: ImportSource = { kind: 'text', name: 'Texte collé', pages: [] };
-const options = { setId: 'set-1', level: 'B1' as const };
+const options = { setId: 'set-1', level: 'B1' as const, createdAt: 1_700_000_000_000 };
 
 function sequentialIds() {
   let n = 0;
@@ -46,7 +46,12 @@ test('confirmed AI answers keep their provenance and never persist original file
   const result = prepareImport(draft, source, 'complete', options);
   expect(result.errors).toEqual([]);
   expect(result.units[0].items[0].answerSource).toBe('ai');
-  expect(result.units[0]).toMatchObject({ setId: 'set-1', setTitle: 'Mon document', level: 'B1' });
+  expect(result.units[0]).toMatchObject({
+    setId: 'set-1',
+    setTitle: 'Mon document',
+    level: 'B1',
+    createdAt: options.createdAt,
+  });
   expect(result.units[0].importSource).toEqual({ ...source, mode: 'complete', extractedText: draft.sourceText });
   expect(JSON.stringify(result)).not.toContain('SECRET');
 
