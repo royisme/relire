@@ -8,8 +8,8 @@ How a lead Claude Code session hands work to other agents and takes it back. Rea
 | --- | --- | --- | --- |
 | Lead | This Claude Code session | Writes the plan and the acceptance criteria, writes the worker prompt, dispatches, re-runs every check, reviews the diff, merges a reviewed worker branch into the current designated feature branch, locally and without asking (owner decision 2026-10-18) | Write the implementation itself |
 | Implementer | `pi` (GPT/GLM via `scripts/pi-dispatch.sh`) or the `implementer` subagent (Sonnet) | Executes an agreed plan inside a stated scope, in its own worktree, and reports | Change the plan, widen the scope, merge, push |
-| Reviewer | The `reviewer` subagent (Opus, read-only), or a read-only `pi` run on another model family | Accepts or rejects against the plan, with `file:line` findings | Edit anything. A reviewer that fixes what it finds destroys the evidence and reviews its own work next round |
-| Mechanical / research | `agy` (`antigravity/gemini-3.8-flash`, always through `pi`) | Simple tasks whose result a machine can check; cited read-only research | Anything that needs a design decision |
+| Reviewer | The `reviewer` subagent (Opus, read-only), or a read-only `pi` run on another model family (Gemini 4 Argon, quota-gated: section 2) | Accepts or rejects against the plan, with `file:line` findings | Edit anything. A reviewer that fixes what it finds destroys the evidence and reviews its own work next round |
+| Research / copy / mechanical | `agy` (`antigravity/gemini-3.8-flash`, always through `pi`) | Web search and cited research, gathering reference material, copy and corpus drafts (en, zh, fr), marketing and README copy, simple tasks whose result a machine can check | Multi-file code implementation; anything that needs a design decision |
 
 By owner decision 2026-10-18, the lead may merge a reviewed worker branch into the current designated feature branch locally without asking. Merging into `main`, pushing and opening PRs still happen only when the user asks, each time (CLAUDE.md: "Do not open PRs, merge or force-push unless asked"). Keep the gradient: the reviewer is never weaker than the implementer.
 
@@ -34,13 +34,41 @@ Use this loop only when a mistake would surface late: work that spans several fi
 ## 2. Which agent for which task
 
 1. **Hard or complex work goes to `pi` (GPT) or a Sonnet subagent.** Concurrency, state machines, design trade-offs, multi-file changes without an existing machine check (anything like the audio player).
-2. **Simple, machine-checkable work goes to `agy` `gemini-3.8-flash` through `pi`.** Mechanical replacements, doc lines, edits from given source text, moving i18n keys: work where a byte comparison, `i18n:check`, a test or a build decides right or wrong. Before dispatching, write down what "done right" means as something a script can check.
-3. **Cited research on `agy` runs at `high` thinking** (the script's default), with concrete questions. At `medium` it has produced claims without sources.
+2. **`agy` `gemini-3.8-flash` through `pi` is the default for three kinds of work, and it should be used heavily (owner decision 2026-10-18: its quota is large).** (a) Web search and online research. (b) Gathering reference material. (c) Copy and corpus work in Chinese, English and French: app i18n (en + zh), French learning content (sample reading texts, example sentences, exercise corpora), marketing and README copy. It also takes simple machine-checkable work: mechanical replacements, doc lines, edits from given source text, moving i18n keys, where a byte comparison, `i18n:check`, a test or a build decides right or wrong. Before dispatching, write down what "done right" means: as a script check where one exists, otherwise the output rules below.
+3. **Cited research on `agy` runs with `PI_THINKING=high`** (the script's default), with concrete questions. At `medium` it has produced claims without sources.
 4. **Never `gemini-3.1-pro`.** Unverified, and hard tasks belong to `pi` or Sonnet anyway.
 5. **If `pi` is rate-limited, wait for it or give the task to Sonnet. Never downgrade a hard task to `agy`.** Simple tasks are already on `agy` and are unaffected.
-6. **No multi-file implementation on `agy`.** There is no evidence it does that well.
+6. **No multi-file code implementation on `agy`.** There is no evidence it does that well.
+7. **`agy` is not sandboxed** (section 8). Give it a throwaway directory or a worktree, never the lead's checkout, and never secrets.
+
+Rules for `agy` output:
+
+- **Research** cites a URL for every claim and marks uncertain ones. Treat the report as leads and spot-check claims against the source.
+- **Copy and corpus drafts** come back as files in the throwaway directory or `.pi-runs/<task>/`. The lead (or a Sonnet worker) integrates them into the repo; `agy` does not edit the lead's checkout.
+- **Locale copy** keeps every key and `{{placeholder}}` intact and passes `bun run i18n:check`.
+- **French or any sample text** records its source and its licence or public-domain status. Never invent a source or a passage (CLAUDE.md: never invent data).
+- **Tone** follows `PRODUCT.md`: plain, no hype, no claims about exams or scores.
 
 Whoever did it, verification is the same (section 5), and `agy` output gets the stricter review.
+
+### External reviewer: Gemini 4 Argon
+
+Owner decision 2026-10-18.
+
+- **Role.** Second-opinion reviewer and advisor next to the in-house Opus `reviewer`, for design, plan and diff review where a different model family is wanted. Read-only: it never edits. Its verdict is advice; the lead spot-checks each finding against the code before acting. Model id through pi: `antigravity/gemini-4-argon` (agy itself exposes `gemini-4-argon-low|medium|high`).
+- **The quota is tight. Check it before every use** with `cd /tmp && agy -p "/usage"` (read-only, instant, no model call). The output is tab-separated lines, for example:
+
+  ```text
+  Gemini Models	Weekly Limit Remaining	100%	<reset time>
+  Gemini Models	Five Hour Limit Remaining	...
+  Claude and GPT models	Weekly Limit Remaining	1%	...
+  Gemini 4 Argon	Gemini 4 Argon Weekly Limit	96%	2026-10-24T00:47:35Z
+  ```
+
+- **Budget.** Measured 2026-10-18: one trivial smoke call (reply two words, thinking high) cost about 1% of the Argon weekly limit, so the budget is roughly tens of real reviews per week, not hundreds.
+- **When to use it.** Only at real review gates (a plan before big work, a diff before merge), never for routine lookups. If the Argon weekly limit is below 20%, use it only for the most important gate and use the Opus `reviewer` otherwise. If it is at 0 or the call fails, fall back to the `reviewer` and say so in the report; never silently skip a review.
+- **Other quotas.** The Gemini family (3.8 flash and so on) has its own, larger limit (the `Gemini Models` weekly and five-hour lines); research and copy go there. The `Claude and GPT models` line is the quota for Claude and GPT models reached through agy and was at 1% weekly: do not route work to `antigravity/claude-*` or `antigravity/gpt-oss-*`.
+- **How to run a review.** Give it the artifacts, not a summary: the spec, the full `git diff` and the raw check output. Put the diff and every file it needs into a throwaway directory or worktree, and run `scripts/pi-dispatch.sh <throwaway dir or worktree> antigravity/gemini-4-argon <prompt-file> <log>`. The prompt asks for the in-house reviewer's format (end of section 6): `Verdict` PASS or FAIL, then per finding `file:line`, the rule broken and the consequence, with no rewrites. agy is not sandboxed (section 8): never run it in the lead's checkout, never pass secrets.
 
 ## 3. Models
 
@@ -55,7 +83,9 @@ The owner's rules, reconciled with `pi --list-models` on 2026-10-18 (pi 1.3.0, a
 | Simple / research work | `antigravity/gemini-3.8-flash` | yes | Only through `scripts/pi-dispatch.sh` (it loads the agy-lean extension) |
 | Never | anything `deepseek/*`; `commandcode/*` | deepseek yes, commandcode no | commandcode had no balance and is no longer listed |
 | Never | `gemini-3.1-pro` | only as `google/gemini-3.1-pro-preview` | |
-| Ask before using | `magpie/*`, `antigravity/claude-*`, `antigravity/gemini-4-argon`, `antigravity/gpt-oss-120b`, `huggingface/*` | yes | Listed, but no owner rule covers them |
+| Review gate, quota-gated | `antigravity/gemini-4-argon` | yes | Read-only second opinion; check `agy -p "/usage"` first (section 2) |
+| Never route | `antigravity/claude-*`, `antigravity/gpt-oss-*` | yes | Their shared agy quota was at 1% weekly (section 2) |
+| Ask before using | `magpie/*`, `huggingface/*` | yes | Listed, but no owner rule covers them |
 
 Always pass `--model <provider>/<id>`. pi's own default is `antigravity/gemini-3.8-flash`, so a call without `--model` silently runs Gemini.
 
@@ -74,7 +104,8 @@ Run from the checkout to be reviewed. `--tools read,grep,find,ls` restricts pi's
 ```bash
 task=<short-name>
 mkdir -p .pi-runs/$task
-git worktree add ../relire-wt/$task -b pi/$task
+git worktree add -b pi/$task ../relire-wt/$task HEAD
+git -C ../relire-wt/$task log -1   # must be the commit you expect
 ln -s "$PWD/node_modules" ../relire-wt/$task/node_modules
 # write the prompt to .pi-runs/$task/prompt.md (template in section 6)
 nohup scripts/pi-dispatch.sh ../relire-wt/$task openai-codex/gpt-5.6-sol \
@@ -119,6 +150,7 @@ You are the implementer for one task in Relire, working in the git worktree <wor
 - Every user-visible string goes through t(), with the key in both src/locales/en.json and zh.json.
 - Never write, print or commit an API key, token or credential. Do not read .env files or ~/.pi, ~/.gemini, ~/.config credentials.
 - Never invent data: no sample stats, fake scores or fallback AI answers. Empty means empty; failures show the real error.
+- Nothing has shipped: write no backward-compatibility, legacy-fallback or migration code for unreleased states, and no defensive code for cases that cannot happen. Add an abstraction only when a second real caller exists. When unsure, take the smaller change and report the question instead of building options.
 - AI calls go through src/services/ai; prompt wording lives in template files, never in TypeScript.
 - Comments and commit messages in English. Chinese only in zh.json and *.zh.txt prompts.
 - A change a user could notice gets one line in CHANGELOG.md (Unreleased) in the same commit.
@@ -145,6 +177,7 @@ For a reviewer, replace the task with: the plan path, the diff (or the branch to
 ## 7. Worktree rules for Relire
 
 - Worktrees go **outside** the repo (`../relire-wt/<task>`). `bun test` and `oxlint .` scan recursively, so a nested worktree gets swept into the lead's checks. `.works/` belongs to the user; do not reuse it without asking.
+- **Create worktrees by hand from the current HEAD** (`git worktree add -b <branch> ../relire-wt/<task> HEAD`), check `git log -1` there, and give the worker the absolute path. Do not rely on the Agent tool's `isolation: "worktree"` (section 8).
 - No `.env` or secret file is needed in a worktree; Relire's keys live in the user's browser. Symlink `node_modules` from the main checkout. Because it is shared, nothing may install into it from a worktree.
 - **Never two executors on the same file at the same time.** Split tasks by file before dispatching.
 - **The lead runs e2e by default; a worker only when its task explicitly allows it, with the port check and `CI=1`. One run at a time across all checkouts.** `playwright.config.ts` serves on port 5174 with `reuseExistingServer: !process.env.CI`, so a dev server left on 5174 by another checkout gets tested silently instead of yours. Before e2e: `lsof -iTCP:5174 -sTCP:LISTEN` must print nothing. Workers do not run Playwright unless their task explicitly allows it, and then with the port check and `CI=1` (template, section 6).
@@ -154,6 +187,8 @@ For a reviewer, replace the task with: the plan path, the diff (or the branch to
 
 - **Extensions hijack tasks. Always use `-ne`** (the script does). Installed delegation extensions have taken over a real implementation task, launched a child agent that failed, and implemented nothing. A small smoke task never triggers the delegation, so "a small task worked" proves nothing about a large one.
 - **`pi auth check` can lie.** It only checks that a local credential exists; the server can still reject it, and a rejection can also be temporary. Smoke-test before concluding either way: `pi -p -ne --no-session --model <id> --tools read "Reply with one word: ready"`. A run that exits 1 within seconds with no changes is the symptom.
+- **The agy route through `pi` works here (smoke test 2026-10-18, pi 1.3.0, agy 1.4.2).** `scripts/pi-dispatch.sh /tmp/agy-smoke antigravity/gemini-3.8-flash <prompt> <log> 120` answered "smoke ok" in about 7 s, exit 0. The log shows `[watchdog] attempt 1 ...`, the answer, then `[watchdog] exit 0 ...`. Same on 2026-10-18 for `antigravity/gemini-4-argon`: `scripts/pi-dispatch.sh /tmp/agy-smoke antigravity/gemini-4-argon <prompt> <log> 120` answered "smoke ok" in about 15 s, exit 0.
+- **`isolation: "worktree"` on the Agent tool can branch from an old base.** On 2026-10-18 it created a worktree 83 commits behind HEAD, so the worker's tests, docs and file paths did not match and its commit could not be applied. Create worktrees by hand from HEAD (section 7).
 - **Never print API keys or tokens.** Do not run `pi auth print-api-key` or `pi auth print-bearer-token`. Error output can contain partly masked credentials; delete such logs after reading them.
 - **Two kinds of stall:**
   - *Startup hang:* process alive, CPU time barely moving, no network connection, no file changes in the worktree. The script's 48 s watchdog catches this; for anything outside the script, wrap it in `timeout`.
