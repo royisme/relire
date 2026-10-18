@@ -1,6 +1,7 @@
 /**
- * One numbered row of the sheet: the number (a mark once checked), the control
- * for the item's type, its buttons and notes. The row owns the keyboard rules
+ * One numbered row of the sheet: the number (a mark once checked), a Listen
+ * control for the prompt beside the grammar topic, the control for the item's
+ * type, its buttons and notes. The row owns the keyboard rules
  * for the text fields its control registers: Enter moves to the next blank,
  * then to the first empty one, then checks; Enter during IME composition does
  * nothing. It also tells the sheet which field the character bar is bound to.
@@ -8,11 +9,12 @@
 import { useCallback, useRef, type FocusEvent, type KeyboardEvent } from 'react';
 import { Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { isAnswerFilled } from '../../services/exercises/answer';
+import { isAnswerFilled, spokenPrompt } from '../../services/exercises/answer';
 import { effectiveItemType, type ExerciseAnswer, type ExerciseItem, type ExerciseUnit } from '../../types/exercises';
 import type { ItemRuntime } from '../../hooks/useExerciseUnit';
 import { CONTROLS } from './controls';
 import type { TextInputElement } from './controls/types';
+import { SpeakButton } from '../ui/speak-button';
 import { ItemActions } from './ItemActions';
 import { ItemNotes } from './ItemNotes';
 
@@ -25,13 +27,27 @@ interface ItemRowProps {
   onCheck: () => void;
   onHint: () => void;
   onExplain: () => void;
+  onRedo: () => void;
   /** The learner put the cursor in this field: the character bar types into it. */
   onBind: (element: TextInputElement) => void;
 }
 
-export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExplain, onBind, onWord }: ItemRowProps) {
+export function ItemRow({
+  unit,
+  item,
+  runtime,
+  onAnswer,
+  onCheck,
+  onHint,
+  onExplain,
+  onRedo,
+  onBind,
+  onWord,
+}: ItemRowProps) {
   const { t } = useTranslation();
   const type = effectiveItemType(item, unit);
+  // The spoken prompt: the item's own audio when it has some, otherwise its words without the markup.
+  const audio = item.audioText?.trim() || spokenPrompt(item.prompt);
   const Control = CONTROLS[type];
   const { checked, busy } = runtime;
   const locked = Boolean(checked) || busy === 'check';
@@ -79,7 +95,20 @@ export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExpl
         {checked && <span className="sr-only">{checked.correct ? t('practice.right') : t('practice.wrong')}</span>}
       </span>
       <div className="min-w-0 space-y-3">
-        <p className="text-xs text-ink-500">{t(`grammarTags.${item.grammarTag}`)}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="text-xs text-ink-500">{t(`grammarTags.${item.grammarTag}`)}</p>
+          {/* A dictation item has its own Listen button beside the field, next to its audio. */}
+          {audio && type !== 'NUMBER_DICTATION' && (
+            <SpeakButton
+              text={audio}
+              label={t('practice.listen')}
+              stopLabel={t('reader.stop')}
+              variant="ghost"
+              size="icon"
+              className="-my-2 shrink-0"
+            />
+          )}
+        </div>
         <div onKeyDown={onKeyDown} onFocus={onFocus}>
           <Control
             item={item}
@@ -98,6 +127,7 @@ export function ItemRow({ unit, item, runtime, onAnswer, onCheck, onHint, onExpl
           onCheck={onCheck}
           onHint={onHint}
           onExplain={onExplain}
+          onRedo={onRedo}
         />
         <ItemNotes item={item} runtime={runtime} onWord={onWord} />
       </div>

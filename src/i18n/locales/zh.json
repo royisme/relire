@@ -24,7 +24,8 @@
     "main": "主导航",
     "collapse": "收起侧边栏",
     "expand": "展开侧边栏",
-    "due": "{{count}} 个待复习"
+    "due": "{{count}} 个待复习",
+    "toReview": "{{count}} 道待复习"
   },
   "theme": {
     "label": "主题",
@@ -185,6 +186,8 @@
     "checkAll": "全部检查",
     "hint": "提示",
     "explain": "讲解",
+    "redo": "重做",
+    "redoTitle": "清空这道题的作答，再试一次。作答记录会留在错题本。",
     "resetUnit": "重置本组",
     "reset": "重置",
     "resetTitle": "重置这一组？",
@@ -344,7 +347,7 @@
     "strictAccentsNote": "开启后，重音符号写错即判错；关闭时，不带重音符号的答案也算对。",
     "dictationSpeed": "听写播放速度",
     "dictationSpeedNote": "点“播放”时，听写内容朗读的速度。",
-    "speakAfterCheck": "检查后再播放",
+    "speakAfterCheck": "听写检查后再播放",
     "speakAfterCheckNote": "听写题检查后，再播放一遍它的数字。"
   },
   "aiSettings": {

@@ -83,7 +83,7 @@ test('wrong answer → grouped notebook → explanation → actual word saved �
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).first().click();
   await page.getByRole('link', { name: 'Words', exact: true }).click();
   await expect(page.getByText('pain', { exact: true }).first()).toBeVisible();
-  await page.getByRole('link', { name: 'Mistakes', exact: true }).click();
+  await page.getByRole('link', { name: /^Mistakes/ }).click();
   await entry(page).getByRole('link', { name: 'Retry in unit' }).click();
   await expect(row(page, 'Je ne').getByRole('textbox')).toHaveValue('mangez');
   await expect(row(page, 'Je ne').getByRole('textbox')).not.toBeEditable();
@@ -142,18 +142,18 @@ test('empty notebook, real read error and query retry; mounted notifications ref
     const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     const d = await db();
     const original = d.getAllFromIndex.bind(d);
-    let refuse = true;
+    // The notebook and the My study → Mistakes count both read attempts: keep refusing until the retry.
+    const flag = globalThis as { notebookRefuses?: boolean };
+    flag.notebookRefuses = true;
     d.getAllFromIndex = ((...args: Parameters<typeof original>) => {
-      if (args[0] === 'attempts' && refuse) {
-        refuse = false;
-        return Promise.reject(new Error('notebook disk refused'));
-      }
+      if (args[0] === 'attempts' && flag.notebookRefuses) return Promise.reject(new Error('notebook disk refused'));
       return original(...args);
     }) as typeof d.getAllFromIndex;
     const { exercisesChanged } = await import(/* @vite-ignore */ '/src/storage/exerciseEvents.ts' as string);
     exercisesChanged();
   });
   await expect(page.getByRole('alert')).toContainText('notebook disk refused');
+  await page.evaluate(() => ((globalThis as { notebookRefuses?: boolean }).notebookRefuses = false));
   await page.getByRole('button', { name: 'Retry', exact: true }).click();
   await expect(page.getByText('No mistakes yet.', { exact: false })).toBeVisible();
   await wrong(page);
@@ -323,6 +323,6 @@ test('late explanation is dropped after unmount', async ({ page, ai }) => {
   await page.getByRole('link', { name: 'Words', exact: true }).click();
   await pause(900);
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('link', { name: 'Mistakes', exact: true }).click();
+  await page.getByRole('link', { name: /^Mistakes/ }).click();
   await expect(page.getByText('Unmounted answer')).toHaveCount(0);
 });

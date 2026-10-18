@@ -1,8 +1,8 @@
 /**
  * Helpers for the learner's answer to one item: how many blanks and choice
- * groups a prompt has, the empty answer for an item, and whether an answer is
- * filled. Pure and React-free; shared by grading and the exercise sheet.
- * Does not own grading rules or persistence.
+ * groups a prompt has, the prompt as plain speech, the empty answer for an item,
+ * and whether an answer is filled. Pure and React-free; shared by grading and
+ * the exercise sheet. Does not own grading rules or persistence.
  */
 import type { ExerciseAnswer, ExerciseItem, ExerciseType } from '../../types/exercises';
 
@@ -12,6 +12,20 @@ export const countBlanks = (prompt: string) => (prompt.match(/\[___\]/g) || []).
 /** Inline `{a|b}` option groups in a CHOICE_SELECT prompt, in order. */
 export const choiceGroups = (prompt: string) =>
   [...prompt.matchAll(/\{([^}]+)\}/g)].map((match) => match[1].split('|').map((option) => option.trim()));
+
+/**
+ * A prompt as something to read aloud: `[___]` blanks and `{a|b}` groups are
+ * markup, not words, so they are left out instead of being spoken.
+ */
+export function spokenPrompt(prompt: string): string {
+  return choicePieces(prompt)
+    .filter((piece) => piece.kind === 'text')
+    .map((piece) => piece.text)
+    .join(' ')
+    .replace(/\[___\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
 /** The answer a learner starts from; dialogue lines start in the printed order. */
 export function emptyAnswer(item: Pick<ExerciseItem, 'prompt' | 'options'>): ExerciseAnswer {

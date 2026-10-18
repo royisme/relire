@@ -1,7 +1,7 @@
 /**
- * One unit on one sheet: a single bordered surface with the title and
- * instruction, numbered hairline rows, and a footer with "Check all", the unit
- * reset and one status line. It draws the state of `useExerciseUnit` and keeps
+ * One unit on one sheet: a single bordered surface with the title, instruction
+ * and the running count of what is checked, numbered hairline rows, and a footer
+ * with "Check all" and the unit reset. It draws the state of `useExerciseUnit` and keeps
  * only what is about this screen: the field the character bar types into, the
  * open explanation and the open reset confirmation. A READING_CLOZE unit's
  * passage sits beside the questions from `md` (stacked above them on phones)
@@ -100,6 +100,7 @@ export function UnitSheet({
           onCheck={() => void session.check(item.id)}
           onHint={() => void session.requestHint(item.id)}
           onExplain={() => explain(item.id)}
+          onRedo={() => void session.resetItem(item.id)}
           onBind={setBound}
         />
       ))}
@@ -136,6 +137,10 @@ export function UnitSheet({
               {t('practice.example')}: {unit.example}
             </p>
           )}
+          {/* The same counts the footer used to carry, where they are visible while answering. */}
+          <p aria-live="polite" className="tnum min-h-5 text-sm text-ink-600">
+            {t('practice.progress', { checked: progress.checked, total: progress.total, correct: progress.correct })}
+          </p>
         </header>
 
         {cloze ? (
@@ -163,13 +168,9 @@ export function UnitSheet({
             <RotateCcw className="h-4 w-4" aria-hidden="true" />
             <span>{t('practice.resetUnit')}</span>
           </Button>
-          {session.saveError ? (
-            <p role="alert" className="min-h-5 min-w-0 break-words text-sm text-bad-700 sm:ml-auto">
+          {session.saveError && (
+            <p role="alert" className="min-w-0 break-words text-sm text-bad-700 sm:ml-auto">
               {t('practice.saveFailed', { msg: session.saveError })}
-            </p>
-          ) : (
-            <p aria-live="polite" className="tnum min-h-5 text-sm text-ink-600 sm:ml-auto">
-              {t('practice.progress', { checked: progress.checked, total: progress.total, correct: progress.correct })}
             </p>
           )}
         </footer>

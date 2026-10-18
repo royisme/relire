@@ -24,7 +24,8 @@
     "main": "Main navigation",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
-    "due": "{{count}} due"
+    "due": "{{count}} due",
+    "toReview": "{{count}} to review"
   },
   "theme": {
     "label": "Theme",
@@ -188,6 +189,8 @@
     "checkAll": "Check all",
     "hint": "Hint",
     "explain": "Explain",
+    "redo": "Redo",
+    "redoTitle": "Clear this answer and try it again. Your attempts stay in Mistakes.",
     "resetUnit": "Reset this unit",
     "reset": "Reset",
     "resetTitle": "Reset this unit?",
@@ -348,7 +351,7 @@
     "strictAccentsNote": "On, an answer is only correct with the right accents. Off, an answer without accents still counts.",
     "dictationSpeed": "Dictation speed",
     "dictationSpeedNote": "How fast a dictation item is read when you press Listen.",
-    "speakAfterCheck": "Speak after checking",
+    "speakAfterCheck": "Speak dictation after checking",
     "speakAfterCheckNote": "After a dictation item is checked, its number is spoken again."
   },
   "aiSettings": {

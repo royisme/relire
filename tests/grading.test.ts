@@ -6,6 +6,7 @@ import {
   expectedAnswerText,
   isAnswerFilled,
   recordedAnswerText,
+  spokenPrompt,
 } from '../src/services/exercises/answer';
 import { buildAttempt, gradeItem, gradeUnitItem, normalizeFrench } from '../src/services/exercises/grading';
 import type { ExerciseAnswer, ExerciseItem, ExerciseType } from '../src/types/exercises';
@@ -193,6 +194,14 @@ describe('answer helpers', () => {
       ['a', 'b'],
       ['c', 'd'],
     ]);
+  });
+
+  test('a prompt spoken aloud keeps its words and leaves out the markup', () => {
+    expect(spokenPrompt('Je ne [___] pas de pain (manger).')).toBe('Je ne pas de pain (manger).');
+    expect(spokenPrompt('Le blé pour {moi|me} est {inutile|utile}.')).toBe('Le blé pour est .');
+    expect(spokenPrompt('  Tu [___]  polonais  et elle [___] belge. ')).toBe('Tu polonais et elle belge.');
+    // Nothing to say: the sheet shows no Listen control rather than an empty clip.
+    expect(spokenPrompt('{a|b}')).toBe('');
   });
 
   test('empty answers are sized to the prompt', () => {

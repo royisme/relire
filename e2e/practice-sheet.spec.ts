@@ -1,7 +1,8 @@
 /**
  * The unit sheet: FILL_BLANKS, CHOICE_SELECT and WORD_TRANSFORM answered right and wrong from
- * the catalogue fixtures, what a wrong answer looks like, and batch checking. The remaining
- * types are covered by practice-choice-order.spec.ts and practice-writing-listening.spec.ts.
+ * the catalogue fixtures, what a wrong answer looks like, batch checking, the per-item Listen
+ * control and redoing one item. The remaining types are covered by practice-choice-order.spec.ts
+ * and practice-writing-listening.spec.ts.
  */
 import { expect, test } from './fixtures';
 import { checkButton, openUnit, row, seedUnits, stored } from './practice.helpers';
@@ -162,4 +163,53 @@ test.describe('transform the word', () => {
     await struck(one.getByRole('textbox'));
     await expect(one.getByText('intriguée', { exact: true })).toBeVisible();
   });
+});
+
+test('an ordinary item speaks its prompt from one Listen control on its meta line', async ({ page, ai }) => {
+  ai.ttsDelayMs = 50;
+  await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+  const item = row(page, 'Je ne');
+  const listen = item.getByRole('button', { name: 'Listen', exact: true });
+  await expect(listen).toHaveCount(1);
+  const box = (await listen.boundingBox())!;
+  expect(box.width).toBeGreaterThanOrEqual(40);
+  expect(box.height).toBeGreaterThanOrEqual(40);
+
+  // Through the shared speech layer: the clip is synthesized once, and the pressed control is the stop button.
+  await listen.click();
+  await expect.poll(() => ai.calls.tts).toBe(1);
+  await expect(item.getByRole('button', { name: 'Stop', exact: true })).toBeVisible();
+});
+
+test('Redo appears only once an item is checked, clears that item alone and keeps its attempts', async ({ page }) => {
+  await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+  const done = row(page, 'Je ne');
+  const wrong = row(page, "Si tu m'");
+  const [first, second] = [wrong.getByRole('textbox').nth(0), wrong.getByRole('textbox').nth(1)];
+  await first.fill('apprivoise');
+  await second.fill('auron');
+  await done.getByRole('textbox').fill('mange');
+  await expect(wrong.getByRole('button', { name: 'Redo', exact: true })).toHaveCount(0);
+
+  await checkButton(wrong).click();
+  await expect(wrong.getByText('Incorrect', { exact: true })).toBeAttached();
+  const redo = wrong.getByRole('button', { name: 'Redo', exact: true });
+  await redo.click();
+  await expect(redo).toHaveCount(0);
+  await expect(first).toHaveValue('');
+  await expect(first).toBeEditable();
+  await expect(done.getByRole('textbox')).toHaveValue('mange');
+
+  // Attempts are history: the mistake stays in the notebook, counted and still to revisit.
+  await page.waitForTimeout(400);
+  const { attempts, itemStates } = await stored(page);
+  expect(attempts).toHaveLength(1);
+  expect(itemStates.map((state: { itemId: string }) => state.itemId)).not.toContain('fb-2');
+
+  // The notebook counts it as unresolved, on the My study → Mistakes row.
+  await page.goto('/#/study/words');
+  const mistakes = page.getByRole('link', { name: /^Mistakes/ });
+  await expect(mistakes).toContainText('1');
+  await mistakes.click();
+  await expect(page.getByRole('listitem').filter({ hasText: "Si tu m'" })).toContainText('To revisit');
 });

@@ -313,6 +313,25 @@ export async function checkItem(input: CheckInput): Promise<CheckOutcome> {
 }
 
 /**
+ * Clears one item's state (answer, result and flags) and keeps its attempts, so
+ * the mistake stays in the notebook until a later correct attempt resolves it.
+ * Other items and the unit's reset token are untouched. Resolves false when the
+ * item had no state to clear.
+ */
+export async function clearItemState(unitId: string, itemId: string): Promise<boolean> {
+  const d = await db();
+  const tx = d.transaction('itemStates', 'readwrite');
+  const cleared = await settle(tx, async () => {
+    const key = itemStateId(unitId, itemId);
+    if (!(await tx.objectStore('itemStates').getKey(key))) return false;
+    await tx.objectStore('itemStates').delete(key);
+    return true;
+  });
+  if (cleared) exercisesChanged();
+  return cleared;
+}
+
+/**
  * Clears the unit's current states and keeps its attempts, and moves the reset
  * token so work started before the reset cannot write afterwards. Resolves with
  * the new token; a screen that stays on the unit should keep using that one.

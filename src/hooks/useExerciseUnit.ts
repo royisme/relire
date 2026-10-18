@@ -4,12 +4,15 @@
  * explanations through `exerciseUnit/actions`. The screen only draws this and
  * never touches storage. Leaving the unit drops late results silently; a reset
  * moves the reset token, so work that began before it cannot write after it.
+ * Redoing one item clears its own row and drops that item's queued draft, so the
+ * old answer cannot be written back.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getUnitSnapshot, resetUnit, saveItemProgress, StaleResetError } from '../storage/exercises';
+import { clearItemState, getUnitSnapshot, resetUnit, saveItemProgress, StaleResetError } from '../storage/exercises';
 import { errorMessage } from '../services/ai/errors';
 import type { ExerciseAnswer, ExerciseUnit } from '../types/exercises';
 import { runCheck, runExplanation, runHint, type ActionContext } from './exerciseUnit/actions';
+import { cancelDrafts, dropDraft, queueDraft, type DraftMap } from './exerciseUnit/drafts';
 import {
   checkable,
   emptyItems,
@@ -47,6 +50,8 @@ export interface ExerciseUnitSession {
   requestExplanation: (itemId: string) => Promise<void>;
   /** Clears the answers and keeps the history. Resolves false (and sets `resetError`) when it failed. */
   reset: () => Promise<boolean>;
+  /** Clears one item's answer and result, keeping its attempts, so it can be tried again. */
+  resetItem: (itemId: string) => Promise<void>;
   resetting: boolean;
   resetError: string | null;
   /** Reads the unit again (after a read failure). */
@@ -75,7 +80,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey }: Options): Exer
   const token = useRef(0);
   const itemsRef = useRef<ItemMap>({});
   const unitRef = useRef<ExerciseUnit | null>(null);
-  const drafts = useRef(new Map<string, { answer: ExerciseAnswer; token: number; timer: number }>());
+  const drafts = useRef<DraftMap>(new Map());
   // Work in flight by `kind:itemId`, so a second press before the screen redraws starts nothing.
   const running = useRef(new Set<string>());
   const onMissingKeyRef = useRef(onMissingKey);
@@ -84,27 +89,21 @@ export function useExerciseUnit(unitId: string, { onMissingKey }: Options): Exer
     onMissingKeyRef.current = onMissingKey;
   });
 
-  const cancelDrafts = useCallback(() => {
-    drafts.current.forEach((draft) => window.clearTimeout(draft.timer));
-    drafts.current.clear();
-  }, []);
-
   const reload = useCallback(() => {
     endSession();
-    cancelDrafts();
+    cancelDrafts(drafts.current);
     unitRef.current = null;
     setResetting(false);
     setResetError(null);
     setLoad({ status: 'loading' });
     setLoadKey((key) => key + 1);
-  }, [cancelDrafts, endSession]);
+  }, [endSession]);
 
   const writeDraft = useCallback(
     (itemId: string) => {
       const draft = drafts.current.get(itemId);
       if (!draft) return;
-      window.clearTimeout(draft.timer);
-      drafts.current.delete(itemId);
+      dropDraft(drafts.current, itemId);
       const mine = session.current;
       const isCurrent = () => mine === session.current && draft.token === token.current;
       saveItemProgress(unitId, itemId, draft.token, { answer: draft.answer }).then(
@@ -177,13 +176,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey }: Options): Exer
     const unit = unitRef.current;
     if (!unit || itemsRef.current[itemId]?.checked) return;
     patch(itemId, { answer, error: null });
-    const previous = drafts.current.get(itemId);
-    if (previous) window.clearTimeout(previous.timer);
-    drafts.current.set(itemId, {
-      answer,
-      token: token.current,
-      timer: window.setTimeout(() => writeDraft(itemId), DRAFT_DELAY_MS),
-    });
+    queueDraft(drafts.current, itemId, { answer, token: token.current }, DRAFT_DELAY_MS, writeDraft);
   };
 
   /** Runs `work` on the open unit unless the same work for the same item is already running. */
@@ -220,7 +213,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey }: Options): Exer
     try {
       const next = await resetUnit(unit.id);
       if (mine !== session.current) return false;
-      cancelDrafts();
+      cancelDrafts(drafts.current);
       token.current = next;
       itemsRef.current = emptyItems(unit);
       setItems(itemsRef.current);
@@ -231,6 +224,22 @@ export function useExerciseUnit(unitId: string, { onMissingKey }: Options): Exer
       return false;
     } finally {
       if (mine === session.current) setResetting(false);
+    }
+  };
+
+  const resetItem = async (itemId: string) => {
+    const unit = unitRef.current;
+    if (!unit) return;
+    // The draft queued before the redo would write the old answer back into the cleared item.
+    dropDraft(drafts.current, itemId);
+    const mine = session.current;
+    try {
+      await clearItemState(unit.id, itemId);
+      if (mine !== session.current) return;
+      const fresh = emptyItems(unit)[itemId];
+      if (fresh) patch(itemId, fresh);
+    } catch (err) {
+      if (mine === session.current) patch(itemId, { error: errorMessage(err) });
     }
   };
 
@@ -248,6 +257,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey }: Options): Exer
     requestHint: (itemId) => once(`hint:${itemId}`, (u) => runHint(context(u), itemId)),
     requestExplanation: (itemId) => once(`explain:${itemId}`, (u) => runExplanation(context(u), itemId)),
     reset,
+    resetItem,
     resetting,
     resetError,
     reload,
