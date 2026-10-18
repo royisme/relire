@@ -16,6 +16,9 @@ Principles that shape every item: nothing has shipped, so no compatibility code;
 | Grammar pack P1 | Schema, generator, machine checks, delivery proof | `docs/grammar-pack.md` section 9 |
 | Grammar pack P2 | Build with publish gate (only `reviewed` rows ship), review CLI, validated lazy loader, first pack of the 4 control verbs (reviewed by the owner 2026-10-18) | `docs/grammar-pack.md` section 9 |
 | Conjugation engine to `src/` (CP1) and Morphalou oracle (P3) | Generator and rule tables live in `src/services/conjugation/`; offline oracle against Morphalou 3.1 (all four controls attested; the extra `st` for `être` 3pl is not adopted) | `docs/grammar-pack.md` Part 3 F2, section 5 |
+| Import source step | Thumbnails, up to five images per request (reading order), remove one image or the PDF, clear pasted text, discard in place without the leave dialog; the extraction mode select keeps a fixed height | `docs/merge-progress.md` (import), `CHANGELOG.md` |
+| Practice as exercise sets | Practice lists sets in a table (search, level filter, sortable columns, delete with a named confirmation); a set page lists its exercises with per-exercise delete; "Add exercises" dialog holds import and "from an article"; Library and Practice tables share shadcn Table with TanStack Table | `DESIGN.md` "Data tables", `docs/architecture.md` |
+| UI component library | shadcn/ui on Base UI is set up (`components.json`, `@/` alias, tokens mapped); only Table is generated so far; existing hand-written primitives are not migrated | `docs/conventions.md` "UI components" |
 
 ## Next
 
@@ -26,6 +29,8 @@ Principles that shape every item: nothing has shipped, so no compatibility code;
 
 ## Later
 
+- Migrate the hand-written UI primitives (overlay Dialog/Sheet/Drawer, Segmented, MenuButton) to shadcn/Base UI components, one at a time, when the owner asks; the e2e suite asserts their behaviour.
+- Lazy-load TanStack Table (it adds about 43 kB to the main chunk through the Library table) if first-load size matters.
 - Optional scoring behind a Settings switch (auto-score after each shadowing take); no auto player mode in v1.
 - Remaining test gaps recorded in `docs/merge-progress.md` (negative assertions that cannot fail; delete-batch and edited-sentence recordings).
 - Real-device checks (iOS Safari, real microphone waveforms, device voices) and a real-provider smoke of `transcribeMaterial`.
