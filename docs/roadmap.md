@@ -15,7 +15,7 @@ Principles that shape every item: nothing has shipped, so no compatibility code;
 | Import | Article import (Read) and exercise import (Practise); batches newest first, deletable | `docs/merge-progress.md` |
 | Grammar pack P1 | Schema, generator, machine checks, delivery proof | `docs/grammar-pack.md` section 9 |
 | Grammar pack P2 | Build with publish gate (only `reviewed` rows ship), review CLI, validated lazy loader, first pack of the 4 control verbs (reviewed by the owner 2026-10-18) | `docs/grammar-pack.md` section 9 |
-| Conjugation engine to `src/` (CP1) and Morphalou oracle (P3) | Generator and rule tables live in `src/services/conjugation/`; offline oracle against Morphalou 3.1 (three of four controls attested; `être` waits for an owner decision) | `docs/grammar-pack.md` Part 3 F2, section 5 |
+| Conjugation engine to `src/` (CP1) and Morphalou oracle (P3) | Generator and rule tables live in `src/services/conjugation/`; offline oracle against Morphalou 3.1 (all four controls attested; the extra `st` for `être` 3pl is not adopted) | `docs/grammar-pack.md` Part 3 F2, section 5 |
 
 ## Next
 
