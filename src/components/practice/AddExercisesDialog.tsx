@@ -1,5 +1,5 @@
-/** Owns the two add choices and generation article picker; GenerateForm owns generation, not navigation. */
-import { useState } from 'react';
+/** Owns the three add choices and the article picker; each form owns its own work, not navigation. */
+import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '../../hooks/useRoute';
 import type { Article } from '../../types';
@@ -8,6 +8,11 @@ import { Link } from '../shell/Link';
 import { Button, buttonVariants } from '../ui/button';
 import { Dialog, OverlayHeader } from '../ui/overlay';
 import { GenerateForm } from './GenerateForm';
+
+// Lazy so the conjugation engine and the pack that the drill form needs stay out of the main chunk.
+const ConjugationDrillForm = lazy(() =>
+  import('./ConjugationDrillForm').then((module) => ({ default: module.ConjugationDrillForm })),
+);
 
 export function AddExercisesDialog({
   articles,
@@ -21,7 +26,7 @@ export function AddExercisesDialog({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const [generating, setGenerating] = useState(fromArticle);
+  const [choice, setChoice] = useState<'article' | 'conjugation' | null>(fromArticle ? 'article' : null);
   const [pickedId, setPickedId] = useState(articles[0]?.id);
   const article = articles.find((candidate) => candidate.id === pickedId);
   return (
@@ -32,11 +37,14 @@ export function AddExercisesDialog({
           <Button variant="outline" onClick={() => navigate({ name: 'importExercises' })}>
             {t('practice.importWorksheet')}
           </Button>
-          <Button variant="outline" onClick={() => setGenerating(true)}>
+          <Button variant="outline" onClick={() => setChoice('article')}>
             {t('practice.makeFromArticle')}
           </Button>
+          <Button variant="outline" onClick={() => setChoice('conjugation')}>
+            {t('practice.makeConjugationDrills')}
+          </Button>
         </div>
-        {generating &&
+        {choice === 'article' &&
           (article ? (
             <div className="space-y-4 border-t border-ink-200 pt-4">
               <label className="block min-w-0">
@@ -64,6 +72,13 @@ export function AddExercisesDialog({
               </Link>
             </div>
           ))}
+        {choice === 'conjugation' && (
+          <div className="border-t border-ink-200 pt-4">
+            <Suspense fallback={<div className="min-h-24" />}>
+              <ConjugationDrillForm onSaved={onClose} />
+            </Suspense>
+          </div>
+        )}
       </div>
     </Dialog>
   );

@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Conjugation drills without a key.** Practice → Add exercises has a third choice: pick verbs from the reviewed conjugation pack and the tenses to practise, and each tense becomes its own exercise (write the verb in the form asked). No AI is called, so it works with no key configured; accents always count on these items, whatever the strict-accents preference says, and a missing accent is marked wrong with the right form beside it.
 - **Importing exercises opens the new exercise set.** After a successful import the new exercise set page opens, listing its exercises, instead of the first exercise.
 - **Delete a whole batch of exercises.** Each batch on Practice has a "Delete this batch" button that asks first, then removes the batch's units and the answers on them in one step; your history of attempts stays in Mistakes and Progress. If the delete fails, the dialog stays open and shows the reason. Batches are now listed newest first, because every batch remembers when it was made.
 - **Each speech engine keeps its own model and voice.** Switch Gemini TTS → Fish Audio → Gemini and each comes back with the model and voice you last chose for it, instead of resetting to defaults; the choices are validated on save like any other setting, so a value the provider would refuse is never stored silently.

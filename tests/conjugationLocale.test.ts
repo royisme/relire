@@ -9,6 +9,8 @@ import zh from '../src/i18n/locales/zh.json';
 import { FINITE_PERSONS, RuleIdSchema, TENSES } from '../src/types/grammarPack';
 
 const regularRules = RuleIdSchema.options.filter((rule) => rule !== 'irregular');
+const drillCopy = (locale: typeof en | typeof zh): Record<string, string> =>
+  (locale.conjugation as { drill: Record<string, string> }).drill;
 
 for (const [language, locale] of [
   ['en', en],
@@ -42,3 +44,10 @@ for (const [language, locale] of [
     expect(all.includes('!')).toBe(false);
   });
 }
+
+test('the drill copy has the same key set in both locales, none blank', () => {
+  const enDrill = drillCopy(en);
+  const zhDrill = drillCopy(zh);
+  expect(Object.keys(zhDrill).sort()).toEqual(Object.keys(enDrill).sort());
+  for (const value of [...Object.values(enDrill), ...Object.values(zhDrill)]) expect(value.trim()).toBeTruthy();
+});
