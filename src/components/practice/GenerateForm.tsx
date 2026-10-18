@@ -21,7 +21,15 @@ const field =
 const startLevel = (article: Article): ExerciseLevel =>
   EXERCISE_LEVELS.find((level) => article.level.toUpperCase().includes(level)) ?? 'B1';
 
-export function GenerateForm({ article, onMissingKey }: { article: Article; onMissingKey: () => void }) {
+export function GenerateForm({
+  article,
+  onMissingKey,
+  onSaved,
+}: {
+  article: Article;
+  onMissingKey: () => void;
+  onSaved: () => void;
+}) {
   const { t } = useTranslation();
   const { state, make } = useExerciseGeneration(article, onMissingKey);
   const [level, setLevel] = useState<ExerciseLevel>(() => startLevel(article));
@@ -32,7 +40,10 @@ export function GenerateForm({ article, onMissingKey }: { article: Article; onMi
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    if (valid && !working) void make({ level, count: number });
+    if (valid && !working)
+      void make({ level, count: number }).then((saved) => {
+        if (saved) onSaved();
+      });
   };
 
   return (

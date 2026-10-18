@@ -11,7 +11,8 @@
  *   #/study/words            My study → Words
  *   #/study/shadowing        My study → Shadowing
  *   #/study/mistakes         My study → Mistakes
- *   #/practice               practice: the exercise batches and their units
+ *   #/practice               practice: the exercise sets
+ *   #/practice/set/:setId     one set and its exercise table
  *   #/practice/:unitId       one exercise unit on one sheet
  *   #/progress               progress
  *   #/settings               section list on phones; desktop resolves it to the first section
@@ -36,6 +37,7 @@ export type Route =
   | { name: 'passage'; unitId: string; sentence?: string }
   | { name: 'study'; tab: StudyTab }
   | { name: 'practice' }
+  | { name: 'practiceSet'; setId: string }
   | { name: 'unit'; unitId: string }
   | { name: 'progress' }
   | { name: 'about' }
@@ -74,6 +76,8 @@ export function routeHref(route: Route): string {
       return `#/study/${route.tab}`;
     case 'practice':
       return '#/practice';
+    case 'practiceSet':
+      return `#/practice/set/${encodeURIComponent(route.setId)}`;
     case 'unit':
       return `#/practice/${encodeURIComponent(route.unitId)}`;
     case 'progress':
@@ -124,6 +128,13 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
       ...(params.get('key') === '1' ? { focusKey: true } : {}),
       ...(returnTo?.startsWith('#/') && !returnTo.includes('?return=') ? { returnTo } : {}),
     };
+  } else if (area === 'practice' && sub === 'set' && extra.length === 1 && extra[0] && !query) {
+    // Match sets first. Unit ids start with `unit-`, so the reserved `set` segment cannot collide.
+    try {
+      route = { name: 'practiceSet', setId: decodeURIComponent(extra[0]) };
+    } catch {
+      route = { name: 'notFound' };
+    }
   } else if (!area) route = LIBRARY;
   else if (extra.length || parts.some((p) => p === '')) route = { name: 'notFound' };
   else if (area === 'import' && sub === 'article') route = { name: 'importArticle' };
@@ -138,7 +149,7 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
   } else if (area === 'study' && sub === undefined) route = { name: 'study', tab: 'words' };
   else if (area === 'study' && isStudyTab(sub)) route = { name: 'study', tab: sub };
   else if (area === 'practice' && sub === undefined) route = { name: 'practice' };
-  else if (area === 'practice' && !query) {
+  else if (area === 'practice' && sub !== 'set' && !query) {
     try {
       route = { name: 'unit', unitId: decodeURIComponent(sub) };
     } catch {
@@ -171,6 +182,7 @@ export function areaOf(route: Route): Area | null {
     case 'about':
       return route.name;
     case 'practice':
+    case 'practiceSet':
     case 'importExercises':
     case 'unit':
       return 'practice';

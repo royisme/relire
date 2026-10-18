@@ -65,6 +65,7 @@ export function useExerciseGeneration(article: Article, onMissingKey: () => void
           items: saved.reduce((sum, unit) => sum + unit.items.length, 0),
           dropped: set.dropped,
         });
+        return true;
       } catch (err) {
         if (mine !== session.current) return;
         if (err instanceof MissingApiKeyError) {

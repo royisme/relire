@@ -9,6 +9,7 @@ import { SentenceDrawer } from './components/SentenceDrawer';
 import { StudyView } from './components/study/StudyView';
 import { PracticePage } from './components/practice/PracticePage';
 import { UnitView } from './components/practice/UnitView';
+import { PracticeSetPage } from './components/practice/PracticeSetPage';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { ArticleEditorDialog } from './components/ArticleEditorDialog';
 import { ImportArticlePage } from './components/import/ImportArticlePage';
@@ -519,6 +520,7 @@ export default function App() {
               <PracticePage articles={articles} onMissingKey={requestKey} onAssessed={handleRecordAssessmentComplete} />
             )}
 
+            {route.name === 'practiceSet' && <PracticeSetPage key={route.setId} setId={route.setId} />}
             {route.name === 'unit' && (
               <UnitView key={route.unitId} unitId={route.unitId} onMissingKey={requestKey} onWord={handleWordClick} />
             )}

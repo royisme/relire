@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { buttonVariants } from '../ui/button';
 import { Link } from './Link';
 
-export function NotFoundView({ reason }: { reason: 'page' | 'article' | 'unit' | 'passage' }) {
+export function NotFoundView({ reason }: { reason: 'page' | 'article' | 'unit' | 'set' | 'passage' }) {
   const { t } = useTranslation();
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center space-y-4">
       <h2 className="font-serif text-2xl font-semibold text-ink-900">{t('notFound.title')}</h2>
       <p className="text-sm text-ink-500 break-words">{t(`notFound.${reason}`)}</p>
-      {reason === 'unit' ? (
+      {reason === 'unit' || reason === 'set' ? (
         <Link to={{ name: 'practice' }} className={buttonVariants()}>
           {t('notFound.toPractice')}
         </Link>

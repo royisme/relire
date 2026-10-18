@@ -1,25 +1,18 @@
-/**
- * `#/practice`: making a new batch from an article, the exercise batches (each
- * opening its units, with the learner's real progress), and reading an
- * article's sentences aloud for a score (the open oral assessment). The article
- * is picked here only for the generator and the oral practice; batches never
- * point at it. The form sits above the list, so new batches grow the list
- * downwards and never move the button that made them. The data comes from
- * `useUnitRows` and the generating from `GenerateForm`.
- */
+/** Owns Practice's set list, filters and add/delete overlays; generation and oral recording have their own owners. */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUnitRows } from '../../hooks/useUnitRows';
-import { setLabel } from '../../services/exercises/setLabel';
+import { aggregateSets, filterSets, type SetRow } from '../../services/exercises/sets';
 import type { Article, PronunciationAssessment } from '../../types';
 import { cleanArticleTitle } from '../../utils/i18nHelpers';
 import { Link } from '../shell/Link';
 import { Button, buttonVariants } from '../ui/button';
 import { PageHeader } from '../ui/page-header';
+import { Segmented } from '../ui/segmented';
+import { AddExercisesDialog } from './AddExercisesDialog';
 import { DeleteSetDialog } from './DeleteSetDialog';
-import { GenerateForm } from './GenerateForm';
 import { OralPractice } from './OralPractice';
-import { UnitList } from './UnitList';
+import { SetTable } from './SetTable';
 
 interface PracticePageProps {
   articles: Article[];
@@ -27,45 +20,111 @@ interface PracticePageProps {
   onAssessed: (assessment: PronunciationAssessment, sentence: string) => void;
 }
 
-const selectClass =
-  'h-10 w-full max-w-sm cursor-pointer rounded-md border border-ink-300 bg-surface px-3 text-sm text-ink-900 focus:border-accent-600 focus:outline-none';
-
 export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePageProps) {
   const { t } = useTranslation();
-  const [pickedId, setPickedId] = useState<string | null>(null);
-  const article = articles.find((candidate) => candidate.id === pickedId) ?? articles[0] ?? null;
   const { rows, loading, error } = useUnitRows();
-  const [deleting, setDeleting] = useState<{ setId: string; label: string } | null>(null);
-  // Newest batch first (every unit of a batch carries its creation time); units inside a batch by their number.
-  const sets = useMemo(() => {
-    const bySet = new Map<string, typeof rows>();
-    for (const row of rows) bySet.set(row.unit.setId, [...(bySet.get(row.unit.setId) ?? []), row]);
-    return [...bySet.entries()]
-      .map(([setId, group]) => ({
-        setId,
-        label: setLabel(t, group[0].unit),
-        level: group[0].unit.level,
-        createdAt: group[0].unit.createdAt,
-        rows: group,
-      }))
-      .sort((a, b) => b.createdAt - a.createdAt || a.setId.localeCompare(b.setId));
-  }, [rows, t]);
+  const sets = useMemo(() => aggregateSets(rows, t), [rows, t]);
+  const [query, setQuery] = useState('');
+  const [level, setLevel] = useState('all');
+  const filtered = useMemo(() => filterSets(sets, query, level), [sets, query, level]);
+  const levels = useMemo(() => [...new Set(sets.map((set) => set.level))].sort(), [sets]);
+  const [adding, setAdding] = useState<'choices' | 'article' | null>(null);
+  const [deleting, setDeleting] = useState<SetRow | null>(null);
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const article = articles.find((candidate) => candidate.id === pickedId) ?? articles[0];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 px-4 py-6 sm:px-6">
-      <PageHeader title={t('practice.title')} subtitle={t('practice.subtitle')} />
-
-      {article ? (
-        <section aria-labelledby="practice-from-article" className="space-y-4">
+    <div className="mx-auto max-w-5xl space-y-4 px-4 py-6 sm:px-6">
+      <PageHeader
+        title={t('practice.title')}
+        subtitle={
+          <span className="tnum inline-block min-h-5">
+            {!loading && !error && t('practice.setCount', { count: sets.length })}
+          </span>
+        }
+        actions={<Button onClick={() => setAdding('choices')}>{t('practice.add')}</Button>}
+      />
+      {error && (
+        <p role="alert" className="break-words text-sm text-bad-700">
+          {error}
+        </p>
+      )}
+      {loading ? (
+        <div aria-busy="true" className="h-56" />
+      ) : (
+        !error && (
+          <>
+            {sets.length > 0 && (
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="min-w-0 flex-1 basis-56">
+                  <span className="sr-only">{t('practice.search')}</span>
+                  <input
+                    type="search"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder={t('practice.search')}
+                    className="h-10 w-full rounded-md border border-ink-300 bg-surface px-3 text-sm focus:border-accent-600 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                  />
+                </label>
+                <Segmented
+                  label={t('practice.level')}
+                  value={level}
+                  onChange={setLevel}
+                  options={['all', ...levels].map((value) => ({
+                    value,
+                    label: value === 'all' ? t('library.allLevels') : t(`levels.${value}`),
+                  }))}
+                />
+              </div>
+            )}
+            {sets.length === 0 ? (
+              <div className="space-y-4 rounded-lg border border-ink-200 bg-surface px-6 py-14 text-center">
+                <p className="font-serif text-lg text-ink-900">{t('practice.emptyTitle')}</p>
+                <p className="mx-auto max-w-md text-sm text-ink-500">{t('practice.emptyDesc')}</p>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <Link to={{ name: 'importExercises' }} className={buttonVariants({ variant: 'outline' })}>
+                    {t('practice.importWorksheet')}
+                  </Link>
+                  <Button variant="outline" onClick={() => setAdding('article')}>
+                    {t('practice.makeFromArticle')}
+                  </Button>
+                </div>
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="space-y-3 rounded-lg border border-ink-200 bg-surface px-6 py-12 text-center">
+                <p className="text-sm text-ink-600">{t('practice.noMatch')}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setQuery('');
+                    setLevel('all');
+                  }}
+                >
+                  {t('library.clearFilters')}
+                </Button>
+              </div>
+            ) : (
+              <SetTable sets={filtered} onDelete={setDeleting} />
+            )}
+          </>
+        )
+      )}
+      {article && (
+        <section aria-labelledby="practice-oral" className="space-y-4 border-t border-ink-200 pt-6">
           <div>
-            <h3 id="practice-from-article" className="font-serif text-lg font-semibold text-ink-900">
-              {t('practice.fromArticleTitle')}
+            <h3 id="practice-oral" className="font-serif text-lg font-semibold text-ink-900">
+              {t('practice.oralTitle')}
             </h3>
-            <p className="text-sm text-ink-500">{t('practice.fromArticleDesc')}</p>
+            <p className="text-sm text-ink-500">{t('practice.oralDesc')}</p>
           </div>
-          <label className="block">
+          <label className="block min-w-0">
             <span className="mb-1 block text-sm font-medium text-ink-800">{t('practice.article')}</span>
-            <select value={article.id} onChange={(event) => setPickedId(event.target.value)} className={selectClass}>
+            <select
+              value={article.id}
+              onChange={(event) => setPickedId(event.target.value)}
+              className="h-10 w-full min-w-0 max-w-sm rounded-md border border-ink-300 bg-surface px-3 text-sm text-ink-900"
+            >
               {articles.map((candidate) => (
                 <option key={candidate.id} value={candidate.id}>
                   {cleanArticleTitle(candidate.title)}
@@ -73,77 +132,26 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
               ))}
             </select>
           </label>
-          <GenerateForm key={article.id} article={article} onMissingKey={onMissingKey} />
-        </section>
-      ) : (
-        <section className="space-y-4 text-center">
-          <p className="font-serif text-lg text-ink-900">{t('practice.noArticleTitle')}</p>
-          <p className="text-sm text-ink-500">{t('practice.noArticleDesc')}</p>
-          <Link to={{ name: 'library' }} className={buttonVariants()}>
-            {t('practice.openLibrary')}
-          </Link>
-        </section>
-      )}
-
-      <section aria-labelledby="practice-units" className="space-y-4">
-        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
-          <div className="min-w-0">
-            <h3 id="practice-units" className="font-serif text-lg font-semibold text-ink-900">
-              {t('practice.unitsTitle')}
-            </h3>
-            <p className="text-sm text-ink-500">{t('practice.unitsDesc')}</p>
-          </div>
-          <Link to={{ name: 'importExercises' }} className={buttonVariants({ variant: 'outline' })}>
-            {t('practice.importExercises')}
-          </Link>
-        </div>
-        {error && (
-          <p role="alert" className="break-words text-sm text-bad-700">
-            {error}
-          </p>
-        )}
-        {loading ? (
-          <div aria-busy="true" className="min-h-12" />
-        ) : sets.length > 0 ? (
-          sets.map((set) => (
-            <section key={set.setId} aria-labelledby={`practice-set-${set.setId}`} className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                <h4
-                  id={`practice-set-${set.setId}`}
-                  className="min-w-0 break-words font-serif text-base font-semibold text-ink-900"
-                >
-                  {set.label}
-                  <span className="ml-2 text-xs font-normal text-ink-500">{t(`levels.${set.level}`)}</span>
-                </h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label={t('practice.deleteSetNamed', { title: set.label })}
-                  onClick={() => setDeleting({ setId: set.setId, label: set.label })}
-                >
-                  {t('practice.deleteSet')}
-                </Button>
-              </div>
-              <UnitList rows={set.rows} />
-            </section>
-          ))
-        ) : (
-          !error && <p className="text-sm text-ink-600">{t('practice.noUnits')}</p>
-        )}
-      </section>
-
-      {article && (
-        <section aria-labelledby="practice-oral" className="space-y-4">
-          <div>
-            <h3 id="practice-oral" className="font-serif text-lg font-semibold text-ink-900">
-              {t('practice.oralTitle')}
-            </h3>
-            <p className="text-sm text-ink-500">{t('practice.oralDesc')}</p>
-          </div>
           <OralPractice key={article.id} article={article} onAssessed={onAssessed} />
         </section>
       )}
-      {deleting && <DeleteSetDialog setId={deleting.setId} title={deleting.label} onClose={() => setDeleting(null)} />}
+      {adding && (
+        <AddExercisesDialog
+          articles={articles}
+          fromArticle={adding === 'article'}
+          onMissingKey={onMissingKey}
+          onClose={() => setAdding(null)}
+        />
+      )}
+      {deleting && (
+        <DeleteSetDialog
+          setId={deleting.setId}
+          title={deleting.title}
+          count={deleting.rows.length}
+          onClose={() => setDeleting(null)}
+          onDeleted={() => setDeleting(null)}
+        />
+      )}
     </div>
   );
 }
