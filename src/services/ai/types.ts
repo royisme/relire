@@ -24,6 +24,8 @@ export interface JsonRequest {
 export interface TextConfig {
   apiKey: string;
   model: string;
+  /** Endpoint override for an OpenAI-compatible provider; absent (or empty) means the provider's default. */
+  baseUrl?: string;
 }
 
 export interface SpeechConfig extends TextConfig {
@@ -53,7 +55,8 @@ export interface ModelInfo {
 }
 
 export interface ModelCatalogue {
-  listModels(apiKey: string, signal?: AbortSignal): Promise<ModelInfo[]>;
+  /** `baseUrl` is the learner's endpoint override; a provider with one fixed host ignores it. */
+  listModels(apiKey: string, signal?: AbortSignal, baseUrl?: string): Promise<ModelInfo[]>;
   capabilities(model: string): ModelCapabilities;
 }
 
@@ -113,6 +116,8 @@ export interface ProviderInfo {
   id: string;
   /** Where the user creates an API key. */
   keyUrl: string;
+  /** The endpoint this provider calls unless the learner overrides it; only such providers show a Base URL field. */
+  defaultBaseUrl?: string;
   /** `imageModels` are the static `models` known to accept images, a starting hint for Settings; discovery adds the rest. */
   text?: { models: string[]; defaultModel: string; imageModels?: string[] };
   speech?: { models: string[]; defaultModel: string; voices: VoiceInfo[]; defaultVoice: string };

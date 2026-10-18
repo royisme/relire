@@ -109,6 +109,32 @@ test('one shared key saves with all three purposes', () => {
   ]);
 });
 
+test('an endpoint override is part of the AI slice, saved with it and refused when unusable', () => {
+  saveAppSettings({});
+  const base = getAppSettings();
+  const draft = draftOf(base, { baseUrls: { gemini: 'https://gemini.example/v1beta' } });
+  expect(sliceOf(draft, 'ai')).not.toBe(sliceOf(base, 'ai'));
+  expect(saveSlice(draft, 'ai').baseUrls).toEqual({ gemini: 'https://gemini.example/v1beta' });
+  expect(getAppSettings().baseUrls).toEqual({ gemini: 'https://gemini.example/v1beta' });
+
+  for (const invalid of ['ftp://x.test', 'https://x.test/v1?a=1', 'x.test']) {
+    expect(() => saveSlice(draftOf(getAppSettings(), { baseUrls: { gemini: invalid } }), 'ai')).toThrow(
+      i18n.t('aiSettings.baseUrlNotValid'),
+    );
+    expect(getAppSettings().baseUrls).toEqual({ gemini: 'https://gemini.example/v1beta' });
+  }
+});
+
+test('an empty endpoint saves as the provider default, and one no purpose uses is not saved', () => {
+  saveAppSettings({ baseUrls: { gemini: 'https://gemini.example/v1beta' } });
+  expect(saveSlice(draftOf(getAppSettings(), { baseUrls: { gemini: '  ' } }), 'ai').baseUrls).toEqual({});
+  expect(getAppSettings().baseUrls).toEqual({});
+
+  saveAppSettings({});
+  const unused = saveSlice(draftOf(getAppSettings(), { baseUrls: { openai: 'nonsense' } }), 'ai');
+  expect(unused.baseUrls).toEqual({});
+});
+
 test('a write the browser refuses is reported, not shown as saved', () => {
   saveAppSettings({ apiKeys: { gemini: 'saved-key' } });
   const draft = draftOf(getAppSettings(), { textModel: 'gemini-2.5-pro' });

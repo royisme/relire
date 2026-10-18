@@ -1,12 +1,13 @@
 import type { GradingOptions } from '../services/exercises/grading';
 import { getProvider } from '../services/ai/providers';
 import { normalizeModelId } from '../services/ai/catalogue';
+import { normalizeBaseUrl } from '../services/ai/baseUrl';
 
 /**
  * User settings: which provider and model write the answers, which provider
- * reads page images, which provider speaks them, one shared key per provider, and the
- * practice preferences (how answers are compared and dictation is played).
- * Display names live in the locale files (providers.*, models.*, voices.*).
+ * reads page images, which provider speaks them, one shared key per provider, the
+ * endpoint overrides, and the practice preferences (how answers are compared and
+ * dictation is played). Display names live in the locale files (providers.*, models.*, voices.*).
  */
 
 export interface AppSettings {
@@ -19,6 +20,8 @@ export interface AppSettings {
   speechVoice: string;
   /** API keys by provider id. Never part of a backup. */
   apiKeys: Record<string, string>;
+  /** Endpoint overrides by provider id; absent means the provider's default. Part of a backup. */
+  baseUrls: Record<string, string>;
   /** Accents count as spelling mistakes when checking an answer. */
   practiceStrictAccents: boolean;
   /** Playback rate the dictation control speaks at. */
@@ -54,6 +57,7 @@ function defaults(): AppSettings {
     speechModel: speech.defaultModel,
     speechVoice: speech.defaultVoice,
     apiKeys: {},
+    baseUrls: {},
     practiceStrictAccents: false,
     practiceDictationSpeed: DEFAULT_DICTATION_SPEED,
     practiceSpeakAfterCheck: false,
@@ -75,6 +79,12 @@ function normalize(value: unknown): AppSettings {
       raw.apiKeys && typeof raw.apiKeys === 'object' && !Array.isArray(raw.apiKeys) ? raw.apiKeys : {},
     ).filter(([, key]) => typeof key === 'string'),
   );
+  // An override storage cannot use is dropped, so the provider's own default is called instead.
+  const baseUrls = Object.fromEntries(
+    Object.entries(raw.baseUrls && typeof raw.baseUrls === 'object' && !Array.isArray(raw.baseUrls) ? raw.baseUrls : {})
+      .map(([id, value]) => [id, normalizeBaseUrl(value)] as const)
+      .filter((entry): entry is readonly [string, string] => entry[1] !== undefined),
+  );
   return {
     textProvider: textProvider.id,
     textModel: normalizeModelId(raw.textModel) ?? text.defaultModel,
@@ -84,6 +94,7 @@ function normalize(value: unknown): AppSettings {
     speechModel: normalizeModelId(raw.speechModel) ?? speech.defaultModel,
     speechVoice: speech.voices.some((v) => v.id === raw.speechVoice) ? raw.speechVoice! : speech.defaultVoice,
     apiKeys,
+    baseUrls,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),
     practiceDictationSpeed: speedOr(raw.practiceDictationSpeed),
     practiceSpeakAfterCheck: boolOr(raw.practiceSpeakAfterCheck, false),
@@ -110,6 +121,9 @@ export function saveAppSettings(settings: Partial<AppSettings>): AppSettings {
 }
 
 export const getApiKey = (settings: AppSettings, providerId: string) => settings.apiKeys[providerId]?.trim() ?? '';
+
+/** The provider's endpoint override, or '' for its default. */
+export const getBaseUrl = (settings: AppSettings, providerId: string) => settings.baseUrls[providerId] ?? '';
 
 /** True when the provider that writes the answers has a key. */
 export const hasTextKey = (settings: AppSettings = getAppSettings()) => !!getApiKey(settings, settings.textProvider);

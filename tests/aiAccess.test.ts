@@ -4,6 +4,8 @@ import * as accessModule from '../src/services/ai/access';
 import { gemini } from '../src/services/ai/providers/gemini';
 import { geminiText } from '../src/services/ai/providers/gemini/client';
 import { geminiSpeech } from '../src/services/ai/providers/gemini/tts';
+import { openaiText } from '../src/services/ai/providers/openai/client';
+import { openaiCatalogue } from '../src/services/ai/providers/openai/models';
 import type { AiAccess, AiPurpose, TextPurpose } from '../src/services/ai/types';
 import { getAppSettings } from '../src/utils/appSettings';
 import { loadSpeech, prefetchSpeech } from '../src/utils/speech/clips';
@@ -78,7 +80,7 @@ describe('BYOK access', () => {
     const access = accessModule.createByokAccess(settings());
     const controller = new AbortController();
     expect(await access.listModels('ocr', controller.signal)).toEqual([]);
-    expect(list).toHaveBeenCalledWith('fixture-key', controller.signal);
+    expect(list).toHaveBeenCalledWith('fixture-key', controller.signal, undefined);
     expect(generation).not.toHaveBeenCalled();
     expect(check).not.toHaveBeenCalled();
   });
@@ -197,6 +199,43 @@ describe('feature execution uses AiAccess', () => {
     });
     expect(((await failure(testSpeech(configured, controller.signal))) as Error).name).toBe('AbortError');
     expect(fake.synthesize).toHaveBeenCalledTimes(2);
+  });
+
+  test('an endpoint override travels in the snapshot to the request, the check and discovery', async () => {
+    const generate = spyOn(openaiText, 'generateJson').mockResolvedValue({});
+    const check = spyOn(openaiText, 'checkKey').mockResolvedValue();
+    const list = spyOn(openaiCatalogue, 'listModels').mockResolvedValue([]);
+    const configured = {
+      ...getAppSettings(),
+      textProvider: 'openai',
+      textModel: 'gpt-4o-mini',
+      ocrProvider: 'openai',
+      ocrModel: 'gpt-4o',
+      apiKeys: { openai: 'fixture-key' },
+      baseUrls: { openai: 'https://api.deepseek.com/v1' },
+    };
+    const access = accessModule.createByokAccess(configured);
+    // The snapshot is taken at consent time: a later edit cannot redirect the request to another host.
+    configured.baseUrls.openai = 'https://elsewhere.test/v1';
+    await access.text('text').generateJson({ prompt: 'Bonjour' });
+    expect(generate).toHaveBeenCalledWith(
+      { prompt: 'Bonjour' },
+      { apiKey: 'fixture-key', model: 'gpt-4o-mini', baseUrl: 'https://api.deepseek.com/v1' },
+    );
+    await access.checkConnection('ocr');
+    expect(check).toHaveBeenCalledWith({
+      apiKey: 'fixture-key',
+      model: 'gpt-4o',
+      baseUrl: 'https://api.deepseek.com/v1',
+    });
+    await access.listModels('text');
+    expect(list).toHaveBeenCalledWith('fixture-key', undefined, 'https://api.deepseek.com/v1');
+
+    const plain = accessModule.createByokAccess({ ...configured, baseUrls: {} });
+    await plain.text('text').generateJson({ prompt: 'Bonjour' });
+    expect(generate).toHaveBeenLastCalledWith({ prompt: 'Bonjour' }, { apiKey: 'fixture-key', model: 'gpt-4o-mini' });
+    await plain.listModels('text');
+    expect(list).toHaveBeenLastCalledWith('fixture-key', undefined, undefined);
   });
 
   test('unknown provider IDs are not silently redirected', () => {

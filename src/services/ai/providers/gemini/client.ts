@@ -1,5 +1,6 @@
 import { GoogleGenAI, ThinkingLevel, type GenerateContentConfig, type Part } from '@google/genai';
 import i18n from '../../../../i18n';
+import { parseJsonAnswer } from '../../answerJson';
 import { ImageInputUnsupportedError, MissingApiKeyError, errorMessage } from '../../errors';
 import type { JsonRequest, TextConfig, TextProvider } from '../../types';
 import { geminiCapabilities } from './models';
@@ -18,18 +19,6 @@ export function geminiClient(apiKey: string) {
   const key = apiKey?.trim();
   if (!key) throw new MissingApiKeyError();
   return new GoogleGenAI({ apiKey: key });
-}
-
-function parseJson<T>(rawText: string): T {
-  let cleaned = rawText.trim();
-  if (cleaned.startsWith('```json')) cleaned = cleaned.slice(7);
-  else if (cleaned.startsWith('```')) cleaned = cleaned.slice(3);
-  if (cleaned.endsWith('```')) cleaned = cleaned.slice(0, -3);
-  try {
-    return JSON.parse(cleaned.trim()) as T;
-  } catch {
-    throw new Error(i18n.t('errors.badResponse'));
-  }
 }
 
 const toContents = (req: JsonRequest) => {
@@ -70,7 +59,7 @@ export const geminiText: TextProvider = {
           if (request.jsonSchema) options.responseJsonSchema = request.jsonSchema;
           if (model.includes('gemini-3')) options.thinkingConfig = { thinkingLevel: ThinkingLevel.LOW };
           const response = await ai.models.generateContent({ model, contents, config: options });
-          if (response?.text) return parseJson<T>(response.text);
+          if (response?.text) return parseJsonAnswer<T>(response.text);
         } catch (err) {
           // A cancelled request is the learner's choice: never retry it or report it as a failure.
           if (request.signal?.aborted) throw cancelled();

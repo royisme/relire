@@ -14,7 +14,7 @@ import { testSpeech } from '../../utils/speech';
 import { useSaveStatus } from '../../hooks/useSaveStatus';
 import { Link } from '../shell/Link';
 import { Button } from '../ui/button';
-import { fieldLabel, KeyBadge, KeyField, selectClass, useProviderNames } from './fields';
+import { fieldLabel, BaseUrlField, KeyBadge, KeyField, selectClass, useProviderNames } from './fields';
 import type { KeyRequest } from './keyRequest';
 import { ModelField } from './ModelField';
 import { saveSlice, sliceOf } from './slices';
@@ -198,6 +198,15 @@ export function AiSection({
           />
           {sharedNote && <p className="text-xs text-ink-500 leading-relaxed">{sharedNote}</p>}
         </div>
+
+        {provider.info.defaultBaseUrl && (
+          <BaseUrlField
+            providerId={providerId}
+            defaultUrl={provider.info.defaultBaseUrl}
+            value={draft.baseUrls[providerId] ?? ''}
+            onChange={(value) => edit({ ...draft, baseUrls: { ...draft.baseUrls, [providerId]: value } })}
+          />
+        )}
 
         <ModelField draft={draft} purpose={purpose} catalogue={catalogue} onChange={setModel} />
 

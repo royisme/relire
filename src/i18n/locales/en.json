@@ -365,6 +365,10 @@
     "modelHelp": "Pick a suggested model or type its ID.",
     "invalidModel": "Enter a model ID of at most 512 characters, without control characters.",
     "modelNotValid": "A model ID on one of the three AI pages is not valid. Fix it there, then save again.",
+    "baseUrlLabel": "Base URL",
+    "baseUrlHelp": "Leave it empty to use {{url}}. Change it for a compatible service such as DeepSeek or Qwen.",
+    "invalidBaseUrl": "Enter an http or https address without a key, a query or a fragment, at most 2048 characters.",
+    "baseUrlNotValid": "A Base URL is not a usable address. Fix it, then save again.",
     "fetch": "Fetch models",
     "fetching": "Fetching…",
     "refresh": "Refresh models",
@@ -499,6 +503,7 @@
     "modelListPagination": "The provider's model list could not be completed safely.",
     "modelListUnavailable": "This provider does not offer model discovery.",
     "invalidModelId": "Enter a nonempty model ID of at most 512 characters, without control characters.",
+    "invalidBaseUrl": "The Base URL for this provider is not usable. Fix it in Settings.",
     "providerUnavailable": "The provider {{provider}} is not available.",
     "purposeUnavailable": "This provider does not support the selected task.",
     "speechOutputUnsupported": "The model {{model}} cannot synthesize speech. Choose a speech model."
@@ -518,10 +523,26 @@
     },
     "gemini-3_8-flash-lite-tts": {
       "name": "Gemini 3.8 Flash-Lite TTS (recommended)"
+    },
+    "gpt-4o-mini": {
+      "name": "GPT-4o Mini (recommended)"
+    },
+    "gpt-4o": {
+      "name": "GPT-4o"
+    },
+    "gpt-4_1": {
+      "name": "GPT-4.1"
+    },
+    "gpt-4_1-mini": {
+      "name": "GPT-4.1 Mini"
+    },
+    "o4-mini": {
+      "name": "o4-mini"
     }
   },
   "providers": {
-    "gemini": "Google Gemini"
+    "gemini": "Google Gemini",
+    "openai": "OpenAI-compatible"
   },
   "prompts": {
     "word": "Word analysis",

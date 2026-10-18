@@ -361,6 +361,10 @@
     "modelHelp": "从建议里选一个模型，或直接填写模型 ID。",
     "invalidModel": "请输入不超过 512 个字符的模型 ID，不能为空或包含控制字符。",
     "modelNotValid": "三个 AI 页面中有模型 ID 无效，请在那里修改后再保存。",
+    "baseUrlLabel": "Base URL",
+    "baseUrlHelp": "留空即使用 {{url}}。使用 DeepSeek、通义千问等兼容服务时填写它们的地址。",
+    "invalidBaseUrl": "请填写 http 或 https 地址，不要包含 Key、查询参数或片段，最多 2048 个字符。",
+    "baseUrlNotValid": "有一个 Base URL 不是可用的地址，请修改后再保存。",
     "fetch": "获取模型列表",
     "fetching": "获取中…",
     "refresh": "刷新模型列表",
@@ -494,6 +498,7 @@
     "modelListPagination": "无法安全地获取完整的模型列表。",
     "modelListUnavailable": "此服务商不提供模型列表。",
     "invalidModelId": "请输入不超过 512 个字符的模型 ID，不能为空或包含控制字符。",
+    "invalidBaseUrl": "此提供方的 Base URL 不可用，请在设置中修改。",
     "providerUnavailable": "服务商 {{provider}} 不可用。",
     "purposeUnavailable": "此服务商不支持所选任务。",
     "speechOutputUnsupported": "模型 {{model}} 无法合成语音，请选择语音模型。"
@@ -513,10 +518,26 @@
     },
     "gemini-3_8-flash-lite-tts": {
       "name": "Gemini 3.8 Flash-Lite TTS（推荐）"
+    },
+    "gpt-4o-mini": {
+      "name": "GPT-4o Mini（推荐）"
+    },
+    "gpt-4o": {
+      "name": "GPT-4o"
+    },
+    "gpt-4_1": {
+      "name": "GPT-4.1"
+    },
+    "gpt-4_1-mini": {
+      "name": "GPT-4.1 Mini"
+    },
+    "o4-mini": {
+      "name": "o4-mini"
     }
   },
   "providers": {
-    "gemini": "Google Gemini"
+    "gemini": "Google Gemini",
+    "openai": "OpenAI 兼容"
   },
   "prompts": {
     "word": "单词解析",

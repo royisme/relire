@@ -1,12 +1,13 @@
 import type { Provider, SpeechProvider, TextProvider } from '../types';
 import { gemini } from './gemini';
+import { openai } from './openai';
 
 /**
  * Every provider the app can use. To add one, implement `Provider` (text,
  * speech or both), register it here and add its display name under
  * `providers.<id>` in the locale files; the settings screen picks it up.
  */
-const PROVIDERS: Provider[] = [gemini];
+const PROVIDERS: Provider[] = [gemini, openai];
 
 export const textProviders = () => PROVIDERS.filter((p) => p.text);
 export const speechProviders = () => PROVIDERS.filter((p) => p.speech);

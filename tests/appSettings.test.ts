@@ -1,6 +1,6 @@
 /** BYOK settings keep independent purpose selections and custom model IDs, never a legacy inheritance rule. */
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { getApiKey, getAppSettings, saveAppSettings } from '../src/utils/appSettings';
+import { getApiKey, getAppSettings, getBaseUrl, saveAppSettings } from '../src/utils/appSettings';
 
 const storage = new Map<string, string>();
 const original = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
@@ -54,5 +54,42 @@ describe('appSettings BYOK configuration', () => {
       expect(settings.textProvider).toBe('gemini');
       expect(getApiKey(settings, 'gemini')).toBe('');
     }
+  });
+
+  test('an endpoint override is trimmed on save, and an unusable one never reaches storage', () => {
+    saveAppSettings({ baseUrls: { openai: ' https://api.deepseek.com/v1/ ' } });
+    expect(getAppSettings().baseUrls).toEqual({ openai: 'https://api.deepseek.com/v1' });
+    expect(getBaseUrl(getAppSettings(), 'openai')).toBe('https://api.deepseek.com/v1');
+    expect(getBaseUrl(getAppSettings(), 'gemini')).toBe('');
+
+    for (const invalid of [
+      'ftp://example.com',
+      'https://user:pw@example.com/v1',
+      'https://example.com/v1?key=1',
+      'https://example.com/v1#fragment',
+      'api.deepseek.com',
+      'not a url',
+      `https://example.com/${'a'.repeat(2048)}`,
+      7,
+      null,
+    ]) {
+      storage.set('relire_app_settings_v1', JSON.stringify({ baseUrls: { openai: invalid } }));
+      expect(getAppSettings().baseUrls).toEqual({});
+    }
+    storage.set('relire_app_settings_v1', JSON.stringify({ baseUrls: [] }));
+    expect(getAppSettings().baseUrls).toEqual({});
+  });
+
+  test('an existing install has no endpoint, and a restored backup keeps the endpoint but never a key', () => {
+    storage.set('relire_app_settings_v1', JSON.stringify({ textProvider: 'openai', textModel: 'gpt-4o-mini' }));
+    expect(getAppSettings().baseUrls).toEqual({});
+
+    saveAppSettings({ baseUrls: { openai: 'https://api.qwen.test/v1' }, apiKeys: { openai: 'local-key' } });
+    // BackupControls exports the settings without their keys and restores them over the stored key.
+    const { apiKeys: _keys, ...exported } = getAppSettings();
+    storage.clear();
+    saveAppSettings({ ...exported, apiKeys: {} });
+    expect(getAppSettings().baseUrls).toEqual({ openai: 'https://api.qwen.test/v1' });
+    expect(getApiKey(getAppSettings(), 'openai')).toBe('');
   });
 });
