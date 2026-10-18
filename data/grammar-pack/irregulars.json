@@ -1,0 +1,38 @@
+{
+  "etre": {
+    "participles": { "present": "étant", "past": "été" },
+    "forms": {
+      "present": { "1sg": "suis", "2sg": "es", "3sg": "est", "1pl": "sommes", "2pl": "êtes", "3pl": "sont" },
+      "imparfaitStem": "ét",
+      "futurStem": "ser",
+      "subjonctif": { "1sg": "sois", "2sg": "sois", "3sg": "soit", "1pl": "soyons", "2pl": "soyez", "3pl": "soient" },
+      "imperatif": { "2sg": "sois", "1pl": "soyons", "2pl": "soyez" }
+    }
+  },
+  "aller": {
+    "participles": { "present": "allant", "past": "allé" },
+    "forms": {
+      "present": { "1sg": "vais", "2sg": "vas", "3sg": "va", "1pl": "allons", "2pl": "allez", "3pl": "vont" },
+      "imparfaitStem": "all",
+      "futurStem": "ir",
+      "subjonctif": {
+        "1sg": "aille",
+        "2sg": "ailles",
+        "3sg": "aille",
+        "1pl": "allions",
+        "2pl": "alliez",
+        "3pl": "aillent"
+      }
+    }
+  },
+  "avoir": {
+    "participles": { "present": "ayant", "past": "eu" },
+    "forms": {
+      "present": { "1sg": "ai", "2sg": "as", "3sg": "a", "1pl": "avons", "2pl": "avez", "3pl": "ont" },
+      "imparfaitStem": "av",
+      "futurStem": "aur",
+      "subjonctif": { "1sg": "aie", "2sg": "aies", "3sg": "ait", "1pl": "ayons", "2pl": "ayez", "3pl": "aient" },
+      "imperatif": { "2sg": "aie", "1pl": "ayons", "2pl": "ayez" }
+    }
+  }
+}
