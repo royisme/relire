@@ -1,9 +1,9 @@
 /**
- * The buttons under an item: Check, Hint and Explain, plus Redo once the item is
- * checked. The first three are always there and keep their size, so checking or
- * asking changes an icon and a label on the pressed button and nothing else
- * moves. Hint belongs to the time before the check, Explain to a wrong answer
- * after it, Redo to trying the same item again without losing its history.
+ * The buttons under an item: Check, Hint, Explain and Redo. All four are always
+ * there and keep their size, so checking or asking changes an icon and a label on
+ * the pressed button and nothing else moves. Hint belongs to the time before the
+ * check, Explain to a wrong answer after it, Redo to trying the same item again
+ * without losing its history; Redo is disabled until the item is checked.
  */
 import { BookOpen, Check, Lightbulb, Loader2, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -64,12 +64,17 @@ export function ItemActions({ runtime, canCheck, onCheck, onHint, onExplain, onR
         )}
         <span>{t('practice.explain')}</span>
       </Button>
-      {checked && (
-        <Button variant="ghost" size="sm" className={small} onClick={onRedo} title={t('practice.redoTitle')}>
-          <RotateCcw className="h-4 w-4" aria-hidden="true" />
-          <span>{t('practice.redo')}</span>
-        </Button>
-      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        className={small}
+        onClick={onRedo}
+        disabled={!checked || !idle}
+        title={t('practice.redoTitle')}
+      >
+        <RotateCcw className="h-4 w-4" aria-hidden="true" />
+        <span>{t('practice.redo')}</span>
+      </Button>
     </div>
   );
 }

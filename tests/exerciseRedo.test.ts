@@ -4,17 +4,22 @@
  * already queued for that item cannot write the old answer back.
  */
 import { beforeEach, expect, test } from 'bun:test';
-import { answered, freshDb, right, seedUnit, wrong } from './fixtures/storage';
+import { answered, failure, freshDb, right, seedUnit, wrong } from './fixtures/storage';
 import { ITEMS } from './fixtures/units';
 import {
   checkItem,
   clearItemState,
+  deleteUnit,
   getItemState,
   getResetToken,
+  ItemGoneError,
   listAttempts,
   listItemStates,
   listMistakes,
+  resetUnit,
   saveItemProgress,
+  StaleResetError,
+  UnitGoneError,
 } from '../src/storage/exercises';
 import { dropDraft, queueDraft, type DraftMap } from '../src/hooks/exerciseUnit/drafts';
 
@@ -30,7 +35,7 @@ test('clearing one item removes its state only, keeping its attempts and the oth
   await checkItem({ unitId: unit.id, itemId: FIRST, resetToken: token, answer: answered('suis'), result: wrong });
   await saveItemProgress(unit.id, SECOND, token, { answer: { ...answered('es'), multiAnswers: ['es', 'est'] } });
 
-  expect(await clearItemState(unit.id, FIRST)).toBe(true);
+  expect(await clearItemState(unit.id, FIRST, token)).toBe(true);
   expect(await getItemState(unit.id, FIRST)).toBeUndefined();
   expect(await getItemState(unit.id, SECOND)).toBeDefined();
   // Attempts are history, so the mistake stays and only a later correct attempt resolves it.
@@ -38,7 +43,7 @@ test('clearing one item removes its state only, keeping its attempts and the oth
   expect((await listMistakes()).map((entry) => entry.resolved)).toEqual([false]);
   // The token did not move: work in flight for other items is still the current work.
   expect(await getResetToken(unit.id)).toBe(token);
-  expect(await clearItemState(unit.id, FIRST)).toBe(false);
+  expect(await clearItemState(unit.id, FIRST, token)).toBe(false);
 });
 
 test('a queued autosave would write the cleared answer back if the redo did not drop it', async () => {
@@ -49,7 +54,7 @@ test('a queued autosave would write the cleared answer back if the redo did not 
     void saveItemProgress(unit.id, itemId, token, { answer: answered('suis') });
   };
   queueDraft(drafts, FIRST, { answer: answered('suis'), token }, 5, write);
-  await clearItemState(unit.id, FIRST);
+  await clearItemState(unit.id, FIRST, token);
   await wait(30);
   expect(await getItemState(unit.id, FIRST)).toBeDefined();
 });
@@ -70,7 +75,7 @@ test('the redo drops that item’s autosave and leaves the other item’s alone'
   queueDraft(drafts, FIRST, { answer: answered('suis'), token }, 5, write);
   queueDraft(drafts, SECOND, { answer: answered('es'), token }, 5, write);
   dropDraft(drafts, FIRST);
-  await clearItemState(unit.id, FIRST);
+  await clearItemState(unit.id, FIRST, token);
   await wait(30);
 
   expect(writes).toEqual([SECOND]);
@@ -83,8 +88,31 @@ test('a later correct attempt resolves the mistake the cleared item left behind'
   const unit = await seedUnit();
   const token = await getResetToken(unit.id);
   await checkItem({ unitId: unit.id, itemId: FIRST, resetToken: token, answer: answered('suis'), result: wrong });
-  await clearItemState(unit.id, FIRST);
+  await clearItemState(unit.id, FIRST, token);
   await checkItem({ unitId: unit.id, itemId: FIRST, resetToken: token, answer: answered('suis'), result: right });
   expect((await listMistakes()).map((entry) => entry.resolved)).toEqual([true]);
   expect(await listAttempts()).toHaveLength(2);
+});
+
+test('a redo from before a reset rejects and leaves the answer written after it', async () => {
+  const unit = await seedUnit();
+  const stale = await getResetToken(unit.id);
+  await checkItem({ unitId: unit.id, itemId: FIRST, resetToken: stale, answer: answered('suis'), result: wrong });
+  const current = await resetUnit(unit.id);
+  await checkItem({ unitId: unit.id, itemId: FIRST, resetToken: current, answer: answered('mange'), result: right });
+
+  expect(await failure(clearItemState(unit.id, FIRST, stale))).toBeInstanceOf(StaleResetError);
+  expect((await getItemState(unit.id, FIRST))?.checked).toEqual(right);
+  expect(await listAttempts()).toHaveLength(2);
+  // The current token still clears it, so a redo after the reset works.
+  expect(await clearItemState(unit.id, FIRST, current)).toBe(true);
+  expect(await listAttempts()).toHaveLength(2);
+});
+
+test('a redo rejects when the unit or the item is gone', async () => {
+  const unit = await seedUnit();
+  const token = await getResetToken(unit.id);
+  expect(await failure(clearItemState(unit.id, 'no-such-item', token))).toBeInstanceOf(ItemGoneError);
+  await deleteUnit(unit.id);
+  expect(await failure(clearItemState(unit.id, FIRST, token))).toBeInstanceOf(UnitGoneError);
 });

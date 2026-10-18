@@ -95,6 +95,35 @@ test('working on an item changes its buttons, not their place', async ({ page, a
   expect(await boxes()).toEqual(before);
 });
 
+for (const width of [430, 360, 1280])
+  test(`a check and a redo leave the next row in place at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 860 });
+    await seedUnits(page);
+    await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
+    const done = row(page, 'Je ne');
+    const next = row(page, "Si tu m'");
+    const redo = done.getByRole('button', { name: 'Redo', exact: true });
+    // Redo holds its place while it cannot be used, so checking never adds a line of buttons.
+    await expect(redo).toBeDisabled();
+    await done.getByRole('textbox').fill('mange');
+    await settled(page);
+    const place = async () => (await next.boundingBox())!;
+    const before = await place();
+
+    await checkButton(done).click();
+    await expect(done.getByText('Correct', { exact: true })).toBeAttached();
+    await settled(page);
+    await expect(redo).toBeEnabled();
+    expect(await place()).toEqual(before);
+
+    await redo.click();
+    await expect(redo).toBeDisabled();
+    await settled(page);
+    expect(await place()).toEqual(before);
+    expect(await overflowing(page.locator('body'))).toEqual([]);
+    expect((await layout(page, 'main')).width).toBeLessThanOrEqual(width);
+  });
+
 for (const phone of [false, true]) {
   const suffix = phone ? ' @phone' : '';
   const size = phone ? '360' : '1280';

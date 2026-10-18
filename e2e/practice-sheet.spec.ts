@@ -181,7 +181,9 @@ test('an ordinary item speaks its prompt from one Listen control on its meta lin
   await expect(item.getByRole('button', { name: 'Stop', exact: true })).toBeVisible();
 });
 
-test('Redo appears only once an item is checked, clears that item alone and keeps its attempts', async ({ page }) => {
+test('Redo waits disabled until an item is checked, clears that item alone and keeps its attempts', async ({
+  page,
+}) => {
   await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');
   const done = row(page, 'Je ne');
   const wrong = row(page, "Si tu m'");
@@ -189,13 +191,14 @@ test('Redo appears only once an item is checked, clears that item alone and keep
   await first.fill('apprivoise');
   await second.fill('auron');
   await done.getByRole('textbox').fill('mange');
-  await expect(wrong.getByRole('button', { name: 'Redo', exact: true })).toHaveCount(0);
+  const redo = wrong.getByRole('button', { name: 'Redo', exact: true });
+  await expect(redo).toBeDisabled();
 
   await checkButton(wrong).click();
   await expect(wrong.getByText('Incorrect', { exact: true })).toBeAttached();
-  const redo = wrong.getByRole('button', { name: 'Redo', exact: true });
+  await expect(redo).toBeEnabled();
   await redo.click();
-  await expect(redo).toHaveCount(0);
+  await expect(redo).toBeDisabled();
   await expect(first).toHaveValue('');
   await expect(first).toBeEditable();
   await expect(done.getByRole('textbox')).toHaveValue('mange');

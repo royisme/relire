@@ -5,7 +5,8 @@
  * never touches storage. Leaving the unit drops late results silently; a reset
  * moves the reset token, so work that began before it cannot write after it.
  * Redoing one item clears its own row and drops that item's queued draft, so the
- * old answer cannot be written back.
+ * old answer cannot be written back; the redo carries the sheet's reset token, so
+ * one begun before a reset is rejected instead of clearing a newer answer.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { clearItemState, getUnitSnapshot, resetUnit, saveItemProgress, StaleResetError } from '../storage/exercises';
@@ -233,13 +234,17 @@ export function useExerciseUnit(unitId: string, { onMissingKey }: Options): Exer
     // The draft queued before the redo would write the old answer back into the cleared item.
     dropDraft(drafts.current, itemId);
     const mine = session.current;
+    const started = token.current;
     try {
-      await clearItemState(unit.id, itemId);
+      await clearItemState(unit.id, itemId, started);
       if (mine !== session.current) return;
       const fresh = emptyItems(unit)[itemId];
       if (fresh) patch(itemId, fresh);
     } catch (err) {
-      if (mine === session.current) patch(itemId, { error: errorMessage(err) });
+      if (mine !== session.current) return;
+      // Another writer reset or restored this sheet: read their state instead of clearing ours.
+      if (err instanceof StaleResetError) return reload();
+      patch(itemId, { error: errorMessage(err) });
     }
   };
 

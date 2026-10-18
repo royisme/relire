@@ -315,13 +315,19 @@ export async function checkItem(input: CheckInput): Promise<CheckOutcome> {
 /**
  * Clears one item's state (answer, result and flags) and keeps its attempts, so
  * the mistake stays in the notebook until a later correct attempt resolves it.
- * Other items and the unit's reset token are untouched. Resolves false when the
- * item had no state to clear.
+ * Other items and the unit's reset token are untouched. Rejects with
+ * `StaleResetError`, `UnitGoneError` or `ItemGoneError` like the other state
+ * writes, so a redo begun before a reset cannot delete a newer answer. Resolves
+ * false when the item had no state to clear.
  */
-export async function clearItemState(unitId: string, itemId: string): Promise<boolean> {
+export async function clearItemState(unitId: string, itemId: string, resetToken: number): Promise<boolean> {
   const d = await db();
-  const tx = d.transaction('itemStates', 'readwrite');
+  const tx = d.transaction(['units', 'itemStates', 'meta'], 'readwrite');
   const cleared = await settle(tx, async () => {
+    const unit = await tx.objectStore('units').get(unitId);
+    if (!unit) throw new UnitGoneError(unitId);
+    if ((await readResetToken(tx.objectStore('meta'), unitId)) !== resetToken) throw new StaleResetError(unitId);
+    if (!unit.items.some((candidate) => candidate.id === itemId)) throw new ItemGoneError(unitId, itemId);
     const key = itemStateId(unitId, itemId);
     if (!(await tx.objectStore('itemStates').getKey(key))) return false;
     await tx.objectStore('itemStates').delete(key);
