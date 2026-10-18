@@ -5,7 +5,8 @@ The long form of the hard rules in `CLAUDE.md`. Area-specific rules live in `.cl
 ## Strings and locales
 
 - Every user-visible string goes through `t()`, with keys in both `src/i18n/locales/en.json` and `src/i18n/locales/zh.json`. `bun run i18n:check` enforces it; the key-level rules (plurals, placeholders, removing unused keys, Chinese copy style) are in `.claude/rules/i18n.md`.
-- Chinese lives only in `src/i18n/locales/zh.json`, the `*.zh.txt` prompt templates, `README.zh-CN.md` and `marketing/zh/`. `bun run i18n:check` rejects hard-coded Chinese in components.
+- Chinese lives only in `src/i18n/locales/zh.json`, the `*.zh.txt` prompt templates, `README.zh-CN.md`, `marketing/zh/` and the schema-validated JSON content packs (see below). `bun run i18n:check` rejects hard-coded Chinese in components and other `.ts`/`.tsx` files.
+- Content packs (`src/data/*/*.json`, for example the grammar pack) are data, not interface strings: they may carry Chinese and English text per entry (Zod-validated at load, with provenance and review status). Interface labels around them (tense names, headings, buttons) still go through `t()` with keys in both locales. Owner decision 2026-10-18.
 - Prompt wording lives in template files (never in TypeScript); AI calls go through `src/services/ai` (`.claude/rules/ai-layer.md`).
 
 ## Language of text
