@@ -1,51 +1,38 @@
 # CLAUDE.md
 
-Relire is a static, browser-only PWA for French close reading and pronunciation practice, aimed at learners preparing for TCF Canada (no mock exams or official scores). It is becoming **Relire Plus** by absorbing the FrenchLab AI workbook (exercises including dictation and AI-graded writing, material import, mistake notebook); follow `docs/merge-plan.md` for that work. React 19 + Vite + Tailwind v4 + i18next, IndexedDB for data, the user's own AI key called straight from the browser. There is no server.
+Relire is a static, browser-only PWA for French close reading and pronunciation practice for TCF Canada learners (no mock exams or official scores); it is becoming **Relire Plus** (`docs/merge-plan.md`). Stack: React 19, Vite, Tailwind v4, i18next, IndexedDB, the user's own AI key called from the browser; no server. Bun is the only package manager.
 
-This file holds only what applies to every task. Everything else is loaded when needed (see "Where to look").
-
-## Commands
-
-Bun is the only package manager.
-
-- `bun install` · `bun run dev` (Vite on :5173) · `bun run build` (static site in `dist/`, with the PWA service worker) · `bun run preview`
-- `bun run typecheck`: `tsc --noEmit`
-- `bun run lint`: oxlint, type-aware, with the React Hooks rules; warnings fail (`bun run lint:fix` applies safe fixes)
-- `bun run format` / `bun run format:check`: oxfmt is the only formatter (CI checks it); Markdown, prompt templates and `marketing/` are left as written
-- `bun run test`: `bun test` over `tests/` (pure logic: exercise contracts, grading, import drafts, taxonomy; Playwright specs in `e2e/` are separate)
-- `bun run i18n:check`: keys exist in both locales, locales match, no hard-coded Chinese in components (CI runs it)
-- `impeccable detect --json src index.html`: UI anti-pattern detector; keep it at `[]`
-- `bun run e2e`: Playwright specs in `e2e/` drive the real app in installed Chrome with every AI call mocked (`e2e/fixtures.ts`); `bun scripts/check-prosody-schema.ts` guards the marker parser. Cover UI changes with a spec (`verify-ui` skill).
-
-## Always
+## Hard rules
 
 - Every user-visible string goes through `t()` with keys in both `en.json` and `zh.json`.
-- Never commit API keys; backups never contain them. Keys live only in the user's browser.
-- Never invent data (sample stats, fake scores, fallback AI answers). Empty means empty; failures show the real error.
+- Never commit API keys; backups never contain them.
+- Never invent data (fake stats, scores, AI answers); failures show the real error.
 - AI calls go through `src/services/ai`; prompt wording lives in template files, never in TypeScript.
+- Nothing has shipped. Until a release is documented in `CHANGELOG.md`, no data shape, route, key or behaviour is "existing": no backward-compatibility shims, legacy fallbacks or migrations for unreleased states. Change the shape and the code together.
+- Solve from first principles with the smallest design (Occam). No defensive code for cases that cannot happen, no abstraction until a second real caller exists, no speculative options or config.
 - Controls never move the page: transient states show on the control itself or in an overlay.
-- Technical documentation, code comments, commit messages and PR text are in English. Chinese lives only in `locales/zh.json`, the `*.zh.txt` prompts, `README.zh-CN.md` and `marketing/zh/`.
-- Every change a user could notice gets a line in `CHANGELOG.md` (Unreleased) in the same commit.
+- Docs, comments, commit messages and PR text are in English; Chinese only where `docs/conventions.md` allows.
+- A user-noticeable change gets a `CHANGELOG.md` (Unreleased) line in the same commit.
 
 ## How to work here
 
 - Read before you change: the files you will touch, and the docs below for the area.
-- Keep diffs minimal and on-topic. Ask before decisions that are the user's (product scope, new dependencies, a new provider, data shape after release).
-- Prove it works before saying so: run the checks, and for UI drive the app (`verify-ui`). Report what was and was not verified; AI responses in checks are mocked. Visual acceptance is performed manually by the user: do not add screenshot capture or review as a delivery gate unless explicitly requested.
-- Develop on the designated branch. Do not open PRs, merge or force-push unless asked. Finish with the `ship-change` skill.
+- Minimal diffs. Ask before decisions that are the user's (product scope, new dependencies, a new provider, data shape after release).
+- Prove it works and report what was and was not verified (AI in checks is mocked). Visual acceptance is manual: no screenshot gates unless asked.
+- Develop on the designated branch. No PRs, merges or force-push unless asked, except the lead's local merge in `docs/agent-delegation.md`. Finish with `ship-change`.
 
 ## Where to look
 
-| When you need… | Read |
+| Your task | Read |
 | --- | --- |
-| What the product is for, who it serves, what it must not claim | `PRODUCT.md` |
-| Merging FrenchLab AI: decisions, target screens, storage, phases | `docs/merge-plan.md` |
-| Where the merge stands and what to do next (resume here) | `docs/merge-progress.md` |
-| Visual system: tokens, type, spacing, overlays | `DESIGN.md` |
-| Which module owns what, data flow, storage lifetimes | `docs/architecture.md` |
-| Area rules (UI, AI layer, storage, speech, i18n, marketing site, TypeScript style) | `.claude/rules/*.md`, loaded automatically when you open matching files |
-| Checking a change in the browser | skill `verify-ui` |
+| Commands, checks, ports, e2e | `docs/development.md` |
+| What the hard rules mean in practice | `docs/conventions.md` |
+| Files in an area (UI, AI, storage, speech, i18n, marketing, TS) | `.claude/rules/*.md`, auto-loaded |
+| Product intent, audience, claims to avoid | `PRODUCT.md` |
+| UI work: tokens, type, spacing, overlays | `DESIGN.md`, skill `verify-ui` |
+| Module ownership, data flow, storage | `docs/architecture.md` |
+| Merging FrenchLab AI | `docs/merge-plan.md`, then `docs/merge-progress.md` |
 | Adding an AI provider | skill `add-ai-provider` |
-| Finishing a change (checks, changelog, commit, report) | skill `ship-change` |
-| Delegating work to pi / agy / Claude subagents | `docs/agent-delegation.md` |
-| Launch and deployment notes | `docs/LAUNCH.md`, `.github/workflows/` |
+| Finishing a change | skill `ship-change` |
+| Delegating to pi, agy, subagents | `docs/agent-delegation.md` |
+| Launch and deployment | `docs/LAUNCH.md`, `.github/workflows/` |
