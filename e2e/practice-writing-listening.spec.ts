@@ -304,7 +304,12 @@ test('a failed remote Listen shows its real reason and never speaks the device v
   await openUnit(page, 'unit-number-dictation', 'Les nombres');
   const one = row(page, 'Écoutez et écrivez').first();
   await one.getByRole('button', { name: 'Listen' }).click();
-  // The control itself reports the provider's real error, at its fixed size, and no engine is substituted.
+  // The control itself reports the provider's real error, at its fixed size, and no engine is substituted;
+  // the reason is a real visible box, not screen-reader-only text.
+  await expect(one.getByRole('alert')).toBeVisible();
+  const box = await one.getByRole('alert').boundingBox();
+  expect(box?.width ?? 0).toBeGreaterThan(24);
+  expect(box?.height ?? 0).toBeGreaterThan(10);
   await expect(one.getByRole('alert')).toContainText('Listen failed');
   await expect(one.getByRole('alert')).toContainText('tts failed');
   await page.waitForTimeout(300);

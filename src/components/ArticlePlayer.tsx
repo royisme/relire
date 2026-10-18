@@ -15,6 +15,8 @@ interface ArticlePlayerProps {
   total: number;
   phase: SpeechPhase;
   failed: boolean;
+  /** Why the current sentence could not be played, when the player knows the real reason. */
+  reason?: string | null;
   onToggle: () => void;
   onStep: (delta: number) => void;
   onStop: () => void;
@@ -25,6 +27,7 @@ export const ArticlePlayer: React.FC<ArticlePlayerProps> = ({
   total,
   phase,
   failed,
+  reason,
   onToggle,
   onStep,
   onStop,
@@ -80,7 +83,10 @@ export const ArticlePlayer: React.FC<ArticlePlayerProps> = ({
 
       <div className="min-w-0 flex-1 px-2" aria-live="polite">
         {failed ? (
-          <p className="text-xs text-panel-bad-ink truncate">{t('player.failed')}</p>
+          // The real reason of the failing sentence, wrapped and scrollable — never cut off.
+          <p className="max-h-12 overflow-y-auto break-words text-xs text-panel-bad-ink">
+            {reason ? t('player.failedReason', { msg: reason }) : t('player.failed')}
+          </p>
         ) : (
           <p className="text-xs text-panel-muted tnum truncate">
             {t('player.progress', { current: index + 1, total })}

@@ -262,7 +262,11 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
           className={cn(panelOutline, 'justify-self-start px-3')}
           disabled={!ready}
           onClick={() => (referencePhase === 'idle' ? card.playReference() : stopSpeech())}
-          aria-label={t('practiceCard.reference')}
+          aria-label={
+            referencePhase === 'idle' && referenceFailure
+              ? t('speech.listenFailed', { msg: referenceFailure })
+              : t('practiceCard.reference')
+          }
           title={
             referencePhase === 'idle' && referenceFailure
               ? t('speech.listenFailed', { msg: referenceFailure })
@@ -396,6 +400,11 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
         ) : card.error ? (
           <p role="alert" className="text-panel-bad-ink break-words">
             {t('practiceCard.error', { msg: card.error })}
+          </p>
+        ) : referenceFailure ? (
+          // The reference's real failure, in the card's own bounded line: visible on touch as well.
+          <p role="alert" className="text-panel-bad-ink break-words">
+            {t('speech.listenFailed', { msg: referenceFailure })}
           </p>
         ) : (
           <p className="text-panel-muted">{status ?? t('practiceCard.hint')}</p>

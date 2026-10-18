@@ -263,7 +263,7 @@ Esc closes the topmost thing: a modal sheet first, then the practice card, then 
 `surface` background, `ink-300` 1px border, 6px radius, 40px high, `ink-400` placeholder, global focus ring. Errors appear inline next to what failed, in `bad-700`, with the real reason.
 
 ### Speak buttons
-`SpeakButton` / `SpeakIcon` show idle (speaker), loading (spinner) and playing (stop square) at a fixed size; every button for the same text or take shows the same state. Never keep a separate "is speaking" flag.
+`SpeakButton` / `SpeakIcon` show idle (speaker), loading (spinner), playing (stop square) and failed (crossed-out speaker, `bad-700`) at a fixed size; every button for the same text or take shows the same state. Never keep a separate "is speaking" flag. A failure shows its real reason where it happened, visibly on touch too: icon-only and labelled speak buttons float a small error overlay under the control (over it near the bottom of the screen) — outside the button's semantics, wrapped and scrollable, clamped inside the viewport — while the practice card and the article player use their bounded status lines; pressing the control retries and clears it. The Settings preview is a sound like any other: claiming the slot stops and unpublishes whatever played, anything that stops speech cancels it (never a failure, never a stuck check), leaving Settings cancels it with its request, and it only reports success once the clip has really finished playing.
 
 ### Practice card (signature)
 A recording tool on the ink panel (10px radius, `shadow-lg`, at most `min(70vh, 28rem)` tall, scrolling inside itself), docked at the bottom of the reader. Top to bottom:

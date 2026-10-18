@@ -29,6 +29,9 @@ class FakeAudio {
   addEventListener(type: string, handler: () => void) {
     (this.listeners[type] ??= []).push(handler);
   }
+  removeEventListener(type: string, handler: () => void) {
+    this.listeners[type] = (this.listeners[type] ?? []).filter((fn) => fn !== handler);
+  }
   async play() {
     this.paused = false;
   }
@@ -137,6 +140,9 @@ async function settleOf(text: string, options: Parameters<typeof speakFrench>[1]
   return () => outcome;
 }
 
+/** Lets the fake synthesis and play promises run, so a preview's audio element exists. */
+const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 describe('remote speech failures', () => {
   test('a failed synthesis settles failed with the real reason and never speaks the device voice', async () => {
     const fake = fakeAccess(() => {
@@ -214,25 +220,69 @@ describe('the settings preview', () => {
   test('plays through the shared slot: stopping or starting any playback interrupts it', async () => {
     const fake = fakeAccess(async () => new Blob(['audio'], { type: 'audio/wav' }));
     spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
-    await testSpeech(remoteSettings());
+    const preview = testSpeech(remoteSettings());
+    await tick();
     expect(FakeAudio.instances).toHaveLength(1);
     stopSpeech();
     expect(FakeAudio.instances[0].paused).toBe(true);
+    await failure(preview); // stopped, so cancelled without a failure
 
-    await testSpeech(remoteSettings());
+    const second = testSpeech(remoteSettings());
+    await tick();
     expect(FakeAudio.instances).toHaveLength(2);
     await speakFrench('Une autre phrase');
     expect(FakeAudio.instances[1].paused).toBe(true);
+    await failure(second);
+  });
+
+  test('claiming the slot clears the clip it interrupted, so no Listen button stays playing', async () => {
+    const fake = fakeAccess(async () => new Blob(['audio'], { type: 'audio/wav' }));
+    spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
+    await settleOf('Bonjour');
+    expect(getSpeechState()).toMatchObject({ phase: 'playing', key: 'Bonjour' });
+    const preview = testSpeech(remoteSettings());
+    expect(getSpeechState()).toMatchObject({ phase: 'idle', key: null });
+    expect(FakeAudio.instances[0].paused).toBe(true);
+    await tick();
+    FakeAudio.instances[1].end();
+    expect(await failure(preview)).toBeUndefined();
+  });
+
+  test('a clip that errors while the preview plays reports the failure, not a false success', async () => {
+    const fake = fakeAccess(async () => new Blob(['audio'], { type: 'audio/wav' }));
+    spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
+    const preview = testSpeech(remoteSettings());
+    await tick();
+    FakeAudio.instances[0].fail();
+    const error = await failure(preview);
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toBeTruthy();
+  });
+
+  test('interrupting a remote preview cancels it, and its late error cannot fail the new sound', async () => {
+    const fake = fakeAccess(async () => new Blob(['audio'], { type: 'audio/wav' }));
+    spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
+    const preview = testSpeech(remoteSettings());
+    await tick();
+    await speakFrench('Une autre phrase');
+    expect(await failure(preview)).toBeUndefined();
+    // The interrupted preview's element can still emit its error (its URL was revoked): a new clip must not fail.
+    FakeAudio.instances[0].fail();
+    expect(getSpeechFailure()).toBeNull();
   });
 
   test('a repeated preview does not overlap the one before it', async () => {
     const fake = fakeAccess(async () => new Blob(['audio'], { type: 'audio/wav' }));
     spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
-    await testSpeech(remoteSettings());
-    await testSpeech(remoteSettings());
-    expect(FakeAudio.instances).toHaveLength(2);
+    const first = testSpeech(remoteSettings());
+    await tick();
+    const second = testSpeech(remoteSettings());
     expect(FakeAudio.instances[0].paused).toBe(true);
+    await tick();
     expect(FakeAudio.instances[1].paused).toBe(false);
+    FakeAudio.instances[1].end();
+    expect(await failure(first)).toBeUndefined();
+    expect(await failure(second)).toBeUndefined();
   });
 
   test('interrupting a device preview is a cancellation, not a reported failure', async () => {

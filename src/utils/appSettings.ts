@@ -185,7 +185,7 @@ export const hasTextKey = (settings: AppSettings = getAppSettings()) => keyReady
 /** OCR has its own selection, never inherited from Text AI. */
 export const hasOcrKey = (settings: AppSettings = getAppSettings()) => keyReady(settings, settings.ocrProvider);
 
-/** True when the provider that speaks has a key (otherwise the browser's own voice is used). */
+/** True when the provider that speaks has a key. */
 export const hasSpeechKey = (settings: AppSettings = getAppSettings()) => keyReady(settings, settings.speechProvider);
 
 /** How the sheet compares answers: strict accents from the Practice settings. */

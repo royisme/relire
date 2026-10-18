@@ -103,7 +103,8 @@ for (const phone of [false, true]) {
         await expect(row.getByText(/^Last recorded:/)).toContainText(text === soleSentence ? '0:11' : '0:13');
         const sentenceBox = (await sentence.boundingBox())!;
         const rowBox = (await row.boundingBox())!;
-        const actionsBox = (await reference.locator('..').boundingBox())!;
+        // The actions row itself, not the speak control's positioning wrapper.
+        const actionsBox = (await row.locator('[data-shadowing-actions]').boundingBox())!;
         expect(Math.abs(sentenceBox.width - rowBox.width)).toBeLessThan(2);
         expect(Math.abs(actionsBox.width - rowBox.width)).toBeLessThan(2);
         expect(actionsBox.y).toBeGreaterThanOrEqual(sentenceBox.y + sentenceBox.height);

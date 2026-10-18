@@ -26,7 +26,7 @@ export interface SpeechOptions {
   engine?: 'device';
   /**
    * Called once when this clip is done: it played to the end, it was stopped or replaced by another clip,
-   * or neither the provider nor the browser voice could play it. Used to chain clips (`sequence.ts`).
+   * or it could not be played by its engine. Used to chain clips (`sequence.ts`).
    */
   onSettled?: (outcome: SpeechOutcome) => void;
 }
@@ -383,6 +383,8 @@ async function previewDeviceVoice(signal?: AbortSignal, isCurrent: () => boolean
  * Plays a short phrase with the given (possibly unsaved) settings and reports failure; a cached clip
  * cannot stand in for a check. The preview is a sound like any other: it interrupts whatever plays, is
  * interrupted by any new playback or stop, and is cancelled with its request when Settings is left.
+ * It only settles once the clip has really finished: `play()` resolving says the sound started, not
+ * that it played, so a clip that errors part-way reports the failure instead of a false success.
  * A device engine is its own check: it reports whether this device has a French voice.
  */
 export async function testSpeech(settings: AppSettings, signal?: AbortSignal): Promise<void> {
@@ -390,6 +392,9 @@ export async function testSpeech(settings: AppSettings, signal?: AbortSignal): P
   const device = access.selection('speech').device;
   beforePlay?.();
   halt();
+  // Claiming the single-playback slot also unpublishes whatever it interrupted: no Listen button may
+  // keep showing playing for a clip the preview just stopped.
+  setSpeechState('idle');
   const id = requestId;
   const isCurrent = () => id === requestId;
   if (device) return previewDeviceVoice(signal, isCurrent);
@@ -408,19 +413,44 @@ export async function testSpeech(settings: AppSettings, signal?: AbortSignal): P
     if (currentAudio === audio) currentAudio = null;
     URL.revokeObjectURL(url);
     signal?.removeEventListener('abort', abort);
+    audio.removeEventListener('ended', ended);
+    audio.removeEventListener('error', failed);
+  };
+  let resolvePlayed: ((outcome: { error?: Error }) => void) | null = null;
+  let done = false;
+  /** Ends the preview exactly once: it really finished, it failed, or its request or the slot was taken. */
+  const end = (error?: Error) => {
+    if (done) return;
+    done = true;
+    resolvePlayed?.(error === undefined ? {} : { error });
+    resolvePlayed = null;
+    release();
+  };
+  const ended = () => end();
+  // A late error from an element whose slot was already taken must not fail anything: it settles silently.
+  const failed = () => {
+    if (!done && currentAudio !== audio) return end();
+    end(new Error(i18n.t('errors.speechPlayback')));
   };
   const abort = () => {
     audio.pause();
-    release();
+    end(new DOMException('Aborted', 'AbortError'));
   };
+  // Anything that stops or replaces a sound cancels the preview (never a failure, never a stuck check).
+  settle = () => end();
+  const played = new Promise<{ error?: Error }>((resolve) => {
+    resolvePlayed = resolve;
+  });
   signal?.addEventListener('abort', abort, { once: true });
-  audio.addEventListener('ended', release, { once: true });
-  audio.addEventListener('error', release, { once: true });
+  audio.addEventListener('ended', ended);
+  audio.addEventListener('error', failed);
   try {
     await audio.play();
     signal?.throwIfAborted();
+    const { error } = await played;
+    if (error) throw error;
   } catch (err) {
-    release();
+    end();
     throw err;
   }
 }

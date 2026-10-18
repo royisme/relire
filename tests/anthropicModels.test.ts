@@ -1,4 +1,4 @@
-/** Claude model discovery: canonical IDs, bounded cursor pages, header credentials, family image hints only. */
+/** Claude model discovery: canonical IDs, bounded cursor pages, header credentials, verified-ID image hints. */
 import { afterEach, beforeEach, describe, expect, spyOn, test, type Mock } from 'bun:test';
 import i18n from '../src/i18n';
 import { MissingApiKeyError } from '../src/services/ai/errors';

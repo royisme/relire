@@ -61,7 +61,8 @@
     "next": "Next sentence",
     "stop": "Stop listening",
     "progress": "Sentence {{current}} of {{total}}",
-    "failed": "This sentence could not be played. Press play to try again."
+    "failed": "This sentence could not be played. Press play to try again.",
+    "failedReason": "This sentence could not be played: {{msg}}"
   },
   "speech": {
     "listenFailed": "Listen failed: {{msg}}"

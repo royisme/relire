@@ -15,7 +15,7 @@ export interface SequenceState {
   id: string | null;
   index: number;
   total: number;
-  /** The current sentence could not be played (provider and browser voice both failed). */
+  /** The current sentence could not be played by its engine. */
   failed: boolean;
 }
 

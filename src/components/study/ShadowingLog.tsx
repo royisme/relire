@@ -196,7 +196,7 @@ function Row({
       ) : (
         <p className="font-serif text-base text-ink-700 break-words">{record.text}</p>
       )}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2" data-shadowing-actions>
         <SpeakButton
           text={record.text}
           label={t('shadowingLog.reference')}

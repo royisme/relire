@@ -27,7 +27,7 @@ import { PracticeCard } from './reader/PracticeCard';
 import { SentenceBar } from './reader/SentenceBar';
 import { useTouchLayout } from '../hooks/useTouchLayout';
 import { usePracticeCard } from '../hooks/usePracticeCard';
-import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
+import { SpeakButton, useSpeechFailure, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {
@@ -249,6 +249,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
   const listening = sequence.id === sourceId;
   const listeningId = listening ? (flatSentences[sequence.index]?.id ?? null) : null;
+  // Why the sentence being read could not be played, so the player can say it instead of a generic line.
+  const sequenceFailure = useSpeechFailure(listening ? (flatSentences[sequence.index]?.text ?? '') : '');
 
   const toggleListening = () => {
     if (listening) toggleSequence();
@@ -655,6 +657,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               total={sequence.total}
               phase={speech.phase}
               failed={sequence.failed}
+              reason={sequence.failed ? sequenceFailure : null}
               onToggle={toggleSequence}
               onStep={stepSequence}
               onStop={stopSequence}
