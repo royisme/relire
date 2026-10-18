@@ -78,6 +78,22 @@ async function expectUnclipped(reason: Locator) {
   }
 }
 
+/** The player's region and each of its controls, so a longer reason cannot move them. */
+async function playerBoxes(page: Page) {
+  return page.getByRole('region', { name: 'Article player' }).evaluate((root) => {
+    const box = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return {
+        left: Math.round(r.left),
+        top: Math.round(r.top),
+        width: Math.round(r.width),
+        height: Math.round(r.height),
+      };
+    };
+    return { player: box(root), controls: [...root.querySelectorAll('button')].map(box) };
+  });
+}
+
 /** The last line of a reason is reachable inside its own scrolling box. */
 async function expectWholeReason(reason: Locator) {
   const read = await reason.evaluate((el) => {
@@ -223,5 +239,41 @@ test('a long failed word Listen stays inside the sheet that clips it on a phone 
   await expectReadable(reason);
   await expectUnclipped(reason);
   await expectWholeReason(reason);
+  await fitsViewport(page);
+});
+
+test('a long article failure does not move the player or its controls', async ({ page }) => {
+  await openArticle(page);
+  const player = page.getByRole('region', { name: 'Article player' });
+  await page.getByRole('button', { name: 'Listen', exact: true }).click();
+  await expect(player).toBeVisible();
+  await expect(player).not.toContainText('could not be played');
+  await settled(page);
+  const playing = await playerBoxes(page);
+  // The next sentence fails with a reason that wraps to several lines.
+  await failTtsWith(page, LONG_REASON);
+  await player.getByRole('button', { name: 'Next sentence' }).click();
+  await expect(player).toContainText('could not be played');
+  await expect(player).toContainText('quota is unavailable');
+  await settled(page);
+  // The dock is anchored to the bottom: a taller status line would lift the player and its buttons.
+  expect(await playerBoxes(page)).toEqual(playing);
+  await expectWholeReason(player.locator('p'));
+});
+
+test('a long article failure does not move the player or its controls on a phone @phone', async ({ page }) => {
+  await openArticle(page);
+  const player = page.getByRole('region', { name: 'Article player' });
+  await page.getByRole('button', { name: 'Listen', exact: true }).click();
+  await expect(player).toBeVisible();
+  await settled(page);
+  const playing = await playerBoxes(page);
+  await failTtsWith(page, LONG_REASON);
+  await player.getByRole('button', { name: 'Next sentence' }).click();
+  await expect(player).toContainText('could not be played');
+  await expect(player).toContainText('quota is unavailable');
+  await settled(page);
+  expect(await playerBoxes(page)).toEqual(playing);
+  await expectWholeReason(player.locator('p'));
   await fitsViewport(page);
 });

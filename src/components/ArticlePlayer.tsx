@@ -81,10 +81,11 @@ export const ArticlePlayer: React.FC<ArticlePlayerProps> = ({
         <SkipForward className="w-4 h-4" />
       </Button>
 
-      <div className="min-w-0 flex-1 px-2" aria-live="polite">
+      <div className="min-w-0 flex-1 h-10 px-2 flex flex-col justify-center" aria-live="polite">
         {failed ? (
-          // The real reason of the failing sentence, wrapped and scrollable — never cut off.
-          <p className="max-h-12 overflow-y-auto break-words text-xs text-panel-bad-ink">
+          // The real reason, wrapped and scrollable inside the same 40 px slot as the progress line
+          // and bar, so a long one cannot grow the dock or lift these controls.
+          <p className="max-h-8 overflow-y-auto break-words text-xs text-panel-bad-ink">
             {reason ? t('player.failedReason', { msg: reason }) : t('player.failed')}
           </p>
         ) : (
