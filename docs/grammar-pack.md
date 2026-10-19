@@ -300,6 +300,8 @@ Source: `/tmp/agy-research/run2.log` (agy report, the lead spot-checked it; not 
 
 # Part 2: Grammar topics pack (A1 first, design for review)
 
+Delivery update (2026-10-19, H2b): the accepted [hosted content service ADR](adr-hosted-content-service.md) supersedes the static delivery in T5 and T7 below. Drafts stay private in gitignored `.local/grammar-topics/`; `publish.ts` reuses the reviewed-only gate to write private SQL and optionally load local D1. The Worker serves summaries, individual topics and a derived tag index; the app validates fetched content and caches it for offline use. Static topic/tag-index artifacts and `build.ts topics --check` are removed; CI uses metadata-only `bun scripts/grammar-topics/publish.ts --check` without private drafts. No deploy, login or remote execution is part of H2b. The older design text is retained as a design record, not current delivery instructions.
+
 Status: design for review, nothing built. Paths marked **(new)** do not exist yet, and neither does any file named only in T8 and T9; every other path was checked with `test -e`. The reference database is `/Users/royzhu/software/my-local-service/llm-server/artifacts/a1-grammar-full/` (`README.md`, `USAGE.md`, `OUTLINE.md`, `index.json`, `topics/K001.md` to `K093.md`, `library.sqlite3`): 93 topics, 10 chapters, 45 tables, A1 only, Chinese explanations, derived from a textbook PDF, not teacher-reviewed. It is local input only: never committed, shipped or pasted into the repo or this file. Unverified claims are listed at the end (T11).
 
 ## T1. Goals, non-goals, owner decisions (2026-10-18, fixed)

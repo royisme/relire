@@ -60,4 +60,23 @@ The following account operations are for the owner, using their own Cloudflare a
    bunx wrangler deploy
    ```
 
-Content is loaded only from the owner's machine into D1, never through this Worker. The reviewed-content loading script belongs to H2 and does not exist yet. Store only full JSON accepted by the app's `GrammarTopicSchema`, mirror its summary fields into the columns, and update `meta.packVersion` whenever content changes. There is no real topic content or seed content in this package; the TEST-only fixture is used only by tests and the local smoke check.
+## Publishing content
+
+From the repository root, after the owner reviews drafts with `scripts/grammar-topics/review.ts mark` and sets manifest inclusion:
+
+```sh
+bun scripts/grammar-topics/publish.ts                # Generate private SQL only
+bun scripts/grammar-topics/publish.ts --apply-local  # Generate and replace local D1 topics
+```
+
+The existing `buildTopics` gate refuses an included draft without a matching owner review, naming the id. Excluded ids are listed; zero included topics publishes an empty set. SQL contains the exact published topic JSON, mirrored summary fields, JSON tags and canonical content hashes, ordered by id. The pack version is `<manifest.packVersion>+<first 8 SHA-256 hex of sorted id:contentHash lines joined with newlines (no final newline)>`. Wrangler strips explicit transaction wrappers, so SQL orders deletion first, rows next and the version last.
+
+The only output file is gitignored `.local/grammar-topics/publish.sql`: it contains private topic text; never commit or print it. The command prints counts, skipped ids and the path, not text. Apply the migration first (`cd worker && bunx wrangler d1 migrations apply DB --local`); publishing never applies it silently. `--check` instead validates public manifest/review metadata and chapter labels without reading drafts or writing SQL, for CI.
+
+Later, only the owner runs `wrangler d1 execute DB --remote --file .local/grammar-topics/publish.sql` by hand. From the repository root, use the Worker's installed executable and explicit config so the SQL path resolves correctly (requires the owner's configured database and access):
+
+```sh
+worker/node_modules/.bin/wrangler d1 execute DB --remote --file .local/grammar-topics/publish.sql --config worker/wrangler.jsonc
+```
+
+The publisher itself has only a local execution path; it never logs in or deploys. There is no real topic content or seed content in this package; the TEST-only fixture is used only by tests and the local smoke check.
