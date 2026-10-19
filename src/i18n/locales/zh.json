@@ -736,6 +736,16 @@
     "mistakes": "错题本",
     "grammar": "语法"
   },
+  "grammarTopics": {
+    "sections": "语法分区",
+    "title": "语法专题",
+    "loading": "正在加载专题…",
+    "loadError": "无法加载专题：{{msg}}",
+    "empty": "尚未发布语法专题。",
+    "noMatch": "此标签下尚无已发布的专题。",
+    "clearTag": "清除标签筛选：{{tag}}",
+    "back": "返回语法专题"
+  },
   "shadowingLog": {
     "title": "跟读本",
     "subtitle": "保存在本机的文章和练习短文录音，每句保留最近三次。",
@@ -852,6 +862,7 @@
     }
   },
   "notFound": {
+    "grammarTopic": "此语法专题尚未发布或不存在。",
     "passage": "这篇短文已不可用。请返回文章库选择其他内容。",
     "title": "找不到这个页面",
     "page": "这个地址在 Relire Plus 里没有对应的页面。",

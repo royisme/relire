@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useRef, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from './components/shell/Header';
 import { Sidebar } from './components/shell/Sidebar';
@@ -45,6 +45,8 @@ import { useReaderUnits } from './hooks/useReaderUnits';
 import { passageDocument, readerIdentity, type ReaderSource } from './types/readerSource';
 import { sourceOfRecording } from './storage/shadowing';
 import { setLabel } from './services/exercises/setLabel';
+
+const GrammarSection = lazy(() => import('./components/study/grammar/GrammarSection'));
 
 const ONBOARDING_KEY = 'relire_onboarded';
 const storedFlag = (key: string) => {
@@ -492,6 +494,8 @@ export default function App() {
               <StudyView
                 tab={route.tab}
                 verb={route.verb}
+                section={route.section}
+                tag={route.tag}
                 sectionsInSidebar={expanded}
                 mistakes={{
                   onMissingKey: requestKey,
@@ -515,6 +519,14 @@ export default function App() {
                   },
                 }}
               />
+            )}
+
+            {route.name === 'grammarTopic' && (
+              <div className="max-w-5xl min-w-0 mx-auto px-4 sm:px-6 py-6">
+                <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
+                  <GrammarSection topicId={route.topicId} />
+                </Suspense>
+              </div>
             )}
 
             {route.name === 'practice' && (
