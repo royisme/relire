@@ -10,7 +10,7 @@
       ],
       "related": [],
       "reference": "K001",
-      "include": false
+      "include": true
     },
     {
       "id": "noun-plurals",
@@ -21,7 +21,7 @@
       ],
       "related": [],
       "reference": "K002",
-      "include": false
+      "include": true
     },
     {
       "id": "definite-article-forms",

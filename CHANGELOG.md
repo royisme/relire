@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- First-chapter noun gender and plural topics are included for local content-service testing after owner-authorized AI review, not human language review.
 - **Common verbs show their tenses without a key.** When a content service is configured, the word sheet's conjugation slot shows a common verb's simple tenses from the Morphalou dictionary (marked as not reviewed; compound tenses stay on the Conjugation page), and tapping any conjugated form of such a verb adds a "Verb form" line naming the verb, tense and person. The About page lists the data source, its licence and how to rebuild it.
 - Grammar Topics are available only when a content service is configured, with offline copies of fetched content; the free build shows Conjugation only.
 - Grammar tags in mistakes, practice and Progress link to their topics when one is published.

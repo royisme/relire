@@ -1,3 +1,16 @@
 {
-  "records": []
+  "records": [
+    {
+      "topicId": "noun-gender-feminine",
+      "contentHash": "3942714b09c5ad40f06aa7123561a0b3f5a1eafe4ef2e256405c00755da9f0be",
+      "reviewedBy": "AI assistant (owner-authorized local review)",
+      "reviewedAt": "2026-10-19"
+    },
+    {
+      "topicId": "noun-plurals",
+      "contentHash": "26aa51a8f42fafef6adea33e62282ca2a144fa2dcd3d3ef17703677217e6e7b8",
+      "reviewedBy": "AI assistant (owner-authorized local review)",
+      "reviewedAt": "2026-10-19"
+    }
+  ]
 }

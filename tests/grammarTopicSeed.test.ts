@@ -67,11 +67,11 @@ test('seed groups by first chapter appearance and shared nodes, never overwritin
   }
 });
 
-test('real manifest remains metadata only, with all proposals excluded', () => {
+test('real manifest remains metadata only, with 93 A1 topics', () => {
   const parsed = TopicManifestSchema.parse(manifest);
   expect(parsed.topics).toHaveLength(93);
   expect(new Set(parsed.topics.map((entry) => entry.chapter)).size).toBe(10);
-  expect(parsed.topics.every((entry) => !entry.include && entry.level === 'A1')).toBe(true);
+  expect(parsed.topics.every((entry) => entry.level === 'A1')).toBe(true);
   for (const entry of parsed.topics) {
     expect(Object.keys(entry).sort()).toEqual(['chapter', 'id', 'include', 'level', 'reference', 'related', 'tags']);
     for (const id of entry.related) expect(parsed.topics.some((topic) => topic.id === id)).toBe(true);
