@@ -752,7 +752,19 @@
     "empty": "No topics are published yet.",
     "noMatch": "No published topics match this tag.",
     "clearTag": "Clear tag filter: {{tag}}",
-    "back": "Back to Topics"
+    "back": "Back to Topics",
+    "chapters": {
+      "chapter-one": "Nouns",
+      "chapter-two": "Determiners",
+      "chapter-three": "Pronouns",
+      "chapter-four": "Qualifying adjectives",
+      "chapter-five": "Verbs",
+      "chapter-six": "Adverbs",
+      "chapter-seven": "Prepositions",
+      "chapter-eight": "Conjunctions",
+      "chapter-nine": "Sentences",
+      "chapter-ten": "French communication: further practice"
+    }
   },
   "shadowingLog": {
     "title": "Shadowing",
