@@ -1,4 +1,4 @@
-/** Content transport contract only: no live service or module mocks. */
+/** Content transport and short-lived reuse contracts: no live service or module mocks. */
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import {
   contentServiceFetch,
@@ -6,15 +6,22 @@ import {
   ContentServiceHttpError,
   ContentServiceNetworkError,
 } from '../src/services/grammarTopics/service';
-import { failure } from './fixtures/storage';
+import { contentRequest, resetContentRequests } from '../src/services/grammarTopics/request';
+import { failure, freshDb } from './fixtures/storage';
 
 let fetchSpy: ReturnType<typeof spyOn<typeof globalThis, 'fetch'>>;
+let clockSpy: ReturnType<typeof spyOn<typeof Date, 'now'>> | undefined;
 const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
-beforeEach(() => {
+beforeEach(async () => {
+  resetContentRequests();
+  await freshDb();
   process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test/';
   fetchSpy = spyOn(globalThis, 'fetch');
 });
 afterEach(() => {
+  resetContentRequests();
+  clockSpy?.mockRestore();
+  clockSpy = undefined;
   fetchSpy.mockRestore();
   if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
   else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
@@ -75,6 +82,70 @@ test('a service that never answers is cut off by the request timeout and reporte
   } finally {
     timeoutSpy.mockRestore();
   }
+});
+
+test('the same content path reuses its parsed result within the window', async () => {
+  fetchSpy.mockImplementation(Object.assign(async () => Response.json({ count: 1 }), { preconnect: () => {} }));
+  const parse = (data: unknown) => ({ parsed: data });
+  const first = await contentRequest('/v1/topics', parse);
+  expect(await contentRequest('/v1/topics', parse)).toBe(first);
+  expect(fetchSpy).toHaveBeenCalledTimes(1);
+});
+
+test('identical in-flight content requests share one network call', async () => {
+  let release!: (response: Response) => void;
+  fetchSpy.mockReturnValue(
+    new Promise<Response>((resolve) => {
+      release = resolve;
+    }),
+  );
+  const first = contentRequest('/v1/topics', (data) => data);
+  const second = contentRequest('/v1/topics', (data) => data);
+  expect(fetchSpy).toHaveBeenCalledTimes(1);
+  release(Response.json([]));
+  expect(await Promise.all([first, second])).toEqual([[], []]);
+});
+
+test('a failed content request is retried immediately and keeps its real error', async () => {
+  fetchSpy.mockRejectedValueOnce(new TypeError('TEST ONLY recovered')).mockResolvedValue(Response.json([]));
+  expect(((await failure(contentRequest('/v1/topics', (data) => data))) as Error).message).toBe('TEST ONLY recovered');
+  expect(await contentRequest('/v1/topics', (data) => data)).toEqual([]);
+  expect(fetchSpy).toHaveBeenCalledTimes(2);
+});
+
+test('successful content is reused until exactly 60 seconds after completion', async () => {
+  clockSpy = spyOn(Date, 'now').mockReturnValue(1000);
+  fetchSpy.mockImplementation(Object.assign(async () => Response.json([]), { preconnect: () => {} }));
+  await contentRequest('/v1/topics', (data) => data);
+  clockSpy.mockReturnValue(60_999);
+  await contentRequest('/v1/topics', (data) => data);
+  expect(fetchSpy).toHaveBeenCalledTimes(1);
+  clockSpy.mockReturnValue(61_000);
+  await contentRequest('/v1/topics', (data) => data);
+  expect(fetchSpy).toHaveBeenCalledTimes(2);
+});
+
+test('different content paths and service origins do not share requests', async () => {
+  fetchSpy.mockImplementation(Object.assign(async () => Response.json([]), { preconnect: () => {} }));
+  await contentRequest('/v1/topics', (data) => data);
+  await contentRequest('/v1/tag-index', (data) => data);
+  process.env.VITE_CONTENT_SERVICE_URL = 'http://other-content.test';
+  await contentRequest('/v1/topics', (data) => data);
+  expect(fetchSpy.mock.calls.map(([url]) => url)).toEqual([
+    'http://content.test/v1/topics',
+    'http://content.test/v1/tag-index',
+    'http://other-content.test/v1/topics',
+  ]);
+});
+
+test('an offline fallback is not reused when the service recovers', async () => {
+  fetchSpy.mockResolvedValueOnce(Response.json(['stored']));
+  await contentRequest('/v1/topics', (data) => data);
+  resetContentRequests();
+  fetchSpy.mockRejectedValueOnce(new TypeError('TEST ONLY offline')).mockResolvedValue(Response.json(['recovered']));
+  expect(await contentRequest('/v1/topics', (data) => data)).toEqual(['stored']);
+  expect(await contentRequest('/v1/topics', (data) => data)).toEqual(['recovered']);
+  expect(fetchSpy).toHaveBeenCalledTimes(3);
 });
 
 test('network failure keeps its original text', async () => {

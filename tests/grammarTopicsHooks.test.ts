@@ -3,6 +3,7 @@ import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import * as React from 'react';
 import { useGrammarTopics } from '../src/hooks/useGrammarTopics';
 import { useGrammarTagIndex } from '../src/hooks/useGrammarTagIndex';
+import { resetContentRequests } from '../src/services/grammarTopics/request';
 import { freshDb } from './fixtures/storage';
 import { topicFixture } from './fixtures/grammarTopics';
 
@@ -15,6 +16,7 @@ let stateSpy: ReturnType<typeof spyOn<typeof React, 'useState'>>;
 let effectSpy: ReturnType<typeof spyOn<typeof React, 'useEffect'>>;
 
 beforeEach(async () => {
+  resetContentRequests();
   await freshDb();
   process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
   let resolve!: () => void;
@@ -37,6 +39,7 @@ beforeEach(async () => {
   fetchSpy = spyOn(globalThis, 'fetch');
 });
 afterEach(() => {
+  resetContentRequests();
   fetchSpy.mockRestore();
   stateSpy.mockRestore();
   effectSpy.mockRestore();
