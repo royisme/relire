@@ -80,6 +80,8 @@
     "conjugateThis": "查这个动词的变位",
     "showTenses": "显示全部时态",
     "hideTenses": "收起全部时态",
+    "dictionaryNote": "来自 Morphalou 词典，未经人工审核。",
+    "compoundTenses": "复合时态在“动词变位”页面。",
     "verbForm": "动词形式",
     "verbFormLine": "{{verb}} : {{forms}}",
     "verbFormTense": "{{tense}}, {{persons}}",
