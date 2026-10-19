@@ -1,10 +1,11 @@
-/** Owns the shared test D1 read adapter over SQLite and the real Worker migration; no seed content. */
+/** Owns the shared test D1 read adapter over SQLite and the real Worker migrations; no seed content. */
 import { Database, type SQLQueryBindings } from 'bun:sqlite';
 import type { Env } from '../../worker/src/index';
 
 export async function createWorkerDb() {
   const db = new Database(':memory:');
-  db.exec(await Bun.file(new URL('../../worker/migrations/0001_init.sql', import.meta.url)).text());
+  for (const migration of ['0001_init.sql', '0002_lexicon.sql'])
+    db.exec(await Bun.file(new URL(`../../worker/migrations/${migration}`, import.meta.url)).text());
   const env: Env = {
     DB: {
       prepare(sql: string) {
