@@ -304,6 +304,8 @@ Delivery update (2026-10-19, H2b): the accepted [hosted content service ADR](adr
 
 Status: design for review, nothing built. Paths marked **(new)** do not exist yet, and neither does any file named only in T8 and T9; every other path was checked with `test -e`. The reference database is `/Users/royzhu/software/my-local-service/llm-server/artifacts/a1-grammar-full/` (`README.md`, `USAGE.md`, `OUTLINE.md`, `index.json`, `topics/K001.md` to `K093.md`, `library.sqlite3`): 93 topics, 10 chapters, 45 tables, A1 only, Chinese explanations, derived from a textbook PDF, not teacher-reviewed. It is local input only: never committed, shipped or pasted into the repo or this file. Unverified claims are listed at the end (T11).
 
+Interactive-learning proposal (2026-10-19): [Chapter One development specification](grammar-topic-learning-spec.md) defines task-led, offline-authored checkpoints for the two first-chapter topics, with shared Practice/Mistakes history. It is **not implemented or approved** and proposes replacing T1's “no exercises generated from topics” clause; the current scope below remains in force until owner sign-off.
+
 ## T1. Goals, non-goals, owner decisions (2026-10-18, fixed)
 - Goals: readable, bilingual (en, zh) grammar topics inside the app, lazily loaded, Zod-validated at load, each with provenance and a review status; linked from tags in the Mistake notebook, Practise and Progress.
 - Non-goals: no AI at runtime, no exercises generated from topics, no speech on examples (TQ10), no IPA (a character-class scan found it only in K047 and K080; not carried, same reasoning as Q13), no new grammar tags, no search, no reference text, page images or page numbers shipped, no server.
