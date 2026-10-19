@@ -24,7 +24,7 @@ Bun is the only package manager. The delivery checklist (which checks must pass,
 - `bun scripts/noun-gender/measure.ts attest`: write the last measurement into `data/noun-gender/oracle-attest.json`; owner-only, and only after NQ6 (licence) is confirmed.
 - `bun scripts/noun-gender/build.ts`: assemble `src/data/noun-gender/pack.json` from the A1 noun list, candidates, attest and reviews; candidates below the dictionary threshold (80%, n ≥ 30; a candidate's `override` decision ships it anyway, a `hold` never ships it) or without an attest record are dropped, unreviewed rows fail the build. No pack is committed yet.
 - `bun scripts/noun-gender/build.ts --check`: regenerate in memory and reject any byte difference from the committed pack (fails while no pack exists).
-- `bun scripts/noun-gender/review.ts print <id...>`: print noun rows and derived rule tables (dictionary figure, A1 figure, examples, exceptions) before review; only the owner runs `record <id...> --by "<name>" --ref "<reference>"` to append review records to `data/noun-gender/reviews.json`.
+- `bun scripts/noun-gender/review.ts print <id...>`: print noun rows and derived rule tables (dictionary figure, A1 figure, examples, exceptions) before review; only the owner runs `record <id...> --by "<name>" --ref "<reference>"` to append review records to `data/noun-gender/reviews.json`. An id can name both a noun and a rule (`age` is the noun `âge` and the rule `-age`; so is `eau`): `print` shows both and `record` records both.
 
 ## Run the content service locally
 

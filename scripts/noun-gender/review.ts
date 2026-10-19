@@ -15,6 +15,23 @@ function ruleTable(row: RuleRow): string {
   ].join('\n');
 }
 
+type NounRef = { id: string; lemma: string; gender: string };
+export type ReviewTarget = { noun: NounRef } | { row: RuleRow } | { text: string };
+
+/**
+ * What each id names. An id can name a noun, a rule, or both: an ending is spelled like a word (`age` the rule and
+ * `âge` the noun, `eau` the rule and the noun), and confirming that id confirms both. An id that names neither
+ * (a held, dropped or rejected row) is its reason, which `record` refuses.
+ */
+export function resolveIds(ids: string[], kept: NounRef[], rows: RuleRow[], drops: string[]): ReviewTarget[] {
+  return [...new Set(ids)].flatMap((id): ReviewTarget[] => {
+    const noun = kept.find((noun) => noun.id === id);
+    const row = rows.find((row) => row.id === id);
+    if (noun || row) return [...(noun ? [{ noun }] : []), ...(row ? [{ row }] : [])];
+    return [{ text: drops.find((drop) => drop.startsWith(`${id}:`)) ?? `${id}: rejected; skipped` }];
+  });
+}
+
 if (import.meta.main) {
   const [command, ...args] = Bun.argv.slice(2);
   const by = args.indexOf('--by');
@@ -40,30 +57,38 @@ if (import.meta.main) {
     candidates,
     attest,
   );
-  const sheet = [...new Set(ids)].map((id) => {
-    const noun = kept.find((noun) => noun.id === id);
-    if (noun) return `${noun.id}\t${noun.lemma}\t${noun.gender}`;
-    const row = rows.find((row) => row.id === id);
-    if (row) return ruleTable(row);
-    return drops.find((drop) => drop.startsWith(`${id}:`)) ?? `${id}: rejected; skipped`;
-  });
+  const targets = resolveIds(ids, kept, rows, drops);
   if (command === 'print') {
-    console.log(sheet.join('\n\n'));
+    console.log(
+      targets
+        .map((target) =>
+          'noun' in target
+            ? `${target.noun.id}\t${target.noun.lemma}\t${target.noun.gender}`
+            : 'row' in target
+              ? ruleTable(target.row)
+              : target.text,
+        )
+        .join('\n\n'),
+    );
   } else {
     const reviewedAt = new Date().toISOString().slice(0, 10);
-    const records = [...new Set(ids)].map((id) => {
-      const noun = kept.find((noun) => noun.id === id);
-      const row = rows.find((row) => row.id === id);
-      if (!noun && !row) throw new Error(`${id}: ${drops.find((drop) => drop.startsWith(`${id}:`)) ?? 'rejected'}`);
-      return noun
+    const records = targets.map((target) => {
+      if ('text' in target) throw new Error(target.text);
+      return 'noun' in target
         ? {
-            nounId: noun.id,
-            rowHash: rowHash({ id: noun.id, lemma: noun.lemma, gender: noun.gender }),
+            nounId: target.noun.id,
+            rowHash: rowHash({ id: target.noun.id, lemma: target.noun.lemma, gender: target.noun.gender }),
             reviewedBy: args[by + 1]!,
             reviewedAt,
             reference: args[ref + 1]!,
           }
-        : { ruleId: row!.id, rowHash: rowHash(row), reviewedBy: args[by + 1]!, reviewedAt, reference: args[ref + 1]! };
+        : {
+            ruleId: target.row.id,
+            rowHash: rowHash(target.row),
+            reviewedBy: args[by + 1]!,
+            reviewedAt,
+            reference: args[ref + 1]!,
+          };
     });
     const next = ReviewsSchema.parse({ ...reviews, records: [...reviews.records, ...records] });
     await Bun.write(
