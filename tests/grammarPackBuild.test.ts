@@ -1,8 +1,12 @@
 /** Owns build/review gate regression tests with in-memory inputs; not owner attestations or the committed artifact. */
 import { afterEach, expect, spyOn, test } from 'bun:test';
 import { createHash } from 'node:crypto';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { buildPack, publishGate, type BuildInputs } from '../scripts/grammar-pack/build';
-import { rowHash, type Reviews } from '../scripts/grammar-pack/gate';
+import { rowHash, writeArtifact, type Reviews } from '../scripts/grammar-pack/gate';
 import * as generator from '../src/services/conjugation/generate';
 import { GrammarPackSchema } from '../src/types/grammarPack';
 import { CONTROL_SPECS, generateControls, IRREGULARS } from './fixtures/grammarPackVerbs';
@@ -165,6 +169,27 @@ test('identical inputs produce identical bytes, no CJK, and a schema-valid pack'
   expect(bytes(input)).toBe(bytes(input));
   expect(bytes(input)).not.toMatch(/[\u3400-\u9fff\uf900-\ufaff]/u);
   expect(GrammarPackSchema.safeParse(buildPack(input).pack).success).toBe(true);
+});
+
+test('--check is byte-exact and does not rewrite a drifted conjugation artifact', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-pack-check-'));
+  try {
+    const output = pathToFileURL(join(directory, 'pack.json'));
+    const { pack } = buildPack(inputs());
+    await writeArtifact(output, pack, false);
+    const generated = await Bun.file(output).text();
+    await writeArtifact(output, buildPack(inputs()).pack, true);
+    await Bun.write(output, generated + ' ');
+    expect(
+      await writeArtifact(output, pack, true).then(
+        () => 'unexpected success',
+        (error: Error) => error.message,
+      ),
+    ).toContain('pack.json differs');
+    expect(await Bun.file(output).text()).toBe(generated + ' ');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test('invalid output schema prevents publication', () => {

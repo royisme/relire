@@ -151,20 +151,9 @@ export async function readInputs(): Promise<BuildInputs> {
 
 if (import.meta.main) {
   const args = Bun.argv.slice(2);
-  const topics = args[0] === 'topics';
-  if (topics) args.shift();
-  if (args.length && (args.length !== 1 || args[0] !== '--check'))
-    throw new Error('Usage: build.ts [topics] [--check]');
+  if (args.length && (args.length !== 1 || args[0] !== '--check')) throw new Error('Usage: build.ts [--check]');
   const check = args[0] === '--check';
-  if (topics) {
-    const { buildTopics, readTopicInputs } = await import('./topics');
-    const { pack, tagIndex, report } = buildTopics(await readTopicInputs());
-    for (const line of report) console.log(line);
-    await writeArtifact(new URL('../../src/data/grammar/topics.json', import.meta.url), pack, check);
-    await writeArtifact(new URL('../../src/data/grammar/tag-index.json', import.meta.url), tagIndex, check);
-  } else {
-    const { pack, report } = buildPack(await readInputs());
-    for (const line of report) console.log(line);
-    await writeArtifact(new URL('../../src/data/grammar-pack/pack.json', import.meta.url), pack, check);
-  }
+  const { pack, report } = buildPack(await readInputs());
+  for (const line of report) console.log(line);
+  await writeArtifact(new URL('../../src/data/grammar-pack/pack.json', import.meta.url), pack, check);
 }

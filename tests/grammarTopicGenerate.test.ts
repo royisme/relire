@@ -334,8 +334,6 @@ test('actual CLIs use the private path, report errors on stderr and exit 1 on a 
   expect((await cli('scripts/grammar-topics/review.ts', ['unmark', 'test-a'])).code).toBe(0);
   for (const call of await env.calls()) cleanup.push(call.temporary);
   expect(await readdir(output)).toEqual(['drafts-test-only.json']);
-  expect(await Bun.file(new URL('../src/data/grammar/topics.json', import.meta.url)).json()).toHaveProperty(
-    'topics',
-    [],
-  );
+  for (const name of ['topics.json', 'tag-index.json'])
+    expect(await Bun.file(new URL(`../src/data/grammar/${name}`, import.meta.url)).exists()).toBe(false);
 });
