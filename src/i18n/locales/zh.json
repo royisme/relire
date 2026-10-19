@@ -744,7 +744,19 @@
     "empty": "尚未发布语法专题。",
     "noMatch": "此标签下尚无已发布的专题。",
     "clearTag": "清除标签筛选：{{tag}}",
-    "back": "返回语法专题"
+    "back": "返回语法专题",
+    "chapters": {
+      "chapter-one": "名词",
+      "chapter-two": "限定词",
+      "chapter-three": "代词",
+      "chapter-four": "品质形容词",
+      "chapter-five": "动词",
+      "chapter-six": "副词",
+      "chapter-seven": "介词",
+      "chapter-eight": "连词",
+      "chapter-nine": "句子",
+      "chapter-ten": "法语交际拓展"
+    }
   },
   "shadowingLog": {
     "title": "跟读本",
