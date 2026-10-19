@@ -1,17 +1,13 @@
-/** Owns topic gate, hash and deterministic artifact tests; fixtures are not owner reviews or teaching content. */
+/** Owns topic assembly and hash-gate tests; fixtures are not owner reviews or teaching content. */
 import { expect, test } from 'bun:test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import {
-  buildTopics,
-  readTopicInputs,
-  type TopicBuildInputs,
-  type TopicManifest,
-} from '../scripts/grammar-pack/topics';
-import { topicContentHash, writeArtifact } from '../scripts/grammar-pack/gate';
+import { buildTopics, readTopicInputs, type TopicBuildInputs } from '../scripts/grammar-pack/topics';
+import { topicContentHash } from '../scripts/grammar-pack/gate';
 import { topicFixture } from './fixtures/grammarTopics';
+import { checkTopicMetadata } from '../scripts/grammar-topics/publish';
 import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
 
@@ -139,52 +135,23 @@ test('an empty manifest publishes an empty pack and index', () => {
   expect(tagIndex).toEqual({});
 });
 
-function requireChapterLabels(manifest: TopicManifest, locales: unknown[]) {
-  for (const { chapter } of manifest.topics) {
-    for (const locale of locales) expect(locale).toHaveProperty(`grammarTopics.chapters.${chapter}`);
-  }
-}
-
-test('committed artifacts match derived bytes and both locales cover manifest chapters', async () => {
-  const input = await readTopicInputs();
-  requireChapterLabels(input.manifest, [en, zh]);
-  const { pack, tagIndex } = buildTopics(input);
-  const root = new URL('../src/data/grammar/', import.meta.url);
-  await writeArtifact(new URL('topics.json', root), pack, true);
-  await writeArtifact(new URL('tag-index.json', root), tagIndex, true);
+test('committed public metadata is valid and both locales cover manifest chapters without drafts', async () => {
+  const root = new URL('../data/grammar-topics/', import.meta.url);
+  checkTopicMetadata(
+    await Bun.file(new URL('manifest.json', root)).json(),
+    await Bun.file(new URL('reviews.json', root)).json(),
+  );
 });
 
 test('the dynamic chapter-key gate fails when either locale lacks a synthetic manifest chapter', () => {
-  const { manifest } = inputs();
+  const { manifest, reviews } = inputs();
   const labelled = { grammarTopics: { chapters: { 'test-only': 'TEST ONLY' } } };
-  requireChapterLabels(manifest, [labelled, labelled]);
+  checkTopicMetadata(manifest, reviews, { en: labelled, zh: labelled });
   for (const locales of [
-    [labelled, en],
-    [zh, labelled],
-  ]) {
-    expect(() => requireChapterLabels(manifest, locales)).toThrow('grammarTopics.chapters.test-only');
-  }
-});
-
-test('--check is byte-exact and does not rewrite a drifted artifact', async () => {
-  const directory = await mkdtemp(join(tmpdir(), 'relire-topic-check-'));
-  try {
-    const output = pathToFileURL(join(directory, 'topics.json'));
-    const { pack } = buildTopics(inputs());
-    await writeArtifact(output, pack, false);
-    const bytes = await Bun.file(output).text();
-    await writeArtifact(output, buildTopics(inputs()).pack, true);
-    await Bun.write(output, bytes + ' ');
-    expect(
-      await writeArtifact(output, pack, true).then(
-        () => 'unexpected success',
-        (error: Error) => error.message,
-      ),
-    ).toContain('topics.json differs');
-    expect(await Bun.file(output).text()).toBe(bytes + ' ');
-  } finally {
-    await rm(directory, { recursive: true, force: true });
-  }
+    { en, zh: labelled },
+    { en: labelled, zh },
+  ])
+    expect(() => checkTopicMetadata(manifest, reviews, locales)).toThrow('grammarTopics.chapters.test-only');
 });
 
 test('the topics builder reads included drafts from the private directory only', async () => {
@@ -198,15 +165,5 @@ test('the topics builder reads included drafts from the private directory only',
     expect(buildTopics(read).pack.topics).toHaveLength(1);
   } finally {
     await rm(directory, { recursive: true, force: true });
-  }
-});
-
-test('topics --check succeeds through the actual CLI twice without changing committed artifacts', async () => {
-  for (let i = 0; i < 2; i++) {
-    const result = Bun.spawnSync(['bun', 'scripts/grammar-pack/build.ts', 'topics', '--check'], {
-      cwd: new URL('..', import.meta.url).pathname,
-    });
-    expect(result.stderr.toString()).toBe('');
-    expect(result.exitCode).toBe(0);
   }
 });

@@ -1,31 +1,14 @@
 /** Owns Worker HTTP contract checks with real SQLite migrations and synthetic TEST-only topics. */
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
-import { Database, type SQLQueryBindings } from 'bun:sqlite';
+import type { Database } from 'bun:sqlite';
 import { GrammarTopicSchema, type GrammarTopic } from '../src/types/grammarTopic';
 import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import worker, { handle, type Env } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
+import { createWorkerDb } from './fixtures/workerDb';
 
 let db: Database;
 let env: Env;
-
-// Only the D1 read subset used by handle; all SQL executes against the real migration.
-function prepare(sql: string) {
-  const statement = db.query(sql);
-  let bindings: SQLQueryBindings[] = [];
-  return {
-    bind(...values: SQLQueryBindings[]) {
-      bindings = values;
-      return this;
-    },
-    all<T>() {
-      return Promise.resolve({ results: statement.all(...bindings) as T[] });
-    },
-    first<T>() {
-      return Promise.resolve(statement.get(...bindings) as T | null);
-    },
-  };
-}
 
 function insert(input: GrammarTopic) {
   const topic = GrammarTopicSchema.parse(input);
@@ -48,9 +31,7 @@ function insert(input: GrammarTopic) {
 const request = (path: string, init?: RequestInit) => handle(new Request(`https://content.test${path}`, init), env);
 
 beforeEach(async () => {
-  db = new Database(':memory:');
-  db.exec(await Bun.file(new URL('../worker/migrations/0001_init.sql', import.meta.url)).text());
-  env = { DB: { prepare } as unknown as Env['DB'], ALLOWED_ORIGINS: '' };
+  ({ db, env } = await createWorkerDb());
 });
 afterEach(() => db.close());
 
