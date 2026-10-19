@@ -16,6 +16,8 @@ A Cloudflare **Worker with a D1 database** serves read-only content. Two kinds o
 1. **Grammar topics** (Part 2): reviewed topic text (en, zh, French examples), the tag index, chapter metadata.
 2. **Lexicon** (issue #27): attested forms, gender and conjugation of a lemma, so an unknown verb is answered by the dictionary before the model.
 
+**Local first (owner, 2026-10-19):** the target is Cloudflare D1, but every phase is built and proven against a local Worker and a local D1 (`wrangler dev --local`, data under the gitignored `worker/.wrangler/`), so the whole product works end to end on the owner's machine. Deploying to Cloudflare is a later step the owner does, once the functionality is complete; no phase here includes a deploy, a login or a remote database.
+
 The free static build is unchanged and keeps working with no service: it needs no key and no network beyond what it uses today.
 
 ## 3. What lives where
