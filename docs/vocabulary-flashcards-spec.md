@@ -2,7 +2,9 @@
 
 Status: **Development handoff; not implemented.** The owner requested this specification on 2026-10-19 after approving the product direction: a system-provided TCF vocabulary list, deduplicated with user-added vocabulary, with Anki-style flashcards and shared review progress. This document defines the recommended engineering defaults. It authorizes no deployment, public distribution of source data, destructive data reset or functional change in this documentation task.
 
-Source baseline: `6baff62`. Read `CLAUDE.md`, `PRODUCT.md`, `DESIGN.md`, `docs/conventions.md`, `docs/architecture.md`, `docs/development.md`, `.claude/rules/{ui,storage,i18n,speech,typescript}.md`, and this specification before implementation. Preserve unrelated work, including edits to the separate grammar-topic learning specification. Grammar checkpoints are not a prerequisite for this feature.
+Source baseline: `e876e6a`. Revised on 2026-10-19 after the source-checked Argon review and the owner's instruction to revise. First reveal now commits a new introduction; the existing long-term formula remains an explicit version-one limitation. The review dispositions are recorded in section 14; no second external review or feature validation is claimed.
+
+Read `CLAUDE.md`, `PRODUCT.md`, `DESIGN.md`, `docs/conventions.md`, `docs/architecture.md`, `docs/development.md`, `.claude/rules/{ui,storage,i18n,speech,typescript}.md`, and this specification before implementation. Preserve unrelated work, including edits to the separate grammar-topic learning specification. Grammar checkpoints are not a prerequisite for this feature.
 
 ## 1. Deliverable and fixed boundaries
 
@@ -29,7 +31,7 @@ The input contains `id`, `word`, `pos`, `gloss`, `gloss_en`, `raw`, `tags` and o
 
 The adjacent README names a third-party shared deck and says no distribution licence was stated. Personal access is not proof of public redistribution permission. **Code and synthetic fixtures can be implemented without distributing the corpus.** The owner must approve the corrected private artifact and distribution rights before any public content publication. Do not turn this into an automatic network/legal research or publishing task.
 
-Recommended delivery is an extension of the existing optional read-only content Worker/D1, not a front-end bundle or a personal-import-only product. This intentionally extends the [hosted-content ADR](adr-hosted-content-service.md) from topics/lexicon to the built-in wordbook; update that scope and the privacy text with implementation. No new backend service, account, key or learner-write endpoint is needed. Without a configured service, personal bookmarks and previously saved learning cards continue to work; the built-in-book entry explains that its content service is unavailable.
+Recommended delivery is an extension of the existing optional read-only content Worker/D1, not a front-end bundle or a personal-import-only product. This intentionally extends the [hosted-content ADR](adr-hosted-content-service.md) from topics/lexicon to the built-in wordbook; update that scope and the privacy text with implementation. No new backend service, account, key or learner-write endpoint is needed. Without a configured service, personal bookmarks and saved learning cards continue to work. A previously completed book cache can still be browsed/studied offline; its entry says updates are unavailable. With neither service nor complete book cache, the entry explains that the built-in content is unavailable rather than showing an empty book.
 
 ## 3. Word identity, senses and bookmark semantics
 
@@ -42,7 +44,7 @@ Implement one exported `vocabularyKey` used by content preparation, bookmark loo
 - Fold ASCII apostrophe to U+2019.
 - Lowercase French spelling; preserve accents, punctuation, hyphens and phrase word order.
 
-Thus spacing/case/apostrophe variants deduplicate, but accentless versus accented words do not. Do not use the exercise grader's accent-folding normalizer. Do not automatically collapse an inflected spelling into an AI-guessed lemma. This first version matches the displayed word/phrase, not semantic similarity.
+Thus spacing/case/apostrophe variants deduplicate, but accentless versus accented words do not. Do not use the exercise grader's accent-folding normalizer. A built-in entry uses its reviewed `word`; a personal lookup uses the original cleaned clicked spelling retained by `useLookupSheets`, never the model-returned `word` or `lemma`. Require the returned analysis word to have the same canonical key before enabling bookmark save; a mismatch shows the real mismatch and existing explicit Retry action, not a silently merged/relabelled explanation. This first version matches spelling, not semantic similarity.
 
 The learner-row id is the deterministic string `word:<canonical key>`. No content version or source id is part of this identity. Always encode identifiers through route helpers when used in a URL; never interpolate raw spellings into paths.
 
@@ -66,16 +68,34 @@ The reader's Save control represents **personal bookmarking**, not “exists any
 
 For the same word, built-in senses and personal context remain separately attributed. Never replace a user's context with the book's example or fabricate a missing translation. A single card may show several senses on the answer side; it is not one independent card per source or sense in this version.
 
+### 3.3 Word-sheet actions and context identity
+
+Replace the single `onToggleVocab` prop with explicit save-current-context and remove-bookmark actions. The footer always reserves the same two action cells plus its local save/error slot:
+
+| Membership | First action | Second action |
+| --- | --- | --- |
+| Not personally bookmarked | Save word, enabled after matching analysis is ready | Remove bookmark, disabled |
+| Bookmarked, current context not saved | Save this context | Remove bookmark |
+| Bookmarked, current context already saved | Context saved, disabled | Remove bookmark |
+
+Each action keeps its cell/size while saving or failing. Only Save is filled when enabled; removal is outline and never performs full learner-card deletion. Removal clears the word-level bookmark, not a single context; retained contexts and learning history are stated in the action's help. An unbookmarked word whose old context survives can be saved again without duplicating that context.
+
+Define context identity as `JSON.stringify([source?.kind ?? null, source?.id ?? null, normalizedSentence, requestLanguage])`, with sentence NFC/trim/whitespace collapse for identity only. Store the original sentence for display. Source title, timestamp and model explanation are not identity fields. First successful save owns the existing context snapshot; repeating it is idempotent. Changing the interface language alone does not create a translated context; only a new completed lookup in that language can do so.
+
+`useLookupSheets` captures cleaned clicked word, sentence, source descriptor and the EN/ZH branch immediately before the synchronous `fetchWordAnalysis` call. That is the request language, not the language when the user eventually saves. Retry is a new request using the same original source/word and the current request language. Late lookup/session results keep the existing stale-request guards.
+
+Extend the lookup callback with an optional fourth source argument `{ kind: 'article' | 'unit', id, title }`. Reader supplies its actual article or passage-unit source; `UnitSheet` supplies its unit; the notebook and its explanation lookup supply the selected surviving unit, if present. Forward through `UnitView`, `StudyView` and App, then freeze it with the request. Without a known source, omit it rather than using App's last reader. No new Open source control is required in version one; stored provenance and the sentence remain readable after deletion.
+
 ## 4. Proposed domain and persistence contracts
 
 All shapes in this section are **new contracts**, not existing APIs. Add Zod schemas in a focused proposed `src/types/vocabulary.ts`; replace the unreleased `VocabWord`/`ReviewRecord` shape and all real readers/writers together. Do not add a second old-shape reader or background migration. Never clear the owner's browser data to make a new shape work; stop and request a safe test database/profile if encountering incompatible development data.
 
 ### 4.1 Content contracts
 
-- **Book manifest:** `bookId` (`tcf-7000`), bilingual title, 64-hex canonical content hash `version`, normalized `entryCount`, `pageCount`, `pageSize` (250), source attribution and actual review metadata. Only reviewed content is publishable.
+- **Book manifest:** `bookId` (`tcf-7000`), bilingual title, 64-hex served-artifact hash `version` (section 8.1), normalized `entryCount`, `pageCount`, `pageSize` (250), source attribution and actual review metadata. Only reviewed content is publishable.
 - **Book entry:** canonical `key`, display `word`, nonnegative source-order `position`, source note ids as strings, and one or more senses.
 - **Built-in sense:** optional nonblank POS, nonblank English and Chinese glosses, zero or more `{ fr, en, zh }` examples. Missing POS is omitted; missing example is omitted. Partial examples are rejected, not completed at runtime.
-- **Personal context:** original French sentence when supplied, save timestamp, interface language at save, and the actual `WordAnalysis` snapshot. Include a source reference (article/unit id and saved title) only when supplied by that lookup's actual context; never borrow an unrelated last-open reader source. Keep the sentence readable after its source is deleted. The generic `analysis.translation` is in the request language (the English template explicitly says so); do not relabel every saved translation as Chinese. Keep the language with it. Optional `translationEn`/example translations are used only when actually present.
+- **Personal context:** context identity from section 3.3, original French sentence when supplied, actual save timestamp, frozen request language, optional actual source descriptor, and the `WordAnalysis` snapshot for that same canonical word. The generic `analysis.translation` is in the request language (the English template explicitly says so); do not relabel every saved translation as Chinese or use the current UI language as its provenance. Optional `translationEn`/example translations are used only when actually present.
 
 Published data contains no HTML, `raw`, unknown injected fields, private paths or secrets. Validate NFC/nonblank text and field languages; normalize French apostrophes before validation. Retain original input and correction decisions privately, rather than destroying evidence in place.
 
@@ -85,13 +105,13 @@ A row carries:
 
 - `id`, canonical `key`, display `word`, creation timestamp.
 - `bookSource?`: `{ bookId, version, sourceIds, senses }`, a self-contained snapshot for offline answers.
-- `bookmarked: boolean` and `contexts: PersonalContext[]`.
+- `bookmarked: boolean`, `bookmarkedAt: number | null` and `contexts: PersonalContext[]`. False means null bookmark time; changing false to true captures now, while saving another context on an already bookmarked row preserves that bookmark time.
 - `schedule: null | VocabularySchedule`.
 - `introducedAt: number | null`, set once at the first committed introduction, not on download/bookmark.
 - `revision: nonnegative integer`, increased on each committed rating/reset.
 - `history: VocabularyReviewRecord[]`, kept through bookmark removal and scheduling reset.
 
-A row requires book content or a personal context. `schedule: null` means unintroduced; it is not a due date of today. No row is needed for every unseen downloaded book entry: join the book cache and learner rows at the Words page. Starting a new word creates/reuses its row; bookmarking may create an unintroduced row.
+A row requires book content or a personal context. `schedule` and `introducedAt` are either both null (unintroduced) or both non-null. A front-side preview is transient and needs no new row; first reveal creates/reuses the learner row. Bookmarking may create an unintroduced row. No row is needed for every unseen downloaded book entry: join the book cache and learner rows at the Words page. Schedule reset is only available on an introduced row; it never converts a row back to unintroduced.
 
 `VocabularySchedule` has common `repetitions`, `intervalDays`, `easeFactor` plus a discriminated phase:
 
@@ -110,7 +130,8 @@ Use owned, named vocabulary metadata, not another IndexedDB store:
 
 - `vocabularyPreferences`: `{ newPerDay: integer 0..100 }`, default 20; 0 disables new introductions, not reviews.
 - `vocabularyDay:<YYYY-MM-DD>`: `{ date, introducedKeys: string[] }`, unique canonical keys introduced that local day.
-- `vocabularyEpoch`: a monotonically increasing reset/restore invalidation counter, not backed up.
+- `vocabularyEpoch`: a monotonically increasing **restore-wide** invalidation counter, not backed up. Single-card reset/delete does not move it.
+- `vocabularyReset:<canonical key>`: a per-word reset/delete token, initially 0 and monotonically bumped, never removed or backed up. Recreating a deleted row reads the retained token; it must not reset to 0. This prevents old writes from reaching a new row with the same deterministic id without invalidating another word's session.
 
 Daily ledger keys may refer to cards later deleted; this is valid quota history, not a dangling reference. Historical day labels are the browser's local date when introduced; do not reinterpret them using a later time zone.
 
@@ -126,7 +147,11 @@ Ratings: **Again=1, Hard=3, Good=4, Easy=5**. The UI says forgotten, difficult-b
 
 ### 5.1 New introduction
 
-When first presented, atomically materialize the row/snapshot, set `introducedAt=now`, assign `learning, step=0, dueAt=now`, and add the key to today's introduction ledger. This is not a rating and appends no history. Do not prepare all 20 rows as “introduced” before the learner actually sees them. A failed introduction write shows no successful card and consumes no quota.
+Showing a new word's front, navigating Back, reloading it, or skipping before reveal does not introduce it or consume quota. On **first Show answer**, atomically materialize/reuse its row/snapshot, set `introducedAt=now`, assign `learning, step=0, dueAt=now`, and add its key to the current local day's introduction ledger. This is not a rating and appends no history. Only reveal the answer after commit. An introduction failure leaves the front and real error visible; it consumes no quota.
+
+The transaction re-reads today's limit/ledger and existing schedule. If another tab already introduced this key, return that current row without another quota charge. If its schedule changed since the displayed front was read, reload it front-side before accepting a rating. If other words exhausted the allowance first, return quota-reached without inserting/revealing; show the current counts and choose a due card or the waiting/end state. Do not silently bypass the limit. A deleted/recreated key already in today's ledger consumes no second unique introduction; it remains eligible even when the new allowance is otherwise exhausted.
+
+After reveal, leaving or skipping without a rating retains this real introduction and its due learning state. That is distinct from skipping an untouched front. Capture the local day at the reveal transaction, so midnight while previewing charges the day of actual reveal, not the earlier preview.
 
 ### 5.2 Learning and relearning
 
@@ -147,7 +172,7 @@ Retain the existing SM-2-style rule, stated explicitly:
 - **Hard/Good/Easy:** when prior repetitions is 1, schedule 3 calendar days for Hard and 6 for Good/Easy. Otherwise schedule `max(1, round(prior intervalDays × prior easeFactor))` calendar days. Increment repetitions, then update ease.
 - Ease update: `max(1.3, roundTo2(priorEase + 0.1 - (5-q) × (0.08 + (5-q) × 0.02)))`.
 
-This is intentionally not current Anki's complete legacy scheduler. Do not quietly add easy bonuses, fuzz, automatic parameter optimization or a second scheduler. Replace tests that currently demand every failed recall wait a day; keep and extend the pure calendar/ease/immutability tests.
+This is intentionally not current Anki's complete legacy scheduler. For prior repetitions at least 2, **Hard, Good and Easy have the same next interval; their ease updates can affect subsequent reviews**, subject to the shared 1.3 floor. This is an explicit version-one limitation, not an open instruction to choose another formula. Add regression cases with prior ease 2.5 proving equal immediate intervals and distinct next ease values, plus a floor case where Hard/Good may converge. UI help explains this limitation without presenting self-ratings as mastery. Do not quietly add easy bonuses, fuzz, automatic parameter optimization or a second scheduler. Replace tests that currently demand every failed recall wait a day; keep and extend the pure calendar/ease/immutability tests.
 
 ### 5.4 Previews and time
 
@@ -163,33 +188,35 @@ Order at each selection:
 
 1. Due learning/relearning, ascending `dueAt`.
 2. Due review cards, ascending `dueDate`, stable canonical-key tie-break.
-3. Unintroduced personally bookmarked words, oldest bookmark first, then unseen built-in entries in source order, while today's unique introduction allowance remains.
+3. Unintroduced personally bookmarked words, ascending `bookmarkedAt`, then unseen built-in entries in source order. An unintroduced candidate is eligible when its key is already in today's ledger or unique introduction allowance remains. A genuinely new key is ineligible at limit 0 or when the allowance is exhausted.
 
-Deduplicate candidates by canonical key before selection. A saved/bookmarked word matching the book appears once. At most one active card exists in a workbench. Queue entries reference ids, not mutable full-row copies captured for an entire session.
+Deduplicate candidates by canonical key before selection. At most one active card exists in a workbench. An unintroduced front references a catalogue/bookmark candidate without a schedule; it is not a fabricated due card. Read the authoritative learner row/tokens for an introduced card rather than rating a mutable full-row copy captured for the whole session.
 
-If only future minute steps remain, show the actual next due time and a countdown; allow ending the session. Wake selection at that due time and on visibility/focus return. Do not instantly repeat a forgotten card while pretending one minute passed. Do not label “all learned” when cards are waiting or unseen words remain. If the daily new limit is reached, continue due reviews and say no more new words will be introduced today.
+If only future minute steps remain, show the actual next due time and countdown; allow ending the session. Wake selection at that time, local midnight and visibility/focus return. Do not pre-empt an actively shown card when another becomes due; select again on the next card transition. Do not instantly repeat a forgotten card while pretending one minute passed. No eligible card means an honest waiting/quota/session-end state, not “all learned” when unseen/skipped/future cards remain.
 
-Skip-for-now excludes the card from this visit's queue only, with no rating or schedule change; it still counts as due outside that transient exclusion. Re-entering the review route makes it eligible again. No pause/suspension preference or persistent session cursor is added in version one.
+Skip-for-now changes this visit's exclusion set only, with no rating or schedule write. Before first reveal it consumes zero quota; after a committed reveal it does not undo the introduction. Due introduced skipped cards still count as due outside this visit. Re-entering the route drops exclusions. There is no persistent suspension or session cursor.
 
-Reload ends the transient reveal/skip state, rebuilds from storage and presents the next eligible card front-side. Committed ratings and introductions survive; an unsubmitted self-rating does not. Count “unique words introduced” separately from “ratings submitted”; a repeated forgotten word is not several new words. Never imply self-rating measures objective accuracy.
+Reload ends transient reveal/skip state and presents the next eligible card front-side. Committed ratings and first reveals survive; an unsubmitted self-rating does not. Count unique words introduced separately from ratings submitted. Repeated review is not another new word, and self-rating is not objective accuracy.
 
 ## 7. Transactional operations and concurrency
 
-Remove `usePersist('vocabulary', vocabList, saveVocab, ...)` and its whole-library replacement behavior. Statistics persistence can remain unchanged. `saveVocab` must not remain a competing vocabulary writer after this change. App state becomes a read model refreshed after owned operations commit, not the authoritative store to autosave.
+Remove `usePersist('vocabulary', vocabList, saveVocab, ...)` and whole-library replacement writes; stats persistence remains unchanged. App state is a read model refreshed after owned commits. No competing vocabulary autosave may survive.
 
-Required storage API responsibilities (proposed names):
+Required API responsibilities (proposed names):
 
-- `saveVocabularyBookmark`: canonical-key get/merge in one transaction; preserve schedule/revision/history, record actual context/language, notify after commit.
-- Before presenting an existing learner row, attach a matching available book snapshot only if `bookSource` is absent, in the owning storage transaction. Keep an already saved book snapshot even if the downloaded catalogue is newer. This enriches content without changing schedule/revision/history. Without a catalogue, personal-only presentation still works.
-- `removeVocabularyBookmark`: clear bookmarked status; keep contexts/content and learning history. Explicit forget/delete is a separate confirmed operation.
-- `introduceVocabularyCard`: read current row, today's ledger, preference and epoch in one read-write transaction; enforce global daily quota, commit one introduction only. Race between two tabs must not introduce 21 distinct words against a limit of 20.
-- `rateVocabularyCard`: read row and validate epoch first. If the operation id already exists in its history, return an already-committed outcome with the current authoritative row, without another rating. Otherwise require the expected row revision, append one history record and new schedule atomically, and return the committed row. A different stale operation rejects and asks the session to reload. A retry must not replace a newer row with the older operation's historical next schedule.
-- `resetVocabularySchedule`: confirmation; preserve content/bookmark/history, restart learning without decrementing previous daily introductions, increment revision/epoch. Reset never claims to erase remembered exposure.
-- `deleteVocabularyCard`: explicit confirmed removal of learner row and its history; bump epoch. It does not remove the built-in dictionary entry or today's introduction ledger. Returning to a built-in word can start a fresh learner row; say that history is deleted, unlike bookmark removal.
+- `saveVocabularyBookmark`: canonical-key transaction using frozen lookup identity/context; preserve schedule/revision/history, set bookmark time only on false-to-true, and idempotently add the current context. No TTS side effect.
+- Attach matching book content only when the existing row has no `bookSource` and is explicitly saved or prepared for study. Preserve an existing snapshot even if the downloaded catalogue is newer. Preparation of a new front does not materialize a row or introduce a word.
+- `removeVocabularyBookmark`: clear bookmark/time, keep contexts/content/schedule/history. It is not card deletion.
+- `introduceVocabularyCard`: called by first reveal, not route entry/render. In one `vocab`/`meta` read-write transaction validate tokens, read row/preferences/day ledger, enforce quota and commit section 5.1. Return the committed row/tokens, or typed quota-reached/stale outcomes. First reveal of an already introduced card writes no second introduction. Return current state without another charge on a same-key race; stale changed state reloads front-side, never silently grades from the old one.
+- `rateVocabularyCard`: require an introduced row. In one transaction validate restore epoch and this word's reset token first. If the operation id already exists in its history, require the same submitted rating and return already-committed with the current authoritative row. Otherwise require the expected row revision, compute the transition with captured `now`, append history/increment revision and commit. Never replay a historical next schedule over a newer row.
+- `resetVocabularySchedule`: only for an introduced row, with confirmation and current tokens/revision. Set `learning`, step 0, `dueAt=now`, repetitions/interval 0 and ease 2.5; keep `introducedAt`, content/bookmark/history and day ledgers. Increment row revision and this word's reset token atomically; do not bump the global restore epoch. The next view is front-side and immediately due, not a quota-consuming new introduction.
+- `deleteVocabularyCard`: confirmed removal of this learner row/history plus a bump of this word's reset token in the same transaction. Keep book content/day ledgers and other words' tokens. A later explicit reintroduction creates a new row under the retained token, not under token 0. Explain that this deletes history, unlike bookmark removal.
 
-Generate a rating operation id once per button submission and retain it for a storage-only retry. Disable rating/navigation that could duplicate the operation while it commits. A failed write keeps the answer side, the current word and the real error; retry does not call AI or lose the entered decision. Publish the next card only after the write succeeds.
+Capture `{ epoch, resetToken, revision }` with a displayed introduced card; a new front captures epoch/token before reveal. Restore moves the global epoch. Same-word reset/delete moves only its reset token. An operation made stale by either returns stale/missing, drops pending work and reloads front-side; **do not storage-retry it under a freshly adopted token**. Resetting word A must not invalidate word B's in-flight rating.
 
-Capture epoch/revision with the displayed card. Reset/delete/restore invalidate late writes, including delete-and-recreate of the same canonical id. Bookmark/content merge must not overwrite a schedule from another tab. Use transaction reads, not caller-owned copies of whole rows. No live collaborative editing or message bus is promised; refresh on focus and after committed same-tab operations, and reject stale submissions honestly.
+Generate a rating operation id once per submission and retain it only for a non-stale storage retry of that submission. Disable duplicate rating/navigation during commit. Failed writes keep the answer side, selected rating and real error; retry uses the same operation id, and a different rating cannot reuse it. Advance only after successful commit. An already-committed retry returns the current row, so later ratings are not overwritten. Epoch/token invalidation deliberately takes precedence over old-operation replay after destructive changes.
+
+Bookmark/content merges read the transaction's current row and preserve its schedule. There is no live co-editing/message-bus promise: refresh on focus and after same-tab commits, use transaction ownership and reject stale submissions honestly.
 
 ## 8. Built-in content preparation and service delivery
 
@@ -199,9 +226,10 @@ Add a Bun-only private pipeline under proposed `scripts/vocabulary/` (do not run
 
 1. Explicit `--source <absolute words.json>`; no hard-coded default private path in executable code.
 2. Read one stable snapshot, validate, normalize and group by the canonical identity. Emit a private report of source rows, canonical groups, missing fields, conflicting senses and example issues. Do not guess corrections.
-3. Write the normalized artifact/review sheet to ignored `.local/vocabulary/`; logs to ignored `.pi-runs/vocabulary/`. Omit `raw`. Hash the complete normalized content with canonical SHA-256; array order is significant, object keys use code-point sorting.
-4. Maintain public metadata/review hashes only in proposed `data/vocabulary/manifest.json` and `reviews.json`. No corpus strings in committed fixtures/artifacts. A content change invalidates the review hash. Record the actual authorized reviewer, not fabricated owner review.
-5. Publish only matching reviewed artifacts to private SQL; `--apply-local` uses local D1 only. No default source rewrite, automatic generation, remote publish or credential lookup. `--check` validates public metadata only and works in CI without the private source.
+3. Write the normalized artifact/review sheet to ignored `.local/vocabulary/`; logs to ignored `.pi-runs/vocabulary/`. Omit `raw`. `contentHash` is canonical SHA-256 of the normalized book metadata/entries before review metadata; array order is significant, object keys use code-point sorting.
+4. Maintain public metadata/review hashes only in proposed `data/vocabulary/manifest.json` and `reviews.json`. Review records are `{ bookId, contentHash, reviewedBy, reviewedAt }`. No corpus strings in committed fixtures/artifacts. Any content change invalidates that review. Record the actual authorized reviewer, not fabricated owner review.
+5. Publish only artifacts with a matching review. The served `version` is SHA-256 of `{ manifestWithoutVersion, entries }`, including actual review metadata and pagination metadata. This makes every served page immutable under its version even after a re-review. Keep review-content hash and served-version hash distinct; no hash contains itself.
+6. Generate private staged publish SQL; `--apply-local` follows the verified switch protocol below and uses local D1 only. No default source rewrite, automatic generation, remote publish or credential lookup. `--check` validates public metadata only and works in CI without private source access.
 
 Pipeline commands to implement: `bun scripts/vocabulary/prepare.ts --source <file>`, `bun scripts/vocabulary/review.ts print`, `bun scripts/vocabulary/review.ts mark --by <actual reviewer>`, `bun scripts/vocabulary/publish.ts [--check | --apply-local]`. `mark` and applying real content require the owner's authorization; test them with synthetic data.
 
@@ -211,24 +239,45 @@ Add **one** resource to the existing Worker:
 
 `GET /v1/vocabulary/tcf-7000?page=<zero-based integer>[&version=<64-hex hash>]`.
 
-- Page size is 250 entries. Each response carries the manifest, page index and entries. Normalized grouping can change the observed page count; derive it.
-- First request uses page 0 without a version. All subsequent pages pin the returned version. Reject invalid/extra query arguments, malformed page/version and out-of-range pages with fixed machine-readable errors. Never return a different version under a pinned request.
-- Store prebuilt pages in a new D1 `vocabulary_pages` table keyed by `(book_id, version, page)`, with JSON `body`. This avoids putting an entire growing corpus in one database field. Existing D1 `meta` holds the current version pointer. Use prepared bindings.
-- Publication updates page rows/current pointer atomically. If an old pinned version is no longer available, return an explicit version-unavailable error; the client discards the incomplete candidate and offers restart, not a mixed-version book.
-- Reuse current method/CORS/rate-limit/error-header behavior. Correctly derive ETag from the vocabulary version, not `packVersion`/`lexiconVersion`. Preserve GET/HEAD/OPTIONS and reject writes. Do not expose SQL/private corpus text in errors.
-- Add table-creation SQL in proposed `worker/migrations/0003_vocabulary.sql`, following the Worker's existing D1 convention. This creates new content structure only, **not** a client IndexedDB upgrade or a backward-compatibility/data-conversion layer. Do not alter existing topic/lexicon rows.
+- Page size is 250 entries; each response carries the same manifest, page index and entries. Derive normalized counts. First request uses page 0 without a version; later requests pin its version. An unversioned request for any other page is invalid, not permission to mix the current release into a pinned download.
+- Store prebuilt pages in new D1 `vocabulary_pages`, keyed by `(book_id, version, page)`, with JSON `body`. In existing D1 `meta`, `vocabularyCurrent:tcf-7000` holds the current version and `vocabularyPublished:tcf-7000:<version>` holds the complete published manifest. The Worker serves only versions with that publication marker, never partially staged rows. Use prepared bindings.
+- For an unversioned page-0 request, read the current pointer once, then use that resolved version for its publication manifest/page. A concurrent pointer switch cannot mix them. Pinned reads use exactly the requested published manifest/version.
+- Add table-creation SQL in proposed `worker/migrations/0003_vocabulary.sql`; this is new D1 structure, not a client IndexedDB upgrade or an old-shape converter. Preserve topic/lexicon rows.
+- Preserve current GET/HEAD/OPTIONS, CORS/rate-limit behavior, fixed error messages and `no-store` errors. ETag is the returned vocabulary version, not the grammar/lexicon version. Unversioned page 0 uses `Cache-Control: no-cache`, so Check for updates revalidates the current pointer rather than reusing a fresh older HTTP response; pinned pages retain the existing public max-age policy. No learner write method or SQL details in errors.
 
-Use existing `VITE_CONTENT_SERVICE_URL`, transport and timeout handling; no second URL/key setting. Requests disclose only book id, page and version, not saved words, answers, language, grades or schedules. Add that fact to the configured-service privacy description. Do not repurpose the lexicon endpoint as an implicit source for this wordbook.
+Lock the error contract (JSON `{ error: <code> }`):
+
+| Condition | HTTP | Code |
+| --- | --- | --- |
+| Malformed, duplicate or extra query argument; missing/invalid page; malformed version; unversioned nonzero page | 400 | `invalid-query` |
+| Unknown book/resource | 404 | `not-found` |
+| No published current version | 404 | `book-unavailable` |
+| Pinned version has no publication marker | 410 | `version-unavailable` |
+| Page outside the published manifest's bounds | 404 | `page-not-found` |
+| Published marker/pointer exists but required page/manifest is missing, or D1 fails | 500 | `unavailable` |
+| Rate limit / unsupported write method | 429 / 405 | Existing `rate-limited` / `method-not-allowed` |
+
+**Publish protocol, not an all-statements SQL-file transaction:** the current publisher/Worker README warn that Wrangler strips transaction wrappers. Never copy delete-first replacement or claim BEGIN/COMMIT around a SQL file proves atomicity.
+
+1. Stage immutable new-version page rows without deleting/modifying current or older published versions. Re-publishing an existing version is idempotent only if stored bodies exactly match; mismatched bodies fail rather than overwrite.
+2. After the stage command succeeds, read back and validate every expected page body, version, index, count and aggregate hash against the prepared artifact. A failed/missing/mismatched read prevents publication; counting rows alone is insufficient. Capture private readback without printing the corpus.
+3. Write its complete publication-manifest marker **only after** successful verification. If interrupted here, the old current pointer still names a complete book; the new marked version is also complete for any pinned reader.
+4. Switch `vocabularyCurrent:tcf-7000` with one final atomic upsert statement. Read the pointer back before reporting current-publication success. If switching/reporting fails, return a real failure; rerunning the same prepared version is safe.
+5. Keep old published versions and incomplete staging rows; no automatic cleanup policy is added. A separate owner-authorized maintenance task may remove them later. This trades bounded-per-publish growth for simple safe readers; it does not promise zero storage growth.
+
+Only one publisher writes this book at a time, like the existing local content workflow; multi-writer publication is not introduced. Test failure/interruption before each step and prove the old current version stays complete. The guarantee is an atomic **current-version switch after complete staging**, not a fictitious transaction across multiple Wrangler invocations.
+
+Use existing `VITE_CONTENT_SERVICE_URL` and low-level `contentServiceFetch` timeout/transport; no second URL/key setting. Extend `ContentServiceHttpError` to retain the response's machine code and optional raw `Retry-After` header alongside its existing message/status, so the book loader can distinguish 410/retry timing without parsing a translated error string. Existing topic/lexicon failure semantics stay unchanged; a missing header is not an invented delay. Requests disclose only book id, page and version, not saved words, answers, language, grades or schedules. Update privacy text; do not repurpose the lexicon endpoint.
 
 ### 8.3 Complete-book cache and failures
 
-Load the book only at the Words entry/download action, not application startup or every card flip. Reuse the existing `content` cache kind but publish a single **validated complete-book** cache entry only after every page/version/count/key invariant passes. Partial downloads never appear as installed or become review content.
+Load at the Words entry/download action, never application startup or each flip. Fetch pages with **`contentServiceFetch`, not `contentRequest`**: the latter automatically writes/falls back per request. Accumulate pages only in memory, validate manifest/version/count/unique-key invariants and recompute the aggregate served-version hash. Commit exactly one complete-book `content` cache entry through `storage/vocabularyBook.ts`; no per-page cache entries or persistent partial-download manifest.
 
-Known complete cached content may be used directly; an explicit Check for updates starts a pinned fresh download. If refresh gets HTTP 429/500, bad JSON/schema or version mismatch, show the real failure and leave the previously downloaded book intact. Do not call that refresh successful. With no previous book, a network failure shows unavailable; already saved learning cards still review from their snapshots.
+Use an already validated complete cached book directly. Explicit Check for updates downloads a fresh pinned candidate; replace the cache only after complete validation/commit. On HTTP/JSON/schema/hash failure, clear the incomplete in-memory candidate, show the real failure and preserve the old book. Retry restarts at page 0; no unbounded automatic retry. In particular 410 says that version is unavailable and offers Restart download. HTTP 429 preserves its real retry-after/error; it is not a stale-success refresh.
 
-Important source fact: `putCached` deliberately swallows quota/write failures. Its resolved promise is **not evidence of offline availability**. Add a narrow complete-wordbook cache storage operation in `src/storage/` that awaits commit and propagates errors before showing “available offline”; do not change AI cache failure policy globally. The book cache is still disposable and not backed up. Cache clearing/expiry means unseen content needs downloading again; it must not destroy saved cards, history or quota ledgers. The current `content` policy is 365 days, not permanent storage.
+`putCached` deliberately swallows quota failures: do not use its resolved promise as proof of offline storage. The narrow complete-book storage operation must await commit and propagate errors before “available offline.” On failure, do not mark/install the candidate; keep the old cache and storage Retry/restart action. Do not change AI/topic cache policy globally.
 
-Keep current topic network-first/cache-fallback semantics unchanged. This wordbook's explicit complete-download/update flow is not permission to make HTTP failures look like stale success elsewhere.
+With no complete book, first-use failure is unavailable, not zero words. Saved learning cards still review from snapshots. Cache clear/expiry removes only unseen downloadable content, never saved cards/history/quota. Existing `content` TTL is 365 days, not permanent storage; the completed book retains that policy. Topic network-first/cache-fallback semantics remain unchanged.
 
 ## 9. Routes, screens and visual contract
 
@@ -240,7 +289,9 @@ Keep Words under My study; no new top-level navigation. Define real routes for p
 | `#/study/words/all` | Browse the merged dictionary/personal list with search and source/learning-state filters. |
 | `#/study/words/review` | One active flashcard, answer reveal, self-rating and waiting/finish states. |
 
-Extend `Route`, `routeHref`, `parseRoute`, `areaOf`, shell current-area logic and `StudyView` deliberately; preserve Back/reload. Use new route variants for the two deeper Words places rather than overloading Grammar's `section: 'conjugation'`. Review is a local place; no current word id or source text is sent in network requests. Transient filters and card reveal need no extra routes.
+Extend `Route`, `routeHref`, `parseRoute`, `areaOf`, `NavTree`, shell current-area logic and `StudyView`; preserve Back/reload. Use new route variants for the deeper Words places, not Grammar's `section: 'conjugation'`. All three routes keep My study/Words active in expanded sidebar, rail and compact study navigation. No current word/source is sent over the network; transient filters/reveal need no routes.
+
+Today and Browse share two real page links, Today and All words, above their content, with `aria-current="page"` on the matching destination; these are not Segmented radios. Today's Start/Continue links to Review; Browse has an outline Review due words link to that same review route (it does not bypass queue/quota). Review's Back to Words always targets Today and its Browse words link targets All words. Do not add a second sidebar or label Review as the All words destination.
 
 ### Today and browser
 
@@ -272,9 +323,12 @@ Back:  POS / meanings / optional examples / saved context
 - Show answer is the single filled action before reveal; Good is the single filled action after reveal. Other buttons outline/ghost. Four ratings stay mounted but disabled/hidden from interaction before reveal, with their geometry reserved; phone uses a fixed two-by-two grid of 40px-or-larger controls. Do not insert a new button row on flip.
 - Front/back is deliberate reveal, not a transient spinner: back content may increase normal page height for long definitions. Preserve the top word/viewport anchor. Put the controls **above** the answer detail at every width, so revealing long content below them does not move the controls. Desktop and phone use the same DOM order. Do not fix the entire card/page height or clip definitions to force identical front/back size.
 - Reserve a bounded local status slot from first render; saving/error changes that slot/control only. Long error details use a Sheet. Full long definitions/examples remain in normal page flow or an explicitly opened detail Sheet, not a tiny nested reading scroll pane.
-- The word itself is plain text, not a giant clickable container surrounding nested buttons. Space/Enter reveals only when focus is on the reveal control/study surface, never in an input or overlay. After reveal, 1/2/3/4 map to Again/Hard/Good/Easy outside inputs/IME composition. Ignore held-key repeats and disable shortcuts while saving; never let the reveal Space also rate the next card.
+- The word is plain text, not a giant clickable container. Native button Enter/Space performs one Reveal; a study-surface reveal shortcut only handles focus on the surface itself, not bubbling child controls. Before first reveal, the control shows its fixed-size saving state while introduction commits. No rating is enabled until the answer is actually revealed.
+- After a successful reveal, focus the answer-section heading (`tabIndex=-1`, `preventScroll`), not a rating button; Show answer stays mounted/inert in its reserved cell. After a committed rating/Skip, focus the next card's Show answer, or the waiting/session-end heading. Failure keeps focus with the submitted control and announces the error; no automatic jump to another word. Overlay close restores its opener; language/theme changes do not move focus.
+- On the answer side, 1/2/3/4 map to Again/Hard/Good/Easy only outside inputs, editable text, overlays and IME composition. Ignore repeated keydowns and prevent their native default on study action buttons; disable shortcuts while saving. One physical key press/release must never reveal and rate the same card or act on the next card. Test both Enter and Space, including a held key across a fast commit.
 - Before reveal, no gloss, POS/gender cue, contextual sentence, translated example, hidden answer attributes or accessible answer text is mounted. Manual word audio may be requested but no autoplay or example audio reveals a cue.
-- Optional Listen uses existing `SpeakButton` and the user's selected engine; explicit remote speech may require their configured key. Never switch their provider silently or bulk-prefetch all book audio. Moving cards/leaving review stops owned playback through the shared speech layer. Text review itself needs no key or AI network calls.
+- Optional word Listen uses existing `SpeakButton` and the user's selected engine; explicit remote speech may require its key. Do not switch engines silently. Remove the existing `prefetchSpeech([data.word, contextSentence])` side effect from App's bookmark-save path: saving/removing a bookmark, adding context, downloading, revealing and rating trigger no automatic AI/TTS. Reader playback initiated elsewhere keeps its existing behavior. Moving cards/leaving review stops this session's owned playback through the shared layer. Text review needs no key; version one adds no example-audio controls or bulk prefetch.
+- For optional vocabulary-audio backup/LRU protection, qualify only learner rows with `bookmarked === true` or non-null `schedule`. Include their word, personal context sentences and personal analysis usage-example French text. Do not include unseen catalogue entries or built-in sense examples. Protection only retains already acquired clips; it never synthesizes missing clips. Use that same set for vocabulary-audio export; shadowing keeps its existing separate rules. The existing 200 MiB threshold trims unprotected audio and is not a guaranteed ceiling for protected assets.
 - Answer-side book text follows current EN/ZH. Personal analysis shows its actual saved language if no requested translation exists, with a truthful saved-language label; never invent one. Switching language/theme preserves current card/reveal state and progress.
 - Use a polite status announcement for revealed/saved/failure states, visible focus, named controls and overlay focus return. At 360px, 16px gutters, no horizontal document overflow; check light, sepia, dark and reduced motion. Visual acceptance is manual, not a screenshot-diff gate.
 
@@ -282,12 +336,12 @@ Back:  POS / meanings / optional examples / saved context
 
 Extend existing `db.ts` export/import and `BackupControls`, not a separate backup system:
 
-- Always include learner `vocab` rows with their content snapshots, contexts, schedule, exact history/revision and introduction timestamps; include vocabulary preferences/day ledgers in a named `vocabularyMeta` backup field. Do not export arbitrary `meta` or the epoch.
-- Read vocabulary rows and vocabulary metadata in one consistent snapshot. Settings API keys and disposable complete-book/page caches are not included. Optional protected audio continues using existing audio backup behavior.
-- Validate the full vocabulary payload with Zod before the restore transaction: key/id agreement, unique ids/keys, required content, languages, finite times/ease, schedule-phase invariants, supported ratings, history ordering/revisions, unique daily ledger keys and consistent dates. Corrupt data rejects the whole restore; do not silently strip schedule fields or coerce malformed `vocab` into “absent.”
-- Preserve absent-key/explicit-empty semantics. A provided `vocab` array replaces learner rows. When replacing `vocab`, require its paired `vocabularyMeta` for complete restoration; do not combine imported rows with an unrelated current daily ledger. With both absent, preserve them. Explicit empty learner rows still retain whatever valid ledger the backup explicitly provides. There is no old-format converter for unreleased shapes.
-- Restore rows/metadata atomically with the other owned stores; increment vocabulary epoch so a stale tab cannot rate into restored state. Refresh App's vocabulary read model after restore, not only after a delayed page reload. No stale whole-list autosave may overwrite the restore.
-- A restored saved card can be reviewed/revealed without the service. Unseen built-in entries require a separately downloaded book and are not falsely counted as backed up.
+- Always export learner `vocab` rows and the paired field `vocabularyMeta: { preferences: { newPerDay }, days: [{ date, introducedKeys }] }`. Export days sorted by date and unique keys per day; include all retained ledgers, even those referring to deleted cards. Use effective default preferences when no preference row exists. Never export arbitrary `meta`, reset tokens, restore epoch, API keys or disposable content caches.
+- Read `vocab` and owned vocabulary metadata in one consistent `vocab`/`meta` read transaction. Optional vocabulary-audio export uses the eligibility set in section 9; shadowing/audio restoration keeps its existing separate error reporting.
+- Validate raw inputs before the restore transaction. Forward raw `data.vocab`/`data.vocabularyMeta` from `BackupControls`; remove its non-array-to-undefined coercion. Require key/id and bookmark/time agreement, content/language shapes, matching schedule/introduced-nullability, finite fields, ratings, increasing history revisions (gaps after reset allowed), unique day labels/keys and date format. Reject malformed fields rather than stripping them. A day key need not have a surviving card, and historical local dates are not recomputed in a later timezone.
+- Both backup fields absent means preserve vocabulary/metadata and do not bump its epoch. Either one present without the other rejects, including `vocab: []` without metadata. Both present replace the pair; `vocab: [], vocabularyMeta: { preferences, days: [] }` explicitly clears rows/day ledgers while setting those preferences. Empty rows with a supplied nonempty valid ledger deliberately retain that introduction history. No unreleased old-format converter; update callers/fixtures to the new paired contract.
+- In the existing whole-restore transaction, replace `vocab`, delete only `vocabularyPreferences` and keys with the exact `vocabularyDay:` prefix, then write imported preferences/day entries. Never clear the `meta` store. Preserve `started`, stats/exercise tokens and all other metadata except changes the rest of that restore explicitly owns. Keep every `vocabularyReset:` counter and increment the local `vocabularyEpoch` once; never import/reduce either counter. Any failure aborts all row/metadata changes.
+- Notify/refresh the vocabulary read model immediately after successful restore, before `BackupControls`' delayed reload. A still-open review's old epoch rejects late submissions. No whole-list autosave may overwrite the restore. A restored saved card reveals/reviews without the service; unseen entries are not backed up and need a separate book download.
 
 Update consumers together: sidebar due badge uses introduced cards actually due; Analytics distinguishes personal bookmark count, introduced words and submitted self-ratings. Remove the current `repetitions >= 4` mastery metric/claim. No grammar exercise attempts, pronunciation scores or predicted retention are fabricated from these self-ratings.
 
@@ -317,7 +371,7 @@ Replace vocabulary whole-list autosave and all its callers; keep stats persisten
 
 ### Work package B: private built-in book pipeline and delivery
 
-Existing: `worker/src/index.ts`, `worker/README.md`, `worker/NOTICE.md` if attribution requires it; existing content transport/cache modules are reused, not globally renamed.
+Existing: `worker/src/index.ts`, `worker/README.md`, `worker/NOTICE.md` if attribution requires it, `src/services/grammarTopics/service.ts` and `tests/contentService.test.ts` for preserved HTTP error code/retry metadata. Reuse low-level transport, not `contentRequest`'s per-page caching; do not globally rename these modules.
 
 New proposed: `src/services/vocabulary/load.ts`, `src/storage/vocabularyBook.ts`, `scripts/vocabulary/{prepare,review,publish}.ts` (split a pure preparation module only if size/tests justify it), public metadata-only `data/vocabulary/{manifest,reviews}.json`, Worker table initialization SQL, `tests/vocabularyBook.test.ts`, `tests/vocabularyPublish.test.ts`, `tests/vocabularyWorker.test.ts`.
 
@@ -325,11 +379,11 @@ Deliver synthetic end-to-end read-only content first; real publication remains a
 
 ### Work package C: Words pages and shared flashcard session
 
-Existing: `src/components/VocabularyView.tsx` (replace rather than retain a second flashcard engine), `src/components/study/StudyView.tsx`, `src/utils/routes.ts`, shell navigation/current-route helpers, `src/components/WordDetailModal.tsx`, `src/App.tsx`, `src/i18n/locales/en.json`, `src/i18n/locales/zh.json`.
+Existing: `src/components/VocabularyView.tsx` (replace, not a second engine), `src/components/study/StudyView.tsx`, `src/utils/routes.ts`, `src/components/shell/NavTree.tsx` and current-route helpers, `src/components/WordDetailModal.tsx`, `src/hooks/useLookupSheets.ts`, `src/App.tsx`, both `src/i18n/locales/en.json` and `zh.json`. Wire source descriptors through `src/components/practice/UnitView.tsx`, `UnitSheet.tsx`, `src/components/study/MistakeNotebook.tsx` and its explanation callback; add lookup-context tests. Update `e2e/practice-crosslinks.spec.ts` and `e2e/mistakes.spec.ts` to use the explicit All words destination for saved-list assertions, while preserving active Words navigation checks.
 
 New proposed: `src/components/vocabulary/{VocabularyHome,VocabularyBrowser,VocabularyReview,Flashcard}.tsx`, `src/hooks/useVocabularyReview.ts`, `src/services/vocabulary/queue.ts`, `e2e/vocabulary-flashcards.spec.ts`.
 
-Home/browser/review share one storage read model and canonical identity. Session hook owns active id/reveal/skip/operation state; Flashcard only renders. No control performs its own IndexedDB writes. Existing house `Button`, `Table`, `Sheet`, `Dialog`, `Segmented` and speech controls are sufficient; do not add a UI dependency.
+Home/browser/review share one storage read model and canonical identity. Session hook owns candidate/active id, reveal/skip/operation state and captured epoch/token/revision; Flashcard only renders. Word-sheet membership uses both the canonical word bookmark and the current frozen context key, not a single dictionary-exists boolean. No control performs its own IndexedDB writes. Existing house `Button`, `Table`, `Sheet`, `Dialog`, `Segmented` and speech controls suffice; add no UI dependency.
 
 ### Work package D: integrated backup, documentation and real local acceptance
 
@@ -343,15 +397,15 @@ Use synthetic invented French/English/Chinese fixtures only. Do not copy the pri
 
 | Area | Required checks |
 | --- | --- |
-| Identity/content | NFC/case/whitespace/apostrophe matches; accents/hyphens retained; phrases stable; same spelling preserves multiple senses; empty POS/absent example accepted, partial example rejected; raw HTML never rendered; original source ids retained; no automatic lemma merge. |
-| Personal/built-in join | Bookmark-before-download and download-before-bookmark both yield one canonical card; contexts survive; removing bookmark preserves learning; existing row progress wins over downloaded content; content update/spelling correction has specified non-destructive behavior. |
-| Scheduling | Every cell of learning/relearning table; graduation; long-term Hard/Good/Easy/ease minimum; failure returns in one minute; preview is pure; due instant boundaries; local midnight, month/leap-year and DST calendar behavior; self-rating is not objective accuracy. |
-| Quota/queue | 20 unique introductions across repeated sessions/reload/two tabs; 0 limit permits reviews; failed introduction doesn't consume quota; overdue review before new; future relearning waits; repeated word isn't new again; deleting/resetting doesn't refund today's ledger; skip changes no schedule. |
-| Transactions | Rating write failure retains answer side; retry same operation logs once; stale different operation rejected; double-click/held key creates one commit; bookmark merge doesn't erase concurrent rating; reset/delete/recreate/restore rejects old epoch; no whole-vocab autosave remains. |
-| Cache/service | No configured service; first offline use; partial pages; pinned version change; HTTP 429/500, timeout, JSON/schema errors; failed update retains old complete book; swallowed generic cache writes don't produce false offline success; cache clearing retains saved-card review. |
-| Backup | Full roundtrip of senses/language/contexts/schedule/history/ledger/preferences; malformed vocab rejects; absent versus empty fields; paired restore metadata; snapshot consistency, atomic failure and stale writer invalidation; saved-card review works without book/service. |
-| Browser | Browse pagination/search/source/state filters; reveal then rating; save/bookmark dedup from reader; language/theme switch mid-card; reload/resume; waiting countdown/focus return; no answers in DOM/accessibility before reveal; overlays/input/IME don't trigger grading shortcuts. |
-| Layout/audio/network | EN/ZH at 1280×900 and 360×740, all three themes, long words/definitions, zoom and reduced motion; stable control/status bounds during saving/error; intentional reveal readable; no horizontal page overflow; zero automatic AI/TTS calls, no bulk prefetch, explicit Listen follows chosen engine and stops on leave; Worker never receives learner data. |
+| Identity/content | NFC/case/whitespace/apostrophe matches, accents/hyphens retained, phrases/senses/source ids preserved; optional POS/example rules; no raw HTML or automatic lemma merge. A mismatched model-returned word cannot supply the bookmark key or silently attach its analysis. |
+| Personal/built-in join | Both save/download orders yield one card; each footer state in 3.3; new source/context saves without removing the bookmark; same-context retry is idempotent; remove/re-save keeps contexts/history. Lookup language/source stay frozen through UI changes and practice/notebook callbacks; never inherit the last reader. |
+| Scheduling | Every learning/relearning transition; graduation; long-term ease/minimum; mature ratings have equal immediate intervals and rating-specific ease updates (including floor convergence); reset is exactly learning step 0/due now/ease 2.5 with history kept; null introduction state cannot be reset to bypass quota. Preview is pure; minute/local-calendar/DST boundaries hold. |
+| Quota/queue | Preview/Back/reload/Skip-before-reveal consume zero; first committed reveal consumes once; reveal failure/quota race reveals no answer; same-key two-tab reveal charges once; midnight charges the reveal day; 20 distinct keys maximum; limit 0 still permits reviews; already-ledgered recreated key charges no second introduction. Skip after reveal keeps that introduction; future relearning waits. |
+| Transactions | Failed rating keeps answer/selected decision; same operation retries once, different rating cannot reuse it; stale revision/token/epoch reloads without adopting fresh tokens for old work. Reset/delete A does not invalidate rating B; same-key delete/recreate rejects old writes. No competing whole-list autosave. |
+| Cache/service | No service/offline/partial pages; published manifests gate pinned reads; exact HTTP error/code matrix and Retry-After metadata; no page-cache writes; aggregate version/hash verification and committed single-book cache. Interrupt every publish step: old current stays complete; same-version rerun doesn't overwrite; no cleanup/deletion during staging. Failed refresh/storage keeps old book. |
+| Backup | Paired shape roundtrip; raw malformed fields reject; either key alone rejects; explicit empty days remove old vocabulary-day keys but keep unrelated meta and local per-word tokens; epoch moves on replacement only. Deleted-card ledgers remain valid; imported data cannot lower tokens/epoch. Atomic failure and immediate read-model refresh; restored saved cards work without service. |
+| Browser | Real Today/All words/Review links and active Words state at every shell width; existing bookmark crosslink tests still reach saved lists. Reveal focuses answer heading, rating/Skip focuses next Reveal or wait heading; failure preserves focus, overlays restore it, locale change doesn't move it. No answer DOM/accessibility before reveal; IME/inputs/held Enter/Space/numeric shortcuts cannot reveal and grade in one press. |
+| Layout/audio/network | EN/ZH, 1280×900/360×740, three themes, long text/zoom/reduced motion; fixed transient controls/status, readable intentional reveal, no horizontal overflow. Remove bookmark prefetch; no automatic AI/TTS on save/download/reveal/rate. Test exact audio-protection/export set (not the whole book); explicit Listen uses selected engine and stops on leave. Worker receives no learner data. |
 
 For each nontrivial new contract, observe a meaningful failing test before implementation, then record passing output. Examples: current minute scheduling cannot express one-minute relearning; current duplicate save creates/deletes the wrong row; current full-list persistence overwrites a restore. A missing module/compiler error alone is not behavioral regression evidence.
 
@@ -373,7 +427,7 @@ bun run --cwd worker typecheck
 
 `worker/package.json` currently defines `typecheck` as `tsc -p tsconfig.json`; re-check for drift before running. Add no package just to run this specification.
 
-Playwright is milestone-only, one process across all checkouts. `lsof -iTCP:5174 -sTCP:LISTEN` must show no listener first; if occupied, stop rather than reuse/kill it. Then run `CI=1 bunx playwright test` at the assembled milestone; isolate a failed spec before classifying it. AI calls are mocked/guarded; tests must fail on unexpected text-AI/speech/learner-data traffic, permitting explicit selected-engine Listen only in its dedicated test. Preserve the owner's servers on 5173/8787. Do not claim real AI or a new UI was verified by earlier repository checks.
+Playwright is milestone-only, one process across checkouts. First `lsof -iTCP:5174 -sTCP:LISTEN` must show no listener; if busy, stop, never reuse/kill it. Then run `CI=1 bunx playwright test`; isolate failures before diagnosis. Mock existing explicit reader lookups as setup for bookmark integration, then assert saving adds no AI/TTS requests. Flashcard review/download/reveal/rating allow no text-AI/TTS requests; explicit selected-engine Listen is tested separately. Every path rejects learner-data traffic to Worker. Preserve owner servers on 5173/8787. Earlier baseline checks do not verify this unbuilt flow.
 
 Final local content acceptance requires an owner-approved corrected artifact, actual normalized count/hash/report, read-only local Worker/D1 serving, and real browser study of sampled entries including a duplicate-sense word and a missing-example word. Do not publish or deploy as a side effect. Report any content/rights blocker separately from code/test completeness.
 
@@ -384,3 +438,18 @@ An implementation is complete when both built-in and personal words share canoni
 Handoff instruction: **Implement this specification on the designated branch, using a complete vertical slice before expanding polish. Re-check the working tree and source contracts, preserve unrelated edits, use Bun and existing primitives, and stop for new dependency/provider/service, destructive data handling, incompatible development data or unapproved real-content publication. Run ship-change with named-file staging and a behavior changelog entry. No push, PR, merge, remote database write or deployment unless separately requested.**
 
 This documentation task ran no new flashcard implementation, corpus import, publisher, schema initialization or browser acceptance. No private lesson/wordbook text is committed here; examples and counts above describe structure/observations only. Any coding agent must produce its own implementation evidence rather than inheriting a claim that this unbuilt flow passed.
+
+## 14. Source-checked review disposition
+
+The Argon advisory reviewed baseline `e876e6a` and returned FAIL. The lead checked its claims against source, rejected incorrect file omissions/corpus facts and old-backup compatibility advice, and revised the real gaps below. This table records fixes to the **specification**, not runtime proof or an external PASS.
+
+| Item | Resolved contract |
+| --- | --- |
+| R1: bookmark/context/identity | Original clicked-word key, matching analysis, frozen request language/source, deterministic context identity and explicit footer save/add/remove states (3.1, 3.3, 4.1). |
+| R2: publication/cache | Verified immutable staging, publication marker, atomic final pointer switch, retained old versions, exact HTTP/code matrix, low-level page transport and one committed complete-book cache (8). |
+| R3: reset/invalidation | Exact introduced-card reset output; per-word tokens for reset/delete and restore-wide epoch only; no cross-word invalidation or unsafe stale retries (4.3, 7). |
+| R4: automatic speech | Remove reader bookmark prefetch, preserve explicit Listen/other reader playback, specify protected/exported vocabulary audio exactly (7, 9). |
+| R5: backup metadata | Concrete paired export shape and namespace-only replacement, raw validation, preserved unrelated metadata/local tokens and immediate restore refresh (10). |
+| R6: navigation/focus | Real Today/All words/Review links, Words active state, explicit reveal/advance/failure focus and physical-key safety; named crosslink test updates (9, 11, 12). |
+| D1: new-card quota | First successful reveal, not front presentation; specified Skip/Back/reload, quota-race and midnight behavior (5.1, 6). |
+| D2: equal mature intervals | Retain existing formula as an explicit limitation, with truthful previews, floor-aware ease updates and regression coverage; no unapproved scheduler/dependency change (5.3, 12). |
