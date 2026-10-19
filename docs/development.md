@@ -22,6 +22,19 @@ Bun is the only package manager. The delivery checklist (which checks must pass,
 - `bun scripts/noun-gender/build.ts --check`: regenerate in memory and reject any byte difference from the committed pack (fails while no pack exists).
 - `bun scripts/noun-gender/review.ts print <id...>`: print noun rows and derived rule tables (dictionary figure, A1 figure, examples, exceptions) before review; only the owner runs `record <id...> --by "<name>" --ref "<reference>"` to append review records to `data/noun-gender/reviews.json`.
 
+## Run the content service locally
+
+From the repository root, install the Worker dependencies, apply the migration to local D1, and start the service on its default port 8787. The origin flag allows the app's local Vite origin (the Worker otherwise denies cross-origin access):
+
+```sh
+bun install --cwd worker
+cd worker
+bunx wrangler d1 migrations apply DB --local
+bun run dev --var ALLOWED_ORIGINS:http://localhost:5173
+```
+
+In the app root, create the gitignored `.env.local` with `VITE_CONTENT_SERVICE_URL=http://127.0.0.1:8787`, then run `bun run dev` in another terminal and open `http://localhost:5173`. Without that variable, Grammar shows only Conjugation. Local D1 starts with no published topics; publishing content is a separate step.
+
 ## Add a UI component
 
 Run `bunx shadcn@latest add <name> --yes` from the project root. `components.json` selects the Base UI variant and generates files in `src/components/ui/`. The `@/*` alias resolves to `src/*` in `tsconfig.json` (TypeScript and Bun tests) and `vite.config.ts` (Vite). Keep our tokens and themes in `src/index.css`, our `cn` utility and existing components; do not overwrite them as part of adding another component. New dependencies installed by `add` are allowed only for components the owner asked for.
