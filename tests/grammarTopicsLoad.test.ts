@@ -57,7 +57,7 @@ for (const { name, path, load, data, parse } of loaders) {
     expect(await getCached('content', `${origin}${path}`)).toEqual(data());
     expect(await load()).toEqual(data());
     expect(fetchSpy).toHaveBeenCalledTimes(2);
-    expect(fetchSpy).toHaveBeenCalledWith(`${origin}${path}`, { credentials: 'omit' });
+    expect(fetchSpy).toHaveBeenCalledWith(`${origin}${path}`, { credentials: 'omit', signal: expect.any(AbortSignal) });
     expect((await cacheCounts()).content).toBe(1);
   });
 

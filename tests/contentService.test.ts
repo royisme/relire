@@ -24,7 +24,10 @@ test('build-time URL trims one trailing slash; GET omits credentials and custom 
   expect(contentServiceUrl()).toBe('http://content.test');
   fetchSpy.mockResolvedValue(Response.json([]));
   expect(await contentServiceFetch('/v1/topics')).toEqual([]);
-  expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics', { credentials: 'omit' });
+  expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics', {
+    credentials: 'omit',
+    signal: expect.any(AbortSignal),
+  });
 });
 
 test('unconfigured service makes no request', async () => {
@@ -51,6 +54,27 @@ test('a non-JSON error page still reports its HTTP status, not a parse error', a
   const error = await failure(contentServiceFetch('/v1/topics'));
   expect(error).toBeInstanceOf(ContentServiceHttpError);
   expect((error as Error).message).toBe('HTTP 502: unexpected response');
+});
+
+test('a service that never answers is cut off by the request timeout and reported as a network failure', async () => {
+  const timeout = new AbortController();
+  const timeoutSpy = spyOn(AbortSignal, 'timeout').mockReturnValue(timeout.signal);
+  try {
+    // A request that stays pending until its signal aborts, like a server that accepts the connection and never answers.
+    const hang = (_url: unknown, init?: RequestInit) =>
+      new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(init.signal?.reason));
+      });
+    fetchSpy.mockImplementation(hang as unknown as typeof fetch);
+    const pending = failure(contentServiceFetch('/v1/lexicon/form/vais'));
+    timeout.abort(new DOMException('The operation timed out.', 'TimeoutError'));
+    const error = await pending;
+    expect(error).toBeInstanceOf(ContentServiceNetworkError);
+    expect((error as Error).message).toBe('The operation timed out.');
+    expect(timeoutSpy).toHaveBeenCalledWith(5000);
+  } finally {
+    timeoutSpy.mockRestore();
+  }
 });
 
 test('network failure keeps its original text', async () => {

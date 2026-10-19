@@ -23,9 +23,10 @@ export const AboutSection: React.FC = () => {
         <p>{t('settings.about.what')}</p>
         <p>{t('settings.about.privacy')}</p>
         <p>{t('settings.about.scope')}</p>
-        {/* Morphalou data is only used when a content service is configured. */}
+        {/* The content service and Morphalou data exist only when a content service is configured. */}
         {contentServiceUrl() && (
           <>
+            <p>{t('settings.about.servicePrivacy')}</p>
             <p>
               {t('settings.about.lexicon', LEXICON)}{' '}
               <a href={LEXICON.url} target="_blank" rel="noreferrer" className={LINK}>

@@ -58,7 +58,10 @@ test('the list hook becomes ready with summaries', async () => {
   await changed;
   expect(state).toMatchObject({ status: 'ready', topics: [{ id: 'test-only' }] });
   expect(state).not.toHaveProperty('topic');
-  expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics', { credentials: 'omit' });
+  expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics', {
+    credentials: 'omit',
+    signal: expect.any(AbortSignal),
+  });
 });
 
 test('the reader hook receives a full topic without fetching the list', async () => {
@@ -68,7 +71,10 @@ test('the reader hook receives a full topic without fetching the list', async ()
   await changed;
   expect(state).toEqual({ status: 'ready', topic: topicFixture() });
   expect(fetchSpy).toHaveBeenCalledTimes(1);
-  expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics/test-only', { credentials: 'omit' });
+  expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics/test-only', {
+    credentials: 'omit',
+    signal: expect.any(AbortSignal),
+  });
 });
 
 for (const [id, status, expected] of [

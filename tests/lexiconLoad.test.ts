@@ -51,7 +51,10 @@ test('a lemma and a form are validated, cached and asked by their encoded, folde
     LexiconFormResponseSchema.parse(formOf("s'appelle", { lemma: "s'appeler", pos: 'verb' })),
   );
   expect(asked()).toEqual(['/v1/lexicon/chanter', "/v1/lexicon/form/s'appelle"]);
-  expect(fetchSpy).toHaveBeenCalledWith(`${origin}/v1/lexicon/chanter`, { credentials: 'omit' });
+  expect(fetchSpy).toHaveBeenCalledWith(`${origin}/v1/lexicon/chanter`, {
+    credentials: 'omit',
+    signal: expect.any(AbortSignal),
+  });
   expect(await getCached('content', `${origin}/v1/lexicon/chanter`)).toEqual(chanterLemma());
 });
 
