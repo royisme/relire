@@ -1,25 +1,8 @@
-/** Owns lazy topic validation and its retryable cache; not tag-index loading or UI state. */
-import { GrammarTopicsPackSchema, type GrammarTopicsPack } from '../../types/grammarTopic';
+/** Owns summary-list and individual-topic validation; never fetches a whole topic pack. */
+import { GrammarTopicSchema, GrammarTopicSummarySchema } from '../../types/grammarTopic';
+import { contentRequest } from './request';
 
-let topicsPending: Promise<GrammarTopicsPack> | undefined;
-let topicsLoaded: GrammarTopicsPack | undefined;
-
-export const loadedGrammarTopics = () => topicsLoaded;
-
-export function loadGrammarTopics(): Promise<GrammarTopicsPack> {
-  topicsPending ??= (async () => {
-    const { default: data } = await import('../../data/grammar/topics.json');
-    topicsLoaded = GrammarTopicsPackSchema.parse(data);
-    return topicsLoaded;
-  })().catch((error: unknown) => {
-    topicsPending = undefined;
-    throw error;
-  });
-  return topicsPending;
-}
-
-/** Only for isolated loader tests; application callers share immutable artifacts. */
-export function resetGrammarTopicsForTests(): void {
-  topicsPending = undefined;
-  topicsLoaded = undefined;
-}
+const summaries = GrammarTopicSummarySchema.array();
+export const loadGrammarTopics = () => contentRequest('/v1/topics', (data) => summaries.parse(data));
+export const loadGrammarTopic = (id: string) =>
+  contentRequest(`/v1/topics/${encodeURIComponent(id)}`, (data) => GrammarTopicSchema.parse(data));

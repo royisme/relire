@@ -1,4 +1,4 @@
-/** Owns the chapter list and topic reader states; uses the reviewed-only lazy pack, never sample content. */
+/** Owns the summary list and individual topic reader states; never substitutes sample content. */
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useGrammarTopics } from '../../../hooks/useGrammarTopics';
@@ -10,9 +10,8 @@ import { TopicBlocks } from './TopicBlocks';
 export default function TopicsPage({ topicId, tag }: { topicId?: string; tag?: GrammarTag }) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
-  const { status, pack, error } = useGrammarTopics();
-  const topic = pack?.topics.find((entry) => entry.id === topicId);
-  const topics = pack?.topics.filter((entry) => !tag || entry.tags.includes(tag)) ?? [];
+  const { status, topics: summaries, topic, error } = useGrammarTopics(topicId);
+  const topics = summaries?.filter((entry) => !tag || entry.tags.includes(tag)) ?? [];
   const chapters = [...new Set(topics.map((entry) => entry.chapter))];
 
   return (
@@ -60,7 +59,7 @@ export default function TopicsPage({ topicId, tag }: { topicId?: string; tag?: G
               </Link>
             )}
           </header>
-          {pack?.topics.length === 0 ? (
+          {summaries?.length === 0 ? (
             <p className="text-sm text-ink-500">{t('grammarTopics.empty')}</p>
           ) : topics.length === 0 ? (
             <p className="text-sm text-ink-500">{t('grammarTopics.noMatch')}</p>
