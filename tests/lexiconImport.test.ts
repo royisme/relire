@@ -10,6 +10,13 @@ import { LexiconEntrySchema } from '../src/types/lexicon';
 import { ALLOWLIST, writeMorphalouFixture } from './fixtures/morphalouCsv';
 import { createWorkerDb } from './fixtures/workerDb';
 
+/** The message a promise rejects with, or `resolved`. */
+const rejection = (promise: Promise<unknown>) =>
+  promise.then(
+    () => 'resolved',
+    (error: Error) => error.message,
+  );
+
 let root: string;
 let dir: string;
 let lexicon: Lexicon;
@@ -247,13 +254,13 @@ describe('allowlist', () => {
   });
 
   test('a listed lemma that Morphalou does not have fails loudly', async () => {
-    await expect(importWith('verb:testmarcher\nnoun:testabsent\nverb:testabsent2\n')).rejects.toThrow(
+    expect(await rejection(importWith('verb:testmarcher\nnoun:testabsent\nverb:testabsent2\n'))).toBe(
       'Allowlisted but not in Morphalou: noun:testabsent, verb:testabsent2',
     );
   });
 
   test('a malformed line is refused; unknown arguments are refused', async () => {
-    await expect(importWith('verb:testmarcher\nadverb:test\n')).rejects.toThrow('Bad allowlist line: adverb:test');
-    await expect(importLexicon(['--remote'])).rejects.toThrow('Usage: import.ts [--apply-local]');
+    expect(await rejection(importWith('verb:testmarcher\nadverb:test\n'))).toBe('Bad allowlist line: adverb:test');
+    expect(await rejection(importLexicon(['--remote']))).toBe('Usage: import.ts [--apply-local]');
   });
 });

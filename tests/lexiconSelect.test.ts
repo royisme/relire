@@ -2,6 +2,13 @@
 import { expect, test } from 'bun:test';
 import { forcedIds, scoreLemmas, selectLemmas } from '../scripts/lexicon/select';
 
+/** The message a promise rejects with, or `resolved`. */
+const rejection = (promise: Promise<unknown>) =>
+  promise.then(
+    () => 'resolved',
+    (error: Error) => error.message,
+  );
+
 // Columns in an order unlike the real file: they are found by name.
 const header = ['ortho', 'freqlemlivres', 'cgram', 'lemme', 'freqlemfilms2'].join('\t');
 const row = (ortho: string, lemma: string, cgram: string, books: number, films: number) =>
@@ -44,7 +51,7 @@ test('a lemma scores the sum of its two lemma frequencies once, whatever the num
 });
 
 test('a missing column names itself', async () => {
-  await expect(scoreLemmas(['ortho\tlemme\tcgram', 'a\ta\tVER'])).rejects.toThrow(
+  expect(await rejection(scoreLemmas(['ortho\tlemme\tcgram', 'a\ta\tVER']))).toBe(
     'Lexique header has no column freqlemfilms2',
   );
 });

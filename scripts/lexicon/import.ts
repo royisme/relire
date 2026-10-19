@@ -89,7 +89,7 @@ export async function importLexicon(
   const writer = Bun.file(output).writer();
   let bytes = 0;
   for (const statement of lexiconStatements(lexicon, await sourceVersion(dir))) {
-    writer.write(statement + '\n');
+    await writer.write(statement + '\n');
     bytes += Buffer.byteLength(statement) + 1;
   }
   await writer.end();
