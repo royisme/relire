@@ -62,7 +62,7 @@ test('a correct answer passes; an accent-less answer is wrong with the preferenc
   const [unit] = await makeDrillSet(page);
   expect(aiCalls(ai)).toBe(0);
   await page.locator(`main a[href="#/practice/set/${unit.setId}"]`).click();
-  await page.locator(`main a[href="#/practice/${unit.id}"]`).click();
+  await page.locator(`main a[href="#/practice/${encodeURIComponent(unit.id)}"]`).click();
   const items = unit.items as {
     prompt: string;
     expectedAnswer: string;
