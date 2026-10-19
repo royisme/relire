@@ -1,46 +1,14 @@
-/** Owns the offline Morphalou CSV layout and cell mapping; not comparison, decisions or shipped forms. */
-import { createReadStream } from 'node:fs';
+/** Owns the oracle's index of Morphalou cells (layout and tag vocabulary: scripts/lib/morphalou-csv.ts); not comparison, decisions or shipped forms. */
 import { join } from 'node:path';
-import { createInterface } from 'node:readline';
 import type { SimpleTense } from '../../src/services/conjugation/generate';
+import { AGREEMENT, fileLines, MOOD_TENSE, morphalouRows, PERSON } from '../lib/morphalou-csv';
 
 export type OracleTense = SimpleTense | 'participlePresent' | 'participlePast';
 export type MorphalouIndex = Map<string, Map<string, Set<string>>>;
 
-const HEADER =
-  'GRAPHIE;ID;CATÉGORIE;SOUS CATÉGORIE;LOCUTION;GENRE;AUTRES LEMMES LIÉS;PHONÉTIQUE;ORIGINES;GRAPHIE;ID;NOMBRE;MODE;GENRE;TEMPS;PERSONNE;PHONÉTIQUE;ORIGINES';
-const MOOD_TENSE: Record<SimpleTense, string> = {
-  present: 'indicative:present',
-  imparfait: 'indicative:imperfect',
-  futur: 'indicative:future',
-  conditionnel: 'conditional:present',
-  subjonctif: 'subjunctive:present',
-  imperatif: 'imperative:present',
-};
-const PERSON = ['firstPerson', 'secondPerson', 'thirdPerson'];
-const AGREEMENT: Record<string, [string, string]> = {
-  ms: ['masculine', 'singular'],
-  fs: ['feminine', 'singular'],
-  mp: ['masculine', 'plural'],
-  fp: ['feminine', 'plural'],
-};
-
 export async function parseMorphalou(lines: Iterable<string> | AsyncIterable<string>): Promise<MorphalouIndex> {
   const index: MorphalouIndex = new Map();
-  let lineNumber = 0;
-  let lemma = '';
-  for await (const line of lines) {
-    lineNumber++;
-    if (lineNumber < 15) continue;
-    if (lineNumber === 15 || lineNumber === 16) {
-      const expected = lineNumber === 15 ? 'LEMME;;;;;;;;;FLEXION;;;;;;;;' : HEADER;
-      if (line !== expected) throw new Error(`Morphalou line ${lineNumber}: expected ${expected}; got ${line}`);
-      continue;
-    }
-    const c = line.split(';');
-    if (c.length !== 18) throw new Error(`Morphalou line ${lineNumber}: expected 18 columns; got ${line}`);
-    if (c[0]) lemma = c[0];
-    if (!lemma) throw new Error(`Morphalou line ${lineNumber}: form without a lemma; got ${line}`);
+  for await (const { lemma, cells: c } of morphalouRows(lines)) {
     let cells = index.get(lemma);
     if (!cells) index.set(lemma, (cells = new Map()));
     const key =
@@ -49,22 +17,11 @@ export async function parseMorphalou(lines: Iterable<string> | AsyncIterable<str
     if (!forms) cells.set(key, (forms = new Set()));
     forms.add(c[9]);
   }
-  if (lineNumber < 16) throw new Error(`Morphalou header missing after line ${lineNumber}`);
   return index;
 }
 
 export async function loadMorphalou(dir: string): Promise<MorphalouIndex> {
-  const input = createReadStream(join(dir, 'verb_Morphalou3.1_CSV.csv'), { encoding: 'utf8' });
-  const lines = createInterface({
-    input,
-    crlfDelay: Infinity,
-  });
-  try {
-    return await parseMorphalou(lines);
-  } finally {
-    lines.close();
-    input.destroy();
-  }
+  return parseMorphalou(fileLines(join(dir, 'verb_Morphalou3.1_CSV.csv')));
 }
 
 export function morphalouForms(

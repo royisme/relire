@@ -141,7 +141,7 @@ test('zero topics replaces prior content, emits only delete and version, and lis
     db.exec(empty.sql);
     expect(await (await handle(new Request('https://content.test/v1/topics'), env)).json()).toEqual([]);
     expect(await (await handle(new Request('https://content.test/v1/tag-index'), env)).json()).toEqual({});
-    expect(db.query('SELECT value FROM meta').get()).toEqual({ value: empty.version });
+    expect(db.query("SELECT value FROM meta WHERE key = 'packVersion'").get()).toEqual({ value: empty.version });
   } finally {
     db.close();
   }

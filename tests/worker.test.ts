@@ -73,7 +73,7 @@ describe('topic routes', () => {
   });
 
   test('unknown topic and route return 404 JSON', async () => {
-    for (const path of ['/v1/topics/test-absent', '/v1/unknown', '/v1/lexicon/test', '/admin']) {
+    for (const path of ['/v1/topics/test-absent', '/v1/unknown', '/v1/other', '/admin']) {
       const response = await request(path);
       expect(response.status).toBe(404);
       expect(await response.json()).toEqual({ error: 'not-found' });

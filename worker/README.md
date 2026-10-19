@@ -1,6 +1,6 @@
 # Relire content service (H1)
 
-An optional, public read-only Cloudflare Worker backed by D1. It serves grammar topics without putting their text in the app bundle or repository. It has no learner data, AI keys, write endpoint, admin route or lexicon endpoint. Public read access is not paid access control: a reader can still collect individual topics.
+An optional, public read-only Cloudflare Worker backed by D1. It serves grammar topics without putting their text in the app bundle or repository, and a learner-sized lexicon (Morphalou 3.1, LGPL-LR; see `NOTICE.md`). It has no learner data, AI keys, write endpoint or admin route. Public read access is not paid access control: a reader can still collect individual topics.
 
 ## Endpoints
 
@@ -9,8 +9,9 @@ Only `GET`, `HEAD` and `OPTIONS` are accepted; other methods return `405` with `
 - `/v1/topics`: summaries (`id`, `chapter`, `level`, `tags`, bilingual `title`), ordered by chapter then id; no body text.
 - `/v1/topics/:id`: full stored topic JSON; malformed slug `400`, missing topic `404`.
 - `/v1/tag-index`: covered tags mapped to ascending topic ids.
+- `/v1/lexicon/:lemma`: every entry (`pos` `verb`, `noun` or `adjective`, `gender` for nouns, `data`) of a lemma, plus `source`; `/v1/lexicon/form/:form`: the `{ lemma, pos }` pairs a form belongs to, plus `source`. The parameter is URL-decoded, NFC and lowercased; empty or over 64 characters `400 invalid-id`, unknown `404 not-found`. Shapes: `src/types/lexicon.ts`.
 
-Successful reads use JSON UTF-8, `Cache-Control: public, max-age=300`, and an `ETag` derived from `meta.packVersion`. Matching `If-None-Match` returns `304`. `HEAD` returns the same status and headers without a body. Errors are JSON error codes; database failures return `500 unavailable` without exposing SQL or content.
+Successful reads use JSON UTF-8, `Cache-Control: public, max-age=300`, and an `ETag` derived from `meta.packVersion` (`meta.lexiconVersion` for the lexicon routes). Matching `If-None-Match` returns `304`. `HEAD` returns the same status and headers without a body. Errors are JSON error codes; database failures return `500 unavailable` without exposing SQL or content.
 
 CORS echoes only exact origins in the comma-separated `ALLOWED_ORIGINS` variable. Its default empty string permits no cross-origin access. Preflights return `204`; allowed origins may send `If-None-Match` and read `ETag` and `Retry-After`.
 
@@ -44,7 +45,7 @@ The following account operations are for the owner, using their own Cloudflare a
    bunx wrangler d1 migrations apply DB --remote
    ```
 
-   The migration creates only `topics` and `meta` and sets the empty pack's version to `0.0.0`. Local state lives in gitignored `worker/.wrangler/`.
+   The migrations create `topics`, `meta`, `lexicon_entries` and `lexicon_forms` and set the empty versions (`packVersion`, `lexiconVersion`) to `0.0.0`. Local state lives in gitignored `worker/.wrangler/`.
 4. Set `vars.ALLOWED_ORIGINS` in `wrangler.jsonc` to the deployment origins, separated by commas, for example `https://app.example.com,https://owner.example.com` (no paths or trailing slashes). The empty default is intentional. Keep the deployment configuration local if it contains owner-specific identifiers.
 5. Run locally:
 
@@ -80,3 +81,12 @@ worker/node_modules/.bin/wrangler d1 execute DB --remote --file .local/grammar-t
 ```
 
 The publisher itself has only a local execution path; it never logs in or deploys. There is no real topic content or seed content in this package; the TEST-only fixture is used only by tests and the local smoke check.
+
+## Lexicon
+
+Data comes from Morphalou 3.1 (LGPL-LR); the notice, the licence text and the rebuild steps are in `NOTICE.md` and `licences/`. No lexicon data is in the repository.
+
+- `data/lexicon/lemmas.txt` is the committed allowlist (one `pos:lemma` per line). `bun scripts/lexicon/select.ts` writes it offline from a local frequency table (`LEXIQUE_FILE`, default `.local/lexique/Lexique383.tsv`) and the Morphalou copy (`MORPHALOU_DIR`, default `.local/morphalou/csv/Morphalou3.1_formatCSV`), plus the verbs of the grammar pack and the nouns of the noun-gender data. The size constant `TOP_N` is in that script.
+- `bun scripts/lexicon/import.ts` reads the allowlist and the three Morphalou files and writes the private, gitignored `.local/lexicon/import.sql`; it fails if an allowlisted lemma is not in Morphalou. Statements stay under about 50 KB, to stay well inside D1's per-statement size limit (that limit was not verified in this repository's tooling). `--apply-local` also runs it against the local D1 (apply both migrations first: `cd worker && bunx wrangler d1 migrations apply DB --local`).
+- Later, only the owner loads the remote database, after the migrations: `wrangler d1 execute DB --remote --file .local/lexicon/import.sql` (same invocation as for topics above).
+- Size: the committed allowlist produces 49,238 rows (5,022 lemma rows and 44,216 form rows). Loading all of Morphalou's roughly 600,000 form rows would exceed Cloudflare's free-plan daily write limit, so the allowlist is kept small. Whether 49,238 rows fits the current free-plan daily limit could not be verified here (the limit is not in this repository's tooling and Cloudflare may count index writes too); check Cloudflare's D1 pricing and limits page before loading, and use a paid plan or several days if it does not fit.

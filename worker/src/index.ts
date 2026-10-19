@@ -1,4 +1,4 @@
-/** Owns read-only topic HTTP delivery; content validation and loading belong to the owner's local pipeline. */
+/** Owns read-only topic and lexicon HTTP delivery; content validation and loading belong to the owner's local pipeline. */
 import type { D1Database, RateLimit } from '@cloudflare/workers-types';
 
 export interface Env {
@@ -19,6 +19,23 @@ interface TopicSummaryRow {
 // Slug shared by src/types/grammarTopic.ts via src/types/grammarTagIndex.ts; no Zod in the Worker.
 const topicSlug = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const allow = 'GET, HEAD, OPTIONS';
+// What the lexicon rows come from; the notice and licence text are in worker/NOTICE.md and worker/licences.
+const lexiconSource = {
+  name: 'Morphalou 3.1',
+  maintainer: 'ATILF (CNRS / Université de Lorraine)',
+  licence: 'LGPL-LR',
+  url: 'http://www.cnrtl.fr/lexiques/morphalou/',
+};
+
+// The same key rule as scripts/lexicon (NFC, lowercase). A lookup that finds nothing is a 404, so no other validation.
+function lexiconKey(raw: string): string | undefined {
+  try {
+    const key = decodeURIComponent(raw).normalize('NFC').toLowerCase();
+    return key && key.length <= 64 ? key : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 export async function handle(request: Request, env: Env): Promise<Response> {
   const headers = new Headers({ 'Content-Type': 'application/json; charset=utf-8', Vary: 'Origin' });
@@ -59,10 +76,41 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     const path = new URL(request.url).pathname;
     const topicId = path.startsWith('/v1/topics/') ? path.slice('/v1/topics/'.length) : undefined;
     if (topicId !== undefined && !topicSlug.test(topicId)) return error('invalid-id', 400);
-    if (path !== '/v1/topics' && path !== '/v1/tag-index' && topicId === undefined) return error('not-found', 404);
+    // `/v1/lexicon/form/:form` has an extra segment, so it cannot collide with a lemma named "form".
+    const lexicon = path.startsWith('/v1/lexicon/form/')
+      ? { kind: 'form', raw: path.slice('/v1/lexicon/form/'.length) }
+      : path.startsWith('/v1/lexicon/')
+        ? { kind: 'lemma', raw: path.slice('/v1/lexicon/'.length) }
+        : undefined;
+    const key = lexicon && lexiconKey(lexicon.raw);
+    if (lexicon && key === undefined) return error('invalid-id', 400);
+    if (path !== '/v1/topics' && path !== '/v1/tag-index' && topicId === undefined && !lexicon)
+      return error('not-found', 404);
 
     let body: string;
-    if (topicId !== undefined) {
+    if (lexicon) {
+      if (lexicon.kind === 'lemma') {
+        const { results } = await env.DB.prepare(
+          'SELECT pos, gender, data FROM lexicon_entries WHERE lemma = ? ORDER BY pos',
+        )
+          .bind(key)
+          .all<{ pos: string; gender: string | null; data: string }>();
+        if (!results.length) return error('not-found', 404);
+        body = JSON.stringify({
+          lemma: key,
+          entries: results.map(({ pos, gender, data }) => ({ pos, ...(gender && { gender }), data: JSON.parse(data) })),
+          source: lexiconSource,
+        });
+      } else {
+        const { results } = await env.DB.prepare(
+          'SELECT lemma, pos FROM lexicon_forms WHERE form = ? ORDER BY lemma, pos',
+        )
+          .bind(key)
+          .all<{ lemma: string; pos: string }>();
+        if (!results.length) return error('not-found', 404);
+        body = JSON.stringify({ form: key, lemmas: results, source: lexiconSource });
+      }
+    } else if (topicId !== undefined) {
       const topic = await env.DB.prepare('SELECT body FROM topics WHERE id = ?')
         .bind(topicId)
         .first<{ body: string }>();
@@ -93,8 +141,11 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       body = JSON.stringify(index);
     }
 
-    const version = await env.DB.prepare("SELECT value FROM meta WHERE key = 'packVersion'").first<{ value: string }>();
-    if (!version) throw new Error('Missing pack version');
+    const versionKey = lexicon ? 'lexiconVersion' : 'packVersion';
+    const version = await env.DB.prepare('SELECT value FROM meta WHERE key = ?')
+      .bind(versionKey)
+      .first<{ value: string }>();
+    if (!version) throw new Error(`Missing ${versionKey}`);
     const etag = `"${version.value}"`;
     headers.set('ETag', etag);
     headers.set('Cache-Control', 'public, max-age=300');
