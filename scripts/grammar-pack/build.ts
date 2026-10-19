@@ -1,5 +1,5 @@
-/** Owns deterministic pack assembly, review hashes and the publish gate; not conjugation rules or human review. */
-import { createHash } from 'node:crypto';
+/** Owns conjugation pack assembly and target dispatch; not rules, canonical hashes or human review. */
+import { ReviewsSchema, rowHash, writeArtifact, type Reviews } from './gate';
 import { z } from 'zod';
 import { GrammarPackSchema, type Verb } from '../../src/types/grammarPack';
 import { GOLDEN } from '../../tests/fixtures/grammarPackGolden';
@@ -18,19 +18,6 @@ export interface VerbSource {
   hMute?: string[];
 }
 
-export const ReviewsSchema = z.object({
-  records: z.array(
-    z.object({
-      verbId: z.string().min(1),
-      rowHash: z.string().regex(/^[a-f0-9]{64}$/),
-      reviewedBy: z.string().trim().min(1),
-      reviewedAt: z.iso.date(),
-      reference: z.string().trim().min(1),
-    }),
-  ),
-  rejected: z.array(z.string()),
-});
-export type Reviews = z.infer<typeof ReviewsSchema>;
 /** Strict metadata only: oracle forms belong in ignored reports, never in this file. */
 export const OracleAttestSchema = z.strictObject({
   verbs: z.record(
@@ -61,24 +48,6 @@ export interface BuildInputs {
   irregulars: Record<string, IrregularEntry>;
   reviews: Reviews;
   oracleAttest?: OracleAttest;
-}
-
-function canonical(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(canonical);
-  if (value !== null && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value)
-        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-        .map(([key, item]) => [key, canonical(item)]),
-    );
-  }
-  return value;
-}
-
-export function rowHash({ prov: _prov, ...row }: Verb): string {
-  return createHash('sha256')
-    .update(JSON.stringify(canonical(row)))
-    .digest('hex');
 }
 
 /** Also used by the review CLI, which must work before the publish gate passes. */
@@ -182,14 +151,20 @@ export async function readInputs(): Promise<BuildInputs> {
 
 if (import.meta.main) {
   const args = Bun.argv.slice(2);
-  if (args.length && (args.length !== 1 || args[0] !== '--check')) throw new Error('Usage: build.ts [--check]');
-  const { pack, report } = buildPack(await readInputs());
-  for (const line of report) console.log(line);
-  const bytes = JSON.stringify(pack, null, 2) + '\n';
-  const output = Bun.file(new URL('../../src/data/grammar-pack/pack.json', import.meta.url));
-  if (args[0] === '--check') {
-    if ((await output.text()) !== bytes) throw new Error('pack.json differs from the generated pack');
+  const topics = args[0] === 'topics';
+  if (topics) args.shift();
+  if (args.length && (args.length !== 1 || args[0] !== '--check'))
+    throw new Error('Usage: build.ts [topics] [--check]');
+  const check = args[0] === '--check';
+  if (topics) {
+    const { buildTopics, readTopicInputs } = await import('./topics');
+    const { pack, tagIndex, report } = buildTopics(await readTopicInputs());
+    for (const line of report) console.log(line);
+    await writeArtifact(new URL('../../src/data/grammar/topics.json', import.meta.url), pack, check);
+    await writeArtifact(new URL('../../src/data/grammar/tag-index.json', import.meta.url), tagIndex, check);
   } else {
-    await Bun.write(output, bytes);
+    const { pack, report } = buildPack(await readInputs());
+    for (const line of report) console.log(line);
+    await writeArtifact(new URL('../../src/data/grammar-pack/pack.json', import.meta.url), pack, check);
   }
 }

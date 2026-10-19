@@ -8,10 +8,10 @@ import {
   generateRows,
   OracleAttestSchema,
   readInputs,
-  rowHash,
   type BuildInputs,
   type OracleAttest,
 } from '../scripts/grammar-pack/build';
+import { rowHash } from '../scripts/grammar-pack/gate';
 import { attestResults, compareVerb } from '../scripts/grammar-pack/oracle-diff';
 import { loadMorphalou, morphalouForms, parseMorphalou } from '../scripts/grammar-pack/oracle-morphalou';
 import { TENSES } from '../src/types/grammarPack';

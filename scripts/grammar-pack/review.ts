@@ -1,7 +1,8 @@
 /** Owns the owner's plain-text review sheet and append-only review recording; not generation or the publish gate. */
 import { FINITE_PERSONS, TENSES, type Verb } from '../../src/types/grammarPack';
 import { cellAt } from './checks';
-import { generateRows, readInputs, ReviewsSchema, rowHash } from './build';
+import { generateRows, readInputs } from './build';
+import { ReviewsSchema, rowHash } from './gate';
 
 function table(verb: Verb): string {
   const lines = [`${verb.id} (${verb.infinitive})`, ['tense', ...FINITE_PERSONS].join('\t')];
