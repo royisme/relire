@@ -76,7 +76,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         subtitle={<span className="tnum">{t('library.count', { count: articles.length })}</span>}
         actions={
           <Button onClick={() => setAdding(true)}>
-            <FilePlus2 className="w-4 h-4" />
+            <FilePlus2 aria-hidden="true" className="w-4 h-4" />
             <span>{t('library.add')}</span>
           </Button>
         }
@@ -86,7 +86,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         <div className="flex flex-wrap items-center gap-3">
           <label className="relative flex-1 basis-56 min-w-0">
             <span className="sr-only">{t('library.search')}</span>
-            <Search className="w-4 h-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search aria-hidden="true" className="w-4 h-4 text-ink-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="search"
               value={query}

@@ -1,5 +1,6 @@
 /** Owns one set's heading and delete destinations; UnitTable owns rows and storage owns all writes. */
 import { useMemo, useState } from 'react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '../../hooks/useRoute';
 import { useUnitRows } from '../../hooks/useUnitRows';
@@ -27,6 +28,10 @@ export function PracticeSetPage({ setId }: { setId: string }) {
       </p>
     );
   if (!set) return <NotFoundView reason="set" />;
+  const ordered = [...set.rows].sort((a, b) => a.unit.unitNumber - b.unit.unitNumber);
+  const unfinished = ordered.find(({ progress }) => progress.checked < progress.total);
+  const next = unfinished ?? ordered[0];
+  const action = set.progress.checked === 0 ? 'start' : unfinished ? 'continue' : 'practiseAgain';
   const date = new Date(set.createdAt).toLocaleDateString(i18n.language === 'zh' ? 'zh-CN' : 'en-GB', {
     day: 'numeric',
     month: 'short',
@@ -34,16 +39,24 @@ export function PracticeSetPage({ setId }: { setId: string }) {
   });
   return (
     <div className="mx-auto max-w-5xl space-y-4 px-4 py-6 sm:px-6">
-      <Link to={{ name: 'practice' }} className="inline-flex h-10 items-center text-sm text-ink-700 hover:text-ink-900">
+      <Link
+        to={{ name: 'practice' }}
+        className="inline-flex h-10 items-center gap-1.5 text-sm text-ink-700 hover:text-ink-900"
+      >
+        <ArrowLeft aria-hidden="true" className="h-4 w-4" />
         {t('practice.back')}
       </Link>
       <PageHeader
         title={set.title}
         subtitle={`${t(`levels.${set.level}`)} · ${date} · ${t('practice.exercises', { count: set.rows.length })}`}
         actions={
-          <Button variant="outline" onClick={() => setDeletingSet(true)}>
-            {t('practice.deleteSet')}
-          </Button>
+          <div className="flex w-full flex-wrap items-center gap-2">
+            <Button onClick={() => navigate({ name: 'unit', unitId: next.unit.id })}>{t(`practice.${action}`)}</Button>
+            <Button variant="ghost" className="ml-auto" onClick={() => setDeletingSet(true)}>
+              <Trash2 aria-hidden="true" className="h-4 w-4" />
+              {t('practice.deleteSet')}
+            </Button>
+          </div>
         }
       />
       <UnitTable rows={set.rows} onDelete={setDeletingUnit} />

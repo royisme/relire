@@ -85,6 +85,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- **Practice is easier to start and scan.** Sets offer Start, Continue or Practise again; phone tables give titles room and show real checked/correct counts beneath them. Add choices explain what they do and show the open choice, conjugation drills have clearer sizing and touch targets, and Library and Practice mark every sortable heading.
 - **Import controls stay put while fonts load.** The exercise import's extraction mode keeps a fixed height, so adding or removing images and discarding a source no longer shift the controls below it by a pixel.
 - **See and discard import sources in place.** Both import pages accept up to five images in reading order or five selected PDF pages, show thumbnails, let you remove images or a PDF and clear pasted text, and discard unsaved input and errors immediately without leaving the page.
 - **Compact Practice level filters.** Level options show just their codes, matching Library; full level descriptions remain in the set table and set-page subtitle.
