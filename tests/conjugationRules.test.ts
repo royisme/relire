@@ -2,7 +2,7 @@
 import { expect, test } from 'bun:test';
 import { checkVerb } from '../scripts/grammar-pack/checks';
 import { generateVerb } from '../src/services/conjugation/generate';
-import { REGULAR_RULES, pastParticiples } from '../src/services/conjugation/rules';
+import { composePresentParticiple, REGULAR_RULES, pastParticiples } from '../src/services/conjugation/rules';
 import { verifyAnswer } from '../src/services/conjugation/verify';
 import { erAnswer } from './fixtures/conjugationAnswer';
 import { generateControls } from './fixtures/grammarPackVerbs';
@@ -31,6 +31,16 @@ for (const [infinitive, base, third] of [
     expect(verifyAnswer(answer).status).toBe('rule-checked');
   });
 }
+
+test('present participles take se or s’ only for a pronominal verb, respecting h aspiré', () => {
+  expect([
+    composePresentParticiple({ pronominal: true }, 'lavant'),
+    composePresentParticiple({ pronominal: true }, 'appelant'),
+    composePresentParticiple({ pronominal: true, hAspire: false }, 'habillant'),
+    composePresentParticiple({ pronominal: true, hAspire: true }, 'hissant'),
+    composePresentParticiple({ pronominal: false }, 'appelant'),
+  ]).toEqual(['se lavant', 's’appelant', 's’habillant', 'se hissant', 'appelant']);
+});
 
 test('mettre is a re-regular stem misfit, naming the stem', () => {
   expect(() => REGULAR_RULES['re-regular']('mett')).toThrow('the stem "mett" does not end with d or p');

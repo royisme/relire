@@ -264,6 +264,12 @@ const VOWEL = /^[aeiouàâäéèêëîïôöùûüœ]/;
 export const startsWithVowelSound = (form: string, hAspire: boolean | undefined) =>
   VOWEL.test(form) || (form.startsWith('h') && !hAspire);
 
+/** Infinitive-style reflexive for the present participle only; past participles stay bare. */
+export function composePresentParticiple(verb: Pick<LeadVerb, 'pronominal' | 'hAspire'>, form: string): string {
+  if (!verb.pronominal) return form;
+  return startsWithVowelSound(form, verb.hAspire) ? `s’${form}` : `se ${form}`;
+}
+
 /** All that is printed before the verb group; `firstForm` is forms[0] (the auxiliary in passé composé). */
 export function composeLead(tense: Tense, person: Person, verb: LeadVerb, firstForm: string): string {
   if (tense === 'imperatif') return '';

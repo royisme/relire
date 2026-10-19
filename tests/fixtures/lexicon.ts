@@ -22,6 +22,23 @@ export const chanterData = (): VerbData => ({
   participles: { present: ['chantant'], past: { ms: ['chanté'], fs: ['chantée'], mp: ['chantés'], fp: ['chantées'] } },
 });
 
+/** Bare TEST forms for pronominal dictionary entries (not reviewed pack rows). */
+export const laverData = (): VerbData => ({
+  tenses: {
+    present: cells(SIX, ['lave', 'laves', 'lave', 'lavons', 'lavez', 'lavent']),
+    imperatif: cells(IMPERATIVE, ['lave', 'lavons', 'lavez']),
+  },
+  participles: { present: ['lavant'], past: { ms: ['lavé'] } },
+});
+
+export const amuserData = (): VerbData => ({
+  tenses: {
+    present: cells(SIX, ['amuse', 'amuses', 'amuse', 'amusons', 'amusez', 'amusent']),
+    imperatif: cells(IMPERATIVE, ['amuse', 'amusons', 'amusez']),
+  },
+  participles: { present: ['amusant'], past: { ms: ['amusé'] } },
+});
+
 export const chanterLemma = (): LexiconLemmaResponse => ({
   lemma: 'chanter',
   entries: [{ pos: 'verb', data: chanterData() }],

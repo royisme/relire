@@ -5,7 +5,7 @@
  * before; a failure shows its real text without breaking the sheet; the cached copy serves a lost connection;
  * nothing moves when the lexicon answers late. The AI is always mocked.
  */
-import { chanterLemma, formOf } from '../tests/fixtures/lexicon';
+import { amuserData, chanterLemma, formOf, laverData, testSource } from '../tests/fixtures/lexicon';
 import { mockLexicon } from './contentService.helpers';
 import { expect, overflowing, settled, test } from './fixtures';
 import type { Page } from '@playwright/test';
@@ -36,12 +36,12 @@ const lexicon = (page: Page) =>
     lemmas: { chanter: chanterLemma() },
   });
 
-async function openSeeded(page: Page) {
+async function openSeeded(page: Page, article = ARTICLE) {
   await page.goto('/#/read');
   await page.evaluate(async (content) => {
     const { saveArticle } = (await import('/src/storage/db.ts' as string)) as typeof import('../src/storage/db');
     await saveArticle({ id: 'chant', title: 'Chant', content, level: 'A1', category: '', createdAt: '2026-01-01' });
-  }, ARTICLE);
+  }, article);
   await page.goto('/#/read/chant');
   await page.reload();
   await expect(page.locator('article [data-sentence]').first()).toBeVisible();
@@ -96,6 +96,74 @@ test('tapping a form of a verb outside the pack names it and shows the dictionar
   expect(await overflowing(sheet(page))).toEqual([]);
   expect(lex.paths).toEqual(['/v1/lexicon/form/chantons', '/v1/lexicon/chanter']);
 });
+
+for (const [lemma, word, data, present, imperative] of [
+  [
+    'se laver',
+    'laves',
+    laverData(),
+    ['je me lave', 'tu te laves', 'il/elle se lave', 'nous nous lavons', 'vous vous lavez', 'ils/elles se lavent'],
+    ['lave-toi', 'lavons-nous', 'lavez-vous'],
+  ],
+  [
+    "s'amuser",
+    'amuses',
+    amuserData(),
+    ['je m’amuse', 'tu t’amuses', 'il/elle s’amuse', 'nous nous amusons', 'vous vous amusez', 'ils/elles s’amusent'],
+    ['amuse-toi', 'amusons-nous', 'amusez-vous'],
+  ],
+] as const) {
+  for (const phone of [false, true]) {
+    test(`${lemma}: dictionary leads, elision and clitics keep the bare tapped cell marked ${phone ? '@phone' : ''}`, async ({
+      page,
+      ai,
+    }) => {
+      await mockLexicon(page, {
+        forms: { [word]: formOf(word, { lemma, pos: 'verb' }) },
+        lemmas: { [lemma]: { lemma, entries: [{ pos: 'verb', data }], source: testSource } },
+      });
+      ai.answer({ word: wordAnswer(word, lemma, 'verbe') });
+      await openSeeded(page, `Tu te ${word}.`);
+      await tap(page, word);
+      await expect(verbForm(page).getByRole('listitem')).toHaveText([`${lemma} : présent, tu`]);
+      await sheet(page).getByRole('button', { name: 'Show all tenses' }).click();
+      await expect(tense(page, 'Present').getByRole('cell')).toHaveText([...present]);
+      await expect(tense(page, 'Present').getByRole('cell').nth(1)).toHaveAttribute('aria-current', 'true');
+      await expect(sheet(page).locator('[aria-current="true"]')).toHaveCount(1);
+      await expect(tense(page, 'Imperative').getByRole('cell')).toHaveText([...imperative]);
+      await expect(
+        sheet(page).getByRole('link', { name: 'Compound tenses are on the Conjugation page.' }),
+      ).toBeVisible();
+      expect(await overflowing(sheet(page))).toEqual([]);
+      expect(ai.calls.conjugate).toBe(0);
+    });
+  }
+}
+
+for (const lemma of ["s'habiller", 'se hisser']) {
+  test(`${lemma}: an h-initial dictionary entry keeps only the Conjugation link`, async ({ page, ai }) => {
+    const word = lemma === 'se hisser' ? 'hisses' : 'habilles';
+    await mockLexicon(page, {
+      forms: { [word]: formOf(word, { lemma, pos: 'verb' }) },
+      lemmas: {
+        [lemma]: {
+          lemma,
+          entries: [{ pos: 'verb', data: { tenses: { present: { '2sg': [word] } }, participles: { past: {} } } }],
+          source: testSource,
+        },
+      },
+    });
+    ai.answer({ word: wordAnswer(word, lemma, 'verbe') });
+    await openSeeded(page, `Tu te ${word}.`);
+    await tap(page, word);
+    await expect(sheet(page).getByRole('link', { name: 'Conjugate this verb' })).toHaveAttribute(
+      'href',
+      `#/study/grammar/conjugation?verb=${encodeURIComponent(lemma)}`,
+    );
+    await expect(sheet(page).getByRole('button', { name: 'Show all tenses' })).toHaveCount(0);
+    await expect(sheet(page).getByRole('table')).toHaveCount(0);
+  });
+}
 
 test('a form that is several cells lists them all', async ({ page, ai }) => {
   await lexicon(page);

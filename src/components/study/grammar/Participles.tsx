@@ -1,4 +1,4 @@
-/** The participles section of the result: present and the four past forms, each shown as the pack or AI gave it, a differing one with both lines. Owns that section only. */
+/** The engine-composed present participle and four bare past forms; a differing one keeps both lines. Owns this section only. */
 import { useTranslation } from 'react-i18next';
 import type { VerifiedVerb } from '../../../services/conjugation/verify';
 import { ComparedLines } from './ComparedLines';
