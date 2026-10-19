@@ -276,6 +276,53 @@ describe('a verb in the pack', () => {
   });
 });
 
+test('pack and AI present participles carry the reflexive; past participles and statuses stay bare', () => {
+  const row = { ...GOLDEN['s-appeler'], prov: { origin: 'human', checkedAgainst: [], status: 'draft' } } as Verb;
+  const pack = verifyPackVerb(row);
+  const answer = answerFromGolden('s-appeler');
+  const ai = verifyAnswer(answer);
+  const wrong = structuredClone(answer);
+  wrong.participles.present = 'appellant';
+  expect({
+    pack: pack.participles,
+    ai: ai.participles,
+    differs: verifyAnswer(wrong).participles.present,
+    bareInput: answer.participles.present,
+    absent: verifyAnswer(falloirAnswer()).participles.present,
+  }).toEqual({
+    pack: {
+      present: { form: 's’appelant', status: 'reviewed' },
+      ms: { form: 'appelé', status: 'reviewed' },
+      fs: { form: 'appelée', status: 'reviewed' },
+      mp: { form: 'appelés', status: 'reviewed' },
+      fp: { form: 'appelées', status: 'reviewed' },
+    },
+    ai: {
+      present: { form: 's’appelant', status: 'match' },
+      ms: { form: 'appelé', status: 'match' },
+      fs: { form: 'appelée', status: 'match' },
+      mp: { form: 'appelés', status: 'match' },
+      fp: { form: 'appelées', status: 'match' },
+    },
+    differs: { form: 's’appellant', status: 'differs', ruleForm: 's’appelant' },
+    bareInput: 'appelant',
+    absent: undefined,
+  });
+});
+
+for (const [infinitive, stem, hAspire, present, lead] of [
+  ['se laver', 'lav', false, 'se lavant', 'je me'],
+  ['s’habiller', 'habill', false, 's’habillant', 'je m’'],
+  ['se hisser', 'hiss', true, 'se hissant', 'je me'],
+] as const) {
+  test(`${infinitive}: the verified present participle and finite lead share elision rules`, () => {
+    const verb = verifyAnswer(
+      erAnswer(infinitive, 'er-regular', { plain: stem, strong: stem, fut: `${stem}er` }, { hAspire }),
+    );
+    expect([verb.participles.present?.form, verb.tenses.present['1sg']?.lead]).toEqual([present, lead]);
+  });
+}
+
 test('a verb used only in the 3sg and named irregular stays ai-only through the whole path', () => {
   const verified = verifyAnswer(falloirAnswer());
   expect(verified.status).toBe('ai-only');

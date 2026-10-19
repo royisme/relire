@@ -18,7 +18,7 @@ import {
 } from '../../types/grammarPack';
 import { assembleVerb, bareInfinitive, engineBase, withClitic, type VerbView } from './assemble';
 import { generateVerb, type GeneratedVerb, type SimpleTense, type VerbSpec } from './generate';
-import { joinParts, type Parts, type PastParticiples } from './rules';
+import { composePresentParticiple, joinParts, type Parts, type PastParticiples } from './rules';
 
 export type VerbStatus = 'pack-reviewed' | 'rule-checked' | 'partly-differs' | 'ai-only';
 export type CellStatus = 'reviewed' | 'match' | 'differs' | 'ai-only';
@@ -129,8 +129,17 @@ function checkView(
   ) as VerifiedVerb['tenses'];
   const { present, past } = view.participles;
   const participles: VerifiedVerb['participles'] = {};
-  for (const [key, form] of [['present', present], ...Object.entries(past)] as [FormKey, string | undefined][])
-    if (form !== undefined) participles[key] = { form, ...formCheck(key, form) };
+  for (const [key, form] of [['present', present], ...Object.entries(past)] as [FormKey, string | undefined][]) {
+    if (form === undefined) continue;
+    // Compare bare forms first; the same engine composition dresses both displayed lines.
+    const check = formCheck(key, form);
+    const display = (bare: string) => (key === 'present' ? composePresentParticiple(view, bare) : bare);
+    participles[key] = {
+      ...check,
+      form: display(form),
+      ...(check.ruleForm !== undefined && { ruleForm: display(check.ruleForm) }),
+    };
+  }
   return {
     infinitive: view.infinitive,
     pronominal: view.pronominal,

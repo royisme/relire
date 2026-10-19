@@ -187,7 +187,42 @@ test('?verb= prefills the Conjugation address and runs once for each verb', asyn
   await expect(page).toHaveURL(/#\/study\/grammar\/conjugation\?verb=/);
   await expect(verbInput(page)).toHaveValue("s'appeler");
   await expect(page.getByRole('article', { name: 's’appeler' })).toBeVisible();
+  await expect(section(page, 'Participles').getByText('s’appelant', { exact: true })).toBeVisible();
+  await expect(
+    section(page, 'Participles').getByRole('button', { name: 'Hear on this device: s’appelant', exact: true }),
+  ).toBeVisible();
+  await expect(section(page, 'Participles').getByText('appelé', { exact: true })).toBeVisible();
   expect(totalCalls(ai)).toBe(0);
+});
+
+for (const [infinitive, stem, hAspire, present, finite] of [
+  ['se laver', 'lav', false, 'se lavant', 'je me lave'],
+  ['s’habiller', 'habill', false, 's’habillant', 'je m’habille'],
+  ['se hisser', 'hiss', true, 'se hissant', 'je me hisse'],
+] as const) {
+  test(`${infinitive}: AI participles use the engine’s reflexive and h flag`, async ({ page, ai }) => {
+    ai.answer({
+      conjugate: erAnswer(infinitive, 'er-regular', { plain: stem, strong: stem, fut: `${stem}er` }, { hAspire }),
+    });
+    await page.goto(PAGE);
+    await conjugate(page, infinitive);
+    await expect(section(page, 'Participles').getByText(present, { exact: true })).toBeVisible();
+    await expect(section(page, 'Participles').getByText(`${stem}é`, { exact: true })).toBeVisible();
+    await expect(section(page, 'Present').getByText(finite, { exact: true })).toBeVisible();
+    expect(ai.calls.conjugate).toBe(1);
+  });
+}
+
+test('a differing pronominal present participle composes both Model and Rule, not the past', async ({ page, ai }) => {
+  const answer = erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' });
+  answer.participles.present = 'lavxant'; // TEST-only wrong form.
+  ai.answer({ conjugate: answer });
+  await page.goto(PAGE);
+  await conjugate(page, 'se laver');
+  const participles = section(page, 'Participles');
+  await expect(participles.getByText('se lavxant', { exact: true })).toBeVisible();
+  await expect(participles.getByText('se lavant', { exact: true })).toBeVisible();
+  await expect(participles.getByText('lavé', { exact: true })).toBeVisible();
 });
 
 test('?verb= for a verb outside the pack makes exactly one request', async ({ page, ai }) => {

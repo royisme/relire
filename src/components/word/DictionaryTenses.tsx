@@ -9,9 +9,10 @@
 import { useTranslation } from 'react-i18next';
 import { useLexiconVerb } from '../../hooks/useLexiconVerb';
 import { matchVerbForm } from '../../services/lexicon/match';
-import { FINITE_PERSONS, TENSES, type Person } from '../../types/grammarPack';
+import { lexiconTable } from '../../services/lexicon/table';
+import { FINITE_PERSONS, TENSES } from '../../types/grammarPack';
 import type { ReactNode } from 'react';
-import { formsLabel } from '../study/grammar/forms';
+import { cellText } from '../study/grammar/forms';
 import { Link } from '../shell/Link';
 import { Table, TableBody, TableCell, TableRow } from '../ui/table';
 import { TensesDisclosure } from './TensesDisclosure';
@@ -32,13 +33,14 @@ export function DictionaryTenses({ lemma, lookup, fallback }: { lemma: string; l
     );
   if (!data) return fallback;
 
+  const table = lexiconTable(lemma, data);
+  if (!table) return fallback;
   const tapped = matchVerbForm(data, lookup).tenses;
   return (
     <TensesDisclosure>
       <p className="text-xs text-ink-500">{t('wordModal.dictionaryNote')}</p>
       {TENSES.flatMap((tense) => {
-        const cells: Partial<Record<Person, string[]>> | undefined =
-          tense === 'passeCompose' ? undefined : data.tenses[tense];
+        const cells = tense === 'passeCompose' ? undefined : table.tenses[tense];
         if (!cells) return [];
         const hits = tapped.find((entry) => entry.tense === tense)?.persons ?? [];
         return [
@@ -51,12 +53,12 @@ export function DictionaryTenses({ lemma, lookup, fallback }: { lemma: string; l
             <Table className="mt-1">
               <TableBody>
                 {FINITE_PERSONS.flatMap((person) => {
-                  const forms = cells[person];
-                  if (!forms) return [];
+                  const cell = cells[person];
+                  if (!cell) return [];
                   return [
                     <TableRow key={person} className="border-0 hover:bg-transparent">
-                      {/* The imperative takes no subject pronoun: the form alone. */}
-                      {tense !== 'imperatif' && (
+                      {/* Pronominal cells already carry their subject and reflexive lead. */}
+                      {tense !== 'imperatif' && !table.pronominal && (
                         <TableCell className="w-24 px-0 py-1 align-baseline text-ink-500">
                           {t(`conjugation.pronouns.${person}`)}
                         </TableCell>
@@ -69,7 +71,7 @@ export function DictionaryTenses({ lemma, lookup, fallback }: { lemma: string; l
                             : ''
                         }`}
                       >
-                        {formsLabel(forms)}
+                        {cellText(cell)}
                       </TableCell>
                     </TableRow>,
                   ];
