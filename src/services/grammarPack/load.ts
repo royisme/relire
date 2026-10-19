@@ -8,10 +8,10 @@ let loaded: GrammarPack | undefined;
 /** The pack once a load has succeeded, else undefined (never loading, never failed). */
 export const loadedGrammarPack = () => loaded;
 
-export function loadGrammarPack(): Promise<GrammarPack> {
+export function loadGrammarPack(data?: unknown): Promise<GrammarPack> {
   pending ??= (async () => {
-    const { default: data } = await import('../../data/grammar-pack/pack.json');
-    const result = GrammarPackSchema.safeParse(data);
+    const source = data === undefined ? (await import('../../data/grammar-pack/pack.json')).default : data;
+    const result = GrammarPackSchema.safeParse(source);
     if (!result.success) {
       throw new Error(
         `The grammar pack was not usable: ${result.error.issues
