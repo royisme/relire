@@ -102,6 +102,36 @@ test('tapping vais names the pack verb, tense and person', async ({ page, ai }) 
   await expect(section.getByRole('listitem')).toHaveCount(1);
 });
 
+test('the Verb form line sits directly under the meaning, before every other section', async ({ page, ai }) => {
+  ai.answer({
+    word: wordAnswer('vais', 'aller', 'verbe', {
+      phoneticsGuide: 'say it',
+      contextTense: 'present',
+      memoryTrick: 'a trick',
+      usageExamples: [{ fr: 'Je vais bien.', en: 'I am well.', zh: 'x' }],
+    }),
+  });
+  await openSeeded(page);
+  await tap(page, 'vais');
+  await expect(sheet(page).getByRole('heading', { name: 'vais' })).toBeVisible();
+  const order = await page.evaluate(() => {
+    const dialog = document.querySelector('[role="dialog"]')!;
+    const top = (el: Element) => el.getBoundingClientRect().top;
+    const meaning = [...dialog.querySelectorAll('p')].find((p) => p.textContent === 'meaning of vais')!;
+    const headings = [...dialog.querySelectorAll('h4')].sort((a, b) => top(a) - top(b)).map((h) => h.textContent);
+    return { headings, meaningAbove: top(meaning) < top(dialog.querySelector('h4')!) };
+  });
+  expect(order.meaningAbove).toBe(true);
+  expect(order.headings).toEqual([
+    'Verb form',
+    'How to say it',
+    'In this sentence',
+    'Examples',
+    'To remember',
+    'Conjugation',
+  ]);
+});
+
 test('the Verb form line is the same French text in Chinese', async ({ page, ai }) => {
   await page.addInitScript(() => localStorage.setItem('relire_lang', 'zh'));
   ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });
@@ -155,6 +185,8 @@ test('the disclosure keeps its size when opened, and the Conjugation heading out
   const closed = sheet(page).getByRole('button', { name: 'Show all tenses' });
   await expect(closed).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
+  // The sheet slides in for 200 ms: measure from where it has come to rest.
+  await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)));
   const before = await closed.boundingBox();
   const opened = await showTenses(page);
   await page.evaluate(() => document.fonts.ready);
@@ -250,16 +282,17 @@ const anchors = (page: Page) =>
   page.evaluate(() => {
     const top = (el: Element | null) => Math.round(el?.getBoundingClientRect().top ?? NaN);
     const dialog = document.querySelector('[role="dialog"]')!;
-    const heading = [...dialog.querySelectorAll('h4')].find((h) => h.textContent === 'Conjugation') ?? null;
+    const h4 = (name: string) => [...dialog.querySelectorAll('h4')].find((h) => h.textContent === name) ?? null;
     return {
       title: top(dialog.querySelector('h2')),
-      conjugation: top(heading),
+      verbForm: top(h4('Verb form')),
+      conjugation: top(h4('Conjugation')),
       save: top([...dialog.querySelectorAll('button')].find((b) => b.textContent?.includes('Save word')) ?? null),
       page: document.documentElement.scrollWidth,
     };
   });
 
-test('@phone the pack table arrives in place at 360 px with long text: no overflow, nothing above it moves', async ({
+test('@phone the pack sections are in the first frame of the entry at 360 px with long text: no overflow, nothing moves', async ({
   page,
   ai,
 }) => {
@@ -282,19 +315,34 @@ test('@phone the pack table arrives in place at 360 px with long text: no overfl
   });
   await openSeeded(page);
   await tap(page, 'vais');
-  await expect(sheet(page).getByRole('heading', { name: 'vais' })).toBeVisible();
-  await expect(sheet(page).getByText('Loading the conjugation…')).toBeVisible();
-  await page.evaluate(() => document.fonts.ready);
-  // The sheet slides in for 200 ms: measure from where it has come to rest.
+  // The analysis has arrived (the mock answers at once) but the pack has not: the sheet is still its loading
+  // state, with none of the pack's sections and nothing half drawn.
+  await expect(sheet(page).getByText('Looking up the word…')).toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(sheet(page).getByText('Looking up the word…')).toBeVisible();
+  await expect(sheet(page).getByRole('heading', { name: 'Conjugation' })).toHaveCount(0);
+  await expect(sheet(page).getByRole('heading', { name: 'Verb form' })).toHaveCount(0);
+  expect(ai.calls.word).toBe(1);
+  // The sheet slides in for 200 ms: let it come to rest first.
   await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)));
-  const before = await anchors(page);
 
   release();
+  await expect(sheet(page).getByRole('heading', { name: 'vais' })).toBeVisible();
+  // The entry's first frame: the Verb form line and the conjugation disclosure are already there.
+  const first = await page.evaluate(() => {
+    const dialog = document.querySelector('[role="dialog"]')!;
+    return {
+      verbForm: [...dialog.querySelectorAll('h4')].some((h) => h.textContent === 'Verb form'),
+      disclosure: [...dialog.querySelectorAll('button')].some((b) => b.textContent?.includes('all tenses')),
+    };
+  });
+  expect(first).toEqual({ verbForm: true, disclosure: true });
+  const before = await anchors(page);
   await page.evaluate(() => document.fonts.ready);
-  await expect(sheet(page).getByRole('button', { name: 'Show all tenses' })).toBeVisible();
-  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(300);
   const after = await anchors(page);
   expect(after).toEqual(before);
+  expect(Object.values(before).every(Number.isFinite)).toBe(true);
   expect(await overflowing(sheet(page))).toEqual([]);
   // Opening the table moves nothing above it: the heading keeps its distance to the disclosure, which does not move.
   const gap = () =>

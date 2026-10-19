@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { useState } from 'react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './ui/overlay';
@@ -7,19 +7,15 @@ import { WordAnalysis } from '../types';
 import { isVerbEntry } from '../services/grammarPack/verbEntry';
 import { Button } from './ui/button';
 import { SpeakButton } from './ui/speak-button';
+import { useWordSheetPack } from '../hooks/useWordSheetPack';
 import { Section } from './word/Section';
-
-// The pack, the engine and the reverse index load on demand (the pack-backed sections), never with the app.
-const WordConjugation = lazy(() =>
-  import('./word/WordConjugation').then((module) => ({ default: module.WordConjugation })),
-);
-const VerbForms = lazy(() => import('./word/VerbForms').then((module) => ({ default: module.VerbForms })));
 
 /**
  * The word lookup sheet, laid out like a dictionary entry: the word, how it sounds and what it means
- * here, then plain sections (pronunciation, use in this sentence, examples, memory trick) and, last, the
- * pack-backed ones: the conjugation of a verb and the verb forms the word is. Sections are separated by
- * rules, not tinted boxes.
+ * here, the verb forms the word is (a pack form), then plain sections (pronunciation, use in this sentence,
+ * examples, memory trick) and, last, the conjugation of a verb. Sections are separated by rules, not tinted
+ * boxes. The pack and its two sections are settled before the entry is drawn (useWordSheetPack), so they
+ * are in its first frame and nothing shifts when they arrive.
  */
 
 interface WordDetailModalProps {
@@ -50,6 +46,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
   const [speechSpeed, setSpeechSpeed] = useState<number>(0.85);
+  const pack = useWordSheetPack(isOpen);
 
   if (!isOpen) return null;
 
@@ -69,7 +66,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
   return (
     <Sheet onClose={onClose} label={wordData?.word || activeWord || t('wordModal.analyzing')}>
       <div className="flex-1 min-h-0 flex flex-col">
-        {isLoading ? (
+        {isLoading || (wordData && !pack) ? (
           <div className="p-6">
             <div className="flex justify-end">{closeButton}</div>
             <div className="py-12 text-center">
@@ -77,7 +74,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
               <p className="text-sm text-ink-600">{t('wordModal.analyzing')}</p>
             </div>
           </div>
-        ) : !wordData ? (
+        ) : !wordData || !pack ? (
           <div className="p-6 space-y-3">
             <div className="flex items-start justify-between gap-3">
               <h2 className="font-serif text-2xl font-semibold text-ink-900 break-words">
@@ -152,6 +149,8 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
                 </div>
               </header>
 
+              <pack.VerbForms lookup={activeWord ?? wordData.word} />
+
               {wordData.phoneticsGuide && (
                 <Section title={t('wordModal.phoneticsGuide')}>
                   <p className="text-sm text-ink-800 leading-relaxed break-words">{wordData.phoneticsGuide}</p>
@@ -205,16 +204,10 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
               {isVerbEntry(wordData.lemma, wordData.partOfSpeech) && (
                 <Section title={t('wordModal.conjugation')}>
                   <div className="min-h-10">
-                    <Suspense fallback={<p className="text-sm text-ink-500">{t('wordModal.conjugationLoading')}</p>}>
-                      <WordConjugation lemma={wordData.lemma} lookup={activeWord ?? wordData.word} />
-                    </Suspense>
+                    <pack.WordConjugation lemma={wordData.lemma} lookup={activeWord ?? wordData.word} />
                   </div>
                 </Section>
               )}
-
-              <Suspense fallback={null}>
-                <VerbForms lookup={activeWord ?? wordData.word} />
-              </Suspense>
             </div>
 
             <div className="px-4 py-3 border-t border-ink-200 bg-surface flex items-center justify-between gap-3">

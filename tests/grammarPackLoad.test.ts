@@ -1,6 +1,8 @@
 /** Owns isolated loader cache/failure tests using a mocked JSON module; not the real pack or owner reviews. */
 import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
 import { GOLDEN } from './fixtures/grammarPackGolden';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { GrammarPackSchema, type GrammarPack } from '../src/types/grammarPack';
 
 const fixture = (): GrammarPack => ({
@@ -19,7 +21,9 @@ const fixture = (): GrammarPack => ({
 });
 const data = fixture();
 void mock.module('../src/data/grammar-pack/pack.json', () => ({ default: data }));
-const { loadGrammarPack, resetGrammarPackForTests } = await import('../src/services/grammarPack/load');
+const { loadedGrammarPack, loadGrammarPack, resetGrammarPackForTests } =
+  await import('../src/services/grammarPack/load');
+const { useGrammarPack } = await import('../src/hooks/useGrammarPack');
 let parseSpy: ReturnType<typeof spyOn<typeof GrammarPackSchema, 'safeParse'>>;
 beforeEach(() => {
   resetGrammarPackForTests();
@@ -67,4 +71,22 @@ test('one malformed row rejects the whole pack with joined, readable Zod reasons
   expect(message).toBe(
     'The grammar pack was not usable: verbs.0.tenses.present.2sg: cell is missing; verbs.1.tenses.imperatif.2sg.lead: lead must be empty in imperatif',
   );
+});
+
+test('the loader keeps the resolved pack, and a hook mounted after the load is ready on its first render', async () => {
+  // A probe that draws the hook's first-render status; effects do not run in a static render.
+  const probe = () => createElement((): string => useGrammarPack().status);
+  expect(loadedGrammarPack()).toBeUndefined();
+  expect(renderToStaticMarkup(probe())).toBe('loading');
+  const pack = await loadGrammarPack();
+  expect(loadedGrammarPack()).toBe(pack);
+  expect(renderToStaticMarkup(probe())).toBe('ready');
+  resetGrammarPackForTests();
+  expect(loadedGrammarPack()).toBeUndefined();
+});
+
+test('a failed load leaves no resolved pack behind', async () => {
+  data.verbs = [];
+  await loadGrammarPack().catch(() => undefined);
+  expect(loadedGrammarPack()).toBeUndefined();
 });

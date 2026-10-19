@@ -1,7 +1,12 @@
-/** Owns lazy whole-pack validation and promise memoisation; not generation, lookup or UI state. */
+/** Owns lazy whole-pack validation, promise memoisation and the resolved value; not generation, lookup or UI state. */
 import { GrammarPackSchema, type GrammarPack } from '../../types/grammarPack';
 
 let pending: Promise<GrammarPack> | undefined;
+// The resolved value beside its promise, so a caller that mounts after the load can start ready, not "loading".
+let loaded: GrammarPack | undefined;
+
+/** The pack once a load has succeeded, else undefined (never loading, never failed). */
+export const loadedGrammarPack = () => loaded;
 
 export function loadGrammarPack(): Promise<GrammarPack> {
   pending ??= (async () => {
@@ -14,6 +19,7 @@ export function loadGrammarPack(): Promise<GrammarPack> {
           .join('; ')}`,
       );
     }
+    loaded = result.data;
     return result.data;
   })().catch((error: unknown) => {
     pending = undefined;
@@ -25,4 +31,5 @@ export function loadGrammarPack(): Promise<GrammarPack> {
 /** Only for isolated loader tests; application callers share the immutable pack. */
 export function resetGrammarPackForTests(): void {
   pending = undefined;
+  loaded = undefined;
 }
