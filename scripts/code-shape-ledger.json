@@ -1,7 +1,6 @@
 {
   "longFiles": {
-    "src/components/ReaderView.tsx": 670,
-    "src/App.tsx": 630
+    "src/components/ReaderView.tsx": 670
   },
   "longLines": {
     "e2e/shadowing-history.spec.ts": 1,
