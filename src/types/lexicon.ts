@@ -57,3 +57,4 @@ export const LexiconFormResponseSchema = z.strictObject({
 
 export type LexiconLemmaResponse = z.infer<typeof LexiconLemmaResponseSchema>;
 export type LexiconFormResponse = z.infer<typeof LexiconFormResponseSchema>;
+export type VerbData = z.infer<typeof VerbDataSchema>;
