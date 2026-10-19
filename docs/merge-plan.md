@@ -12,7 +12,7 @@ One application in which a learner does all of their French study: read real mat
 
 | # | Decision | Consequence |
 | --- | --- | --- |
-| 1 | No server. Every AI call goes from the browser with the learner's own key (BYOK). | FrenchLab's Express server (`server.ts`, `src/server/*`), its endpoint allowlist and its request-cancellation registry are dropped. OCR, tutoring, grading, drills and TTS become `src/services/ai` tasks. Cancellation is a browser `AbortController`. |
+| 1 | No server for AI: every AI call goes from the browser with the learner's own key (BYOK). Amended 2026-10-19: an optional read-only content service for private grammar content exists beside it (`docs/adr-hosted-content-service.md`) and never sees a key. | FrenchLab's Express server (`server.ts`, `src/server/*`), its endpoint allowlist and its request-cancellation registry are dropped. OCR, tutoring, grading, drills and TTS become `src/services/ai` tasks. Cancellation is a browser `AbortController`. |
 | 2 | Product scope widens to exercises, including listening (dictation) and writing (AI-graded open answers). | `CLAUDE.md`, `PRODUCT.md` and the READMEs stop saying "reading and speaking only". Still no mock exams and no official scores; AI grades are estimates. |
 | 3 | A new grammar taxonomy that covers A1–C1 (section 6). | FrenchLab's textbook-specific categories are not mapped: importing FrenchLab backups is not planned. |
 | 4 | New dependencies: `zod` (exercise contracts, import drafts, AI answer validation) and `pdfjs-dist` (local PDF page rendering, loaded on demand). Linting and formatting move to oxlint and oxfmt. | `bun run lint` becomes oxlint; type checking moves to `bun run typecheck`; `bun run format:check` joins CI. |

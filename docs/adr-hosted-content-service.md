@@ -1,6 +1,6 @@
 # ADR: a hosted content service for grammar topics and the lexicon
 
-Status: **Proposed**, for the owner's review (2026-10-19). Nothing in this document is built. It answers issue #27 and changes the "no server" statements in `CLAUDE.md`, `PRODUCT.md`, `docs/architecture.md` and `docs/merge-plan.md` (decision 1) only after the owner accepts it; until then those statements stand.
+Status: **Accepted** by the owner's instruction on 2026-10-19 ("no authorization issue, just do it", after answering the three design questions in section 1). It answers issue #27. The "no server" statements in `CLAUDE.md`, `PRODUCT.md`, `docs/architecture.md` and `docs/merge-plan.md` (decision 1) were amended in the same change (H0). Q1 to Q6 in section 8 stay open; the stated defaults apply until the owner says otherwise: Q2 yes, Q3 build-time URL only, Q4 existing packs stay static, Q6 yes. The legal read in Q5 is dropped by the owner's instruction (no licence concern), but the Morphalou notices and a rebuild recipe are still built in H3 because the licence requires them.
 
 ## 1. Context
 
@@ -57,7 +57,7 @@ Read-only JSON, versioned under `/v1`:
 | Phase | Scope | Gate |
 | --- | --- | --- |
 | H0 | Owner accepts or amends this ADR; the "no server" statements are rewritten explicitly (`CLAUDE.md`, `PRODUCT.md`, `docs/architecture.md`, `docs/merge-plan.md` decision 1) | owner |
-| H1 | Worker skeleton: `wrangler` config, D1 schema and migrations, the four read endpoints, CORS, rate limit, tests; no real content | unit tests, a local miniflare run |
+| H1 | Worker in `worker/`: `wrangler` config, D1 schema and migration for topics, the three topic read endpoints (list, one topic, tag index), CORS, rate limit, tests; no real content; the lexicon table and endpoint come with H3 | unit tests, a local miniflare run |
 | H2 | Local publish script (reviewed topics to D1), the app's fetch loaders and offline cache, the "not configured" states; TP1 static outputs removed | e2e with a mocked service; main chunk not larger |
 | H3 | Lexicon import pipeline from the local Morphalou data, with notices and a rebuild recipe; word-sheet lookup | licence review done first; oracle diff against the engine |
 | H4 | Accounts and paid access | before any charge |

@@ -4,7 +4,7 @@ How Relire is put together: where each responsibility lives and how data moves. 
 
 ## Shape of the system
 
-There is no server. Relire is a static PWA built by Vite into `dist/`; the user's browser calls the AI provider directly with the user's own key, and everything the user creates is stored in that browser (IndexedDB, plus a few synchronous settings in localStorage). A future hosted, paid service would enter only through the AI access boundary (`src/services/ai/access.ts`): it is deliberately not built, and no account, plan, balance or remote usage exists.
+Relire has no server of its own. The only backend is an optional read-only content service (a Cloudflare Worker with D1) for private grammar topics and the lexicon, decided in `docs/adr-hosted-content-service.md`; it receives only a topic id or a lemma, never a key or learner data, and every feature degrades without it. Relire is a static PWA built by Vite into `dist/`; the user's browser calls the AI provider directly with the user's own key, and everything the user creates is stored in that browser (IndexedDB, plus a few synchronous settings in localStorage). A future hosted, paid service would enter only through the AI access boundary (`src/services/ai/access.ts`): it is deliberately not built, and no account, plan, balance or remote usage exists.
 
 ```
 UI (src/components)  ──calls──▶  src/services/api.ts  ──▶  src/services/ai (access → tasks → provider)
