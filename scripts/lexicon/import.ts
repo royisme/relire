@@ -10,8 +10,8 @@ const repository = new URL('../../', import.meta.url);
 const quote = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
 /**
- * D1 refuses a statement over 100 KB and wrangler cannot wrap rows in a transaction, so rows go in
- * statements well under that, each a multi-row INSERT. Measured in UTF-8 bytes: forms are accented.
+ * Rows go in multi-row INSERTs of about 50 KB, well inside D1's per-statement size limit (not verified here);
+ * wrangler cannot wrap rows in a transaction. Measured in UTF-8 bytes: forms are accented.
  */
 export const STATEMENT_CAP = 50_000;
 
