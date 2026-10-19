@@ -2,8 +2,8 @@
   "verbs": {
     "aller": {
       "source": "morphalou-3.1",
-      "ranAt": "2026-10-18T21:30:52.929Z",
-      "rowHash": "2a3e10aa66373045439298c57bd92298cfe3016ccd855cad88d2df542aa26f6e",
+      "ranAt": "2026-10-19T03:54:45.406Z",
+      "rowHash": "84ab8452dda4d041842f4229126b3a4051909366bc4edabd973a11221139da0b",
       "agree": 38,
       "disagree": 0
     },
@@ -16,8 +16,8 @@
     },
     "s-appeler": {
       "source": "morphalou-3.1",
-      "ranAt": "2026-10-18T21:30:52.929Z",
-      "rowHash": "f306a183903149999a2c10cedd86a413c579677291e9dc6d2c766faebc791d9d",
+      "ranAt": "2026-10-19T03:54:45.406Z",
+      "rowHash": "5492a8add336aeaef494933d216de2f4732e53ddf58141b4c7023e8d30d98b0b",
       "agree": 38,
       "disagree": 0
     },

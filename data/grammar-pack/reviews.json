@@ -27,6 +27,20 @@
       "reviewedBy": "Roy Zhu",
       "reviewedAt": "2026-10-18",
       "reference": "Owner confirmed the printed tables in a session on 2026-10-18; no external reference"
+    },
+    {
+      "verbId": "aller",
+      "rowHash": "84ab8452dda4d041842f4229126b3a4051909366bc4edabd973a11221139da0b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed the printed tables in a session on 2026-10-18; changed cell: polite singular vous in the passé composé; no external reference"
+    },
+    {
+      "verbId": "s-appeler",
+      "rowHash": "5492a8add336aeaef494933d216de2f4732e53ddf58141b4c7023e8d30d98b0b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed the printed tables in a session on 2026-10-18; changed cell: polite singular vous in the passé composé; no external reference"
     }
   ],
   "rejected": []

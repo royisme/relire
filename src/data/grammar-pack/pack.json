@@ -358,7 +358,9 @@
             "lead": "vous",
             "forms": [
               "êtes allés",
-              "êtes allées"
+              "êtes allées",
+              "êtes allé",
+              "êtes allée"
             ]
           },
           "3pl": {
@@ -559,7 +561,7 @@
           "morphalou-3.1",
           "human"
         ],
-        "checkedAt": "2026-10-18",
+        "checkedAt": "2026-10-19",
         "status": "reviewed",
         "reviewedBy": "Roy Zhu"
       }
@@ -920,7 +922,9 @@
             "lead": "vous vous",
             "forms": [
               "êtes appelés",
-              "êtes appelées"
+              "êtes appelées",
+              "êtes appelé",
+              "êtes appelée"
             ]
           },
           "3pl": {
@@ -1121,7 +1125,7 @@
           "morphalou-3.1",
           "human"
         ],
-        "checkedAt": "2026-10-18",
+        "checkedAt": "2026-10-19",
         "status": "reviewed",
         "reviewedBy": "Roy Zhu"
       }
