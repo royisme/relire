@@ -41,7 +41,7 @@ export const TopicProvenanceSchema = z.object({
 
 export const GrammarTopicSchema = z
   .object({
-    id: slug,
+    id: slug.refine((id) => !['conjugation', 'gender'].includes(id), 'reserved Grammar section name'),
     level: ExerciseLevelSchema,
     chapter: z.string().regex(/^[a-z]+(-[a-z]+)*$/),
     tags: z.array(GrammarTagSchema).min(1).max(2),

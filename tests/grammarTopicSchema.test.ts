@@ -9,6 +9,12 @@ test('the fixture covers all block types; zero topics and levels beyond A1 are v
   expect(GrammarTopicSchema.safeParse({ ...topicFixture(), level: 'C1' }).success).toBe(true);
 });
 
+test('Grammar section names cannot be topic ids', () => {
+  for (const id of ['conjugation', 'gender']) {
+    expect(GrammarTopicSchema.safeParse({ ...topicFixture(), id }).success).toBe(false);
+  }
+});
+
 test('drafts are valid authoring rows, but never valid published topics', () => {
   const pack = topicsFixture();
   pack.topics[0].status = 'draft';

@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Topics in My study → Grammar.** The tab now opens Topics, with an honest empty state because no topics are published yet; Conjugation remains a separate section.
 - **Hear conjugations without a key.** Listen beside each form, participle or example on the Conjugation page and each form in the word sheet, using this device’s French voice; playback and errors stay on the fixed-size control.
 - **See how conjugations are built.** Regular forms underline the engine’s endings, and the Conjugation page shows the rule’s ending table from the same generator; irregular forms stay unsplit.
 - **Sentence patterns on the Conjugation page.** Choose a tense and person to see negation, an est-ce que question and an inversion question, without another AI call; unavailable patterns say why and unchecked forms keep their note. The pattern rules await language review.
