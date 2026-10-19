@@ -11,6 +11,8 @@
  *   #/study/words            My study → Words
  *   #/study/shadowing        My study → Shadowing
  *   #/study/mistakes         My study → Mistakes
+ *   #/study/grammar/conjugation  My study → Grammar, the Conjugation page; accepts ?verb=<infinitive>
+ *                            (`#/study/grammar` opens the same page)
  *   #/practice               practice: the exercise sets
  *   #/practice/set/:setId     one set and its exercise table
  *   #/practice/:unitId       one exercise unit on one sheet
@@ -26,7 +28,7 @@ export type AiPurposeRoute = (typeof AI_PURPOSES)[number];
 
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
 
-export const STUDY_TABS = ['words', 'shadowing', 'mistakes'] as const;
+export const STUDY_TABS = ['words', 'shadowing', 'mistakes', 'grammar'] as const;
 export type StudyTab = (typeof STUDY_TABS)[number];
 
 export type Route =
@@ -35,7 +37,8 @@ export type Route =
   | { name: 'importExercises' }
   | { name: 'reader'; articleId: string; sentence?: string }
   | { name: 'passage'; unitId: string; sentence?: string }
-  | { name: 'study'; tab: StudyTab }
+  /** `verb` prefills the Conjugation page (Grammar tab) and runs it once. */
+  | { name: 'study'; tab: StudyTab; verb?: string }
   | { name: 'practice' }
   | { name: 'practiceSet'; setId: string }
   | { name: 'unit'; unitId: string }
@@ -73,6 +76,8 @@ export function routeHref(route: Route): string {
     case 'passage':
       return `#/passage/${encodeURIComponent(route.unitId)}${sentenceQuery(route.sentence)}`;
     case 'study':
+      if (route.tab === 'grammar')
+        return `#/study/grammar/conjugation${route.verb ? `?verb=${encodeURIComponent(route.verb)}` : ''}`;
       return `#/study/${route.tab}`;
     case 'practice':
       return '#/practice';
@@ -128,6 +133,14 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
       ...(params.get('key') === '1' ? { focusKey: true } : {}),
       ...(returnTo?.startsWith('#/') && !returnTo.includes('?return=') ? { returnTo } : {}),
     };
+  } else if (
+    area === 'study' &&
+    sub === 'grammar' &&
+    (extra.length === 0 || (extra.length === 1 && extra[0] === 'conjugation'))
+  ) {
+    // Before the generic tab branch, which would drop ?verb=. Conjugation is the only Grammar section today.
+    const verb = new URLSearchParams(query).get('verb')?.trim();
+    route = { name: 'study', tab: 'grammar', ...(verb ? { verb } : {}) };
   } else if (area === 'practice' && sub === 'set' && extra.length === 1 && extra[0] && !query) {
     // Match sets first. Unit ids start with `unit-`, so the reserved `set` segment cannot collide.
     try {

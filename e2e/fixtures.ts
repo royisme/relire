@@ -19,6 +19,7 @@ type Task =
   | 'extract'
   | 'transcribe'
   | 'word'
+  | 'conjugate'
   | 'sentence'
   | 'pronunciation'
   | 'prosody'
@@ -67,6 +68,8 @@ export const defaultAnswers: Record<Task, Answer> = {
     cefrLevel: 'A1',
     memoryTrick: '',
   },
+  // Conjugation answers depend on the verb asked, so each spec supplies its own ai.answer({ conjugate }).
+  conjugate: () => noCatalogAnswer('conjugate', 'a verb the spec did not give an answer for'),
   sentence: {
     sentence: 'Je suis en vacances !',
     translation: 'I am on holiday!',
@@ -118,6 +121,7 @@ export const defaultAnswers: Record<Task, Answer> = {
 
 /** Which task a request is for, from the shipped prompt text (src/services/ai/prompts/defaults). */
 function taskOf(body: string): Task {
+  if (/Give the conjugation of the French verb|给出法语动词.+的变位/.test(body)) return 'conjugate';
   if (/French test curriculum designer|法语.*课程设计/.test(body)) return 'adaptive';
   if (/Turn the French workbook material into an exercise draft|请把下面的法语练习材料整理成一份练习草稿/.test(body))
     return 'extract';
@@ -160,6 +164,7 @@ export const test = base.extend<{ ai: MockAi }>({
         transcribe: 0,
         tts: 0,
         word: 0,
+        conjugate: 0,
         sentence: 0,
         pronunciation: 0,
         prosody: 0,
@@ -173,6 +178,7 @@ export const test = base.extend<{ ai: MockAi }>({
         extract: [],
         transcribe: [],
         word: [],
+        conjugate: [],
         sentence: [],
         pronunciation: [],
         prosody: [],

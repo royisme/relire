@@ -1,5 +1,8 @@
-/** My study: Words, Shadowing and Mistakes. The route carries the tab. */
-import type { ComponentProps } from 'react';
+/**
+ * My study: Words, Shadowing, Mistakes and Grammar. The route carries the tab. The Conjugation page (Grammar) is
+ * loaded on demand, with its engine and verification code, so the main bundle does not carry it.
+ */
+import { lazy, Suspense, type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 import { STUDY_TABS, type StudyTab } from '../../utils/routes';
 import { VocabularyView } from '../VocabularyView';
@@ -7,15 +10,21 @@ import { Link } from '../shell/Link';
 import { MistakeNotebook } from './MistakeNotebook';
 import { ShadowingLog } from './ShadowingLog';
 
+const ConjugationPage = lazy(() =>
+  import('./grammar/ConjugationPage').then((module) => ({ default: module.ConjugationPage })),
+);
+
 interface Props {
   tab: StudyTab;
+  /** The Conjugation page's `?verb=` prefill. */
+  verb?: string;
   sectionsInSidebar: boolean;
   vocabulary: ComponentProps<typeof VocabularyView>;
   shadowing: ComponentProps<typeof ShadowingLog>;
   mistakes: ComponentProps<typeof MistakeNotebook>;
 }
 
-export function StudyView({ tab, sectionsInSidebar, vocabulary, shadowing, mistakes }: Props) {
+export function StudyView({ tab, verb, sectionsInSidebar, vocabulary, shadowing, mistakes }: Props) {
   const { t } = useTranslation();
   return (
     <div>
@@ -43,7 +52,15 @@ export function StudyView({ tab, sectionsInSidebar, vocabulary, shadowing, mista
         <VocabularyView {...vocabulary} />
       ) : (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-          {tab === 'mistakes' ? <MistakeNotebook {...mistakes} /> : <ShadowingLog {...shadowing} />}
+          {tab === 'mistakes' ? (
+            <MistakeNotebook {...mistakes} />
+          ) : tab === 'grammar' ? (
+            <Suspense fallback={<div aria-busy="true" className="min-h-96" />}>
+              <ConjugationPage key={verb ?? ''} initialVerb={verb} />
+            </Suspense>
+          ) : (
+            <ShadowingLog {...shadowing} />
+          )}
         </div>
       )}
     </div>
