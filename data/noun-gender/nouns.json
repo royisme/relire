@@ -1,0 +1,245 @@
+{
+  "packVersion": "0.1.0",
+  "nouns": [
+    {
+      "id": "maison",
+      "lemma": "maison",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "livre",
+      "lemma": "livre",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "table",
+      "lemma": "table",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "telephone",
+      "lemma": "téléphone",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "cle",
+      "lemma": "clé",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "miroir",
+      "lemma": "miroir",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "fenetre",
+      "lemma": "fenêtre",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "ordinateur",
+      "lemma": "ordinateur",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "ville",
+      "lemma": "ville",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "gare",
+      "lemma": "gare",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "parc",
+      "lemma": "parc",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "rue",
+      "lemma": "rue",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "musee",
+      "lemma": "musée",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "voiture",
+      "lemma": "voiture",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "pont",
+      "lemma": "pont",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "restaurant",
+      "lemma": "restaurant",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "soleil",
+      "lemma": "soleil",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "lune",
+      "lemma": "lune",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "mer",
+      "lemma": "mer",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "montagne",
+      "lemma": "montagne",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "arbre",
+      "lemma": "arbre",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "fleur",
+      "lemma": "fleur",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "pluie",
+      "lemma": "pluie",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "vent",
+      "lemma": "vent",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "pain",
+      "lemma": "pain",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "pomme",
+      "lemma": "pomme",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "fromage",
+      "lemma": "fromage",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "eau",
+      "lemma": "eau",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "vin",
+      "lemma": "vin",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "cafe",
+      "lemma": "café",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "cuisine",
+      "lemma": "cuisine",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "chocolat",
+      "lemma": "chocolat",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "travail",
+      "lemma": "travail",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "liberte",
+      "lemma": "liberté",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "temps",
+      "lemma": "temps",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "question",
+      "lemma": "question",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "argent",
+      "lemma": "argent",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "paix",
+      "lemma": "paix",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "monde",
+      "lemma": "monde",
+      "gender": "m",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    },
+    {
+      "id": "idee",
+      "lemma": "idée",
+      "gender": "f",
+      "prov": { "origin": "clarte-seed", "checkedAgainst": [], "status": "draft" }
+    }
+  ]
+}
