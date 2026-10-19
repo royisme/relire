@@ -14,8 +14,16 @@ const rowHashField = z.string().regex(/^[a-f0-9]{64}$/);
 /** Publish threshold (NQ2 default): dictionary accuracy at least 80% with n >= 30. */
 export const THRESHOLD = { accuracyPercent: 80, minN: 30 };
 
+/** The owner's call on one candidate: never ship it (hold) or ship it below the threshold (override). */
+export const DecisionSchema = z.strictObject({ kind: z.enum(['hold', 'override']), reason: z.string().trim().min(1) });
+
 export const CandidatesSchema = z.array(
-  z.strictObject({ id: slug, ending: z.string().trim().min(1), gender: z.enum(['m', 'f']) }),
+  z.strictObject({
+    id: slug,
+    ending: z.string().trim().min(1),
+    gender: z.enum(['m', 'f']),
+    decision: DecisionSchema.optional(),
+  }),
 );
 export type Candidate = z.infer<typeof CandidatesSchema>[number];
 
@@ -112,14 +120,20 @@ function a1Figures(nouns: NounRow[], ending: string, gender: Gender) {
 /**
  * Derives the shippable rule rows from the candidates, the attest and the kept
  * nouns. Also used by the review CLI, which must work before the gate passes.
- * A candidate with no attest record, a lapsed attest, a dictionary figure below
- * the threshold, or fewer than 3 agreeing A1 nouns is dropped with a reason,
- * never softened.
+ * A held candidate never ships and is listed with its reason. Otherwise a
+ * candidate with no attest record, a lapsed attest, a dictionary figure below
+ * the threshold (unless the owner overrode it), or fewer than 3 agreeing A1
+ * nouns is dropped with a reason, never softened. An override keeps the honest
+ * dictionary and A1 figures.
  */
 export function deriveRules(nouns: NounRow[], candidates: Candidate[], attest: OracleAttest) {
   const rows: RuleRow[] = [];
   const drops: string[] = [];
   for (const candidate of candidates) {
+    if (candidate.decision?.kind === 'hold') {
+      drops.push(`${candidate.id}: held by the owner (${candidate.decision.reason}); not shipped`);
+      continue;
+    }
     const record = attest.rules[candidate.id];
     if (!record) {
       drops.push(`${candidate.id}: no attest record; dropped`);
@@ -130,8 +144,10 @@ export function deriveRules(nouns: NounRow[], candidates: Candidate[], attest: O
       continue;
     }
     if (record.n < THRESHOLD.minN || record.agree * 100 < THRESHOLD.accuracyPercent * record.n) {
-      drops.push(`${candidate.id}: below threshold (dictionary ${record.agree}/${record.n}); dropped`);
-      continue;
+      if (candidate.decision?.kind !== 'override') {
+        drops.push(`${candidate.id}: below threshold (dictionary ${record.agree}/${record.n}); dropped`);
+        continue;
+      }
     }
     const a1 = a1Figures(nouns, candidate.ending, candidate.gender);
     const examples = nouns
@@ -200,6 +216,12 @@ export function buildPack({ source, candidates, reviews: rawReviews, attest: raw
   report.push(...drops);
   const rules: NounRule[] = [];
   for (const row of rows) {
+    const decision = candidates.find((candidate) => candidate.id === row.id)?.decision;
+    if (decision?.kind === 'override') {
+      report.push(
+        `${row.id}: owner override (dictionary ${row.dictionary.agree}/${row.dictionary.n}; ${decision.reason}); shipped`,
+      );
+    }
     const review = [...reviews.records].reverse().find((record) => 'ruleId' in record && record.ruleId === row.id);
     if (review && review.rowHash !== rowHash(row)) failures.push(`${row.id}: review lapsed (row hash changed)`);
     const matching = review?.rowHash === rowHash(row) ? review : undefined;

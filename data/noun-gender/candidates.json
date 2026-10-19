@@ -2,7 +2,15 @@
   { "id": "tion", "ending": "tion", "gender": "f" },
   { "id": "sion", "ending": "sion", "gender": "f" },
   { "id": "te", "ending": "té", "gender": "f" },
-  { "id": "ure", "ending": "ure", "gender": "f" },
+  {
+    "id": "ure",
+    "ending": "ure",
+    "gender": "f",
+    "decision": {
+      "kind": "override",
+      "reason": "Dictionary 74% is lowered by chemical terms (chlorure, sulfure); every A1 noun in -ure is feminine."
+    }
+  },
   { "id": "ette", "ending": "ette", "gender": "f" },
   { "id": "ance", "ending": "ance", "gender": "f" },
   { "id": "ence", "ending": "ence", "gender": "f" },
@@ -13,7 +21,17 @@
   { "id": "eau", "ending": "eau", "gender": "m" },
   { "id": "oir", "ending": "oir", "gender": "m" },
   { "id": "ier", "ending": "ier", "gender": "m" },
-  { "id": "eur", "ending": "eur", "gender": "m" },
+  {
+    "id": "eur",
+    "ending": "eur",
+    "gender": "m",
+    "decision": {
+      "kind": "hold",
+      "reason": "Dictionary 97% is carried by agent nouns; only 14 of 22 A1 nouns follow it; to be split by meaning before publishing."
+    }
+  },
   { "id": "e", "ending": "e", "gender": "f" },
-  { "id": "ee", "ending": "ée", "gender": "f" }
+  { "id": "ee", "ending": "ée", "gender": "f" },
+  { "id": "esse", "ending": "esse", "gender": "f" },
+  { "id": "ude", "ending": "ude", "gender": "f" }
 ]

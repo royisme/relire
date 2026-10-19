@@ -60,6 +60,19 @@ test('a valid pack passes', () => {
   expect(NounGenderPackSchema.safeParse(pack()).success).toBe(true);
 });
 
+test('a candidate decision is a hold or an override with a one-sentence reason, nothing else', () => {
+  const base = { id: 'age', ending: 'age', gender: 'm' };
+  const parse = (decision: unknown) => CandidatesSchema.safeParse([{ ...base, decision }]).success;
+  expect(CandidatesSchema.safeParse([base]).success).toBe(true);
+  expect(parse({ kind: 'hold', reason: 'Split by meaning first.' })).toBe(true);
+  expect(parse({ kind: 'override', reason: 'Every A1 noun agrees.' })).toBe(true);
+  expect(parse({ kind: 'hold' })).toBe(false);
+  expect(parse({ kind: 'hold', reason: '   ' })).toBe(false);
+  expect(parse({ kind: 'skip', reason: 'Unknown kind.' })).toBe(false);
+  expect(parse({ reason: 'No kind.' })).toBe(false);
+  expect(parse({ kind: 'hold', reason: 'Extra key.', until: '2027' })).toBe(false);
+});
+
 test('duplicate noun and rule ids are rejected', () => {
   const duplicate = pack();
   duplicate.nouns.push(structuredClone(duplicate.nouns[0]!));
@@ -166,7 +179,7 @@ test('committed source files parse and no noun carries an owner review', () => {
     expect(noun.id).toBe(noun.lemma.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
   }
   const candidates = CandidatesSchema.parse(candidatesJson);
-  expect(candidates).toHaveLength(17);
+  expect(candidates).toHaveLength(19);
   expect(candidates.map(({ id, gender }) => `${id}:${gender}`)).toEqual([
     'tion:f',
     'sion:f',
@@ -185,6 +198,13 @@ test('committed source files parse and no noun carries an owner review', () => {
     'eur:m',
     'e:f',
     'ee:f',
+    'esse:f',
+    'ude:f',
+  ]);
+  // The owner's individual decisions of 2026-10-19; every other candidate follows the default threshold.
+  expect(candidates.filter(({ decision }) => decision).map(({ id, decision }) => `${id}:${decision!.kind}`)).toEqual([
+    'ure:override',
+    'eur:hold',
   ]);
   expect(ReviewsSchema.parse(reviewsJson)).toEqual({ records: [], rejected: [] });
   // The owner confirmed (NQ6) that the measured counts may be committed: one record per candidate, integers only.
