@@ -2,7 +2,7 @@
  * Grammar pack generator: builds one verb (every cell, lead and participle)
  * from a verb spec, the rule tables and the explicit irregular table. Pure and
  * deterministic, no I/O. Also returns the stem/ending parts of each simple cell
- * so checks.ts can verify them; those parts are never shipped. Does not own the
+ * for checks.ts and the browser's ending highlights and reference table. Does not own the
  * rule tables (rules.ts) or the checks (checks.ts).
  */
 import {

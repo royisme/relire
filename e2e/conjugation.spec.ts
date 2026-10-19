@@ -6,6 +6,7 @@
 import { erAnswer, EXAMPLES, parlerAnswer } from '../tests/fixtures/conjugationAnswer';
 import { expect, layout, overflowing, settled, test, type MockAi } from './fixtures';
 import type { Page } from '@playwright/test';
+import { mockConjugationDeviceVoice } from './deviceSpeech.helpers';
 
 const PAGE = '/#/study/grammar/conjugation';
 
@@ -240,6 +241,86 @@ test('a request moves nothing at 360 px and nothing overflows, with long forms @
   expect((await layout(page)).width).toBeLessThanOrEqual(360);
   expect(await overflowing(page.locator('body'))).toEqual([]);
   await expect(page.getByText('nous désapprovisionnerions', { exact: true })).toBeVisible();
+});
+
+test('engine endings are highlighted and shown in the rule table at 360 px @phone', async ({ page }) => {
+  await noKey(page);
+  await page.goto(`${PAGE}?verb=s’appeler`);
+  const result = page.getByRole('article', { name: 's’appeler' });
+  const present = section(page, 'Present');
+  await expect(present.getByText('je m’appelle', { exact: true })).toBeVisible();
+  await expect(present.getByRole('listitem').first().locator('span.underline')).toHaveText('e');
+  const table = result.getByRole('table', { name: 'Rule endings' });
+  await expect(table).toBeVisible();
+  await expect(
+    table
+      .getByRole('row')
+      .filter({ hasText: /^Present/ })
+      .getByRole('cell')
+      .nth(1),
+  ).toHaveText('e');
+  await expect(table.getByRole('row')).toHaveCount(7);
+  expect(await overflowing(page.locator('body'))).toEqual([]);
+  await conjugate(page, 'aller');
+  await expect(section(page, 'Present').locator('span.underline')).toHaveCount(0);
+  await expect(page.getByRole('table', { name: 'Rule endings' })).toHaveCount(0);
+});
+
+for (const viewport of ['desktop', 'phone']) {
+  test(`device listening needs no key and keeps forms in place ${viewport === 'phone' ? '@phone' : ''}`, async ({
+    page,
+    ai,
+  }) => {
+    await mockConjugationDeviceVoice(page);
+    await noKey(page);
+    await page.goto(`${PAGE}?verb=aller`);
+    const present = section(page, 'Present');
+    const listen = present.getByRole('button', { name: 'Hear on this device: je vais', exact: true });
+    await listen.scrollIntoViewIfNeeded();
+    await settled(page);
+    const before = { button: await listen.boundingBox(), page: await layout(page) };
+    await listen.click();
+    const stop = present.getByRole('button', { name: 'Stop listening: je vais', exact: true });
+    await expect(stop).toBeVisible();
+    expect(await stop.boundingBox()).toEqual(before.button);
+    expect(await layout(page)).toEqual(before.page);
+    expect(await page.evaluate(() => window.deviceSpeechTest.spoken)).toEqual(['je vais']);
+    await stop.click();
+    await expect(listen).toBeVisible();
+    expect(await listen.boundingBox()).toEqual(before.button);
+
+    await page.evaluate(() => {
+      window.deviceSpeechTest.noFrench = true;
+    });
+    await listen.click();
+    await expect(present.getByRole('alert')).toContainText('This device has no French voice installed');
+    expect(await layout(page)).toEqual(before.page);
+    expect(await present.getByRole('button', { name: /^Listen failed:/ }).boundingBox()).toEqual(before.button);
+    expect(await overflowing(page.locator('body'))).toEqual([]);
+    expect(totalCalls(ai)).toBe(0);
+  });
+}
+
+test('examples, participles and both differing lines have device listening controls', async ({ page, ai }) => {
+  await mockConjugationDeviceVoice(page);
+  const answer = withExamples(parlerAnswer());
+  answer.forms.present['2sg'] = ['parle'];
+  ai.answer({ conjugate: answer });
+  await page.goto(`${PAGE}?verb=parler`);
+  const present = section(page, 'Present');
+  for (const [region, text] of [
+    [present, 'tu parle'],
+    [present, 'tu parles'],
+    [present, 'Je parle français tous les jours.'],
+    [section(page, 'Participles'), 'parlant'],
+  ] as const) {
+    await region.getByRole('button', { name: `Hear on this device: ${text}`, exact: true }).click();
+    expect(await page.evaluate(() => window.deviceSpeechTest.spoken.at(-1))).toBe(text);
+    await page.evaluate(() => window.deviceSpeechTest.finish());
+    await expect(region.getByRole('button', { name: `Hear on this device: ${text}`, exact: true })).toBeVisible();
+  }
+  expect(ai.calls.tts).toBe(0);
+  expect(ai.calls.conjugate).toBe(1);
 });
 
 for (const mode of ['light', 'sepia', 'dark']) {

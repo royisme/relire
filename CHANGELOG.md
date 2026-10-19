@@ -7,6 +7,8 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Hear conjugations without a key.** Listen beside each form, participle or example on the Conjugation page and each form in the word sheet, using this device’s French voice; playback and errors stay on the fixed-size control.
+- **See how conjugations are built.** Regular forms underline the engine’s endings, and the Conjugation page shows the rule’s ending table from the same generator; irregular forms stay unsplit.
 - **Sentence patterns on the Conjugation page.** Choose a tense and person to see negation, an est-ce que question and an inversion question, without another AI call; unavailable patterns say why and unchecked forms keep their note. The pattern rules await language review.
 - **Conjugation drills without a key.** Practice → Add exercises has a third choice: pick verbs from the reviewed conjugation pack and the tenses to practise, and each tense becomes its own exercise (write the verb in the form asked). No AI is called, so it works with no key configured; accents always count on these items, whatever the strict-accents preference says, and a missing accent is marked wrong with the right form beside it.
 - **The word sheet shows real conjugations.** A verb in the reviewed list shows its table from that list, with no AI; any other verb shows a "Conjugate this verb" link to the Conjugation page with the verb filled in; tapping a conjugated form (`vais`) adds a "Verb form" line naming the verb, tense and person. The AI no longer writes a table for a looked-up word, and the Conjugation page has a "Practise this verb" button that makes a drill set for the verb on screen.

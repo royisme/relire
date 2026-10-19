@@ -8,8 +8,11 @@ import { useTranslation } from 'react-i18next';
 import type { CheckedCell, VerifiedVerb } from '../../../services/conjugation/verify';
 import type { ConjugationAnswer } from '../../../types/conjugationAnswer';
 import type { Person, Tense } from '../../../types/grammarPack';
+import { composeLead } from '../../../services/conjugation/rules';
+import { CellForm } from './CellForm';
 import { ComparedLines } from './ComparedLines';
-import { cellText, ruleText, showsFormLine } from './forms';
+import { ConjugationSpeakButton } from './ConjugationSpeakButton';
+import { cellText, showsFormLine } from './forms';
 
 interface Props {
   tense: Tense;
@@ -47,25 +50,43 @@ export function TenseSection({ tense, verb, example, compact, tapped }: Props) {
       <ul
         className={
           compact
-            ? 'mt-2 grid auto-cols-fr grid-flow-col grid-rows-3 gap-x-6 gap-y-1'
+            ? 'mt-2 grid gap-x-6 gap-y-1 sm:grid-flow-col sm:grid-rows-3'
             : 'mt-3 grid gap-x-10 gap-y-1.5 sm:grid-flow-col sm:grid-rows-3'
         }
       >
         {cells.map(([person, cell]) => (
           <li key={person} className="min-w-0">
             {cell.status === 'differs' && cell.ruleForms ? (
-              <ComparedLines model={cellText(cell)} rule={ruleText(tense, person, verb, cell.ruleForms)} />
+              <ComparedLines
+                model={cellText(cell)}
+                rule={cellText({
+                  lead: composeLead(tense, person, verb, cell.ruleForms[0]),
+                  forms: cell.ruleForms,
+                })}
+                ruleContent={
+                  <CellForm
+                    cell={{
+                      lead: composeLead(tense, person, verb, cell.ruleForms[0]),
+                      forms: cell.ruleForms,
+                      parts: cell.ruleParts,
+                    }}
+                  />
+                }
+              />
             ) : (
-              <p
-                aria-current={tapped?.includes(person) ? 'true' : undefined}
-                className={`break-words font-serif text-ink-900 ${compact ? 'text-base' : 'text-lg'} ${
-                  tapped?.includes(person)
-                    ? 'font-semibold underline decoration-accent-700 decoration-2 underline-offset-4'
-                    : ''
-                }`}
-              >
-                {cellText(cell)}
-              </p>
+              <div className="flex items-start justify-between gap-2">
+                <p
+                  aria-current={tapped?.includes(person) ? 'true' : undefined}
+                  className={`min-w-0 pt-1.5 break-words font-serif text-ink-900 ${compact ? 'text-base' : 'text-lg'} ${
+                    tapped?.includes(person)
+                      ? 'font-semibold underline decoration-accent-700 decoration-2 underline-offset-4'
+                      : ''
+                  }`}
+                >
+                  <CellForm cell={cell} />
+                </p>
+                <ConjugationSpeakButton text={cellText(cell)} />
+              </div>
             )}
           </li>
         ))}
@@ -73,7 +94,10 @@ export function TenseSection({ tense, verb, example, compact, tapped }: Props) {
       {example && (
         <div className="mt-4">
           <p className="text-xs text-ink-500">{t('conjugation.page.example')}</p>
-          <p className="break-words font-serif text-base text-ink-900">{example.fr}</p>
+          <div className="flex items-start justify-between gap-2">
+            <p className="min-w-0 pt-1.5 break-words font-serif text-base text-ink-900">{example.fr}</p>
+            <ConjugationSpeakButton text={example.fr} />
+          </div>
           <p className="break-words text-sm text-ink-600">{example.gloss}</p>
         </div>
       )}
