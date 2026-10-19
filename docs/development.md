@@ -10,6 +10,7 @@ Bun is the only package manager. The delivery checklist (which checks must pass,
 - `bun run preview`: serve the built site.
 - `bun scripts/grammar-pack/build.ts`: generate `src/data/grammar-pack/pack.json`; P2 requires matching owner reviews for every included verb. `packDate` in `data/grammar-pack/verbs.json` is hand-set; builds never read the clock.
 - `bun scripts/grammar-pack/build.ts --check`: regenerate in memory and reject any byte difference from the committed pack (also in CI).
+- `bun scripts/grammar-pack/build.ts topics [--check]`: assemble the reviewed-only topics pack and derived tag index from `data/grammar-topics/manifest.json`, hash-bound owner reviews and `src/data/grammar/drafts-<chapter>.json` arrays. Excluded topics are logged; zero included topics is valid. `--check` rejects byte drift in either committed artifact (also in CI).
 - `bun scripts/grammar-pack/review.ts print <verbId...>`: print the generated tables before review; only the owner runs `record <verbId...> --by "<name>" --ref "<reference>"` to append review records. `data/grammar-pack/reviews.json` holds the owner's records for the four controls.
 
 - `bun scripts/grammar-pack/oracle-diff.ts [verbId...]`: offline-only simple-tense/participle comparison, stdout and ignored `.local/oracle/<verb>.txt` reports; never run in CI or bundle the oracle.

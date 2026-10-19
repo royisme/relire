@@ -1,7 +1,8 @@
 /** Owns build/review gate regression tests with in-memory inputs; not owner attestations or the committed artifact. */
 import { afterEach, expect, spyOn, test } from 'bun:test';
 import { createHash } from 'node:crypto';
-import { buildPack, publishGate, rowHash, type BuildInputs, type Reviews } from '../scripts/grammar-pack/build';
+import { buildPack, publishGate, type BuildInputs } from '../scripts/grammar-pack/build';
+import { rowHash, type Reviews } from '../scripts/grammar-pack/gate';
 import * as generator from '../src/services/conjugation/generate';
 import { GrammarPackSchema } from '../src/types/grammarPack';
 import { CONTROL_SPECS, generateControls, IRREGULARS } from './fixtures/grammarPackVerbs';

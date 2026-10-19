@@ -3,7 +3,8 @@ import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TENSES, type Verb } from '../../src/types/grammarPack';
-import { generateRows, OracleAttestSchema, readInputs, rowHash, type OracleAttest } from './build';
+import { generateRows, OracleAttestSchema, readInputs, type OracleAttest } from './build';
+import { rowHash } from './gate';
 import { loadMorphalou, morphalouForms, type MorphalouIndex, type OracleTense } from './oracle-morphalou';
 
 export interface Disagreement {
