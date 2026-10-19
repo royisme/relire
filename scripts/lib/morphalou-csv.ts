@@ -1,9 +1,26 @@
-/** Owns the Morphalou 3.1 CSV row layout (preamble, headers, 18 columns, lemma carry-forward); not what any column means to a caller. */
+/** Owns the Morphalou 3.1 CSV row layout (preamble, headers, 18 columns, lemma carry-forward) and the tag vocabulary the app's tenses map to; not what a caller does with the rows. */
 import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
+import type { SimpleTense } from '../../src/services/conjugation/generate';
 
 const HEADER =
   'GRAPHIE;ID;CATÉGORIE;SOUS CATÉGORIE;LOCUTION;GENRE;AUTRES LEMMES LIÉS;PHONÉTIQUE;ORIGINES;GRAPHIE;ID;NOMBRE;MODE;GENRE;TEMPS;PERSONNE;PHONÉTIQUE;ORIGINES';
+
+export const MOOD_TENSE: Record<SimpleTense, string> = {
+  present: 'indicative:present',
+  imparfait: 'indicative:imperfect',
+  futur: 'indicative:future',
+  conditionnel: 'conditional:present',
+  subjonctif: 'subjunctive:present',
+  imperatif: 'imperative:present',
+};
+export const PERSON = ['firstPerson', 'secondPerson', 'thirdPerson'];
+export const AGREEMENT: Record<string, [string, string]> = {
+  ms: ['masculine', 'singular'],
+  fs: ['feminine', 'singular'],
+  mp: ['masculine', 'plural'],
+  fp: ['feminine', 'plural'],
+};
 
 export interface MorphalouRow {
   lemma: string;

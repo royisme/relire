@@ -1,26 +1,10 @@
-/** Owns the oracle's mapping from Morphalou cells to tense keys (the CSV row layout is scripts/lib/morphalou-csv.ts); not comparison, decisions or shipped forms. */
+/** Owns the oracle's index of Morphalou cells (layout and tag vocabulary: scripts/lib/morphalou-csv.ts); not comparison, decisions or shipped forms. */
 import { join } from 'node:path';
 import type { SimpleTense } from '../../src/services/conjugation/generate';
-import { fileLines, morphalouRows } from '../lib/morphalou-csv';
+import { AGREEMENT, fileLines, MOOD_TENSE, morphalouRows, PERSON } from '../lib/morphalou-csv';
 
 export type OracleTense = SimpleTense | 'participlePresent' | 'participlePast';
 export type MorphalouIndex = Map<string, Map<string, Set<string>>>;
-
-const MOOD_TENSE: Record<SimpleTense, string> = {
-  present: 'indicative:present',
-  imparfait: 'indicative:imperfect',
-  futur: 'indicative:future',
-  conditionnel: 'conditional:present',
-  subjonctif: 'subjunctive:present',
-  imperatif: 'imperative:present',
-};
-const PERSON = ['firstPerson', 'secondPerson', 'thirdPerson'];
-const AGREEMENT: Record<string, [string, string]> = {
-  ms: ['masculine', 'singular'],
-  fs: ['feminine', 'singular'],
-  mp: ['masculine', 'plural'],
-  fp: ['feminine', 'plural'],
-};
 
 export async function parseMorphalou(lines: Iterable<string> | AsyncIterable<string>): Promise<MorphalouIndex> {
   const index: MorphalouIndex = new Map();
