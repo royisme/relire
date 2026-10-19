@@ -71,7 +71,7 @@ export async function collect(
 }
 
 /** The `data` JSON and the gender column of one entry, in one canonical order whatever the file order. */
-export function entryRow({ pos, genders, cells }: Entry): { gender: string | null; data: string } {
+export function entryRow({ lemma, pos, genders, cells }: Entry): { gender: string | null; data: string } {
   const slot = (key: string) => {
     const forms = cells.get(key);
     return forms && [...forms].sort();
@@ -85,7 +85,10 @@ export function entryRow({ pos, genders, cells }: Entry): { gender: string | nul
     return picked;
   };
   if (pos === 'noun') {
-    return { gender: [...genders].sort().join(','), data: JSON.stringify(pick(['singular', 'plural'])) };
+    // Morphalou lists a few nouns in two blocks with different genders; a learner list has no room for that choice.
+    if (genders.size > 1)
+      throw new Error(`Conflicting Morphalou genders for ${lemma}: ${[...genders].sort().join(', ')}`);
+    return { gender: [...genders][0], data: JSON.stringify(pick(['singular', 'plural'])) };
   }
   if (pos === 'adjective') return { gender: null, data: JSON.stringify(pick(AGREEMENTS)) };
   const tenses: Record<string, unknown> = {};

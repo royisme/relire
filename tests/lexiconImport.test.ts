@@ -82,12 +82,10 @@ describe('verbs', () => {
 });
 
 describe('nouns and adjectives', () => {
-  test('gender is Morphalou own value; blocks of one lemma keep each value', () => {
+  test('gender is Morphalou own value', () => {
     expect(entry('testmaison', 'noun').gender).toBe('feminine');
     expect(entry('testinvar', 'noun').gender).toBe('invariable');
     expect(entry('testnogender', 'noun').gender).toBe('-');
-    expect(entry('testambigu', 'noun').gender).toBe('feminine,masculine');
-    expect(entry('testambigu', 'noun').data).toEqual({ singular: ['testambigu', 'testambigue'] });
   });
 
   test('forms by number; an invariable number fills both; the entity row parses', () => {
@@ -257,6 +255,13 @@ describe('allowlist', () => {
     expect(await rejection(importWith('verb:testmarcher\nnoun:testabsent\nverb:testabsent2\n'))).toBe(
       'Allowlisted but not in Morphalou: noun:testabsent, verb:testabsent2',
     );
+  });
+
+  test('a listed noun that Morphalou gives two genders fails by name; unlisted, it never matters', async () => {
+    expect(await rejection(importWith('noun:testmaison\nnoun:testambigu\n'))).toBe(
+      'Conflicting Morphalou genders for testambigu: feminine, masculine',
+    );
+    expect(await importWith('noun:testmaison\n')).not.toContain('testambigu');
   });
 
   test('a malformed line is refused; unknown arguments are refused', async () => {

@@ -28,10 +28,8 @@ export const VerbDataSchema = z.strictObject({
 export const NounDataSchema = z.strictObject({ singular: forms.optional(), plural: forms.optional() });
 export const AdjectiveDataSchema = z.partialRecord(z.enum(AGREEMENTS), forms);
 
-/** Morphalou's own GENRE values, stored as they are: `masculine`, `feminine`, `invariable`, `-`. A lemma listed in several blocks keeps each value, sorted and joined by a comma. */
-export const GenderSchema = z
-  .string()
-  .refine((value) => value.split(',').every((part) => ['masculine', 'feminine', 'invariable', '-'].includes(part)));
+/** Morphalou's own GENRE values, stored as they are. A noun with two different genders is refused at import. */
+export const GenderSchema = z.enum(['masculine', 'feminine', 'invariable', '-']);
 
 export const LexiconEntrySchema = z.discriminatedUnion('pos', [
   z.strictObject({ pos: z.literal('verb'), data: VerbDataSchema }),

@@ -134,7 +134,6 @@ export const ALLOWLIST = [
   'noun:testinvar',
   'noun:testangle',
   'noun:testamp',
-  'noun:testambigu',
   'noun:testnogender',
   'adjective:testbeau',
   'adjective:testrouge',
