@@ -12,6 +12,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
+      - name: Worker typecheck
+        run: bun install --cwd worker --frozen-lockfile && cd worker && bun run typecheck
       - name: Typecheck
         run: bun run typecheck
       - name: Lint
