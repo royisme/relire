@@ -6,6 +6,7 @@
  * phonetic data by default; tests supply what they assert.
  */
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
+import { mockIndex, mockTopics } from './contentService.helpers';
 import {
   CATALOG_ARTICLE,
   CATALOG_EXERCISES,
@@ -153,6 +154,11 @@ export interface MockAi {
 const silence = Buffer.alloc(24000 * 2).toString('base64'); // 1 s of 24 kHz 16-bit PCM
 
 export const test = base.extend<{ ai: MockAi }>({
+  page: async ({ page }, use) => {
+    await mockTopics(page);
+    await mockIndex(page);
+    await use(page);
+  },
   ai: async ({ page }, use) => {
     const answers = { ...defaultAnswers };
     const failing = new Set<string>();

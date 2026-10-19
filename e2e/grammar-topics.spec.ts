@@ -1,12 +1,11 @@
-/** Topics use test-only pack data, never teaching content or a real provider. */
+/** Topics use a fake service with test-only pack data, never teaching content or a real provider. */
 import type { Page } from '@playwright/test';
 import { expect, layout, settled, test } from './fixtures';
 import { topicFixture, topicsFixture } from '../tests/fixtures/grammarTopics';
 import type { GrammarTopicsPack } from '../src/types/grammarTopic';
 import zh from '../src/i18n/locales/zh.json' with { type: 'json' };
 
-// Observed in the dev server on the first empty-pack run (e2e-discovery.log), not a production URL.
-const MODULE = '**/src/data/grammar/topics.json?import';
+import { mockTopics, TOPICS_REQUEST } from './contentService.helpers';
 const LIST = '/#/study/grammar';
 
 function testPack(): GrammarTopicsPack {
@@ -41,12 +40,7 @@ function testPack(): GrammarTopicsPack {
 }
 
 async function mockPack(page: Page, pack = testPack()) {
-  await page.route(MODULE, (route) =>
-    route.fulfill({
-      contentType: 'text/javascript',
-      body: `export default ${JSON.stringify(pack)};`,
-    }),
-  );
+  await mockTopics(page, pack);
 }
 
 async function noPageOverflow(page: Page) {
@@ -57,7 +51,7 @@ test.beforeEach(async ({ ai }) => {
   ai.ttsDelayMs = 50;
 });
 
-test('the real empty pack says that no topics are published', async ({ page }) => {
+test('the empty service list says that no topics are published', async ({ page }) => {
   await page.goto(LIST);
   await expect(page.getByText('No topics are published yet.', { exact: true })).toBeVisible();
   await expect(page.locator('[data-grammar-topics] a')).toHaveCount(0);
@@ -120,14 +114,14 @@ test('unknown and unpublished ids use the topic-specific not-found view', async 
   }
 });
 
-test('a module load error displays its real reason once without a retry loop', async ({ page }) => {
+test('a service 500 displays its real reason once without a retry loop', async ({ page }) => {
   let requests = 0;
-  await page.route(MODULE, (route) => {
+  await page.route(TOPICS_REQUEST, (route) => {
     requests++;
-    return route.fulfill({ contentType: 'text/javascript', body: 'throw new Error("TEST ONLY topic load failed");' });
+    return route.fulfill({ status: 500, json: { error: 'unavailable' } });
   });
   await page.goto(LIST);
-  await expect(page.getByRole('alert')).toHaveText('Could not load topics: TEST ONLY topic load failed');
+  await expect(page.getByRole('alert')).toHaveText('Could not load topics: HTTP 500: unavailable');
   await page.waitForTimeout(300);
   expect(requests).toBe(1);
   await noPageOverflow(page);
@@ -141,9 +135,14 @@ for (const destination of ['', '/test-only']) {
     const held = new Promise<void>((resolve) => {
       release = resolve;
     });
-    await page.route(MODULE, async (route) => {
+    await page.route(TOPICS_REQUEST, async (route) => {
       await held;
-      await route.fulfill({ contentType: 'text/javascript', body: `export default ${JSON.stringify(testPack())};` });
+      const topics = testPack().topics;
+      await route.fulfill({
+        json: destination
+          ? topics[0]
+          : topics.map(({ id, chapter, level, tags, title }) => ({ id, chapter, level, tags, title })),
+      });
     });
     await page.goto(`${LIST}${destination}`);
     await expect(page.getByRole('status')).toHaveText('Loading topics…');
@@ -186,6 +185,38 @@ for (const theme of ['light', 'sepia', 'dark']) {
     await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
   });
 }
+
+for (const destination of ['', '/test-only']) {
+  test(`offline fallback retains ${destination ? 'one topic' : 'the summary list'} after a successful load`, async ({
+    page,
+  }) => {
+    await mockPack(page);
+    await page.goto(`${LIST}${destination}`);
+    const content = destination
+      ? page.getByRole('heading', { name: 'TEST TOPIC', exact: true })
+      : page.getByRole('link', { name: /TEST TOPIC A1/ });
+    await expect(content).toBeVisible();
+    let requests = 0;
+    await page.route(TOPICS_REQUEST, (route) => {
+      requests++;
+      return route.abort('failed');
+    });
+    await page.reload();
+    await expect(content).toBeVisible();
+    expect(requests).toBe(1);
+    await expect(page.getByRole('alert')).toHaveCount(0);
+  });
+}
+
+test('a topic 500 is a real load error, not a not-found or stale success', async ({ page }) => {
+  await mockPack(page);
+  await page.goto(`${LIST}/test-only`);
+  await expect(page.getByRole('article')).toBeVisible();
+  await page.route(TOPICS_REQUEST, (route) => route.fulfill({ status: 500, json: { error: 'unavailable' } }));
+  await page.reload();
+  await expect(page.getByRole('alert')).toHaveText('Could not load topics: HTTP 500: unavailable');
+  await expect(page.getByRole('article')).toHaveCount(0);
+});
 
 test('Chinese UI selects Chinese prose but keeps French cells and examples @phone', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('relire_lang', 'zh'));

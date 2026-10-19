@@ -56,6 +56,7 @@ test('Grammar opens Topics and switches to its distinct Conjugation address', as
   await page.goto('/#/study/grammar');
   await expect(page).toHaveURL(/#\/study\/grammar$/);
   await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
+  await expect(page.getByText('No topics are published yet.', { exact: true })).toBeVisible();
   await page.getByRole('radio', { name: 'Conjugation', exact: true }).click();
   await expect(page).toHaveURL(/#\/study\/grammar\/conjugation$/);
   await expect(page.getByRole('heading', { name: 'Conjugation', exact: true })).toBeVisible();

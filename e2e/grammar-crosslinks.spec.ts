@@ -8,9 +8,7 @@ import type { GrammarTagIndex } from '../src/types/grammarTagIndex';
 import en from '../src/i18n/locales/en.json' with { type: 'json' };
 import zh from '../src/i18n/locales/zh.json' with { type: 'json' };
 
-// Observed with the real dev server (completion/e2e-discovery-fixed.log and e2e-published.log).
-const INDEX_MODULE = '**/src/data/grammar/tag-index.json?import';
-const TOPICS_MODULE = '**/src/data/grammar/topics.json?import';
+import { CONTENT_ORIGIN, INDEX_REQUEST, mockIndex, mockTopics as mockTopicService } from './contentService.helpers';
 const INDEX: GrammarTagIndex = { present: ['test-only'], 'hypothesis-si': ['another-test', 'third-test'] };
 const UNIT = 'unit-fill-blanks';
 const tags = ['present', 'hypothesis-si', 'adjective-agreement'] as const;
@@ -30,20 +28,7 @@ function testPack() {
   return pack;
 }
 async function mockTopics(page: Page) {
-  await page.route(TOPICS_MODULE, (route) =>
-    route.fulfill({
-      contentType: 'text/javascript',
-      body: `export default ${JSON.stringify(testPack())};`,
-    }),
-  );
-}
-async function mockIndex(page: Page, index = INDEX) {
-  await page.route(INDEX_MODULE, (route) =>
-    route.fulfill({
-      contentType: 'text/javascript',
-      body: `export default ${JSON.stringify(index)};`,
-    }),
-  );
+  await mockTopicService(page, testPack());
 }
 async function go(page: Page, href: string, copy: Copy = en) {
   if (href === '#/study/mistakes' && !(await page.locator(`a[href="${href}"]`).first().isVisible())) {
@@ -117,10 +102,10 @@ for (const phone of [false, true]) {
     if (phone) await page.addInitScript(() => localStorage.setItem('relire_lang', 'zh'));
     const modules: string[] = [];
     page.on('request', (request) => {
-      if (request.url().includes('/src/data/grammar/')) modules.push(request.url());
+      if (request.url().startsWith(CONTENT_ORIGIN)) modules.push(request.url());
     });
     await mockTopics(page);
-    await mockIndex(page);
+    await mockIndex(page, INDEX);
     await seedUnits(page);
     expect(modules).toEqual([]);
     await history(page, copy);
@@ -130,8 +115,8 @@ for (const phone of [false, true]) {
     await page.keyboard.press('Escape');
     await go(page, '#/practice', copy);
     await openListedUnit(page, 'set-1', UNIT);
-    // Index loading at every source site must not request the full topic pack.
-    expect(modules.some((url) => url.includes('topics.json'))).toBe(false);
+    // Source labels request only the index, never summaries or topic content.
+    expect(modules.some((url) => url.includes('/v1/topics'))).toBe(false);
     for (const [tag, prompt] of [
       ['present', 'Je ne'],
       ['hypothesis-si', 'Si tu'],
@@ -181,28 +166,27 @@ for (const phone of [false, true]) {
       await destination(page, tag, copy);
       await page.goBack();
     }
-    console.log('OBSERVED GRAMMAR MODULE URLS', [...new Set(modules)]);
+    console.log('OBSERVED CONTENT SERVICE URLS', [...new Set(modules)]);
   });
 }
 
 for (const failure of [false, true]) {
-  test(`${failure ? 'failed index' : 'real empty pack'} leaves every source label plain without error noise`, async ({
+  test(`${failure ? 'failed index' : 'empty service index'} leaves every source label plain without error noise`, async ({
     page,
   }) => {
     const noise: string[] = [];
     const modules: string[] = [];
     page.on('request', (request) => {
-      if (request.url().includes('/src/data/grammar/')) modules.push(request.url());
+      if (request.url().startsWith(CONTENT_ORIGIN)) modules.push(request.url());
     });
     page.on('console', (message) => {
       if (message.type() === 'error') noise.push(message.text());
     });
     page.on('pageerror', (error) => noise.push(error.message));
     if (failure)
-      await page.route(INDEX_MODULE, (route) =>
+      await page.route(INDEX_REQUEST, (route) =>
         route.fulfill({
-          contentType: 'text/javascript',
-          body: 'throw new Error("TEST ONLY index refused");',
+          json: { 'TEST ONLY invalid tag': ['test-only'] },
         }),
       );
     await seedUnits(page);
@@ -224,10 +208,26 @@ for (const failure of [false, true]) {
     for (const tag of tags) await label(targetSentence(page), tag, false);
     await expect(page.getByRole('alert')).toHaveCount(0);
     expect(noise).toEqual([]);
-    expect(modules.some((url) => url.includes('tag-index.json'))).toBe(true);
-    expect(modules.some((url) => url.includes('topics.json'))).toBe(false);
+    expect(modules.some((url) => url.includes('/v1/tag-index'))).toBe(true);
+    expect(modules.some((url) => url.includes('/v1/topics'))).toBe(false);
   });
 }
+
+test('offline tag-index fallback restores links after one successful load', async ({ page }) => {
+  await mockIndex(page, INDEX);
+  await seedUnits(page);
+  await openPractice(page);
+  await label(row(page, 'Je ne'), 'present', true);
+  let requests = 0;
+  await page.route(INDEX_REQUEST, (route) => {
+    requests++;
+    return route.abort('failed');
+  });
+  await page.reload();
+  await label(row(page, 'Je ne'), 'present', true);
+  expect(requests).toBe(1);
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
 
 for (const site of ['item', 'notebook', 'practice-sheet', 'notebook-sheet', 'progress']) {
   test(`delayed index keeps ${site} label and surrounding header still @phone`, async ({ page }) => {
@@ -236,10 +236,10 @@ for (const site of ['item', 'notebook', 'practice-sheet', 'notebook-sheet', 'pro
       release = resolve;
     });
     let requested = false;
-    await page.route(INDEX_MODULE, async (route) => {
+    await page.route(INDEX_REQUEST, async (route) => {
       requested = true;
       await held;
-      await route.fulfill({ contentType: 'text/javascript', body: `export default ${JSON.stringify(INDEX)};` });
+      await route.fulfill({ json: INDEX });
     });
     await seedUnits(page);
     await openPractice(page);
