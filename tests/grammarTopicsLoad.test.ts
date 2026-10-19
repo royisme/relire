@@ -4,6 +4,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { loadGrammarTopic, loadGrammarTopics } from '../src/services/grammarTopics/load';
 import { loadGrammarTagIndex } from '../src/services/grammarTopics/tagIndex';
+import { resetContentRequests } from '../src/services/grammarTopics/request';
 import { GrammarTopicSchema, GrammarTopicSummarySchema } from '../src/types/grammarTopic';
 import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { useGrammarTopics } from '../src/hooks/useGrammarTopics';
@@ -16,11 +17,13 @@ const origin = 'http://content.test';
 const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 let fetchSpy: ReturnType<typeof spyOn<typeof globalThis, 'fetch'>>;
 beforeEach(async () => {
+  resetContentRequests();
   await freshDb();
   process.env.VITE_CONTENT_SERVICE_URL = origin;
   fetchSpy = spyOn(globalThis, 'fetch');
 });
 afterEach(() => {
+  resetContentRequests();
   fetchSpy.mockRestore();
   if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
   else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
@@ -51,10 +54,11 @@ const loaders = [
 ];
 
 for (const { name, path, load, data, parse } of loaders) {
-  test(`${name}: valid responses are validated and persisted; every new load is network first`, async () => {
+  test(`${name}: valid responses are validated and persisted; a load after reset is network first`, async () => {
     fetchSpy.mockImplementation(Object.assign(async () => Response.json(data()), { preconnect: () => {} }));
     expect(await load()).toEqual(data());
     expect(await getCached('content', `${origin}${path}`)).toEqual(data());
+    resetContentRequests();
     expect(await load()).toEqual(data());
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     expect(fetchSpy).toHaveBeenCalledWith(`${origin}${path}`, { credentials: 'omit', signal: expect.any(AbortSignal) });
@@ -86,6 +90,7 @@ for (const { name, path, load, data, parse } of loaders) {
   test(`${name}: network failure falls back to that request's last good copy`, async () => {
     fetchSpy.mockResolvedValue(Response.json(data()));
     await load();
+    resetContentRequests();
     fetchSpy.mockRejectedValue(new TypeError('TEST ONLY offline'));
     expect(await load()).toEqual(data());
     process.env.VITE_CONTENT_SERVICE_URL = 'http://other-content.test';
@@ -114,6 +119,7 @@ for (const { name, path, load, data, parse } of loaders) {
 test('offline cache is request-scoped, validated on read, and expires after 365 days', async () => {
   fetchSpy.mockResolvedValue(Response.json(topicFixture()));
   await loadGrammarTopic('test-only');
+  resetContentRequests();
   fetchSpy.mockRejectedValue(new TypeError('TEST ONLY offline'));
   expect(((await failure(loadGrammarTopic('another-test'))) as Error).message).toBe('TEST ONLY offline');
   await putCached('content', `${origin}/v1/topics/test-only`, null);
@@ -128,7 +134,7 @@ test('offline cache is request-scoped, validated on read, and expires after 365 
   }
 });
 
-test('tag-index requests share in-flight work without parsing topics, then a later mount fetches again', async () => {
+test('tag-index requests share in-flight work without parsing topics, then a later mount after reset fetches again', async () => {
   const topicParse = spyOn(GrammarTopicSchema, 'parse');
   const summaryParse = spyOn(GrammarTopicSummarySchema, 'parse');
   fetchSpy.mockImplementation(Object.assign(async () => Response.json({}), { preconnect: () => {} }));
@@ -136,6 +142,7 @@ test('tag-index requests share in-flight work without parsing topics, then a lat
     const first = loadGrammarTagIndex();
     expect(loadGrammarTagIndex()).toBe(first);
     await first;
+    resetContentRequests();
     expect(loadGrammarTagIndex()).not.toBe(first);
     await loadGrammarTagIndex();
     expect(fetchSpy).toHaveBeenCalledTimes(2);

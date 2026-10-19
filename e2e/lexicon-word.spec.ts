@@ -94,7 +94,7 @@ test('tapping a form of a verb outside the pack names it and shows the dictionar
   );
   expect(ai.calls.conjugate).toBe(0);
   expect(await overflowing(sheet(page))).toEqual([]);
-  expect(lex.paths).toEqual(['/v1/lexicon/form/chantons', '/v1/lexicon/chanter', '/v1/lexicon/chanter']);
+  expect(lex.paths).toEqual(['/v1/lexicon/form/chantons', '/v1/lexicon/chanter']);
 });
 
 test('a form that is several cells lists them all', async ({ page, ai }) => {

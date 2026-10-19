@@ -4,6 +4,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useLexiconVerb } from '../src/hooks/useLexiconVerb';
 import { lexiconForm, lexiconLemma } from '../src/services/lexicon/load';
+import { resetContentRequests } from '../src/services/grammarTopics/request';
 import { lexiconVerb, lexiconVerbLines } from '../src/services/lexicon/verbs';
 import { getCached } from '../src/storage/cache';
 import { LexiconFormResponseSchema, LexiconLemmaResponseSchema } from '../src/types/lexicon';
@@ -14,11 +15,13 @@ const origin = 'http://content.test';
 const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 let fetchSpy: ReturnType<typeof spyOn<typeof globalThis, 'fetch'>>;
 beforeEach(async () => {
+  resetContentRequests();
   await freshDb();
   process.env.VITE_CONTENT_SERVICE_URL = origin;
   fetchSpy = spyOn(globalThis, 'fetch');
 });
 afterEach(() => {
+  resetContentRequests();
   fetchSpy.mockRestore();
   if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
   else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
@@ -80,6 +83,7 @@ test('a response of the wrong shape keeps the real schema error', async () => {
 test('an HTTP 500 keeps its status and service code, and a cached copy is not used for it', async () => {
   serve({ '/v1/lexicon/chanter': chanterLemma() });
   await lexiconLemma('chanter');
+  resetContentRequests();
   fetchSpy.mockResolvedValue(Response.json({ error: 'unavailable' }, { status: 500 }));
   expect(((await failure(lexiconLemma('chanter'))) as Error).message).toBe('HTTP 500: unavailable');
 });
@@ -87,6 +91,7 @@ test('an HTTP 500 keeps its status and service code, and a cached copy is not us
 test('a network failure uses the last good copy of that request, and without one shows its reason', async () => {
   serve({ '/v1/lexicon/chanter': chanterLemma() });
   await lexiconLemma('chanter');
+  resetContentRequests();
   fetchSpy.mockRejectedValue(new TypeError('TEST ONLY offline'));
   expect(await lexiconLemma('chanter')).toEqual(chanterLemma());
   expect(((await failure(lexiconLemma('other'))) as Error).message).toBe('TEST ONLY offline');
