@@ -167,6 +167,7 @@
     "add": "添加练习",
     "importWorksheet": "导入练习单",
     "makeFromArticle": "由文章出题",
+    "makeConjugationDrills": "动词变位练习",
     "search": "搜索题组",
     "colTitle": "标题",
     "colExercises": "练习数",
@@ -1059,6 +1060,21 @@
       "1pl": "我们",
       "2pl": "你们/您",
       "3pl": "他们/她们"
+    },
+    "drill": {
+      "title": "动词变位：{{tense}}",
+      "instruction": "按要求写出动词的正确形式。",
+      "setTitle": "动词变位：{{verbs}}",
+      "more": "等 {{count}} 个",
+      "made_one": "已生成 {{count}} 道题，就在下面的列表里。",
+      "made_other": "已生成 {{count}} 道题，就在下面的列表里。",
+      "making": "正在生成练习…",
+      "make": "生成练习",
+      "countRange": "请输入不小于 1 的整数。",
+      "loading": "正在加载动词…",
+      "noVerbs": "动词库里还没有动词。",
+      "verbs": "动词",
+      "tenses": "时态"
     }
   }
 }

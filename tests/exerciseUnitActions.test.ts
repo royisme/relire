@@ -1,22 +1,22 @@
 /** Exercise button actions: real storage transactions, mocked AI, and late-result boundaries. */
 import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
 import { freshDb } from './fixtures/storage';
-import { ITEMS, unitOf } from './fixtures/units';
+import { ITEM_BY_TYPE, ITEMS, unitOf } from './fixtures/units';
 import * as api from '../src/services/api';
 import * as appSettings from '../src/utils/appSettings';
 import { runCheck, runExplanation, runHint, type ActionContext } from '../src/hooks/exerciseUnit/actions';
 import { emptyItems } from '../src/hooks/exerciseUnit/model';
 import { getUnitSnapshot, listAttempts, resetUnit, saveUnits } from '../src/storage/exercises';
 import type { OpenGrade } from '../src/types/exerciseAi';
-import type { ExerciseUnit } from '../src/types/exercises';
+import type { ExerciseItem, ExerciseUnit } from '../src/types/exercises';
 
 beforeEach(freshDb);
 afterEach(() => mock.restore());
 
 const grade: OpenGrade = { isCorrect: true, feedback: 'Another valid wording.' };
 
-async function seed(type: ExerciseUnit['type'] = 'OPEN_QA') {
-  const [unit] = await saveUnits([unitOf(type)]);
+async function seed(type: ExerciseUnit['type'] = 'OPEN_QA', seedItems: ExerciseItem[] = [ITEM_BY_TYPE[type]]) {
+  const [unit] = await saveUnits([unitOf(type, seedItems)]);
   const items = emptyItems(unit);
   const id = unit.items[0].id;
   items[id].answer.singleAnswer = 'Une autre réponse.';
@@ -35,6 +35,23 @@ async function seed(type: ExerciseUnit['type'] = 'OPEN_QA') {
   };
   return { ctx, id, items, onForeignReset, onSaveError, leave: () => (current = false) };
 }
+
+test('a conjugation drill item is graded with accents even when the preference is off, and stores that flag', async () => {
+  spyOn(appSettings, 'practiceGrading').mockReturnValue({ strictAccents: false });
+  const item: ExerciseItem = {
+    ...ITEMS.WORD_TRANSFORM,
+    id: 'aller:passeCompose:1sg',
+    prompt: 'je ... (aller), Passé composé',
+    expectedAnswer: 'suis allé',
+    acceptableAnswers: undefined,
+    grammarTag: 'passe-compose',
+    meta: { strictAccents: true },
+  };
+  const { ctx, id, items } = await seed('WORD_TRANSFORM', [item]);
+  items[id].answer.singleAnswer = 'suis alle';
+  await runCheck(ctx, id);
+  expect((await getUnitSnapshot(ctx.unit.id)).states[0].checked).toEqual({ correct: false, strictAccents: true });
+});
 
 test('runCheck commits a reference match without AI and an unmatched answer with AI feedback', async () => {
   const { ctx, id, items } = await seed();

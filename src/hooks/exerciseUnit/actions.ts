@@ -9,10 +9,10 @@
 import { fetchExplanation, fetchHint, gradeOpenAnswer, MissingApiKeyError } from '../../services/api';
 import { checkItem, saveItemProgress, StaleResetError, type ItemProgress } from '../../storage/exercises';
 import { expectedAnswerText, recordedAnswerText } from '../../services/exercises/answer';
-import { gradeUnitItem } from '../../services/exercises/grading';
+import { effectiveItemType, type CheckedResult, type ExerciseItem, type ExerciseUnit } from '../../types/exercises';
+import { effectiveStrictAccents, gradeUnitItem } from '../../services/exercises/grading';
 import { errorMessage } from '../../services/ai/errors';
 import { practiceGrading } from '../../utils/appSettings';
-import { effectiveItemType, type CheckedResult, type ExerciseItem, type ExerciseUnit } from '../../types/exercises';
 import { aiErrorText } from '../../utils/aiErrorText';
 import type { ItemRuntime } from './model';
 
@@ -68,10 +68,12 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
   ctx.patch(itemId, { busy: 'check', error: null });
   try {
     const grading = practiceGrading();
+    // The item may require accents on top of the preference; both stored results carry the flag the grader used.
+    const strictAccents = effectiveStrictAccents(item, grading);
     const graded = gradeUnitItem(ctx.unit, item, answer, grading);
     let result: CheckedResult;
     if (graded.status === 'graded') {
-      result = { correct: graded.correct, strictAccents: grading.strictAccents };
+      result = { correct: graded.correct, strictAccents };
     } else {
       // An open answer that matched no reference: the verdict and the words come from the AI, never a score.
       const grade = await gradeOpenAnswer({
@@ -83,7 +85,7 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
       if (!ctx.isCurrent()) return;
       result = {
         correct: grade.isCorrect,
-        strictAccents: grading.strictAccents,
+        strictAccents,
         aiFeedback: {
           feedback: grade.feedback,
           ...(grade.correctedVersion ? { correctedVersion: grade.correctedVersion } : {}),

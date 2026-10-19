@@ -169,6 +169,7 @@
     "add": "Add exercises",
     "importWorksheet": "Import a worksheet",
     "makeFromArticle": "Make from an article",
+    "makeConjugationDrills": "Conjugation drills",
     "search": "Search exercise sets",
     "colTitle": "Title",
     "colExercises": "Exercises",
@@ -1067,6 +1068,21 @@
       "1pl": "we",
       "2pl": "you (plural or formal)",
       "3pl": "they"
+    },
+    "drill": {
+      "title": "Conjugation: {{tense}}",
+      "instruction": "Write each verb in the form asked.",
+      "setTitle": "Conjugation: {{verbs}}",
+      "more": "and {{count}} more",
+      "made_one": "Made {{count}} item. It is in the list below.",
+      "made_other": "Made {{count}} items. They are in the list below.",
+      "making": "Making exercises…",
+      "make": "Make exercises",
+      "countRange": "Choose a whole number of 1 or more.",
+      "loading": "Loading the verbs…",
+      "noVerbs": "No verbs are in the pack yet.",
+      "verbs": "Verbs",
+      "tenses": "Tenses"
     }
   }
 }
