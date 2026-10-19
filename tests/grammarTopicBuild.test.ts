@@ -187,6 +187,20 @@ test('--check is byte-exact and does not rewrite a drifted artifact', async () =
   }
 });
 
+test('the topics builder reads included drafts from the private directory only', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-private-build-'));
+  try {
+    const input = inputs();
+    await Bun.write(join(directory, 'data/grammar-topics/manifest.json'), JSON.stringify(input.manifest));
+    await Bun.write(join(directory, 'data/grammar-topics/reviews.json'), JSON.stringify(input.reviews));
+    await Bun.write(join(directory, '.local/grammar-topics/drafts-test-only.json'), JSON.stringify(input.drafts));
+    const read = await readTopicInputs(pathToFileURL(directory + '/'));
+    expect(buildTopics(read).pack.topics).toHaveLength(1);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 test('topics --check succeeds through the actual CLI twice without changing committed artifacts', async () => {
   for (let i = 0; i < 2; i++) {
     const result = Bun.spawnSync(['bun', 'scripts/grammar-pack/build.ts', 'topics', '--check'], {

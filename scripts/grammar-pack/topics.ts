@@ -86,20 +86,16 @@ export function buildTopics({ manifest: rawManifest, drafts: rawDrafts, reviews:
   return { pack: parsed.data, tagIndex: GrammarTagIndexSchema.parse(tagIndex), report };
 }
 
-export async function readTopicInputs(): Promise<TopicBuildInputs> {
-  const manifest = TopicManifestSchema.parse(
-    await Bun.file(new URL('../../data/grammar-topics/manifest.json', import.meta.url)).json(),
-  );
-  const reviews = TopicReviewsSchema.parse(
-    await Bun.file(new URL('../../data/grammar-topics/reviews.json', import.meta.url)).json(),
-  );
+export async function readTopicInputs(root = new URL('../../', import.meta.url)): Promise<TopicBuildInputs> {
+  const manifest = TopicManifestSchema.parse(await Bun.file(new URL('data/grammar-topics/manifest.json', root)).json());
+  const reviews = TopicReviewsSchema.parse(await Bun.file(new URL('data/grammar-topics/reviews.json', root)).json());
   const chapters = [...new Set(manifest.topics.filter((topic) => topic.include).map((topic) => topic.chapter))];
   const drafts = (
     await Promise.all(
       chapters.map(async (chapter) =>
         z
           .array(GrammarTopicSchema)
-          .parse(await Bun.file(new URL(`../../src/data/grammar/drafts-${chapter}.json`, import.meta.url)).json()),
+          .parse(await Bun.file(new URL(`.local/grammar-topics/drafts-${chapter}.json`, root)).json()),
       ),
     )
   ).flat();
