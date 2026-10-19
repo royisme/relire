@@ -28,7 +28,8 @@ export async function* morphalouRows(
       if (line !== expected) throw new Error(`Morphalou line ${lineNumber}: expected ${expected}; got ${line}`);
       continue;
     }
-    const cells = line.split(';');
+    // The one `&amp;` in the file (a multiword noun) is an HTML entity whose `;` would add a column.
+    const cells = line.replaceAll('&amp;', '&').split(';');
     if (cells.length !== 18) throw new Error(`Morphalou line ${lineNumber}: expected 18 columns; got ${line}`);
     if (cells[0]) {
       lemma = cells[0];
