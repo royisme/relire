@@ -202,7 +202,8 @@ test('loading owns a fixed-height busy region and load failures stay inline', as
   });
   const busy = page.locator('main [aria-busy="true"]');
   await expect(busy).toBeVisible();
-  expect((await busy.boundingBox())!.height).toBe(224);
+  // The page loads with its route behind its own 36rem slot; once that is gone the page's busy region is 224 px.
+  await expect.poll(async () => (await busy.boundingBox())?.height).toBe(224);
   await page.evaluate(() => sessionStorage.setItem('releaseSetRead', '1'));
   await expect(page.getByRole('table')).toBeVisible();
   await page.evaluate(async () => {
