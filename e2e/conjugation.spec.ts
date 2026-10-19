@@ -7,6 +7,7 @@ import { erAnswer, EXAMPLES, parlerAnswer } from '../tests/fixtures/conjugationA
 import { expect, layout, overflowing, settled, test, type MockAi } from './fixtures';
 import type { Page } from '@playwright/test';
 import { mockConjugationDeviceVoice } from './deviceSpeech.helpers';
+import { CONTENT_ORIGIN } from './contentService.helpers';
 
 const PAGE = '/#/study/grammar/conjugation';
 
@@ -33,6 +34,10 @@ const withExamples = (answer: ReturnType<typeof parlerAnswer>) => ({
 });
 
 test('a verb in the pack is answered from the pack: reviewed, no AI request, no key', async ({ page, ai }) => {
+  const contentRequests: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().startsWith(CONTENT_ORIGIN)) contentRequests.push(request.url());
+  });
   await noKey(page);
   await page.goto(PAGE);
   await expect(page.getByText('Type a verb in the infinitive', { exact: false })).toBeVisible();
@@ -48,6 +53,7 @@ test('a verb in the pack is answered from the pack: reviewed, no AI request, no 
   await expect(result.getByText('AI-made', { exact: false })).toHaveCount(0);
   await expect(page.getByRole('alert')).toHaveCount(0);
   expect(totalCalls(ai)).toBe(0);
+  expect(contentRequests).toEqual([]);
 });
 
 test('an irregular verb shows when each tense is used but no generic formation line', async ({ page, ai }) => {

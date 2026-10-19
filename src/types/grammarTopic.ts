@@ -39,13 +39,18 @@ export const TopicProvenanceSchema = z.object({
   promptHash: z.string().regex(/^[0-9a-f]{8}$/),
 });
 
+export const GrammarTopicSummarySchema = z.object({
+  id: slug.refine((id) => !['conjugation', 'gender'].includes(id), 'reserved Grammar section name'),
+  level: ExerciseLevelSchema,
+  chapter: z.string().regex(/^[a-z]+(-[a-z]+)*$/),
+  tags: z.array(GrammarTagSchema).min(1).max(2),
+  title: bilingual,
+});
+export type GrammarTopicSummary = z.infer<typeof GrammarTopicSummarySchema>;
+
 export const GrammarTopicSchema = z
   .object({
-    id: slug.refine((id) => !['conjugation', 'gender'].includes(id), 'reserved Grammar section name'),
-    level: ExerciseLevelSchema,
-    chapter: z.string().regex(/^[a-z]+(-[a-z]+)*$/),
-    tags: z.array(GrammarTagSchema).min(1).max(2),
-    title: bilingual,
+    ...GrammarTopicSummarySchema.shape,
     blocks: z.array(block).min(1),
     related: z.array(slug),
     provenance: TopicProvenanceSchema,

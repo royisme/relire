@@ -2,8 +2,8 @@ import { db, type CacheEntry } from './db';
 import { PRONUNCIATION_SCHEMA_VERSION, READER_TOKENIZER_VERSION } from '../types/pronunciation';
 
 /**
- * Persistent cache for AI answers, so the same word or sentence is never paid
- * for twice. Failures here are never fatal: a broken cache is just a miss.
+ * Persistent cache for AI answers and offline content.
+ * Failures here are never fatal: a broken cache is just a miss.
  */
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -13,6 +13,8 @@ const POLICY = {
   word: { ttl: Infinity, max: Infinity },
   // The conjugation of a verb has one right answer, so it is kept like a word analysis.
   conjugation: { ttl: Infinity, max: Infinity },
+  // Network-first content keeps its last good copy for offline reading.
+  content: { ttl: 365 * DAY, max: Infinity },
   // Sentence analyses are kept for 30 days.
   sentence: { ttl: 30 * DAY, max: 1000 },
   prosody: { ttl: 30 * DAY, max: 1000 },
@@ -122,6 +124,7 @@ export async function putCached(kind: CacheKind, key: string, value: unknown): P
 export async function cacheCounts(): Promise<{
   words: number;
   conjugations: number;
+  content: number;
   sentences: number;
   exercises: number;
   prosody: number;
@@ -129,18 +132,19 @@ export async function cacheCounts(): Promise<{
   try {
     const d = await db();
     const count = (kind: CacheKind) => d.countFromIndex('cache', 'kind', kind);
-    const [words, conjugations, sentences, prosody, sets, hints, explanations] = await Promise.all([
+    const [words, conjugations, content, sentences, prosody, sets, hints, explanations] = await Promise.all([
       count('word'),
       count('conjugation'),
+      count('content'),
       count('sentence'),
       count('prosody'),
       count('exercises'),
       count('hint'),
       count('explanation'),
     ]);
-    return { words, conjugations, sentences, exercises: sets + hints + explanations, prosody };
+    return { words, conjugations, content, sentences, exercises: sets + hints + explanations, prosody };
   } catch {
-    return { words: 0, conjugations: 0, sentences: 0, exercises: 0, prosody: 0 };
+    return { words: 0, conjugations: 0, content: 0, sentences: 0, exercises: 0, prosody: 0 };
   }
 }
 

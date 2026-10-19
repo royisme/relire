@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Grammar Topics are available only when a content service is configured, with offline copies of fetched content; the free build shows Conjugation only.
 - Grammar tags in mistakes, practice and Progress link to their topics when one is published.
 - **Topics in My study → Grammar.** The tab now opens Topics, with an honest empty state because no topics are published yet; Conjugation remains a separate section.
 - **Hear conjugations without a key.** Listen beside each form, participle or example on the Conjugation page and each form in the word sheet, using this device’s French voice; playback and errors stay on the fixed-size control.

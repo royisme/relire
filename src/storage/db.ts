@@ -16,7 +16,7 @@ export interface RelireDB extends DBSchema {
   articles: { key: string; value: Article };
   vocab: { key: string; value: VocabWord };
   meta: { key: string; value: unknown };
-  /** AI answers kept to save tokens. Derivable, so never part of a backup. */
+  /** Saved AI answers and offline content. Derivable, so never part of a backup. */
   cache: { key: string; value: CacheEntry; indexes: { kind: string } };
   /** Synthesized speech. Clips for vocabulary words are kept for good; the rest are trimmed by use. */
   audio: { key: string; value: AudioEntry; indexes: { text: string; lastUsed: number } };
@@ -47,7 +47,7 @@ export interface AudioEntry {
 
 export interface CacheEntry {
   key: string;
-  kind: 'word' | 'sentence' | 'prosody' | 'hint' | 'explanation' | 'exercises' | 'conjugation';
+  kind: 'word' | 'sentence' | 'prosody' | 'hint' | 'explanation' | 'exercises' | 'conjugation' | 'content';
   value: unknown;
   createdAt: number;
 }

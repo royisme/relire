@@ -1,5 +1,14 @@
 import { expect, test } from 'bun:test';
-import { areaOf, parseRoute, routeHref, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../src/utils/routes';
+import {
+  areaOf,
+  parseRoute as parseConfiguredRoute,
+  routeHref,
+  SETTINGS_SECTIONS,
+  STUDY_TABS,
+  type Route,
+} from '../src/utils/routes';
+
+const parseRoute = (hash: string) => parseConfiguredRoute(hash, true);
 
 const roundTrip = (route: Route) => parseRoute(routeHref(route));
 
@@ -171,6 +180,25 @@ test('Grammar topics and Conjugation have distinct addresses and query values', 
   });
   expect(parseRoute('#/study/grammar/conjugation?verb=%20').route).toEqual(conjugation);
   expect(parseRoute('#/study/grammar/conjugation?tag=articles').canonical).toBe('#/study/grammar/conjugation');
+});
+
+test('without a content service Grammar is Conjugation and topic routes are not found', () => {
+  expect(parseConfiguredRoute('#/study/grammar', false)).toEqual({
+    route: { name: 'study', tab: 'grammar', section: 'conjugation' },
+    canonical: '#/study/grammar/conjugation',
+  });
+  expect(parseConfiguredRoute('#/study/grammar?tag=articles', false).route).toEqual({
+    name: 'study',
+    tab: 'grammar',
+    section: 'conjugation',
+  });
+  expect(parseConfiguredRoute('#/study/grammar/test-only', false).route).toEqual({ name: 'notFound' });
+  expect(parseConfiguredRoute('#/study/grammar/conjugation?verb=aller', false).route).toEqual({
+    name: 'study',
+    tab: 'grammar',
+    section: 'conjugation',
+    verb: 'aller',
+  });
 });
 
 test('topic ids decode safely before the extra-path guard; section names are reserved', () => {

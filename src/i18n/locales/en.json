@@ -332,6 +332,7 @@
     "exportFailed": "Export failed: {{msg}}",
     "restoreFailed": "Restore failed: {{msg}}",
     "cacheSummary": "Saved answers: {{words}} words, {{conjugations}} conjugations, {{sentences}} sentences, {{exercises}} exercise answers, {{prosody}} marker sets",
+    "contentCacheSummary": "{{count}} saved content responses (kept for 365 days, not backed up)",
     "clearCache": "Clear saved answers",
     "cacheDesc": "Explanations, exercise help and markers are saved on this device. Words are kept until you clear them; sentences, exercise help and markers for 30 days. They are not part of backups.",
     "audioSummary": "Pronunciation audio: {{clips}} clips, {{mb}} MB; {{kept}} kept for your vocabulary",

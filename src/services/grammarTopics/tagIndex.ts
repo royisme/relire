@@ -1,25 +1,11 @@
-/** Owns lazy tag-index validation and its retryable cache; never imports topic content or schemas. */
+/** Owns tag-index validation and in-flight sharing; never imports topic content or schemas. */
 import { GrammarTagIndexSchema, type GrammarTagIndex } from '../../types/grammarTagIndex';
+import { contentRequest } from './request';
 
-let indexPending: Promise<GrammarTagIndex> | undefined;
-let indexLoaded: GrammarTagIndex | undefined;
-
-export const loadedGrammarTagIndex = () => indexLoaded;
-
+let pending: Promise<GrammarTagIndex> | undefined;
 export function loadGrammarTagIndex(): Promise<GrammarTagIndex> {
-  indexPending ??= (async () => {
-    const { default: data } = await import('../../data/grammar/tag-index.json');
-    indexLoaded = GrammarTagIndexSchema.parse(data);
-    return indexLoaded;
-  })().catch((error: unknown) => {
-    indexPending = undefined;
-    throw error;
+  pending ??= contentRequest('/v1/tag-index', (data) => GrammarTagIndexSchema.parse(data)).finally(() => {
+    pending = undefined;
   });
-  return indexPending;
-}
-
-/** Only for isolated loader tests; application callers share immutable artifacts. */
-export function resetGrammarTagIndexForTests(): void {
-  indexPending = undefined;
-  indexLoaded = undefined;
+  return pending;
 }
