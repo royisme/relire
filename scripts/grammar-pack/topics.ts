@@ -21,10 +21,17 @@ export const TopicManifestSchema = z
   })
   .superRefine((manifest, ctx) => {
     const seen = new Set<string>();
+    const ids = new Set(manifest.topics.map((topic) => topic.id));
     manifest.topics.forEach((topic, i) => {
       if (seen.has(topic.id))
         ctx.addIssue({ code: 'custom', path: ['topics', i, 'id'], message: `duplicate id ${topic.id}` });
       seen.add(topic.id);
+      if (new Set(topic.tags).size !== topic.tags.length)
+        ctx.addIssue({ code: 'custom', path: ['topics', i, 'tags'], message: 'duplicate tag' });
+      topic.related.forEach((id, j) => {
+        if (id === topic.id || !ids.has(id))
+          ctx.addIssue({ code: 'custom', path: ['topics', i, 'related', j], message: `invalid related topic ${id}` });
+      });
     });
   });
 export type TopicManifest = z.infer<typeof TopicManifestSchema>;
