@@ -16,6 +16,7 @@
     "format:check": "oxfmt --check .",
     "clean": "rm -rf dist dev-dist",
     "i18n:check": "bun scripts/check-i18n.ts",
+    "shape:check": "bun scripts/check-code-shape.ts",
     "test": "bun test",
     "e2e": "playwright test"
   },

@@ -53,6 +53,7 @@ Run `bunx shadcn@latest add <name> --yes` from the project root. `components.jso
 - `bun run lint`: oxlint, type-aware, with the React Hooks rules; warnings fail. `bun run lint:fix` applies safe fixes.
 - `bun run format` / `bun run format:check`: oxfmt is the only formatter (CI checks it). Markdown, prompt templates and `marketing/` are left as written.
 - `bun run i18n:check`: keys exist in both locales, the locales match, and no hard-coded Chinese is in components (CI runs it). See `.claude/rules/i18n.md` and `docs/conventions.md`.
+- `bun run shape:check`: the machine-checkable shape of the code: a source file has at most 800 lines, a line at most 200 characters, and no file is named `utils`, `types`, `config`, `helpers`, `common`, `misc`, `shared` or `constants` (name it for what it holds). Old violations are recorded in `scripts/code-shape-ledger.json`, which may only shrink: growing an entry fails, and a shrunk entry must be lowered with `bun scripts/check-code-shape.ts --tighten`. Runs in CI and in the pre-commit hook; turn the hook on once per clone with `git config core.hooksPath .githooks` (it also runs `format:check`).
 
 ## Tests
 

@@ -30,5 +30,7 @@ jobs:
         run: bun scripts/grammar-topics/publish.ts --check
       - name: Translations
         run: bun run i18n:check
+      - name: Code shape
+        run: bun run shape:check
       - name: Build
         run: bun run build

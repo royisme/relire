@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Rejects a commit that breaks what a machine can judge. Judgement calls live in CLAUDE.md and .claude/rules, not here.
+# Turn it on once per clone: git config core.hooksPath .githooks
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+bun run shape:check
+bun run format:check
