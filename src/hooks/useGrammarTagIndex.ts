@@ -1,8 +1,8 @@
 /** Owns mount-scoped tag-index readiness without loading topic content; not link rendering. */
 import { useEffect, useState } from 'react';
 import { errorMessage } from '../services/ai/errors';
-import { loadedGrammarTagIndex, loadGrammarTagIndex } from '../services/grammarTopics/load';
-import type { GrammarTagIndex } from '../types/grammarTopic';
+import { loadedGrammarTagIndex, loadGrammarTagIndex } from '../services/grammarTopics/tagIndex';
+import type { GrammarTagIndex } from '../types/grammarTagIndex';
 
 interface GrammarTagIndexState {
   status: 'loading' | 'ready' | 'error';

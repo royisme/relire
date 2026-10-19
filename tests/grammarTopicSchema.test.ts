@@ -1,6 +1,7 @@
 /** Owns structural topic schema tests with synthetic probes, not linguistic validation. */
 import { expect, test } from 'bun:test';
-import { GrammarTopicSchema, GrammarTopicsPackSchema, GrammarTagIndexSchema } from '../src/types/grammarTopic';
+import { GrammarTopicSchema, GrammarTopicsPackSchema } from '../src/types/grammarTopic';
+import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { topicFixture, topicsFixture } from './fixtures/grammarTopics';
 
 test('the fixture covers all block types; zero topics and levels beyond A1 are valid', () => {

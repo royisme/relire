@@ -1,10 +1,10 @@
-/** Owns topic, block and tag-index contracts and structural validation; not content generation or review decisions. */
+/** Owns topic and block contracts and structural validation; not content generation or review decisions. */
 import { z } from 'zod';
 import { ExerciseLevelSchema } from './exercises';
 import { GrammarTagSchema } from './grammar';
+import { grammarTopicSlug as slug } from './grammarTagIndex';
 
 const text = z.string().trim().min(1);
-const slug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
 const bilingual = z.object({ en: text, zh: text });
 const cell = z
   .object({ fr: text.optional(), en: text.optional(), zh: text.optional() })
@@ -112,6 +112,3 @@ export const GrammarTopicsPackSchema = z
     });
   });
 export type GrammarTopicsPack = z.infer<typeof GrammarTopicsPackSchema>;
-
-export const GrammarTagIndexSchema = z.partialRecord(GrammarTagSchema, z.array(slug).min(1));
-export type GrammarTagIndex = z.infer<typeof GrammarTagIndexSchema>;

@@ -2,7 +2,8 @@
 import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { GrammarTopicsPackSchema, GrammarTagIndexSchema } from '../src/types/grammarTopic';
+import { GrammarTopicsPackSchema } from '../src/types/grammarTopic';
+import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { topicsFixture } from './fixtures/grammarTopics';
 
 const data = topicsFixture();
@@ -13,13 +14,10 @@ void mock.module('../src/data/grammar/topics.json', () => {
   return { default: data };
 });
 void mock.module('../src/data/grammar/tag-index.json', () => ({ default: index }));
-const {
-  loadGrammarTopics,
-  loadGrammarTagIndex,
-  loadedGrammarTopics,
-  loadedGrammarTagIndex,
-  resetGrammarTopicsForTests,
-} = await import('../src/services/grammarTopics/load');
+const { loadGrammarTopics, loadedGrammarTopics, resetGrammarTopicsForTests } =
+  await import('../src/services/grammarTopics/load');
+const { loadGrammarTagIndex, loadedGrammarTagIndex, resetGrammarTagIndexForTests } =
+  await import('../src/services/grammarTopics/tagIndex');
 const { useGrammarTopics } = await import('../src/hooks/useGrammarTopics');
 const { useGrammarTagIndex } = await import('../src/hooks/useGrammarTagIndex');
 let topicSpy: ReturnType<typeof spyOn<typeof GrammarTopicsPackSchema, 'parse'>>;
@@ -27,6 +25,7 @@ let indexSpy: ReturnType<typeof spyOn<typeof GrammarTagIndexSchema, 'parse'>>;
 
 beforeEach(() => {
   resetGrammarTopicsForTests();
+  resetGrammarTagIndexForTests();
   Object.assign(data, topicsFixture());
   for (const key of Object.keys(index)) delete index[key];
   void GrammarTopicsPackSchema.parse;
