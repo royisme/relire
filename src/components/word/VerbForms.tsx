@@ -1,25 +1,38 @@
 /**
- * The "Verb form" section of the word sheet: which pack verbs, tenses and persons write the clicked word
- * (`aller : présent, je` for `vais`, the tense and the person in French), one line per lemma. Draws nothing, with no
- * heading, when the word is no pack form or the pack did not load (the Conjugation slot shows that error). The
- * sheet settles the pack before drawing this (useWordSheetPack), so it is in the entry's first frame. Loaded
- * lazily with the pack, so neither the pack nor the index is in the main bundle. Does not own the section frame's look
- * (Section) or the matching (grammarPack/reverse).
+ * The "Verb form" section of the word sheet: which verbs, tenses and persons write the clicked word
+ * (`aller : présent, je` for `vais`, the tense and the person in French), one line per lemma: the pack's verbs
+ * first, then the lexicon's other verbs when a content service is configured. Draws nothing, with no heading,
+ * when the word is no verb form or the pack did not load (the Conjugation slot shows that error); a lexicon
+ * failure shows its real text under the lines. The sheet settles the pack and the lexicon before drawing this
+ * (useWordSheetPack), so it is in the entry's first frame. Loaded lazily with the pack, so neither the pack nor
+ * the index is in the main bundle. Does not own the section frame's look (Section) or the matching
+ * (grammarPack/reverse, lexicon/match).
  */
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGrammarPack } from '../../hooks/useGrammarPack';
-import { lookupVerbForms, type VerbFormGroup } from '../../services/grammarPack/reverse';
+import { lookupVerbForms } from '../../services/grammarPack/reverse';
+import type { VerbFormMatch } from '../../services/lexicon/match';
+import type { LexiconVerbLines } from '../../services/lexicon/verbs';
 import { Section } from './Section';
 
-export function VerbForms({ lookup }: { lookup: string }) {
+export function VerbForms({ lookup, lexicon }: { lookup: string; lexicon: LexiconVerbLines }) {
   const { t } = useTranslation();
   const { pack } = useGrammarPack();
-  const groups = useMemo(() => (pack ? lookupVerbForms(pack, lookup) : []), [pack, lookup]);
+  const lines = useMemo(
+    () => [
+      ...(pack ? lookupVerbForms(pack, lookup) : []).map(({ verb, tenses, participles }) => ({
+        infinitive: verb.infinitive,
+        match: { tenses, participles },
+      })),
+      ...lexicon.lines,
+    ],
+    [pack, lookup, lexicon],
+  );
 
-  const line = ({ verb, tenses, participles }: VerbFormGroup) =>
+  const line = (infinitive: string, { tenses, participles }: VerbFormMatch) =>
     t('wordModal.verbFormLine', {
-      verb: verb.infinitive,
+      verb: infinitive,
       forms: [
         ...tenses.map(({ tense, persons }) =>
           t('wordModal.verbFormTense', {
@@ -32,16 +45,21 @@ export function VerbForms({ lookup }: { lookup: string }) {
       ].join('; '),
     });
 
-  if (!groups.length) return null;
+  if (!lines.length && !lexicon.error) return null;
   return (
     <Section title={t('wordModal.verbForm')}>
       <ul className="space-y-1">
-        {groups.map((group) => (
-          <li key={group.verb.id} className="break-words text-sm text-ink-800">
-            {line(group)}
+        {lines.map(({ infinitive, match }) => (
+          <li key={infinitive} className="break-words text-sm text-ink-800">
+            {line(infinitive, match)}
           </li>
         ))}
       </ul>
+      {lexicon.error && (
+        <p role="alert" className="break-words text-sm text-bad-700">
+          {lexicon.error}
+        </p>
+      )}
     </Section>
   );
 }

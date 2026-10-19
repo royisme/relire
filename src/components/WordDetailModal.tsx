@@ -12,10 +12,10 @@ import { Section } from './word/Section';
 
 /**
  * The word lookup sheet, laid out like a dictionary entry: the word, how it sounds and what it means
- * here, the verb forms the word is (a pack form), then plain sections (pronunciation, use in this sentence,
+ * here, the verb forms the word is (a pack or lexicon form), then plain sections (pronunciation, use in this sentence,
  * examples, memory trick) and, last, the conjugation of a verb. Sections are separated by rules, not tinted
- * boxes. The pack and its two sections are settled before the entry is drawn (useWordSheetPack), so they
- * are in its first frame and nothing shifts when they arrive.
+ * boxes. The pack, the lexicon's verb lines and the two sections are settled before the entry is drawn
+ * (useWordSheetPack), so they are in its first frame and nothing shifts when they arrive.
  */
 
 interface WordDetailModalProps {
@@ -46,7 +46,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
   const [speechSpeed, setSpeechSpeed] = useState<number>(0.85);
-  const pack = useWordSheetPack(isOpen);
+  const pack = useWordSheetPack(isOpen, activeWord ?? null);
   const sections = pack?.sections;
 
   if (!isOpen) return null;
@@ -150,7 +150,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
                 </div>
               </header>
 
-              {sections && <sections.VerbForms lookup={activeWord ?? wordData.word} />}
+              {sections && <sections.VerbForms lookup={activeWord ?? wordData.word} lexicon={pack.lexicon} />}
 
               {wordData.phoneticsGuide && (
                 <Section title={t('wordModal.phoneticsGuide')}>

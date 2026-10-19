@@ -19,23 +19,24 @@ test('a failed sections import settles with its real error, is cleared on close,
     throw new Error('sections chunk unavailable offline');
   });
 
-  expect(useWordSheetPack(true)).toBeUndefined();
+  expect(useWordSheetPack(true, 'vais')).toBeUndefined();
   const close = effect!();
   await Bun.sleep(0);
-  expect(useWordSheetPack(true)).toEqual({ error: 'sections chunk unavailable offline' });
+  expect(useWordSheetPack(true, 'vais')).toEqual({ error: 'sections chunk unavailable offline' });
   if (typeof close === 'function') close();
   expect(state).toBeUndefined();
-  expect(useWordSheetPack(false)).toBeUndefined();
+  expect(useWordSheetPack(false, null)).toBeUndefined();
 
   const load = mock(() => Promise.resolve());
   void mock.module('../src/components/word/packSections', () => ({
     loadedGrammarPack: () => undefined,
     loadGrammarPack: load,
+    lexiconVerbLines: () => Promise.resolve({ lines: [] }),
   }));
-  expect(useWordSheetPack(true)).toBeUndefined();
+  expect(useWordSheetPack(true, 'vais')).toBeUndefined();
   const cleanup = effect!();
   await Bun.sleep(0);
   expect(load).toHaveBeenCalledTimes(1);
-  expect(useWordSheetPack(true)?.sections).toBeDefined();
+  expect(useWordSheetPack(true, 'vais')?.sections).toBeDefined();
   if (typeof cleanup === 'function') cleanup();
 });
