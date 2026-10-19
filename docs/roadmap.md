@@ -28,6 +28,10 @@ Principles that shape every item: nothing has shipped, so no compatibility code;
 3. **Noun gender tendencies (Part 4):** NP1 is built (schema, measurement, build gate, review sheet) and the Morphalou counts are recorded (15 of 17 candidate endings pass the 80% threshold; `-ure` 74% and `-e` 64% do not). NP2 is drafted: 337 A1 nouns (40 seed plus 297 agy-drafted, every gender agrees with Morphalou), all `draft`; sources and doubts are in `.pi-runs/np2/notes.md`. Next: the owner reviews the nouns and the 15 rules that pass (`bun scripts/noun-gender/review.ts print`, then `record`), then NP3 (Gender section, word-sheet tip, `GENDER_CHECK` drills).
 4. **Integration e2e pass** when a batch of the above is assembled; then the owner's visual acceptance (three themes, 360 px, phone drawer).
 
+## Backlog
+
+Follow-ups, owner reviews and tech debt are tracked as GitHub issues on the repository (labels `grammar-pack`, `ux`, `needs-owner`, `tech-debt`); the first backlog is #11 to #27 (2026-10-19). This page keeps the direction, the issues keep the work items.
+
 ## Later
 
 - Migrate the hand-written UI primitives (overlay Dialog/Sheet/Drawer, Segmented, MenuButton) to shadcn/Base UI components, one at a time, when the owner asks; the e2e suite asserts their behaviour.
