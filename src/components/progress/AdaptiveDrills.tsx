@@ -1,13 +1,15 @@
 /** One adaptive action with retained-save retry and explicit discard/leave decisions. */
-import { useState, type FormEvent } from 'react';
+import { Fragment, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2, ListPlus } from 'lucide-react';
 import { EXERCISE_LEVELS, type ExerciseLevel } from '../../types/exercises';
 import type { GrammarTag } from '../../types/grammar';
 import { MAX_GENERATED_ITEMS } from '../../services/api';
 import { useAdaptiveDrills } from '../../hooks/useAdaptiveDrills';
+import { GrammarTagLabel } from '../GrammarTagLabel';
 import { Button } from '../ui/button';
 import { Dialog, OverlayHeader } from '../ui/overlay';
+import { adaptiveTargetParts, TARGETS_MARKER } from './adaptiveTargets';
 
 const field = 'h-10 rounded-md border border-ink-300 bg-surface px-3 text-sm text-ink-900';
 export function AdaptiveDrills({
@@ -19,7 +21,12 @@ export function AdaptiveDrills({
   disabled: boolean;
   onMissingKey: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const targetParts = adaptiveTargetParts(
+    t('adaptive.targets', { tags: TARGETS_MARKER }),
+    targets.map((tag) => t(`grammarTags.${tag}`)),
+    i18n.language,
+  );
   const drills = useAdaptiveDrills(onMissingKey);
   const [level, setLevel] = useState<ExerciseLevel>('B1');
   const [count, setCount] = useState('8');
@@ -46,7 +53,11 @@ export function AdaptiveDrills({
       <h3 className="font-serif text-lg text-ink-900">{t('adaptive.title')}</h3>
       <p className="text-sm text-ink-600 break-words">
         {targets.length
-          ? t('adaptive.targets', { tags: targets.map((tag) => t(`grammarTags.${tag}`)).join(', ') })
+          ? targetParts.map((part, index) => (
+              <Fragment key={index}>
+                {part.type === 'tag' ? <GrammarTagLabel tag={targets[part.index]} /> : part.value}
+              </Fragment>
+            ))
           : t('adaptive.noTargets')}
       </p>
       <form onSubmit={submit} className="space-y-3">
