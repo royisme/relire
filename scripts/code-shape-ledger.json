@@ -1,6 +1,5 @@
 {
   "longFiles": {
-    "src/components/ReaderView.tsx": 670,
     "src/App.tsx": 630,
     "e2e/ai-settings.spec.ts": 569,
     "tests/aiTasks.test.ts": 505
@@ -8,7 +7,6 @@
   "longLines": {
     "e2e/shadowing-history.spec.ts": 1,
     "scripts/lexicon/lexicon.ts": 1,
-    "src/components/ReaderView.tsx": 1,
     "src/components/practice/SetTable.tsx": 1,
     "src/components/reader/BottomDock.tsx": 1,
     "src/components/reader/PracticeCard.tsx": 1,
