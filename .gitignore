@@ -35,6 +35,7 @@ Thumbs.db
 *~
 
 # Local tooling state
+worker/.wrangler/
 .claude/settings.local.json
 # Agent definitions are never committed (rules/ and skills/ stay tracked)
 .claude/agents/
