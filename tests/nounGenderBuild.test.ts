@@ -233,13 +233,12 @@ test('review records reference exactly one row kind', () => {
   expect(ReviewsSchema.safeParse({ records: [neither], rejected: [] }).success).toBe(false);
 });
 
-test('the CLI refuses to produce a pack while attest and reviews are missing', () => {
+test('the CLI refuses to produce a pack while the owner has reviewed nothing', () => {
   const root = fileURLToPath(new URL('../', import.meta.url));
   for (const args of [[], ['--check']]) {
     const run = Bun.spawnSync({ cmd: ['bun', `${root}scripts/noun-gender/build.ts`, ...args], cwd: root });
     expect(run.exitCode).not.toBe(0);
     const stderr = new TextDecoder().decode(run.stderr);
-    expect(stderr).toContain('no attest record');
     expect(stderr).toContain('publish gate refuses draft; human review required');
   }
   expect(existsSync(`${root}src/data/noun-gender/pack.json`)).toBe(false);

@@ -155,12 +155,14 @@ test('strings are NFC and endings are lowercase letters', () => {
   );
 });
 
-test('committed source files parse and carry no review, count or claim', () => {
+test('committed source files parse and no noun carries an owner review', () => {
   const source = NounsSourceSchema.parse(nounsJson);
   expect(source.packVersion).toBe('0.1.0');
-  expect(source.nouns).toHaveLength(40);
+  expect(source.nouns.length).toBeGreaterThanOrEqual(40);
   for (const noun of source.nouns) {
-    expect(noun.prov).toEqual({ origin: 'clarte-seed', checkedAgainst: [], status: 'draft' });
+    expect(['clarte-seed', 'agy-drafted']).toContain(noun.prov.origin);
+    expect(noun.prov.status).toBe('draft');
+    expect(noun.prov.reviewedBy).toBeUndefined();
     expect(noun.id).toBe(noun.lemma.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
   }
   const candidates = CandidatesSchema.parse(candidatesJson);
@@ -185,5 +187,8 @@ test('committed source files parse and carry no review, count or claim', () => {
     'ee:f',
   ]);
   expect(ReviewsSchema.parse(reviewsJson)).toEqual({ records: [], rejected: [] });
-  expect(OracleAttestSchema.parse(attestJson)).toEqual({ rules: {} });
+  // The owner confirmed (NQ6) that the measured counts may be committed: one record per candidate, integers only.
+  const attest = OracleAttestSchema.parse(attestJson);
+  expect(Object.keys(attest.rules).sort()).toEqual(candidates.map(({ id }) => id).sort());
+  for (const record of Object.values(attest.rules)) expect(record.agree).toBeLessThanOrEqual(record.n);
 });
