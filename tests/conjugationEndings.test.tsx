@@ -5,11 +5,10 @@ import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import en from '../src/i18n/locales/en.json';
 import { CellForm } from '../src/components/study/grammar/CellForm';
-import { TenseSection } from '../src/components/study/grammar/TenseSection';
 import { RuleEndings } from '../src/components/study/grammar/RuleEndings';
 import { ruleEndingRows } from '../src/components/study/grammar/forms';
 import { generateVerb } from '../src/services/conjugation/generate';
-import { joinParts } from '../src/services/conjugation/rules';
+import { composeLead, joinParts } from '../src/services/conjugation/rules';
 import { verifyAnswer, verifyPackVerb } from '../src/services/conjugation/verify';
 import { REGULAR_RULES } from '../src/services/conjugation/rules';
 import { erAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
@@ -61,12 +60,14 @@ test('differing model forms are unsplit, only the engine line has parts', () => 
 test('the highlighted rule line uses its own elision, not the model lead', () => {
   const answer = parlerAnswer();
   answer.forms.present['1sg'] = ['aime'];
-  const html = renderToStaticMarkup(
-    <I18nextProvider i18n={i18n}>
-      <TenseSection tense="present" verb={verifyAnswer(answer)} />
-    </I18nextProvider>,
-  );
-  expect(html).toContain('j’aime');
+  const verb = verifyAnswer(answer);
+  const cell = verb.tenses.present['1sg']!;
+  expect(renderCell(cell)).toBe('j’aime');
+  const html = renderCell({
+    lead: composeLead('present', '1sg', verb, cell.ruleForms![0]),
+    forms: cell.ruleForms!,
+    parts: cell.ruleParts,
+  });
   expect(html).toContain('je parl<span');
 });
 

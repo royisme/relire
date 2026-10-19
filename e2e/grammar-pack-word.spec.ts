@@ -7,6 +7,7 @@
 import { parlerAnswer } from '../tests/fixtures/conjugationAnswer';
 import { expect, layout, overflowing, settled, test, type MockAi } from './fixtures';
 import type { Locator, Page } from '@playwright/test';
+import { mockConjugationDeviceVoice } from './deviceSpeech.helpers';
 
 const ARTICLE = 'Je vais manger. Elle parle du pain. Quelle chose. Il faut aller.';
 
@@ -89,6 +90,42 @@ test('a verb in the pack shows the pack table with no AI conjugation request, an
   expect(ai.calls.conjugate).toBe(0);
   expect(ai.prompts.word[0]).not.toContain('conjugationTable');
 });
+
+for (const viewport of ['desktop', 'phone']) {
+  test(`word-sheet forms use device listening without moving the sheet ${viewport === 'phone' ? '@phone' : ''}`, async ({
+    page,
+    ai,
+  }) => {
+    await mockConjugationDeviceVoice(page);
+    ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });
+    await openSeeded(page);
+    await tap(page, 'vais');
+    await showTenses(page);
+    await page.evaluate(() => localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: {} })));
+    const present = tense(page, 'Present');
+    const listen = present.getByRole('button', { name: 'Hear on this device: je vais', exact: true });
+    await listen.scrollIntoViewIfNeeded();
+    await settled(page);
+    const before = {
+      button: await listen.boundingBox(),
+      section: await present.boundingBox(),
+      page: await layout(page),
+    };
+    await listen.click();
+    const stop = present.getByRole('button', { name: 'Stop listening: je vais', exact: true });
+    await expect(stop).toBeVisible();
+    expect(await stop.boundingBox()).toEqual(before.button);
+    expect(await present.boundingBox()).toEqual(before.section);
+    expect(await layout(page)).toEqual(before.page);
+    expect(await page.evaluate(() => window.deviceSpeechTest.spoken)).toEqual(['je vais']);
+    await page.evaluate(() => window.deviceSpeechTest.finish());
+    await expect(listen).toBeVisible();
+    expect(await listen.boundingBox()).toEqual(before.button);
+    expect(await overflowing(sheet(page))).toEqual([]);
+    expect(ai.calls.tts).toBe(0);
+    expect(ai.calls.conjugate).toBe(0);
+  });
+}
 
 test('tapping vais names the pack verb, tense and person', async ({ page, ai }) => {
   ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });

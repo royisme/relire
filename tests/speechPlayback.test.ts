@@ -9,7 +9,7 @@ import * as accessModule from '../src/services/ai/access';
 import type { AiAccess, AiPurpose, TextPurpose } from '../src/services/ai/types';
 import { audioStats } from '../src/storage/audio';
 import { getSpeechFailure, getSpeechState } from '../src/utils/speech/state';
-import { speakFrench, stopSpeech, testSpeech } from '../src/utils/speech/playback';
+import { speakFrench, stopSpeech, testSpeech, toggleSpeech } from '../src/utils/speech/playback';
 import { failure, freshDb } from './fixtures/storage';
 import { getAppSettings } from '../src/utils/appSettings';
 
@@ -184,6 +184,23 @@ describe('remote speech failures', () => {
 });
 
 describe('the device engine', () => {
+  test('explicit device controls play, replace and stop without consulting AI access or keys', async () => {
+    const access = spyOn(accessModule, 'getAiAccess').mockImplementation(() => {
+      throw new Error('Device listening must not consult AI access');
+    });
+    toggleSpeech('je vais', { engine: 'device' });
+    await tick();
+    expect(getSpeechState()).toEqual({ phase: 'playing', key: 'je vais' });
+    toggleSpeech('tu vas', { engine: 'device' });
+    await tick();
+    expect(spoken.map((utterance) => utterance.text)).toEqual(['je vais', 'tu vas']);
+    expect(getSpeechState()).toEqual({ phase: 'playing', key: 'tu vas' });
+    toggleSpeech('tu vas', { engine: 'device' });
+    expect(getSpeechState().phase).toBe('idle');
+    expect(access).not.toHaveBeenCalled();
+    expect((await audioStats()).clips).toBe(0);
+  });
+
   test('speaks with the platform voice when it is the selected engine', async () => {
     const fake = fakeAccess(() => {
       throw new Error('never called');

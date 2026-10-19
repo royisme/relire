@@ -11,6 +11,7 @@ import {
   toggleSpeech,
   type SpeechPhase,
   type SpeechState,
+  type SpeechOptions,
 } from '../../utils/speech';
 
 /**
@@ -57,6 +58,8 @@ interface SpeakButtonProps extends Omit<ButtonProps, 'children'> {
   text: string;
   /** Overrides the shared playback rate for this button. */
   rate?: number;
+  /** Explicit device playback bypasses the selected remote engine and needs no key. */
+  engine?: SpeechOptions['engine'];
   /** Idle name; the accessible name of an icon-only button. */
   label: string;
   /** Name while loading or playing, when pressing stops the clip. */
@@ -131,6 +134,7 @@ function SpeechFailureBubble({ message, host }: { message: string; host: React.R
 export function SpeakButton({
   text,
   rate,
+  engine,
   label,
   stopLabel,
   showLabel,
@@ -159,7 +163,7 @@ export function SpeakButton({
         className={className}
         onClick={(e) => {
           onClick?.(e);
-          toggleSpeech(text, { rate });
+          toggleSpeech(text, { rate, engine });
         }}
         {...rest}
       >

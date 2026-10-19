@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import type { VerifiedVerb } from '../../../services/conjugation/verify';
 import { ComparedLines } from './ComparedLines';
+import { ConjugationSpeakButton } from './ConjugationSpeakButton';
 
 const KEYS = ['present', 'ms', 'fs', 'mp', 'fp'] as const;
 
@@ -17,11 +18,14 @@ export function Participles({ participles }: { participles: VerifiedVerb['partic
         {rows.map(([key, participle]) => (
           <li key={key} className="flex flex-col gap-x-4 sm:flex-row sm:items-baseline">
             <span className="shrink-0 text-sm text-ink-700 sm:w-48">{t(`conjugation.page.participle.${key}`)}</span>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               {participle.status === 'differs' && participle.ruleForm ? (
                 <ComparedLines model={participle.form} rule={participle.ruleForm} />
               ) : (
-                <p className="break-words font-serif text-lg text-ink-900">{participle.form}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <p className="min-w-0 pt-1.5 break-words font-serif text-lg text-ink-900">{participle.form}</p>
+                  <ConjugationSpeakButton text={participle.form} />
+                </div>
               )}
             </div>
           </li>

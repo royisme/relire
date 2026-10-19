@@ -1082,6 +1082,8 @@
       "aiOnly": "AI-made, not checked",
       "differs": "Some forms differ",
       "example": "AI-made example",
+      "listen": "Hear on this device: {{text}}",
+      "stopListening": "Stop listening: {{text}}",
       "endings": {
         "title": "Rule endings",
         "note": "Underlined endings in the forms and this table come from the same rule. A dash marks a person not used in that tense.",

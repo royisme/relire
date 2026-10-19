@@ -1073,6 +1073,8 @@
       "aiOnly": "AI 生成，未核对",
       "differs": "有形式不一致",
       "example": "AI 生成的例句",
+      "listen": "用本机语音朗读：{{text}}",
+      "stopListening": "停止朗读：{{text}}",
       "endings": {
         "title": "规则词尾",
         "note": "变位中带下划线的词尾与此表来自同一规则。破折号表示该时态不使用此人称。",
