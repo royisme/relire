@@ -1017,6 +1017,21 @@
       "practise": "练习这个动词",
       "practising": "正在生成练习…",
       "practiseOpen": "打开新的练习集",
+      "patterns": {
+        "title": "句式",
+        "tense": "时态",
+        "person": "人称",
+        "impersonal": "无人称 il",
+        "negation": "negation",
+        "estCeQue": "est-ce que 疑问句",
+        "inversion": "倒装疑问句",
+        "unavailable": "— {{reason}}",
+        "noQuestions": "此时态不提供疑问句。",
+        "noJe": "je 请用 est-ce que 提问。",
+        "notCovered": "所列规则未涵盖此情况。",
+        "aiOnly": "AI 生成，未核对",
+        "differs": "AI 生成；此变位与规则不符。"
+      },
       "empty": "输入一个动词原形，例如 parler 或 se lever，即可查看它的各个时态。",
       "auxiliary": {
         "avoir": "助动词：avoir",

@@ -213,14 +213,23 @@ export function passeComposeForms(
   participles: PastParticiples,
 ): string[] {
   const aux = AUXILIARY_PRESENT[verb.aux][personIndex(person)];
-  if (verb.pcInvariable || verb.aux === 'avoir') return [`${aux} ${participles.ms}`];
+  return passeComposeParticiples(verb, person, participles).map((form) => `${aux} ${form}`);
+}
+
+/** Agreement variants shared by the composed grid and the sentence patterns. */
+export function passeComposeParticiples(
+  verb: Pick<Verb, 'aux' | 'pcInvariable'>,
+  person: Person,
+  participles: PastParticiples,
+): string[] {
+  if (verb.pcInvariable || verb.aux === 'avoir') return [participles.ms];
   const plural = person.endsWith('pl');
-  return [participles[plural ? 'mp' : 'ms'], participles[plural ? 'fp' : 'fs']].map((form) => `${aux} ${form}`);
+  return [participles[plural ? 'mp' : 'ms'], participles[plural ? 'fp' : 'fs']];
 }
 
 // ---- Lead ------------------------------------------------------------------
 
-const SUBJECT: Record<Person, string> = {
+export const SUBJECT: Record<Person, string> = {
   '1sg': 'je',
   '2sg': 'tu',
   '3sg': 'il/elle',
@@ -228,7 +237,7 @@ const SUBJECT: Record<Person, string> = {
   '2pl': 'vous',
   '3pl': 'ils/elles',
 };
-const REFLEXIVE: Record<Person, string> = {
+export const REFLEXIVE: Record<Person, string> = {
   '1sg': 'me',
   '2sg': 'te',
   '3sg': 'se',
@@ -246,7 +255,7 @@ export interface LeadVerb {
 
 // Vowels with accents count; `y` is left out because no verb of the list starts with it.
 const VOWEL = /^[aeiouàâäéèêëîïôöùûüœ]/;
-const startsWithVowelSound = (form: string, hAspire: boolean | undefined) =>
+export const startsWithVowelSound = (form: string, hAspire: boolean | undefined) =>
   VOWEL.test(form) || (form.startsWith('h') && !hAspire);
 
 /** All that is printed before the verb group; `firstForm` is forms[0] (the auxiliary in passé composé). */
