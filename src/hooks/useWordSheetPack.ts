@@ -7,27 +7,36 @@
  * sections and the loader are dynamic imports so none of them is in the main bundle.
  */
 import { useEffect, useState } from 'react';
+import { errorMessage } from '../services/ai/errors';
 
 type Sections = typeof import('../components/word/packSections');
 
 let sections: Sections | undefined;
 const loadedSections = () => (sections?.loadedGrammarPack() ? sections : undefined);
 
-export function useWordSheetPack(isOpen: boolean): Sections | undefined {
-  // The sections once an attempt of this open has finished, whether or not the pack loaded.
-  const [settled, setSettled] = useState<Sections>();
+type Settled = { sections: Sections; error?: never } | { sections?: never; error: string };
+
+export function useWordSheetPack(isOpen: boolean): Settled | undefined {
+  // The sections or import error once an attempt of this open has finished.
+  const [settled, setSettled] = useState<Settled>();
   useEffect(() => {
     if (!isOpen || loadedSections()) return;
     let live = true;
-    void import('../components/word/packSections').then(async (module) => {
-      sections = module;
-      await module.loadGrammarPack().catch(() => undefined);
-      if (live) setSettled(module);
-    });
+    void import('../components/word/packSections').then(
+      async (module) => {
+        sections = module;
+        await module.loadGrammarPack().catch(() => undefined);
+        if (live) setSettled({ sections: module });
+      },
+      (error: unknown) => {
+        if (live) setSettled({ error: errorMessage(error) });
+      },
+    );
     return () => {
       live = false;
       setSettled(undefined);
     };
   }, [isOpen]);
-  return loadedSections() ?? (isOpen ? settled : undefined);
+  const loaded = loadedSections();
+  return loaded ? { sections: loaded } : isOpen ? settled : undefined;
 }

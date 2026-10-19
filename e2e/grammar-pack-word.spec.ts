@@ -326,6 +326,7 @@ test('@phone the pack sections are in the first frame of the entry at 360 px wit
   // The sheet slides in for 200 ms: let it come to rest first.
   await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)));
 
+  await page.evaluate(() => document.fonts.ready);
   release();
   await expect(sheet(page).getByRole('heading', { name: 'vais' })).toBeVisible();
   // The entry's first frame: the Verb form line and the conjugation disclosure are already there.
@@ -363,16 +364,20 @@ test('@phone the pack sections are in the first frame of the entry at 360 px wit
   expect(await overflowing(page.locator('body'))).toEqual([]);
 });
 
-test('a pack load error shows its real text in the conjugation slot, in place', async ({ page, ai }) => {
-  ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });
-  await page.route(/grammar-pack\/pack\.json/, (route) => route.abort());
-  await openSeeded(page);
-  await tap(page, 'vais');
-  await expect(sheet(page).getByRole('heading', { name: 'Conjugation' })).toBeVisible();
-  await expect(sheet(page).getByRole('alert').first()).toBeVisible();
-  await expect(sheet(page).getByRole('alert').first()).not.toBeEmpty();
-  await expect(sheet(page).getByText('Conjugate this verb')).toHaveCount(0);
-});
+for (const module of ['data/grammar-pack/pack.json', 'components/word/packSections.ts']) {
+  test(`a pack load error (${module}) shows its real text in the conjugation slot, in place`, async ({ page, ai }) => {
+    ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });
+    await page.route(`**/src/${module}*`, (route) => route.abort());
+    await openSeeded(page);
+    await tap(page, 'vais');
+    await expect(sheet(page).getByRole('heading', { name: 'Conjugation' })).toBeVisible();
+    await expect(sheet(page).getByRole('alert').first()).toBeVisible();
+    await expect(sheet(page).getByRole('alert').first()).not.toBeEmpty();
+    await expect(sheet(page).getByRole('alert').first()).toContainText('Failed to fetch dynamically imported module:');
+    await expect(sheet(page).getByText('Looking up the word…')).toHaveCount(0);
+    await expect(sheet(page).getByText('Conjugate this verb')).toHaveCount(0);
+  });
+}
 
 const PAGE = '/#/study/grammar/conjugation';
 const practise = (page: Page) => page.getByRole('button', { name: /^(Practise this verb|Making exercises…)$/ });

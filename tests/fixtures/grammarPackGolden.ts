@@ -168,7 +168,7 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['tu', 'es allé', 'es allée'],
         ['il/elle', 'est allé', 'est allée'],
         ['nous', 'sommes allés', 'sommes allées'],
-        ['vous', 'êtes allés', 'êtes allées'],
+        ['vous', 'êtes allés', 'êtes allées', 'êtes allé', 'êtes allée'],
         ['ils/elles', 'sont allés', 'sont allées'],
       ]),
       imparfait: rows([
@@ -231,7 +231,7 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['tu t’', 'es appelé', 'es appelée'],
         ['il/elle s’', 'est appelé', 'est appelée'],
         ['nous nous', 'sommes appelés', 'sommes appelées'],
-        ['vous vous', 'êtes appelés', 'êtes appelées'],
+        ['vous vous', 'êtes appelés', 'êtes appelées', 'êtes appelé', 'êtes appelée'],
         ['ils/elles se', 'sont appelés', 'sont appelées'],
       ]),
       imparfait: rows([

@@ -48,47 +48,49 @@ const cases: Case[] = [
   ['negation', 'se lever', 'imperatif', '2sg', 'ne te lève pas'],
   ['negation', 'se lever', 'imperatif', '1pl', 'ne nous levons pas'],
   ['negation', 'se lever', 'imperatif', '2pl', 'ne vous levez pas'],
-  ['estCeQue', 'aimer', 'present', '1sg', 'est-ce que j’aime?'],
-  ['estCeQue', 'parler', 'present', '3sg', 'est-ce qu’il/elle parle?'],
-  ['estCeQue', 'se lever', 'present', '1sg', 'est-ce que je me lève?'],
-  ['estCeQue', 'aimer', 'passeCompose', '1sg', 'est-ce que j’ai aimé?'],
-  ['inversion', 'parler', 'present', '2sg', 'parles-tu?'],
-  ['inversion', 'parler', 'present', '1pl', 'parlons-nous?'],
-  ['inversion', 'parler', 'present', '2pl', 'parlez-vous?'],
-  ['inversion', 'parler', 'present', '3pl', 'parlent-ils/elles?'],
-  ['inversion', 'parler', 'present', '3sg', 'parle-t-il/elle?'],
-  ['inversion', 'avoir', 'present', '3sg', 'a-t-il/elle?'],
-  ['inversion', 'aller', 'present', '3sg', 'va-t-il/elle?'],
-  ['inversion', 'être', 'present', '3sg', 'est-il/elle?'],
-  ['inversion', 'parler', 'passeCompose', '2sg', 'as-tu parlé?'],
-  ['inversion', 'parler', 'passeCompose', '3sg', 'a-t-il/elle parlé?'],
-  ['inversion', 'aller', 'passeCompose', '3sg', 'est-il/elle allé / allée?'],
-  ['inversion', 'se lever', 'present', '2sg', 'te lèves-tu?'],
-  ['inversion', 'se lever', 'present', '3sg', 'se lève-t-il/elle?'],
-  ['inversion', 'se lever', 'passeCompose', '2sg', 't’es-tu levé / levée?'],
-  ['inversion', 'se lever', 'passeCompose', '3sg', 's’est-il/elle levé / levée?'],
+  ['estCeQue', 'aimer', 'present', '1sg', 'est-ce que j’aime\u00a0?'],
+  ['estCeQue', 'parler', 'present', '3sg', 'est-ce qu’il/elle parle\u00a0?'],
+  ['estCeQue', 'se lever', 'present', '1sg', 'est-ce que je me lève\u00a0?'],
+  ['estCeQue', 'aimer', 'passeCompose', '1sg', 'est-ce que j’ai aimé\u00a0?'],
+  ['inversion', 'parler', 'present', '2sg', 'parles-tu\u00a0?'],
+  ['inversion', 'parler', 'present', '1pl', 'parlons-nous\u00a0?'],
+  ['inversion', 'parler', 'present', '2pl', 'parlez-vous\u00a0?'],
+  ['inversion', 'parler', 'present', '3pl', 'parlent-ils\u00a0? / parlent-elles\u00a0?'],
+  ['inversion', 'parler', 'present', '3sg', 'parle-t-il\u00a0? / parle-t-elle\u00a0?'],
+  ['inversion', 'avoir', 'present', '3sg', 'a-t-il\u00a0? / a-t-elle\u00a0?'],
+  ['inversion', 'aller', 'present', '3sg', 'va-t-il\u00a0? / va-t-elle\u00a0?'],
+  ['inversion', 'être', 'present', '3sg', 'est-il\u00a0? / est-elle\u00a0?'],
+  ['inversion', 'parler', 'passeCompose', '2sg', 'as-tu parlé\u00a0?'],
+  ['inversion', 'parler', 'passeCompose', '3sg', 'a-t-il parlé\u00a0? / a-t-elle parlé\u00a0?'],
+  ['inversion', 'aller', 'passeCompose', '3sg', 'est-il allé\u00a0? / est-elle allée\u00a0?'],
+  ['inversion', 'se lever', 'present', '2sg', 'te lèves-tu\u00a0?'],
+  ['inversion', 'se lever', 'present', '3sg', 'se lève-t-il\u00a0? / se lève-t-elle\u00a0?'],
+  ['inversion', 'se lever', 'passeCompose', '2sg', 't’es-tu levé / levée\u00a0?'],
+  ['inversion', 'se lever', 'passeCompose', '3sg', 's’est-il levé\u00a0? / s’est-elle levée\u00a0?'],
+  ['inversion', 'aller', 'passeCompose', '2pl', 'êtes-vous allés / allées / allé / allée\u00a0?'],
+  ['inversion', 's’appeler', 'passeCompose', '3pl', 'se sont-ils appelés\u00a0? / se sont-elles appelées\u00a0?'],
   ['inversion', 'aller', 'present', '1sg', undefined],
   ['estCeQue', 'aller', 'subjonctif', '3sg', undefined],
   ['inversion', 'aller', 'subjonctif', '3sg', undefined],
   ['estCeQue', 'aller', 'imperatif', '2sg', undefined],
   ['inversion', 'aller', 'imperatif', '2sg', undefined],
   ['negation', 'falloir', 'present', '3sg', 'il ne faut pas'],
-  ['estCeQue', 'falloir', 'present', '3sg', 'est-ce qu’il faut?'],
-  ['inversion', 'falloir', 'present', '3sg', 'faut-il?'],
-  ['estCeQue', 'parler', 'present', '3pl', 'est-ce qu’ils/elles parlent?'],
-  ['inversion', 'aller', 'passeCompose', '3pl', 'sont-ils/elles allés / allées?'],
+  ['estCeQue', 'falloir', 'present', '3sg', 'est-ce qu’il faut\u00a0?'],
+  ['inversion', 'falloir', 'present', '3sg', 'faut-il\u00a0?'],
+  ['estCeQue', 'parler', 'present', '3pl', 'est-ce qu’ils/elles parlent\u00a0?'],
+  ['inversion', 'aller', 'passeCompose', '3pl', 'sont-ils allés\u00a0? / sont-elles allées\u00a0?'],
   ['negation', 'être', 'imparfait', '1sg', 'je n’étais pas'],
   ['negation', 'aller', 'futur', '1sg', 'je n’irai pas'],
   ['negation', 'aller', 'conditionnel', '1sg', 'je n’irais pas'],
-  ['estCeQue', 'aller', 'imparfait', '2sg', 'est-ce que tu allais?'],
-  ['estCeQue', 'aller', 'futur', '2sg', 'est-ce que tu iras?'],
-  ['estCeQue', 'aller', 'conditionnel', '2sg', 'est-ce que tu irais?'],
-  ['inversion', 'aller', 'imparfait', '3sg', 'allait-il/elle?'],
-  ['inversion', 'aller', 'futur', '3sg', 'ira-t-il/elle?'],
-  ['inversion', 'aller', 'conditionnel', '3sg', 'irait-il/elle?'],
+  ['estCeQue', 'aller', 'imparfait', '2sg', 'est-ce que tu allais\u00a0?'],
+  ['estCeQue', 'aller', 'futur', '2sg', 'est-ce que tu iras\u00a0?'],
+  ['estCeQue', 'aller', 'conditionnel', '2sg', 'est-ce que tu irais\u00a0?'],
+  ['inversion', 'aller', 'imparfait', '3sg', 'allait-il\u00a0? / allait-elle\u00a0?'],
+  ['inversion', 'aller', 'futur', '3sg', 'ira-t-il\u00a0? / ira-t-elle\u00a0?'],
+  ['inversion', 'aller', 'conditionnel', '3sg', 'irait-il\u00a0? / irait-elle\u00a0?'],
   ['negation', 's’appeler', 'subjonctif', '3sg', 'qu’il/elle ne s’appelle pas'],
   ['negation', 's’appeler', 'imperatif', '2sg', 'ne t’appelle pas'],
-  ['estCeQue', 'aller', 'present', '1sg', 'est-ce que je vais?'],
+  ['estCeQue', 'aller', 'present', '1sg', 'est-ce que je vais\u00a0?'],
   ['negation', 'aller', 'present', '1sg', 'je ne vais pas'],
 ];
 for (const [index, [pattern, verb, tense, person, expected]] of cases.entries()) {
@@ -98,14 +100,22 @@ for (const [index, [pattern, verb, tense, person, expected]] of cases.entries())
 }
 
 const edges: [keyof typeof patterns, CellParts, string | undefined][] = [
-  ['inversion', { tense: 'present', person: '3sg', subject: 'il/elle', verb: ['prend'] }, 'prend-il/elle?'],
-  ['inversion', { tense: 'present', person: '3pl', subject: 'ils/elles', verb: ['aiment'] }, 'aiment-ils/elles?'],
+  [
+    'inversion',
+    { tense: 'present', person: '3sg', subject: 'il/elle', verb: ['prend'] },
+    'prend-il\u00a0? / prend-elle\u00a0?',
+  ],
+  [
+    'inversion',
+    { tense: 'present', person: '3pl', subject: 'ils/elles', verb: ['aiment'] },
+    'aiment-ils\u00a0? / aiment-elles\u00a0?',
+  ],
   ['negation', { tense: 'present', person: '1sg', subject: 'je', verb: ['habite'] }, 'je n’habite pas'],
   ['negation', { tense: 'present', person: '1sg', subject: 'je', verb: ['hurle'], hAspire: true }, 'je ne hurle pas'],
   [
     'estCeQue',
     { tense: 'present', person: '1sg', subject: 'je', verb: ['hurle'], hAspire: true },
-    'est-ce que je hurle?',
+    'est-ce que je hurle\u00a0?',
   ],
   [
     'negation',
@@ -120,12 +130,12 @@ const edges: [keyof typeof patterns, CellParts, string | undefined][] = [
   [
     'estCeQue',
     { tense: 'present', person: '2sg', subject: 'tu', verb: ['paies', 'payes'] },
-    'est-ce que tu paies? / est-ce que tu payes?',
+    'est-ce que tu paies\u00a0? / est-ce que tu payes\u00a0?',
   ],
   [
     'inversion',
     { tense: 'present', person: '3sg', subject: 'il/elle', verb: ['paie', 'paye'] },
-    'paie-t-il/elle? / paye-t-il/elle?',
+    'paie-t-il\u00a0? / paie-t-elle\u00a0? / paye-t-il\u00a0? / paye-t-elle\u00a0?',
   ],
   ...(['negation', 'estCeQue', 'inversion'] as const).map((pattern): [typeof pattern, CellParts, undefined] => [
     pattern,
@@ -231,6 +241,12 @@ for (const [index, [name, actual, expected]] of partsCases.entries()) {
     expect(actual).toEqual(expected);
   });
 }
+
+test('invariable participles serve both complete inversion sentences', () => {
+  expect(inversion(cellParts(fromPack('aller', true), 'passeCompose', '3sg'))).toBe(
+    'est-il allé\u00a0? / est-elle allé\u00a0?',
+  );
+});
 
 // AI assembly must preserve the same structured contract as the pack, with no new AI call.
 test('CP6 parts 9: AI golden compound', () => {

@@ -99,7 +99,7 @@ export function checkLead(g: GeneratedVerb): string[] {
   return failures;
 }
 
-/** Passé composé is the auxiliary plus the participle, with the agreement variants the verb allows. */
+/** Passé composé is the auxiliary plus the participle, including polite singular vous when agreement applies. */
 export function checkPasseCompose(g: GeneratedVerb): string[] {
   const failures: string[] = [];
   const { past } = g.verb.participles;

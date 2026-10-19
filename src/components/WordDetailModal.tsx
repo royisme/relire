@@ -47,6 +47,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
   const isEn = i18n.language === 'en';
   const [speechSpeed, setSpeechSpeed] = useState<number>(0.85);
   const pack = useWordSheetPack(isOpen);
+  const sections = pack?.sections;
 
   if (!isOpen) return null;
 
@@ -149,7 +150,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
                 </div>
               </header>
 
-              <pack.VerbForms lookup={activeWord ?? wordData.word} />
+              {sections && <sections.VerbForms lookup={activeWord ?? wordData.word} />}
 
               {wordData.phoneticsGuide && (
                 <Section title={t('wordModal.phoneticsGuide')}>
@@ -204,7 +205,13 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
               {isVerbEntry(wordData.lemma, wordData.partOfSpeech) && (
                 <Section title={t('wordModal.conjugation')}>
                   <div className="min-h-10">
-                    <pack.WordConjugation lemma={wordData.lemma} lookup={activeWord ?? wordData.word} />
+                    {sections ? (
+                      <sections.WordConjugation lemma={wordData.lemma} lookup={activeWord ?? wordData.word} />
+                    ) : (
+                      <p role="alert" className="break-words text-sm text-bad-700">
+                        {pack.error}
+                      </p>
+                    )}
                   </div>
                 </Section>
               )}

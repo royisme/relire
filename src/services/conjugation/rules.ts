@@ -136,6 +136,7 @@ export const REGULAR_RULES: Record<Exclude<RuleId, 'irregular'>, (base: string) 
     };
   },
   'er-eler-double': (b) => {
+    if (!/[lt]$/.test(b)) throw new Error(`the stem "${b}" does not end with l or t to double`);
     const double = b + b.slice(-1);
     return {
       presentEndings: ER_ENDINGS,
@@ -173,15 +174,18 @@ export const REGULAR_RULES: Record<Exclude<RuleId, 'irregular'>, (base: string) 
     subjonctif: always([b]),
     participle: b,
   }),
-  're-regular': (b) => ({
-    presentEndings: ['s', 's', '', 'ons', 'ez', 'ent'],
-    present: always([b]),
-    imparfait: always([b]),
-    futur: [`${b}r`],
-    subjonctif: always([b]),
-    participle: b,
-    past: `${b}u`,
-  }),
+  're-regular': (b) => {
+    if (!/[dp]$/.test(b)) throw new Error(`the stem "${b}" does not end with d or p`);
+    return {
+      presentEndings: ['s', 's', b.endsWith('d') ? '' : 't', 'ons', 'ez', 'ent'],
+      present: always([b]),
+      imparfait: always([b]),
+      futur: [`${b}r`],
+      subjonctif: always([b]),
+      participle: b,
+      past: `${b}u`,
+    };
+  },
 };
 
 // ---- Participles and passé composé -----------------------------------------
@@ -197,8 +201,9 @@ export interface PastParticiples {
 
 export function pastParticiples(ms: string): PastParticiples {
   if (INVARIABLE_PARTICIPLES.has(ms)) return { ms, fs: ms, mp: ms, fp: ms };
-  const fs = `${ms}e`;
-  return { ms, fs, mp: /[sx]$/.test(ms) ? ms : `${ms}s`, fp: `${fs}s` };
+  const base = ms.endsWith('û') ? `${ms.slice(0, -1)}u` : ms;
+  const fs = `${base}e`;
+  return { ms, fs, mp: /[sx]$/.test(base) ? base : `${base}s`, fp: `${fs}s` };
 }
 
 export const AUXILIARY_PRESENT = {
@@ -223,6 +228,7 @@ export function passeComposeParticiples(
   participles: PastParticiples,
 ): string[] {
   if (verb.pcInvariable || verb.aux === 'avoir') return [participles.ms];
+  if (person === '2pl') return [participles.mp, participles.fp, participles.ms, participles.fs];
   const plural = person.endsWith('pl');
   return [participles[plural ? 'mp' : 'ms'], participles[plural ? 'fp' : 'fs']];
 }

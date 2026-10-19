@@ -139,6 +139,14 @@ describe('ai-only verbs: nothing independent is left to compare with', () => {
     }
   });
 
+  test('mettre and battre are suffix misfits for re-regular, not checked cells', () => {
+    for (const infinitive of ['mettre', 'battre']) {
+      const verified = verifyAnswer({ ...parlerAnswer(), infinitive, rule: 're-regular' });
+      allAiOnly(verified);
+      expect(verified.rule).toBeUndefined();
+    }
+  });
+
   test('a rule that cannot apply makes generateVerb throw: a misfit too', () => {
     // parler ends in -er but its stem has no e to turn into è.
     expect(() => REGULAR_RULES['er-e-grave']('parl')).toThrow('no "e"');
