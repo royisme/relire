@@ -49,11 +49,12 @@ async function openSeeded(page: Page) {
   await settled(page);
 }
 
-const tap = (page: Page, word: string) =>
-  page
-    .locator('article [data-reader-word]')
-    .filter({ hasText: new RegExp(`^${word}$`) })
-    .click();
+/** Opens the lookup of a word with the keyboard: a sentence's hover toolbar from an earlier tap can sit on top of a click. */
+async function tap(page: Page, word: string) {
+  const target = page.locator('article [data-reader-word]').filter({ hasText: new RegExp(`^${word}$`) });
+  await target.focus();
+  await target.press('Enter');
+}
 
 const sheet = (page: Page) => page.getByRole('dialog');
 const tense = (page: Page, name: string) => sheet(page).getByRole('region', { name, exact: true });
@@ -112,12 +113,23 @@ test('a verb outside the pack shows one link; following it opens the Conjugation
 });
 
 test('a word that is no pack form shows no Verb form section, not even a heading', async ({ page, ai }) => {
-  ai.answer({ word: wordAnswer('parle', 'parler', 'verbe') });
+  ai.answer({
+    word: (prompt: string) =>
+      prompt.includes('French word "vais"')
+        ? wordAnswer('vais', 'aller', 'verbe')
+        : wordAnswer('parle', 'parler', 'verbe'),
+  });
   await openSeeded(page);
+  // A form of the pack first: it proves that both lazy sections and the pack have arrived and that the section does draw.
+  await tap(page, 'vais');
+  await expect(sheet(page).getByRole('heading', { name: 'Verb form' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(sheet(page)).toHaveCount(0);
+
   await tap(page, 'parle');
-  // Wait until the pack has been read: the slot has left its loading state, and the chunks are in.
+  await expect(sheet(page).getByRole('heading', { name: 'parle' })).toBeVisible();
+  // Everything the pack gives is ready at once now, so the missing section is a real absence, not a late one.
   await expect(sheet(page).getByRole('link', { name: 'Conjugate this verb' })).toBeVisible();
-  await page.waitForLoadState('networkidle');
   await expect(sheet(page).getByRole('heading', { name: 'Verb form' })).toHaveCount(0);
 });
 
@@ -251,11 +263,14 @@ test('Practise this verb makes one set of seven tenses with no AI request, and l
       setId: unit.setId,
       tag: unit.grammarTags[0],
       items: unit.items.length,
+      packVersions: unit.items.map((item) => typeof item.meta?.packVersion),
     }));
   });
   expect(units).toHaveLength(7);
   expect(new Set(units.map((unit) => unit.setId)).size).toBe(1);
   expect(units.map((unit) => unit.items)).toEqual(Array(7).fill(2));
+  // A pack verb's items name the pack they came from, as the Practice entry's do.
+  expect(units.flatMap((unit) => unit.packVersions)).toEqual(Array(14).fill('string'));
   await expect(link).toHaveAttribute('href', `#/practice/set/${units[0].setId}`);
   expect(totalCalls(ai)).toBe(0);
 

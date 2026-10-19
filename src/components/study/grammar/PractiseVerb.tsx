@@ -7,6 +7,7 @@
  */
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useGrammarPack } from '../../../hooks/useGrammarPack';
 import { useUnitSaver } from '../../../hooks/useUnitSaver';
 import type { VerifiedVerb } from '../../../services/conjugation/verify';
 import {
@@ -23,6 +24,8 @@ import { Button } from '../../ui/button';
 export function PractiseVerb({ verb }: { verb: VerifiedVerb }) {
   const { t } = useTranslation();
   const { status, save } = useUnitSaver();
+  // The page has read the pack to answer a pack verb, so it is ready by the time the button is pressed.
+  const pack = useGrammarPack();
   if (!hasGradableCell(verb)) return null;
   const working = status.kind === 'working';
   return (
@@ -39,6 +42,7 @@ export function PractiseVerb({ verb }: { verb: VerifiedVerb }) {
               tenses: [...TENSES],
               level: DEFAULT_DRILL_LEVEL,
               perUnit: DEFAULT_DRILL_COUNT,
+              packVersion: verb.status === 'pack-reviewed' ? pack.pack?.packVersion : undefined,
               t,
             }),
           )
