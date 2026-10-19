@@ -1025,6 +1025,21 @@
       "practise": "Practise this verb",
       "practising": "Making exercises…",
       "practiseOpen": "Open the new exercise set",
+      "patterns": {
+        "title": "Patterns",
+        "tense": "Tense",
+        "person": "Person",
+        "impersonal": "he (impersonal)",
+        "negation": "Negation",
+        "estCeQue": "Question with est-ce que",
+        "inversion": "Question with inversion",
+        "unavailable": "— {{reason}}",
+        "noQuestions": "No questions for this tense.",
+        "noJe": "Use est-ce que with je.",
+        "notCovered": "The stated rules do not cover this case.",
+        "aiOnly": "AI-made, not checked",
+        "differs": "AI-made; this cell differs from the rule."
+      },
       "empty": "Type a verb in the infinitive, such as parler or se lever, to see its tenses.",
       "auxiliary": {
         "avoir": "Auxiliary: avoir",

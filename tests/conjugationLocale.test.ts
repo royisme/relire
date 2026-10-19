@@ -90,6 +90,41 @@ test('the word sheet has the same new keys in en and zh, none blank', () => {
   expect('clickToListen' in zh.wordModal).toBe(false);
 });
 
+for (const [language, locale] of [
+  ['en', en],
+  ['zh', zh],
+] as const) {
+  test(`CP6 locale ${language}: fixed pattern rows and reasons`, () => {
+    const copy = locale.conjugation.page.patterns;
+    expect({
+      keys: Object.entries(copy)
+        .filter(([, text]) => text.trim())
+        .map(([key]) => key)
+        .sort(),
+      names: language === 'en' ? [copy.negation, copy.estCeQue, copy.inversion] : copy.negation,
+      unavailable: copy.unavailable,
+    }).toEqual({
+      keys: [
+        'title',
+        'tense',
+        'person',
+        'impersonal',
+        'negation',
+        'estCeQue',
+        'inversion',
+        'unavailable',
+        'noQuestions',
+        'noJe',
+        'notCovered',
+        'aiOnly',
+        'differs',
+      ].sort(),
+      names: language === 'en' ? ['Negation', 'Question with est-ce que', 'Question with inversion'] : 'negation',
+      unavailable: '— {{reason}}',
+    });
+  });
+}
+
 test('the Conjugation page practise button copy exists in both locales', () => {
   for (const { practise, practising, practiseOpen } of [en.conjugation.page, zh.conjugation.page])
     for (const text of [practise, practising, practiseOpen]) expect(text.trim()).toBeTruthy();

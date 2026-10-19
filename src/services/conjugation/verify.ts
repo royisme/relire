@@ -45,6 +45,8 @@ export interface VerifiedVerb {
   /** The rule the AI named; undefined when it was discarded (a suffix misfit, or the engine could not apply it). */
   rule?: RuleId;
   defective?: Verb['defective'];
+  hAspire?: true;
+  pcInvariable?: true;
   status: VerbStatus;
   /** Every tense of the view; imperatif is empty for a defective verb. */
   tenses: Record<Tense, Partial<Record<Person, CheckedCell>>>;
@@ -132,6 +134,8 @@ function checkView(
     aux: view.aux,
     rule: view.rule,
     ...(view.defective && { defective: view.defective }),
+    ...(view.hAspire && { hAspire: view.hAspire }),
+    ...(view.pcInvariable && { pcInvariable: view.pcInvariable }),
     tenses,
     participles,
   };

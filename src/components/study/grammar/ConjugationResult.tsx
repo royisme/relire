@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import type { ConjugationResult as Result } from '../../../services/conjugation/resolve';
 import { TENSES } from '../../../types/grammarPack';
 import { Participles } from './Participles';
+import { Patterns } from './Patterns';
 import { PractiseVerb } from './PractiseVerb';
 import { TenseSection } from './TenseSection';
 
@@ -29,6 +30,7 @@ export function ConjugationResult({ result: { verb, examples } }: { result: Resu
       {TENSES.filter((tense) => Object.keys(verb.tenses[tense]).length > 0).map((tense) => (
         <TenseSection key={tense} tense={tense} verb={verb} example={examples?.[tense]} />
       ))}
+      <Patterns key={verb.infinitive} verb={verb} />
       <Participles participles={verb.participles} />
     </article>
   );

@@ -19,7 +19,7 @@ import {
 import { IMPERATIVE_CLITICS, composeLead, passeComposeForms } from './rules';
 
 /** What the Conjugation screen renders: a pack row without its id and provenance. */
-export type VerbView = Omit<Verb, 'id' | 'prov'>;
+export type VerbView = Omit<Verb, 'id' | 'prov'> & { hAspire?: true };
 
 /** The infinitive without a leading `se ` or `s’`. */
 export const bareInfinitive = (infinitive: string) => infinitive.replace(PRONOMINAL_PREFIX, '');
@@ -64,6 +64,7 @@ export function assembleVerb(answer: ConjugationAnswer): VerbView {
     aux,
     rule: answer.rule,
     ...(defective && { defective }),
+    ...(hAspire && { hAspire }),
     tenses: {
       present: simple('present'),
       // The AI is never asked for passé composé: it is the auxiliary plus the AI's participles.
