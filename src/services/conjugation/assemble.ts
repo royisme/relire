@@ -2,11 +2,11 @@
  * Builds the view of a verb from an AI answer: leads, passé composé and the
  * hyphenated imperative clitics, composed by the engine from the AI's forms and
  * participles, for any rule (including `irregular` and rule misfits). Also owns
- * the two small string helpers that hand the learner's infinitive to the engine.
+ * the small helpers that take an infinitive apart for the engine (`bareInfinitive`, `engineBase`).
  * Never calls `generateVerb`, and does not decide whether the AI is right
  * (verify.ts).
  */
-import { foldApostrophes, type ConjugationAnswer } from '../../types/conjugationAnswer';
+import type { ConjugationAnswer } from '../../types/conjugationAnswer';
 import {
   PRONOMINAL_PREFIX,
   isPronominalInfinitive,
@@ -20,14 +20,6 @@ import { IMPERATIVE_CLITICS, composeLead, passeComposeForms } from './rules';
 
 /** What the Conjugation screen renders: a pack row without its id and provenance. */
 export type VerbView = Omit<Verb, 'id' | 'prov'>;
-
-/**
- * The learner's infinitive in the engine's form: NFC, trimmed, lowercase (French infinitives are), single spaces
- * and the typographic apostrophe (`isPronominalInfinitive` and the pack schema accept only U+2019). The cache key
- * lowercases too, so a request and its key always agree.
- */
-export const engineInfinitive = (typed: string) =>
-  foldApostrophes(typed.normalize('NFC').trim().toLowerCase().replace(/\s+/g, ' '));
 
 /** The infinitive without a leading `se ` or `s’`. */
 export const bareInfinitive = (infinitive: string) => infinitive.replace(PRONOMINAL_PREFIX, '');

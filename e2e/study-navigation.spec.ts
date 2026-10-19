@@ -156,3 +156,13 @@ test('phone Library filters retain 40px radio targets and selection @phone', asy
   await expect(radios.nth(1)).toHaveAttribute('tabindex', '0');
   expect(await overflowing(page.locator('body'))).toEqual([]);
 });
+
+test('the four study tabs fit a 360px phone in Chinese without scrolling @phone', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('relire_lang', 'zh'));
+  await page.goto('/#/study/grammar');
+  const tabs = page.getByRole('main').getByRole('navigation').first();
+  for (const name of ['生词', '跟读', '错题本', '语法'])
+    await expect(tabs.getByRole('link', { name, exact: true })).toBeVisible();
+  expect(await tabs.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+  expect(await overflowing(page.locator('body'))).toEqual([]);
+});

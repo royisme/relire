@@ -36,7 +36,7 @@ import {
 } from '../types/exerciseAi';
 import { ConjugationAnswerSchema, type ConjugationAnswer } from '../types/conjugationAnswer';
 import type { ImportDraft } from './exercises/importDraft';
-import { engineInfinitive } from './conjugation/assemble';
+import { engineInfinitive } from './conjugation/infinitive';
 import type { Transcription } from '../types/transcription';
 import {
   MAX_PRONUNCIATION_SOURCE,

@@ -1,6 +1,7 @@
 /** Owns the view built from an AI answer and the infinitive helpers; not verification statuses (conjugationVerify) or the schema. */
 import { describe, expect, test } from 'bun:test';
-import { assembleVerb, engineBase, engineInfinitive } from '../src/services/conjugation/assemble';
+import { assembleVerb, engineBase } from '../src/services/conjugation/assemble';
+import { engineInfinitive } from '../src/services/conjugation/infinitive';
 import { generateVerb } from '../src/services/conjugation/generate';
 import { GOLDEN } from './fixtures/grammarPackGolden';
 import { answerFromGolden, erAnswer, falloirAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
