@@ -17,7 +17,6 @@ const wordAnswer = (word: string, translation: string) => ({
   translation,
   otherMeanings: [],
   contextTense: '',
-  conjugationTable: [],
   usageExamples: [],
   cefrLevel: 'A1',
   memoryTrick: '',

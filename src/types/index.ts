@@ -1,13 +1,3 @@
-export interface ConjugationForm {
-  person: string;
-  form: string;
-}
-
-export interface ConjugationTense {
-  tense: string;
-  forms: ConjugationForm[];
-}
-
 export interface UsageExample {
   fr: string;
   zh: string;
@@ -25,7 +15,6 @@ export interface WordAnalysis {
   translationEn?: string;
   otherMeanings?: string[];
   contextTense?: string;
-  conjugationTable?: ConjugationTense[];
   usageExamples?: UsageExample[];
   cefrLevel?: string;
   memoryTrick?: string;

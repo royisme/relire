@@ -7,29 +7,24 @@
  * units so the next press retries the same payload with the same ids.
  * Does not own the dialog it lives in (AddExercisesDialog) or the sets table.
  */
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { ListPlus, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { verifyPackVerb } from '../../services/conjugation/verify';
-import { prepareConjugationDrills } from '../../services/exercises/fromConjugation';
-import { saveUnits } from '../../storage/exercises';
+import {
+  DEFAULT_DRILL_COUNT,
+  DEFAULT_DRILL_LEVEL,
+  prepareConjugationDrills,
+} from '../../services/exercises/fromConjugation';
 import { useGrammarPack } from '../../hooks/useGrammarPack';
-import { EXERCISE_LEVELS, type ExerciseLevel, type ExerciseUnit } from '../../types/exercises';
+import { useUnitSaver } from '../../hooks/useUnitSaver';
+import { EXERCISE_LEVELS, type ExerciseLevel } from '../../types/exercises';
 import { TENSES, type Tense } from '../../types/grammarPack';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 
-const DEFAULT_COUNT = 8;
-/** The pack verbs are the first a learner meets; the level stays a free choice. */
-const DEFAULT_LEVEL: ExerciseLevel = 'A2';
 const field =
   'h-10 rounded-md border border-ink-300 bg-surface px-3 text-sm text-ink-900 focus:border-accent-600 focus:outline-none';
-
-type Status =
-  | { kind: 'idle' }
-  | { kind: 'working' }
-  | { kind: 'error'; message: string }
-  | { kind: 'done'; items: number; units: number };
 
 export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
   const { t } = useTranslation();
@@ -37,19 +32,9 @@ export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
   const verbs = pack.status === 'ready' ? (pack.pack?.verbs ?? []) : [];
   const [pickedVerbs, setPickedVerbs] = useState<Set<string>>(new Set());
   const [pickedTenses, setPickedTenses] = useState<Set<Tense>>(new Set());
-  const [level, setLevel] = useState<ExerciseLevel>(DEFAULT_LEVEL);
-  const [count, setCount] = useState(String(DEFAULT_COUNT));
-  const [status, setStatus] = useState<Status>({ kind: 'idle' });
-  /** Units prepared but not yet committed; a retry saves these, never a fresh batch. */
-  const payload = useRef<ExerciseUnit[] | null>(null);
-  const busy = useRef(false);
-  const live = useRef(true);
-  useEffect(() => {
-    live.current = true;
-    return () => {
-      live.current = false;
-    };
-  }, []);
+  const [level, setLevel] = useState<ExerciseLevel>(DEFAULT_DRILL_LEVEL);
+  const [count, setCount] = useState(String(DEFAULT_DRILL_COUNT));
+  const { status, save, drop: dropPayload } = useUnitSaver();
 
   const number = Number(count);
   const validCount = count.trim() !== '' && Number.isInteger(number) && number >= 1;
@@ -57,10 +42,7 @@ export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
   const valid = ready && pickedVerbs.size > 0 && pickedTenses.size > 0 && validCount;
   const working = status.kind === 'working';
 
-  // Any change after a failed save drops the prepared batch: the next press prepares afresh.
-  const dropPayload = () => {
-    payload.current = null;
-  };
+  // Any change after a failed save drops the prepared batch (dropPayload): the next press prepares afresh.
   const toggle = <T,>(set: Set<T>, value: T): Set<T> => {
     const next = new Set(set);
     if (next.has(value)) next.delete(value);
@@ -69,32 +51,18 @@ export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
   };
 
   async function make() {
-    if (busy.current || !valid) return;
-    busy.current = true;
-    setStatus({ kind: 'working' });
-    try {
-      const units =
-        payload.current ??
-        prepareConjugationDrills({
-          verbs: verbs.filter((row) => pickedVerbs.has(row.id)).map(verifyPackVerb),
-          tenses: TENSES.filter((tense) => pickedTenses.has(tense)),
-          level,
-          packVersion: pack.status === 'ready' ? pack.pack?.packVersion : undefined,
-          perUnit: number,
-          t,
-        });
-      payload.current = units;
-      await saveUnits(units);
-      payload.current = null;
-      if (!live.current) return;
-      setStatus({ kind: 'done', items: units.reduce((sum, unit) => sum + unit.items.length, 0), units: units.length });
-      onSaved();
-    } catch (err) {
-      if (!live.current) return;
-      setStatus({ kind: 'error', message: err instanceof Error ? err.message : String(err) });
-    } finally {
-      busy.current = false;
-    }
+    if (!valid) return;
+    const units = await save(() =>
+      prepareConjugationDrills({
+        verbs: verbs.filter((row) => pickedVerbs.has(row.id)).map(verifyPackVerb),
+        tenses: TENSES.filter((tense) => pickedTenses.has(tense)),
+        level,
+        packVersion: pack.status === 'ready' ? pack.pack?.packVersion : undefined,
+        perUnit: number,
+        t,
+      }),
+    );
+    if (units) onSaved();
   }
 
   const submit = (event: FormEvent) => {
@@ -202,7 +170,9 @@ export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
           </p>
         )}
         {status.kind === 'done' && (
-          <p className="text-ink-700">{t('conjugation.drill.made', { count: status.items })}</p>
+          <p className="text-ink-700">
+            {t('conjugation.drill.made', { count: status.units.reduce((sum, unit) => sum + unit.items.length, 0) })}
+          </p>
         )}
         {status.kind === 'idle' && !validCount && <p className="text-bad-700">{t('conjugation.drill.countRange')}</p>}
       </div>

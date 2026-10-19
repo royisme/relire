@@ -9,7 +9,7 @@ import type { TFunction } from 'i18next';
 import type { VerifiedVerb } from '../conjugation/verify';
 import { ExerciseUnitSchema, type ExerciseLevel, type ExerciseUnit } from '../../types/exercises';
 import type { GrammarTag } from '../../types/grammar';
-import { FINITE_PERSONS, IMPERATIVE_PERSONS, type Person, type Tense } from '../../types/grammarPack';
+import { FINITE_PERSONS, IMPERATIVE_PERSONS, TENSES, type Person, type Tense } from '../../types/grammarPack';
 
 /** The grammar tag each tense drills on (Part 1 Q7: tense granularity only). */
 const TENSE_TAG: Record<Tense, GrammarTag> = {
@@ -21,6 +21,10 @@ const TENSE_TAG: Record<Tense, GrammarTag> = {
   subjonctif: 'subjunctive',
   imperatif: 'imperative',
 };
+
+/** What a drill set starts from: the level is a free choice, A2 because the first verbs a learner meets are simple. */
+export const DEFAULT_DRILL_LEVEL: ExerciseLevel = 'A2';
+export const DEFAULT_DRILL_COUNT = 8;
 
 /** Verbs named in the set title before the count takes over. */
 const TITLE_VERBS = 3;
@@ -73,6 +77,9 @@ function gradableCells(verbs: VerifiedVerb[], tense: Tense): GradableCell[] {
   return cells;
 }
 
+/** Whether any cell of the verb can be asked: the Conjugation page offers drills only then. */
+export const hasGradableCell = (verb: VerifiedVerb) => TENSES.some((tense) => gradableCells([verb], tense).length > 0);
+
 function sampleCells(pool: GradableCell[], perUnit: number, maxPerVerb: number, rng: () => number): GradableCell[] {
   // Fisher-Yates on a copy, then a greedy walk: the cap is per verb, so any
   // order reaches the same count; the shuffle only picks which cells.
@@ -112,7 +119,7 @@ export function prepareConjugationDrills({
   tenses,
   level,
   packVersion,
-  perUnit = 8,
+  perUnit = DEFAULT_DRILL_COUNT,
   maxPerVerb = 2,
   rng = Math.random,
   makeId = () => crypto.randomUUID(),
