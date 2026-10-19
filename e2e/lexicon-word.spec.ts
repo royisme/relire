@@ -187,47 +187,51 @@ const anchors = (page: Page) =>
   });
 
 for (const phone of [false, true]) {
-  test(`the sheet waits for the lexicon, so nothing shifts when it answers, on a first and a second open ${phone ? '@phone' : ''}`, async ({
+  test(`the sheet waits for the lexicon, so nothing shifts when it answers; a second open asks nothing new ${phone ? '@phone' : ''}`, async ({
     page,
     ai,
   }) => {
     const lex = await lexicon(page);
     ai.answer({ word: wordAnswer('chantons', 'chanter', 'verbe') });
     await openSeeded(page);
-    for (const round of [1, 2]) {
-      let release!: () => void;
-      let releaseLemma!: () => void;
-      const formGate = new Promise<void>((done) => (release = done));
-      const slotGate = new Promise<void>((done) => (releaseLemma = done));
-      // The form answer is held; so is the slot's own lemma request (the second one, after the sheet's).
-      lex.hold = (path, nth) =>
-        path.includes('/form/') ? formGate : path === '/v1/lexicon/chanter' && nth % 2 === 0 ? slotGate : undefined;
-      await tap(page, 'chantons');
-      // The AI has answered, the lexicon has not: the entry is not drawn yet.
-      await expect.poll(() => lex.paths.filter((path) => path.includes('/form/')).length).toBe(round);
-      await page.waitForTimeout(300);
-      await expect(sheet(page).getByRole('heading', { name: 'chantons' })).toHaveCount(0);
-      expect(ai.calls.word).toBe(1);
-      release();
-      // The entry's first frame already holds the Verb form line, and the slot says it is loading.
-      await expect(sheet(page).getByRole('heading', { name: 'chantons' })).toBeVisible();
-      const first = await anchors(page);
-      expect(first.verbForm).not.toBeNaN();
-      expect(first.slot).not.toBeNaN();
-      await expect(sheet(page).getByText('Loading the conjugation…')).toBeVisible();
-      await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)));
-      const loading = await anchors(page);
-      releaseLemma();
-      await expect(sheet(page).getByRole('button', { name: 'Show all tenses' })).toBeVisible();
-      await page.evaluate(() => document.fonts.ready);
-      const after = await anchors(page);
-      expect(after).toEqual(loading);
-      expect(after.verbForm).toBe(first.verbForm);
-      expect(after.sheet.height).toBe(first.sheet.height);
-      expect(await overflowing(sheet(page))).toEqual([]);
-      await sheet(page).getByRole('button', { name: 'Close', exact: true }).first().click();
-      await expect(sheet(page)).toHaveCount(0);
-    }
+    let release!: () => void;
+    const formGate = new Promise<void>((done) => (release = done));
+    lex.hold = (path) => (path.includes('/form/') ? formGate : undefined);
+    await tap(page, 'chantons');
+    // The AI has answered, the lexicon has not: the entry is not drawn yet.
+    await expect.poll(() => lex.paths.filter((path) => path.includes('/form/')).length).toBe(1);
+    await page.waitForTimeout(300);
+    await expect(sheet(page).getByRole('heading', { name: 'chantons' })).toHaveCount(0);
+    expect(ai.calls.word).toBe(1);
+    release();
+    // The entry's first frame already holds the Verb form line and the conjugation slot: the lemma the sheet fetched
+    // for the line also answers the slot (a fresh request is reused), so the slot has no loading phase to shift from.
+    await expect(sheet(page).getByRole('heading', { name: 'chantons' })).toBeVisible();
+    const first = await anchors(page);
+    expect(first.verbForm).not.toBeNaN();
+    expect(first.slot).not.toBeNaN();
+    await expect(sheet(page).getByRole('button', { name: 'Show all tenses' })).toBeVisible();
+    await expect(sheet(page).getByText('Loading the conjugation…')).toHaveCount(0);
+    await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)));
+    await page.evaluate(() => document.fonts.ready);
+    const after = await anchors(page);
+    expect(after.verbForm).toBe(first.verbForm);
+    expect(after.slot).toBe(first.slot);
+    expect(after.sheet.height).toBe(first.sheet.height);
+    expect(await overflowing(sheet(page))).toEqual([]);
+    // One form lookup and one lemma lookup in all.
+    expect(lex.paths).toEqual(['/v1/lexicon/form/chantons', '/v1/lexicon/chanter']);
+    await sheet(page).getByRole('button', { name: 'Close', exact: true }).first().click();
+    await expect(sheet(page)).toHaveCount(0);
+
+    // A second open of the same word within the reuse window asks the service nothing and draws the same way.
+    lex.hold = undefined;
+    await tap(page, 'chantons');
+    await expect(sheet(page).getByRole('heading', { name: 'chantons' })).toBeVisible();
+    await expect(verbForm(page).getByRole('listitem')).toHaveText(['chanter : présent, nous; impératif, nous']);
+    await expect(sheet(page).getByRole('button', { name: 'Show all tenses' })).toBeVisible();
+    expect(lex.paths).toEqual(['/v1/lexicon/form/chantons', '/v1/lexicon/chanter']);
+    expect(await overflowing(sheet(page))).toEqual([]);
   });
 }
 
