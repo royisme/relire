@@ -65,7 +65,7 @@ const SUFFIX: Record<Exclude<RuleId, 'irregular'>, RegExp> = {
   'ir-issons': /[^o]ir$/,
   'ir-sortir': /[^o]ir$/,
   'ir-ouvrir': /[^o]ir$/,
-  're-regular': /re$/,
+  're-regular': /(d|p)re$/,
 };
 
 interface EngineRun {

@@ -293,7 +293,7 @@ test('imperatif has no lead and pronominal verbs carry the hyphenated clitic', (
 test('passé composé: agreement variants, avoir without them, pcInvariable without them', () => {
   const aller = generate(CONTROL_SPECS[1]).verb;
   expect(aller.tenses.passeCompose['1sg']!.forms).toEqual(['suis allé', 'suis allée']);
-  expect(aller.tenses.passeCompose['2pl']!.forms).toEqual(['êtes allés', 'êtes allées']);
+  expect(aller.tenses.passeCompose['2pl']!.forms).toEqual(['êtes allés', 'êtes allées', 'êtes allé', 'êtes allée']);
   const parler = generate(CASES.parler.spec).verb;
   expect(parler.tenses.passeCompose['1pl']!.forms).toEqual(['avons parlé']);
   const spec: VerbSpec = {

@@ -1035,12 +1035,12 @@
         "tense": "时态",
         "person": "人称",
         "impersonal": "无人称 il",
-        "negation": "negation",
+        "negation": "否定句",
         "estCeQue": "est-ce que 疑问句",
         "inversion": "倒装疑问句",
         "unavailable": "— {{reason}}",
         "noQuestions": "此时态不提供疑问句。",
-        "noJe": "je 请用 est-ce que 提问。",
+        "noJe": "je 通常不使用倒装，请用 est-ce que 提问。",
         "notCovered": "所列规则未涵盖此情况。",
         "aiOnly": "AI 生成，未核对",
         "differs": "AI 生成；此变位与规则不符。"
@@ -1101,7 +1101,7 @@
       "futur": {
         "name": "简单将来时",
         "use": "用于表达将来会发生或计划进行的动作与事件。",
-        "form": "在以 -r 结尾的将来时词干后加上词尾 -ai、-as、-a、-ons、-ez、-ont。"
+        "form": "规则动词以动词原形为基础（-re 动词去掉末尾的 e），加上词尾 -ai、-as、-a、-ons、-ez、-ont。"
       },
       "conditionnel": {
         "name": "条件式",
@@ -1116,7 +1116,7 @@
       "imperatif": {
         "name": "命令式",
         "use": "用于直接给出指令、建议、要求或禁令。",
-        "form": "直接使用现在时的 tu、nous、vous 形式且不加主语代词，其中 -er 动词的 tu 形式省去词尾 -s。"
+        "form": "使用现在时的 tu、nous、vous 形式且不加主语代词；-er 动词、aller（va）及类似 ouvrir 的动词在 tu 形式中省去词尾 -s。"
       }
     },
     "rules": {
@@ -1124,13 +1124,13 @@
       "er-cer": "以 -cer 结尾的动词在元音 a 和 o 前将 c 改为 ç 以保持发音，如 nous commençons。",
       "er-ger": "以 -ger 结尾的动词在元音 a 和 o 前在 g 后加上不发音的 e 以保持发音，如 nous mangeons。",
       "er-yer-i": "以 -yer 结尾的动词在不发音的 e 前将 y 改为 i，如 ils nettoient。",
-      "er-e-grave": "词尾前带有不发音 e 的动词在不发音音节前将 e 改为 è，如 il lève。",
-      "er-eacute-egrave": "倒数第二音节带 é 的动词在不发音音节前将 é 改为 è，但在将来时和条件式中保持 é，如 je préfère。",
-      "er-eler-double": "以 -eler 和 -eter 结尾的双写类动词在不发音音节前及整个将来时和条件式中双写辅音，如 j’appelle。",
-      "ir-issons": "第二组规则 -ir 动词在现在时复数、未完成过去时和虚拟式中加入 -iss-，如 nous choisissons。",
+      "er-e-grave": "词干末音节带 e 的动词在含不发音 e 的词尾前（以及将来时和条件式中）将 e 改为 è，如 il lève。",
+      "er-eacute-egrave": "词干末音节带 é 的动词在含不发音 e 的词尾前将 é 改为 è，但在将来时和条件式中保持 é，如 je préfère。",
+      "er-eler-double": "类似 appeler 和 jeter 的 -eler/-eter 动词在含不发音 e 的词尾前以及将来时和条件式中双写 l 或 t，如 j’appelle。",
+      "ir-issons": "第二组规则 -ir 动词在现在时复数、未完成过去时、虚拟式和现在分词中加入 -iss-，如 nous choisissons。",
       "ir-sortir": "类似 sortir 和 partir 的动词在现在时单数人称中去掉词根末尾的辅音，如 je sors。",
       "ir-ouvrir": "类似 ouvrir 和 offrir 的动词在现在时中使用规则 -er 动词的词尾，如 j’ouvre。",
-      "re-regular": "规则 -re 动词在现在时单数中分别添加词尾 -s、-s 且第三人称不加词尾，如 il vend。"
+      "re-regular": "类似 vendre 的规则 -dre 动词在现在时单数中分别加 -s、-s，第三人称不加词尾，如 il vend。"
     },
     "persons": {
       "1sg": "我",

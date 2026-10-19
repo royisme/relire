@@ -1043,13 +1043,13 @@
         "title": "Patterns",
         "tense": "Tense",
         "person": "Person",
-        "impersonal": "he (impersonal)",
+        "impersonal": "it (impersonal)",
         "negation": "Negation",
         "estCeQue": "Question with est-ce que",
         "inversion": "Question with inversion",
         "unavailable": "— {{reason}}",
         "noQuestions": "No questions for this tense.",
-        "noJe": "Use est-ce que with je.",
+        "noJe": "Inversion is rarely used with je; use est-ce que.",
         "notCovered": "The stated rules do not cover this case.",
         "aiOnly": "AI-made, not checked",
         "differs": "AI-made; this cell differs from the rule."
@@ -1110,7 +1110,7 @@
       "futur": {
         "name": "Future",
         "use": "Use it for actions or events that will happen in the future.",
-        "form": "Add the endings -ai, -as, -a, -ons, -ez, -ont to the future stem ending in -r."
+        "form": "For regular verbs, use the infinitive (dropping the final -e of -re verbs) and add -ai, -as, -a, -ons, -ez, -ont."
       },
       "conditionnel": {
         "name": "Conditional",
@@ -1125,7 +1125,7 @@
       "imperatif": {
         "name": "Imperative",
         "use": "Use it to give direct orders, advice, instructions, or prohibitions.",
-        "form": "Use the present tense forms of tu, nous, and vous without subject pronouns, dropping the final -s in the tu form of -er verbs."
+        "form": "Use the present tense forms of tu, nous, and vous without subject pronouns; drop the final -s in the tu form of -er verbs, aller (va), and verbs like ouvrir (ouvre)."
       }
     },
     "rules": {
@@ -1133,13 +1133,13 @@
       "er-cer": "Verbs ending in -cer change c to ç before a and o to keep the soft sound, as in nous commençons.",
       "er-ger": "Verbs ending in -ger insert a silent e after g before a and o to keep the soft sound, as in nous mangeons.",
       "er-yer-i": "Verbs ending in -yer change y to i before a silent e, as in ils nettoient.",
-      "er-e-grave": "Verbs with a silent e before the ending change e to è before a silent syllable, as in il lève.",
-      "er-eacute-egrave": "Verbs with é in the stem change é to è before a silent syllable except in the future and conditional, as in je préfère.",
+      "er-e-grave": "Verbs with e in the last stem syllable change it to è before endings with a silent e (and in the future and conditional), as in il lève.",
+      "er-eacute-egrave": "Verbs with é in the last stem syllable change it to è before endings with a silent e, but keep é in the future and conditional, as in je préfère.",
       "er-eler-double": "Doubling verbs in -eler and -eter double l or t before a silent syllable and throughout the future and conditional, as in j’appelle.",
-      "ir-issons": "Regular second-group -ir verbs add the infix -iss- in the plural present, the imparfait, and the subjunctive, as in nous choisissons.",
+      "ir-issons": "Regular second-group -ir verbs add -iss- in the plural present, imparfait, subjunctive, and present participle, as in nous choisissons.",
       "ir-sortir": "Verbs like sortir and partir drop the stem’s final consonant in the singular present, as in je sors.",
       "ir-ouvrir": "Verbs like ouvrir and offrir take standard -er verb endings in the present tense, as in j’ouvre.",
-      "re-regular": "Regular -re verbs take -s, -s, and no ending in the singular present, as in il vend."
+      "re-regular": "Regular -dre verbs like vendre take -s, -s, and no ending in the singular present, as in il vend."
     },
     "persons": {
       "1sg": "I",

@@ -48,7 +48,7 @@ export function estCeQue(parts: CellParts): string | undefined {
       ...(ref ? [ref] : []),
       finite,
       ...(participle ? [variants(participle)] : []),
-    ])}?`;
+    ])}\u00a0?`;
   };
   return aux ? make(aux) : variants(verb.map(make));
 }
@@ -59,13 +59,17 @@ export function inversion(parts: CellParts): string | undefined {
   const forms = aux ? [aux] : verb;
   // F6 gives no ending rule for y; do not silently decide whether to insert -t-.
   if (person === '3sg' && forms.some((form) => form.endsWith('y'))) return undefined;
-  const make = (finite: string) => {
+  const subjects = subject.split('/');
+  const make = (finite: string, pronoun: string, index: number) => {
     const t = person === '3sg' && /[aeiouàâäéèêëîïôöùûüœ]$/.test(finite) ? '-t' : '';
+    // Pair each pronoun with its agreement; an invariable participle serves both.
+    const agreement =
+      participle && (subjects.length === 1 ? variants(participle) : participle[index % participle.length]);
     return `${join([
       ...(reflexive ? [elide(reflexive, finite, hOf(parts))] : []),
-      `${finite}${t}-${subject}`,
-      ...(participle ? [variants(participle)] : []),
-    ])}?`;
+      `${finite}${t}-${pronoun}`,
+      ...(agreement ? [agreement] : []),
+    ])}\u00a0?`;
   };
-  return variants(forms.map(make));
+  return variants(forms.flatMap((finite) => subjects.map((pronoun, index) => make(finite, pronoun, index))));
 }

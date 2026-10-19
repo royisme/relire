@@ -60,21 +60,28 @@ for (const mode of ['light', 'sepia', 'dark']) {
       await expect(tense(page)).toHaveText('Present');
       await expect(person(page)).toHaveText('I');
       await expect(row(page, 'Negation').locator('dd')).toHaveText('je ne vais pas');
-      await expect(row(page, 'Question with est-ce que').locator('dd')).toHaveText('est-ce que je vais?');
-      await expect(row(page, 'Question with inversion').locator('dd')).toHaveText('— Use est-ce que with je.');
+      await expect(row(page, 'Question with est-ce que').locator('dd')).toHaveText('est-ce que je vais\u00a0?');
+      await expect(row(page, 'Question with inversion').locator('dd')).toHaveText(
+        '— Inversion is rarely used with je; use est-ce que.',
+      );
+      expect(await row(page, 'Question with est-ce que').locator('dd').textContent()).toBe('est-ce que je vais\u00a0?');
       const before = await boxes(page);
       await tense(page).click();
       expect(await boxes(page)).toEqual(before);
       await page.getByRole('option', { name: 'Passé composé', exact: true }).click();
       await expect(row(page, 'Negation').locator('dd')).toHaveText('je ne suis pas allé / allée');
-      await expect(row(page, 'Question with est-ce que').locator('dd')).toHaveText('est-ce que je suis allé / allée?');
+      await expect(row(page, 'Question with est-ce que').locator('dd')).toHaveText(
+        'est-ce que je suis allé / allée\u00a0?',
+      );
       expect(await boxes(page)).toEqual(before);
       await select(page, person(page), 'he, she');
-      await expect(row(page, 'Question with inversion').locator('dd')).toHaveText('est-il/elle allé / allée?');
+      await expect(row(page, 'Question with inversion').locator('dd')).toHaveText(
+        'est-il allé\u00a0? / est-elle allée\u00a0?',
+      );
       await expect(row(page, 'Negation').locator('dd')).toHaveText('il/elle n’est pas allé / allée');
       expect(await boxes(page)).toEqual(before);
       await select(page, tense(page), 'Present');
-      await expect(row(page, 'Question with inversion').locator('dd')).toHaveText('va-t-il/elle?');
+      await expect(row(page, 'Question with inversion').locator('dd')).toHaveText('va-t-il\u00a0? / va-t-elle\u00a0?');
       await select(page, tense(page), 'Imperative');
       await expect(person(page)).toHaveText('you (singular)');
       await person(page).click();
@@ -149,7 +156,7 @@ test('CP6 a defective verb offers only its available person and no imperative', 
   await expect(section(page)).toBeVisible();
   await expect(row(page, 'Negation').locator('dd p').first()).toHaveText('il ne faut pas');
   await person(page).click();
-  await expect(page.getByRole('option')).toHaveText(['he (impersonal)']);
+  await expect(page.getByRole('option')).toHaveText(['it (impersonal)']);
   await page.keyboard.press('Escape');
   await tense(page).click();
   await expect(page.getByRole('option')).toHaveCount(6);
@@ -174,7 +181,7 @@ test('CP6 long pattern variants stay inside their fixed row at 360 px @phone', a
   await select(page, tense(page), 'Conditional');
   await select(page, person(page), 'they');
   await expect(row(page, 'Question with inversion').locator('dd p').first()).toHaveText(
-    'désapprovisionneraient-ils/elles? / désapprovisionneront-ils/elles?',
+    'désapprovisionneraient-ils\u00a0? / désapprovisionneraient-elles\u00a0? / désapprovisionneront-ils\u00a0? / désapprovisionneront-elles\u00a0?',
   );
   expect(await boxes(page)).toEqual(before);
   expect(await overflowing(page.locator('body'))).toEqual([]);

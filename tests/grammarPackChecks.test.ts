@@ -58,6 +58,15 @@ test('a missing agreement variant is rejected', () => {
   expect(checkPasseCompose(g).join()).toContain('aller passeCompose 1pl');
 });
 
+test('missing polite singular vous variants or a changed variant order are rejected', () => {
+  for (const control of [aller, appeler]) {
+    const missing = mutated(control(), (c) => c.verb.tenses.passeCompose['2pl']!.forms.splice(2));
+    expect(checkPasseCompose(missing).join()).toContain(`${missing.verb.id} passeCompose 2pl`);
+    const reordered = mutated(control(), (c) => c.verb.tenses.passeCompose['2pl']!.forms.reverse());
+    expect(checkPasseCompose(reordered).join()).toContain(`${reordered.verb.id} passeCompose 2pl`);
+  }
+});
+
 test('ç before e is rejected at the stem/ending boundary', () => {
   const g = mutated(commencer(), (c) => {
     c.parts.simple.present['1sg'] = [{ stem: 'commenç', ending: 'e' }];

@@ -119,7 +119,7 @@ for (const [language, locale] of [
         'aiOnly',
         'differs',
       ].sort(),
-      names: language === 'en' ? ['Negation', 'Question with est-ce que', 'Question with inversion'] : 'negation',
+      names: language === 'en' ? ['Negation', 'Question with est-ce que', 'Question with inversion'] : '否定句',
       unavailable: '— {{reason}}',
     });
   });
