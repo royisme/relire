@@ -24,29 +24,29 @@ const seed = (): Noun[] =>
   }));
 const candidate = (): Candidate => ({ id: 'age', ending: 'age', gender: 'm' });
 const ranAt = '2026-10-19T00:00:00.000Z';
-const attest = (n: number, agree: number): OracleAttest => ({
+const attest = (n: number, agree: number, from: Candidate = candidate()): OracleAttest => ({
   rules: {
     age: {
       ending: 'age',
-      gender: 'm',
+      gender: from.gender,
       n,
       agree,
       morphalouVersion: 'Version de fixture',
       ranAt,
-      rowHash: rowHash(candidate()),
+      rowHash: rowHash(from),
     },
   },
 });
-const derivedRule = () => ({
+const derivedRule = (dictionary = { n: 100, agree: 80 }) => ({
   id: 'age',
   ending: 'age',
   gender: 'm' as const,
-  dictionary: { n: 100, agree: 80 },
+  dictionary,
   a1: { n: 9, agree: 8 },
   examples: ['aaage', 'baage', 'caage', 'daage', 'faage'],
   exceptions: ['eeage'],
 });
-const reviews = (nouns: Noun[]): Reviews => {
+const reviews = (nouns: Noun[], rule = derivedRule()): Reviews => {
   const record = {
     reviewedBy: 'TEST ONLY',
     reviewedAt: '2026-10-18',
@@ -55,7 +55,7 @@ const reviews = (nouns: Noun[]): Reviews => {
   return {
     records: [
       ...nouns.map(({ id, lemma, gender }) => ({ nounId: id, rowHash: rowHash({ id, lemma, gender }), ...record })),
-      { ruleId: 'age', rowHash: rowHash(derivedRule()), ...record },
+      { ruleId: 'age', rowHash: rowHash(rule), ...record },
     ],
     rejected: [],
   };
@@ -115,6 +115,46 @@ test('the threshold drops candidates at 79% or n 29, never at 80% and n 30', () 
   expect(at(30, 24).rows).toHaveLength(1);
   expect(at(30, 23).drops).toEqual(['age: below threshold (dictionary 23/30); dropped']);
   expect(at(29, 29).drops).toEqual(['age: below threshold (dictionary 29/29); dropped']);
+});
+
+const hold: Candidate = { ...candidate(), decision: { kind: 'hold', reason: 'Split by meaning first.' } };
+const override: Candidate = { ...candidate(), decision: { kind: 'override', reason: 'Every A1 noun agrees.' } };
+
+test('a held candidate never ships, even above the threshold, and is reported with its reason', () => {
+  const { pack, report } = buildPack(inputs({ candidates: [hold], attest: attest(100, 99, hold) }));
+  expect(pack.rules).toEqual([]);
+  expect(report).toEqual(['age: held by the owner (Split by meaning first.); not shipped']);
+});
+
+test('an override ships below the threshold with the honest dictionary and A1 figures', () => {
+  for (const dictionary of [
+    { n: 100, agree: 50 },
+    { n: 10, agree: 10 },
+  ]) {
+    const nouns = seed();
+    const { pack, report } = buildPack(
+      inputs({
+        candidates: [override],
+        attest: attest(dictionary.n, dictionary.agree, override),
+        reviews: reviews(nouns, derivedRule(dictionary)),
+      }),
+    );
+    expect(pack.rules[0]).toMatchObject({ dictionary, a1: { n: 9, agree: 8 } });
+    expect(report).toEqual([
+      `age: owner override (dictionary ${dictionary.agree}/${dictionary.n}; Every A1 noun agrees.); shipped`,
+    ]);
+  }
+});
+
+test('an override still needs an attest record, 3 agreeing A1 nouns and a review', () => {
+  const noAttest = inputs({ candidates: [override], attest: { rules: {} } });
+  expect(buildPack(noAttest).report).toEqual(['age: no attest record; dropped']);
+  // Predicted feminine, only one feminine -age noun in the list.
+  const feminine: Candidate = { ...override, gender: 'f' };
+  const fewExamples = inputs({ candidates: [feminine], attest: attest(10, 10, feminine) });
+  expect(buildPack(fewExamples).report).toEqual(['age: only 1 agreeing A1 noun(s), 3 required; dropped']);
+  const unreviewed = inputs({ candidates: [override], attest: attest(10, 10, override) });
+  expect(failure(unreviewed)).toContain('age: publish gate refuses draft; human review required');
 });
 
 test('a candidate without an attest record, or with a lapsed one, is dropped', () => {
