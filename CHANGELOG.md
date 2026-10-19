@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Grammar tags in mistakes, practice and Progress link to their topics when one is published.
 - **Topics in My study → Grammar.** The tab now opens Topics, with an honest empty state because no topics are published yet; Conjugation remains a separate section.
 - **Hear conjugations without a key.** Listen beside each form, participle or example on the Conjugation page and each form in the word sheet, using this device’s French voice; playback and errors stay on the fixed-size control.
 - **See how conjugations are built.** Regular forms underline the engine’s endings, and the Conjugation page shows the rule’s ending table from the same generator; irregular forms stay unsplit.

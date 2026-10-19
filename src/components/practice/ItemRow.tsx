@@ -14,6 +14,7 @@ import { effectiveItemType, type ExerciseAnswer, type ExerciseItem, type Exercis
 import type { ItemRuntime } from '../../hooks/useExerciseUnit';
 import { CONTROLS } from './controls';
 import type { TextInputElement } from './controls/types';
+import { GrammarTagLabel } from '../GrammarTagLabel';
 import { SpeakButton } from '../ui/speak-button';
 import { ItemActions } from './ItemActions';
 import { ItemNotes } from './ItemNotes';
@@ -96,7 +97,9 @@ export function ItemRow({
       </span>
       <div className="min-w-0 space-y-3">
         <div className="flex min-w-0 items-center gap-2">
-          <p className="text-xs text-ink-500">{t(`grammarTags.${item.grammarTag}`)}</p>
+          <p className="text-xs text-ink-500">
+            <GrammarTagLabel tag={item.grammarTag} />
+          </p>
           {/* A dictation item has its own Listen button beside the field, next to its audio. */}
           {audio && type !== 'NUMBER_DICTATION' && (
             <SpeakButton
