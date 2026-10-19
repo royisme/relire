@@ -391,7 +391,7 @@
       "privacy": "没有账号，也没有应用服务器。文章、生词和录音都保存在这个浏览器里。使用 AI 功能时，文本或录音会用你自己的 Key 从这个浏览器直接发给你选择的提供方。",
       "scope": "Relire Plus 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
       "source": "在 GitHub 查看源代码",
-      "lexicon": "单词页中的动词形式和时态来自 {{name}}，由 {{maintainer}} 维护，许可证为 {{licence}}。",
+      "lexicon": "对于不在已审核词表里的动词，单词页中的动词形式和时态来自 {{name}}，由 {{maintainer}} 维护，许可证为 {{licence}}。",
       "lexiconSource": "{{name}} 数据来源",
       "lexiconRebuild": "这些数据不在代码仓库里，可以用原始下载文件重新生成。",
       "lexiconNotice": "重新生成的方法"

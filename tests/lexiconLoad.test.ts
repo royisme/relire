@@ -1,5 +1,8 @@
 /** Lexicon loaders and the word sheet's two questions: a fetch spy restored in afterEach, no module mocks, no live service. */
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { useLexiconVerb } from '../src/hooks/useLexiconVerb';
 import { lexiconForm, lexiconLemma } from '../src/services/lexicon/load';
 import { lexiconVerb, lexiconVerbLines } from '../src/services/lexicon/verbs';
 import { getCached } from '../src/storage/cache';
@@ -155,4 +158,13 @@ test('verb lines name the lexicon verb, skip the pack verbs and the nouns, and d
 test('a lexicon failure leaves no lines and carries its real text', async () => {
   fetchSpy.mockResolvedValue(Response.json({ error: 'unavailable' }, { status: 500 }));
   expect(await lexiconVerbLines('chantons')).toEqual({ lines: [], error: 'HTTP 500: unavailable' });
+});
+
+test('the conjugation slot starts ready with no entry and asks nothing when no service is configured', () => {
+  const status = () => createElement((): string => useLexiconVerb('chanter').status);
+  delete process.env.VITE_CONTENT_SERVICE_URL;
+  expect(renderToStaticMarkup(status())).toBe('ready');
+  process.env.VITE_CONTENT_SERVICE_URL = origin;
+  expect(renderToStaticMarkup(status())).toBe('loading');
+  expect(fetchSpy).not.toHaveBeenCalled();
 });

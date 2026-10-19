@@ -398,7 +398,7 @@
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
       "scope": "Relire Plus is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
       "source": "Source code on GitHub",
-      "lexicon": "Verb forms and tenses in the word sheet come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}.",
+      "lexicon": "For verbs outside the reviewed list, the word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}.",
       "lexiconSource": "{{name}} source",
       "lexiconRebuild": "This data is not kept in the repository: it can be rebuilt from the original download.",
       "lexiconNotice": "How to rebuild it"
