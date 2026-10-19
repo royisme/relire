@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { generateTopics, type GenerateOptions } from '../scripts/grammar-topics/generator';
 import { referenceDirectory, repositoryRoot } from '../scripts/grammar-topics/reference';
-import { PrivateDraftSchema } from '../scripts/grammar-topics/drafts';
+import { PrivateDraftSchema, type PrivateDraft } from '../scripts/grammar-topics/drafts';
 import { sheet } from '../scripts/grammar-topics/sheet';
 import { review } from '../scripts/grammar-topics/review';
 import { topicContentHash } from '../scripts/grammar-pack/gate';
@@ -33,7 +33,7 @@ type Call = {
   properties: string[];
   arguments: string[];
 };
-async function setup(modes: Record<string, string[]> = {}, count = 1) {
+async function setup(modes: Record<string, string[]> = {}, references: number | string[] = 1) {
   const root = await mkdtemp(join(tmpdir(), 'relire-TEST-generator-'));
   cleanup.push(root);
   const reference = join(root, 'reference');
@@ -43,12 +43,15 @@ async function setup(modes: Record<string, string[]> = {}, count = 1) {
     'CREATE TABLE topic(id TEXT, title TEXT, chapter TEXT, path TEXT, markdown_sha256 TEXT); CREATE TABLE node(id TEXT, parent TEXT, title TEXT, path TEXT, referenced_page INTEGER); CREATE TABLE link(topic TEXT, node TEXT, role TEXT); CREATE TABLE source_ref(id TEXT); CREATE TABLE table_ref(id TEXT); CREATE TABLE review(id TEXT)',
   );
   const manifest: TopicManifest = { packVersion: '0.1.0', topics: [] };
-  for (let i = 1; i <= count; i++) {
-    const ref = `K${String(i).padStart(3, '0')}`;
+  const refs =
+    typeof references === 'number'
+      ? Array.from({ length: references }, (_, i) => `K${String(i + 1).padStart(3, '0')}`)
+      : references;
+  for (const [i, ref] of refs.entries()) {
     await Bun.write(join(reference, 'topics', `${ref}.md`), `TEST ONLY: invented schema probe ${ref}\nTEST\n`);
     db.query('INSERT INTO topic VALUES (?, ?, ?, ?, ?)').run(ref, 'TEST ONLY', 'TEST ONLY', '', '');
     manifest.topics.push({
-      id: `test-${String.fromCharCode(96 + i)}`,
+      id: `test-${String.fromCharCode(97 + i)}`,
       reference: ref,
       chapter: 'test-only',
       tags: ['articles'],
@@ -82,6 +85,7 @@ await Bun.write(log, 'TEST fake dispatch log');
 console.error('TEST fake stderr');
 if (selected.includes('dispatch')) process.exit(23);
 if (selected.includes('watchdog')) process.exit(124);
+if (selected.includes('signal')) process.kill(process.pid, 'SIGTERM');
 for (let i=0;i<refs.length;i++) {
   const mode = selected[i];
   if (mode === 'none') continue;
@@ -89,6 +93,8 @@ for (let i=0;i<refs.length;i++) {
   if (mode === 'schema') delete value.title;
   if (mode === 'language') value.title.zh = 'TEST NO CJK';
   if (mode === 'ragged') value.blocks[2].rows[0] = [];
+  if (mode === 'tables') value.blocks.push(value.blocks[2]);
+  if (mode === 'dialogue') value.blocks[3].items.forEach((item, index) => item.speaker = index === 0 ? 'A' : 'B');
   if (mode === 'normalize') value.blocks[3].items[0].fr = "TEST e\\u0301 l'apostrophe";
   await Bun.write(join(directory, 'out', refs[i]+'.json'), mode === 'json' ? '{TEST bad JSON' : JSON.stringify(value));
 }
@@ -115,6 +121,7 @@ for (const [mode, outcome, detail] of [
   ['ragged', 'schema', 'blocks.2.rows.0: row width must match header'],
   ['dispatch', 'dispatch', 'exit code 23'],
   ['watchdog', 'dispatch', 'exit code 124 (watchdog gave up)'],
+  ['signal', 'timeout', 'timeout or signal SIGTERM'],
 ] as const) {
   test(`fake ${mode} reports ${outcome}, the real error and writes nothing`, async () => {
     const env = await setup({ K001: [mode] });
@@ -156,6 +163,28 @@ test('fake valid output is always draft, keeps uncertainty/warnings, resumes and
   draft.provenance.promptHash = '00000000';
   await Bun.write(file, JSON.stringify([draft]));
   expect(await sheet(env.output, undefined, undefined, env.root)).toContain('STALE PROMPT');
+});
+
+test('synthetic K001, K053 and K086 probes validate tables, notes and dialogue without real topic text', async () => {
+  const env = await setup({ K053: ['tables'], K086: ['dialogue'] }, ['K001', 'K053', 'K086']);
+  expect((await env.run()).failures).toEqual([]);
+  const drafts: PrivateDraft[] = (await Bun.file(join(env.output, 'drafts-test-only.json')).json()).map(
+    (value: unknown) => PrivateDraftSchema.parse(value),
+  );
+  expect(drafts).toHaveLength(3);
+  expect(drafts[0].blocks.some((block) => block.type === 'note')).toBe(true);
+  expect(drafts[1].blocks.filter((block) => block.type === 'table')).toHaveLength(2);
+  const dialogue = drafts[2].blocks.find((block) => block.type === 'examples');
+  expect(dialogue?.items.map((item) => item.speaker)).toEqual(['A', 'B']);
+});
+
+test('an unlaunchable fake dispatch reports the operating system error without writing a draft', async () => {
+  const env = await setup();
+  const { failures } = await env.run({ dispatch: join(env.root, 'TEST-no-such-executable') });
+  expect(failures[0].outcome).toBe('dispatch');
+  expect(failures[0].detail).toContain('ENOENT');
+  cleanup.push(failures[0].temporary);
+  expect(await Bun.file(join(env.output, 'drafts-test-only.json')).exists()).toBe(false);
 });
 
 test('failed forced generation preserves the previous draft byte for byte', async () => {
