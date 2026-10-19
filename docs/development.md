@@ -2,6 +2,8 @@
 
 Bun is the only package manager. The delivery checklist (which checks must pass, changelog, commit, report) belongs to the `ship-change` skill (`.claude/skills/ship-change/SKILL.md`); this page only says what each command does.
 
+Development handoff: [Built-in vocabulary and flashcards specification](vocabulary-flashcards-spec.md) defines the shared wordbook/bookmark identity, scheduling, storage and acceptance contract. It describes work to implement, not functionality already available.
+
 ## Run and build
 
 - `bun install`
