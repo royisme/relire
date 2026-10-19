@@ -1,0 +1,19 @@
+[
+  { "id": "tion", "ending": "tion", "gender": "f" },
+  { "id": "sion", "ending": "sion", "gender": "f" },
+  { "id": "te", "ending": "té", "gender": "f" },
+  { "id": "ure", "ending": "ure", "gender": "f" },
+  { "id": "ette", "ending": "ette", "gender": "f" },
+  { "id": "ance", "ending": "ance", "gender": "f" },
+  { "id": "ence", "ending": "ence", "gender": "f" },
+  { "id": "ie", "ending": "ie", "gender": "f" },
+  { "id": "age", "ending": "age", "gender": "m" },
+  { "id": "ment", "ending": "ment", "gender": "m" },
+  { "id": "isme", "ending": "isme", "gender": "m" },
+  { "id": "eau", "ending": "eau", "gender": "m" },
+  { "id": "oir", "ending": "oir", "gender": "m" },
+  { "id": "ier", "ending": "ier", "gender": "m" },
+  { "id": "eur", "ending": "eur", "gender": "m" },
+  { "id": "e", "ending": "e", "gender": "f" },
+  { "id": "ee", "ending": "ée", "gender": "f" }
+]

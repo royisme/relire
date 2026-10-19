@@ -15,6 +15,11 @@ Bun is the only package manager. The delivery checklist (which checks must pass,
 - `bun scripts/grammar-pack/oracle-diff.ts [verbId...]`: offline-only simple-tense/participle comparison, stdout and ignored `.local/oracle/<verb>.txt` reports; never run in CI or bundle the oracle.
 - `bun scripts/grammar-pack/oracle-diff.ts attest [verbId...]`: record current row hashes only for verbs with zero uncovered disagreements; only the owner writes disagreement decisions in `data/grammar-pack/oracle-attest.json`.
 - `MORPHALOU_DIR`: oracle directory, default `.local/morphalou/csv/Morphalou3.1_formatCSV` relative to the repository root; stale attestations are ignored and reported by the build.
+- `bun scripts/noun-gender/measure.ts`: count dictionary figures per candidate noun ending over single-word gendered lemmas of the offline Morphalou commonNoun file (reads `MORPHALOU_DIR`); prints a table and writes integers only to ignored `.local/noun-gender/measurement.json`.
+- `bun scripts/noun-gender/measure.ts attest`: write the last measurement into `data/noun-gender/oracle-attest.json`; owner-only, and only after NQ6 (licence) is confirmed.
+- `bun scripts/noun-gender/build.ts`: assemble `src/data/noun-gender/pack.json` from the A1 noun list, candidates, attest and reviews; candidates below the dictionary threshold (80%, n ≥ 30) or without an attest record are dropped, unreviewed rows fail the build. No pack is committed yet.
+- `bun scripts/noun-gender/build.ts --check`: regenerate in memory and reject any byte difference from the committed pack (fails while no pack exists).
+- `bun scripts/noun-gender/review.ts print <id...>`: print noun rows and derived rule tables (dictionary figure, A1 figure, examples, exceptions) before review; only the owner runs `record <id...> --by "<name>" --ref "<reference>"` to append review records to `data/noun-gender/reviews.json`.
 
 ## Add a UI component
 
