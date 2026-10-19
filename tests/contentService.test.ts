@@ -46,6 +46,13 @@ for (const [status, code] of [
   });
 }
 
+test('a non-JSON error page still reports its HTTP status, not a parse error', async () => {
+  fetchSpy.mockResolvedValue(new Response('<html>TEST ONLY gateway</html>', { status: 502 }));
+  const error = await failure(contentServiceFetch('/v1/topics'));
+  expect(error).toBeInstanceOf(ContentServiceHttpError);
+  expect((error as Error).message).toBe('HTTP 502: unexpected response');
+});
+
 test('network failure keeps its original text', async () => {
   fetchSpy.mockRejectedValue(new TypeError('TEST ONLY network refused'));
   const error = await failure(contentServiceFetch('/v1/tag-index'));

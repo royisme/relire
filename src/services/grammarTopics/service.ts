@@ -24,8 +24,9 @@ export async function contentServiceFetch(path: string): Promise<unknown> {
     throw new ContentServiceNetworkError(error instanceof Error ? error.message : String(error));
   }
   if (!response.ok) {
-    const body = (await response.json()) as { error: string };
-    throw new ContentServiceHttpError(response.status, body.error);
+    // The service answers its own errors as JSON; a platform page (a gateway or rate-limit error) is not JSON.
+    const body = (await response.json().catch(() => undefined)) as { error?: string } | undefined;
+    throw new ContentServiceHttpError(response.status, body?.error ?? 'unexpected response');
   }
   return response.json();
 }
