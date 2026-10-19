@@ -78,8 +78,10 @@
     "conjugation": "Conjugation",
     "conjugationLoading": "Loading the conjugation…",
     "conjugateThis": "Conjugate this verb",
+    "showTenses": "Show all tenses",
+    "hideTenses": "Hide all tenses",
     "verbForm": "Verb form",
-    "verbFormLine": "{{verb}}: {{forms}}",
+    "verbFormLine": "{{verb}} : {{forms}}",
     "verbFormTense": "{{tense}}, {{persons}}",
     "examples": "Examples",
     "listenExample": "Listen to example",
@@ -1074,6 +1076,7 @@
       "model": "Model",
       "rule": "Rule",
       "aiOnly": "AI-made, not checked",
+      "differs": "Some forms differ",
       "example": "AI-made example",
       "participles": "Participles",
       "participle": {
@@ -1141,6 +1144,23 @@
       "1pl": "we",
       "2pl": "you (plural or formal)",
       "3pl": "they"
+    },
+    "pronouns": {
+      "1sg": "je",
+      "2sg": "tu",
+      "3sg": "il/elle",
+      "1pl": "nous",
+      "2pl": "vous",
+      "3pl": "ils/elles"
+    },
+    "tenseFr": {
+      "present": "présent",
+      "passeCompose": "passé composé",
+      "imparfait": "imparfait",
+      "futur": "futur",
+      "conditionnel": "conditionnel",
+      "subjonctif": "subjonctif",
+      "imperatif": "impératif"
     },
     "drill": {
       "title": "Conjugation: {{tense}}",

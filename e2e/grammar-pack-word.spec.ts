@@ -8,7 +8,7 @@ import { parlerAnswer } from '../tests/fixtures/conjugationAnswer';
 import { expect, layout, overflowing, settled, test, type MockAi } from './fixtures';
 import type { Locator, Page } from '@playwright/test';
 
-const ARTICLE = 'Je vais manger. Elle parle du pain. Quelle chose.';
+const ARTICLE = 'Je vais manger. Elle parle du pain. Quelle chose. Il faut aller.';
 
 /** A word answer in the shape the word task returns now: no conjugation table. */
 const wordAnswer = (word: string, lemma: string, partOfSpeech: string, extra: Record<string, unknown> = {}) => ({
@@ -58,6 +58,13 @@ async function tap(page: Page, word: string) {
 
 const sheet = (page: Page) => page.getByRole('dialog');
 const tense = (page: Page, name: string) => sheet(page).getByRole('region', { name, exact: true });
+/** The table is closed on arrival; this opens it from the disclosure and returns the disclosure. */
+async function showTenses(page: Page) {
+  const disclosure = sheet(page).getByRole('button', { name: 'Show all tenses' });
+  await disclosure.click();
+  await expect(sheet(page).getByRole('button', { name: 'Hide all tenses' })).toBeVisible();
+  return sheet(page).getByRole('button', { name: /all tenses$/ });
+}
 const totalCalls = (ai: MockAi) => Object.values(ai.calls).reduce((sum, count) => sum + count, 0);
 
 test('a verb in the pack shows the pack table with no AI conjugation request, and no table is asked of the word task', async ({
@@ -69,6 +76,9 @@ test('a verb in the pack shows the pack table with no AI conjugation request, an
   await tap(page, 'vais');
   await expect(sheet(page).getByRole('heading', { name: 'vais' })).toBeVisible();
   await expect(sheet(page).getByRole('heading', { name: 'Conjugation' })).toBeVisible();
+  // Closed on arrival: the tenses are behind one disclosure.
+  await expect(tense(page, 'Present')).toHaveCount(0);
+  await showTenses(page);
   await expect(tense(page, 'Present').getByText('je vais', { exact: true })).toBeVisible();
   await expect(tense(page, 'Imperative').getByText('va', { exact: true })).toBeVisible();
   await expect(tense(page, 'Passé composé').getByText('je suis allé / suis allée', { exact: true })).toBeVisible();
@@ -87,8 +97,105 @@ test('tapping vais names the pack verb, tense and person', async ({ page, ai }) 
   const section = sheet(page)
     .locator('section')
     .filter({ has: page.getByRole('heading', { name: 'Verb form' }) });
-  await expect(section.getByRole('listitem')).toHaveText(['aller: Present, I']);
+  // French in the learner's language too: the tense and the pronoun as the verb is written.
+  await expect(section.getByRole('listitem')).toHaveText(['aller : présent, je']);
   await expect(section.getByRole('listitem')).toHaveCount(1);
+});
+
+test('the Verb form line sits directly under the meaning, before every other section', async ({ page, ai }) => {
+  ai.answer({
+    word: wordAnswer('vais', 'aller', 'verbe', {
+      phoneticsGuide: 'say it',
+      contextTense: 'present',
+      memoryTrick: 'a trick',
+      usageExamples: [{ fr: 'Je vais bien.', en: 'I am well.', zh: 'x' }],
+    }),
+  });
+  await openSeeded(page);
+  await tap(page, 'vais');
+  await expect(sheet(page).getByRole('heading', { name: 'vais' })).toBeVisible();
+  const order = await page.evaluate(() => {
+    const dialog = document.querySelector('[role="dialog"]')!;
+    const top = (el: Element) => el.getBoundingClientRect().top;
+    const meaning = [...dialog.querySelectorAll('p')].find((p) => p.textContent === 'meaning of vais')!;
+    const headings = [...dialog.querySelectorAll('h4')].sort((a, b) => top(a) - top(b)).map((h) => h.textContent);
+    return { headings, meaningAbove: top(meaning) < top(dialog.querySelector('h4')!) };
+  });
+  expect(order.meaningAbove).toBe(true);
+  expect(order.headings).toEqual([
+    'Verb form',
+    'How to say it',
+    'In this sentence',
+    'Examples',
+    'To remember',
+    'Conjugation',
+  ]);
+});
+
+test('the Verb form line is the same French text in Chinese', async ({ page, ai }) => {
+  await page.addInitScript(() => localStorage.setItem('relire_lang', 'zh'));
+  ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });
+  await openSeeded(page);
+  await tap(page, 'vais');
+  await expect(sheet(page).getByRole('listitem').filter({ hasText: 'aller' })).toHaveText(['aller : présent, je']);
+});
+
+test('the tapped form is marked in the opened table: semibold and a 2px underline, one cell, no other tense', async ({
+  page,
+  ai,
+}) => {
+  ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });
+  await openSeeded(page);
+  await tap(page, 'vais');
+  await showTenses(page);
+  const marked = sheet(page).locator('[aria-current="true"]');
+  await expect(marked).toHaveText(['je vais']);
+  await expect(marked).toHaveCSS('font-weight', '600');
+  await expect(marked).toHaveCSS('text-decoration-line', 'underline');
+  await expect(marked).toHaveCSS('text-decoration-thickness', '2px');
+  await expect(tense(page, 'Present').locator('[aria-current="true"]')).toHaveCount(1);
+  await expect(tense(page, 'Imparfait').locator('[aria-current="true"]')).toHaveCount(0);
+  // The other cells of the same tense carry no mark.
+  await expect(tense(page, 'Present').getByText('tu vas', { exact: true })).toHaveCSS('font-weight', '400');
+});
+
+test('opened on the verb itself there is no reverse hit: the table stays closed and nothing is marked', async ({
+  page,
+  ai,
+}) => {
+  ai.answer({ word: wordAnswer('aller', 'aller', 'verbe') });
+  await openSeeded(page);
+  await tap(page, 'aller');
+  await expect(sheet(page).getByRole('heading', { name: 'aller' })).toBeVisible();
+  await expect(sheet(page).getByRole('heading', { name: 'Verb form' })).toHaveCount(0);
+  await expect(sheet(page).getByRole('button', { name: 'Show all tenses' })).toBeVisible();
+  await expect(tense(page, 'Present')).toHaveCount(0);
+  await showTenses(page);
+  await expect(tense(page, 'Present')).toBeVisible();
+  await expect(sheet(page).locator('[aria-current="true"]')).toHaveCount(0);
+});
+
+test('the disclosure keeps its size when opened, and the Conjugation heading outranks the tense headings', async ({
+  page,
+  ai,
+}) => {
+  ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });
+  await openSeeded(page);
+  await tap(page, 'vais');
+  const closed = sheet(page).getByRole('button', { name: 'Show all tenses' });
+  await expect(closed).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  // The sheet slides in for 200 ms: measure from where it has come to rest.
+  await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)));
+  const before = await closed.boundingBox();
+  const opened = await showTenses(page);
+  await page.evaluate(() => document.fonts.ready);
+  expect(await opened.boundingBox()).toEqual(before);
+  const heading = sheet(page).getByRole('heading', { name: 'Conjugation', level: 4 });
+  await expect(heading).toHaveCSS('font-size', '16px');
+  await expect(heading).toHaveCSS('font-weight', '600');
+  await expect(tense(page, 'Present').getByRole('heading')).toHaveCSS('font-size', '14px');
+  await expect(tense(page, 'Present').getByRole('heading')).toHaveCSS('font-weight', '500');
 });
 
 test('a verb outside the pack shows one link; following it opens the Conjugation page with the verb', async ({
@@ -101,6 +208,10 @@ test('a verb outside the pack shows one link; following it opens the Conjugation
   const link = sheet(page).getByRole('link', { name: 'Conjugate this verb' });
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute('href', '#/study/grammar/conjugation?verb=parler');
+  // It reads as an action: an outline button-sized link with an arrow, 40 px high.
+  expect((await link.boundingBox())!.height).toBe(40);
+  await expect(link).toHaveCSS('border-top-width', '1px');
+  await expect(link.locator('svg')).toBeVisible();
   await expect(tense(page, 'Present')).toHaveCount(0);
   expect(ai.calls.conjugate).toBe(0);
 
@@ -146,6 +257,7 @@ test('a saved pack verb carries no conjugation table', async ({ page, ai }) => {
   ai.answer({ word: wordAnswer('vais', 'aller', 'verbe') });
   await openSeeded(page);
   await tap(page, 'vais');
+  await showTenses(page);
   await expect(tense(page, 'Present')).toBeVisible();
   await sheet(page).getByRole('button', { name: 'Save word' }).click();
   await expect(sheet(page).getByRole('button', { name: 'Saved' })).toBeVisible();
@@ -170,16 +282,17 @@ const anchors = (page: Page) =>
   page.evaluate(() => {
     const top = (el: Element | null) => Math.round(el?.getBoundingClientRect().top ?? NaN);
     const dialog = document.querySelector('[role="dialog"]')!;
-    const heading = [...dialog.querySelectorAll('h4')].find((h) => h.textContent === 'Conjugation') ?? null;
+    const h4 = (name: string) => [...dialog.querySelectorAll('h4')].find((h) => h.textContent === name) ?? null;
     return {
       title: top(dialog.querySelector('h2')),
-      conjugation: top(heading),
+      verbForm: top(h4('Verb form')),
+      conjugation: top(h4('Conjugation')),
       save: top([...dialog.querySelectorAll('button')].find((b) => b.textContent?.includes('Save word')) ?? null),
       page: document.documentElement.scrollWidth,
     };
   });
 
-test('@phone the pack table arrives in place at 360 px with long text: no overflow, nothing above it moves', async ({
+test('@phone the pack sections are in the first frame of the entry at 360 px with long text: no overflow, nothing moves', async ({
   page,
   ai,
 }) => {
@@ -202,18 +315,47 @@ test('@phone the pack table arrives in place at 360 px with long text: no overfl
   });
   await openSeeded(page);
   await tap(page, 'vais');
-  await expect(sheet(page).getByRole('heading', { name: 'vais' })).toBeVisible();
-  await expect(sheet(page).getByText('Loading the conjugation…')).toBeVisible();
-  await page.evaluate(() => document.fonts.ready);
-  // The sheet slides in for 200 ms: measure from where it has come to rest.
+  // The analysis has arrived (the mock answers at once) but the pack has not: the sheet is still its loading
+  // state, with none of the pack's sections and nothing half drawn.
+  await expect(sheet(page).getByText('Looking up the word…')).toBeVisible();
+  await page.waitForTimeout(500);
+  await expect(sheet(page).getByText('Looking up the word…')).toBeVisible();
+  await expect(sheet(page).getByRole('heading', { name: 'Conjugation' })).toHaveCount(0);
+  await expect(sheet(page).getByRole('heading', { name: 'Verb form' })).toHaveCount(0);
+  expect(ai.calls.word).toBe(1);
+  // The sheet slides in for 200 ms: let it come to rest first.
   await sheet(page).evaluate((el) => Promise.all(el.getAnimations().map((animation) => animation.finished)));
-  const before = await anchors(page);
 
   release();
-  await expect(tense(page, 'Present').getByText('je vais', { exact: true })).toBeVisible();
+  await expect(sheet(page).getByRole('heading', { name: 'vais' })).toBeVisible();
+  // The entry's first frame: the Verb form line and the conjugation disclosure are already there.
+  const first = await page.evaluate(() => {
+    const dialog = document.querySelector('[role="dialog"]')!;
+    return {
+      verbForm: [...dialog.querySelectorAll('h4')].some((h) => h.textContent === 'Verb form'),
+      disclosure: [...dialog.querySelectorAll('button')].some((b) => b.textContent?.includes('all tenses')),
+    };
+  });
+  expect(first).toEqual({ verbForm: true, disclosure: true });
+  const before = await anchors(page);
   await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(300);
   const after = await anchors(page);
   expect(after).toEqual(before);
+  expect(Object.values(before).every(Number.isFinite)).toBe(true);
+  expect(await overflowing(sheet(page))).toEqual([]);
+  // Opening the table moves nothing above it: the heading keeps its distance to the disclosure, which does not move.
+  const gap = () =>
+    page.evaluate(() => {
+      const dialog = document.querySelector('[role="dialog"]')!;
+      const heading = [...dialog.querySelectorAll('h4')].find((h) => h.textContent === 'Conjugation')!;
+      const button = [...dialog.querySelectorAll('button')].find((b) => b.textContent?.includes('all tenses'))!;
+      return Math.round(button.getBoundingClientRect().top - heading.getBoundingClientRect().top);
+    });
+  const gapBefore = await gap();
+  await showTenses(page);
+  await page.evaluate(() => document.fonts.ready);
+  expect(await gap()).toBe(gapBefore);
   expect(await overflowing(sheet(page))).toEqual([]);
   // Every tense of the verb is there and none is wider than the sheet.
   for (const name of ['Present', 'Passé composé', 'Imparfait', 'Future', 'Conditional', 'Subjunctive', 'Imperative'])

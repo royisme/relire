@@ -96,6 +96,39 @@ for (const mode of ['light', 'sepia', 'dark']) {
   }
 }
 
+test('CP6 each pattern row reserves the height of a two-line sentence and its note, and no more', async ({
+  page,
+  ai,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('relire_lang', 'en');
+    localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: {} }));
+  });
+  await page.goto('/#/study/grammar/conjugation?verb=aller');
+  await expect(section(page)).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await settled(page);
+  const measure = () =>
+    page.evaluate(() => {
+      const patterns = document.querySelector('section[aria-label="Patterns"]')!;
+      const rows = [...patterns.querySelectorAll('dl > div')];
+      const last = rows.at(-1)!.getBoundingClientRect();
+      return {
+        heights: rows.map((row) => row.getBoundingClientRect().height),
+        scrolls: rows.map((row) => row.scrollHeight > row.clientHeight),
+        // Section bottom minus its last row's bottom is its 20px padding: no reserved blank below the rows.
+        below: patterns.getBoundingClientRect().bottom - last.bottom,
+      };
+    });
+  const before = await measure();
+  expect(before.heights).toEqual([125, 125, 125]);
+  expect(before.scrolls).toEqual([false, false, false]);
+  expect(before.below).toBe(20);
+  await select(page, tense(page), 'Subjunctive');
+  expect(await measure()).toEqual(before);
+  expect(Object.values(ai.calls).reduce((sum, count) => sum + count, 0)).toBe(0);
+});
+
 test('CP6 patterns inherit unchecked and differing cell notes without another request', async ({ page, ai }) => {
   const answer = parlerAnswer();
   answer.forms.present['2sg'] = ['parle'];

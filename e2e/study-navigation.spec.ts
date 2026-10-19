@@ -157,12 +157,30 @@ test('phone Library filters retain 40px radio targets and selection @phone', asy
   expect(await overflowing(page.locator('body'))).toEqual([]);
 });
 
-test('the four study tabs fit a 360px phone in Chinese without scrolling @phone', async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem('relire_lang', 'zh'));
-  await page.goto('/#/study/grammar');
-  const tabs = page.getByRole('main').getByRole('navigation').first();
-  for (const name of ['生词', '跟读', '错题本', '语法'])
-    await expect(tabs.getByRole('link', { name, exact: true })).toBeVisible();
-  expect(await tabs.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
-  expect(await overflowing(page.locator('body'))).toEqual([]);
-});
+for (const [lang, names] of [
+  ['zh', ['生词', '跟读', '错题本', '语法']],
+  ['en', ['Words', 'Shadowing', 'Mistakes', 'Grammar']],
+] as const) {
+  test(`the four study tabs fit a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
+    page,
+  }) => {
+    await page.addInitScript((value) => localStorage.setItem('relire_lang', value), lang);
+    await page.goto('/#/study/grammar');
+    const tabs = page.getByRole('main').getByRole('navigation').first();
+    for (const name of names) await expect(tabs.getByRole('link', { name, exact: true })).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    expect(await tabs.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    // Every tab lies inside the strip and inside the screen, none clipped at the right edge.
+    const strip = (await tabs.boundingBox())!;
+    const boxes = await Promise.all(
+      names.map(async (name) => (await tabs.getByRole('link', { name, exact: true }).boundingBox())!),
+    );
+    for (const box of boxes) {
+      expect(box.x).toBeGreaterThanOrEqual(strip.x);
+      expect(box.x + box.width).toBeLessThanOrEqual(strip.x + strip.width);
+      expect(box.x + box.width).toBeLessThanOrEqual(360);
+      expect(box.height).toBeGreaterThanOrEqual(40);
+    }
+    expect(await overflowing(page.locator('body'))).toEqual([]);
+  });
+}

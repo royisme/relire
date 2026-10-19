@@ -31,13 +31,14 @@ export function StudyView({ tab, verb, sectionsInSidebar, vocabulary, shadowing,
       {!sectionsInSidebar && (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
           <nav aria-label={t('study.label')} className="max-w-full overflow-x-auto">
-            <div className="inline-flex items-center gap-0.5 rounded-lg bg-ink-100 p-1">
+            <div className="flex items-center gap-0.5 rounded-lg bg-ink-100 p-1 sm:inline-flex">
               {STUDY_TABS.map((section) => (
                 <Link
                   key={section}
                   to={{ name: 'study', tab: section }}
                   aria-current={section === tab ? 'page' : undefined}
-                  className={`inline-flex h-10 items-center px-3 rounded-md text-sm whitespace-nowrap cursor-pointer transition-colors ${
+                  // Below sm the four tabs share the width equally in a smaller label, so none is clipped in either language.
+                  className={`inline-flex h-10 min-w-0 flex-1 items-center justify-center rounded-md px-1 text-xs whitespace-nowrap cursor-pointer transition-colors sm:flex-none sm:px-3 sm:text-sm ${
                     section === tab ? 'bg-surface text-ink-950 font-medium' : 'text-ink-600 hover:text-ink-900'
                   }`}
                 >

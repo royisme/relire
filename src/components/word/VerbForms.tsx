@@ -1,8 +1,9 @@
 /**
  * The "Verb form" section of the word sheet: which pack verbs, tenses and persons write the clicked word
- * (`aller: Present, I` for `vais`), one line per lemma. Draws nothing while the pack loads and nothing, with no
- * heading, when the word is no pack form; a load error shows its real text under the heading. Loaded lazily with
- * the pack, so neither the pack nor the index is in the main bundle. Does not own the section frame's look
+ * (`aller : présent, je` for `vais`, the tense and the person in French), one line per lemma. Draws nothing, with no
+ * heading, when the word is no pack form or the pack did not load (the Conjugation slot shows that error). The
+ * sheet settles the pack before drawing this (useWordSheetPack), so it is in the entry's first frame. Loaded
+ * lazily with the pack, so neither the pack nor the index is in the main bundle. Does not own the section frame's look
  * (Section) or the matching (grammarPack/reverse).
  */
 import { useMemo } from 'react';
@@ -13,7 +14,7 @@ import { Section } from './Section';
 
 export function VerbForms({ lookup }: { lookup: string }) {
   const { t } = useTranslation();
-  const { status, pack, error } = useGrammarPack();
+  const { pack } = useGrammarPack();
   const groups = useMemo(() => (pack ? lookupVerbForms(pack, lookup) : []), [pack, lookup]);
 
   const line = ({ verb, tenses, participles }: VerbFormGroup) =>
@@ -22,22 +23,15 @@ export function VerbForms({ lookup }: { lookup: string }) {
       forms: [
         ...tenses.map(({ tense, persons }) =>
           t('wordModal.verbFormTense', {
-            tense: t(`conjugation.tenses.${tense}.name`),
-            persons: persons.map((person) => t(`conjugation.persons.${person}`)).join(' / '),
+            tense: t(`conjugation.tenseFr.${tense}`),
+            persons: persons.map((person) => t(`conjugation.pronouns.${person}`)).join(' / '),
           }),
         ),
         ...participles.map((key) => t(`conjugation.page.participle.${key}`)),
-      ].join(t('common.listSeparator')),
+        // A plain semicolon, not the locale's list separator: the line stays French punctuation in both languages.
+      ].join('; '),
     });
 
-  if (status === 'error')
-    return (
-      <Section title={t('wordModal.verbForm')}>
-        <p role="alert" className="break-words text-sm text-bad-700">
-          {error}
-        </p>
-      </Section>
-    );
   if (!groups.length) return null;
   return (
     <Section title={t('wordModal.verbForm')}>
