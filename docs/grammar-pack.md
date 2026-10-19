@@ -488,6 +488,8 @@ Not verified by the author, for the language reviewer: the tense "use" and "form
 
 # Part 4: Noun gender tendencies (owner decision 2026-10-18)
 
+Status: NP1 (schema, `measure.ts`, `build.ts`, seed list) is built; no pack is committed, and NQ6 plus the owner's review gate the first pack.
+
 Status: design for review, nothing built. Ids: `N1` to `N7`, `NQ1` to `NQ6`, `NP1` to `NP4`. It reuses Part 1's conventions (schema validation at load, provenance, the review gate, the offline Morphalou oracle) and Part 2's tab pattern. Paths marked **(new)** do not exist yet.
 
 ## N1. Goals and non-goals
