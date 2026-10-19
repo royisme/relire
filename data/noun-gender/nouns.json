@@ -12,16 +12,6 @@
       }
     },
     {
-      "id": "livre",
-      "lemma": "livre",
-      "gender": "m",
-      "prov": {
-        "origin": "clarte-seed",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
       "id": "table",
       "lemma": "table",
       "gender": "f",
@@ -484,26 +474,6 @@
     {
       "id": "cage",
       "lemma": "cage",
-      "gender": "f",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "nage",
-      "lemma": "nage",
-      "gender": "f",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "jument",
-      "lemma": "jument",
       "gender": "f",
       "prov": {
         "origin": "agy-drafted",
@@ -1042,16 +1012,6 @@
       }
     },
     {
-      "id": "toilette",
-      "lemma": "toilette",
-      "gender": "f",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
       "id": "naissance",
       "lemma": "naissance",
       "gender": "f",
@@ -1104,16 +1064,6 @@
     {
       "id": "importance",
       "lemma": "importance",
-      "gender": "f",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "ordonnance",
-      "lemma": "ordonnance",
       "gender": "f",
       "prov": {
         "origin": "agy-drafted",
@@ -1582,16 +1532,6 @@
       }
     },
     {
-      "id": "pansement",
-      "lemma": "pansement",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
       "id": "tourisme",
       "lemma": "tourisme",
       "gender": "m",
@@ -1604,56 +1544,6 @@
     {
       "id": "cyclisme",
       "lemma": "cyclisme",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "athletisme",
-      "lemma": "athlétisme",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "journalisme",
-      "lemma": "journalisme",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "organisme",
-      "lemma": "organisme",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "dynamisme",
-      "lemma": "dynamisme",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "optimisme",
-      "lemma": "optimisme",
       "gender": "m",
       "prov": {
         "origin": "agy-drafted",
@@ -1852,26 +1742,6 @@
       }
     },
     {
-      "id": "dortoir",
-      "lemma": "dortoir",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "comptoir",
-      "lemma": "comptoir",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
       "id": "cahier",
       "lemma": "cahier",
       "gender": "m",
@@ -1982,16 +1852,6 @@
       }
     },
     {
-      "id": "pompier",
-      "lemma": "pompier",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
       "id": "ouvrier",
       "lemma": "ouvrier",
       "gender": "m",
@@ -2032,28 +1892,8 @@
       }
     },
     {
-      "id": "professeur",
-      "lemma": "professeur",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
       "id": "serveur",
       "lemma": "serveur",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "docteur",
-      "lemma": "docteur",
       "gender": "m",
       "prov": {
         "origin": "agy-drafted",
@@ -2084,16 +1924,6 @@
     {
       "id": "vendeur",
       "lemma": "vendeur",
-      "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "chauffeur",
-      "lemma": "chauffeur",
       "gender": "m",
       "prov": {
         "origin": "agy-drafted",
@@ -2625,16 +2455,6 @@
       "id": "ami",
       "lemma": "ami",
       "gender": "m",
-      "prov": {
-        "origin": "agy-drafted",
-        "checkedAgainst": [],
-        "status": "draft"
-      }
-    },
-    {
-      "id": "amie",
-      "lemma": "amie",
-      "gender": "f",
       "prov": {
         "origin": "agy-drafted",
         "checkedAgainst": [],
@@ -3365,6 +3185,186 @@
       "id": "musique",
       "lemma": "musique",
       "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "page",
+      "lemma": "page",
+      "gender": "f",
+      "prov": {
+        "origin": "human",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "racisme",
+      "lemma": "racisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "alpinisme",
+      "lemma": "alpinisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "seisme",
+      "lemma": "séisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "parachutisme",
+      "lemma": "parachutisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "adresse",
+      "lemma": "adresse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "tristesse",
+      "lemma": "tristesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vitesse",
+      "lemma": "vitesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "jeunesse",
+      "lemma": "jeunesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "politesse",
+      "lemma": "politesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "gentillesse",
+      "lemma": "gentillesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "promesse",
+      "lemma": "promesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "habitude",
+      "lemma": "habitude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "etude",
+      "lemma": "étude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "attitude",
+      "lemma": "attitude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "solitude",
+      "lemma": "solitude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "inquietude",
+      "lemma": "inquiétude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "coude",
+      "lemma": "coude",
+      "gender": "m",
       "prov": {
         "origin": "agy-drafted",
         "checkedAgainst": [],

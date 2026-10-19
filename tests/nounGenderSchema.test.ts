@@ -173,7 +173,7 @@ test('committed source files parse and no noun carries an owner review', () => {
   expect(source.packVersion).toBe('0.1.0');
   expect(source.nouns.length).toBeGreaterThanOrEqual(40);
   for (const noun of source.nouns) {
-    expect(['clarte-seed', 'agy-drafted']).toContain(noun.prov.origin);
+    expect(['clarte-seed', 'agy-drafted', 'human']).toContain(noun.prov.origin);
     expect(noun.prov.status).toBe('draft');
     expect(noun.prov.reviewedBy).toBeUndefined();
     expect(noun.id).toBe(noun.lemma.normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
