@@ -21,7 +21,9 @@ test.beforeEach(async ({ ai }) => {
   ai.ttsDelayMs = 50;
 });
 
-test('empty state and Add dialog offer both choices; worksheet choice opens the import route', async ({ page }) => {
+test('empty state and Add dialog offer all three choices; worksheet choice opens the import route', async ({
+  page,
+}) => {
   await page.goto(PRACTICE);
   await waitForArticle(page);
   await expect(page.getByText('0 exercise sets', { exact: true })).toBeVisible();
@@ -29,7 +31,9 @@ test('empty state and Add dialog offer both choices; worksheet choice opens the 
   await expect(main(page).getByRole('link', { name: 'Import a worksheet', exact: true })).toBeVisible();
   await expect(main(page).getByRole('button', { name: 'Make from an article', exact: true })).toBeVisible();
   await expect(page.getByRole('searchbox')).toHaveCount(0);
-  await expect(page.locator('main button.bg-accent-700')).toHaveCount(1);
+  await expect(main(page).getByRole('button', { name: 'Conjugation drills', exact: true })).toBeVisible();
+  await expect(page.locator('main :is(button, a).bg-accent-700')).toHaveCount(1);
+  await expect(main(page).getByRole('link', { name: 'Import a worksheet', exact: true })).toHaveClass(/bg-accent-700/);
   await expect(page.getByRole('button', { name: 'Record', exact: true })).toHaveClass(/bg-surface/);
   await page.getByRole('button', { name: 'Add exercises', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Add exercises' });
@@ -246,10 +250,10 @@ test('set progress is the sum of stored checked items; the set page shows exerci
   await item.getByRole('button', { name: 'Check', exact: true }).click();
   await expect(item.getByText('Correct', { exact: true })).toBeAttached();
   await page.goto(PRACTICE);
-  await expect(page.locator('main tbody tr')).toContainText('1 of 15 checked');
+  await expect(page.locator('main tbody tr')).toContainText('1 of 15 checked · 1 correct');
   await setLinks(page).click();
   await expect(page.locator('main tbody tr').filter({ hasText: 'Le féminin des adjectifs' })).toContainText(
-    '1 of 1 checked',
+    '1 of 1 checked · 1 correct',
   );
   await expect(page.locator('main tbody tr').filter({ hasText: 'Conjuguer au présent' })).toContainText('Not started');
 });

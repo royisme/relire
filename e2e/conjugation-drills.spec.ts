@@ -3,7 +3,7 @@
  * made with no AI key configured and no AI request at all, and every item is
  * graded with accents whatever the global strict-accents preference says.
  */
-import { expect, test, type MockAi } from './fixtures';
+import { expect, overflowing, test, type MockAi } from './fixtures';
 import { PRACTICE, row, stored, waitForArticle } from './practice.helpers';
 import type { Page } from '@playwright/test';
 
@@ -37,6 +37,63 @@ async function makeDrillSet(page: Page): Promise<StoredUnit[]> {
 }
 
 const aiCalls = (ai: MockAi) => Object.values(ai.calls).reduce((sum, calls) => sum + calls, 0);
+
+for (const phone of [false, true]) {
+  test(`drill options stay compact, grouped and touch-sized in every theme ${phone ? '@phone' : ''}`, async ({
+    page,
+    ai,
+  }) => {
+    for (const theme of ['light', 'sepia', 'dark']) {
+      await page.goto(PRACTICE);
+      await waitForArticle(page);
+      await page.evaluate((theme) => localStorage.setItem('relire_theme', theme), theme);
+      await page.reload();
+      await page.getByRole('button', { name: 'Add exercises', exact: true }).click();
+      const dialog = page.getByRole('dialog', { name: 'Add exercises' });
+      await dialog.getByRole('button', { name: 'Conjugation drills', exact: true }).click();
+      const verbs = dialog.getByRole('group', { name: 'Verbs', exact: true });
+      const tenses = dialog.getByRole('group', { name: 'Tenses', exact: true });
+      await expect(verbs.getByRole('checkbox')).toHaveCount(4);
+      await expect(tenses.getByRole('checkbox')).toHaveCount(7);
+      await expect(dialog.getByRole('spinbutton', { name: 'Items per tense', exact: true })).toHaveValue('8');
+      const make = dialog.getByRole('button', { name: 'Make exercises', exact: true });
+      await expect(make).toBeDisabled();
+      await expect(make).toHaveClass(/border-ink-300.*bg-surface/);
+      await page.evaluate(() => document.fonts.ready);
+      for (const checkbox of await dialog.getByRole('checkbox').all()) {
+        const box = (await checkbox.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(24);
+        expect(box.height).toBeGreaterThanOrEqual(24);
+        expect((await checkbox.locator('..').boundingBox())!.height).toBeGreaterThanOrEqual(40);
+      }
+      const lastVerb = (await verbs.locator('label').last().boundingBox())!;
+      const tensesBox = (await tenses.boundingBox())!;
+      expect(tensesBox.y - lastVerb.y - lastVerb.height).toBeLessThanOrEqual(24);
+      await verbs.getByRole('checkbox', { name: 'aller', exact: true }).check();
+      await tenses.getByRole('checkbox', { name: 'Present', exact: true }).check();
+      await expect(make).toBeEnabled();
+      await expect(make).toHaveClass(/bg-accent-700/);
+      expect(await overflowing(page.locator('body'))).toEqual([]);
+      // Base UI's clipped, aria-hidden checkbox inputs live at viewport (0, 0), not in the dialog.
+      const visibleOverflow = await dialog.evaluate((root) => {
+        const box = root.getBoundingClientRect();
+        return [...root.querySelectorAll('*')]
+          .filter((element) => {
+            const rect = element.getBoundingClientRect();
+            return (
+              getComputedStyle(element).clipPath === 'none' &&
+              rect.width > 0 &&
+              (rect.left < box.left - 1 || rect.right > box.right + 1)
+            );
+          })
+          .map((element) => element.tagName);
+      });
+      expect(visibleOverflow).toEqual([]);
+      await page.keyboard.press('Escape');
+    }
+    expect(aiCalls(ai)).toBe(0);
+  });
+}
 
 test('a set is made from the pack with no key and no AI request', async ({ page, ai }) => {
   await withoutKey(page);

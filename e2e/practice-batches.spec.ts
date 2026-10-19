@@ -34,6 +34,15 @@ test('set columns, newest first, all four sorts, title search and present-level 
     await expect(page.getByRole('columnheader', { name, exact: true })).toBeVisible();
   await expect(page.getByText('2 exercise sets', { exact: true })).toBeVisible();
   await expect(titles(page)).toHaveText(['Le lot récent', 'Le lot ancien']);
+  await expect(page.getByRole('button', { name: 'Add exercises', exact: true }).locator('svg')).toHaveClass(
+    /lucide-file-plus-2/,
+  );
+  await expect(page.getByRole('searchbox').locator('..').locator('svg')).toHaveClass(/lucide-search/);
+  for (const name of ['Title', 'Level', 'Progress']) {
+    await expect(page.getByRole('columnheader', { name, exact: true }).locator('svg')).toHaveClass(
+      /lucide-arrow-up-down.*text-ink-400/,
+    );
+  }
   const added = page.getByRole('columnheader', { name: 'Added', exact: true });
   await expect(added).toHaveAttribute('aria-sort', 'descending');
   await added.getByRole('button').click();
@@ -161,7 +170,8 @@ test('set page supports quiet set deletion and unknown-set recovery', async ({ p
   await seedTwoSets(page);
   await page.goto('/#/practice/set/set-new');
   const del = page.getByRole('main').getByRole('button', { name: 'Delete set', exact: true });
-  await expect(del).toHaveClass(/bg-surface/);
+  await expect(del).toHaveClass(/text-ink-600/);
+  await expect(del).not.toHaveClass(/bg-surface|bg-accent-700/);
   await del.click();
   await page.getByRole('dialog').getByRole('button', { name: 'Delete set', exact: true }).click();
   await expect(page).toHaveURL(/#\/practice$/);

@@ -22,7 +22,7 @@ const classes: Record<string, string> = {
   title: 'pl-4 pr-2',
   level: 'hidden sm:table-cell w-20 px-2',
   exercises: 'hidden md:table-cell w-24 px-2',
-  progress: 'w-24 sm:w-32 px-2',
+  progress: 'hidden md:table-cell w-40 px-2',
   createdAt: 'hidden md:table-cell w-32 px-2',
   actions: 'w-12 pr-2 pl-0',
 };
@@ -42,9 +42,13 @@ export function SetTable({ sets, onDelete }: { sets: SetRow[]; onDelete: (set: S
                 {set.title}
               </span>
               <span className="mt-0.5 block text-xs text-ink-500">
-                <span className="sm:hidden">{t(`levels.${set.level}`)} · </span>
-                {t('practice.exercises', { count: set.rows.length })}
+                <span className="sm:hidden">{set.level}</span>
+                <span className="hidden sm:inline">{t(`levels.${set.level}`)}</span>
                 {set.types.length === 1 && <> · {t(`exerciseTypes.${set.types[0]}.name`)}</>}
+                <span className="tnum mt-0.5 block md:hidden">
+                  {t('practice.exercises', { count: set.rows.length })} ·{' '}
+                  {set.progress.checked === 0 ? t('practice.notStarted') : t('practice.checkedProgress', set.progress)}
+                </span>
               </span>
             </Link>
           ),
@@ -52,7 +56,7 @@ export function SetTable({ sets, onDelete }: { sets: SetRow[]; onDelete: (set: S
         helper.accessor('level', {
           header: t('practice.level'),
           sortDescFirst: false,
-          cell: ({ row }) => t(`levels.${row.original.level}`),
+          cell: ({ row }) => row.original.level,
         }),
         helper.accessor((set) => set.rows.length, {
           id: 'exercises',
@@ -64,8 +68,8 @@ export function SetTable({ sets, onDelete }: { sets: SetRow[]; onDelete: (set: S
           header: t('practice.colProgress'),
           sortDescFirst: true,
           cell: ({ row }) => {
-            const { checked, total } = row.original.progress;
-            return checked === 0 ? t('practice.notStarted') : t('practice.checkedProgress', { checked, total });
+            const progress = row.original.progress;
+            return progress.checked === 0 ? t('practice.notStarted') : t('practice.checkedProgress', progress);
           },
         }),
         helper.accessor('createdAt', {
@@ -141,7 +145,7 @@ export function SetTable({ sets, onDelete }: { sets: SetRow[]; onDelete: (set: S
               {row.getAllCells().map((cell) => (
                 <TableCell
                   key={cell.id}
-                  className={`${classes[cell.column.id]} py-3 align-top whitespace-normal break-words text-ink-600 ${cell.column.id !== 'title' ? 'tnum' : ''}`}
+                  className={`${classes[cell.column.id]} py-3 ${cell.column.id === 'actions' ? 'align-middle' : 'align-top'} whitespace-normal break-words text-ink-600 ${cell.column.id !== 'title' ? 'tnum' : ''}`}
                 >
                   <table.FlexRender cell={cell} />
                 </TableCell>

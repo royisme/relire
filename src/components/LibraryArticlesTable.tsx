@@ -32,7 +32,7 @@ const cells: Record<string, string> = {
   level: 'hidden sm:table-cell px-2 py-3 align-top text-ink-700 whitespace-nowrap',
   words: 'hidden md:table-cell px-2 py-3 align-top text-ink-700 tnum',
   createdAt: 'hidden md:table-cell px-2 py-3 align-top text-ink-600 whitespace-normal',
-  actions: 'pr-2 pl-0 py-1.5 align-top',
+  actions: 'pr-2 pl-0 py-1.5 align-middle',
 };
 
 export function LibraryArticlesTable({
@@ -103,7 +103,7 @@ export function LibraryArticlesTable({
                 aria-label={t('library.edit')}
                 title={t('library.edit')}
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil aria-hidden="true" className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
@@ -113,7 +113,7 @@ export function LibraryArticlesTable({
                 title={t('library.delete')}
                 className="hover:text-bad-700"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 aria-hidden="true" className="w-4 h-4" />
               </Button>
             </div>
           ),

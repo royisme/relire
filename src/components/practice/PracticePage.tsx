@@ -1,5 +1,6 @@
 /** Owns Practice's set list, filters and add/delete overlays; generation and oral recording have their own owners. */
 import { useMemo, useState } from 'react';
+import { FilePlus2, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUnitRows } from '../../hooks/useUnitRows';
 import { aggregateSets, filterSets, type SetRow } from '../../services/exercises/sets';
@@ -28,7 +29,7 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
   const [level, setLevel] = useState('all');
   const filtered = useMemo(() => filterSets(sets, query, level), [sets, query, level]);
   const levels = useMemo(() => [...new Set(sets.map((set) => set.level))].sort(), [sets]);
-  const [adding, setAdding] = useState<'choices' | 'article' | null>(null);
+  const [adding, setAdding] = useState<'choices' | 'article' | 'conjugation' | null>(null);
   const [deleting, setDeleting] = useState<SetRow | null>(null);
   const [pickedId, setPickedId] = useState<string | null>(null);
   const article = articles.find((candidate) => candidate.id === pickedId) ?? articles[0];
@@ -42,7 +43,12 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
             {!loading && !error && t('practice.setCount', { count: sets.length })}
           </span>
         }
-        actions={<Button onClick={() => setAdding('choices')}>{t('practice.add')}</Button>}
+        actions={
+          <Button variant={sets.length === 0 ? 'outline' : 'default'} onClick={() => setAdding('choices')}>
+            <FilePlus2 aria-hidden="true" className="h-4 w-4" />
+            {t('practice.add')}
+          </Button>
+        }
       />
       {error && (
         <p role="alert" className="break-words text-sm text-bad-700">
@@ -56,14 +62,18 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
           <>
             {sets.length > 0 && (
               <div className="flex flex-wrap items-center gap-3">
-                <label className="min-w-0 flex-1 basis-56">
+                <label className="relative min-w-0 flex-1 basis-56">
                   <span className="sr-only">{t('practice.search')}</span>
+                  <Search
+                    aria-hidden="true"
+                    className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"
+                  />
                   <input
                     type="search"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder={t('practice.search')}
-                    className="h-10 w-full rounded-md border border-ink-300 bg-surface px-3 text-sm focus:border-accent-600 focus:outline-none focus:ring-1 focus:ring-accent-600"
+                    className="h-10 w-full rounded-md border border-ink-300 bg-surface pl-9 pr-3 text-sm focus:border-accent-600 focus:outline-none focus:ring-1 focus:ring-accent-600"
                   />
                 </label>
                 <Segmented
@@ -81,12 +91,15 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
               <div className="space-y-4 rounded-lg border border-ink-200 bg-surface px-6 py-14 text-center">
                 <p className="font-serif text-lg text-ink-900">{t('practice.emptyTitle')}</p>
                 <p className="mx-auto max-w-md text-sm text-ink-500">{t('practice.emptyDesc')}</p>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  <Link to={{ name: 'importExercises' }} className={buttonVariants({ variant: 'outline' })}>
+                <div className="flex flex-col flex-wrap items-center justify-center gap-2 sm:flex-row">
+                  <Link to={{ name: 'importExercises' }} className={buttonVariants({ className: 'w-full sm:w-auto' })}>
                     {t('practice.importWorksheet')}
                   </Link>
-                  <Button variant="outline" onClick={() => setAdding('article')}>
+                  <Button variant="outline" className="w-full sm:w-auto" onClick={() => setAdding('article')}>
                     {t('practice.makeFromArticle')}
+                  </Button>
+                  <Button variant="outline" className="w-full sm:w-auto" onClick={() => setAdding('conjugation')}>
+                    {t('practice.makeConjugationDrills')}
                   </Button>
                 </div>
               </div>
@@ -138,7 +151,7 @@ export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePag
       {adding && (
         <AddExercisesDialog
           articles={articles}
-          fromArticle={adding === 'article'}
+          initialChoice={adding === 'choices' ? null : adding}
           onMissingKey={onMissingKey}
           onClose={() => setAdding(null)}
         />

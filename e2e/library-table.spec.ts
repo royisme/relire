@@ -18,7 +18,9 @@ for (const phone of [false, true]) {
       'Le Petit Prince et le Secret du Renard',
     ]);
     const title = table.getByRole('columnheader', { name: 'Title', exact: true });
+    await expect(title.getByRole('button').locator('svg')).toHaveClass(/lucide-arrow-up-down.*text-ink-400/);
     await title.getByRole('button').click();
+    await expect(title.getByRole('button').locator('svg')).toHaveClass(/lucide-arrow-up/);
     await expect(title).toHaveAttribute('aria-sort', 'ascending');
     await expect(titles.first()).toHaveText("L'Art de Vivre dans un Café Parisien");
     // A no-match unmount must not reset the selected Library sort.
@@ -52,6 +54,10 @@ for (const phone of [false, true]) {
       await added.getByRole('button').click();
       await expect(added).toHaveAttribute('aria-sort', 'descending');
     }
+    await page.evaluate(() => document.fonts.ready);
+    const rowBox = (await row.boundingBox())!;
+    const deleteBox = (await del.boundingBox())!;
+    expect(Math.abs(deleteBox.y + deleteBox.height / 2 - rowBox.y - rowBox.height / 2)).toBeLessThan(2);
     expect(await overflowing(page.locator('body'))).toEqual([]);
     await titles.click();
     await expect(page).toHaveURL(/#\/read\/petit-prince$/);

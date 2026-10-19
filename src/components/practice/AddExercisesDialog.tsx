@@ -16,33 +16,65 @@ const ConjugationDrillForm = lazy(() =>
 
 export function AddExercisesDialog({
   articles,
-  fromArticle,
+  initialChoice,
   onMissingKey,
   onClose,
 }: {
   articles: Article[];
-  fromArticle: boolean;
+  initialChoice: 'article' | 'conjugation' | null;
   onMissingKey: () => void;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const [choice, setChoice] = useState<'article' | 'conjugation' | null>(fromArticle ? 'article' : null);
+  const [choice, setChoice] = useState(initialChoice);
   const [pickedId, setPickedId] = useState(articles[0]?.id);
   const article = articles.find((candidate) => candidate.id === pickedId);
   return (
     <Dialog label={t('practice.add')} onClose={onClose} className="max-w-lg">
       <OverlayHeader title={t('practice.add')} closeLabel={t('common.close')} onClose={onClose} />
       <div className="space-y-4 p-5">
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={() => navigate({ name: 'importExercises' })}>
-            {t('practice.importWorksheet')}
-          </Button>
-          <Button variant="outline" onClick={() => setChoice('article')}>
-            {t('practice.makeFromArticle')}
-          </Button>
-          <Button variant="outline" onClick={() => setChoice('conjugation')}>
-            {t('practice.makeConjugationDrills')}
-          </Button>
+        <div className="space-y-3">
+          <div>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              aria-describedby="practice-choice-import"
+              onClick={() => navigate({ name: 'importExercises' })}
+            >
+              {t('practice.importWorksheet')}
+            </Button>
+            <p id="practice-choice-import" className="mt-1 text-xs text-ink-500">
+              {t('practice.importWorksheetDesc')}
+            </p>
+          </div>
+          <div>
+            <Button
+              variant="outline"
+              className="w-full justify-start aria-pressed:border-accent-700 aria-pressed:bg-accent-100 aria-pressed:text-accent-900"
+              aria-pressed={choice === 'article'}
+              aria-describedby="practice-choice-article"
+              onClick={() => setChoice('article')}
+            >
+              {t('practice.makeFromArticle')}
+            </Button>
+            <p id="practice-choice-article" className="mt-1 text-xs text-ink-500">
+              {t('practice.makeFromArticleDesc')}
+            </p>
+          </div>
+          <div>
+            <Button
+              variant="outline"
+              className="w-full justify-start aria-pressed:border-accent-700 aria-pressed:bg-accent-100 aria-pressed:text-accent-900"
+              aria-pressed={choice === 'conjugation'}
+              aria-describedby="practice-choice-conjugation"
+              onClick={() => setChoice('conjugation')}
+            >
+              {t('practice.makeConjugationDrills')}
+            </Button>
+            <p id="practice-choice-conjugation" className="mt-1 text-xs text-ink-500">
+              {t('practice.makeConjugationDrillsDesc')}
+            </p>
+          </div>
         </div>
         {choice === 'article' &&
           (article ? (

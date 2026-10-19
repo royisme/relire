@@ -19,11 +19,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 const features = tableFeatures({ rowSortingFeature, sortedRowModel: createSortedRowModel() });
 const helper = createColumnHelper<typeof features, UnitRow>();
 const classes: Record<string, string> = {
-  number: 'w-16 pl-3 pr-1',
+  number: 'hidden sm:table-cell w-16 pl-3 pr-1',
   title: 'px-2',
   type: 'hidden sm:table-cell w-40 px-2',
   items: 'hidden md:table-cell w-20 px-2',
-  progress: 'w-24 sm:w-32 px-2',
+  progress: 'hidden md:table-cell w-40 px-2',
   actions: 'w-12 pl-0 pr-2',
 };
 
@@ -45,10 +45,16 @@ export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit
               to={{ name: 'unit', unitId: unit.id }}
               className="block min-w-0 break-words font-serif text-base font-semibold text-ink-900 hover:text-accent-900"
             >
-              {unit.title}
-              <span className="mt-0.5 block font-sans text-xs font-normal text-ink-500">
+              <span className="sm:hidden">
+                {t('practice.numberedTitle', { number: unit.unitNumber, title: unit.title })}
+              </span>
+              <span className="hidden sm:inline">{unit.title}</span>
+              <span className="mt-0.5 block font-sans text-xs font-normal text-ink-500 md:hidden">
                 <span className="sm:hidden">{t(`exerciseTypes.${unit.type}.name`)} · </span>
-                <span className="md:hidden">{t('practice.items', { count: progress.total })}</span>
+                {t('practice.items', { count: progress.total })}
+                <span className="mt-0.5 block">
+                  {progress.checked === 0 ? t('practice.notStarted') : t('practice.checkedProgress', { ...progress })}
+                </span>
               </span>
             </Link>
           ),
@@ -63,8 +69,8 @@ export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit
           id: 'progress',
           header: t('practice.colProgress'),
           cell: ({ row }) => {
-            const { checked, total } = row.original.progress;
-            return checked === 0 ? t('practice.notStarted') : t('practice.checkedProgress', { checked, total });
+            const progress = row.original.progress;
+            return progress.checked === 0 ? t('practice.notStarted') : t('practice.checkedProgress', { ...progress });
           },
         }),
         helper.display({
@@ -117,7 +123,7 @@ export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit
               {row.getAllCells().map((cell) => (
                 <TableCell
                   key={cell.id}
-                  className={`${classes[cell.column.id]} break-words whitespace-normal py-3 align-top text-ink-600 tnum`}
+                  className={`${classes[cell.column.id]} break-words whitespace-normal py-3 ${cell.column.id === 'actions' ? 'align-middle' : 'align-top'} text-ink-600 tnum`}
                 >
                   <table.FlexRender cell={cell} />
                 </TableCell>

@@ -72,41 +72,48 @@ export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <div className="min-h-24 space-y-1">
-        <span className="block text-sm font-medium text-ink-800">{t('conjugation.drill.verbs')}</span>
-        {pack.status === 'loading' && <p className="text-sm text-ink-500">{t('conjugation.drill.loading')}</p>}
-        {pack.status === 'error' && (
-          <p role="alert" className="break-words text-sm text-bad-700">
-            {pack.error}
-          </p>
-        )}
-        {pack.status === 'ready' && verbs.length === 0 && (
-          <p className="text-sm text-ink-500">{t('conjugation.drill.noVerbs')}</p>
-        )}
-        {verbs.length > 0 && (
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {verbs.map((row) => (
-              <label key={row.id} className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-ink-900">
-                <Checkbox
-                  checked={pickedVerbs.has(row.id)}
-                  onCheckedChange={() => {
-                    dropPayload();
-                    setPickedVerbs(toggle(pickedVerbs, row.id));
-                  }}
-                />
-                <span className="break-words">{row.infinitive}</span>
-              </label>
-            ))}
-          </div>
-        )}
-      </div>
+      <fieldset className="min-w-0 space-y-1">
+        <legend className="text-sm font-medium text-ink-800">{t('conjugation.drill.verbs')}</legend>
+        <div className="h-20 overflow-y-auto sm:h-10">
+          {pack.status === 'loading' && <p className="text-sm text-ink-500">{t('conjugation.drill.loading')}</p>}
+          {pack.status === 'error' && (
+            <p role="alert" className="break-words text-sm text-bad-700">
+              {pack.error}
+            </p>
+          )}
+          {pack.status === 'ready' && verbs.length === 0 && (
+            <p className="text-sm text-ink-500">{t('conjugation.drill.noVerbs')}</p>
+          )}
+          {verbs.length > 0 && (
+            <div className="grid grid-cols-2 gap-x-3 sm:grid-cols-4">
+              {verbs.map((row) => (
+                <label
+                  key={row.id}
+                  className="flex min-h-10 min-w-0 cursor-pointer items-center gap-2 text-sm text-ink-900"
+                >
+                  <Checkbox
+                    className="size-6"
+                    checked={pickedVerbs.has(row.id)}
+                    onCheckedChange={() => {
+                      dropPayload();
+                      setPickedVerbs(toggle(pickedVerbs, row.id));
+                    }}
+                  />
+                  <span className="break-words">{row.infinitive}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      </fieldset>
 
-      <div className="space-y-1">
-        <span className="block text-sm font-medium text-ink-800">{t('conjugation.drill.tenses')}</span>
-        <div className="flex flex-wrap gap-x-4 gap-y-1">
+      <fieldset className="min-w-0 space-y-1">
+        <legend className="text-sm font-medium text-ink-800">{t('conjugation.drill.tenses')}</legend>
+        <div className="grid gap-x-4 sm:grid-cols-2">
           {TENSES.map((tense) => (
-            <label key={tense} className="flex min-h-10 cursor-pointer items-center gap-2 text-sm text-ink-900">
+            <label key={tense} className="flex min-h-10 min-w-0 cursor-pointer items-center gap-2 text-sm text-ink-900">
               <Checkbox
+                className="size-6"
                 checked={pickedTenses.has(tense)}
                 onCheckedChange={() => {
                   dropPayload();
@@ -117,7 +124,7 @@ export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
             </label>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
         <label className="block">
@@ -138,7 +145,7 @@ export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
           </select>
         </label>
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-ink-800">{t('practice.count')}</span>
+          <span className="mb-1 block text-sm font-medium text-ink-800">{t('practice.drillItems')}</span>
           <input
             type="number"
             inputMode="numeric"
@@ -152,7 +159,7 @@ export function ConjugationDrillForm({ onSaved }: { onSaved: () => void }) {
             className={`${field} w-24 tnum`}
           />
         </label>
-        <Button type="submit" disabled={!valid || working} aria-busy={working}>
+        <Button type="submit" variant={valid ? 'default' : 'outline'} disabled={!valid || working} aria-busy={working}>
           {working ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
