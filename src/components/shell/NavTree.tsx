@@ -69,7 +69,11 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
               {...item}
               to={{ name: 'study', tab }}
               label={t(`study.${tab}`)}
-              current={route.name === 'study' && route.tab === tab ? 'page' : undefined}
+              current={
+                (route.name === 'study' && route.tab === tab) || (route.name === 'grammarTopic' && tab === 'grammar')
+                  ? 'page'
+                  : undefined
+              }
               badge={tab === 'mistakes' ? mistakes : undefined}
               badgeLabel={tab === 'mistakes' ? t('nav.toReview', { count: mistakes }) : undefined}
             />

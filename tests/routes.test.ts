@@ -145,27 +145,51 @@ test('a missing-key request keeps its purpose and where to return', () => {
   }
 });
 
-test('the Grammar tab is the Conjugation page, with an optional verb that survives the round trip', () => {
+test('Grammar topics and Conjugation have distinct addresses and query values', () => {
   expect(STUDY_TABS).toEqual(['words', 'shadowing', 'mistakes', 'grammar']);
   const bare: Route = { name: 'study', tab: 'grammar' };
-  expect(routeHref(bare)).toBe('#/study/grammar/conjugation');
+  expect(routeHref(bare)).toBe('#/study/grammar');
   expect(roundTrip(bare)).toEqual({ route: bare, canonical: null });
   expect(areaOf(bare)).toBe('study');
-  expect(parseRoute('#/study/grammar')).toEqual({ route: bare, canonical: '#/study/grammar/conjugation' });
+  expect(parseRoute('#/study/grammar')).toEqual({ route: bare, canonical: null });
+  const conjugation: Route = { name: 'study', tab: 'grammar', section: 'conjugation' };
+  expect(roundTrip(conjugation)).toEqual({ route: conjugation, canonical: null });
+  const filtered: Route = { ...bare, tag: 'articles' };
+  expect(routeHref(filtered)).toBe('#/study/grammar?tag=articles');
+  expect(roundTrip(filtered)).toEqual({ route: filtered, canonical: null });
+  for (const query of ['tag=unknown', 'tag=', 'verb=parler']) {
+    expect(parseRoute(`#/study/grammar?${query}`)).toEqual({ route: bare, canonical: '#/study/grammar' });
+  }
   for (const verb of ['s’habiller', 'se lever', "s'appeler", 'éternuer']) {
-    const route: Route = { name: 'study', tab: 'grammar', verb };
+    const route: Route = { ...conjugation, verb };
     expect(roundTrip(route)).toEqual({ route, canonical: null });
   }
   // The generic tab branch must not drop the verb, and an empty one is no verb.
-  expect(parseRoute('#/study/grammar?verb=parler')).toEqual({
-    route: { name: 'study', tab: 'grammar', verb: 'parler' },
-    canonical: '#/study/grammar/conjugation?verb=parler',
-  });
   expect(parseRoute('#/study/grammar/conjugation?verb=')).toEqual({
-    route: bare,
+    route: conjugation,
     canonical: '#/study/grammar/conjugation',
   });
-  expect(parseRoute('#/study/grammar/conjugation?verb=%20').route).toEqual(bare);
-  for (const hash of ['#/study/grammar/x', '#/study/grammar/conjugation/y', '#/study/grammar//'])
+  expect(parseRoute('#/study/grammar/conjugation?verb=%20').route).toEqual(conjugation);
+  expect(parseRoute('#/study/grammar/conjugation?tag=articles').canonical).toBe('#/study/grammar/conjugation');
+});
+
+test('topic ids decode safely before the extra-path guard; section names are reserved', () => {
+  for (const topicId of ['test-only', 'unknown', 'a b', 'é/ü?&=', 'x#y', '100%']) {
+    const route: Route = { name: 'grammarTopic', topicId };
+    expect(roundTrip(route)).toEqual({ route, canonical: null });
+    expect(areaOf(route)).toBe('study');
+  }
+  expect(parseRoute('#/study/grammar/%74est-only?tag=articles')).toEqual({
+    route: { name: 'grammarTopic', topicId: 'test-only' },
+    canonical: '#/study/grammar/test-only',
+  });
+  for (const hash of [
+    '#/study/grammar/gender',
+    '#/study/grammar/%63onjugation',
+    '#/study/grammar/%67ender',
+    '#/study/grammar/%E0%A4%A',
+    '#/study/grammar/conjugation/y',
+    '#/study/grammar//',
+  ])
     expect(parseRoute(hash).route.name).toBe('notFound');
 });

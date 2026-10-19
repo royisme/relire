@@ -170,14 +170,14 @@ test('a failed request shows its reason and a later one replaces it', async ({ p
   await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
-test('?verb= prefills the input and runs once; the bare Grammar address opens the same page', async ({ page, ai }) => {
+test('?verb= prefills the Conjugation address and runs once for each verb', async ({ page, ai }) => {
   await noKey(page);
   await page.goto('/#/study/grammar/conjugation?verb=aller');
   await expect(verbInput(page)).toHaveValue('aller');
   await expect(page.getByRole('article', { name: 'aller' })).toBeVisible();
   expect(totalCalls(ai)).toBe(0);
 
-  await page.goto('/#/study/grammar?verb=s%27appeler');
+  await page.goto('/#/study/grammar/conjugation?verb=s%27appeler');
   await expect(page).toHaveURL(/#\/study\/grammar\/conjugation\?verb=/);
   await expect(verbInput(page)).toHaveValue("s'appeler");
   await expect(page.getByRole('article', { name: 's’appeler' })).toBeVisible();

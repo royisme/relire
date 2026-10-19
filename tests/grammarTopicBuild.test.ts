@@ -4,7 +4,12 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { buildTopics, readTopicInputs, type TopicBuildInputs } from '../scripts/grammar-pack/topics';
+import {
+  buildTopics,
+  readTopicInputs,
+  type TopicBuildInputs,
+  type TopicManifest,
+} from '../scripts/grammar-pack/topics';
 import { topicContentHash, writeArtifact } from '../scripts/grammar-pack/gate';
 import { topicFixture } from './fixtures/grammarTopics';
 import en from '../src/i18n/locales/en.json';
@@ -134,15 +139,30 @@ test('an empty manifest publishes an empty pack and index', () => {
   expect(tagIndex).toEqual({});
 });
 
-test('committed artifacts match derived bytes and both locales cover published chapters', async () => {
-  const { pack, tagIndex } = buildTopics(await readTopicInputs());
+function requireChapterLabels(manifest: TopicManifest, locales: unknown[]) {
+  for (const { chapter } of manifest.topics) {
+    for (const locale of locales) expect(locale).toHaveProperty(`grammarTopics.chapters.${chapter}`);
+  }
+}
+
+test('committed artifacts match derived bytes and both locales cover manifest chapters', async () => {
+  const input = await readTopicInputs();
+  requireChapterLabels(input.manifest, [en, zh]);
+  const { pack, tagIndex } = buildTopics(input);
   const root = new URL('../src/data/grammar/', import.meta.url);
   await writeArtifact(new URL('topics.json', root), pack, true);
   await writeArtifact(new URL('tag-index.json', root), tagIndex, true);
-  for (const topic of pack.topics) {
-    for (const locale of [en, zh]) {
-      expect(locale).toHaveProperty(`grammarTopics.chapters.${topic.chapter}`);
-    }
+});
+
+test('the dynamic chapter-key gate fails when either locale lacks a synthetic manifest chapter', () => {
+  const { manifest } = inputs();
+  const labelled = { grammarTopics: { chapters: { 'test-only': 'TEST ONLY' } } };
+  requireChapterLabels(manifest, [labelled, labelled]);
+  for (const locales of [
+    [labelled, en],
+    [zh, labelled],
+  ]) {
+    expect(() => requireChapterLabels(manifest, locales)).toThrow('grammarTopics.chapters.test-only');
   }
 });
 

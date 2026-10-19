@@ -11,8 +11,9 @@
  *   #/study/words            My study → Words
  *   #/study/shadowing        My study → Shadowing
  *   #/study/mistakes         My study → Mistakes
- *   #/study/grammar/conjugation  My study → Grammar, the Conjugation page; accepts ?verb=<infinitive>
- *                            (`#/study/grammar` opens the same page)
+ *   #/study/grammar          My study → Grammar topics; accepts ?tag=<GrammarTag>
+ *   #/study/grammar/conjugation  Conjugation; accepts ?verb=<infinitive>
+ *   #/study/grammar/:topicId  a published topic (conjugation and gender are reserved)
  *   #/practice               practice: the exercise sets
  *   #/practice/set/:setId     one set and its exercise table
  *   #/practice/:unitId       one exercise unit on one sheet
@@ -21,6 +22,8 @@
  *   #/settings/:section      ai/:purpose | practice | prompts | data
  *   #/about                  About
  */
+
+import { GRAMMAR_TAGS, type GrammarTag } from '../types/grammar';
 
 export const SETTINGS_SECTIONS = ['ai', 'practice', 'prompts', 'data'] as const;
 export const AI_PURPOSES = ['text', 'ocr', 'speech'] as const;
@@ -38,7 +41,8 @@ export type Route =
   | { name: 'reader'; articleId: string; sentence?: string }
   | { name: 'passage'; unitId: string; sentence?: string }
   /** `verb` prefills the Conjugation page (Grammar tab) and runs it once. */
-  | { name: 'study'; tab: StudyTab; verb?: string }
+  | { name: 'study'; tab: StudyTab; section?: 'conjugation'; verb?: string; tag?: GrammarTag }
+  | { name: 'grammarTopic'; topicId: string }
   | { name: 'practice' }
   | { name: 'practiceSet'; setId: string }
   | { name: 'unit'; unitId: string }
@@ -76,9 +80,14 @@ export function routeHref(route: Route): string {
     case 'passage':
       return `#/passage/${encodeURIComponent(route.unitId)}${sentenceQuery(route.sentence)}`;
     case 'study':
-      if (route.tab === 'grammar')
-        return `#/study/grammar/conjugation${route.verb ? `?verb=${encodeURIComponent(route.verb)}` : ''}`;
+      if (route.tab === 'grammar') {
+        if (route.section === 'conjugation')
+          return `#/study/grammar/conjugation${route.verb ? `?verb=${encodeURIComponent(route.verb)}` : ''}`;
+        return `#/study/grammar${route.tag ? `?tag=${encodeURIComponent(route.tag)}` : ''}`;
+      }
       return `#/study/${route.tab}`;
+    case 'grammarTopic':
+      return `#/study/grammar/${encodeURIComponent(route.topicId)}`;
     case 'practice':
       return '#/practice';
     case 'practiceSet':
@@ -138,9 +147,21 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
     sub === 'grammar' &&
     (extra.length === 0 || (extra.length === 1 && extra[0] === 'conjugation'))
   ) {
-    // Before the generic tab branch, which would drop ?verb=. Conjugation is the only Grammar section today.
-    const verb = new URLSearchParams(query).get('verb')?.trim();
-    route = { name: 'study', tab: 'grammar', ...(verb ? { verb } : {}) };
+    const params = new URLSearchParams(query);
+    if (extra[0] === 'conjugation') {
+      const verb = params.get('verb')?.trim();
+      route = { name: 'study', tab: 'grammar', section: 'conjugation', ...(verb ? { verb } : {}) };
+    } else {
+      const tag = params.get('tag') as GrammarTag;
+      route = { name: 'study', tab: 'grammar', ...(GRAMMAR_TAGS.includes(tag) ? { tag } : {}) };
+    }
+  } else if (area === 'study' && sub === 'grammar' && extra.length === 1 && extra[0]) {
+    try {
+      const topicId = decodeURIComponent(extra[0]);
+      route = ['conjugation', 'gender'].includes(topicId) ? { name: 'notFound' } : { name: 'grammarTopic', topicId };
+    } catch {
+      route = { name: 'notFound' };
+    }
   } else if (area === 'practice' && sub === 'set' && extra.length === 1 && extra[0] && !query) {
     // Match sets first. Unit ids start with `unit-`, so the reserved `set` segment cannot collide.
     try {
@@ -189,6 +210,8 @@ export function areaOf(route: Route): Area | null {
     case 'reader':
     case 'passage':
       return 'read';
+    case 'grammarTopic':
+      return 'study';
     case 'study':
     case 'progress':
     case 'settings':

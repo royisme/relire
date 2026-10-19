@@ -19,10 +19,7 @@ async function studyLinks(page: Page, location: 'sidebar' | 'page', active: stri
     const link = page.getByRole('link', { name, exact: true });
     await expect(link).toHaveCount(1);
     await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute(
-      'href',
-      name === 'Grammar' ? '#/study/grammar/conjugation' : `#/study/${name.toLowerCase()}`,
-    );
+    await expect(link).toHaveAttribute('href', `#/study/${name.toLowerCase()}`);
     await expect((location === 'sidebar' ? sidebar : main).getByRole('link', { name, exact: true })).toBeVisible();
     if (name === active) await expect(link).toHaveAttribute('aria-current', 'page');
     else await expect(link).not.toHaveAttribute('aria-current');
@@ -55,15 +52,18 @@ test('expanded, collapsed and tablet study pages keep just one visible set of pa
   await studyLinks(page, 'page', 'Mistakes');
 });
 
-test('Grammar is a study tab whose address names the Conjugation page', async ({ page }) => {
+test('Grammar opens Topics and switches to its distinct Conjugation address', async ({ page }) => {
   await page.goto('/#/study/grammar');
+  await expect(page).toHaveURL(/#\/study\/grammar$/);
+  await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
+  await page.getByRole('radio', { name: 'Conjugation', exact: true }).click();
   await expect(page).toHaveURL(/#\/study\/grammar\/conjugation$/);
   await expect(page.getByRole('heading', { name: 'Conjugation', exact: true })).toBeVisible();
   await studyLinks(page, 'sidebar', 'Grammar');
   await page.getByRole('link', { name: 'Words', exact: true }).click();
   await expect(page).toHaveURL(/#\/study\/words$/);
   await page.getByRole('link', { name: 'Grammar', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Conjugation', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
   await page.goBack();
   await expect(page).toHaveURL(/#\/study\/words$/);
 });
@@ -130,7 +130,7 @@ test('phone study links stay local; the drawer has About last and no collapse co
   await page.goBack();
   await studyLinks(page, 'page', 'Words');
   await page.getByRole('link', { name: 'Grammar', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/grammar\/conjugation$/);
+  await expect(page).toHaveURL(/#\/study\/grammar$/);
   await studyLinks(page, 'page', 'Grammar');
   await page.goBack();
   await studyLinks(page, 'page', 'Words');

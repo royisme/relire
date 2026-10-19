@@ -744,6 +744,16 @@
     "mistakes": "Mistakes",
     "grammar": "Grammar"
   },
+  "grammarTopics": {
+    "sections": "Grammar sections",
+    "title": "Topics",
+    "loading": "Loading topics…",
+    "loadError": "Could not load topics: {{msg}}",
+    "empty": "No topics are published yet.",
+    "noMatch": "No published topics match this tag.",
+    "clearTag": "Clear tag filter: {{tag}}",
+    "back": "Back to Topics"
+  },
   "shadowingLog": {
     "title": "Shadowing",
     "subtitle": "Your recordings of article and exercise-passage sentences, kept on this device. The last three of each sentence are kept.",
@@ -860,6 +870,7 @@
     }
   },
   "notFound": {
+    "grammarTopic": "This grammar topic is not published or does not exist.",
     "passage": "This passage is no longer available. Return to the library to choose another source.",
     "title": "This page is not here",
     "page": "This address does not match a page in Relire Plus.",
