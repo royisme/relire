@@ -63,7 +63,6 @@ export const defaultAnswers: Record<Task, Answer> = {
     translation: 'thing',
     otherMeanings: [],
     contextTense: '',
-    conjugationTable: [],
     usageExamples: [{ fr: 'Quelle chose !', zh: '', highlight: 'chose' }],
     cefrLevel: 'A1',
     memoryTrick: '',

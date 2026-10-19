@@ -67,7 +67,6 @@ test('wrong answer → grouped notebook → explanation → actual word saved �
       translation: 'bread',
       otherMeanings: [],
       contextTense: '',
-      conjugationTable: [],
       usageExamples: [],
       cefrLevel: 'A1',
       memoryTrick: '',

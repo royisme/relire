@@ -6,7 +6,12 @@
  */
 import { describe, expect, test } from 'bun:test';
 import i18n from '../src/i18n';
-import { prepareConjugationDrills } from '../src/services/exercises/fromConjugation';
+import {
+  DEFAULT_DRILL_COUNT,
+  DEFAULT_DRILL_LEVEL,
+  hasGradableCell,
+  prepareConjugationDrills,
+} from '../src/services/exercises/fromConjugation';
 import { effectiveStrictAccents, gradeItem } from '../src/services/exercises/grading';
 import { emptyAnswer } from '../src/services/exercises/answer';
 import { verifyAnswer, verifyPackVerb } from '../src/services/conjugation/verify';
@@ -198,6 +203,35 @@ test('only reviewed and match cells become items', () => {
 test('a tense whose cells are all ungradable yields no unit', () => {
   // Outside the pack the passé composé is always ai-only (Part 3 F4).
   expect(make({ verbs: [verifyAnswer(parlerAnswer())], tenses: ['passeCompose'] })).toEqual([]);
+});
+
+describe('the Conjugation page button', () => {
+  test('a pack verb and a rule-checked verb have cells to ask; an ai-only verb has none', () => {
+    expect(hasGradableCell(verifyPackVerb(packVerb('aller')))).toBe(true);
+    expect(hasGradableCell(verifyAnswer(parlerAnswer()))).toBe(true);
+    expect(hasGradableCell(verifyAnswer({ ...parlerAnswer(), rule: 'irregular' }))).toBe(false);
+  });
+
+  test('one displayed verb, all seven tenses, the default level and size, one set', () => {
+    const units = make({
+      verbs: [verifyPackVerb(packVerb('aller'))],
+      tenses: [...TENSES],
+      level: DEFAULT_DRILL_LEVEL,
+      perUnit: DEFAULT_DRILL_COUNT,
+    });
+    expect(units).toHaveLength(7);
+    expect(new Set(units.map((unit) => unit.setId)).size).toBe(1);
+    expect(units.map((unit) => unit.level)).toEqual(Array(7).fill('A2'));
+    // One verb: the per-verb cap of 2 decides the size of every unit.
+    expect(units.map((unit) => unit.items.length)).toEqual(Array(7).fill(2));
+  });
+
+  test('a verb of which only some tenses can be asked yields only those units', () => {
+    // Outside the pack the passé composé is ai-only, so the other six tenses remain.
+    const units = make({ verbs: [verifyAnswer(parlerAnswer())], tenses: [...TENSES] });
+    expect(units.map((unit) => unit.grammarTags[0])).not.toContain('passe-compose');
+    expect(units).toHaveLength(6);
+  });
 });
 
 describe('effectiveStrictAccents', () => {

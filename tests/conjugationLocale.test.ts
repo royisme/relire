@@ -74,3 +74,23 @@ test('the drill copy has the same key set in both locales, none blank', () => {
 test('the Conjugation page has the same keys in en and zh', () => {
   expect(paths(zh.conjugation.page).sort()).toEqual(paths(en.conjugation.page).sort());
 });
+
+test('the word sheet has the same new keys in en and zh, none blank', () => {
+  const keys = ['conjugation', 'conjugationLoading', 'conjugateThis', 'verbForm', 'verbFormLine', 'verbFormTense'];
+  for (const locale of [en, zh])
+    for (const key of keys) expect((locale.wordModal as Record<string, string>)[key]?.trim()).toBeTruthy();
+  // The two pattern keys keep their placeholders in both languages.
+  for (const locale of [en, zh]) {
+    expect(locale.wordModal.verbFormLine).toContain('{{verb}}');
+    expect(locale.wordModal.verbFormLine).toContain('{{forms}}');
+    expect(locale.wordModal.verbFormTense).toContain('{{tense}}');
+    expect(locale.wordModal.verbFormTense).toContain('{{persons}}');
+  }
+  expect('clickToListen' in en.wordModal).toBe(false);
+  expect('clickToListen' in zh.wordModal).toBe(false);
+});
+
+test('the Conjugation page practise button copy exists in both locales', () => {
+  for (const { practise, practising, practiseOpen } of [en.conjugation.page, zh.conjugation.page])
+    for (const text of [practise, practising, practiseOpen]) expect(text.trim()).toBeTruthy();
+});

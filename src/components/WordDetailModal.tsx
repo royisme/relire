@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
+import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './ui/overlay';
 import { X, Bookmark, BookmarkCheck, Loader2 } from 'lucide-react';
 import { WordAnalysis } from '../types';
-import { toggleSpeech } from '../utils/speech';
+import { isVerbEntry } from '../services/grammarPack/verbEntry';
 import { Button } from './ui/button';
-import { SpeakButton, SpeakIcon, useSpeechPhase } from './ui/speak-button';
+import { SpeakButton } from './ui/speak-button';
+import { Section } from './word/Section';
+
+// The pack, the engine and the reverse index load on demand (the pack-backed sections), never with the app.
+const WordConjugation = lazy(() =>
+  import('./word/WordConjugation').then((module) => ({ default: module.WordConjugation })),
+);
+const VerbForms = lazy(() => import('./word/VerbForms').then((module) => ({ default: module.VerbForms })));
 
 /**
  * The word lookup sheet, laid out like a dictionary entry: the word, how it sounds and what it means
- * here, then plain sections (pronunciation, use in this sentence, conjugation, examples). Sections are
- * separated by rules, not tinted boxes.
+ * here, then plain sections (pronunciation, use in this sentence, examples, memory trick) and, last, the
+ * pack-backed ones: the conjugation of a verb and the verb forms the word is. Sections are separated by
+ * rules, not tinted boxes.
  */
 
 interface WordDetailModalProps {
@@ -26,44 +35,7 @@ interface WordDetailModalProps {
   errorMessage?: string | null;
 }
 
-/** One conjugated form; pressing it speaks the form, and its icon shows loading / playing in place. */
-const FormTile: React.FC<{ person: string; form: string; rate: number; label: string }> = ({
-  person,
-  form,
-  rate,
-  label,
-}) => {
-  const text = `${person} ${form}`;
-  const phase = useSpeechPhase(text);
-  return (
-    <button
-      type="button"
-      onClick={() => toggleSpeech(text, { rate })}
-      aria-label={`${label}: ${text}`}
-      className="group h-9 px-2 rounded-md hover:bg-ink-100 cursor-pointer flex items-center gap-2 text-sm text-left min-w-0"
-    >
-      <span className="text-ink-500 shrink-0">{person}</span>
-      <span className="font-serif text-ink-900 truncate flex-1">{form}</span>
-      <SpeakIcon phase={phase} className="w-3.5 h-3.5 shrink-0 text-ink-400 group-hover:text-ink-700" />
-    </button>
-  );
-};
-
-const Section: React.FC<{ title: string; aside?: React.ReactNode; children: React.ReactNode }> = ({
-  title,
-  aside,
-  children,
-}) => (
-  <section className="pt-5 border-t border-ink-200 space-y-2">
-    <div className="flex items-baseline justify-between gap-3">
-      <h4 className="text-xs font-medium text-ink-500">{title}</h4>
-      {aside}
-    </div>
-    {children}
-  </section>
-);
-
-export const WordDetailModal: React.FC<WordDetailModalProps> = ({
+export const WordDetailModal: FC<WordDetailModalProps> = ({
   isOpen,
   onClose,
   wordData,
@@ -200,32 +172,6 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                 </Section>
               )}
 
-              {wordData.conjugationTable && wordData.conjugationTable.length > 0 && (
-                <Section
-                  title={t('wordModal.conjugation')}
-                  aside={<span className="text-xs text-ink-500">{t('wordModal.clickToListen')}</span>}
-                >
-                  <div className="space-y-3">
-                    {wordData.conjugationTable.map((tenseBlock, idx) => (
-                      <div key={idx}>
-                        <p className="text-sm font-medium text-ink-800 mb-1">{tenseBlock.tense}</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2">
-                          {tenseBlock.forms.map((item, fIdx) => (
-                            <FormTile
-                              key={fIdx}
-                              person={item.person}
-                              form={item.form}
-                              rate={speechSpeed}
-                              label={t('wordModal.clickToListen')}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Section>
-              )}
-
               {wordData.usageExamples && wordData.usageExamples.length > 0 && (
                 <Section title={t('wordModal.examples')}>
                   <ul className="divide-y divide-ink-200">
@@ -255,6 +201,20 @@ export const WordDetailModal: React.FC<WordDetailModalProps> = ({
                   <p className="text-sm text-ink-800 leading-relaxed break-words">{wordData.memoryTrick}</p>
                 </Section>
               )}
+
+              {isVerbEntry(wordData.lemma, wordData.partOfSpeech) && (
+                <Section title={t('wordModal.conjugation')}>
+                  <div className="min-h-10">
+                    <Suspense fallback={<p className="text-sm text-ink-500">{t('wordModal.conjugationLoading')}</p>}>
+                      <WordConjugation lemma={wordData.lemma} />
+                    </Suspense>
+                  </div>
+                </Section>
+              )}
+
+              <Suspense fallback={null}>
+                <VerbForms lookup={activeWord ?? wordData.word} />
+              </Suspense>
             </div>
 
             <div className="px-4 py-3 border-t border-ink-200 bg-surface flex items-center justify-between gap-3">
