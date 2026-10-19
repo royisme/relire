@@ -1,13 +1,13 @@
 /**
  * Owns the machine-checkable shape of the code, so no agent has to remember it: a source file stays within the
- * context window (at most 800 lines), a line stays readable (at most 200 characters), and a file name says what the
+ * context window (at most 500 lines), a line stays readable (at most 200 characters), and a file name says what the
  * file is for (no catch-all names such as `utils` or `types`). Old violations sit in a ledger that may only shrink:
  * an entry that grew fails, and an entry that shrank must be lowered (`--tighten` does it). Does not own style
  * (the formatter and linter) or the judgement calls in the rule files.
  */
 import { basename } from 'node:path';
 
-export const MAX_FILE_LINES = 800;
+export const MAX_FILE_LINES = 500;
 export const MAX_LINE_CHARS = 200;
 /** Catch-all names: a project ends up with ten of them and nobody can tell which one to change. */
 export const GENERIC_NAMES = ['utils', 'util', 'types', 'config', 'helpers', 'common', 'misc', 'shared', 'constants'];
