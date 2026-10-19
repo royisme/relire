@@ -397,7 +397,11 @@
       "what": "Relire Plus is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
       "scope": "Relire Plus is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
-      "source": "Source code on GitHub"
+      "source": "Source code on GitHub",
+      "lexicon": "Verb forms and tenses in the word sheet come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}.",
+      "lexiconSource": "{{name}} source",
+      "lexiconRebuild": "This data is not kept in the repository: it can be rebuilt from the original download.",
+      "lexiconNotice": "How to rebuild it"
     },
     "strictAccents": "Strict accents",
     "strictAccentsNote": "On, an answer is only correct with the right accents. Off, an answer without accents still counts.",
