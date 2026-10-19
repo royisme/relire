@@ -13,6 +13,20 @@ export default defineConfig(() => {
       react(),
       tailwindcss(),
       pdfjsAssets(),
+      {
+        name: 'grammar-topic-artifacts',
+        apply: 'build',
+        buildStart() {
+          // TP1 ships the lazy artifacts before any reader or cross-link imports their loaders.
+          for (const file of ['topics', 'tag-index']) {
+            this.emitFile({
+              type: 'chunk',
+              id: path.resolve(import.meta.dirname, `src/data/grammar/${file}.json`),
+              preserveSignature: 'strict',
+            });
+          }
+        },
+      },
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
