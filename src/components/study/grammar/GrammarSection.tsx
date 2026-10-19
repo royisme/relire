@@ -2,6 +2,7 @@
 import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '../../../hooks/useRoute';
+import { contentServiceUrl } from '../../../services/grammarTopics/service';
 import type { GrammarTag } from '../../../types/grammar';
 import { Segmented } from '../../ui/segmented';
 
@@ -22,22 +23,24 @@ export default function GrammarSection({
   const { t } = useTranslation();
   return (
     <div className="min-w-0 space-y-5">
-      <Segmented
-        label={t('grammarTopics.sections')}
-        value={section ?? 'topics'}
-        options={[
-          { value: 'topics', label: t('grammarTopics.title') },
-          { value: 'conjugation', label: t('conjugation.page.title') },
-        ]}
-        onChange={(value) =>
-          navigate({ name: 'study', tab: 'grammar', ...(value === 'conjugation' ? { section: value } : {}) })
-        }
-      />
+      {contentServiceUrl() && (
+        <Segmented
+          label={t('grammarTopics.sections')}
+          value={section ?? 'topics'}
+          options={[
+            { value: 'topics', label: t('grammarTopics.title') },
+            { value: 'conjugation', label: t('conjugation.page.title') },
+          ]}
+          onChange={(value) =>
+            navigate({ name: 'study', tab: 'grammar', ...(value === 'conjugation' ? { section: value } : {}) })
+          }
+        />
+      )}
       <Suspense fallback={<div aria-busy="true" className="h-[32rem]" />}>
-        {section === 'conjugation' ? (
+        {section === 'conjugation' || !contentServiceUrl() ? (
           <ConjugationPage key={verb ?? ''} initialVerb={verb} />
         ) : (
-          <TopicsPage topicId={topicId} tag={tag} />
+          <TopicsPage key={topicId ?? ''} topicId={topicId} tag={tag} />
         )}
       </Suspense>
     </div>

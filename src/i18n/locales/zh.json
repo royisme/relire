@@ -325,6 +325,7 @@
     "exportFailed": "导出失败：{{msg}}",
     "restoreFailed": "恢复失败：{{msg}}",
     "cacheSummary": "已保存的解析：{{words}} 个单词，{{conjugations}} 个动词变位，{{sentences}} 个句子，{{exercises}} 个练习答案，{{prosody}} 套发音标记",
+    "contentCacheSummary": "{{count}} 份已保存的内容响应（保留 365 天，不含在备份中）",
     "clearCache": "清除已保存的解析",
     "cacheDesc": "解析、练习辅助和发音标记会保存在这台设备上。单词一直保留到你清除，句子、练习辅助和标记保留 30 天。它们不会包含在备份里。",
     "audioSummary": "发音音频：{{clips}} 段，{{mb}} MB；其中 {{kept}} 段因属于生词本而永久保留",

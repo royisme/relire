@@ -23,6 +23,7 @@
  *   #/about                  About
  */
 
+import { contentServiceUrl } from '../services/grammarTopics/service';
 import { GRAMMAR_TAGS, type GrammarTag } from '../types/grammar';
 
 export const SETTINGS_SECTIONS = ['ai', 'practice', 'prompts', 'data'] as const;
@@ -113,7 +114,10 @@ export function routeHref(route: Route): string {
  * Reads an address. `canonical` is set when the address is valid but not spelled the canonical way
  * (an empty hash, a trailing slash, `#/study`); the caller replaces it in history instead of pushing.
  */
-export function parseRoute(hash: string): { route: Route; canonical: string | null } {
+export function parseRoute(
+  hash: string,
+  hasContentService = !!contentServiceUrl(),
+): { route: Route; canonical: string | null } {
   const [rawPath, query = ''] = hash.split('?', 2);
   const path = rawPath.replace(/^#\/?/, '').replace(/\/$/, '');
   const parts = path === '' ? [] : path.split('/');
@@ -148,9 +152,14 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
     (extra.length === 0 || (extra.length === 1 && extra[0] === 'conjugation'))
   ) {
     const params = new URLSearchParams(query);
-    if (extra[0] === 'conjugation') {
+    if (extra[0] === 'conjugation' || !hasContentService) {
       const verb = params.get('verb')?.trim();
-      route = { name: 'study', tab: 'grammar', section: 'conjugation', ...(verb ? { verb } : {}) };
+      route = {
+        name: 'study',
+        tab: 'grammar',
+        section: 'conjugation',
+        ...(extra[0] === 'conjugation' && verb ? { verb } : {}),
+      };
     } else {
       const tag = params.get('tag') as GrammarTag;
       route = { name: 'study', tab: 'grammar', ...(GRAMMAR_TAGS.includes(tag) ? { tag } : {}) };
@@ -158,7 +167,10 @@ export function parseRoute(hash: string): { route: Route; canonical: string | nu
   } else if (area === 'study' && sub === 'grammar' && extra.length === 1 && extra[0]) {
     try {
       const topicId = decodeURIComponent(extra[0]);
-      route = ['conjugation', 'gender'].includes(topicId) ? { name: 'notFound' } : { name: 'grammarTopic', topicId };
+      route =
+        !hasContentService || ['conjugation', 'gender'].includes(topicId)
+          ? { name: 'notFound' }
+          : { name: 'grammarTopic', topicId };
     } catch {
       route = { name: 'notFound' };
     }
