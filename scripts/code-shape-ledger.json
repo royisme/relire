@@ -1,7 +1,6 @@
 {
   "longFiles": {
     "src/components/ReaderView.tsx": 670,
-    "src/App.tsx": 630,
     "e2e/ai-settings.spec.ts": 569,
     "tests/aiTasks.test.ts": 505
   },

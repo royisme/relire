@@ -1,4 +1,5 @@
-import React, { lazy, Suspense, useState, useEffect, useRef, type CSSProperties } from 'react';
+/** Owns app startup, shared vocabulary/stats and route wiring; lookup sheets and library actions live in hooks. */
+import React, { lazy, Suspense, useState, useEffect, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from './components/shell/Header';
 import { Sidebar } from './components/shell/Sidebar';
@@ -18,20 +19,10 @@ import { SettingsPage } from './components/settings/SettingsPage';
 import { AboutSection } from './components/settings/AboutSection';
 import type { KeyRequest } from './components/settings/keyRequest';
 
-import { Article, VocabWord, WordAnalysis, SentenceAnalysis, UserStats, PronunciationAssessment } from './types';
+import { Article, VocabWord, WordAnalysis, UserStats, PronunciationAssessment } from './types';
 import { SAMPLE_ARTICLES } from './data/sampleArticles';
-import {
-  deleteArticleData,
-  EMPTY_STATS,
-  loadData,
-  initializeData,
-  saveArticle,
-  restoreMissingArticles,
-  saveStats,
-  saveVocab,
-} from './storage/db';
+import { EMPTY_STATS, loadData, initializeData, saveStats, saveVocab } from './storage/db';
 import { usePersist } from './storage/usePersist';
-import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from './services/api';
 import { isDueToday, formatDate } from './utils/srs';
 import { prefetchSpeech } from './utils/speech';
 import { hasTextKey } from './utils/appSettings';
@@ -40,6 +31,8 @@ import { navigate, useRoute } from './hooks/useRoute';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { useSidebar } from './hooks/useSidebar';
 import { useReaderUnits } from './hooks/useReaderUnits';
+import { useLookupSheets } from './hooks/useLookupSheets';
+import { useArticleLibrary } from './hooks/useArticleLibrary';
 import { passageDocument, readerIdentity, type ReaderSource } from './types/readerSource';
 import { sourceOfRecording } from './storage/shadowing';
 import { setLabel } from './services/exercises/setLabel';
@@ -77,6 +70,10 @@ export default function App() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
+  const reportSave = (name: string, error: unknown) => {
+    if (error) console.error(`Saving ${name} failed`, error);
+    setFailedSaves((prev) => (error ? [...new Set([...prev, name])] : prev.filter((n) => n !== name)));
+  };
   const currentArticle = route.name === 'reader' ? (articles.find((a) => a.id === route.articleId) ?? null) : null;
   const readerUnits = useReaderUnits();
   const passageUnit = route.name === 'passage' ? readerUnits.units?.find((u) => u.id === route.unitId) : undefined;
@@ -89,7 +86,15 @@ export default function App() {
         ? { kind: 'passage', unitId: route.unitId }
         : null;
   const lookupOwner = JSON.stringify([routeHref(route), readerDocument?.content]);
-  const [editor, setEditor] = useState<{ article: Article | null } | null>(null);
+  const {
+    editor,
+    setEditor,
+    openArticle,
+    handleSaveArticle,
+    handleDeleteArticle,
+    missingSamples,
+    handleRestoreSamples,
+  } = useArticleLibrary(articles, setArticles, reportSave);
   const [hasKey, setHasKey] = useState(() => hasTextKey());
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [vocabList, setVocabList] = useState<VocabWord[]>([]);
@@ -98,11 +103,6 @@ export default function App() {
   // State that belongs to one place is dropped when the learner leaves it (adjusted while rendering, not in an effect).
   if (logSourceId && route.name !== 'study') setLogSourceId(null);
   if (keyRequest && route.name !== 'settings') setKeyRequest(null);
-
-  const reportSave = (name: string, error: unknown) => {
-    if (error) console.error(`Saving ${name} failed`, error);
-    setFailedSaves((prev) => (error ? [...new Set([...prev, name])] : prev.filter((n) => n !== name)));
-  };
 
   useEffect(() => {
     let cancelled = false;
@@ -128,55 +128,6 @@ export default function App() {
   usePersist('vocabulary', vocabList, saveVocab, ready, reportSave);
   usePersist('stats', stats, saveStats, ready, reportSave);
 
-  // Word Detail Modal state
-  const [isWordModalOpen, setIsWordModalOpen] = useState(false);
-  const [activeWord, setActiveWord] = useState<string | null>(null);
-  const [wordData, setWordData] = useState<WordAnalysis | null>(null);
-  const [isWordLoading, setIsWordLoading] = useState(false);
-  const [activeWordSentence, setActiveWordSentence] = useState('');
-  // The address and exact Reader content whose source opened the sheet.
-  const [wordSheetOwner, setWordSheetOwner] = useState<string | null>(null);
-  const wordRequest = useRef(0);
-  const wordContext = useRef<string | undefined>(undefined);
-  // A lookup belongs to the address that opened it: Back, Forward or a typed address closes the sheet before
-  // the new page paints, and the request is dropped so a late answer or failure cannot show on that page,
-  // replace a newer lookup or send the learner to Settings from it.
-  if (wordSheetOwner && wordSheetOwner !== lookupOwner) {
-    setWordSheetOwner(null);
-    setIsWordModalOpen(false);
-    setIsWordLoading(false);
-    setActiveWord(null);
-  }
-  useEffect(
-    () => () => {
-      wordRequest.current++;
-    },
-    [lookupOwner],
-  );
-
-  // Sentence Drawer state
-  const [isSentenceDrawerOpen, setIsSentenceDrawerOpen] = useState(false);
-  const [activeSentence, setActiveSentence] = useState<string | null>(null);
-  const [sentenceData, setSentenceData] = useState<SentenceAnalysis | null>(null);
-  const [isSentenceLoading, setIsSentenceLoading] = useState(false);
-  const [sentenceSheetOwner, setSentenceSheetOwner] = useState<string | null>(null);
-  const sentenceRequest = useRef(0);
-  if (sentenceSheetOwner && sentenceSheetOwner !== lookupOwner) {
-    setSentenceSheetOwner(null);
-    setIsSentenceDrawerOpen(false);
-    setIsSentenceLoading(false);
-    setActiveSentence(null);
-  }
-  useEffect(
-    () => () => {
-      sentenceRequest.current++;
-    },
-    [lookupOwner],
-  );
-
-  // AI failures: a missing key sends the user to Settings, anything else is shown in the sheet.
-  const [aiError, setAiError] = useState<string | null>(null);
-
   // Settings → AI services, on the purpose that needs the key, with the key field ready; its way back is
   // wherever the learner is now. Lookups, generation and grading use the text purpose.
   const requestKey = (purpose: AiPurposeRoute = 'text') => {
@@ -186,79 +137,8 @@ export default function App() {
     navigate({ name: 'settings', section: 'ai', purpose, focusKey: true });
   };
 
-  const handleAiError = (err: unknown, closeSheet: () => void) => {
-    if (err instanceof MissingApiKeyError) {
-      closeSheet();
-      requestKey();
-      return;
-    }
-    setAiError(err instanceof Error ? err.message : String(err));
-  };
-
-  // Word Click Handler
-  const handleWordClick = async (word: string, sentence: string, context = readerDocument?.content) => {
-    // Strip leading/trailing punctuation while preserving French accents
-    const cleanWord = word.trim().replace(/^[^\p{L}\p{M}]+|[^\p{L}\p{M}]+$/gu, '');
-    if (!cleanWord) return;
-
-    const request = ++wordRequest.current;
-    wordContext.current = context;
-    setWordSheetOwner(lookupOwner);
-    setActiveWord(cleanWord);
-    setActiveWordSentence(sentence);
-    setIsWordModalOpen(true);
-    setIsWordLoading(true);
-    setWordData(null);
-    setAiError(null);
-
-    try {
-      const data = await fetchWordAnalysis(cleanWord, sentence, context);
-      if (request !== wordRequest.current) return;
-      if (data && data.word) {
-        setWordData(data);
-      } else {
-        throw new Error(t('notebook.emptyWordAnalysis'));
-      }
-    } catch (err) {
-      if (request === wordRequest.current) handleAiError(err, () => setIsWordModalOpen(false));
-    } finally {
-      if (request === wordRequest.current) setIsWordLoading(false);
-    }
-  };
-
-  const handleRetryWord = () => {
-    if (activeWord) {
-      void handleWordClick(activeWord, activeWordSentence, wordContext.current);
-    }
-  };
-
-  // Sentence Click Handler
-  const handleSentenceClick = async (sentence: string) => {
-    if (!sentence.trim()) return;
-
-    const request = ++sentenceRequest.current;
-    setSentenceSheetOwner(lookupOwner);
-    setActiveSentence(sentence);
-    setIsSentenceDrawerOpen(true);
-    setIsSentenceLoading(true);
-    setSentenceData(null);
-    setAiError(null);
-
-    // Increment sentence analysis stat
-    setStats((prev) => ({
-      ...prev,
-      sentencesAnalyzed: (prev.sentencesAnalyzed || 0) + 1,
-    }));
-
-    try {
-      const data = await fetchSentenceAnalysis(sentence, readerDocument?.content);
-      if (request === sentenceRequest.current) setSentenceData(data);
-    } catch (err) {
-      if (request === sentenceRequest.current) handleAiError(err, () => setIsSentenceDrawerOpen(false));
-    } finally {
-      if (request === sentenceRequest.current) setIsSentenceLoading(false);
-    }
-  };
+  const { activeWord, activeSentence, wordData, handleWordClick, handleSentenceClick, wordSheet, sentenceSheet } =
+    useLookupSheets({ lookupOwner, content: readerDocument?.content, requestKey, setStats, t });
 
   // Toggle Vocabulary handler
   const handleToggleVocab = (data: WordAnalysis, contextSentence: string) => {
@@ -299,45 +179,6 @@ export default function App() {
 
   const handleDeleteWord = (wordId: string) => {
     setVocabList((prev) => prev.filter((w) => w.id !== wordId));
-  };
-
-  const openArticle = (article: Article) => {
-    navigate({ name: 'reader', articleId: article.id });
-  };
-
-  // Add or edit only after commit. A new article opens; an edit stays where it is.
-  const handleSaveArticle = async (article: Article): Promise<void> => {
-    await saveArticle(article);
-    const exists = articles.some((a) => a.id === article.id);
-    setArticles((prev) =>
-      prev.some((a) => a.id === article.id) ? prev.map((a) => (a.id === article.id ? article : a)) : [article, ...prev],
-    );
-    if (!exists) openArticle(article);
-  };
-
-  const handleDeleteArticle = async (article: Article) => {
-    // The article and its recordings go in one transaction; the list changes only once that committed.
-    try {
-      await deleteArticleData(article.id);
-    } catch (err) {
-      reportSave('articles', err);
-      return;
-    }
-    reportSave('articles', null);
-    setArticles((prev) => prev.filter((a) => a.id !== article.id));
-    const here = parseRoute(window.location.hash).route;
-    if (here.name === 'reader' && here.articleId === article.id) navigate(LIBRARY, { replace: true });
-  };
-
-  const missingSamples = SAMPLE_ARTICLES.filter((sample) => !articles.some((a) => a.id === sample.id));
-  const handleRestoreSamples = async () => {
-    try {
-      const restored = await restoreMissingArticles(missingSamples);
-      setArticles((prev) => [...prev.filter((a) => !restored.some((row) => row.id === a.id)), ...restored]);
-      reportSave('articles', null);
-    } catch (err) {
-      reportSave('articles', err);
-    }
   };
 
   const finishOnboarding = () => {
@@ -575,38 +416,10 @@ export default function App() {
       </div>
 
       {/* Word Detail Floating Modal */}
-      <WordDetailModal
-        isOpen={isWordModalOpen}
-        onClose={() => {
-          wordRequest.current++;
-          setWordSheetOwner(null);
-          setIsWordModalOpen(false);
-          setActiveWord(null);
-        }}
-        wordData={wordData}
-        isLoading={isWordLoading}
-        contextSentence={activeWordSentence}
-        isSavedInVocab={isCurrentWordInVocab}
-        onToggleVocab={handleToggleVocab}
-        onRetry={handleRetryWord}
-        activeWord={activeWord}
-        errorMessage={aiError}
-      />
+      <WordDetailModal {...wordSheet} isSavedInVocab={isCurrentWordInVocab} onToggleVocab={handleToggleVocab} />
 
       {/* Sentence Breakdown & Shadowing Drawer */}
-      <SentenceDrawer
-        isOpen={isSentenceDrawerOpen}
-        onClose={() => {
-          sentenceRequest.current++;
-          setSentenceSheetOwner(null);
-          setIsSentenceDrawerOpen(false);
-          setActiveSentence(null);
-        }}
-        sentenceData={sentenceData}
-        isLoading={isSentenceLoading}
-        errorMessage={aiError}
-        onRecordAssessmentComplete={handleRecordAssessmentComplete}
-      />
+      <SentenceDrawer {...sentenceSheet} onRecordAssessmentComplete={handleRecordAssessmentComplete} />
 
       {/* Article Importer / Pasting Modal */}
       {editor && (
