@@ -1,9 +1,11 @@
-/** Owns isolated loader cache/failure tests using a mocked JSON module; not the real pack or owner reviews. */
-import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
+/** Owns loader cache/failure tests with an explicit pack fixture, plus the bundled-pack default; not owner reviews. */
+import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import { GOLDEN } from './fixtures/grammarPackGolden';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { GrammarPackSchema, type GrammarPack } from '../src/types/grammarPack';
+import { loadedGrammarPack, loadGrammarPack, resetGrammarPackForTests } from '../src/services/grammarPack/load';
+import { useGrammarPack } from '../src/hooks/useGrammarPack';
 
 const fixture = (): GrammarPack => ({
   schemaVersion: 1,
@@ -20,10 +22,6 @@ const fixture = (): GrammarPack => ({
   })),
 });
 const data = fixture();
-void mock.module('../src/data/grammar-pack/pack.json', () => ({ default: data }));
-const { loadedGrammarPack, loadGrammarPack, resetGrammarPackForTests } =
-  await import('../src/services/grammarPack/load');
-const { useGrammarPack } = await import('../src/hooks/useGrammarPack');
 let parseSpy: ReturnType<typeof spyOn<typeof GrammarPackSchema, 'safeParse'>>;
 beforeEach(() => {
   resetGrammarPackForTests();
@@ -34,20 +32,21 @@ beforeEach(() => {
 });
 afterEach(() => {
   parseSpy.mockRestore();
+  resetGrammarPackForTests();
 });
 
-test('concurrent and subsequent loads share the promise, result and one import/parse', async () => {
-  const first = loadGrammarPack();
-  expect(loadGrammarPack()).toBe(first);
+test('concurrent and subsequent loads share the promise, result and one parse', async () => {
+  const first = loadGrammarPack(data);
+  expect(loadGrammarPack(data)).toBe(first);
   const pack = await first;
-  expect(await loadGrammarPack()).toBe(pack);
-  expect(loadGrammarPack()).toBe(first);
+  expect(await loadGrammarPack(data)).toBe(pack);
+  expect(loadGrammarPack(data)).toBe(first);
   expect(parseSpy).toHaveBeenCalledTimes(1);
 });
 
-test('failure is not cached: a later load reimports and parses successfully', async () => {
+test('failure is not cached: a later load parses successfully', async () => {
   data.verbs = [];
-  const first = loadGrammarPack();
+  const first = loadGrammarPack(data);
   expect(
     await first.then(
       () => 'unexpected success',
@@ -55,7 +54,7 @@ test('failure is not cached: a later load reimports and parses successfully', as
     ),
   ).toContain('verbs');
   Object.assign(data, fixture());
-  const retry = loadGrammarPack();
+  const retry = loadGrammarPack(data);
   expect(retry).not.toBe(first);
   expect((await retry).verbs).toHaveLength(4);
   expect(parseSpy).toHaveBeenCalledTimes(2);
@@ -64,7 +63,7 @@ test('failure is not cached: a later load reimports and parses successfully', as
 test('one malformed row rejects the whole pack with joined, readable Zod reasons', async () => {
   delete data.verbs[0].tenses.present['2sg'];
   data.verbs[1].tenses.imperatif!['2sg']!.lead = 'tu';
-  const message = await loadGrammarPack().then(
+  const message = await loadGrammarPack(data).then(
     () => 'unexpected success',
     (error: Error) => error.message,
   );
@@ -78,7 +77,7 @@ test('the loader keeps the resolved pack, and a hook mounted after the load is r
   const probe = () => createElement((): string => useGrammarPack().status);
   expect(loadedGrammarPack()).toBeUndefined();
   expect(renderToStaticMarkup(probe())).toBe('loading');
-  const pack = await loadGrammarPack();
+  const pack = await loadGrammarPack(data);
   expect(loadedGrammarPack()).toBe(pack);
   expect(renderToStaticMarkup(probe())).toBe('ready');
   resetGrammarPackForTests();
@@ -87,6 +86,11 @@ test('the loader keeps the resolved pack, and a hook mounted after the load is r
 
 test('a failed load leaves no resolved pack behind', async () => {
   data.verbs = [];
-  await loadGrammarPack().catch(() => undefined);
+  await loadGrammarPack(data).catch(() => undefined);
   expect(loadedGrammarPack()).toBeUndefined();
+});
+
+test('the default load uses the bundled pack, not a test fixture', async () => {
+  const pack = await loadGrammarPack();
+  expect(pack.verbs.map((verb) => verb.prov.reviewedBy)).not.toContain('TEST ONLY');
 });

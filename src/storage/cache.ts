@@ -119,21 +119,28 @@ export async function putCached(kind: CacheKind, key: string, value: unknown): P
 }
 
 /** Saved answers by kind. `exercises` adds up generated sets, hints and explanations. */
-export async function cacheCounts(): Promise<{ words: number; sentences: number; exercises: number; prosody: number }> {
+export async function cacheCounts(): Promise<{
+  words: number;
+  conjugations: number;
+  sentences: number;
+  exercises: number;
+  prosody: number;
+}> {
   try {
     const d = await db();
     const count = (kind: CacheKind) => d.countFromIndex('cache', 'kind', kind);
-    const [words, sentences, prosody, sets, hints, explanations] = await Promise.all([
+    const [words, conjugations, sentences, prosody, sets, hints, explanations] = await Promise.all([
       count('word'),
+      count('conjugation'),
       count('sentence'),
       count('prosody'),
       count('exercises'),
       count('hint'),
       count('explanation'),
     ]);
-    return { words, sentences, exercises: sets + hints + explanations, prosody };
+    return { words, conjugations, sentences, exercises: sets + hints + explanations, prosody };
   } catch {
-    return { words: 0, sentences: 0, exercises: 0, prosody: 0 };
+    return { words: 0, conjugations: 0, sentences: 0, exercises: 0, prosody: 0 };
   }
 }
 
