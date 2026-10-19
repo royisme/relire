@@ -21,7 +21,7 @@ const TENSE_BY_TAG = new Map(LEXICON_TENSES.map((tense) => [MOOD_TENSE[tense], t
 // Same convention as the oracle: an `invariable` gender or number fills both slots.
 const agreements = (gender: string, number: string) =>
   AGREEMENTS.filter(
-    (a) => [gender, 'invariable'].includes(AGREEMENT[a][0]) && [number, 'invariable'].includes(AGREEMENT[a][1]),
+    (a) => [AGREEMENT[a][0], 'invariable'].includes(gender) && [AGREEMENT[a][1], 'invariable'].includes(number),
   );
 
 /** Adds one file's lemmas (only the `wanted` ids, `lemma\0pos`, when given). Skips capitalised lemmas (gentilés, abbreviations: lowercasing them would merge them into the common word) and multiword locutions. */

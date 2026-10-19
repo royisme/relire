@@ -2,7 +2,7 @@
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { fileLines } from '../lib/morphalou-csv';
-import { loadLexicon, morphalouDir, type Lexicon, type Pos } from './lexicon';
+import { loadLexicon, morphalouDir, type Pos } from './lexicon';
 
 /** About what learners from A1 to B2 meet; raise or lower it and rerun. */
 export const TOP_N = 5000;
@@ -37,7 +37,12 @@ export async function scoreLemmas(lines: AsyncIterable<string> | Iterable<string
 }
 
 /** The top `topN` scored ids that Morphalou has, plus every forced id that Morphalou has; the rest of `forced` is returned as missing. */
-export function selectLemmas(scores: Map<string, number>, lexicon: Lexicon, forced: string[], topN = TOP_N) {
+export function selectLemmas(
+  scores: Map<string, number>,
+  lexicon: { has(id: string): boolean },
+  forced: string[],
+  topN = TOP_N,
+) {
   const ranked = [...scores]
     .filter(([id]) => lexicon.has(id))
     .sort(([a, x], [b, y]) => y - x || (a < b ? -1 : 1))
