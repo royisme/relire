@@ -13,18 +13,6 @@ export default defineConfig(() => {
       react(),
       tailwindcss(),
       pdfjsAssets(),
-      {
-        name: 'grammar-tag-index-artifact',
-        apply: 'build',
-        buildStart() {
-          // Until TP4 imports the index loader, only this artifact still needs explicit delivery.
-          this.emitFile({
-            type: 'chunk',
-            id: path.resolve(import.meta.dirname, 'src/data/grammar/tag-index.json'),
-            preserveSignature: 'strict',
-          });
-        },
-      },
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
