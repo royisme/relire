@@ -7,6 +7,7 @@ import { getUnit } from '../../storage/exercises';
 import type { ExerciseAttempt } from '../../types/exercises';
 import type { Explanation } from '../../types/exerciseAi';
 import { aiErrorText } from '../../utils/aiErrorText';
+import { GrammarTagLabel } from '../GrammarTagLabel';
 import { Button } from '../ui/button';
 import { OverlayHeader, Sheet } from '../ui/overlay';
 import { InlineMarkup } from '../practice/InlineMarkup';
@@ -58,7 +59,7 @@ export function MistakeExplanationSheet({ attempt, onClose, onMissingKey, onWord
     <Sheet onClose={onClose} label={t('practice.explanationTitle')}>
       <OverlayHeader
         title={t('practice.explanationTitle')}
-        subtitle={t(`grammarTags.${attempt.grammarTag}`)}
+        subtitle={<GrammarTagLabel tag={attempt.grammarTag} />}
         onClose={onClose}
         closeLabel={t('common.close')}
       />

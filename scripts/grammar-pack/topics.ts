@@ -1,12 +1,7 @@
 /** Owns manifest-driven topic assembly and its reviewed-only gate; not generation, review recording or delivery. */
 import { z } from 'zod';
-import {
-  GrammarTopicSchema,
-  GrammarTopicsPackSchema,
-  GrammarTagIndexSchema,
-  type GrammarTopic,
-  type GrammarTagIndex,
-} from '../../src/types/grammarTopic';
+import { GrammarTopicSchema, GrammarTopicsPackSchema, type GrammarTopic } from '../../src/types/grammarTopic';
+import { GrammarTagIndexSchema, type GrammarTagIndex } from '../../src/types/grammarTagIndex';
 import { TopicReviewsSchema, topicContentHash, type TopicReviews } from './gate';
 
 export const TopicManifestSchema = z

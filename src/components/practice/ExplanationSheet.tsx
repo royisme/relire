@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import type { ItemRuntime } from '../../hooks/useExerciseUnit';
 import { expectedAnswerText, recordedAnswerText } from '../../services/exercises/answer';
 import type { ExerciseItem, ExerciseType } from '../../types/exercises';
+import { GrammarTagLabel } from '../GrammarTagLabel';
 import { Button } from '../ui/button';
 import { OverlayHeader, Sheet } from '../ui/overlay';
 import { InlineMarkup } from './InlineMarkup';
@@ -30,7 +31,7 @@ export function ExplanationSheet({ item, type, runtime, onClose, onRetry, onWord
     <Sheet onClose={onClose} label={t('practice.explanationTitle')}>
       <OverlayHeader
         title={t('practice.explanationTitle')}
-        subtitle={t(`grammarTags.${item.grammarTag}`)}
+        subtitle={<GrammarTagLabel tag={item.grammarTag} />}
         onClose={onClose}
         closeLabel={t('common.close')}
       />
