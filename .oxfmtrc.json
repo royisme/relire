@@ -17,6 +17,9 @@
     "*.md",
     "src/services/ai/prompts/defaults/**",
     "marketing/**",
-    "src/data/grammar-pack/pack.json"
+    "src/data/grammar-pack/pack.json",
+    "data/grammar-pack/*.json",
+    "src/data/grammar/*.json",
+    "data/grammar-topics/*.json"
   ]
 }
