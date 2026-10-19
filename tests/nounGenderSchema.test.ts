@@ -168,7 +168,7 @@ test('strings are NFC and endings are lowercase letters', () => {
   );
 });
 
-test('committed source files parse and no noun carries an owner review', () => {
+test("committed source files parse; the owner's review lives in reviews.json, never in the source rows", () => {
   const source = NounsSourceSchema.parse(nounsJson);
   expect(source.packVersion).toBe('0.1.0');
   expect(source.nouns.length).toBeGreaterThanOrEqual(40);
@@ -206,7 +206,18 @@ test('committed source files parse and no noun carries an owner review', () => {
     'ure:override',
     'eur:hold',
   ]);
-  expect(ReviewsSchema.parse(reviewsJson)).toEqual({ records: [], rejected: [] });
+  // The owner's review of 2026-10-19 (issue #11): one record per noun and per shippable rule; -eur is held and -e is below the threshold.
+  const reviews = ReviewsSchema.parse(reviewsJson);
+  expect(reviews.rejected).toEqual([]);
+  const reviewed = (kind: 'nounId' | 'ruleId') =>
+    reviews.records.flatMap((record) => (kind in record ? [(record as Record<string, string>)[kind]] : [])).sort();
+  expect(reviewed('nounId')).toEqual(source.nouns.map(({ id }) => id).sort());
+  expect(reviewed('ruleId')).toEqual(
+    candidates
+      .map(({ id }) => id)
+      .filter((id) => id !== 'eur' && id !== 'e')
+      .sort(),
+  );
   // The owner confirmed (NQ6) that the measured counts may be committed: one record per candidate, integers only.
   const attest = OracleAttestSchema.parse(attestJson);
   expect(Object.keys(attest.rules).sort()).toEqual(candidates.map(({ id }) => id).sort());
