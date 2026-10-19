@@ -49,6 +49,39 @@ test('a verb in the pack is answered from the pack: reviewed, no AI request, no 
   expect(totalCalls(ai)).toBe(0);
 });
 
+test('an irregular verb shows when each tense is used but no generic formation line', async ({ page, ai }) => {
+  await noKey(page);
+  await page.goto(PAGE);
+  await conjugate(page, 'aller');
+  const result = page.getByRole('article', { name: 'aller' });
+  await expect(result.getByText('Reviewed', { exact: true })).toBeVisible();
+  for (const name of ['Present', 'Passé composé', 'Imparfait', 'Future', 'Conditional', 'Subjunctive', 'Imperative']) {
+    // The use line stays; the generic "how it is formed" line is gone, as it is not true for this verb.
+    await expect(section(page, name).getByText(/^Use it /)).toHaveCount(1);
+    await expect(section(page, name).getByText(/^(Add the|Combine the|Preceded by|Use the present tense)/)).toHaveCount(
+      0,
+    );
+  }
+  await expect(result.getByText('Add the tense endings', { exact: false })).toHaveCount(0);
+  expect(totalCalls(ai)).toBe(0);
+});
+
+test('a regular -er verb keeps its formation lines; an -ir rule keeps all but the -er ones', async ({ page, ai }) => {
+  ai.answer({ conjugate: parlerAnswer() });
+  await page.goto(PAGE);
+  await conjugate(page, 'parler');
+  const parler = page.getByRole('article', { name: 'parler' });
+  await expect(parler.getByText('Add the tense endings to the verb stem', { exact: false })).toBeVisible();
+  await expect(parler.getByText('Use the present tense forms of tu, nous', { exact: false })).toBeVisible();
+
+  ai.answer({ conjugate: erAnswer('finir', 'ir-issons', { plain: 'fin', strong: 'fin', fut: 'finir' }) });
+  await conjugate(page, 'finir');
+  const finir = page.getByRole('article', { name: 'finir' });
+  await expect(finir.getByText('Add the endings -ais', { exact: false }).first()).toBeVisible();
+  await expect(finir.getByText('Add the tense endings', { exact: false })).toHaveCount(0);
+  await expect(finir.getByText('Use the present tense forms of tu, nous', { exact: false })).toHaveCount(0);
+});
+
 test('a regular verb outside the pack matches the rule and shows an AI-made example', async ({ page, ai }) => {
   ai.answer({ conjugate: withExamples(parlerAnswer()) });
   await page.goto(PAGE);
@@ -86,6 +119,23 @@ test('a wrong form shows the model line and the rule line for that cell', async 
   await expect(cell.getByText('tu parles', { exact: true })).toBeVisible();
   // Every other cell is a single line.
   await expect(result.getByText('Model', { exact: true })).toHaveCount(1);
+  // The rule's form is the right one and the model's is struck through, so the cell is found at a glance.
+  await expect(cell.getByText('tu parles', { exact: true })).toHaveCSS('font-weight', '600');
+  await expect(cell.getByText('tu parle', { exact: true })).toHaveCSS('text-decoration-line', 'line-through');
+  await expect(cell.getByText('tu parles', { exact: true })).not.toHaveCSS('text-decoration-line', 'line-through');
+  // The tense heading says so, and only that tense's heading.
+  await expect(section(page, 'Present').getByText('Some forms differ', { exact: true })).toBeVisible();
+  await expect(result.getByText('Some forms differ', { exact: true })).toHaveCount(1);
+});
+
+test('the participle labels are 14 px body text beside the 18 px forms', async ({ page }) => {
+  await noKey(page);
+  await page.goto(`${PAGE}?verb=aller`);
+  await expect(page.getByRole('article', { name: 'aller' })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  const label = section(page, 'Participles').getByText('Past, masculine singular', { exact: true });
+  await expect(label).toHaveCSS('font-size', '14px');
+  await expect(section(page, 'Participles').getByText('allé', { exact: true }).first()).toHaveCSS('font-size', '18px');
 });
 
 test('without a key, a verb outside the pack shows the real error next to the input', async ({ page, ai }) => {

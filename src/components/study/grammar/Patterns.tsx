@@ -29,7 +29,7 @@ export function Patterns({ verb }: { verb: VerifiedVerb }) {
     label: t(verb.defective === 'impersonal' ? 'conjugation.page.patterns.impersonal' : `conjugation.persons.${key}`),
   }));
   return (
-    <section aria-label={t('conjugation.page.patterns.title')} className="min-h-[40rem] border-t border-ink-200 py-5">
+    <section aria-label={t('conjugation.page.patterns.title')} className="border-t border-ink-200 py-5">
       <h3 className="font-serif text-lg font-semibold text-ink-900">{t('conjugation.page.patterns.title')}</h3>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <div className="min-w-0">
@@ -91,22 +91,24 @@ export function Patterns({ verb }: { verb: VerifiedVerb }) {
                 ? 'noJe'
                 : 'notCovered';
           return (
-            <div key={name} className="h-40 overflow-y-auto py-3">
-              <dt className="text-sm text-ink-600">{t(`conjugation.page.patterns.${name}`)}</dt>
+            // Exactly a two-line sentence plus the note line, so a row never changes height with the selection:
+            // py-3 (24) + label 20 + gap 4 + 2 x 28 + note gap 4 + 16 = 124px, plus the 1px divider.
+            <div key={name} className="h-[125px] overflow-y-auto py-3">
+              <dt className="text-sm leading-5 text-ink-600">{t(`conjugation.page.patterns.${name}`)}</dt>
               <dd className="mt-1 break-words">
                 {sentence !== undefined ? (
                   <>
-                    <p lang="fr" className="font-serif text-lg text-ink-900">
+                    <p lang="fr" className="font-serif text-lg leading-7 text-ink-900">
                       {sentence}
                     </p>
                     {status !== 'reviewed' && status !== 'match' && (
-                      <p className="mt-1 text-xs text-ink-500">
+                      <p className="mt-1 text-xs leading-4 text-ink-500">
                         {t(`conjugation.page.patterns.${status === 'differs' ? 'differs' : 'aiOnly'}`)}
                       </p>
                     )}
                   </>
                 ) : (
-                  <p className="text-sm text-ink-500">
+                  <p className="text-sm leading-5 text-ink-500">
                     {t('conjugation.page.patterns.unavailable', { reason: t(`conjugation.page.patterns.${reason}`) })}
                   </p>
                 )}

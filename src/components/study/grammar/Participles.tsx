@@ -16,7 +16,7 @@ export function Participles({ participles }: { participles: VerifiedVerb['partic
       <ul className="mt-3 space-y-1.5">
         {rows.map(([key, participle]) => (
           <li key={key} className="flex flex-col gap-x-4 sm:flex-row sm:items-baseline">
-            <span className="shrink-0 text-xs text-ink-500 sm:w-56">{t(`conjugation.page.participle.${key}`)}</span>
+            <span className="shrink-0 text-sm text-ink-700 sm:w-48">{t(`conjugation.page.participle.${key}`)}</span>
             <div className="min-w-0">
               {participle.status === 'differs' && participle.ruleForm ? (
                 <ComparedLines model={participle.form} rule={participle.ruleForm} />

@@ -206,7 +206,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
                 <Section title={t('wordModal.conjugation')}>
                   <div className="min-h-10">
                     <Suspense fallback={<p className="text-sm text-ink-500">{t('wordModal.conjugationLoading')}</p>}>
-                      <WordConjugation lemma={wordData.lemma} />
+                      <WordConjugation lemma={wordData.lemma} lookup={activeWord ?? wordData.word} />
                     </Suspense>
                   </div>
                 </Section>

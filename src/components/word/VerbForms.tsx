@@ -1,6 +1,6 @@
 /**
  * The "Verb form" section of the word sheet: which pack verbs, tenses and persons write the clicked word
- * (`aller: Present, I` for `vais`), one line per lemma. Draws nothing while the pack loads and nothing, with no
+ * (`aller : présent, je` for `vais`, the tense and the person in French), one line per lemma. Draws nothing while the pack loads and nothing, with no
  * heading, when the word is no pack form; a load error shows its real text under the heading. Loaded lazily with
  * the pack, so neither the pack nor the index is in the main bundle. Does not own the section frame's look
  * (Section) or the matching (grammarPack/reverse).
@@ -22,12 +22,13 @@ export function VerbForms({ lookup }: { lookup: string }) {
       forms: [
         ...tenses.map(({ tense, persons }) =>
           t('wordModal.verbFormTense', {
-            tense: t(`conjugation.tenses.${tense}.name`),
-            persons: persons.map((person) => t(`conjugation.persons.${person}`)).join(' / '),
+            tense: t(`conjugation.tenseFr.${tense}`),
+            persons: persons.map((person) => t(`conjugation.pronouns.${person}`)).join(' / '),
           }),
         ),
         ...participles.map((key) => t(`conjugation.page.participle.${key}`)),
-      ].join(t('common.listSeparator')),
+        // A plain semicolon, not the locale's list separator: the line stays French punctuation in both languages.
+      ].join('; '),
     });
 
   if (status === 'error')

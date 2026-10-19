@@ -4,7 +4,16 @@
  */
 import type { CheckedCell } from '../../../services/conjugation/verify';
 import { composeLead } from '../../../services/conjugation/rules';
-import type { Person, Tense, Verb } from '../../../types/grammarPack';
+import type { Person, RuleId, Tense, Verb } from '../../../types/grammarPack';
+
+/**
+ * Whether a tense's generic "how it is formed" line is true for a verb with this rule. Never for an irregular verb
+ * or one whose rule is unknown; the present and imperatif lines speak of -er endings, so only for an `er-` rule.
+ */
+export const showsFormLine = (tense: Tense, rule: RuleId | undefined) =>
+  rule !== undefined &&
+  rule !== 'irregular' &&
+  ((tense !== 'present' && tense !== 'imperatif') || rule.startsWith('er-'));
 
 /** Primary form first, then variants. */
 export const formsLabel = (forms: string[]) => forms.join(' / ');
