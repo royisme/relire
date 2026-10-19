@@ -34,6 +34,7 @@ async function clean(page: Page, textLabel: string) {
   await expect(page.getByLabel(textLabel)).toHaveValue('');
   await expect(previews(page).getByRole('img')).toHaveCount(0);
   await expect(page.getByLabel('Pages to send')).toHaveCount(0);
+  await expect(page.getByRole('alert')).toHaveText('');
   await expect(page.getByRole('status')).toHaveText('');
   await expect(page.getByRole('button', { name: 'Discard', exact: true })).toBeHidden();
   await expect(page.getByRole('dialog', { name: 'Discard this import?' })).toHaveCount(0);
@@ -54,6 +55,10 @@ export function importSourceChecks({ enter, textLabel, analyze, task, answer, re
     }) => {
       void ai;
       await enter(page);
+      // The chooser is a bordered drop area with a button and one help line, plus the hidden named picker.
+      await expect(page.getByRole('button', { name: 'Choose images', exact: true })).toBeVisible();
+      await expect(page.getByText('or drop or paste images here, up to 5')).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
       const before = await layout(page, 'main button.w-44');
       await page.getByLabel(textLabel).fill('Wrong pasted text.');
       await page.getByRole('button', { name: 'Clear text', exact: true }).click();
@@ -62,7 +67,7 @@ export function importSourceChecks({ enter, textLabel, analyze, task, answer, re
       await page.getByRole('button', { name: 'Discard', exact: true }).click();
       await clean(page, textLabel);
       await pasteFiles(page, [{ name: 'wrong.svg', mimeType: 'image/svg+xml', buffer: Buffer.from('<svg/>') }]);
-      await expect(page.getByRole('status')).toContainText('Choose a PNG, JPEG, WebP image or a PDF file.');
+      await expect(page.getByRole('alert')).toContainText('Choose a PNG, JPEG, WebP image or a PDF file.');
       await page.getByRole('button', { name: 'Discard', exact: true }).click();
       await clean(page, textLabel);
       await chooser(page).setInputFiles({
@@ -70,7 +75,7 @@ export function importSourceChecks({ enter, textLabel, analyze, task, answer, re
         mimeType: 'application/pdf',
         buffer: Buffer.from('Not a PDF'),
       });
-      await expect(page.getByRole('status')).toContainText('The PDF could not be opened.');
+      await expect(page.getByRole('alert')).toContainText('The PDF could not be opened.');
       await page.getByRole('button', { name: 'Discard', exact: true }).click();
       await clean(page, textLabel);
       expect(await layout(page, 'main button.w-44')).toEqual(before);
@@ -103,6 +108,7 @@ export function importSourceChecks({ enter, textLabel, analyze, task, answer, re
         mimeType: 'image/png',
         buffer: Buffer.from(data, 'base64'),
       }));
+      await page.evaluate(() => document.fonts.ready);
       const before = await layout(page, 'main button.w-44');
       await chooser(page).setInputFiles(files.slice(0, 2));
       await expect(previews(page).getByRole('img')).toHaveCount(2);
@@ -134,27 +140,38 @@ export function importSourceChecks({ enter, textLabel, analyze, task, answer, re
         });
       await expect(previews(page).getByRole('img')).toHaveCount(5);
       await expect(previews(page).locator('figcaption')).toHaveText(files.slice(0, 5).map((file) => file.name));
-      await expect(page.getByRole('status')).toContainText('At most 5 images');
+      // Intake errors, including the cap, sit on one reserved line under the thumbnails.
+      await expect(page.getByRole('alert')).toContainText('At most 5 images');
       await chooser(page).setInputFiles(files[5]);
-      await expect(page.getByRole('status')).toContainText('At most 5 images');
+      await expect(page.getByRole('alert')).toContainText('At most 5 images');
       await expect(previews(page).getByRole('img')).toHaveCount(5);
       await chooser(page).setInputFiles(pdf);
-      await expect(page.getByRole('status')).toContainText('Remove the held material');
+      await expect(page.getByRole('alert')).toContainText('Remove the held material');
       await expect(previews(page).getByRole('img')).toHaveCount(5);
       const remove = page.getByRole('button', { name: `Remove image ${files[1].name}`, exact: true });
+      await expect(remove).toBeVisible();
       await remove.focus();
       await page.keyboard.press('Enter');
       await expect(previews(page).getByRole('img')).toHaveCount(4);
       await chooser(page).setInputFiles(files[6]);
       const indices = [0, 2, 3, 4, 6];
       await expect(previews(page).locator('figcaption')).toHaveText(indices.map((index) => files[index].name));
-      await expect(page.getByRole('status')).toHaveText('');
+      await expect(page.getByRole('alert')).toHaveText('');
       const consent = page.getByRole('region', { name: task === 'transcribe' ? 'What is sent' : 'Before you send' });
-      for (const [order, index] of indices.entries()) {
-        await expect(consent).toContainText(`File ${order + 1}: ${files[index].name} · pages 1`);
-      }
+      // Consent counts what leaves the device instead of repeating the filenames above.
+      await expect(consent).toContainText('5 images, pages 1 to 5');
       expect(await layout(page, 'main button.w-44')).toEqual(before);
       expect(await overflowing(page.locator('body'))).toEqual([]);
+      if (phone) {
+        // Below the small breakpoint the action row is a column of full-width, equal-height buttons.
+        await page.evaluate(() => document.fonts.ready);
+        const boxes = await Promise.all(
+          [analyze, 'Cancel', 'Discard'].map((name) => page.getByRole('button', { name, exact: true }).boundingBox()),
+        );
+        expect(boxes[1]!.y).toBeGreaterThan(boxes[0]!.y);
+        expect(boxes[2]!.y).toBeGreaterThan(boxes[1]!.y);
+        for (const box of boxes) expect(box!.width).toBeGreaterThan(300);
+      }
       const sent = page.waitForRequest(
         (request) => request.url().includes('generativelanguage') && request.method() === 'POST',
       );
@@ -178,7 +195,7 @@ export function importSourceChecks({ enter, textLabel, analyze, task, answer, re
     await chooser(page).setInputFiles(pdf);
     await expect(previews(page).getByRole('img', { name: 'Page 1 of pages.pdf', exact: true })).toBeVisible();
     await chooser(page).setInputFiles(tinyPng);
-    await expect(page.getByRole('status')).toContainText('Remove the held material');
+    await expect(page.getByRole('alert')).toContainText('Remove the held material');
     await expect(previews(page).getByRole('img')).toHaveCount(1);
     await page.getByRole('button', { name: 'Remove file', exact: true }).click();
     await clean(page, textLabel);
@@ -191,7 +208,7 @@ export function importSourceChecks({ enter, textLabel, analyze, task, answer, re
         .evaluateAll((images) => images.map((image) => image.getAttribute('alt'))),
     ).toEqual([1, 2, 3, 4, 5].map((page) => `Page ${page} of pages.pdf`));
     await page.getByLabel('Pages to send').fill('1-6');
-    await expect(page.getByRole('status')).toContainText('at most 5 pages');
+    await expect(page.getByRole('alert')).toContainText('at most 5 pages');
     await expect(page.getByRole('button', { name: analyze, exact: true })).toBeDisabled();
     await page.getByRole('button', { name: 'Discard', exact: true }).click();
     await clean(page, textLabel);
@@ -199,7 +216,7 @@ export function importSourceChecks({ enter, textLabel, analyze, task, answer, re
     await expect(page.getByLabel('Pages to send')).toHaveValue('1');
     await page.getByLabel('Pages to send').fill('5,1-4');
     await expect(previews(page).getByRole('img')).toHaveCount(5);
-    await expect(page.getByText('File 1: pages.pdf · pages 1, 2, 3, 4, 5', { exact: true })).toBeVisible();
+    await expect(page.getByText('1 PDF, pages 1, 2, 3, 4, 5', { exact: true })).toBeVisible();
     const sent = page.waitForRequest(
       (request) => request.url().includes('generativelanguage') && request.method() === 'POST',
     );
