@@ -1,7 +1,8 @@
 /** Two labelled lines, the AI's form and the rule's form, for a cell or participle that differs; never one silently. The rule's form is the right one (semibold, ok), the model's is struck through, as a wrong answer is on the exercise sheet. Owns only that pair of lines. */
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export function ComparedLines({ model, rule }: { model: string; rule: string }) {
+export function ComparedLines({ model, rule }: { model: ReactNode; rule: ReactNode }) {
   const { t } = useTranslation();
   return (
     <div className="space-y-0.5">

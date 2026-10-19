@@ -30,7 +30,12 @@ describe('a regular verb whose answer equals the engine', () => {
       'match',
       'match',
     ]);
-    expect(verified.tenses.present['1sg']).toEqual({ lead: 'je', forms: ['parle'], status: 'match' });
+    expect(verified.tenses.present['1sg']).toEqual({
+      lead: 'je',
+      forms: ['parle'],
+      status: 'match',
+      parts: [{ stem: 'parl', ending: 'e' }],
+    });
   });
 
   test('passé composé is always ai-only outside the pack, even when its participle matches', () => {
@@ -57,6 +62,7 @@ describe('a difference keeps both forms', () => {
       forms: ['parles'],
       status: 'differs',
       ruleForms: ['parle'],
+      ruleParts: [{ stem: 'parl', ending: 'e' }],
     });
     expect(cells(verified, SIMPLE).filter((cell) => cell.status === 'differs')).toHaveLength(1);
   });
@@ -93,6 +99,7 @@ describe('a difference keeps both forms', () => {
       forms: ['achète'],
       status: 'differs',
       ruleForms: ['achete'],
+      ruleParts: [{ stem: 'achet', ending: 'e' }],
     });
     // Named correctly, the same answer is checked clean.
     const named = verifyAnswer({ ...acheter, rule: 'er-e-grave' });
@@ -105,7 +112,12 @@ describe('the pronominal imperatif keeps its clitic in both forms', () => {
   test('se laver: the view and the rule form carry -toi, -nous, -vous', () => {
     const verified = verifyAnswer(erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' }));
     expect(verified.status).toBe('rule-checked');
-    expect(verified.tenses.imperatif['2sg']).toEqual({ lead: '', forms: ['lave-toi'], status: 'match' });
+    expect(verified.tenses.imperatif['2sg']).toEqual({
+      lead: '',
+      forms: ['lave-toi'],
+      status: 'match',
+      parts: [{ stem: 'lav', ending: 'e', clitic: '-toi' }],
+    });
     expect(verified.tenses.imperatif['1pl']?.forms).toEqual(['lavons-nous']);
     const wrong = erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' });
     wrong.forms.imperatif = { '2sg': ['laves'], '1pl': ['lavons'], '2pl': ['lavez'] };
@@ -200,7 +212,12 @@ test('the pronominal flag of the AI cannot change the clitic or the rule forms',
   const verified = verifyAnswer(lie);
   expect(verified.pronominal).toBe(true);
   expect(verified.status).toBe('rule-checked');
-  expect(verified.tenses.imperatif['2sg']).toEqual({ lead: '', forms: ['lave-toi'], status: 'match' });
+  expect(verified.tenses.imperatif['2sg']).toEqual({
+    lead: '',
+    forms: ['lave-toi'],
+    status: 'match',
+    parts: [{ stem: 'lav', ending: 'e', clitic: '-toi' }],
+  });
 });
 
 describe('ir-ouvrir: the engine takes the participle from the AI', () => {

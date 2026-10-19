@@ -1073,6 +1073,12 @@
       "aiOnly": "AI 生成，未核对",
       "differs": "有形式不一致",
       "example": "AI 生成的例句",
+      "endings": {
+        "title": "规则词尾",
+        "note": "变位中带下划线的词尾与此表来自同一规则。破折号表示该时态不使用此人称。",
+        "none": "无词尾",
+        "unavailable": "—"
+      },
       "participles": "分词",
       "participle": {
         "present": "现在分词",

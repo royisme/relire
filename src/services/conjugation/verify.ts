@@ -18,7 +18,7 @@ import {
 } from '../../types/grammarPack';
 import { assembleVerb, bareInfinitive, engineBase, withClitic, type VerbView } from './assemble';
 import { generateVerb, type GeneratedVerb, type SimpleTense, type VerbSpec } from './generate';
-import type { PastParticiples } from './rules';
+import { joinParts, type Parts, type PastParticiples } from './rules';
 
 export type VerbStatus = 'pack-reviewed' | 'rule-checked' | 'partly-differs' | 'ai-only';
 export type CellStatus = 'reviewed' | 'match' | 'differs' | 'ai-only';
@@ -29,6 +29,9 @@ export interface CheckedCell {
   forms: string[];
   status: CellStatus;
   ruleForms?: string[];
+  /** Engine-produced splits, in the displayed forms' order; never inferred from spelling. */
+  parts?: Parts[];
+  ruleParts?: Parts[];
 }
 /** One participle; `ruleForm` is present only when the status is `differs`. */
 export interface CheckedForm {
@@ -104,7 +107,7 @@ function ruleFormsOf(generated: GeneratedVerb, tense: SimpleTense, person: Perso
   return tense === 'imperatif' ? withClitic(pronominal, person as ImperativePerson, forms) : forms;
 }
 
-type CellCheck = Pick<CheckedCell, 'status' | 'ruleForms'>;
+type CellCheck = Pick<CheckedCell, 'status' | 'ruleForms' | 'parts' | 'ruleParts'>;
 type FormCheck = Pick<CheckedForm, 'status' | 'ruleForm'>;
 
 /** Pairs every cell and participle of the view with a check, without deciding the verb's status. */
@@ -143,10 +146,20 @@ function checkView(
 
 /** A verb in the pack: every cell is `reviewed`, nothing is compared and no AI is involved. */
 export function verifyPackVerb(row: Verb): VerifiedVerb {
+  const generated =
+    row.rule === 'irregular'
+      ? undefined
+      : generateVerb(
+          { ...row, base: engineBase(row.infinitive) },
+          { [row.id]: { participles: { past: row.participles.past.ms } } },
+        );
   return {
     ...checkView(
       row,
-      () => ({ status: 'reviewed' }),
+      (tense, person) => ({
+        status: 'reviewed',
+        ...(generated && tense !== 'passeCompose' && { parts: generated.parts.simple[tense][person] }),
+      }),
       () => ({ status: 'reviewed' }),
     ),
     status: 'pack-reviewed',
@@ -165,7 +178,10 @@ export function verifyAnswer(answer: ConjugationAnswer): VerifiedVerb {
       // Passé composé rests on the AI's auxiliary and agreement claims, which the engine cannot check.
       if (!generated || tense === 'passeCompose') return { status: 'ai-only' };
       const ruleForms = ruleFormsOf(generated, tense, person, view.pronominal);
-      return sameForms(cell.forms, ruleForms) ? { status: 'match' } : { status: 'differs', ruleForms };
+      const parts = generated.parts.simple[tense][person]!;
+      return sameForms(cell.forms, ruleForms)
+        ? { status: 'match', parts: cell.forms.map((form) => parts.find((part) => joinParts(part) === form)!) }
+        : { status: 'differs', ruleForms, ruleParts: parts };
     },
     (key, form) => {
       if (!generated || (ouvrir && key !== 'present')) return { status: 'ai-only' };

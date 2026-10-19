@@ -1082,6 +1082,12 @@
       "aiOnly": "AI-made, not checked",
       "differs": "Some forms differ",
       "example": "AI-made example",
+      "endings": {
+        "title": "Rule endings",
+        "note": "Underlined endings in the forms and this table come from the same rule. A dash marks a person not used in that tense.",
+        "none": "No ending",
+        "unavailable": "—"
+      },
       "participles": "Participles",
       "participle": {
         "present": "Present participle",

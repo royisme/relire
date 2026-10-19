@@ -242,6 +242,29 @@ test('a request moves nothing at 360 px and nothing overflows, with long forms @
   await expect(page.getByText('nous désapprovisionnerions', { exact: true })).toBeVisible();
 });
 
+test('engine endings are highlighted and shown in the rule table at 360 px @phone', async ({ page }) => {
+  await noKey(page);
+  await page.goto(`${PAGE}?verb=s’appeler`);
+  const result = page.getByRole('article', { name: 's’appeler' });
+  const present = section(page, 'Present');
+  await expect(present.getByText('je m’appelle', { exact: true })).toBeVisible();
+  await expect(present.getByRole('listitem').first().locator('span.underline')).toHaveText('e');
+  const table = result.getByRole('table', { name: 'Rule endings' });
+  await expect(table).toBeVisible();
+  await expect(
+    table
+      .getByRole('row')
+      .filter({ hasText: /^Present/ })
+      .getByRole('cell')
+      .nth(1),
+  ).toHaveText('e');
+  await expect(table.getByRole('row')).toHaveCount(7);
+  expect(await overflowing(page.locator('body'))).toEqual([]);
+  await conjugate(page, 'aller');
+  await expect(section(page, 'Present').locator('span.underline')).toHaveCount(0);
+  await expect(page.getByRole('table', { name: 'Rule endings' })).toHaveCount(0);
+});
+
 for (const mode of ['light', 'sepia', 'dark']) {
   test(`renders in ${mode} with no console errors and keeps its surfaces`, async ({ page }) => {
     const errors: string[] = [];
