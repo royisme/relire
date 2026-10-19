@@ -76,6 +76,8 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 
 ## Data tables
 
+`App.tsx` lazy-loads `PracticePage` and `PracticeSetPage` at their routes, each behind the same fixed-height Suspense fallback as the grammar route. Their `SetTable` and `UnitTable` implementations load with those pages. Library stays eager because it is the default route (`#/read`): deferring it would add a startup request and a possible loading flash. TanStack Table therefore remains in the eager graph through `LibraryArticlesTable`; moving it to a separate preloaded chunk would not reduce eager bytes. Both interface locales also remain eager so language switching stays immediate. Measure the entry plus every `modulepreload` in built `dist/index.html`, not the entry alone, when assessing bundle changes; shared modules can move between chunks without reducing startup work. Workbox still precaches lazy chunks for offline navigation.
+
 Library's `LibraryArticlesTable`, Practice's `SetTable` and `UnitTable` compose `ui/table` directly with TanStack Table v9 column definitions and row models (`useTable`, `rowSortingFeature`, `createSortedRowModel`, `getSortedRowModel`). No DataTable wrapper owns page behavior. `SortableHeader` shares only the header button, arrow and `aria-sort`; pages own filtering, empty/no-match states and confirmations. Unit sheets link back to their set page; Reader passage links still return to the exact exercise sheet.
 
 ## Navigation and routes

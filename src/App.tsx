@@ -7,9 +7,7 @@ import { ReaderView } from './components/ReaderView';
 import { WordDetailModal } from './components/WordDetailModal';
 import { SentenceDrawer } from './components/SentenceDrawer';
 import { StudyView } from './components/study/StudyView';
-import { PracticePage } from './components/practice/PracticePage';
 import { UnitView } from './components/practice/UnitView';
-import { PracticeSetPage } from './components/practice/PracticeSetPage';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { ArticleEditorDialog } from './components/ArticleEditorDialog';
 import { ImportArticlePage } from './components/import/ImportArticlePage';
@@ -46,6 +44,12 @@ import { passageDocument, readerIdentity, type ReaderSource } from './types/read
 import { sourceOfRecording } from './storage/shadowing';
 import { setLabel } from './services/exercises/setLabel';
 
+const PracticePage = lazy(() =>
+  import('./components/practice/PracticePage').then((module) => ({ default: module.PracticePage })),
+);
+const PracticeSetPage = lazy(() =>
+  import('./components/practice/PracticeSetPage').then((module) => ({ default: module.PracticeSetPage })),
+);
 const GrammarSection = lazy(() => import('./components/study/grammar/GrammarSection'));
 
 const ONBOARDING_KEY = 'relire_onboarded';
@@ -530,10 +534,20 @@ export default function App() {
             )}
 
             {route.name === 'practice' && (
-              <PracticePage articles={articles} onMissingKey={requestKey} onAssessed={handleRecordAssessmentComplete} />
+              <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
+                <PracticePage
+                  articles={articles}
+                  onMissingKey={requestKey}
+                  onAssessed={handleRecordAssessmentComplete}
+                />
+              </Suspense>
             )}
 
-            {route.name === 'practiceSet' && <PracticeSetPage key={route.setId} setId={route.setId} />}
+            {route.name === 'practiceSet' && (
+              <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
+                <PracticeSetPage key={route.setId} setId={route.setId} />
+              </Suspense>
+            )}
             {route.name === 'unit' && (
               <UnitView key={route.unitId} unitId={route.unitId} onMissingKey={requestKey} onWord={handleWordClick} />
             )}
