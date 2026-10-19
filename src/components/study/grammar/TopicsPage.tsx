@@ -15,7 +15,7 @@ export default function TopicsPage({ topicId, tag }: { topicId?: string; tag?: G
   const chapters = [...new Set(topics.map((entry) => entry.chapter))];
 
   return (
-    <div data-grammar-topics className="h-[32rem] min-w-0 overflow-y-auto break-words" aria-busy={status === 'loading'}>
+    <div data-grammar-topics className="min-w-0 break-words" aria-busy={status === 'loading'}>
       {status === 'loading' ? (
         <p role="status" className="text-sm text-ink-500">
           {t('grammarTopics.loading')}
@@ -33,8 +33,8 @@ export default function TopicsPage({ topicId, tag }: { topicId?: string; tag?: G
             {t('grammarTopics.back')}
           </Link>
           {topic ? (
-            <article lang={language} className="max-w-prose space-y-6 text-sm leading-relaxed">
-              <header className="space-y-2">
+            <article lang={language} className="min-w-0 space-y-6 text-sm leading-relaxed">
+              <header className="max-w-prose space-y-2">
                 <h2 className="font-serif text-2xl font-semibold text-balance">{topic.title[language]}</h2>
                 <p className="text-xs text-ink-500">{t(`levels.${topic.level}`)}</p>
               </header>

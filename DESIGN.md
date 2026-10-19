@@ -218,11 +218,12 @@ Four choices from the theme menu in the header: **Match system** (light or dark,
 
 - **App frame:** a 56px sticky header, then from `md` a sidebar column beside the content (see Navigation). Content up to `max-w-5xl` (64rem) centred in the space beside it, with 16px gutters on phones and 24px from `sm`.
 - **Reader:** the article is a single bordered surface; the text column is `.reading` (68ch). Reading settings (font size, listen, speed, markers) sit in a toolbar above it.
+- **Grammar topics:** lists and topic readers grow with their content and use page-level vertical scrolling, never a fixed-height reading pane. Prose blocks keep a readable measure; tables may use the full content width and scroll horizontally within the table component when needed.
 - **Bottom dock:** the reader has exactly one fixed bottom area (`reader/BottomDock`), holding the practice card, then the touch sentence bar, then the article player, each up to `max-w-md` (28rem), centred, respecting the safe-area inset. It publishes its height as `--dock-height`; the article's bottom padding is `max(7rem, dock height + 2rem)` and follow-scrolling keeps the current sentence above it. Any new fixed UI in the reader goes inside the dock.
 - **Breakpoints:** `md` (768px) brings in the sidebar as a 56px icon rail (below it, a menu button opens the same tree in a left drawer) and switches sheets from bottom to side. `lg` (1024px) lets the sidebar expand to 240px with labels and sub-pages.
 - **360px:** every screen is checked at 360px with long text; layouts wrap (`break-words`, `min-w-0`, `flex-wrap`) instead of fixing widths. No horizontal page scroll.
 
-**The Still Page Rule.** Controls must not move the page. Loading, playing, recording and errors show on the pressed control (icon swap, fixed size) or in an overlay, never as a row that appears and disappears. A slot that changes content between states keeps its height.
+**The Still Page Rule.** Controls must not move the page. Loading, playing, recording and errors show on the pressed control (icon swap, fixed size) or in an overlay, never as a row that appears and disappears. A control or status slot that changes content between states keeps its height. This does not fix the total height of a reading page: loaded documents grow naturally while the controls above them stay in place.
 
 ## Elevation & Depth
 

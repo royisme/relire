@@ -24,7 +24,7 @@ function CellText({ cell, language }: { cell: Cell; language: 'en' | 'zh' }) {
 
 export function TopicBlocks({ blocks, language }: { blocks: Block[]; language: 'en' | 'zh' }) {
   return blocks.map((block, index) => (
-    <section key={index} className="min-w-0 space-y-3">
+    <section key={index} className={`min-w-0 space-y-3 ${block.type === 'table' ? '' : 'max-w-prose'}`}>
       {block.heading && <h3 className="font-serif text-lg font-semibold">{block.heading[language]}</h3>}
       {block.type === 'paragraph' && <p className="whitespace-pre-line">{block.text[language]}</p>}
       {block.type === 'rules' && (
@@ -51,7 +51,7 @@ export function TopicBlocks({ blocks, language }: { blocks: Block[]; language: '
         </ul>
       )}
       {block.type === 'table' && (
-        <div className="min-w-0 overflow-x-auto rounded-lg border border-ink-200 bg-surface">
+        <div className="min-w-0 overflow-hidden rounded-lg border border-ink-200 bg-surface">
           <Table>
             <TableHeader className="bg-ink-50 text-xs">
               <TableRow>

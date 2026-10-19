@@ -1,6 +1,6 @@
 /** Topics use a fake service with test-only pack data, never teaching content or a real provider. */
 import type { Page } from '@playwright/test';
-import { expect, layout, settled, test } from './fixtures';
+import { expect, settled, test } from './fixtures';
 import { topicFixture, topicsFixture } from '../tests/fixtures/grammarTopics';
 import type { GrammarTopicsPack } from '../src/types/grammarTopic';
 import zh from '../src/i18n/locales/zh.json' with { type: 'json' };
@@ -128,7 +128,7 @@ test('a service 500 displays its real reason once without a retry loop', async (
 });
 
 for (const destination of ['', '/test-only']) {
-  test(`loading ${destination ? 'the reader' : 'the list'} keeps the page and section control still @phone`, async ({
+  test(`loading ${destination ? 'the reader' : 'the list'} keeps the section control and content start still @phone`, async ({
     page,
   }) => {
     let release!: () => void;
@@ -147,15 +147,70 @@ for (const destination of ['', '/test-only']) {
     await page.goto(`${LIST}${destination}`);
     await expect(page.getByRole('status')).toHaveText('Loading topics…');
     await settled(page);
-    const before = await layout(page, '[role="radiogroup"]');
-    const region = await page.locator('[data-grammar-topics]').boundingBox();
+    const control = page.getByRole('radiogroup');
+    const before = await control.boundingBox();
+    const region = page.locator('[data-grammar-topics]');
+    const top = await region.evaluate((el) => el.getBoundingClientRect().top);
     release();
     await expect(page.getByRole('heading', { name: destination ? 'TEST TOPIC' : 'Topics', exact: true })).toBeVisible();
-    expect(await layout(page, '[role="radiogroup"]')).toEqual(before);
-    expect(await page.locator('[data-grammar-topics]').boundingBox()).toEqual(region);
+    expect(await control.boundingBox()).toEqual(before);
+    expect(await region.evaluate((el) => el.getBoundingClientRect().top)).toBe(top);
     await noPageOverflow(page);
   });
 }
+
+for (const language of ['en', 'zh'] as const) {
+  for (const phone of [false, true]) {
+    test(`long topics use page scrolling and wider tables in ${language}${phone ? ' @phone' : ''}`, async ({
+      page,
+    }) => {
+      await page.addInitScript((value) => localStorage.setItem('relire_lang', value), language);
+      const pack = testPack();
+      const paragraph = pack.topics[0].blocks[0];
+      if (paragraph.type === 'paragraph') {
+        paragraph.text.en = 'TEST PARAGRAPH '.repeat(600);
+        paragraph.text.zh = topicFixture().title.zh.repeat(600);
+      }
+      pack.topics[0].blocks.push({ type: 'paragraph', text: { en: 'TEST END', zh: topicFixture().title.zh } });
+      await mockPack(page, pack);
+      await page.goto(`${LIST}/test-only`);
+      const article = page.getByRole('article');
+      await expect(article).toBeVisible();
+      await settled(page);
+      const region = page.locator('[data-grammar-topics]');
+      expect(await region.evaluate((el) => getComputedStyle(el).overflowY)).toBe('visible');
+      expect(await region.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
+      const prose = await article.locator('section').first().boundingBox();
+      const table = await article.locator('[data-slot="table-container"]').boundingBox();
+      if (!phone) expect(table!.width).toBeGreaterThan(prose!.width);
+      expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)).toBe(true);
+      const end = article.locator('section').last();
+      await end.scrollIntoViewIfNeeded();
+      await expect(end).toBeInViewport();
+      expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+      expect(await region.evaluate((el) => el.scrollTop)).toBe(0);
+      await noPageOverflow(page);
+    });
+  }
+}
+
+test('long topic lists grow with the page @phone', async ({ page }) => {
+  const pack = testPack();
+  pack.topics = Array.from({ length: 30 }, (_, i) => ({
+    ...topicFixture(),
+    id: `test-${i}`,
+    title: { en: `TEST TOPIC ${i}`, zh: topicFixture().title.zh },
+  }));
+  await mockPack(page, pack);
+  await page.goto(LIST);
+  const last = page.locator('[data-grammar-topics] li').last();
+  await expect(last).toBeAttached();
+  await last.scrollIntoViewIfNeeded();
+  await expect(last).toBeInViewport();
+  expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  expect(await page.locator('[data-grammar-topics]').evaluate((el) => el.scrollTop)).toBe(0);
+  await noPageOverflow(page);
+});
 
 for (const theme of ['light', 'sepia', 'dark']) {
   test(`list, section switch, reader and table work at 360px in ${theme} @phone`, async ({ page }) => {

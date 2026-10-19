@@ -93,6 +93,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Grammar topics scroll with the page instead of inside a fixed-height pane; tables use the available content width while prose keeps a readable line length.
 - Pronominal verbs show their reflexive pronouns in present participles and dictionary conjugations, with elision and imperative clitics; h-initial dictionary entries link to Conjugation instead of guessing elision.
 - Settings' saved-answer counts now include conjugations, and saved answers can be cleared when only conjugations are cached.
 - **More accurate conjugation guidance.** Polite singular vous gains passé composé agreement variants; inversion gives separate il/elle sentences with matching agreement, questions use a no-break space before ?, and tense and rule descriptions are corrected. A word-sheet module load failure now shows its real error instead of loading forever and retries on the next open.
