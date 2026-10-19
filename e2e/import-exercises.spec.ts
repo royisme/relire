@@ -34,6 +34,8 @@ const chooseLevel = (page: import('@playwright/test').Page, level = 'B2') =>
 async function extractText(page: import('@playwright/test').Page) {
   await page.getByLabel('Text to send').fill(WORKSHEET);
   await expect(page.getByText('Recipient: Google Gemini · gemini-2.5-flash')).toBeVisible();
+  // No files are held: the empty value reads like a label, not a stray word.
+  await expect(page.getByText('None', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Send and extract' }).click();
   await expect(page.getByRole('heading', { name: 'Review and correct' })).toBeVisible();
 }

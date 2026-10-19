@@ -1,7 +1,6 @@
 /** Bounded local thumbnail strip using the sender's render path; owns preview cancellation, not source selection or requests. */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
 import type { ImportMaterial } from '../../services/importMaterial';
 import { Button } from '../ui/button';
 
@@ -33,27 +32,26 @@ function Thumbnail({ material, page, onRemove, onError }: ThumbnailProps) {
   const remove = t('importFlow.removeImage', { name: material.source.name });
   return (
     <figure className="w-24 min-w-0 shrink-0">
-      <div className="relative w-24 h-24 border border-ink-200 bg-ink-100">
+      <div className="w-24 h-24 border border-ink-200 bg-ink-100">
         {preview?.material === material && preview.page === page && (
           <img src={preview.url} alt={label} className="w-full h-full object-contain" />
         )}
-        {material.source.kind === 'image' && (
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            className="absolute top-0 right-0"
-            aria-label={remove}
-            title={remove}
-            onClick={() => onRemove(material)}
-          >
-            <X size={16} aria-hidden="true" />
-          </Button>
-        )}
       </div>
-      <figcaption className="h-10 overflow-auto text-xs break-words">
+      <figcaption className="mt-1 min-h-8 break-all text-xs leading-4 line-clamp-2">
         {material.source.kind === 'pdf' ? label : material.source.name}
       </figcaption>
+      {material.source.kind === 'image' && (
+        <Button
+          type="button"
+          variant="ghost"
+          className="mt-1 w-full px-2"
+          aria-label={remove}
+          title={remove}
+          onClick={() => onRemove(material)}
+        >
+          {t('importFlow.remove')}
+        </Button>
+      )}
     </figure>
   );
 }
@@ -70,9 +68,10 @@ export function SourceThumbnails({
   onError: ThumbnailProps['onError'];
 }) {
   const { t } = useTranslation();
+  // One reserved row (96 px box + two caption lines + the 40 px Remove control) keeps the page still.
   return (
     <div
-      className="h-72 sm:h-36 overflow-auto flex flex-wrap content-start items-start gap-2 min-w-0"
+      className="h-44 overflow-auto flex flex-wrap content-start items-start gap-2 min-w-0"
       aria-label={t('importFlow.previews')}
     >
       {materials.flatMap((material, index) =>

@@ -85,6 +85,9 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- **The import source step is one calm block.** The file chooser is now a bordered drop area (a "Choose images" button and one help line; dropping and pasting still work) whose size never changes when files are added; each thumbnail keeps its 96 px box with the filename wrapping to two lines and a Remove button under it instead of a control covering the image, and the send buttons wrap into full-width rows on a phone instead of leaving one orphan.
+- **Import errors sit next to what they are about.** Adding too many files, a wrong file type or a bad page range shows on one reserved line under the thumbnails instead of far below the send buttons; only the failure of the send itself stays on the page's status line.
+- **The import consent counts instead of repeating.** Before sending you still see the exact model, and the files you send appear as a count with the exact pages ("3 images, pages 1 to 3") rather than every filename again; with no files the empty value reads "None".
 - **Import controls stay put while fonts load.** The exercise import's extraction mode keeps a fixed height, so adding or removing images and discarding a source no longer shift the controls below it by a pixel.
 - **See and discard import sources in place.** Both import pages accept up to five images in reading order or five selected PDF pages, show thumbnails, let you remove images or a PDF and clear pasted text, and discard unsaved input and errors immediately without leaving the page.
 - **Compact Practice level filters.** Level options show just their codes, matching Library; full level descriptions remain in the set table and set-page subtitle.
