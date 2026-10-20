@@ -96,7 +96,9 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
   const token = useRef(0);
   const itemsRef = useRef<ItemMap>({});
   const unitRef = useRef<ExerciseUnit | null>(null);
+  const unitPersisted = useRef(false);
   const drafts = useRef<DraftMap>(new Map());
+  const draftVersions = useRef(new Map<string, number>());
   const failedDrafts = useRef(new Set<string>());
   const workingStateIds = useRef(new Set<string>());
   // Work in flight by `kind:itemId`, so a second press before the screen redraws starts nothing.
@@ -120,17 +122,24 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
 
   const ensureUnit = useCallback(async (unit: ExerciseUnit, started: number, mine: number) => {
     if (!unit.topicOrigin) return unit;
-    if (mine === session.current) setInitialWriting(true);
+    const initial = !unitPersisted.current;
+    if (initial && mine === session.current) setInitialWriting(true);
     try {
       const stored = await ensureTopicUnit(unit, started);
       if (mine === session.current && started === token.current) {
         unitRef.current = stored;
+        unitPersisted.current = true;
         setLoad({ status: 'ready', unit: stored });
       }
       return stored;
     } finally {
-      if (mine === session.current) setInitialWriting(false);
+      if (initial && mine === session.current) setInitialWriting(false);
     }
+  }, []);
+
+  const invalidateDraft = useCallback((itemId: string) => {
+    draftVersions.current.set(itemId, (draftVersions.current.get(itemId) ?? 0) + 1);
+    dropDraft(drafts.current, itemId);
   }, []);
 
   const writeDraft = useCallback(
@@ -139,11 +148,16 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
       if (!draft) return;
       dropDraft(drafts.current, itemId);
       const mine = session.current;
-      const isCurrent = () => mine === session.current && draft.token === token.current;
+      const version = draftVersions.current.get(itemId);
+      const isValid = () => version === draftVersions.current.get(itemId);
+      const isCurrent = () => mine === session.current && draft.token === token.current && isValid();
       const unit = unitRef.current;
       if (!unit) return;
       ensureUnit(unit, draft.token, mine)
-        .then(() => saveItemProgress(unitId, itemId, draft.token, { answer: draft.answer }))
+        .then(() => {
+          // Unmount flushes may finish, but Redo or a committed Check cancels this item's old answer.
+          if (isValid()) return saveItemProgress(unitId, itemId, draft.token, { answer: draft.answer });
+        })
         .then(
           () => {
             if (!isCurrent()) return;
@@ -176,6 +190,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
         const unit = snapshot.unit ?? (allowPrepared.current ? preparedUnit : undefined);
         allowPrepared.current = false;
         if (!unit) return setLoad({ status: 'missing' });
+        unitPersisted.current = Boolean(snapshot.unit);
         const states = snapshot.states;
         workingStateIds.current = new Set(states.map((state) => state.itemId));
         setHasWorkingState(states.length > 0);
@@ -216,6 +231,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
       token: started,
       ensureUnit: unit.topicOrigin ? () => ensureUnit(unit, started, mine) : undefined,
       onPersisted: (itemId) => {
+        invalidateDraft(itemId);
         workingStateIds.current.add(itemId);
         failedDrafts.current.delete(itemId);
         setHasWorkingState(true);
@@ -251,8 +267,8 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
   };
 
   const check = (itemId: string) =>
-    // A pending draft stays: if the learner leaves before the grade arrives, what they typed is still saved,
-    // and once the item is checked the store ignores later drafts.
+    // Keep drafts while checking so leaving or a failed check still preserves the answer.
+    // The committed check invalidates them through onPersisted.
     once(`check:${itemId}`, (unit) => runCheck(context(unit), itemId));
 
   const checkAll = async () => {
@@ -292,7 +308,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
     const unit = unitRef.current;
     if (!unit) return;
     // The draft queued before the redo would write the old answer back into the cleared item.
-    dropDraft(drafts.current, itemId);
+    invalidateDraft(itemId);
     failedDrafts.current.delete(itemId);
     const mine = session.current;
     const started = token.current;
