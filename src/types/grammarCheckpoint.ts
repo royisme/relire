@@ -33,6 +33,17 @@ export const TopicFeedbackSchema = z.object({
   byAnswer: z.array(z.object({ answer: text, message: FeedbackMessageSchema })).optional(),
 });
 
+export type TopicFeedback = z.infer<typeof TopicFeedbackSchema>;
+
+/** Selects authored feedback for the committed answer with the same strict key as grading. */
+export function resolveTopicFeedback(feedback: TopicFeedback, answer: string, correct: boolean): FeedbackMessage {
+  if (correct) return feedback.correct;
+  return (
+    feedback.byAnswer?.find((entry) => normalizeFrench(entry.answer, true) === normalizeFrench(answer, true))
+      ?.message ?? feedback.incorrect
+  );
+}
+
 const questionFields = {
   type: z.enum(['CHOICE_SELECT', 'FILL_BLANKS']),
   prompt: text,
@@ -101,5 +112,5 @@ export const TopicResultSchema = z.object({
   feedback: FeedbackMessageSchema,
 });
 export type TopicResult = z.infer<typeof TopicResultSchema>;
-export const topicUnitId = (origin: z.infer<typeof TopicOriginSchema>) =>
+export const topicUnitId = (origin: Pick<TopicResult, 'topicId' | 'exerciseRevision'>) =>
   `topic:${origin.topicId}:${origin.exerciseRevision}`;

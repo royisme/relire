@@ -7,8 +7,14 @@
  * reload. Does not own React state: `useExerciseUnit` supplies the context.
  */
 import { fetchExplanation, fetchHint, gradeOpenAnswer, MissingApiKeyError } from '../../services/api';
-import { checkItem, saveItemProgress, StaleResetError, type ItemProgress } from '../../storage/exercises';
-import { expectedAnswerText, recordedAnswerText } from '../../services/exercises/answer';
+import {
+  checkItem,
+  saveItemProgress,
+  StaleResetError,
+  UnitGoneError,
+  type ItemProgress,
+} from '../../storage/exercises';
+import { expectedAnswerText, recordedAnswerText, isAnswerFilled } from '../../services/exercises/answer';
 import { effectiveItemType, type CheckedResult, type ExerciseItem, type ExerciseUnit } from '../../types/exercises';
 import { effectiveStrictAccents, gradeUnitItem } from '../../services/exercises/grading';
 import { errorMessage } from '../../services/ai/errors';
@@ -20,6 +26,9 @@ export interface ActionContext {
   unit: ExerciseUnit;
   /** The reset token read when this work started. */
   token: number;
+  /** Topic-only lazy persistence, guarded by this session's original entry token. */
+  ensureUnit?(): Promise<ExerciseUnit>;
+  onPersisted?(): void;
   item(itemId: string): ItemRuntime | undefined;
   patch(itemId: string, partial: Partial<ItemRuntime>): void;
   /** False once the learner left the unit or reset it. */
@@ -40,7 +49,7 @@ const lessonContext = (unit: ExerciseUnit) =>
 
 function fail(ctx: ActionContext, itemId: string, err: unknown) {
   if (!ctx.isCurrent()) return;
-  if (err instanceof StaleResetError) return ctx.onForeignReset();
+  if (err instanceof StaleResetError || err instanceof UnitGoneError) return ctx.onForeignReset();
   if (err instanceof MissingApiKeyError) {
     ctx.patch(itemId, { busy: null, error: null });
     return ctx.onMissingKey();
@@ -62,11 +71,18 @@ async function saveFlag(ctx: ActionContext, itemId: string, progress: ItemProgre
 
 export async function runCheck(ctx: ActionContext, itemId: string) {
   const view = ctx.item(itemId);
-  const item = findItem(ctx.unit, itemId);
+  let item = findItem(ctx.unit, itemId);
   if (!view || !item || view.checked || view.busy) return;
   const answer = view.answer;
+  if (ctx.unit.topicOrigin && !isAnswerFilled(effectiveItemType(item, ctx.unit), answer)) return;
   ctx.patch(itemId, { busy: 'check', error: null });
   try {
+    if (ctx.ensureUnit) {
+      ctx.unit = await ctx.ensureUnit();
+      if (!ctx.isCurrent()) return;
+      item = findItem(ctx.unit, itemId);
+      if (!item) throw new Error('Topic question is missing from its snapshot');
+    }
     const grading = practiceGrading();
     // The item may require accents on top of the preference; both stored results carry the flag the grader used.
     const strictAccents = effectiveStrictAccents(item, grading);
@@ -75,6 +91,7 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
     if (graded.status === 'graded') {
       result = { correct: graded.correct, strictAccents };
     } else {
+      if (ctx.unit.topicOrigin) throw new Error('Topic question requires deterministic grading');
       // An open answer that matched no reference: the verdict and the words come from the AI, never a score.
       const grade = await gradeOpenAnswer({
         prompt: item.prompt,
@@ -94,6 +111,7 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
     }
     const outcome = await checkItem({ unitId: ctx.unit.id, itemId, resetToken: ctx.token, answer, result });
     if (!ctx.isCurrent()) return;
+    ctx.onPersisted?.();
     ctx.patch(itemId, { checked: outcome.state.checked, answer: outcome.state.answer, busy: null });
   } catch (err) {
     fail(ctx, itemId, err);
@@ -101,6 +119,7 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
 }
 
 export async function runHint(ctx: ActionContext, itemId: string) {
+  if (ctx.unit.topicOrigin) return;
   const view = ctx.item(itemId);
   const item = findItem(ctx.unit, itemId);
   if (!view || !item || view.checked || view.busy) return;
@@ -123,6 +142,7 @@ export async function runHint(ctx: ActionContext, itemId: string) {
 }
 
 export async function runExplanation(ctx: ActionContext, itemId: string) {
+  if (ctx.unit.topicOrigin) return;
   const view = ctx.item(itemId);
   const item = findItem(ctx.unit, itemId);
   if (!view || !item || !view.checked || view.checked.correct || view.busy || view.explanation) return;

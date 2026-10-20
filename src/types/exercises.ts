@@ -7,7 +7,13 @@
  */
 import { z } from 'zod';
 import { GrammarTagSchema, type GrammarTag } from './grammar';
-import { TopicAnswerSchema, TopicOriginSchema, TopicQuestionSchema, topicUnitId } from './grammarCheckpoint';
+import {
+  TopicAnswerSchema,
+  TopicOriginSchema,
+  TopicQuestionSchema,
+  topicUnitId,
+  type TopicResult,
+} from './grammarCheckpoint';
 
 export const ExerciseTypeSchema = z.enum([
   'WORD_TRANSFORM',
@@ -272,6 +278,8 @@ export interface ExerciseAttempt {
   expectedAnswer: string;
   correct: boolean;
   timestamp: number;
+  /** Authored feedback retained even after the source snapshot is deleted. */
+  topicResult?: TopicResult;
 }
 
 export const itemStateId = (unitId: string, itemId: string) => `${unitId}:${itemId}`;

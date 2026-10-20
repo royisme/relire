@@ -1,5 +1,8 @@
 /** Exercise button actions: real storage transactions, mocked AI, and late-result boundaries. */
 import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
+import { learningFixture } from './fixtures/grammarLearning';
+import { topicExerciseRevision, topicToExerciseUnit } from '../src/services/grammarTopics/checkpoints';
+import * as exerciseStorage from '../src/storage/exercises';
 import { freshDb } from './fixtures/storage';
 import { ITEM_BY_TYPE, ITEMS, unitOf } from './fixtures/units';
 import * as api from '../src/services/api';
@@ -153,6 +156,52 @@ for (const action of ['hint', 'explanation'] as const) {
     expect((await getUnitSnapshot(ctx.unit.id)).states).toEqual([]);
   });
 }
+
+test('prepared topic checks lazily ensure, commit once and cannot reach AI hint/explanation/grading', async () => {
+  const topic = learningFixture();
+  const unit = topicToExerciseUnit(topic, await topicExerciseRevision(topic), 123);
+  const items = emptyItems(unit);
+  const id = unit.items[0].id;
+  items[id].answer.choiceSelections = ['hiver'];
+  const ai = spyOn(api, 'gradeOpenAnswer');
+  const hint = spyOn(api, 'fetchHint');
+  const explanation = spyOn(api, 'fetchExplanation');
+  const ctx: ActionContext = {
+    unit,
+    token: (await getUnitSnapshot(unit.id)).resetToken,
+    item: (key) => items[key],
+    patch: (key, patch) => Object.assign(items[key], patch),
+    isCurrent: () => true,
+    onForeignReset: mock(() => {}),
+    onMissingKey: mock(() => {}),
+    onSaveError: mock(() => {}),
+    ensureUnit: () => exerciseStorage.ensureTopicUnit(unit, ctx.token),
+  };
+  await runHint(ctx, id);
+  expect((await getUnitSnapshot(unit.id)).unit).toBeUndefined();
+  await runCheck(ctx, id);
+  await runExplanation(ctx, id);
+  await runCheck(ctx, id);
+  expect(items[id].checked).toEqual({ correct: false, strictAccents: true });
+  expect(await listAttempts()).toHaveLength(1);
+  expect(ai).not.toHaveBeenCalled();
+  expect(hint).not.toHaveBeenCalled();
+  expect(explanation).not.toHaveBeenCalled();
+  // A failed initial ensure leaves the answer editable and a retry can commit it.
+  ctx.token = await resetUnit(unit.id);
+  items[id] = emptyItems(unit)[id];
+  items[id].answer.choiceSelections = ['été'];
+  const ensure = spyOn(exerciseStorage, 'ensureTopicUnit').mockRejectedValueOnce(new Error('TEST storage denied'));
+  await runCheck(ctx, id);
+  expect(items[id].checked).toBeNull();
+  expect(items[id].busy).toBeNull();
+  expect(items[id].error).toContain('TEST storage denied');
+  expect(items[id].answer.choiceSelections).toEqual(['été']);
+  ensure.mockRestore();
+  await runCheck(ctx, id);
+  expect(items[id].checked?.correct).toBe(true);
+  expect(await listAttempts()).toHaveLength(2);
+});
 
 test('a successful help flag save clears the previous save error', async () => {
   const { ctx, id, onSaveError } = await seed('FILL_BLANKS');

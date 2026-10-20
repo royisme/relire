@@ -11,6 +11,8 @@
  * States left dangling by a replaced unit list are removed in the same transaction.
  */
 import { z } from 'zod';
+import { TopicResultSchema, topicUnitId, scanTopicStrings, resolveTopicFeedback } from '../types/grammarCheckpoint';
+import { expectedAnswerText } from '../services/exercises/answer';
 import { GrammarTagSchema } from '../types/grammar';
 import {
   ExerciseUnitSchema,
@@ -52,17 +54,28 @@ export const ExerciseItemStateSchema = z
     'Item state id is not unitId:itemId',
   ) satisfies z.ZodType<ExerciseItemState>;
 
-export const ExerciseAttemptSchema = z.object({
-  id: z.string().min(1),
-  unitId: z.string().min(1),
-  itemId: z.string().min(1),
-  grammarTag: GrammarTagSchema,
-  prompt: z.string(),
-  userAnswer: z.string(),
-  expectedAnswer: z.string(),
-  correct: z.boolean(),
-  timestamp: z.number().finite(),
-}) satisfies z.ZodType<ExerciseAttempt>;
+export const ExerciseAttemptSchema = z
+  .object({
+    id: z.string().min(1),
+    unitId: z.string().min(1),
+    itemId: z.string().min(1),
+    grammarTag: GrammarTagSchema,
+    prompt: z.string(),
+    userAnswer: z.string(),
+    expectedAnswer: z.string(),
+    correct: z.boolean(),
+    timestamp: z.number().finite(),
+    topicResult: TopicResultSchema.optional(),
+  })
+  .superRefine((attempt, ctx) => {
+    if (attempt.unitId.startsWith('topic:') !== Boolean(attempt.topicResult))
+      ctx.addIssue({ code: 'custom', message: 'Topic attempt identity and result must be paired' });
+    if (attempt.topicResult) {
+      if (attempt.unitId !== topicUnitId(attempt.topicResult))
+        ctx.addIssue({ code: 'custom', message: 'Topic attempt identity does not match result' });
+      scanTopicStrings({ prompt: attempt.prompt, expectedAnswer: attempt.expectedAnswer }, ctx);
+    }
+  }) satisfies z.ZodType<ExerciseAttempt>;
 
 /** What a backup carries of the exercise stores. A missing field means "keep what is stored". */
 export interface ExerciseBackup {
@@ -110,7 +123,30 @@ export function parseExerciseBackup(data: {
       if (!items.get(state.unitId)?.has(state.itemId))
         throw new ExerciseBackupError(`itemStates: ${state.id} points at an item the backup's units do not hold`);
   }
+  if (out.units && out.attempts) {
+    const units = new Map(out.units.map((unit) => [unit.id, unit]));
+    for (const attempt of out.attempts) validateTopicAttempt(attempt, units.get(attempt.unitId));
+  }
   return out;
+}
+
+/** Deleted sources are valid history; a surviving snapshot must agree with its topic attempt. */
+function validateTopicAttempt(attempt: ExerciseAttempt, unit: ExerciseUnit | undefined) {
+  if (!unit) return;
+  if (Boolean(unit.topicOrigin) !== Boolean(attempt.topicResult))
+    throw new ExerciseBackupError('attempts: topic source and result must be paired');
+  if (!attempt.topicResult) return;
+  const item = unit.items.find((entry) => entry.id === attempt.itemId);
+  if (
+    !item?.topicQuestion ||
+    item.prompt !== attempt.prompt ||
+    expectedAnswerText(item) !== attempt.expectedAnswer ||
+    item.grammarTag !== attempt.grammarTag ||
+    JSON.stringify(item.topicQuestion.instruction) !== JSON.stringify(attempt.topicResult.instruction) ||
+    JSON.stringify(resolveTopicFeedback(item.topicQuestion.feedback, attempt.userAnswer, attempt.correct)) !==
+      JSON.stringify(attempt.topicResult.feedback)
+  )
+    throw new ExerciseBackupError('attempts: topic result does not match saved question');
 }
 
 type Stores = {
@@ -152,6 +188,13 @@ export async function restoreExerciseRows(stores: Stores, backup: ExerciseBackup
       if (!unit?.items.some((item) => item.id === state.itemId)) await stores.itemStates.delete(state.id);
     }
   }
-  // Work started before the restore must not write into what it put back.
-  if (backup.units || backup.itemStates) for (const unitId of priorUnitIds) await bumpResetToken(stores.meta, unitId);
+  for (const attempt of backup.attempts ?? []) validateTopicAttempt(attempt, await stores.units.get(attempt.unitId));
+  // Include missing-row entry tokens as well as surviving rows: a restore invalidates prepared sessions too.
+  if (backup.units || backup.itemStates) {
+    const tokenIds = (await stores.meta.getAllKeys())
+      .filter((key) => key.startsWith('exerciseReset:'))
+      .map((key) => key.slice('exerciseReset:'.length));
+    const ids = new Set([...priorUnitIds, ...(backup.units ?? []).map((unit) => unit.id), ...tokenIds]);
+    for (const unitId of ids) await bumpResetToken(stores.meta, unitId);
+  }
 }

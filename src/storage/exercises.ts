@@ -26,6 +26,8 @@ import {
   type ExerciseItemState,
   type ExerciseUnit,
 } from '../types/exercises';
+import { resolveTopicFeedback } from '../types/grammarCheckpoint';
+import { gradeUnitItem } from '../services/exercises/grading';
 import { emptyAnswer, expectedAnswerText, recordedAnswerText } from '../services/exercises/answer';
 import { db } from './db';
 import { exercisesChanged } from './exerciseEvents';
@@ -117,6 +119,25 @@ export async function saveUnits(units: ExerciseUnit[]): Promise<ExerciseUnit[]> 
   });
   if (rows.length) exercisesChanged();
   return rows;
+}
+
+/** Guarded get-or-create for a prepared topic; an old entry cannot resurrect a deleted snapshot. */
+export async function ensureTopicUnit(preparedUnit: ExerciseUnit, expectedResetToken: number): Promise<ExerciseUnit> {
+  const row = ExerciseUnitSchema.parse(preparedUnit);
+  if (!row.topicOrigin) throw new Error('Expected a topic unit');
+  const tx = (await db()).transaction(['units', 'meta'], 'readwrite');
+  let inserted = false;
+  const unit = await settle(tx, async () => {
+    if ((await readResetToken(tx.objectStore('meta'), row.id)) !== expectedResetToken)
+      throw new StaleResetError(row.id);
+    const stored = await tx.objectStore('units').get(row.id);
+    if (stored) return stored;
+    await tx.objectStore('units').add(row);
+    inserted = true;
+    return row;
+  });
+  if (inserted) exercisesChanged();
+  return unit;
 }
 
 /** Every unit, ordered by unit number; the UI groups them by `setId`. */
@@ -263,12 +284,18 @@ export async function checkItem(input: CheckInput): Promise<CheckOutcome> {
     const id = itemStateId(unitId, itemId);
     const current = await tx.objectStore('itemStates').get(id);
     if (current?.checked) return { created: false, state: current };
+    let committedResult = result;
+    if (unit.topicOrigin) {
+      const grade = gradeUnitItem(unit, item, answer, { strictAccents: true });
+      if (grade.status !== 'graded') throw new Error('Topic question requires deterministic grading');
+      committedResult = { correct: grade.correct, strictAccents: true };
+    }
     const state: ExerciseItemState = {
       id,
       unitId,
       itemId,
       answer,
-      checked: result,
+      checked: committedResult,
       hintShown: current?.hintShown ?? false,
       explanationShown: current?.explanationShown ?? false,
       updatedAt: Date.now(),
@@ -281,9 +308,17 @@ export async function checkItem(input: CheckInput): Promise<CheckOutcome> {
       prompt: item.prompt,
       userAnswer: recordedAnswerText(effectiveItemType(item, unit), item, answer),
       expectedAnswer: expectedAnswerText(item),
-      correct: result.correct,
+      correct: committedResult.correct,
       timestamp: nextStamp(),
     };
+    if (unit.topicOrigin && item.topicQuestion) {
+      attempt.topicResult = {
+        topicId: unit.topicOrigin.topicId,
+        exerciseRevision: unit.topicOrigin.exerciseRevision,
+        instruction: item.topicQuestion.instruction,
+        feedback: resolveTopicFeedback(item.topicQuestion.feedback, attempt.userAnswer, attempt.correct),
+      };
+    }
     await tx.objectStore('itemStates').put(state);
     await tx.objectStore('attempts').add(attempt);
     return { created: true, state };
