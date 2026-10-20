@@ -229,10 +229,13 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
           <Button
             aria-busy={view.busy === 'check'}
             className="px-2"
-            disabled={
-              busy || (view.checked ? selected === unit.items.length - 1 : !isAnswerFilled(item.type!, view.answer))
-            }
-            onClick={() => (view.checked ? select(selected + 1) : void session.check(item.id))}
+            aria-disabled={busy}
+            disabled={view.checked ? selected === unit.items.length - 1 : !isAnswerFilled(item.type!, view.answer)}
+            onClick={() => {
+              if (busy) return;
+              if (view.checked) select(selected + 1);
+              else void session.check(item.id);
+            }}
           >
             <span className="inline-flex h-4 w-4 shrink-0">
               {view.busy ? (
