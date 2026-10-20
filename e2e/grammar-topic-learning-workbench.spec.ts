@@ -33,6 +33,40 @@ for (const language of ['en', 'zh'] as const) {
           workbench(page).getByRole('button', { name: strings.actions.previous, exact: true }),
         ).toBeDisabled();
         await expect(page.getByRole('button', { name: locale.practice.chars.toggle, exact: true })).toHaveCount(1);
+        expect(await stored(page)).toEqual({ units: [], itemStates: [], attempts: [] });
+        // Leaving an unchecked question records neither a skip nor a wrong answer; the draft alone survives.
+        await selectors.nth(1).click();
+        await expect(workbench(page).locator('#topic-instruction')).toBeFocused();
+        await page.keyboard.press('Tab');
+        await expect(workbench(page).getByRole('textbox')).toBeFocused();
+        await workbench(page).getByRole('textbox').fill('TEST learner draft');
+        await selectors.nth(5).click();
+        await page.goto(`/#/study/grammar/${referenceTopic.id}`);
+        await expect(page.getByRole('heading', { name: referenceTopic.title[language], exact: true })).toBeVisible();
+        await expect.poll(async () => (await stored(page)).itemStates.length).toBe(1);
+        const draft = await stored(page);
+        expect(draft.attempts).toEqual([]);
+        expect(draft.itemStates[0].answer.singleAnswer).toBe('TEST learner draft');
+        await page.goto(TOPIC);
+        await expect(selectors.first()).toHaveAttribute('aria-current', 'step');
+        await selectors.nth(1).click();
+        const draftInput = workbench(page).getByRole('textbox');
+        await expect(draftInput).toHaveValue('TEST learner draft');
+        await draftInput.focus();
+        for (const nextLanguage of [language === 'en' ? 'zh' : 'en', language] as const) {
+          await page.evaluate(async (nextLanguage) => {
+            const { setAppLanguage }: typeof import('../src/i18n') = await import(
+              /* @vite-ignore */ '/src/i18n/index.ts' as string
+            );
+            setAppLanguage(nextLanguage);
+          }, nextLanguage);
+          await expect(
+            workbench(page).getByRole('heading', { name: topic.title[nextLanguage], exact: true }),
+          ).toBeVisible();
+          await expect(draftInput).toHaveValue('TEST learner draft');
+          await expect(draftInput).toBeFocused();
+        }
+        expect(await stored(page)).toEqual(draft);
         for (let at = 0; at < 6; at++) {
           await selectors.nth(at).click();
           await expect(selectors.nth(at)).toHaveAttribute('aria-current', 'step');
@@ -45,6 +79,7 @@ for (const language of ['en', 'zh'] as const) {
             await workbench(page).getByRole('button', { name: 'été', exact: true }).click();
           } else {
             const input = workbench(page).getByRole('textbox');
+            await input.fill('');
             await expect(
               workbench(page).getByRole('button', { name: strings.actions.check, exact: true }),
             ).toBeDisabled();

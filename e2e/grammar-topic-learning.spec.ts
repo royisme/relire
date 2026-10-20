@@ -93,12 +93,15 @@ for (const language of ['en', 'zh'] as const) {
         await page.route(`${CONTENT_ORIGIN}/v1/topics**`, (route) =>
           route.fulfill({ status: 500, json: { error: 'TEST unavailable' } }),
         );
-        await page.goto('/#/practice');
+        // A reload makes a fresh request rather than reusing the documented 60-second in-memory response.
+        await page.reload();
+        await expect(page.getByRole('alert')).toContainText('HTTP 500: TEST unavailable');
+        await page.getByRole('link', { name: strings.reference.savedPractice, exact: true }).click();
         await page.locator('main a').filter({ hasText: topic.title[language] }).first().click();
         await expect(page.locator('main')).toContainText(unit.topicOrigin!.exerciseRevision.slice(0, 8));
         await page.locator(`main a[href="${unitHref}"]`).click();
         await expect(workbench(page)).toBeVisible();
-        // Resume uses first unchecked, not a persisted cursor. Typed UI remains deferred.
+        // Resume uses first unchecked, not a persisted cursor.
         await expect(index(page, language).getByRole('button').nth(1)).toHaveAttribute('aria-current', 'step');
         await index(page, language).getByRole('button').first().click();
         await expect(workbench(page).getByRole('status')).toHaveText(strings.result.wrong);
@@ -114,9 +117,18 @@ for (const language of ['en', 'zh'] as const) {
           topic.learning.checkpoints[0].questions[0].feedback.byAnswer![0].message.summary[language],
         );
         await page.keyboard.press('Escape');
-        await page.evaluate(async (id) => {
+        await page.locator(`a[href="${unitHref}"]`).click();
+        await expect(page).toHaveURL(new RegExp(`${unitHref}$`));
+        await expect(
+          workbench(page).getByRole('heading', { name: unit.topicOrigin!.title[language], exact: true }),
+        ).toBeVisible();
+        await index(page, language).getByRole('button').first().click();
+        await expect(workbench(page).getByRole('status')).toHaveText(strings.result.right);
+        await page.goto('/#/study/mistakes');
+        const deletedToken = await page.evaluate(async (id) => {
           const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
           await storage.deleteUnit(id);
+          return storage.getResetToken(id);
         }, unit.id);
         await page.reload();
         await expect(page.locator(`a[href="${unitHref}"]`)).toHaveCount(0);
@@ -125,10 +137,31 @@ for (const language of ['en', 'zh'] as const) {
           topic.learning.checkpoints[0].questions[0].feedback.byAnswer![0].message.summary[language],
         );
         await page.keyboard.press('Escape');
-        await page.evaluate(async (backup) => {
+        const restoredToken = await page.evaluate(async (backup) => {
           const db: Database = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+          const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
           await db.importData(backup);
+          return storage.getResetToken(backup.units[0].id);
         }, original);
+        expect(restoredToken).toBeGreaterThan(deletedToken);
+        const restored = await stored(page);
+        expect(restored.units).toEqual(original.units);
+        expect(restored.itemStates).toEqual(original.itemStates);
+        expect(restored.attempts).toEqual(original.attempts);
+        expect(restored.attempts[0].topicResult).toEqual(original.attempts[0].topicResult);
+        const staleWrite = await page.evaluate(
+          async ({ id, token, state }) => {
+            const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
+            try {
+              await storage.saveItemProgress(id, state.itemId, token, { answer: state.answer });
+              return 'TEST unexpectedly saved';
+            } catch (error) {
+              return error instanceof storage.StaleResetError;
+            }
+          },
+          { id: unit.id, token: deletedToken, state: original.itemStates[0] },
+        );
+        expect(staleWrite).toBe(true);
         await page.goto(`/${unitHref}`);
         await expect(workbench(page)).toBeVisible();
         await index(page, language).getByRole('button').first().click();
@@ -251,6 +284,45 @@ test('pending storage has no provisional verdict and keeps the action row fixed 
   await expect(workbench(page).getByRole('status')).toHaveText('Wrong');
   expect(await geometry(page)).toEqual(before);
   expect((await stored(page)).attempts).toHaveLength(1);
+  expect(forbidden).toEqual([]);
+});
+
+test('a replacement topic revision leaves Mistakes Retry on the original saved question', async ({ page }) => {
+  const { topic, forbidden } = await setup(page);
+  await page.goto(TOPIC);
+  await expect(workbench(page)).toBeVisible();
+  await workbench(page).getByRole('button', { name: 'hiver', exact: true }).click();
+  await workbench(page).getByRole('button', { name: 'Check', exact: true }).click();
+  await expect(workbench(page).getByRole('status')).toHaveText('Wrong');
+  const original = (await stored(page)).units[0];
+  const replacement = structuredClone(topic);
+  replacement.title.en = 'TEST replacement lantern revision';
+  replacement.title.zh += ' TEST replacement';
+  replacement.learning.checkpoints[0].questions[0].prompt = 'TEST ailleurs {été|hiver|printemps}';
+  await page.route(`${CONTENT_ORIGIN}/v1/topics/${topic.id}`, (route) => route.fulfill({ json: replacement }));
+  await page.reload();
+  await expect(workbench(page).getByRole('heading', { name: replacement.title.en, exact: true })).toBeVisible();
+  await expect(workbench(page).getByRole('status')).toBeEmpty();
+  await workbench(page).getByRole('button', { name: 'été', exact: true }).click();
+  await workbench(page).getByRole('button', { name: 'Check', exact: true }).click();
+  await expect(workbench(page).getByRole('status')).toHaveText('Right');
+  const revisions = await stored(page);
+  expect(revisions.units).toHaveLength(2);
+  expect(revisions.units.find((unit) => unit.id === original.id)).toEqual(original);
+  expect(new Set(revisions.units.map((unit) => unit.topicOrigin!.exerciseRevision)).size).toBe(2);
+  await page.goto('/#/study/mistakes');
+  const originalHref = `#/practice/${encodeURIComponent(original.id)}`;
+  await page.locator(`a[href="${originalHref}"]`).click();
+  await expect(
+    workbench(page).getByRole('heading', { name: original.topicOrigin!.title.en, exact: true }),
+  ).toBeVisible();
+  await index(page).getByRole('button').first().click();
+  await expect(workbench(page).getByRole('status')).toHaveText('Wrong');
+  await expect(workbench(page).locator('[aria-labelledby="topic-instruction"]')).not.toContainText('ailleurs');
+  await workbench(page).getByRole('button', { name: 'Read feedback', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText(
+    original.items[0].topicQuestion!.feedback.byAnswer![0].message.summary.en,
+  );
   expect(forbidden).toEqual([]);
 });
 

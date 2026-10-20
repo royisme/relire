@@ -1,5 +1,5 @@
 /** TEST-only topic setup and workbench locators; rejects provider/lookup requests instead of mocking answers. */
-import type { Page } from '@playwright/test';
+import type { Page, Request } from '@playwright/test';
 import { mockTopics, CONTENT_ORIGIN } from './contentService.helpers';
 import { learningFixture, secondLearningFixture, referenceOnlyFixture } from '../tests/fixtures/grammarLearning';
 import { topicsFixture } from '../tests/fixtures/grammarTopics';
@@ -23,21 +23,36 @@ export async function setup(page: Page, language: 'en' | 'zh' = 'en', theme = 'l
   const pack = { ...topicsFixture(), topics: [topic, secondTopic, referenceTopic] };
   await mockTopics(page, pack);
   const forbidden: string[] = [];
-  await page.route('**/*', async (route) => {
-    const request = route.request();
+  const allowed = (request: Request) => {
     const url = new URL(request.url());
-    if (
-      request.method() === 'GET' &&
-      url.origin === CONTENT_ORIGIN &&
-      ['/v1/topics', '/v1/tag-index', ...pack.topics.map((entry) => `/v1/topics/${entry.id}`)].includes(url.pathname)
-    )
-      return route.fallback();
-    if (request.method() === 'GET' && url.origin === 'http://localhost:5174' && !url.pathname.startsWith('/v1/'))
-      return route.fallback();
-    if (request.method() === 'GET' && ['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname))
+    if (request.method() !== 'GET' || request.postData() !== null) return false;
+    if (url.origin === CONTENT_ORIGIN)
+      return (
+        !url.search &&
+        ['/v1/topics', '/v1/tag-index', ...pack.topics.map((entry) => `/v1/topics/${entry.id}`)].includes(url.pathname)
+      );
+    if (['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname)) return true;
+    return (
+      url.origin === 'http://localhost:5174' &&
+      (url.pathname === '/' ||
+        /^\/(src\/|node_modules\/|@|fonts\/|favicon\.|icon\.svg|manifest\.|registerSW\.|vite\.svg)/.test(
+          url.pathname,
+        )) &&
+      [...url.searchParams].every(([key, value]) =>
+        ['import', 'raw'].includes(key) ? value === '' : ['v', 't'].includes(key) && /^[a-f0-9]+$/.test(value),
+      )
+    );
+  };
+  // Observe all outgoing requests, even if a later scenario route supplies an HTTP failure.
+  page.on('request', (request) => {
+    if (!allowed(request)) forbidden.push(`${request.method()} ${request.url()}`);
+  });
+  await page.route('**/*', async (route) => {
+    if (!allowed(route.request())) return route.abort('blockedbyclient');
+    const url = new URL(route.request().url());
+    if (['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname))
       return route.fulfill({ contentType: 'text/css', body: '' });
-    forbidden.push(`${request.method()} ${url.origin}${url.pathname}`);
-    return route.abort('blockedbyclient');
+    return route.fallback();
   });
   return { topic, secondTopic, referenceTopic, forbidden };
 }
