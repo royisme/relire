@@ -10,7 +10,13 @@ import { PrivateDraftSchema, type PrivateDraft } from '../scripts/grammar-topics
 import { sheet } from '../scripts/grammar-topics/sheet';
 import { review } from '../scripts/grammar-topics/review';
 import { topicContentHash } from '../scripts/grammar-pack/gate';
-import type { TopicManifest } from '../scripts/grammar-pack/topics';
+import { buildTopics, readTopicInputs, type TopicManifest } from '../scripts/grammar-pack/topics';
+import { buildPublishSql } from '../scripts/grammar-topics/publish';
+import { pathToFileURL } from 'node:url';
+import { GrammarTopicSchema } from '../src/types/grammarTopic';
+import { learningFixture, testBilingual } from './fixtures/grammarLearning';
+import { createWorkerDb } from './fixtures/workerDb';
+import { handle } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
 
 const cleanup: string[] = [];
@@ -33,7 +39,11 @@ type Call = {
   properties: string[];
   arguments: string[];
 };
-async function setup(modes: Record<string, string[]> = {}, references: number | string[] = 1) {
+async function setup(
+  modes: Record<string, string[]> = {},
+  references: number | string[] = 1,
+  fixture = topicFixture(),
+) {
   const root = await mkdtemp(join(tmpdir(), 'relire-TEST-generator-'));
   cleanup.push(root);
   const reference = join(root, 'reference');
@@ -63,7 +73,6 @@ async function setup(modes: Record<string, string[]> = {}, references: number | 
   db.close();
   await Bun.write(join(root, 'data/grammar-topics/manifest.json'), JSON.stringify(manifest));
   await Bun.write(join(root, 'data/grammar-topics/reviews.json'), '{"records":[]}\n');
-  const fixture = topicFixture();
   const dispatch = join(root, 'fake-dispatch.ts');
   const callsFile = join(root, 'calls.json');
   await Bun.write(
@@ -89,13 +98,30 @@ if (selected.includes('signal')) process.kill(process.pid, 'SIGTERM');
 for (let i=0;i<refs.length;i++) {
   const mode = selected[i];
   if (mode === 'none') continue;
-  const value = ${JSON.stringify({ title: fixture.title, blocks: fixture.blocks, uncertain: ['TEST DOUBT'], status: 'reviewed', reviewedBy: 'TEST NOT TRUSTED' })};
+  const value = ${JSON.stringify({ title: fixture.title, blocks: fixture.blocks, learning: fixture.learning, uncertain: ['TEST DOUBT'], status: 'reviewed', reviewedBy: 'TEST NOT TRUSTED' })};
   if (mode === 'schema') delete value.title;
   if (mode === 'language') value.title.zh = 'TEST NO CJK';
   if (mode === 'ragged') value.blocks[2].rows[0] = [];
   if (mode === 'tables') value.blocks.push(value.blocks[2]);
   if (mode === 'dialogue') value.blocks[3].items.forEach((item, index) => item.speaker = index === 0 ? 'A' : 'B');
   if (mode === 'normalize') value.blocks[3].items[0].fr = "TEST e\\u0301 l'apostrophe";
+  if (mode === 'learning-missing-feedback') delete value.learning.checkpoints[0].questions[0].feedback.byAnswer;
+  if (mode === 'learning-collision') value.learning.checkpoints[0].questions[1].acceptableAnswers = [' ÉCOLE '];
+  if (mode === 'learning-ragged') value.learning.checkpoints[0].teaching = [{type:'table', header:[{fr:'TEST'}, {fr:'TEST'}], rows:[[{fr:'TEST'}]]}];
+  if (mode === 'learning-language') value.learning.instruction.zh = 'TEST NO CJK';
+  if (mode === 'learning-normalize') {
+    const cp = value.learning.checkpoints[0];
+    cp.teaching.push({type:'examples', items:[{fr:"TEST e\\u0301 l'apostrophe", en:"TEST e\\u0301 don't", zh:"\\u6d4b\\u8bd5 e\\u0301 l'"}]});
+    const [choice, typed] = cp.questions;
+    choice.prompt = "TEST {l'e\\u0301te\\u0301|l‘hiver|TEST}";
+    choice.expectedAnswer = "l'e\\u0301te\\u0301";
+    choice.feedback.byAnswer[0].answer = 'l‘hiver';
+    choice.feedback.byAnswer[1].answer = 'TEST';
+    typed.prompt = "TEST l'e\\u0301te\\u0301 [___]";
+    typed.expectedAnswer = "l'e\\u0301cole";
+    typed.acceptableAnswers = ["l‘e\\u0301tage"];
+    typed.feedback.byAnswer = [{answer:"l'essai", message: typed.feedback.incorrect}];
+  }
   await Bun.write(join(directory, 'out', refs[i]+'.json'), mode === 'json' ? '{TEST bad JSON' : JSON.stringify(value));
 }
 `,
@@ -236,7 +262,7 @@ test('throwaway contains only group topic inputs, schema, task and dispatch file
   expect(call.files).toEqual(['dispatch-output.log', 'dispatch.md', 'log', 'schema.json', 'task.md', 'topics']);
   expect(call.refs).toEqual(['K001']);
   expect(call.envClean).toBe(true);
-  expect(call.properties).toEqual(['blocks', 'title', 'uncertain']);
+  expect(call.properties).toEqual(['blocks', 'learning', 'title', 'uncertain']);
   expect(call.arguments).toEqual([
     'antigravity/gemini-3.8-flash',
     join(call.temporary, 'dispatch.md'),
@@ -247,6 +273,104 @@ test('throwaway contains only group topic inputs, schema, task and dispatch file
   expect(draft.blocks[3].items[0].fr).toBe('TEST é l’apostrophe');
   expect(PrivateDraftSchema.safeParse(draft).success).toBe(true);
 });
+
+test('complete TEST learning survives generation, sheet, hash review, assembly, SQL and body delivery', async () => {
+  const fixture = learningFixture();
+  fixture.learning.checkpoints[0].teaching.push({
+    type: 'examples',
+    items: [{ fr: 'TEST', ...testBilingual('TEST compact example') }],
+  });
+  const env = await setup({}, 1, fixture);
+  expect((await env.run()).failures).toEqual([]);
+  const [draft] = await Bun.file(join(env.output, 'drafts-test-only.json')).json();
+  expect(draft.learning).toEqual(fixture.learning);
+  expect(draft.status).toBe('draft');
+  expect(draft.warnings).toContain('learning.checkpoints.0.teaching.1.items.0.fr: verbatim example in reference K001');
+  const text = await sheet(env.output, undefined, undefined, env.root);
+  expect(text).toContain('Linguistic correctness');
+  expect(text).toContain('C1 ceiling');
+  expect(text).toContain('taught-before-tested');
+  expect(text).toContain('no answer leakage');
+  expect(text).toContain('faithful bilingual feedback');
+  expect(text).toContain('not linguistic approval');
+  for (const checkpoint of fixture.learning.checkpoints) {
+    expect(text).toContain(checkpoint.id);
+    for (const question of checkpoint.questions) {
+      expect(text).toContain(question.id);
+      expect(text).toContain(`Expected key: ${JSON.stringify(question.expectedAnswer)}`);
+      expect(text).toContain('Normalized collisions: none (schema validated)');
+    }
+  }
+  expect(text).toContain('Options: ["été","hiver","printemps"]');
+  expect(text).toContain('Accepted keys: ["école","collège"]');
+  const questions = fixture.learning.checkpoints.flatMap((checkpoint) => checkpoint.questions);
+  let previous = -1;
+  for (const [index, question] of questions.entries()) {
+    const position = text.indexOf(`Question ${index + 1}: ${question.id} | ${question.type}`);
+    expect(position).toBeGreaterThan(previous);
+    previous = position;
+  }
+  // Full JSON remains visible too: every translation, teaching block and optional detail/match.
+  expect(text).toContain(JSON.stringify(draft.learning, null, 2));
+  env.manifest.topics[0].include = true;
+  await Bun.write(join(env.root, 'data/grammar-topics/manifest.json'), JSON.stringify(env.manifest));
+  await review(['mark', 'test-a', '--by', 'TEST ONLY synthetic reviewer'], env.root);
+  const input = await readTopicInputs(pathToFileURL(env.root + '/'));
+  const assembled = buildTopics(input).pack.topics[0];
+  expect(assembled.learning).toEqual(fixture.learning);
+  expect(assembled.reviewedBy).toBe('TEST ONLY synthetic reviewer');
+  expect(assembled).not.toHaveProperty('warnings');
+  const { db, env: worker } = await createWorkerDb();
+  try {
+    db.exec(buildPublishSql(input).sql);
+    const response = await handle(new Request('https://content.test/v1/topics/test-a'), worker);
+    expect(response.status).toBe(200);
+    expect(GrammarTopicSchema.parse(await response.json())).toEqual(assembled);
+  } finally {
+    db.close();
+  }
+});
+
+test('learning French fields normalize NFC/apostrophes without rewriting bilingual prose or grading keys', async () => {
+  const env = await setup({ K001: ['learning-normalize'] }, 1, learningFixture());
+  expect((await env.run()).failures).toEqual([]);
+  const [draft] = await Bun.file(join(env.output, 'drafts-test-only.json')).json();
+  const cp = draft.learning.checkpoints[0];
+  expect(cp.teaching[1].items[0]).toEqual({ fr: 'TEST é l’apostrophe', en: "TEST é don't", zh: "\u6d4b\u8bd5 é l'" });
+  expect(cp.questions[0].prompt).toBe('TEST {l’été|l’hiver|TEST}');
+  expect(cp.questions[0].expectedAnswer).toBe('l’été');
+  expect(cp.questions[0].feedback.byAnswer[0].answer).toBe('l’hiver');
+  expect(cp.questions[1].prompt).toBe('TEST l’été [___]');
+  expect(cp.questions[1].expectedAnswer).toBe('l’école');
+  expect(cp.questions[1].acceptableAnswers).toEqual(['l’étage']);
+  expect(cp.questions[1].feedback.byAnswer[0].answer).toBe('l’essai');
+  expect(PrivateDraftSchema.safeParse(draft).success).toBe(true);
+  const text = await sheet(env.output, undefined, undefined, env.root);
+  expect(text).toContain(`Expected key: "l'école"`);
+  expect(text).toContain(`Accepted keys: ["l'école","l'étage"]`);
+  expect(text).toContain(`Option keys: ["l'été","l'hiver","test"]`);
+  expect(text).toContain(`Feedback matches (answer/key): [{"answer":"l’essai","key":"l'essai"}]`);
+});
+
+for (const mode of ['learning-missing-feedback', 'learning-collision', 'learning-ragged', 'learning-language'])
+  test(`malformed ${mode} is not accepted, even by a forced retry over a valid draft`, async () => {
+    const env = await setup({ K001: [mode, 'good', mode] }, 1, learningFixture());
+    expect((await env.run()).failures).toHaveLength(1);
+    const file = join(env.output, 'drafts-test-only.json');
+    expect(await Bun.file(file).exists()).toBe(false);
+    expect((await env.run()).failures).toEqual([]);
+    const valid = await Bun.file(file).text();
+    expect((await env.run({ force: true })).failures).toHaveLength(1);
+    expect(await Bun.file(file).text()).toBe(valid);
+    const [draft] = await Bun.file(file).json();
+    if (mode === 'learning-language') draft.learning.instruction.zh = 'TEST NO CJK';
+    else if (mode === 'learning-ragged')
+      draft.learning.checkpoints[0].teaching[0] = { type: 'table', header: [], rows: [] };
+    else if (mode === 'learning-collision') draft.learning.checkpoints[0].questions[1].acceptableAnswers = [' ÉCOLE '];
+    else delete draft.learning.checkpoints[0].questions[0].feedback.byAnswer;
+    await Bun.write(file, JSON.stringify([draft]));
+    expect(await rejection(sheet(env.output, undefined, undefined, env.root))).not.toBe('UNEXPECTED SUCCESS');
+  });
 
 test('reference guard refuses in-repo paths, symlinks into the repo and missing required entries', async () => {
   const env = await setup();

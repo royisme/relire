@@ -50,8 +50,8 @@ export function rowHash({ prov: _prov, ...row }: Verb): string {
   return contentHash(row);
 }
 
-export function topicContentHash({ title, blocks, tags, related, level, chapter }: GrammarTopic): string {
-  return contentHash({ title, blocks, tags, related, level, chapter });
+export function topicContentHash({ title, blocks, learning, tags, related, level, chapter }: GrammarTopic): string {
+  return contentHash({ title, blocks, learning, tags, related, level, chapter });
 }
 
 export async function writeArtifact(url: URL, value: unknown, check: boolean): Promise<void> {

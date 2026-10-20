@@ -15,8 +15,11 @@ export function promptHash(prompt: string): string {
 }
 
 function normalize(value: unknown, key = ''): unknown {
-  if (typeof value === 'string')
-    return key === 'fr' ? value.normalize('NFC').replaceAll("'", '’') : value.normalize('NFC');
+  if (typeof value === 'string') {
+    // Keep the field classification aligned with scanTopicStrings, including array elements.
+    const french = ['fr', 'prompt', 'expectedAnswer', 'acceptableAnswers', 'answer'].includes(key);
+    return french ? value.normalize('NFC').replace(/['‘]/g, '’') : value.normalize('NFC');
+  }
   if (Array.isArray(value)) return value.map((item) => normalize(item, key));
   if (value !== null && typeof value === 'object')
     return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, normalize(item, key)]));
@@ -162,11 +165,20 @@ export async function generateTopics(options: GenerateOptions, outputDirectory: 
                 } else {
                   draft = full.data;
                   draft.warnings = [];
-                  draft.blocks.forEach((block, i) => {
+                  const blocks = [
+                    ...draft.blocks.map((block, i) => ({ block, path: `blocks.${i}` })),
+                    ...(draft.learning?.checkpoints.flatMap((checkpoint, i) =>
+                      checkpoint.teaching.map((block, j) => ({
+                        block,
+                        path: `learning.checkpoints.${i}.teaching.${j}`,
+                      })),
+                    ) ?? []),
+                  ];
+                  blocks.forEach(({ block, path }) => {
                     if (block.type === 'examples')
                       block.items.forEach((example, j) => {
                         if (sources.get(ref)!.includes(example.fr))
-                          draft!.warnings!.push(`blocks.${i}.items.${j}.fr: verbatim example in reference ${ref}`);
+                          draft!.warnings!.push(`${path}.items.${j}.fr: verbatim example in reference ${ref}`);
                       });
                   });
                 }

@@ -300,6 +300,14 @@ One unit on one sheet (`practice/UnitSheet`): a single `surface` card with a 1px
 
 **Keyboard.** Enter moves to the next blank, then to the first empty one, and checks when every blank is filled; Shift+Enter is a new line in an open answer; Enter that commits an IME composition does nothing.
 
+### Topic learning workbench
+
+Grammar topics with authored learning use one flat, page-scrolling workbench, not the ordinary worksheet's stacked rows. A serif topic title and checkpoint heading lead compact `TopicBlocks` teaching, six 40px question selectors (two rows of three on phones), bilingual task instructions and one existing inline choice or typed control. French keeps the exercise serif treatment. Saved Practice reuses the workbench without duplicating teaching/reference content.
+
+Previous, Redo and Check-to-Next occupy three permanent cells. Checking stays on the question and retains focus; explicit question navigation focuses the new instruction. A local `h-32` result slot reserves status, feedback action, correction and summary/error space from the outset; overflow remains reachable. Corrections never append beside the prompt here. Longer authored feedback opens the existing responsive Sheet. The floating CharacterBar is shared and follows the selected input's editability. No lookup, AI or speech controls appear.
+
+Full reference is one initially closed Collapsible below the Grammar workbench; opening it records nothing. Selectors use `aria-current="step"`, explicit unchecked/right/wrong icons and labels, existing accent/semantic tokens and focus rings. The pilot uses no new theme, typography, motion, mastery display or navigation chrome. Implementation checks use synthetic data; real twelve-question review and local/manual visual acceptance are still pending.
+
 ### Shadowing log
 Under My study → Shadowing: one section per article or unit passage (serif title, `tnum` count), then sentence-first rows separated by `ink-200` rules. The full-width sentence leads; a related, naturally wrapping group below holds Reference, Play my recording, Compare and All recordings (n), with 40px targets at every width. Last-recorded date and actual duration are quiet metadata, not the primary playback label. The text is a serif button that opens the sentence in the reader. Takes expand below the sentence at full width, with playback, date, duration and deletion even for a sole take; unavailable recordings stay in their changed/removed source groups. No pseudo-table or nested cards.
 

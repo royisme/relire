@@ -1,5 +1,8 @@
 /** Owns structural topic schema tests with synthetic probes, not linguistic validation. */
 import { expect, test } from 'bun:test';
+import { z } from 'zod';
+import { DraftOutputSchema, PrivateDraftSchema } from '../scripts/grammar-topics/drafts';
+import { learningFixture } from './fixtures/grammarLearning';
 import { GrammarTopicSchema, GrammarTopicsPackSchema } from '../src/types/grammarTopic';
 import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { topicFixture, topicsFixture } from './fixtures/grammarTopics';
@@ -8,6 +11,30 @@ test('the fixture covers all block types; zero topics and levels beyond A1 are v
   expect(GrammarTopicsPackSchema.safeParse(topicsFixture()).success).toBe(true);
   expect(GrammarTopicsPackSchema.safeParse({ ...topicsFixture(), topics: [] }).success).toBe(true);
   expect(GrammarTopicSchema.safeParse({ ...topicFixture(), level: 'C1' }).success).toBe(true);
+});
+
+test('draft JSON schema and parsing preserve the complete optional learning contract', () => {
+  const schema = z.toJSONSchema(DraftOutputSchema);
+  expect(schema.properties).toHaveProperty('learning');
+  const serialized = JSON.stringify(schema.properties!.learning);
+  for (const field of [
+    'checkpoints',
+    'teaching',
+    'questions',
+    'instruction',
+    'prompt',
+    'expectedAnswer',
+    'acceptableAnswers',
+    'feedback',
+    'byAnswer',
+    'summary',
+    'detail',
+  ])
+    expect(serialized).toContain(`"${field}"`);
+  const topic = learningFixture();
+  expect(DraftOutputSchema.parse(topic).learning).toEqual(topic.learning);
+  expect(PrivateDraftSchema.parse({ ...topic, status: 'draft' }).learning).toEqual(topic.learning);
+  expect(DraftOutputSchema.parse(topicFixture())).not.toHaveProperty('learning');
 });
 
 test('Grammar section names cannot be topic ids', () => {

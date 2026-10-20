@@ -1,5 +1,6 @@
 /** Owns the terminal-only private review sheet; never records an owner review or reads reference prose. */
 import { join } from 'node:path';
+import { normalizeFrench } from '../../src/services/exercises/normalizeFrench';
 import { TopicManifestSchema } from '../grammar-pack/topics';
 import { PrivateDraftSchema, readDrafts } from './drafts';
 import { promptFile, promptHash } from './generator';
@@ -31,6 +32,38 @@ export async function sheet(
         lines.push(`Block ${index + 1}: ${block.type}${block.heading ? ' | ' + JSON.stringify(block.heading) : ''}`);
         lines.push(JSON.stringify(block, null, 2));
       });
+      if (draft.learning) {
+        lines.push(
+          'Learning review objectives (structural validation is not linguistic approval):',
+          '- Linguistic correctness; supported scope and C1 ceiling.',
+          '- Compact teaching and taught-before-tested contrasts; fresh typed contexts.',
+          '- Plausible distractors and no answer leakage; faithful bilingual feedback.',
+          'Full learning payload (EN/ZH instructions, checkpoint titles, teaching, prompts, answers and all feedback):',
+          JSON.stringify(draft.learning, null, 2),
+        );
+        draft.learning.checkpoints.forEach((checkpoint, i) => {
+          lines.push(`Checkpoint ${i + 1}: ${checkpoint.id} | ${JSON.stringify(checkpoint.title)}`);
+          checkpoint.questions.forEach((question, j) => {
+            const key = (answer: string) => normalizeFrench(answer, true);
+            lines.push(
+              `Question ${i * 2 + j + 1}: ${question.id} | ${question.type}`,
+              `Expected key: ${JSON.stringify(key(question.expectedAnswer))}`,
+              `Accepted keys: ${JSON.stringify([question.expectedAnswer, ...(question.acceptableAnswers ?? [])].map(key))}`,
+            );
+            if (question.type === 'CHOICE_SELECT') {
+              const options = question.prompt
+                .match(/\{([^{}]+)\}/)![1]
+                .split('|')
+                .map((option) => option.trim());
+              lines.push(`Options: ${JSON.stringify(options)}`, `Option keys: ${JSON.stringify(options.map(key))}`);
+            }
+            lines.push(
+              `Feedback matches (answer/key): ${JSON.stringify((question.feedback.byAnswer ?? []).map(({ answer }) => ({ answer, key: key(answer) })))}`,
+              'Normalized collisions: none (schema validated)',
+            );
+          });
+        });
+      }
       lines.push(`Warnings: ${JSON.stringify(draft.warnings ?? [])}`);
       lines.push(`Uncertain: ${JSON.stringify(draft.uncertain ?? [])}`, '');
     }

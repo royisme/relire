@@ -10,6 +10,7 @@ const uncertain = z.array(z.string()).optional();
 export const DraftOutputSchema = z.object({
   title: GrammarTopicSchema.shape.title,
   blocks: GrammarTopicSchema.shape.blocks,
+  learning: GrammarTopicSchema.shape.learning,
   uncertain,
 });
 // Warnings are private sheet metadata, never model output or published content.

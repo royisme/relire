@@ -13,6 +13,7 @@ import { GrammarTopicSchema, GrammarTopicSummarySchema, type GrammarTopic } from
 import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { handle } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
+import { learningFixture } from './fixtures/grammarLearning';
 import { createWorkerDb } from './fixtures/workerDb';
 
 function inputs(topics: GrammarTopic[] = [topicFixture()]): TopicBuildInputs {
@@ -52,7 +53,7 @@ async function writeInputs(directory: string, input: TopicBuildInputs) {
 }
 
 function quotingInput() {
-  const topic = topicFixture();
+  const topic = learningFixture();
   const text = 'TEST "quote" \'single\'\nTEST apostrophe ’ \\path; -- TEST';
   topic.title.en = text;
   const examples = topic.blocks.find((block) => block.type === 'examples')!;
@@ -122,6 +123,17 @@ test('version changes with reviewed content, membership or manifest version, not
   expect(buildPublishSql(input).version).not.toBe(original);
   input.manifest.packVersion = '0.2.0';
   expect(buildPublishSql(input).version).toStartWith('0.2.0+');
+});
+
+test('learning edits refuse stale publication and change the delivered version only after a matching TEST review', () => {
+  const input = inputs([learningFixture()]);
+  const before = buildPublishSql(input);
+  input.drafts[0].learning!.checkpoints[0].questions[1].feedback.incorrect.summary.en += ' TEST edit';
+  expect(() => buildPublishSql(input)).toThrow('review lapsed');
+  input.reviews.records[0].contentHash = topicContentHash(input.drafts[0]);
+  const after = buildPublishSql(input);
+  expect(after.version).not.toBe(before.version);
+  expect(after.pack.topics[0].learning).toEqual(input.drafts[0].learning);
 });
 
 test('zero topics replaces prior content, emits only delete and version, and lists excluded ids', async () => {

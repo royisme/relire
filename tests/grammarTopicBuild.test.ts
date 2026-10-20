@@ -7,6 +7,8 @@ import { pathToFileURL } from 'node:url';
 import { buildTopics, readTopicInputs, type TopicBuildInputs } from '../scripts/grammar-pack/topics';
 import { topicContentHash } from '../scripts/grammar-pack/gate';
 import { topicFixture } from './fixtures/grammarTopics';
+import { learningFixture, testBilingual } from './fixtures/grammarLearning';
+import { topicExerciseRevision } from '../src/services/grammarTopics/checkpoints';
 import { checkTopicMetadata } from '../scripts/grammar-topics/publish';
 import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
@@ -68,7 +70,7 @@ test('manifest metadata edits lapse review too, and excluded topics need no draf
   expect(result.report).toEqual(['test-only: excluded; skipped']);
 });
 
-test('canonical topic hash covers exactly title, blocks, tags, related, level and chapter', () => {
+test('canonical topic hash covers exactly title, blocks, learning, tags, related, level and chapter', () => {
   const topic = topicFixture();
   const hash = topicContentHash(topic);
   expect(hash).toMatch(/^[a-f0-9]{64}$/);
@@ -93,6 +95,94 @@ test('canonical topic hash covers exactly title, blocks, tags, related, level an
     }),
   ).toBe(hash);
   expect(topicContentHash(Object.fromEntries(Object.entries(topic).reverse()) as typeof topic)).toBe(hash);
+});
+
+test('every learning edit lapses publication review and changes exercise revision independently', async () => {
+  const original = learningFixture();
+  const publication = topicContentHash(original);
+  const exercise = await topicExerciseRevision(original);
+  const edits: [string, (topic: ReturnType<typeof learningFixture>) => void][] = [
+    [
+      'question',
+      (t) => {
+        t.learning.checkpoints[0].questions[1].prompt += ' TEST edit';
+      },
+    ],
+    [
+      'answer',
+      (t) => {
+        t.learning.checkpoints[0].questions[1].expectedAnswer = 'lycée';
+      },
+    ],
+    [
+      'accepted answer',
+      (t) => {
+        t.learning.checkpoints[0].questions[1].acceptableAnswers = ['lycée'];
+      },
+    ],
+    [
+      'correct summary',
+      (t) => {
+        t.learning.checkpoints[0].questions[0].feedback.correct.summary.en += ' TEST edit';
+      },
+    ],
+    [
+      'incorrect detail',
+      (t) => {
+        t.learning.checkpoints[0].questions[0].feedback.incorrect.detail!.zh += ' TEST edit';
+      },
+    ],
+    [
+      'wrong match',
+      (t) => {
+        t.learning.checkpoints[0].questions[0].feedback.byAnswer![0].message.summary.en += ' TEST edit';
+      },
+    ],
+    [
+      'teaching',
+      (t) => {
+        t.learning.checkpoints[0].teaching[0] = { type: 'note', text: testBilingual('TEST edit') };
+      },
+    ],
+    [
+      'instruction',
+      (t) => {
+        t.learning.instruction.en += ' TEST edit';
+      },
+    ],
+    [
+      'checkpoint title',
+      (t) => {
+        t.learning.checkpoints[0].title.en += ' TEST edit';
+      },
+    ],
+    [
+      'order',
+      (t) => {
+        t.learning.checkpoints.reverse();
+      },
+    ],
+  ];
+  for (const [name, edit] of edits) {
+    const topic = learningFixture();
+    edit(topic);
+    expect(topicContentHash(topic), name).not.toBe(publication);
+    expect(await topicExerciseRevision(topic), name).not.toBe(exercise);
+    const input = inputs();
+    input.drafts = [topic];
+    input.reviews.records[0].contentHash = publication;
+    expect(() => buildTopics(input), name).toThrow('review lapsed');
+    input.reviews.records[0].contentHash = topicContentHash(topic);
+    expect(buildTopics(input).pack.topics[0].learning, name).toEqual(topic.learning);
+  }
+  const referenceEdit = learningFixture();
+  referenceEdit.blocks.push({ type: 'note', text: testBilingual('TEST full reference edit') });
+  expect(topicContentHash(referenceEdit)).not.toBe(publication);
+  expect(await topicExerciseRevision(referenceEdit)).toBe(exercise);
+  const input = inputs();
+  input.drafts = [referenceEdit];
+  input.reviews.records[0].contentHash = publication;
+  expect(() => buildTopics(input)).toThrow('review lapsed');
 });
 
 test('missing or duplicate drafts and duplicate manifest ids fail rather than fabricate content', () => {
