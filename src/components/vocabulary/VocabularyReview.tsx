@@ -20,6 +20,7 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
   const message = error ?? (session.quotaReached ? t('vocab.quotaReached') : null);
   const [errorOpen, setErrorOpen] = useState(false);
   const revealButton = useRef<HTMLButtonElement>(null);
+  const submittedControl = useRef<HTMLButtonElement | null>(null);
   const answerHeading = useRef<HTMLHeadingElement>(null);
   const waitHeading = useRef<HTMLHeadingElement>(null);
   const held = useRef(new Set<string>());
@@ -35,6 +36,13 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
       preventScroll: true,
     });
   }, [key, revealed, hasActive]);
+  useLayoutEffect(() => {
+    if (busy) return;
+    const control = submittedControl.current;
+    submittedControl.current = null;
+    // Disabled controls lose focus; wait until React has committed their re-enabled state.
+    if (error && control?.isConnected && !control.disabled) control.focus({ preventScroll: true });
+  }, [busy, error]);
   useEffect(() => {
     const keydown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
@@ -138,11 +146,9 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
                 variant={revealed ? 'outline' : 'default'}
                 disabled={busy || revealed}
                 aria-busy={busy && !revealed}
-                onClick={() => {
-                  const control = revealButton.current;
-                  void session.reveal().then(() => {
-                    if (control?.isConnected && !control.disabled) control.focus({ preventScroll: true });
-                  });
+                onClick={(event) => {
+                  submittedControl.current = event.currentTarget;
+                  void session.reveal();
                 }}
               >
                 {t(busy && !revealed ? 'vocab.saving' : 'vocab.showAnswer')}
@@ -162,11 +168,8 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
                     disabled={!revealed || busy || (!!pending && pending.rating !== rating)}
                     aria-pressed={pending?.rating === rating}
                     onClick={(event) => {
-                      const control = event.currentTarget;
-                      void rate(rating).then(() => {
-                        if (control.isConnected && !control.disabled && control.getAttribute('aria-pressed') === 'true')
-                          control.focus({ preventScroll: true });
-                      });
+                      submittedControl.current = event.currentTarget;
+                      void rate(rating);
                     }}
                   >
                     <span>{t(`vocab.rating.${rating}`)}</span>

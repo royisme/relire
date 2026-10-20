@@ -96,6 +96,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Failed vocabulary reveals and ratings return focus to the submitted button once it is ready to retry.
 - Saving a personal word preserves literal source markup as safe text, including through backup. Review continues automatically after a daily-limit race, and review/download failures show their actual reason without moving controls; full details remain available in a sheet.
 - Checked topic questions keep their verdict and authored feedback when another answer fails to save.
 - Redo no longer restores an old draft answer, checked answers cancel pending drafts, and topic Reset stays available during later saves.
