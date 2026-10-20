@@ -8,7 +8,7 @@
 import { z } from 'zod';
 import { GrammarTagSchema, type GrammarTag } from './grammar';
 import {
-  TopicAnswerSchema,
+  CheckpointQuestionSchema,
   TopicOriginSchema,
   TopicQuestionSchema,
   topicUnitId,
@@ -161,6 +161,8 @@ export const ExtractedUnitSchema = z
     isExtracurricular: z.boolean().optional(),
   })
   .superRefine((unit, ctx) => {
+    if (unit.id.startsWith('topic:') !== Boolean(unit.topicOrigin))
+      ctx.addIssue({ code: 'custom', message: 'Topic unit identity and origin must be paired' });
     unit.items.forEach((item, index) => refineExerciseItem(item.type ?? unit.type, item, ctx, ['items', index]));
     if (new Set(unit.items.map((item) => item.id)).size !== unit.items.length)
       ctx.addIssue({ code: 'custom', message: 'Duplicate item IDs' });
@@ -168,7 +170,11 @@ export const ExtractedUnitSchema = z
       const fail = (message: string) => ctx.addIssue({ code: 'custom', path: ['items', index], message });
       if (Boolean(unit.topicOrigin) !== Boolean(item.topicQuestion)) fail('Topic origin and question must be paired');
       if (!unit.topicOrigin || !item.topicQuestion) return;
-      const parsed = TopicAnswerSchema.safeParse({ ...item, feedback: item.topicQuestion.feedback });
+      const parsed = CheckpointQuestionSchema.safeParse({
+        ...item,
+        instruction: item.topicQuestion.instruction,
+        feedback: item.topicQuestion.feedback,
+      });
       if (!parsed.success)
         for (const issue of parsed.error.issues) ctx.addIssue({ ...issue, path: ['items', index, ...issue.path] });
       if (item.meta?.strictAccents !== true) fail('Topic items require strict accents');
@@ -198,8 +204,14 @@ export const ExtractedUnitSchema = z
         if (index % 2 === 0) {
           if (checkpoints.has(question.checkpointId)) fail('Duplicate checkpoint ID');
           checkpoints.add(question.checkpointId);
-        } else if (question.checkpointId !== unit.items[index - 1].topicQuestion?.checkpointId)
-          fail('Each checkpoint must own two adjacent questions');
+        } else {
+          const previous = unit.items[index - 1].topicQuestion;
+          if (
+            question.checkpointId !== previous?.checkpointId ||
+            JSON.stringify(question.checkpointTitle) !== JSON.stringify(previous?.checkpointTitle)
+          )
+            fail('Each checkpoint must own two adjacent questions with the same title');
+        }
       });
     }
   });

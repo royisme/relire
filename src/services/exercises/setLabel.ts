@@ -1,10 +1,15 @@
-/**
- * The name of an exercise batch, built from fields the unit already carries:
- * its set title when it has one, otherwise the exercise type and the first four
- * characters of the set id. For a batch, pass its first unit. Pure.
- */
+/** Localized topic titles and worksheet batch labels; pure, with no storage or locale ownership. */
 import type { TFunction } from 'i18next';
 import type { ExerciseUnit } from '../../types/exercises';
 
-export const setLabel = (t: TFunction, unit: Pick<ExerciseUnit, 'setId' | 'setTitle' | 'type'>): string =>
-  unit.setTitle ?? `${t(`exerciseTypes.${unit.type}.name`)} · ${unit.setId.slice(0, 4)}`;
+export const unitTitle = (unit: Pick<ExerciseUnit, 'title' | 'topicOrigin'>, language?: string): string =>
+  unit.topicOrigin ? unit.topicOrigin.title[language === 'zh' ? 'zh' : 'en'] : unit.title;
+
+export const setLabel = (
+  t: TFunction,
+  unit: Pick<ExerciseUnit, 'setId' | 'setTitle' | 'type' | 'topicOrigin'>,
+  language?: string,
+): string =>
+  unit.topicOrigin
+    ? unit.topicOrigin.title[language === 'zh' ? 'zh' : 'en']
+    : (unit.setTitle ?? `${t(`exerciseTypes.${unit.type}.name`)} · ${unit.setId.slice(0, 4)}`);

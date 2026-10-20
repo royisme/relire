@@ -44,7 +44,17 @@ export function SetTable({ sets, onDelete }: { sets: SetRow[]; onDelete: (set: S
               <span className="mt-0.5 block text-xs text-ink-500">
                 <span className="sm:hidden">{set.level}</span>
                 <span className="hidden sm:inline">{t(`levels.${set.level}`)}</span>
-                {set.types.length === 1 && <> · {t(`exerciseTypes.${set.types[0]}.name`)}</>}
+                {set.exerciseRevision ? (
+                  <>
+                    {' '}
+                    · {t('grammarTopics.learning.practice.setLabel')}
+                    <span className="mt-0.5 block">
+                      {t('grammarTopics.learning.practice.revision', { revision: set.exerciseRevision.slice(0, 8) })}
+                    </span>
+                  </>
+                ) : (
+                  set.types.length === 1 && <> · {t(`exerciseTypes.${set.types[0]}.name`)}</>
+                )}
                 <span className="tnum mt-0.5 block md:hidden">
                   {t('practice.exercises', { count: set.rows.length })} ·{' '}
                   {set.progress.checked === 0 ? t('practice.notStarted') : t('practice.checkedProgress', set.progress)}

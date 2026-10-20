@@ -761,6 +761,55 @@
     "noMatch": "No published topics match this tag.",
     "clearTag": "Clear tag filter: {{tag}}",
     "back": "Back to Topics",
+    "learning": {
+      "progress": {
+        "initial": "{{checked}} of {{total}} checked",
+        "summary": "{{checked}} checked, {{right}} right"
+      },
+      "index": {
+        "label": "Question index",
+        "item": "{{checkpoint}}, question {{number}} of {{total}}, {{state}}",
+        "number": "{{number}}",
+        "position": "Question {{number}} of {{total}}",
+        "unchecked": "Unchecked",
+        "right": "Right",
+        "wrong": "Wrong"
+      },
+      "actions": {
+        "previous": "Previous",
+        "redo": "Redo",
+        "check": "Check",
+        "next": "Next",
+        "reset": "Reset answers"
+      },
+      "result": {
+        "right": "Right",
+        "wrong": "Wrong",
+        "expected": "Expected answer",
+        "readFeedback": "Read feedback",
+        "readDetails": "Read details",
+        "saveFailed": "Answer not saved",
+        "feedbackTitle": "Feedback"
+      },
+      "reference": {
+        "fullReference": "Full reference",
+        "openCurrent": "Open current reference",
+        "savedPractice": "Open saved Practice"
+      },
+      "practice": {
+        "savedOnlyNote": "This set contains saved questions only.",
+        "setLabel": "Topic exercises",
+        "revision": "Revision {{revision}}"
+      },
+      "errors": {
+        "prepareFailed": "Could not prepare the questions: {{msg}}",
+        "saveFailed": "Could not save your answer: {{msg}}",
+        "loadSavedFailed": "Could not load the saved questions: {{msg}}"
+      },
+      "unavailable": {
+        "typedPending": "Typed questions are not available yet."
+      }
+    },
     "chapters": {
       "chapter-one": "Nouns",
       "chapter-two": "Determiners",

@@ -98,6 +98,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
   const unitRef = useRef<ExerciseUnit | null>(null);
   const drafts = useRef<DraftMap>(new Map());
   const failedDrafts = useRef(new Set<string>());
+  const workingStateIds = useRef(new Set<string>());
   // Work in flight by `kind:itemId`, so a second press before the screen redraws starts nothing.
   const running = useRef(new Set<string>());
   const onMissingKeyRef = useRef(onMissingKey);
@@ -147,6 +148,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
           () => {
             if (!isCurrent()) return;
             failedDrafts.current.delete(itemId);
+            workingStateIds.current.add(itemId);
             setHasWorkingState(true);
             if (!failedDrafts.current.size) setSaveError(null);
           },
@@ -175,6 +177,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
         allowPrepared.current = false;
         if (!unit) return setLoad({ status: 'missing' });
         const states = snapshot.states;
+        workingStateIds.current = new Set(states.map((state) => state.itemId));
         setHasWorkingState(states.length > 0);
         setInitialWriting(false);
         unitRef.current = unit;
@@ -212,9 +215,11 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
       unit,
       token: started,
       ensureUnit: unit.topicOrigin ? () => ensureUnit(unit, started, mine) : undefined,
-      onPersisted: () => {
+      onPersisted: (itemId) => {
+        workingStateIds.current.add(itemId);
+        failedDrafts.current.delete(itemId);
         setHasWorkingState(true);
-        setSaveError(null);
+        if (!failedDrafts.current.size) setSaveError(null);
       },
       item: (itemId) => itemsRef.current[itemId],
       patch,
@@ -270,6 +275,7 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
       failedDrafts.current.clear();
       token.current = next;
       itemsRef.current = emptyItems(unit);
+      workingStateIds.current.clear();
       setHasWorkingState(false);
       setItems(itemsRef.current);
       setSaveError(null);
@@ -293,6 +299,8 @@ export function useExerciseUnit(unitId: string, { onMissingKey, preparedUnit }: 
     try {
       await clearItemState(unit.id, itemId, started);
       if (mine !== session.current) return;
+      workingStateIds.current.delete(itemId);
+      setHasWorkingState(workingStateIds.current.size > 0);
       const fresh = emptyItems(unit)[itemId];
       if (fresh) patch(itemId, fresh);
     } catch (err) {

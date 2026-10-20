@@ -3,7 +3,7 @@ import type { TFunction } from 'i18next';
 import type { UnitRow } from '../../hooks/useUnitRows';
 import { setLabel } from './setLabel';
 
-export function aggregateSets(rows: UnitRow[], t: TFunction) {
+export function aggregateSets(rows: UnitRow[], t: TFunction, language?: string) {
   const groups = new Map<string, UnitRow[]>();
   for (const row of rows) {
     const group = groups.get(row.unit.setId);
@@ -12,7 +12,8 @@ export function aggregateSets(rows: UnitRow[], t: TFunction) {
   }
   return [...groups.entries()].map(([setId, group]) => ({
     setId,
-    title: setLabel(t, group[0].unit),
+    title: setLabel(t, group[0].unit, language),
+    exerciseRevision: group[0].unit.topicOrigin?.exerciseRevision,
     level: group[0].unit.level,
     createdAt: group[0].unit.createdAt,
     types: [...new Set(group.map(({ unit }) => unit.type))],

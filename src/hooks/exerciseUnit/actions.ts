@@ -28,7 +28,7 @@ export interface ActionContext {
   token: number;
   /** Topic-only lazy persistence, guarded by this session's original entry token. */
   ensureUnit?(): Promise<ExerciseUnit>;
-  onPersisted?(): void;
+  onPersisted?(itemId: string): void;
   item(itemId: string): ItemRuntime | undefined;
   patch(itemId: string, partial: Partial<ItemRuntime>): void;
   /** False once the learner left the unit or reset it. */
@@ -111,7 +111,7 @@ export async function runCheck(ctx: ActionContext, itemId: string) {
     }
     const outcome = await checkItem({ unitId: ctx.unit.id, itemId, resetToken: ctx.token, answer, result });
     if (!ctx.isCurrent()) return;
-    ctx.onPersisted?.();
+    ctx.onPersisted?.(itemId);
     ctx.patch(itemId, { checked: outcome.state.checked, answer: outcome.state.answer, busy: null });
   } catch (err) {
     fail(ctx, itemId, err);

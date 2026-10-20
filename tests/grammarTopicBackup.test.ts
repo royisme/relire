@@ -97,6 +97,10 @@ test('partial attempt restore validates against surviving units inside the resto
     ExerciseBackupError,
   );
   expect(await exportData()).toEqual(original);
+  const replacement = structuredClone(original.units);
+  replacement[0].items[0].topicQuestion!.instruction.en = 'TEST changed instruction';
+  expect(await failure(importData({ units: replacement }))).toBeInstanceOf(ExerciseBackupError);
+  expect(await exportData()).toEqual(original);
   await importData({ attempts: [] });
   expect((await exportData()).units).toEqual(original.units);
   expect((await exportData()).attempts).toEqual([]);

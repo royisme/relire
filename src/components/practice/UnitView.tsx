@@ -8,6 +8,7 @@ import { useExerciseUnit } from '../../hooks/useExerciseUnit';
 import { Button } from '../ui/button';
 import { NotFoundView } from '../shell/NotFoundView';
 import { UnitSheet } from './UnitSheet';
+import { TopicWorkbench } from './TopicWorkbench';
 
 export function UnitView({
   unitId,
@@ -34,5 +35,11 @@ export function UnitView({
       </div>
     );
   if (!session.unit) return <div aria-busy="true" className="min-h-[50vh]" />;
+  if (session.unit.topicOrigin)
+    return (
+      <div className="mx-auto max-w-3xl px-4 pt-6 pb-28 sm:px-6">
+        <TopicWorkbench session={session} />
+      </div>
+    );
   return <UnitSheet unit={session.unit} session={session} onWord={onWord} />;
 }

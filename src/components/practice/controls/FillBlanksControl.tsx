@@ -18,6 +18,7 @@ export function FillBlanksControl({
   checked,
   disabled,
   registerInput,
+  correctionPlacement = 'inline',
 }: ExerciseControlProps) {
   const { t } = useTranslation();
   const parts = item.prompt.split('[___]');
@@ -60,7 +61,7 @@ export function FillBlanksControl({
         className={className}
         align={align}
       />
-      {stateOf(index) === 'wrong' && (
+      {stateOf(index) === 'wrong' && correctionPlacement === 'inline' && (
         <ExpectedBeside text={blanks > 1 ? (expected[index] ?? '') : expected.join(' / ')} />
       )}
     </span>
@@ -81,7 +82,7 @@ export function FillBlanksControl({
     <p className="break-words font-serif text-lg leading-[2.1] text-ink-900">
       {parts.map((part, index) => (
         <Fragment key={index}>
-          <InlineMarkup text={part} onWord={(word) => onWord(word, item.prompt)} />
+          <InlineMarkup text={part} onWord={onWord ? (word) => onWord(word, item.prompt) : undefined} />
           {index < parts.length - 1 && <span className="mx-1">{blank(index, 'w-28')}</span>}
         </Fragment>
       ))}

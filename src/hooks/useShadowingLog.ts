@@ -12,7 +12,7 @@ import type { ShadowingSentence } from '../types/shadowing';
 import { listShadowing, subscribeShadowing, sourceOfRecording } from '../storage/shadowing';
 import { normalizeText } from '../storage/audio';
 import { errorMessage } from '../services/ai/errors';
-import { setLabel } from '../services/exercises/setLabel';
+import { setLabel, unitTitle } from '../services/exercises/setLabel';
 import { splitArticle } from '../utils/sentences';
 
 export interface LogRow {
@@ -29,7 +29,7 @@ export interface LogGroup {
 }
 
 export function useShadowingLog(articles: Article[], units: ExerciseUnit[] | null, unitsError: string | null) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [records, setRecords] = useState<ShadowingSentence[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -64,13 +64,14 @@ export function useShadowingLog(articles: Article[], units: ExerciseUnit[] | nul
       document: article,
     }));
     for (const unit of units ?? []) {
-      const document = passageDocument(unit, setLabel(t, unit));
+      const title = unitTitle(unit, i18n.resolvedLanguage);
+      const document = passageDocument(unit, setLabel(t, unit, i18n.resolvedLanguage), i18n.resolvedLanguage);
       if (document)
         sources.push({
           id: readerIdentity({ kind: 'passage', unitId: unit.id }),
           document: {
             ...document,
-            title: unit.title === document.title ? unit.title : `${unit.title} — ${document.title}`,
+            title: title === document.title ? title : `${title} — ${document.title}`,
           },
         });
     }
@@ -97,7 +98,7 @@ export function useShadowingLog(articles: Article[], units: ExerciseUnit[] | nul
     }
     const removed = [...bySource.values()].flat().map((record): LogRow => ({ record, sentenceId: null }));
     return { groups, removed };
-  }, [records, articles, units, t]);
+  }, [records, articles, units, t, i18n.resolvedLanguage]);
 
   return {
     loading: (records === null && !error) || (units === null && !unitsError),

@@ -14,7 +14,9 @@ export type TextInputElement = HTMLInputElement | HTMLTextAreaElement;
 export interface ExerciseControlProps {
   item: ExerciseItem;
   /** Lookup for source text only, never inside answer buttons or tiles. */
-  onWord: (word: string, sentence: string) => void;
+  onWord?: (word: string, sentence: string) => void;
+  /** Topic feedback owns the correction slot; worksheets keep their inline correction. */
+  correctionPlacement?: 'inline' | 'feedback';
   /** The item's effective type: its own override, else its unit's. */
   type: ExerciseType;
   /** What the learner has entered. A control writes only the field(s) it owns and leaves the rest. */

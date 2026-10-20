@@ -134,6 +134,26 @@ test('typed contracts select fallback/accepted feedback with strict accents; red
   expect(await listItemStates(unit.id)).toEqual([]);
 });
 
+test('topic checks share apostrophe/case/space normalization and feedback survives learner typography in backups', async () => {
+  const topic = learningFixture();
+  topic.learning.checkpoints[0].questions[1].expectedAnswer = 'l’école';
+  topic.learning.checkpoints[0].questions[1].prompt = 'TEST école [___]';
+  const unit = topicToExerciseUnit(topic, await topicExerciseRevision(topic), 123);
+  await ensureTopicUnit(unit, 0);
+  await checkItem({
+    unitId: unit.id,
+    itemId: unit.items[1].id,
+    resetToken: 0,
+    answer: answered(" L'ÉCOLE "),
+    result: right,
+  });
+  expect((await listAttempts())[0].correct).toBe(true);
+  const backup = await exportData();
+  await freshDb();
+  await importData(backup);
+  expect((await listAttempts())[0].topicResult?.feedback.summary.en).toBe('TEST correct');
+});
+
 test('restore preserves and advances deleted-row tokens; a new revision does not merge progress', async () => {
   const unit = await prepare();
   await ensureTopicUnit(unit, 0);

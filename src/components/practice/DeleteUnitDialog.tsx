@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { errorMessage } from '../../services/ai/errors';
+import { unitTitle } from '../../services/exercises/setLabel';
 import { deleteUnit } from '../../storage/exercises';
 import type { ExerciseUnit } from '../../types/exercises';
 import { Button } from '../ui/button';
@@ -19,7 +20,7 @@ export function DeleteUnitDialog({
   onClose: () => void;
   onDeleted: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const cancel = () => {
@@ -40,7 +41,9 @@ export function DeleteUnitDialog({
     <Dialog label={t('practice.deleteUnitTitle')} onClose={cancel} className="max-w-sm">
       <OverlayHeader title={t('practice.deleteUnitTitle')} onClose={cancel} closeLabel={t('common.close')} />
       <div className="space-y-4 p-5">
-        <p className="break-words text-sm text-ink-700">{t('practice.deleteUnitBody', { title: unit.title })}</p>
+        <p className="break-words text-sm text-ink-700">
+          {t('practice.deleteUnitBody', { title: unitTitle(unit, i18n.resolvedLanguage) })}
+        </p>
         {last && <p className="text-sm text-ink-700">{t('practice.deleteLastUnit')}</p>}
         {error && (
           <p role="alert" className="break-words text-sm text-bad-700">

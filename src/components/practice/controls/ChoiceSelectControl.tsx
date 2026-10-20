@@ -12,7 +12,15 @@ import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
 import { InlineMarkup } from '../InlineMarkup';
 
-export function ChoiceSelectControl({ item, onWord, answer, onChange, checked, disabled }: ExerciseControlProps) {
+export function ChoiceSelectControl({
+  item,
+  onWord,
+  answer,
+  onChange,
+  checked,
+  disabled,
+  correctionPlacement = 'inline',
+}: ExerciseControlProps) {
   const { t } = useTranslation();
   const pieces = choicePieces(item.prompt);
   const expected = Array.isArray(item.expectedAnswer) ? item.expectedAnswer : [item.expectedAnswer];
@@ -31,7 +39,7 @@ export function ChoiceSelectControl({ item, onWord, answer, onChange, checked, d
         if (piece.kind === 'text')
           return (
             <Fragment key={at}>
-              <InlineMarkup text={piece.text} onWord={(word) => onWord(word, item.prompt)} />
+              <InlineMarkup text={piece.text} onWord={onWord ? (word) => onWord(word, item.prompt) : undefined} />
             </Fragment>
           );
         const chosen = answer.choiceSelections[piece.index] ?? '';
@@ -54,6 +62,7 @@ export function ChoiceSelectControl({ item, onWord, answer, onChange, checked, d
                     onClick={() => pick(piece.index, option)}
                     className={cn(
                       'min-h-9 max-sm:min-h-10 max-w-full break-words rounded-md px-3 font-sans text-sm',
+                      correctionPlacement === 'feedback' && 'min-h-10',
                       disabled ? 'cursor-default' : 'cursor-pointer',
                       !selected && !disabled && 'text-ink-700 hover:bg-ink-100',
                       !selected && disabled && 'text-ink-500',
@@ -67,7 +76,9 @@ export function ChoiceSelectControl({ item, onWord, answer, onChange, checked, d
                 );
               })}
             </span>
-            {markSlots && !right && <ExpectedBeside text={expected[piece.index] ?? ''} />}
+            {markSlots && !right && correctionPlacement === 'inline' && (
+              <ExpectedBeside text={expected[piece.index] ?? ''} />
+            )}
           </span>
         );
       })}

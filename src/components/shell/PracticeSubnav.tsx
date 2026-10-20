@@ -4,13 +4,13 @@
  * draws nothing on the Practice list and does not navigate imperatively.
  */
 import { useTranslation } from 'react-i18next';
-import { setLabel } from '../../services/exercises/setLabel';
+import { setLabel, unitTitle } from '../../services/exercises/setLabel';
 import { useUnitRows } from '../../hooks/useUnitRows';
 import type { Route } from '../../utils/routes';
 import { NavItem } from './NavItem';
 
 export function PracticeSubnav({ route, onNavigate }: { route: Route; onNavigate?: () => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { rows } = useUnitRows();
   const open = rows.find(({ unit }) =>
     route.name === 'unit' ? unit.id === route.unitId : route.name === 'practiceSet' && unit.setId === route.setId,
@@ -20,7 +20,7 @@ export function PracticeSubnav({ route, onNavigate }: { route: Route; onNavigate
       {open && (
         <NavItem
           to={{ name: 'practiceSet', setId: open.unit.setId }}
-          label={setLabel(t, open.unit)}
+          label={setLabel(t, open.unit, i18n.resolvedLanguage)}
           current={route.name === 'practiceSet' ? 'page' : undefined}
           onNavigate={onNavigate}
         />
@@ -31,7 +31,7 @@ export function PracticeSubnav({ route, onNavigate }: { route: Route; onNavigate
           <NavItem
             key={unit.id}
             to={{ name: 'unit', unitId: unit.id }}
-            label={unit.title}
+            label={unitTitle(unit, i18n.resolvedLanguage)}
             current={route.name === 'unit' && route.unitId === unit.id ? 'page' : undefined}
             onNavigate={onNavigate}
           />

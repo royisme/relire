@@ -10,6 +10,7 @@ import {
   tableFeatures,
   useTable,
 } from '@tanstack/react-table';
+import { unitTitle } from '../../services/exercises/setLabel';
 import type { UnitRow } from '../../hooks/useUnitRows';
 import type { ExerciseUnit } from '../../types/exercises';
 import { Link } from '../shell/Link';
@@ -28,12 +29,13 @@ const classes: Record<string, string> = {
 };
 
 export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit: ExerciseUnit) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.resolvedLanguage;
   const columns = useMemo(
     () =>
       helper.columns([
         helper.accessor((row) => row.unit.unitNumber, { id: 'number', header: t('practice.colNumber') }),
-        helper.accessor((row) => row.unit.title, {
+        helper.accessor((row) => unitTitle(row.unit, language), {
           id: 'title',
           header: t('practice.colTitle'),
           cell: ({
@@ -46,11 +48,21 @@ export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit
               className="block min-w-0 break-words font-serif text-base font-semibold text-ink-900 hover:text-accent-900"
             >
               <span className="sm:hidden">
-                {t('practice.numberedTitle', { number: unit.unitNumber, title: unit.title })}
+                {t('practice.numberedTitle', { number: unit.unitNumber, title: unitTitle(unit, language) })}
               </span>
-              <span className="hidden sm:inline">{unit.title}</span>
+              <span className="hidden sm:inline">{unitTitle(unit, language)}</span>
+              {unit.topicOrigin && (
+                <span className="mt-0.5 block font-sans text-xs font-normal text-ink-500">
+                  {t('grammarTopics.learning.practice.revision', {
+                    revision: unit.topicOrigin.exerciseRevision.slice(0, 8),
+                  })}
+                </span>
+              )}
               <span className="mt-0.5 block font-sans text-xs font-normal text-ink-500 md:hidden">
-                <span className="sm:hidden">{t(`exerciseTypes.${unit.type}.name`)} · </span>
+                <span className="sm:hidden">
+                  {t(unit.topicOrigin ? 'grammarTopics.learning.practice.setLabel' : `exerciseTypes.${unit.type}.name`)}{' '}
+                  ·{' '}
+                </span>
                 {t('practice.items', { count: progress.total })}
                 <span className="mt-0.5 block">
                   {progress.checked === 0 ? t('practice.notStarted') : t('practice.checkedProgress', { ...progress })}
@@ -62,7 +74,12 @@ export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit
         helper.accessor((row) => row.unit.type, {
           id: 'type',
           header: t('practice.colType'),
-          cell: ({ row }) => t(`exerciseTypes.${row.original.unit.type}.name`),
+          cell: ({ row }) =>
+            t(
+              row.original.unit.topicOrigin
+                ? 'grammarTopics.learning.practice.setLabel'
+                : `exerciseTypes.${row.original.unit.type}.name`,
+            ),
         }),
         helper.accessor((row) => row.progress.total, { id: 'items', header: t('practice.count') }),
         helper.accessor((row) => row.progress.checked, {
@@ -77,7 +94,7 @@ export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit
           id: 'actions',
           header: () => <span className="sr-only">{t('practice.actions')}</span>,
           cell: ({ row }) => {
-            const label = t('practice.deleteUnitNamed', { title: row.original.unit.title });
+            const label = t('practice.deleteUnitNamed', { title: unitTitle(row.original.unit, language) });
             return (
               <Button
                 variant="ghost"
@@ -93,7 +110,7 @@ export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit
           },
         }),
       ]),
-    [t, onDelete],
+    [t, onDelete, language],
   );
   const table = useTable({
     features,

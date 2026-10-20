@@ -1,4 +1,5 @@
 /** Owns the summary list and individual topic reader states; never substitutes sample content. */
+import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useGrammarTopics } from '../../../hooks/useGrammarTopics';
@@ -6,8 +7,17 @@ import type { GrammarTag } from '../../../types/grammar';
 import { Link } from '../../shell/Link';
 import { NotFoundView } from '../../shell/NotFoundView';
 import { TopicBlocks } from './TopicBlocks';
+import { TopicLearning } from './TopicLearning';
+import { Button } from '../../ui/button';
 
-export default function TopicsPage({ topicId, tag }: { topicId?: string; tag?: GrammarTag }) {
+export default function TopicsPage(props: { topicId?: string; tag?: GrammarTag }) {
+  const [retry, setRetry] = useState(0);
+  return (
+    <TopicsContent key={`${props.topicId ?? ''}:${retry}`} {...props} onRetry={() => setRetry((value) => value + 1)} />
+  );
+}
+
+function TopicsContent({ topicId, tag, onRetry }: { topicId?: string; tag?: GrammarTag; onRetry: () => void }) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
   const { status, topics: summaries, topic, error } = useGrammarTopics(topicId);
@@ -21,9 +31,22 @@ export default function TopicsPage({ topicId, tag }: { topicId?: string; tag?: G
           {t('grammarTopics.loading')}
         </p>
       ) : status === 'error' ? (
-        <p role="alert" className="text-sm text-bad-700">
-          {t('grammarTopics.loadError', { msg: error })}
-        </p>
+        <div className="space-y-3">
+          <p role="alert" className="text-sm text-bad-700">
+            {t('grammarTopics.loadError', { msg: error })}
+          </p>
+          <Button variant="outline" onClick={onRetry}>
+            {t('common.retry')}
+          </Button>
+          {topicId && (
+            <Link
+              to={{ name: 'practice' }}
+              className="inline-flex min-h-10 items-center px-3 text-sm text-accent-900 underline"
+            >
+              {t('grammarTopics.learning.reference.savedPractice')}
+            </Link>
+          )}
+        </div>
       ) : topicId ? (
         <>
           <Link
@@ -32,7 +55,9 @@ export default function TopicsPage({ topicId, tag }: { topicId?: string; tag?: G
           >
             {t('grammarTopics.back')}
           </Link>
-          {topic ? (
+          {topic?.learning ? (
+            <TopicLearning key={topic.id} topic={topic} />
+          ) : topic ? (
             <article lang={language} className="min-w-0 space-y-6 text-sm leading-relaxed">
               <header className="max-w-prose space-y-2">
                 <h2 className="font-serif text-2xl font-semibold text-balance">{topic.title[language]}</h2>

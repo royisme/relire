@@ -17,7 +17,10 @@ import { UnitTable } from './UnitTable';
 export function PracticeSetPage({ setId }: { setId: string }) {
   const { t, i18n } = useTranslation();
   const { rows, loading, error } = useUnitRows();
-  const set = useMemo(() => aggregateSets(rows, t).find((candidate) => candidate.setId === setId), [rows, t, setId]);
+  const set = useMemo(
+    () => aggregateSets(rows, t, i18n.resolvedLanguage).find((candidate) => candidate.setId === setId),
+    [rows, t, setId, i18n.resolvedLanguage],
+  );
   const [deletingSet, setDeletingSet] = useState(false);
   const [deletingUnit, setDeletingUnit] = useState<ExerciseUnit | null>(null);
   if (loading) return <div aria-busy="true" className="h-56" />;

@@ -4,7 +4,7 @@
  * the model: one module owns the stores, every write is one transaction,
  * `subscribeExercises` fires after commit). Attempt queries live in
  * `exerciseAttempts.ts` and are re-exported here; backup in `exerciseBackup.ts`.
- * Does not grade (services/exercises/grading) and never calls AI.
+ * Grading rules stay in services/exercises/grading; topic checks use the stored key and never call AI.
  *
  * Rules:
  * - Checking an item writes its state and its attempt in ONE transaction. A

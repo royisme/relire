@@ -55,7 +55,7 @@ const storedFlag = (key: string) => {
 };
 
 export default function App() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // Where the learner is: the address decides the screen (see utils/routes.ts).
   const route = useRoute();
   const breakpoint = useBreakpoint();
@@ -78,7 +78,10 @@ export default function App() {
   const readerUnits = useReaderUnits();
   const passageUnit = route.name === 'passage' ? readerUnits.units?.find((u) => u.id === route.unitId) : undefined;
   const readerDocument =
-    currentArticle ?? (passageUnit ? passageDocument(passageUnit, setLabel(t, passageUnit)) : null);
+    currentArticle ??
+    (passageUnit
+      ? passageDocument(passageUnit, setLabel(t, passageUnit, i18n.resolvedLanguage), i18n.resolvedLanguage)
+      : null);
   const readerSource: ReaderSource | null =
     route.name === 'reader'
       ? { kind: 'article', articleId: route.articleId }

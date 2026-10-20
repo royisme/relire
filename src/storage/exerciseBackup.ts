@@ -188,7 +188,8 @@ export async function restoreExerciseRows(stores: Stores, backup: ExerciseBackup
       if (!unit?.items.some((item) => item.id === state.itemId)) await stores.itemStates.delete(state.id);
     }
   }
-  for (const attempt of backup.attempts ?? []) validateTopicAttempt(attempt, await stores.units.get(attempt.unitId));
+  const attempts = backup.units ? await stores.attempts.getAll() : (backup.attempts ?? []);
+  for (const attempt of attempts) validateTopicAttempt(attempt, await stores.units.get(attempt.unitId));
   // Include missing-row entry tokens as well as surviving rows: a restore invalidates prepared sessions too.
   if (backup.units || backup.itemStates) {
     const tokenIds = (await stores.meta.getAllKeys())

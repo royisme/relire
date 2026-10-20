@@ -22,9 +22,9 @@ interface PracticePageProps {
 }
 
 export function PracticePage({ articles, onMissingKey, onAssessed }: PracticePageProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { rows, loading, error } = useUnitRows();
-  const sets = useMemo(() => aggregateSets(rows, t), [rows, t]);
+  const sets = useMemo(() => aggregateSets(rows, t, i18n.resolvedLanguage), [rows, t, i18n.resolvedLanguage]);
   const [query, setQuery] = useState('');
   const [level, setLevel] = useState('all');
   const filtered = useMemo(() => filterSets(sets, query, level), [sets, query, level]);

@@ -753,6 +753,55 @@
     "noMatch": "此标签下尚无已发布的专题。",
     "clearTag": "清除标签筛选：{{tag}}",
     "back": "返回语法专题",
+    "learning": {
+      "progress": {
+        "initial": "已检查 {{checked}}/{{total}} 题",
+        "summary": "已检查 {{checked}} 题，答对 {{right}} 题"
+      },
+      "index": {
+        "label": "题目索引",
+        "item": "{{checkpoint}}，第 {{number}} 题，共 {{total}} 题，{{state}}",
+        "number": "{{number}}",
+        "position": "第 {{number}} 题，共 {{total}} 题",
+        "unchecked": "未检查",
+        "right": "答对",
+        "wrong": "答错"
+      },
+      "actions": {
+        "previous": "上一题",
+        "redo": "重做",
+        "check": "检查",
+        "next": "下一题",
+        "reset": "重置作答"
+      },
+      "result": {
+        "right": "答对",
+        "wrong": "答错",
+        "expected": "正确答案",
+        "readFeedback": "查看反馈",
+        "readDetails": "查看详情",
+        "saveFailed": "作答未保存",
+        "feedbackTitle": "反馈"
+      },
+      "reference": {
+        "fullReference": "完整语法参考",
+        "openCurrent": "打开当前参考",
+        "savedPractice": "打开已保存的练习"
+      },
+      "practice": {
+        "savedOnlyNote": "此题组仅包含已保存的题目。",
+        "setLabel": "专题练习",
+        "revision": "版本 {{revision}}"
+      },
+      "errors": {
+        "prepareFailed": "无法准备题目：{{msg}}",
+        "saveFailed": "无法保存作答：{{msg}}",
+        "loadSavedFailed": "无法加载已保存的题目：{{msg}}"
+      },
+      "unavailable": {
+        "typedPending": "填空题暂未开放。"
+      }
+    },
     "chapters": {
       "chapter-one": "名词",
       "chapter-two": "限定词",

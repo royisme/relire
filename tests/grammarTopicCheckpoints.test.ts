@@ -106,6 +106,68 @@ test('identity includes all learning/title/level/tags but excludes unrelated ref
 
 const invalid: [string, (topic: ReturnType<typeof learningFixture>) => void][] = [
   [
+    'extra checkpoint',
+    (t) => {
+      Object.assign(t.learning.checkpoints, { 3: t.learning.checkpoints[0] });
+    },
+  ],
+  [
+    'extra question',
+    (t) => {
+      Object.assign(t.learning.checkpoints[0].questions, { 2: t.learning.checkpoints[0].questions[0] });
+    },
+  ],
+  [
+    'empty teaching',
+    (t) => {
+      t.learning.checkpoints[0].teaching = [];
+    },
+  ],
+  [
+    'missing feedback translation',
+    (t) => {
+      Object.assign(t.learning.checkpoints[0].questions[0].feedback.correct.summary, { zh: undefined });
+    },
+  ],
+  [
+    'invalid teaching table',
+    (t) => {
+      t.learning.checkpoints[0].teaching = [
+        { type: 'table', header: [{ fr: 'TEST' }], rows: [[{ fr: 'TEST' }, { fr: 'TEST' }]] },
+      ];
+    },
+  ],
+  [
+    'mixed teaching speakers',
+    (t) => {
+      t.learning.checkpoints[0].teaching = [
+        {
+          type: 'examples',
+          items: [
+            { fr: 'TEST', ...testBilingual(), speaker: 'A' },
+            { fr: 'TEST', ...testBilingual() },
+          ],
+        },
+      ];
+    },
+  ],
+  [
+    'straight prompt apostrophe',
+    (t) => {
+      t.learning.checkpoints[0].questions[1].prompt = 'TEST l’école [___]'.replace('’', "'");
+    },
+  ],
+  [
+    'duplicate typed feedback matches',
+    (t) => {
+      const message = t.learning.checkpoints[0].questions[1].feedback.incorrect;
+      t.learning.checkpoints[0].questions[1].feedback.byAnswer = [
+        { answer: 'TEST', message },
+        { answer: ' test ', message },
+      ];
+    },
+  ],
+  [
     'fewer checkpoints',
     (t) => {
       t.learning.checkpoints.pop();
@@ -290,6 +352,18 @@ test('saved unit metadata is paired and malformed topic capabilities cannot beco
   const topic = learningFixture();
   const unit = topicToExerciseUnit(topic, await topicExerciseRevision(topic), 123);
   const corruptions = [
+    (u: typeof unit) => {
+      delete u.topicOrigin;
+      u.items.forEach((item) => {
+        delete item.topicQuestion;
+      });
+    },
+    (u: typeof unit) => {
+      u.items[0].id = 'not a slug';
+    },
+    (u: typeof unit) => {
+      u.items[1].topicQuestion!.checkpointTitle.en += ' different';
+    },
     (u: typeof unit) => {
       delete u.topicOrigin;
     },

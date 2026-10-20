@@ -3,6 +3,8 @@ import { expect, test } from 'bun:test';
 import i18next from 'i18next';
 import type { UnitRow } from '../src/hooks/useUnitRows';
 import { aggregateSets, filterSets } from '../src/services/exercises/sets';
+import { learningFixture } from './fixtures/grammarLearning';
+import { topicExerciseRevision, topicToExerciseUnit } from '../src/services/grammarTopics/checkpoints';
 import { unitOf } from './fixtures/units';
 
 const i18n = i18next.createInstance();
@@ -14,6 +16,21 @@ const t = i18n.t.bind(i18n);
 const row = (title: string, checked = 0, total = 1): UnitRow => ({
   unit: { ...unitOf('FILL_BLANKS'), setTitle: title },
   progress: { checked, total, correct: checked },
+});
+
+test('topic revisions retain separate sets, localized titles and actual counts', async () => {
+  const topic = learningFixture();
+  const first = topicToExerciseUnit(topic, await topicExerciseRevision(topic), 123);
+  topic.learning.instruction.en += ' revision';
+  const second = topicToExerciseUnit(topic, await topicExerciseRevision(topic), 456);
+  const rows = [first, second].map((unit) => ({ unit, progress: { checked: 1, correct: 0, total: 6 } }));
+  const sets = aggregateSets(rows, t, 'zh');
+  expect(sets).toHaveLength(2);
+  expect(sets.map((set) => set.title)).toEqual([topic.title.zh, topic.title.zh]);
+  expect(sets[0].exerciseRevision).toBe(first.topicOrigin!.exerciseRevision);
+  expect(sets[1].exerciseRevision).not.toBe(sets[0].exerciseRevision);
+  expect(sets[0].progress).toEqual({ checked: 1, correct: 0, total: 6 });
+  expect(filterSets(sets, topic.title.zh, 'A1')).toEqual(sets);
 });
 
 test('empty input stays empty', () => {
