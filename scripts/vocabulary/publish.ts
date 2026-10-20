@@ -1,5 +1,6 @@
 /** Metadata-only CI check or owner-authorized local-only staged publication using installed Wrangler. */
 import { fileURLToPath } from 'node:url';
+import type { D1Database } from '../../worker/node_modules/@cloudflare/workers-types';
 import { checkVocabularyMetadata, vocabularyRepository } from './metadata';
 import {
   prepareArtifact,
@@ -46,49 +47,41 @@ export async function publish(args: string[], root = vocabularyRepository, testA
     console.log('Private immutable staging SQL prepared only; --apply-local performs verified publication');
     return;
   }
-  let command = 0;
-  const run = async (sql: string, read: boolean) => {
-    const file = new URL(`.local/vocabulary/command-${++command}.sql`, root);
-    await Bun.write(file, sql + '\n');
-    const child = Bun.spawn(
-      [
-        fileURLToPath(new URL('worker/node_modules/.bin/wrangler', vocabularyRepository)),
-        'd1',
-        'execute',
-        'DB',
-        '--local',
-        '--json',
-        '--file',
-        fileURLToPath(file),
-      ],
-      {
-        cwd: fileURLToPath(new URL('worker/', vocabularyRepository)),
-        stdin: 'ignore',
-        stdout: 'pipe',
-        stderr: 'pipe',
+  const proxy = testAdapter
+    ? undefined
+    : await (
+        await import('../../worker/node_modules/wrangler')
+      ).getPlatformProxy<{ DB: D1Database }>({
+        configPath: fileURLToPath(new URL('worker/wrangler.jsonc', vocabularyRepository)),
+        persist: { path: fileURLToPath(new URL('worker/.wrangler/state/v3', vocabularyRepository)) },
+        remoteBindings: false,
+        envFiles: [],
+      });
+  try {
+    let command = 0;
+    const run = async (sql: string, read: boolean, parameters: (string | number)[] = []) => {
+      const log = new URL(`.pi-runs/vocabulary/command-${++command}.log`, root);
+      try {
+        const statement = proxy!.env.DB.prepare(sql).bind(...parameters);
+        const output = read ? await statement.all<Record<string, unknown>>() : await statement.run();
+        await Bun.write(log, JSON.stringify(output) + '\n');
+        if (!output.success || !Array.isArray(output.results)) throw new Error('Invalid local D1 readback');
+        return output.results;
+      } catch (error) {
+        await Bun.write(log, Bun.inspect(error) + '\n');
+        throw error;
+      }
+    };
+    const adapter: VocabularyPublishAdapter = testAdapter ?? {
+      execute: async (sql, parameters) => {
+        await run(sql, false, parameters);
       },
-    );
-    const [stdout, stderr, exit] = await Promise.all([
-      new Response(child.stdout).text(),
-      new Response(child.stderr).text(),
-      child.exited,
-    ]);
-    await Bun.write(new URL(`.pi-runs/vocabulary/command-${command}.log`, root), stdout + '\n' + stderr);
-    if (exit !== 0)
-      throw new Error(`Local vocabulary command ${command} failed (${exit}); private output in .pi-runs/vocabulary/`);
-    if (!read) return [];
-    const output = JSON.parse(stdout) as { success: boolean; results: Record<string, unknown>[] }[];
-    if (output.length !== 1 || !output[0].success || !Array.isArray(output[0].results))
-      throw new Error('Invalid local D1 readback');
-    return output[0].results;
-  };
-  const adapter: VocabularyPublishAdapter = testAdapter ?? {
-    execute: async (sql) => {
-      await run(sql, false);
-    },
-    read: (sql) => run(sql, true),
-  };
-  await publishVocabularyBook(book, adapter);
+      read: (sql) => run(sql, true),
+    };
+    await publishVocabularyBook(book, adapter);
+  } finally {
+    await proxy?.dispose();
+  }
   console.log(
     unreviewed
       ? 'Unreviewed vocabulary current pointer verified locally; linguistic review waived for local use'
@@ -99,7 +92,9 @@ if (import.meta.main) {
   try {
     await publish(Bun.argv.slice(2));
   } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
+    // D1 errors can include private content; keep raw failures out of the public console.
+    await Bun.write(new URL('.pi-runs/vocabulary/failure.log', vocabularyRepository), Bun.inspect(error) + '\n');
+    console.error('Vocabulary publication failed; private diagnostics in .pi-runs/vocabulary/failure.log');
     process.exitCode = 1;
   }
 }

@@ -45,7 +45,7 @@ export function vocabularyPages(book: VocabularyBook): VocabularyPage[] {
 }
 export const sqlQuote = (value: string) => `'${value.replaceAll("'", "''")}'`;
 export interface VocabularyPublishAdapter {
-  execute(sql: string): Promise<void>;
+  execute(sql: string, parameters?: (string | number)[]): Promise<void>;
   read(sql: string): Promise<Record<string, unknown>[]>;
 }
 export async function publishVocabularyBook(book: VocabularyBook, adapter: VocabularyPublishAdapter) {
@@ -58,7 +58,8 @@ export async function publishVocabularyBook(book: VocabularyBook, adapter: Vocab
     const [existing] = await adapter.read(`SELECT body FROM vocabulary_pages WHERE ${where} AND page = ${page.page};`);
     if (existing && existing.body !== body) throw new Error('Immutable vocabulary page mismatch');
     await adapter.execute(
-      `INSERT OR IGNORE INTO vocabulary_pages (book_id, version, page, body) VALUES (${sqlQuote(bookId)}, ${sqlQuote(version)}, ${page.page}, ${sqlQuote(body)});`,
+      'INSERT OR IGNORE INTO vocabulary_pages (book_id, version, page, body) VALUES (?, ?, ?, ?);',
+      [bookId, version, page.page, body],
     );
   }
   const readback = await adapter.read(`SELECT page, body FROM vocabulary_pages WHERE ${where} ORDER BY page;`);

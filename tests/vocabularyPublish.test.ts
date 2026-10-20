@@ -17,6 +17,7 @@ import { publish } from '../scripts/vocabulary/publish';
 import {
   assembleVocabularyBook,
   publishVocabularyBook,
+  vocabularyPages,
   type VocabularyPublishAdapter,
 } from '../scripts/vocabulary/publication';
 import { vocabularyHash, vocabularyMetadata, canonicalVocabularyJson } from '../src/services/vocabulary/book';
@@ -120,9 +121,9 @@ test('real prepare/review/publish commands work on disposable invented metadata,
   const { db, env } = await createWorkerDb();
   const commands: string[] = [];
   const adapter: VocabularyPublishAdapter = {
-    execute: async (sql) => {
+    execute: async (sql, parameters = []) => {
       commands.push(sql);
-      db.exec(sql);
+      db.query(sql).run(...parameters);
     },
     read: async (sql) => db.query(sql).all() as Record<string, unknown>[],
   };
@@ -181,6 +182,82 @@ async function publicationBook(unreviewed: boolean, count = 1, label = 'TEST') {
     { bookId: 'tcf-7000', contentHash, status: 'unreviewed' },
   );
 }
+test.each([false, true])(
+  'unreviewed=%s: oversized Unicode bodies use short bound SQL without losing content',
+  async (unreviewed) => {
+    const directory = await mkdtemp(`${tmpdir()}/relire-vocabulary-oversized-`);
+    const root = pathToFileURL(directory + '/');
+    const { db } = await createWorkerDb();
+    const base = await testBook(250);
+    const metadata = vocabularyMetadata(base.manifest);
+    const quoteText = `TEST '); DROP TABLE meta; -- "quoted" \\ literal`;
+    for (const entry of base.entries) {
+      entry.senses[0].gloss.zh = '\u6d4b\u8bd5'.repeat(80);
+      entry.senses[0].examples = [{ fr: 'TEST l’école.', en: quoteText, zh: '\u6d4b\u8bd5' }];
+    }
+    const contentHash = await vocabularyHash({ metadata, entries: base.entries });
+    const artifact = { metadata, entries: base.entries, contentHash };
+    const reviewed = {
+      bookId: 'tcf-7000' as const,
+      contentHash,
+      reviewedBy: 'Synthetic TEST reviewer',
+      reviewedAt: '2026-10-20T12:00:00.000Z',
+    };
+    const book = await assembleVocabularyBook(
+      artifact,
+      unreviewed ? { bookId: 'tcf-7000', contentHash, status: 'unreviewed' } : reviewed,
+    );
+    const body = canonicalVocabularyJson(vocabularyPages(book)[0]);
+    expect(new TextEncoder().encode(body).byteLength).toBeGreaterThan(102_400);
+    const commands: string[] = [];
+    const boundFailure = new Error('TEST bound write failed');
+    let rejectWrite = true;
+    const adapter: VocabularyPublishAdapter = {
+      execute: async (sql, parameters = []) => {
+        commands.push(sql);
+        if (new TextEncoder().encode(sql).byteLength > 102_400) throw new Error('TEST SQL statement too long');
+        if (sql.startsWith('INSERT OR IGNORE INTO vocabulary_pages')) {
+          expect(sql.length).toBeLessThan(200);
+          expect(parameters).toEqual(['tcf-7000', book.manifest.version, 0, body]);
+          if (rejectWrite) throw boundFailure;
+        }
+        db.query(sql).run(...parameters);
+      },
+      read: async (sql) => {
+        commands.push(sql);
+        if (new TextEncoder().encode(sql).byteLength > 102_400) throw new Error('TEST SQL statement too long');
+        return db.query(sql).all() as Record<string, unknown>[];
+      },
+    };
+    const args = [unreviewed ? '--apply-local-unreviewed' : '--apply-local'];
+    try {
+      await Bun.write(new URL('data/vocabulary/manifest.json', root), JSON.stringify({ ...metadata, contentHash }));
+      await Bun.write(new URL('data/vocabulary/reviews.json', root), JSON.stringify({ records: [reviewed] }));
+      await Bun.write(new URL('.local/vocabulary/normalized.json', root), JSON.stringify(artifact));
+      expect(await failure(publish(args, root, adapter))).toBe(boundFailure);
+      expect(db.query('SELECT * FROM vocabulary_pages').all()).toEqual([]);
+      expect(db.query("SELECT * FROM meta WHERE key LIKE 'vocabulary%'").all()).toEqual([]);
+      rejectWrite = false;
+      await publish(args, root, adapter);
+      await publish(args, root, adapter);
+      expect(db.query('SELECT body FROM vocabulary_pages').all()).toEqual([{ body }]);
+      expect(JSON.parse(body).entries).toEqual(base.entries);
+      expect(JSON.parse(body).entries[0].senses[0].examples[0].en).toBe(quoteText);
+      expect(db.query("SELECT key, value FROM meta WHERE key LIKE 'vocabulary%' ORDER BY key").all()).toEqual([
+        { key: 'vocabularyCurrent:tcf-7000', value: book.manifest.version },
+        { key: `vocabularyPublished:tcf-7000:${book.manifest.version}`, value: canonicalVocabularyJson(book.manifest) },
+      ]);
+      expect(Math.max(...commands.map((sql) => new TextEncoder().encode(sql).byteLength))).toBeLessThan(2_000);
+      expect(commands.join('\n')).not.toContain(quoteText);
+      expect(commands.join('\n')).not.toContain('DROP TABLE');
+      expect(commands.join('\n')).not.toContain(body);
+      expect(await Bun.file(new URL('.local/vocabulary/publish.sql', root)).text()).toContain('DROP TABLE');
+    } finally {
+      db.close();
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
 test.each([false, true])('unreviewed=%s: safe interruptions and immutable reruns', async (unreviewed) => {
   const old = await testBook(1, 'OLD TEST'),
     next = await publicationBook(unreviewed, 251, 'NEW TEST');
@@ -188,17 +265,17 @@ test.each([false, true])('unreviewed=%s: safe interruptions and immutable reruns
     const { db } = await createWorkerDb();
     let step = 0;
     const adapter: VocabularyPublishAdapter = {
-      execute: async (sql) => {
-        db.exec(sql);
+      execute: async (sql, parameters = []) => {
+        db.query(sql).run(...parameters);
       },
       read: async (sql) => db.query(sql).all() as Record<string, unknown>[],
     };
     try {
       await publishVocabularyBook(old, adapter);
       const failing: VocabularyPublishAdapter = {
-        execute: async (sql) => {
+        execute: async (sql, parameters = []) => {
           if (++step === interrupt) throw new Error(`TEST interruption ${step}`);
-          await adapter.execute(sql);
+          await adapter.execute(sql, parameters);
         },
         read: async (sql) => {
           if (++step === interrupt) throw new Error(`TEST interruption ${step}`);
@@ -230,8 +307,8 @@ test.each([false, true])('unreviewed=%s: immutable body and readback gates', asy
   for (const mismatch of [true, false]) {
     const { db } = await createWorkerDb();
     const adapter: VocabularyPublishAdapter = {
-      execute: async (sql) => {
-        db.exec(sql);
+      execute: async (sql, parameters = []) => {
+        db.query(sql).run(...parameters);
       },
       read: async (sql) => {
         const rows = db.query(sql).all() as Record<string, unknown>[];

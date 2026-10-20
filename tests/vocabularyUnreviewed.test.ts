@@ -57,9 +57,9 @@ test('only explicit local mode publishes unreviewed content through Worker/clien
     messages.push(args.join(' '));
   });
   const adapter: VocabularyPublishAdapter = {
-    execute: async (sql) => {
+    execute: async (sql, parameters = []) => {
       commands.push(sql);
-      db.exec(sql);
+      db.query(sql).run(...parameters);
     },
     read: async (sql) => {
       commands.push(sql);
@@ -230,9 +230,9 @@ test('unreviewed provenance changes served version, not content binding or struc
     const { db } = await createWorkerDb();
     let pointerWrites = 0;
     const adapter: VocabularyPublishAdapter = {
-      execute: async (sql) => {
+      execute: async (sql, parameters = []) => {
         if (sql.includes('vocabularyCurrent:')) pointerWrites++;
-        db.exec(sql);
+        db.query(sql).run(...parameters);
       },
       read: async (sql) => {
         const rows = db.query(sql).all() as Record<string, unknown>[];

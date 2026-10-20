@@ -11,8 +11,8 @@ const request = (query: string, init?: RequestInit) =>
 const seed = async () => {
   const book = await testBook(251);
   await publishVocabularyBook(book, {
-    execute: async (sql) => {
-      sqlite.exec(sql);
+    execute: async (sql, parameters = []) => {
+      sqlite.query(sql).run(...parameters);
     },
     read: async (sql) => sqlite.query(sql).all() as Record<string, unknown>[],
   });
