@@ -267,7 +267,7 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
           </Link>
         )
       )}
-      <CharacterBar target={bound} />
+      <CharacterBar target={bound} editable={!busy && !view.checked} />
       {feedbackOpen && (
         <TopicFeedbackSheet
           instruction={question.instruction}

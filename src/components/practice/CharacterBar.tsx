@@ -41,13 +41,19 @@ export function insertAtCursor(element: TextInputElement, text: string) {
   element.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-export function CharacterBar({ target }: { target: TextInputElement | null }) {
+export function CharacterBar({
+  target,
+  editable = canInsert(target),
+}: {
+  target: TextInputElement | null;
+  editable?: boolean;
+}) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [capital, setCapital] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const lift = useSyncExternalStore(subscribeViewport, keyboardHeight, () => 0);
-  const usable = canInsert(target);
+  const usable = Boolean(target) && editable;
 
   useEffect(() => {
     if (!open) return;

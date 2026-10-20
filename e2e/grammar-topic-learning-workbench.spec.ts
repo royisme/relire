@@ -15,6 +15,100 @@ test('Check retains focus after committing instead of losing it during the save'
   await expect(workbench(page).locator('[data-topic-actions] button').nth(2)).toBeFocused();
 });
 
+for (const phone of [false, true]) {
+  const suffix = phone ? ' @phone' : '';
+
+  test(`an open character bar inserts at the same bound cursor after Check and Redo${suffix}`, async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('relire_onboarded', '1');
+      localStorage.setItem('relire_lang', 'en');
+    });
+    await page.route('**/*', (route) =>
+      new URL(route.request().url()).origin === 'http://localhost:5174' ? route.fallback() : route.abort(),
+    );
+    await page.goto('/');
+    await page.evaluate(async () => {
+      const { mountCharacterWorkbench }: typeof import('./grammar-topic-learning-characters.fixture') = await import(
+        /* @vite-ignore */ '/e2e/grammar-topic-learning-characters.fixture.tsx' as string
+      );
+      mountCharacterWorkbench();
+    });
+    await expect(workbench(page)).toBeVisible();
+    await index(page).getByRole('button').nth(1).click();
+    const input = workbench(page).getByRole('textbox');
+    await input.fill('école');
+    const boundInput = await input.elementHandle();
+    await page.getByRole('button', { name: en.practice.chars.toggle, exact: true }).click();
+    const characters = page.getByRole('group', { name: en.practice.chars.label, exact: true });
+    const accent = characters.getByRole('button', { name: 'é', exact: true });
+    await expect(accent).toBeEnabled();
+    await input.press('Enter');
+    await expect(workbench(page).getByRole('status')).toHaveText('Right');
+    await expect(accent).toBeDisabled();
+    // Keep the bar open; keyboard activation avoids the floating grid covering Redo on phones.
+    await workbench(page).getByRole('button', { name: 'Redo', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await expect(input).toHaveValue('');
+    await expect(input).toBeEditable();
+    expect(await input.evaluate((element, bound) => element === bound, boundInput)).toBe(true);
+    await expect(accent).toBeEnabled();
+    await input.focus();
+    await expect(accent).toBeEnabled();
+    await expect(characters).toContainText(en.practice.chars.hint);
+    await input.fill('cole');
+    await input.evaluate((element: HTMLInputElement) => element.setSelectionRange(0, 0));
+    await accent.click();
+    await expect(input).toHaveValue('école');
+    await expect(input).toBeFocused();
+    expect(await input.evaluate((element: HTMLInputElement) => element.selectionStart)).toBe(1);
+  });
+
+  test(`an open character bar is disabled while Check holds the bound input read-only${suffix}`, async ({ page }) => {
+    const { forbidden } = await setup(page);
+    await page.goto(TOPIC);
+    await expect(workbench(page)).toBeVisible();
+    await index(page).getByRole('button').nth(1).click();
+    const input = workbench(page).getByRole('textbox');
+    await input.fill('école');
+    await page.getByRole('button', { name: en.practice.chars.toggle, exact: true }).click();
+    const characters = page.getByRole('group', { name: en.practice.chars.label, exact: true });
+    const accent = characters.getByRole('button', { name: 'é', exact: true });
+    await expect(accent).toBeEnabled();
+    await expect.poll(async () => (await stored(page)).itemStates.length).toBe(1);
+    // Hold storage, not a timer: the real check stays pending until explicitly released.
+    await page.evaluate(async () => {
+      const { db }: typeof import('../src/storage/db') = await import(
+        /* @vite-ignore */ '/src/storage/db.ts' as string
+      );
+      const tx = (await db()).transaction(['units', 'meta'], 'readwrite');
+      let held = true;
+      Object.assign(window, { releaseCharacterCheck: () => (held = false) });
+      void (async () => {
+        while (held) await tx.objectStore('meta').get('started');
+        await tx.done;
+      })();
+    });
+    try {
+      await input.press('Enter');
+      await expect(workbench(page).getByRole('button', { name: 'Check', exact: true })).toHaveAttribute(
+        'aria-busy',
+        'true',
+      );
+      await expect(input).toHaveAttribute('readonly', '');
+      await expect(input).toBeFocused();
+      await expect(workbench(page).getByRole('status')).toBeEmpty();
+      await expect(accent).toBeDisabled();
+      await expect(characters).toContainText(en.practice.chars.none);
+      await expect(input).toHaveValue('école');
+    } finally {
+      await page.evaluate(() => (window as unknown as { releaseCharacterCheck(): void }).releaseCharacterCheck());
+    }
+    await expect(workbench(page).getByRole('status')).toHaveText('Right');
+    expect((await stored(page)).attempts).toHaveLength(1);
+    expect(forbidden).toEqual([]);
+  });
+}
+
 for (const language of ['en', 'zh'] as const) {
   for (const theme of ['light', 'sepia', 'dark']) {
     for (const phone of [false, true]) {
