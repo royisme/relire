@@ -6,12 +6,18 @@ import { pathToFileURL } from 'node:url';
 import { testBook } from './fixtures/vocabulary';
 import { createWorkerDb } from './fixtures/workerDb';
 import { failure } from './fixtures/storage';
-import { prepareVocabulary, EMPTY_VOCABULARY_DECISIONS } from '../scripts/vocabulary/prepareBook';
+import {
+  prepareVocabulary,
+  EMPTY_VOCABULARY_DECISIONS,
+  VocabularyDecisionsSchema,
+} from '../scripts/vocabulary/prepareBook';
 import { prepare } from '../scripts/vocabulary/prepare';
 import { review } from '../scripts/vocabulary/review';
 import { publish } from '../scripts/vocabulary/publish';
 import { publishVocabularyBook, type VocabularyPublishAdapter } from '../scripts/vocabulary/publication';
 import { vocabularyHash, canonicalVocabularyJson } from '../src/services/vocabulary/book';
+import { VocabularyEntrySchema } from '../src/types/vocabulary';
+import { handle } from '../worker/src/index';
 const metadata = {
   bookId: 'tcf-7000',
   title: { en: 'TEST book', zh: '\u6d4b\u8bd5' },
@@ -24,7 +30,7 @@ const sources = [
     pos: '',
     gloss: '\u6d4b\u8bd5',
     gloss_en: 'TEST sense one',
-    raw: '<p>PRIVATE TEST raw</p>',
+    raw: ['TEST original field', '<p>PRIVATE TEST raw</p>'],
     tags: [],
   },
   {
@@ -77,6 +83,26 @@ test('grouping preserves senses/order/ids; absent POS/examples omitted; partial 
   expect(omitted.entries[0].senses[0].pos).toBe('nom');
   expect(sources[0].pos).toBe('');
 });
+test('array raw is opaque; consumed fields and correction/published schemas remain validated', async () => {
+  const input = sources.slice(0, 2);
+  const original = JSON.stringify(input);
+  const result = await prepareVocabulary(input, metadata, EMPTY_VOCABULARY_DECISIONS);
+  const withoutRaw = input.map(({ raw: _raw, ...row }) => row);
+  expect(result).toEqual(await prepareVocabulary(withoutRaw, metadata, EMPTY_VOCABULARY_DECISIONS));
+  expect(JSON.stringify(input)).toBe(original);
+  expect(JSON.stringify(result)).not.toContain('PRIVATE TEST raw');
+  expect(
+    VocabularyDecisionsSchema.safeParse({
+      corrections: [{ sourceId: '1', reason: 'TEST forbidden raw', patch: { raw: input[0].raw } }],
+      omissions: [],
+    }).success,
+  ).toBe(false);
+  expect(VocabularyEntrySchema.safeParse({ ...result.entries[0], raw: input[0].raw }).success).toBe(false);
+  for (const invalid of [{ word: 123 }, { gloss_en: '<p>TEST HTML</p>' }, { gloss: 'TEST not Chinese' }])
+    expect(
+      await failure(prepareVocabulary([{ ...input[0], ...invalid }], metadata, EMPTY_VOCABULARY_DECISIONS)),
+    ).toBeInstanceOf(Error);
+});
 test('canonical hash sorts object keys by code point, retains array order, and separates content from review/served version', async () => {
   expect(canonicalVocabularyJson({ '\u{10000}': 1, '\ue000': 2 })).toBe('{"\ue000":2,"\u{10000}":1}');
   expect(await vocabularyHash({ b: 2, a: 1 })).toBe(await vocabularyHash({ a: 1, b: 2 }));
@@ -87,9 +113,11 @@ test('canonical hash sorts object keys by code point, retains array order, and s
 test('real prepare/review/publish commands work on disposable invented metadata, invalidate changed content and need absolute source', async () => {
   const directory = await mkdtemp(`${tmpdir()}/relire-vocabulary-test-`);
   const root = pathToFileURL(directory + '/');
-  const { db } = await createWorkerDb();
+  const { db, env } = await createWorkerDb();
+  const commands: string[] = [];
   const adapter: VocabularyPublishAdapter = {
     execute: async (sql) => {
+      commands.push(sql);
       db.exec(sql);
     },
     read: async (sql) => db.query(sql).all() as Record<string, unknown>[],
@@ -97,7 +125,8 @@ test('real prepare/review/publish commands work on disposable invented metadata,
   try {
     await Bun.write(new URL('data/vocabulary/manifest.json', root), JSON.stringify({ ...metadata, contentHash: null }));
     await Bun.write(new URL('data/vocabulary/reviews.json', root), '{"records":[]}');
-    await Bun.write(new URL('source.json', root), JSON.stringify(sources.slice(0, 2)));
+    const sourceBytes = JSON.stringify(sources.slice(0, 2));
+    await Bun.write(new URL('source.json', root), sourceBytes);
     expect(await failure(prepare(['--source', 'source.json'], root))).toBeInstanceOf(Error);
     await prepare(['--source', directory + '/source.json'], root);
     expect(await failure(publish([], root))).toBeInstanceOf(Error);
@@ -108,6 +137,20 @@ test('real prepare/review/publish commands work on disposable invented metadata,
       value: string;
     };
     expect(current.value).toHaveLength(64);
+    const response = await handle(new Request('https://content.test/v1/vocabulary/tcf-7000?page=0'), env);
+    expect(response.status).toBe(200);
+    const served = await response.text();
+    expect(JSON.parse(served).entries).toHaveLength(1);
+    const outputs = [served, commands.join('\n'), JSON.stringify(db.query('SELECT body FROM vocabulary_pages').all())];
+    for (const file of ['normalized.json', 'report.json', 'review-sheet.txt', 'publish.sql'])
+      outputs.push(await Bun.file(new URL(`.local/vocabulary/${file}`, root)).text());
+    for (const output of outputs) {
+      expect(output).not.toContain('PRIVATE TEST raw');
+      expect(output).not.toContain('TEST original field');
+      expect(output).not.toContain('"raw"');
+      expect(output).not.toContain('<p>');
+    }
+    expect(await Bun.file(new URL('source.json', root)).text()).toBe(sourceBytes);
     const first = await Bun.file(new URL('.local/vocabulary/normalized.json', root)).json();
     await review(['mark', '--by', 'Synthetic TEST reviewer two'], root);
     await publish(['--apply-local'], root, adapter);

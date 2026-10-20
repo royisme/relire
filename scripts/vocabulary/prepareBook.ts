@@ -9,11 +9,10 @@ const SourceRowSchema = z.object({
   pos: z.string(),
   gloss: z.string(),
   gloss_en: z.string(),
-  raw: z.string().optional(),
   tags: z.array(z.string()).optional(),
   example: z.object({ fr: z.string().optional(), en: z.string().optional(), zh: z.string().optional() }).optional(),
 });
-const PatchSchema = SourceRowSchema.omit({ id: true, raw: true, tags: true }).partial();
+const PatchSchema = SourceRowSchema.omit({ id: true, tags: true }).partial().strict();
 export const VocabularyDecisionsSchema = z.strictObject({
   corrections: z.array(z.strictObject({ sourceId: z.string(), reason: z.string().min(1), patch: PatchSchema })),
   omissions: z.array(
