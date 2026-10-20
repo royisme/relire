@@ -155,6 +155,7 @@
     "downloadProgress": "第 {{page}} 页，共 {{total}} 页",
     "updatesUnavailable": "未配置内容服务，无法更新词书。",
     "errorDetails": "查看错误详情",
+    "quotaReached": "今天的新词额度已用完，仍可复习到期词汇。",
     "newLimit": "每日新词上限（0–100）",
     "invalidLimit": "请输入 0 到 100 之间的整数。",
     "saved": "已保存",

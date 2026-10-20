@@ -56,6 +56,7 @@ for (const phone of [false, true]) {
     await expect(sheet.getByRole('button', { name: 'Save word' })).toBeVisible();
     expect(ai.prompts.word.at(-1)).toBe(original);
     await sheet.getByRole('button', { name: 'Save word' }).click();
+    await expect(sheet.getByRole('button', { name: 'Context saved', exact: true })).toBeDisabled();
     await sheet.getByRole('button', { name: 'Close', exact: true }).first().click();
     await expect(token).toBeFocused();
     expect(await layout(page, 'main')).toEqual(before);
@@ -83,6 +84,11 @@ for (const phone of [false, true]) {
     expect(await overflowing(page.locator('body'))).toEqual([]);
     await page.goto('/#/study/words/all');
     await expect(page.getByText('ami', { exact: true }).first()).toBeVisible();
+    await page.getByRole('button', { name: 'ami', exact: true }).click();
+    const saved = page.getByRole('dialog', { name: 'ami', exact: true });
+    await expect(saved).toContainText(sourceUnit.items[0].prompt);
+    await expect(saved.locator('img, script')).toHaveCount(0);
+    await expect(saved.locator('[onerror], [onclick]')).toHaveCount(0);
   });
 
   test(`passage and explanation words retain source and stack with sensible Escape/focus ${phone ? '@phone' : ''}`, async ({

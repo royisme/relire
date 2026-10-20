@@ -80,20 +80,26 @@ export function VocabularyHome({ model, content }: { model: VocabularyModel; con
         </Button>
         <div
           data-vocabulary-download-status
-          className="h-16 overflow-hidden text-sm text-ink-600"
+          className="flex h-16 min-w-0 items-start gap-2 overflow-hidden text-sm text-ink-600"
           role="status"
           aria-live="polite"
         >
-          {content.progress
-            ? t('vocab.downloadProgress', content.progress)
-            : !content.configured
-              ? t('vocab.updatesUnavailable')
-              : null}
-          {content.error && (
-            <Button variant="ghost" className="max-w-full" onClick={() => setDetails(true)}>
-              {t('vocab.errorDetails')}
-            </Button>
-          )}
+          {content.error ? (
+            <>
+              <span className="line-clamp-2 min-w-0 flex-1 break-words text-bad-700">{content.error}</span>
+              <Button
+                variant="ghost"
+                className="w-28 shrink-0 whitespace-normal px-2 text-xs"
+                onClick={() => setDetails(true)}
+              >
+                {t('vocab.errorDetails')}
+              </Button>
+            </>
+          ) : content.progress ? (
+            t('vocab.downloadProgress', content.progress)
+          ) : !content.configured ? (
+            t('vocab.updatesUnavailable')
+          ) : null}
         </div>
       </section>
       <section className="space-y-3 border-t border-ink-200 pt-6">

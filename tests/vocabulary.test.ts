@@ -48,6 +48,58 @@ test('frozen source/text/language context identity ignores title, analysis and t
   expect(vocabularyContextKey(lookup)).not.toBe(vocabularyContextKey({ ...lookup, source: undefined }));
   expect(await failure(saveVocabularyBookmark(lookup, testAnalysis('another')))).toBeInstanceOf(Error);
 });
+test('literal source markup and original Unicode snapshots survive personal save and paired backup without weakening book text', async () => {
+  const lookup = {
+    ...testLookup('école'),
+    sentence: '  L’e\u0301cole **TEST** <img src=x onerror=alert(1)>\u00a0ici.  ',
+    source: { kind: 'unit' as const, id: 'unit-TEST', title: 'TEST <b>e\u0301cole</b>' },
+  };
+  const analysis = {
+    ...testAnalysis('e\u0301cole'),
+    translation: 'TEST <em>e\u0301cole</em>',
+    usageExamples: [{ fr: 'TEST <script>alert(1)</script> e\u0301cole', zh: '\u6d4b\u8bd5', en: 'TEST <b>school</b>' }],
+  };
+  const saved = await saveVocabularyBookmark(lookup, analysis, undefined, now);
+  expect(saved.contexts[0]).toEqual({
+    id: vocabularyContextKey(lookup),
+    sentence: lookup.sentence,
+    source: lookup.source,
+    requestLanguage: 'en',
+    savedAt: now,
+    analysis,
+  });
+  const backup = await exportData();
+  await importData(backup);
+  expect((await exportData()).vocab).toEqual(backup.vocab);
+  expect((await saveVocabularyBookmark(lookup, analysis, undefined, now + 1)).contexts).toEqual(saved.contexts);
+  const { VocabularyEntrySchema, VocabularyRowSchema } = await import('../src/types/vocabulary');
+  const { testEntry } = await import('./fixtures/vocabulary');
+  expect(VocabularyEntrySchema.safeParse(testEntry('<b>TEST</b>')).success).toBe(false);
+  const entry = testEntry();
+  expect(
+    VocabularyEntrySchema.safeParse({
+      ...entry,
+      senses: [{ ...entry.senses[0], gloss: { en: '<b>TEST</b>', zh: '\u6d4b\u8bd5' } }],
+    }).success,
+  ).toBe(false);
+  expect(VocabularyRowSchema.safeParse({ ...saved, contexts: [{ ...saved.contexts[0], id: 'forged' }] }).success).toBe(
+    false,
+  );
+  for (const field of ['word', 'translation'] as const)
+    expect(
+      await failure(
+        saveVocabularyBookmark({ ...lookup, sentence: 'Another TEST context' }, { ...analysis, [field]: ' ' }),
+      ),
+    ).toBeInstanceOf(Error);
+  expect(
+    await failure(
+      saveVocabularyBookmark(
+        { ...lookup, sentence: 'Another TEST context', source: { ...lookup.source, title: ' ' } },
+        analysis,
+      ),
+    ),
+  ).toBeInstanceOf(Error);
+});
 test('book-first and bookmark-first both keep one card, first context/snapshot and unchanged scheduling on later saves', async () => {
   for (const bookFirst of [false, true]) {
     await freshDb();

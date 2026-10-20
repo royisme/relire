@@ -17,6 +17,7 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
   const session = useVocabularyReview(model, book);
   const { active, revealed, busy, pending, error, rate } = session;
   const hasActive = active !== null;
+  const message = error ?? (session.quotaReached ? t('vocab.quotaReached') : null);
   const [errorOpen, setErrorOpen] = useState(false);
   const revealButton = useRef<HTMLButtonElement>(null);
   const answerHeading = useRef<HTMLHeadingElement>(null);
@@ -182,16 +183,23 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
             </div>
             <div
               data-vocabulary-status
-              className="h-16 overflow-hidden text-sm text-ink-600"
+              className="flex h-16 min-w-0 items-start gap-2 overflow-hidden text-sm text-ink-600"
               role="status"
               aria-live="polite"
             >
               {busy ? (
                 t('vocab.saving')
-              ) : error ? (
-                <Button variant="ghost" onClick={() => setErrorOpen(true)}>
-                  {t('vocab.errorDetails')}
-                </Button>
+              ) : message ? (
+                <>
+                  <span className="line-clamp-2 min-w-0 flex-1 break-words text-bad-700">{message}</span>
+                  <Button
+                    variant="ghost"
+                    className="w-28 shrink-0 whitespace-normal px-2 text-xs"
+                    onClick={() => setErrorOpen(true)}
+                  >
+                    {t('vocab.errorDetails')}
+                  </Button>
+                </>
               ) : (
                 t(revealed ? 'vocab.revealed' : 'vocab.recall')
               )}
@@ -220,15 +228,27 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
                 })
               : t('vocab.noEligible')}
           </p>
-          <div role="status" className="h-16 overflow-hidden">
-            {error && (
+          <div
+            data-vocabulary-status
+            role="status"
+            aria-live="polite"
+            className="flex h-16 min-w-0 items-start gap-2 overflow-hidden text-sm"
+          >
+            {message && (
               <>
-                <Button variant="ghost" onClick={() => setErrorOpen(true)}>
+                <span className="line-clamp-2 min-w-0 flex-1 break-words text-bad-700">{message}</span>
+                <Button
+                  variant="ghost"
+                  className="w-28 shrink-0 whitespace-normal px-2 text-xs"
+                  onClick={() => setErrorOpen(true)}
+                >
                   {t('vocab.errorDetails')}
                 </Button>
-                <Button variant="outline" onClick={session.retry}>
-                  {t('common.retry')}
-                </Button>
+                {error && (
+                  <Button variant="outline" className="shrink-0" onClick={session.retry}>
+                    {t('common.retry')}
+                  </Button>
+                )}
               </>
             )}
           </div>
@@ -245,7 +265,7 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
             onClose={() => setErrorOpen(false)}
           />
           <p role="alert" className="overflow-auto break-words p-5 text-sm text-bad-700">
-            {error}
+            {message}
           </p>
         </Sheet>
       )}

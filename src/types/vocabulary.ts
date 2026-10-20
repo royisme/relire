@@ -2,12 +2,12 @@
 import { z } from 'zod';
 import { vocabularyContextKey, vocabularyId, vocabularyKey } from '../services/vocabulary/identity';
 
-const text = z
-  .string()
-  .refine(
-    (s) => s.trim().length > 0 && s === s.normalize('NFC') && !/<\/?[a-z][^>]*>/i.test(s),
-    'Expected nonblank NFC text',
-  );
+const personalText = z.string().refine((s) => s.trim().length > 0, 'Expected nonblank text');
+// Published content is normalized/no-HTML; personal snapshots retain literal source text for React to escape.
+const text = personalText.refine(
+  (s) => s === s.normalize('NFC') && !/<\/?[a-z][^>]*>/i.test(s),
+  'Expected nonblank NFC text',
+);
 const french = text.refine((s) => !s.includes("'"), 'Expected French curly apostrophes');
 const english = text.refine((s) => /\p{Script=Latin}/u.test(s), 'English text needs a Latin letter');
 const chinese = text.refine((s) => /\p{Script=Han}/u.test(s), 'Chinese text needs a Han character');
@@ -85,28 +85,35 @@ export const VocabularyScheduleSchema = z.discriminatedUnion('phase', [
   }),
 ]);
 export const VocabularyAnalysisSchema = z.strictObject({
-  word: text,
+  word: personalText,
   lemma: z.string(),
   partOfSpeech: z.string(),
   ipa: z.string(),
   phoneticsGuide: z.string(),
-  translation: text,
-  translationEn: text.optional(),
-  otherMeanings: z.array(text).optional(),
+  translation: personalText,
+  translationEn: personalText.optional(),
+  otherMeanings: z.array(personalText).optional(),
   contextTense: z.string().optional(),
   usageExamples: z
-    .array(z.strictObject({ fr: text, zh: text, en: text.optional(), highlight: z.string().optional() }))
+    .array(
+      z.strictObject({
+        fr: personalText,
+        zh: personalText,
+        en: personalText.optional(),
+        highlight: z.string().optional(),
+      }),
+    )
     .optional(),
   cefrLevel: z.string().optional(),
   memoryTrick: z.string().optional(),
 });
 export const VocabularyContextSchema = z
   .strictObject({
-    id: text,
+    id: personalText,
     sentence: z.string(),
     savedAt: timestamp,
     requestLanguage: z.enum(['en', 'zh']),
-    source: z.strictObject({ kind: z.enum(['article', 'unit']), id: text, title: text }).optional(),
+    source: z.strictObject({ kind: z.enum(['article', 'unit']), id: personalText, title: personalText }).optional(),
     analysis: VocabularyAnalysisSchema,
   })
   .refine((c) => c.id === vocabularyContextKey({ ...c, word: c.analysis.word }), 'Invalid context identity');

@@ -19,6 +19,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
   const [revealed, setRevealed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quotaReached, setQuotaReached] = useState(false);
   const [pending, setPending] = useState<{ operationId: string; rating: VocabularyRating } | null>(null);
   const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set());
   const [ratings, setRatings] = useState(0);
@@ -32,6 +33,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     setRevealed(false);
     setPending(null);
     setError(null);
+    setQuotaReached(false);
   }
   const queue = vocabularyQueue(model.rows, book, model.day, model.preferences.newPerDay, now, excluded);
   useEffect(() => {
@@ -70,6 +72,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     setRevealed(false);
     setPending(null);
     setError(null);
+    setQuotaReached(false);
     setNow(Date.now());
   };
   const handleFailure = async (error: unknown) => {
@@ -78,7 +81,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
       await model.refresh();
       if (alive.current) {
         advance();
-        if (error instanceof VocabularyQuotaError) setError(error.message);
+        if (error instanceof VocabularyQuotaError) setQuotaReached(true);
       }
     } else setError(error instanceof Error ? error.message : String(error));
   };
@@ -87,6 +90,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     lock.current = true;
     setBusy(true);
     setError(null);
+    setQuotaReached(false);
     const epoch = active.tokens.epoch;
     try {
       const result = await introduceVocabularyCard(active.candidate, active.tokens, Date.now());
@@ -138,6 +142,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     revealed,
     busy,
     error: error ?? model.error,
+    quotaReached,
     pending,
     ratings,
     introductions,
