@@ -1,105 +1,93 @@
-import { afterEach, expect, setSystemTime, test } from 'bun:test';
-import type { VocabWord } from '../src/types';
-import { addDays, calculateNextReview, formatDate, isDueToday, SM2_MIN_EASE } from '../src/utils/srs';
-
-const word = (overrides: Partial<VocabWord> = {}): VocabWord => ({
-  id: 'alpha',
-  word: 'alpha',
-  lemma: 'alpha',
-  ipa: '',
-  translation: 'alpha',
-  partOfSpeech: 'nom',
-  contextSentence: '',
-  addedAt: '2026-10-01',
-  repetitions: 0,
-  intervalDays: 1,
-  easeFactor: 2.5,
-  nextReviewDate: '2026-10-17',
-  reviewHistory: [],
-  ...overrides,
+/** Exact two-step and mature vocabulary scheduler contracts, including calendar boundaries and immutability. */
+import { expect, test } from 'bun:test';
+import type { VocabularyRating, VocabularySchedule } from '../src/types/vocabulary';
+import {
+  addDays,
+  formatDate,
+  initialVocabularySchedule,
+  nextVocabularySchedule,
+  vocabularyDue,
+} from '../src/utils/srs';
+const now = new Date(2026, 9, 20, 12).getTime();
+const ratings: VocabularyRating[] = [1, 3, 4, 5];
+test('all learning and relearning transitions use minute steps without changing ease', () => {
+  for (const phase of ['learning', 'relearning'] as const)
+    for (const step of [0, 1] as const) {
+      const prior: VocabularySchedule = { ...initialVocabularySchedule(now), phase, step, easeFactor: 1.7 };
+      const before = structuredClone(prior);
+      for (const rating of ratings) {
+        const result = nextVocabularySchedule(prior, rating, now);
+        expect(result.easeFactor).toBe(1.7);
+        if (rating === 5 || (step === 1 && rating === 4))
+          expect(result).toEqual({
+            phase: 'review',
+            dueDate: '2026-10-21',
+            repetitions: 1,
+            intervalDays: 1,
+            easeFactor: 1.7,
+          });
+        else {
+          const expectedStep = rating === 1 ? 0 : rating === 4 ? 1 : step;
+          expect(result).toEqual({
+            ...prior,
+            step: expectedStep,
+            dueAt: now + (rating === 1 ? 1 : rating === 3 && expectedStep === 0 ? 6 : 10) * 60_000,
+          });
+        }
+      }
+      expect(prior).toEqual(before);
+    }
 });
-
-// Local noon keeps calendar assertions independent of the machine's timezone.
-const now = new Date(2026, 9, 17, 12);
-afterEach(() => setSystemTime());
-
-test('every first-review rating schedules one day, not static 3/6/12-day promises', () => {
-  setSystemTime(now);
-  for (const rating of [1, 3, 4, 5]) {
-    const source = word();
-    const updated = calculateNextReview(source, rating);
-    expect(updated.intervalDays).toBe(1);
-    expect(updated.nextReviewDate).toBe('2026-10-18');
-    expect(updated.repetitions).toBe(rating === 1 ? 0 : 1);
-    expect(updated.reviewHistory).toEqual([
-      { date: '2026-10-17', rating, intervalDays: 1, easeFactor: updated.easeFactor },
-    ]);
-    expect(updated.lastReviewedAt).toBe(now.toISOString());
-    expect(isDueToday(updated)).toBe(false);
-    expect(source.reviewHistory).toEqual([]);
+test('mature Again enters one-minute relearning; due is real rather than an immediate repeat', () => {
+  const result = nextVocabularySchedule(
+    { phase: 'review', repetitions: 5, intervalDays: 20, easeFactor: 1.4, dueDate: '2026-10-20' },
+    1,
+    now,
+  );
+  expect(result).toEqual({
+    phase: 'relearning',
+    step: 0,
+    dueAt: now + 60_000,
+    repetitions: 0,
+    intervalDays: 0,
+    easeFactor: 1.3,
+  });
+  expect(vocabularyDue(result, now)).toBe(false);
+  expect(vocabularyDue(result, now + 60_000)).toBe(true);
+});
+test('mature ratings share immediate interval but have distinct future ease and floor convergence', () => {
+  for (const easeFactor of [2.5, 1.3]) {
+    const prior: VocabularySchedule = {
+      phase: 'review',
+      repetitions: 2,
+      intervalDays: 7,
+      easeFactor,
+      dueDate: '2026-10-20',
+    };
+    const results = ([3, 4, 5] as const).map((rating) => nextVocabularySchedule(prior, rating, now));
+    expect(results.map((s) => s.intervalDays)).toEqual(Array(3).fill(Math.round(7 * easeFactor)));
+    expect(results.map((s) => s.easeFactor)).toEqual(easeFactor === 2.5 ? [2.36, 2.5, 2.6] : [1.3, 1.3, 1.4]);
   }
+  for (const rating of [3, 4, 5] as const)
+    expect(
+      nextVocabularySchedule(
+        { phase: 'review', repetitions: 1, intervalDays: 1, easeFactor: 2.5, dueDate: '2026-10-20' },
+        rating,
+        now,
+      ).intervalDays,
+    ).toBe(rating === 3 ? 3 : 6);
 });
-
-test('second successful review uses three days for rating 3, six for ratings 4 and 5', () => {
-  setSystemTime(now);
-  const first = calculateNextReview(word(), 4);
-  for (const [rating, days] of [
-    [3, 3],
-    [4, 6],
-    [5, 6],
-  ]) {
-    const updated = calculateNextReview(first, rating);
-    expect(updated.intervalDays).toBe(days);
-    expect(updated.nextReviewDate).toBe(formatDate(addDays(now, days)));
-    expect(updated.repetitions).toBe(2);
-    expect(updated.reviewHistory).toHaveLength(2);
-    expect(updated.reviewHistory[0]).toEqual(first.reviewHistory[0]);
+test('null is not due; calendar days handle leap year and DST without elapsed-day arithmetic', () => {
+  expect(vocabularyDue(null, now)).toBe(false);
+  expect(formatDate(addDays(new Date(2024, 1, 28, 12), 1))).toBe('2024-02-29');
+  const original = process.env.TZ;
+  process.env.TZ = 'America/Toronto';
+  try {
+    const before = new Date(2026, 2, 7, 12);
+    const after = addDays(before, 1);
+    expect(after.getHours()).toBe(12);
+    expect(after.getTime() - before.getTime()).toBe(23 * 60 * 60_000);
+  } finally {
+    process.env.TZ = original;
   }
-  expect(first.reviewHistory).toHaveLength(1);
-});
-
-test('later reviews multiply by the previous ease before updating it', () => {
-  setSystemTime(now);
-  const source = word({ repetitions: 3, intervalDays: 7, easeFactor: 2.3 });
-  for (const [rating, ease] of [
-    [3, 2.16],
-    [4, 2.3],
-    [5, 2.4],
-  ]) {
-    const updated = calculateNextReview(source, rating);
-    expect(updated.intervalDays).toBe(16);
-    expect(updated.nextReviewDate).toBe('2026-11-02');
-    expect(updated.easeFactor).toBe(ease);
-    expect(updated.repetitions).toBe(4);
-  }
-});
-
-test('failed recall resets repetitions and interval but preserves prior history and minimum ease', () => {
-  setSystemTime(now);
-  const history = [{ date: '2026-10-01', rating: 3, intervalDays: 20, easeFactor: 1.4 }];
-  const source = word({ repetitions: 5, intervalDays: 20, easeFactor: 1.4, reviewHistory: history });
-  const updated = calculateNextReview(source, 1);
-  expect(updated.repetitions).toBe(0);
-  expect(updated.intervalDays).toBe(1);
-  expect(updated.easeFactor).toBe(SM2_MIN_EASE);
-  expect(updated.reviewHistory).toEqual([
-    ...history,
-    { date: '2026-10-17', rating: 1, intervalDays: 1, easeFactor: SM2_MIN_EASE },
-  ]);
-  expect(source.reviewHistory).toBe(history);
-  expect(source.reviewHistory).toHaveLength(1);
-});
-
-test('due dates include today and overdue words, but not tomorrow', () => {
-  setSystemTime(now);
-  expect(isDueToday(word({ nextReviewDate: '2026-10-16' }))).toBe(true);
-  expect(isDueToday(word())).toBe(true);
-  expect(isDueToday(word({ nextReviewDate: '2026-10-18' }))).toBe(false);
-});
-
-test('review dates advance by calendar days across month and leap-year boundaries', () => {
-  const leapDay = new Date(2024, 1, 28, 12);
-  setSystemTime(leapDay);
-  expect(calculateNextReview(word(), 4).nextReviewDate).toBe('2024-02-29');
-  expect(formatDate(addDays(leapDay, 2))).toBe('2024-03-01');
 });

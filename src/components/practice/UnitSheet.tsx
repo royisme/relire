@@ -21,6 +21,7 @@ import { ExplanationSheet } from './ExplanationSheet';
 import { ItemRow } from './ItemRow';
 import { ResetDialog } from './ResetDialog';
 import { InlineMarkup } from './InlineMarkup';
+import type { VocabularyWordLookup } from '../../services/vocabulary/identity';
 
 /** The unit's reading passage and its distinct Reader address. */
 function PassageSection({
@@ -68,7 +69,7 @@ export function UnitSheet({
 }: {
   unit: ExerciseUnit;
   session: ExerciseUnitSession;
-  onWord: (word: string, sentence: string, context: string) => void;
+  onWord: VocabularyWordLookup;
 }) {
   const { t } = useTranslation();
   const [bound, setBound] = useState<TextInputElement | null>(null);
@@ -77,7 +78,12 @@ export function UnitSheet({
   const { items, progress } = session;
   // Empty is explicit: a unit must never inherit the last reader's context.
   const context = [unit.instruction, unit.readingPassage?.content].filter(Boolean).join('\n');
-  const lookup = (word: string, sentence: string) => onWord(word, sentence, context);
+  const lookup = (word: string, sentence: string) =>
+    onWord(word, sentence, context, {
+      kind: 'unit',
+      id: unit.id,
+      title: unit.readingPassage?.title || unit.title || setLabel(t, unit),
+    });
   const explained = unit.items.find((item) => item.id === explainId);
   const anyChecking = unit.items.some((item) => items[item.id]?.busy === 'check');
   // A cloze unit's questions are answered with the passage in sight, so from `md` it stays beside them.

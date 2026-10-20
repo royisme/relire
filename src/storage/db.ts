@@ -1,5 +1,13 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { Article, UserStats, VocabWord } from '../types';
+import type { Article, UserStats } from '../types';
+import {
+  VocabularyRowSchema,
+  VocabularyPreferencesSchema,
+  VocabularyDaySchema,
+  type VocabularyRow,
+} from '../types/vocabulary';
+import { parseVocabularyBackup, restoreVocabularyRows, type VocabularyMetaBackup } from './vocabularyBackup';
+import { vocabularyChanged } from './vocabulary';
 import type { ShadowingSentence } from '../types/shadowing';
 import type { ExerciseAttempt, ExerciseItemState, ExerciseUnit } from '../types/exercises';
 import { exercisesChanged } from './exerciseEvents';
@@ -14,7 +22,7 @@ import { deleteUnitRows } from './exerciseRows';
 
 export interface RelireDB extends DBSchema {
   articles: { key: string; value: Article };
-  vocab: { key: string; value: VocabWord };
+  vocab: { key: string; value: VocabularyRow };
   meta: { key: string; value: unknown };
   /** Saved AI answers and offline content. Derivable, so never part of a backup. */
   cache: { key: string; value: CacheEntry; indexes: { kind: string } };
@@ -54,12 +62,13 @@ export interface CacheEntry {
 
 export interface AppData {
   articles: Article[];
-  vocab: VocabWord[];
+  vocab: VocabularyRow[];
   stats: UserStats;
 }
 
 /** Everything a backup carries from IndexedDB: the app data plus the exercise stores. */
 export interface BackupData extends AppData {
+  vocabularyMeta: VocabularyMetaBackup;
   units: ExerciseUnit[];
   itemStates: ExerciseItemState[];
   attempts: ExerciseAttempt[];
@@ -190,19 +199,6 @@ export async function restoreMissingArticles(candidates: Article[]): Promise<Art
   return restored;
 }
 
-export async function saveVocab(items: VocabWord[]) {
-  const d = await db();
-  const tx = d.transaction(['vocab', 'meta'], 'readwrite');
-  const store = tx.objectStore('vocab');
-  const keep = new Set(items.map((i) => i.id));
-  for (const key of await store.getAllKeys()) {
-    if (!keep.has(key)) await store.delete(key);
-  }
-  for (const item of items) await store.put(item);
-  await tx.objectStore('meta').put(true, 'started');
-  await tx.done;
-}
-
 export async function saveStats(stats: UserStats) {
   const d = await db();
   const tx = d.transaction('meta', 'readwrite');
@@ -249,18 +245,40 @@ export async function deleteSetData(setId: string) {
 /** App data plus the exercise stores, read as one snapshot of the exercise stores. API keys are never in IndexedDB. */
 export async function exportData(): Promise<BackupData> {
   const d = await db();
-  const tx = d.transaction(['units', 'itemStates', 'attempts'], 'readonly');
-  const [units, itemStates, attempts] = await Promise.all([
+  const tx = d.transaction(['articles', 'vocab', 'meta', 'units', 'itemStates', 'attempts'], 'readonly');
+  const [articles, vocab, metadata, keys, units, itemStates, attempts] = await Promise.all([
+    tx.objectStore('articles').getAll(),
+    tx.objectStore('vocab').getAll(),
+    tx.objectStore('meta').getAll(),
+    tx.objectStore('meta').getAllKeys(),
     tx.objectStore('units').getAll(),
     tx.objectStore('itemStates').getAll(),
     tx.objectStore('attempts').getAll(),
   ]);
-  const app = (await loadData()) ?? { articles: [], vocab: [], stats: EMPTY_STATS };
-  return { ...app, units, itemStates, attempts };
+  await tx.done;
+  const meta = new Map(keys.map((key, index) => [key, metadata[index]]));
+  const days = keys
+    .filter((key) => key.startsWith('vocabularyDay:'))
+    .map((key) => VocabularyDaySchema.parse(meta.get(key)))
+    .sort((a, b) => a.date.localeCompare(b.date));
+  return {
+    articles,
+    vocab: vocab.map((row) => VocabularyRowSchema.parse(row)),
+    stats: { ...EMPTY_STATS, ...(meta.get('stats') as UserStats | undefined) },
+    units,
+    itemStates,
+    attempts,
+    vocabularyMeta: {
+      preferences: VocabularyPreferencesSchema.parse(meta.get('vocabularyPreferences') ?? { newPerDay: 20 }),
+      days,
+    },
+  };
 }
 
 /** What a backup file may hand to `importData`. The exercise keys are unvalidated JSON here. */
-export interface RestoreInput extends Partial<AppData> {
+export interface RestoreInput extends Partial<Omit<AppData, 'vocab'>> {
+  vocab?: unknown;
+  vocabularyMeta?: unknown;
   /** Validated by the caller (`parseShadowingBackup`). */
   shadowing?: ShadowingSentence[];
   units?: unknown;
@@ -277,29 +295,27 @@ export interface RestoreInput extends Partial<AppData> {
  * `ExerciseBackupError` and nothing is written; an absent key keeps the stored rows.
  */
 export async function importData(data: RestoreInput) {
+  const vocabulary = parseVocabularyBackup(data);
   const exercises = parseExerciseBackup(data);
   const touchesExercises = Boolean(exercises.units || exercises.itemStates || exercises.attempts);
   const d = await db();
   const tx = d.transaction(['articles', 'vocab', 'meta', 'shadowing', 'units', 'itemStates', 'attempts'], 'readwrite');
-  if (data.articles) {
-    const store = tx.objectStore('articles');
-    await store.clear();
-    for (const article of data.articles) await store.put(article);
-  }
-  if (data.vocab) {
-    const store = tx.objectStore('vocab');
-    await store.clear();
-    for (const word of data.vocab) await store.put(word);
-  }
-  if (data.shadowing) {
-    const store = tx.objectStore('shadowing');
-    await store.clear();
-    for (const sentence of data.shadowing) await store.put(sentence);
-  }
-  if (data.stats) await tx.objectStore('meta').put({ ...EMPTY_STATS, ...data.stats }, 'stats');
-  await tx.objectStore('meta').put(true, 'started');
-  if (touchesExercises) {
-    try {
+  try {
+    if (data.articles) {
+      const store = tx.objectStore('articles');
+      await store.clear();
+      for (const article of data.articles) await store.put(article);
+    }
+    if (vocabulary)
+      await restoreVocabularyRows({ vocab: tx.objectStore('vocab'), meta: tx.objectStore('meta') }, vocabulary);
+    if (data.shadowing) {
+      const store = tx.objectStore('shadowing');
+      await store.clear();
+      for (const sentence of data.shadowing) await store.put(sentence);
+    }
+    if (data.stats) await tx.objectStore('meta').put({ ...EMPTY_STATS, ...data.stats }, 'stats');
+    await tx.objectStore('meta').put(true, 'started');
+    if (touchesExercises) {
       await restoreExerciseRows(
         {
           units: tx.objectStore('units'),
@@ -309,13 +325,18 @@ export async function importData(data: RestoreInput) {
         },
         exercises,
       );
-    } catch (err) {
-      tx.abort();
-      await tx.done.catch(() => undefined);
-      throw err;
     }
+  } catch (err) {
+    try {
+      tx.abort();
+    } catch {
+      /* Already aborted. */
+    }
+    await tx.done.catch(() => undefined);
+    throw err;
   }
   await tx.done;
+  if (vocabulary) await vocabularyChanged();
   if (touchesExercises) exercisesChanged();
 }
 

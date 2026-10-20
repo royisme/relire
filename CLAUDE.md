@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Relire is a static, browser-only PWA for French close reading and pronunciation practice for TCF Canada learners (no mock exams or official scores); it is becoming **Relire Plus** (`docs/merge-plan.md`). Stack: React 19, Vite, Tailwind v4, i18next, IndexedDB, the user's own AI key called from the browser; no server of its own: the only backend is an optional read-only content service for private grammar content (`docs/adr-hosted-content-service.md`), which never sees a key, an answer, an article or a recording (it receives only a topic id or a tapped word) and is never required. Bun is the only package manager.
+Relire is a static, browser-only PWA for French close reading and pronunciation practice for TCF Canada learners (no mock exams or official scores); it is becoming **Relire Plus** (`docs/merge-plan.md`). Stack: React 19, Vite, Tailwind v4, i18next, IndexedDB, the user's own AI key called from the browser; no server of its own: the only backend is an optional read-only content service for grammar, lexicon and wordbook content (`docs/adr-hosted-content-service.md`), which never sees a key, an answer, an article or a recording (it receives only a topic id, tapped word or book id/page/version) and is never required. Bun is the only package manager.
 
 ## Hard rules
 

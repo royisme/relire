@@ -22,6 +22,8 @@ Read `DESIGN.md` (tokens in `src/index.css`) and `PRODUCT.md` before changing a 
 - Import drafts (the article import under Read and the exercise import under Practice, one component each) stay in memory and use the shared route guard/Dialog (`useImportSession`, `LeaveDialog`); only successful atomic save releases protection before navigation. Native reload/close warnings apply only while dirty.
 - Errors appear inline next to what failed, with the real reason. No `alert()` for new code.
 
+- Words destinations are Today, All words and Review, with Words active throughout; use real links, not Segmented navigation. Review controls precede answer prose: permanent Reveal/Skip, reserved 2×2 phone ratings and bounded status slot. Never mount answer text before durable reveal. Focus answer heading after reveal, next Reveal/wait heading after advance; ignore repeated/IME/overlay keys. No automatic AI or speech. Lookup footer separates context save from bookmark removal and freezes original spelling/source/request language.
+
 ## Visual
 - Every screen must work in light, sepia and dark. Use roles: `bg-surface` (never `bg-white`), `text-on-fill` on filled buttons (never `text-white`), `bg-scrim/NN` behind overlays, hue text from steps 800-950 (`text-accent-900`). No hex or arbitrary colour values outside `src/index.css`. Check a new screen in all three themes (`relire_theme` in localStorage).
 - Structure with headings and rules, not nested cards or tinted boxes; no decorative icons beside headings or labels; one filled button per view.

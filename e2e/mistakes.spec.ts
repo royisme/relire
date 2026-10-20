@@ -81,7 +81,8 @@ test('wrong answer → grouped notebook → explanation → actual word saved �
   await page.getByRole('button', { name: 'Save word' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).first().click();
   await page.getByRole('link', { name: 'Words', exact: true }).click();
-  await expect(page.getByText('pain', { exact: true }).first()).toBeVisible();
+  await page.getByRole('link', { name: 'All words', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'pain', exact: true })).toBeVisible();
   await page.getByRole('link', { name: /^Mistakes/ }).click();
   await entry(page).getByRole('link', { name: 'Retry in unit' }).click();
   await expect(row(page, 'Je ne').getByRole('textbox')).toHaveValue('mangez');

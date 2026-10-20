@@ -19,12 +19,13 @@ import { SettingsPage } from './components/settings/SettingsPage';
 import { AboutSection } from './components/settings/AboutSection';
 import type { KeyRequest } from './components/settings/keyRequest';
 
-import { Article, VocabWord, WordAnalysis, UserStats, PronunciationAssessment } from './types';
+import { Article, UserStats, PronunciationAssessment } from './types';
+import { useVocabulary } from './hooks/useVocabulary';
+import { useVocabularyBookmark } from './hooks/useVocabularyBookmark';
 import { SAMPLE_ARTICLES } from './data/sampleArticles';
-import { EMPTY_STATS, loadData, initializeData, saveStats, saveVocab } from './storage/db';
+import { EMPTY_STATS, loadData, initializeData, saveStats } from './storage/db';
 import { usePersist } from './storage/usePersist';
-import { isDueToday, formatDate } from './utils/srs';
-import { prefetchSpeech } from './utils/speech';
+import { vocabularyDue, formatDate } from './utils/srs';
 import { hasTextKey } from './utils/appSettings';
 import { LIBRARY, parseRoute, routeHref, type AiPurposeRoute } from './utils/routes';
 import { navigate, useRoute } from './hooks/useRoute';
@@ -65,7 +66,7 @@ export default function App() {
 
   // Set while an AI feature is waiting for a key, so Settings can focus the field and offer the way back.
   const [keyRequest, setKeyRequest] = useState<KeyRequest | null>(null);
-  // Articles commit before state changes; vocabulary and stats use debounced persistence.
+  // Articles and vocabulary commit before state changes; only stats use debounced persistence.
   const [ready, setReady] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [failedSaves, setFailedSaves] = useState<string[]>([]);
@@ -100,7 +101,8 @@ export default function App() {
   } = useArticleLibrary(articles, setArticles, reportSave);
   const [hasKey, setHasKey] = useState(() => hasTextKey());
   const [onboardingOpen, setOnboardingOpen] = useState(false);
-  const [vocabList, setVocabList] = useState<VocabWord[]>([]);
+  const vocabulary = useVocabulary();
+  const vocabList = vocabulary.rows;
   const [stats, setStats] = useState<UserStats>(EMPTY_STATS);
 
   // State that belongs to one place is dropped when the learner leaves it (adjusted while rendering, not in an effect).
@@ -114,7 +116,6 @@ export default function App() {
       .then((data) => {
         if (cancelled || !data) return;
         setArticles(data.articles);
-        setVocabList(data.vocab);
         setStats(data.stats);
         setReady(true);
         // First visit with no key: walk the user through setup.
@@ -128,7 +129,6 @@ export default function App() {
     };
   }, []);
 
-  usePersist('vocabulary', vocabList, saveVocab, ready, reportSave);
   usePersist('stats', stats, saveStats, ready, reportSave);
 
   // Settings → AI services, on the purpose that needs the key, with the key field ready; its way back is
@@ -140,49 +140,18 @@ export default function App() {
     navigate({ name: 'settings', section: 'ai', purpose, focusKey: true });
   };
 
-  const { activeWord, activeSentence, wordData, handleWordClick, handleSentenceClick, wordSheet, sentenceSheet } =
-    useLookupSheets({ lookupOwner, content: readerDocument?.content, requestKey, setStats, t });
+  const {
+    lookup,
+    activeWord,
+    activeSentence,
+    wordData,
+    handleWordClick,
+    handleSentenceClick,
+    wordSheet,
+    sentenceSheet,
+  } = useLookupSheets({ lookupOwner, content: readerDocument?.content, requestKey, setStats, t });
 
-  // Toggle Vocabulary handler
-  const handleToggleVocab = (data: WordAnalysis, contextSentence: string) => {
-    const exists = vocabList.some((w) => w.word.toLowerCase() === data.word.toLowerCase());
-
-    if (exists) {
-      setVocabList((prev) => prev.filter((w) => w.word.toLowerCase() !== data.word.toLowerCase()));
-    } else {
-      const newWord: VocabWord = {
-        id: 'v-' + Date.now(),
-        word: data.word,
-        lemma: data.lemma || data.word,
-        ipa: data.ipa || '',
-        translation: data.translation,
-        partOfSpeech: data.partOfSpeech,
-        contextSentence: contextSentence || '',
-        contextTense: data.contextTense,
-        analysis: data,
-        phoneticsGuide: data.phoneticsGuide,
-        addedAt: formatDate(new Date()),
-        repetitions: 0,
-        intervalDays: 1,
-        easeFactor: 2.5,
-        nextReviewDate: formatDate(new Date()), // due immediately or tomorrow
-        reviewHistory: [],
-        tags: [readerDocument?.category || 'Reading'],
-      };
-
-      setVocabList((prev) => [newWord, ...prev]);
-      // Keep the pronunciation with the word: fetch the clips in the background.
-      void prefetchSpeech([data.word, contextSentence]);
-    }
-  };
-
-  const handleUpdateWord = (updatedWord: VocabWord) => {
-    setVocabList((prev) => prev.map((w) => (w.id === updatedWord.id ? updatedWord : w)));
-  };
-
-  const handleDeleteWord = (wordId: string) => {
-    setVocabList((prev) => prev.filter((w) => w.id !== wordId));
-  };
+  const bookmark = useVocabularyBookmark(vocabulary, lookup, wordData);
 
   const finishOnboarding = () => {
     try {
@@ -216,11 +185,7 @@ export default function App() {
     });
   };
 
-  const isCurrentWordInVocab = wordData
-    ? vocabList.some((w) => w.word.toLowerCase() === wordData.word.toLowerCase())
-    : false;
-
-  const dueCount = vocabList.filter(isDueToday).length;
+  const dueCount = vocabList.filter((row) => vocabularyDue(row.schedule, vocabulary.now)).length;
 
   // IndexedDB answers in a few milliseconds; render nothing until then so saved data never flashes as samples.
   if (!ready) {
@@ -338,20 +303,23 @@ export default function App() {
                 </>
               ))}
 
-            {route.name === 'study' && (
+            {(route.name === 'study' || route.name === 'wordsAll' || route.name === 'wordsReview') && (
               <StudyView
-                tab={route.tab}
-                verb={route.verb}
-                section={route.section}
-                tag={route.tag}
+                tab={route.name === 'study' ? route.tab : 'words'}
+                verb={route.name === 'study' ? route.verb : undefined}
+                section={route.name === 'study' ? route.section : undefined}
+                tag={route.name === 'study' ? route.tag : undefined}
                 sectionsInSidebar={expanded}
                 mistakes={{
                   onMissingKey: requestKey,
-                  onWord: (word, sentence, context) => {
-                    void handleWordClick(word, sentence, context);
+                  onWord: (word, sentence, context, source) => {
+                    void handleWordClick(word, sentence, context, source);
                   },
                 }}
-                vocabulary={{ vocabList, onUpdateWord: handleUpdateWord, onDeleteWord: handleDeleteWord }}
+                vocabulary={{
+                  model: vocabulary,
+                  place: route.name === 'wordsAll' ? 'all' : route.name === 'wordsReview' ? 'review' : 'today',
+                }}
                 shadowing={{
                   articles,
                   units: readerUnits.units,
@@ -419,7 +387,7 @@ export default function App() {
       </div>
 
       {/* Word Detail Floating Modal */}
-      <WordDetailModal {...wordSheet} isSavedInVocab={isCurrentWordInVocab} onToggleVocab={handleToggleVocab} />
+      <WordDetailModal {...wordSheet} bookmark={bookmark} />
 
       {/* Sentence Breakdown & Shadowing Drawer */}
       <SentenceDrawer {...sentenceSheet} onRecordAssessmentComplete={handleRecordAssessmentComplete} />

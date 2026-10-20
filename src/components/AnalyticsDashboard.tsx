@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExerciseProgress } from './progress/ExerciseProgress';
-import { VocabWord, UserStats } from '../types';
+import { UserStats } from '../types';
+import type { VocabularyRow } from '../types/vocabulary';
 import { toggleSpeech } from '../utils/speech';
 import { SpeakIcon, useSpeechPhase } from './ui/speak-button';
 import { PageHeader } from './ui/page-header';
@@ -9,7 +10,7 @@ import { FRENCH_IPA, IpaGroup } from '../data/frenchIpa';
 
 interface AnalyticsDashboardProps {
   stats: UserStats;
-  vocabList: VocabWord[];
+  vocabList: VocabularyRow[];
   onMissingKey: () => void;
 }
 
@@ -36,7 +37,9 @@ const IpaTile: React.FC<{ symbol: string; word: string; label: string }> = ({ sy
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, vocabList, onMissingKey }) => {
   const { t } = useTranslation();
-  const masteredCount = vocabList.filter((w) => w.repetitions >= 4).length;
+  const bookmarkedCount = vocabList.filter((word) => word.bookmarked).length;
+  const introducedCount = vocabList.filter((word) => word.schedule).length;
+  const submittedRatings = vocabList.reduce((sum, word) => sum + word.history.length, 0);
   const history = stats.pronunciationHistory ?? [];
 
   return (
@@ -45,10 +48,10 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, v
 
       <dl className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-ink-200 rounded-lg border border-ink-200 bg-surface">
         <div className="p-4 space-y-1">
-          <dt className="text-xs text-ink-500">{t('analytics.wordsLearned')}</dt>
-          <dd className="text-2xl font-serif font-semibold text-ink-900 tnum">{vocabList.length}</dd>
+          <dt className="text-xs text-ink-500">{t('vocab.bookmarked')}</dt>
+          <dd className="text-2xl font-serif font-semibold text-ink-900 tnum">{bookmarkedCount}</dd>
           <dd className="text-xs text-ink-500">
-            {t('vocab.mastered')}: <span className="tnum">{masteredCount}</span>
+            {t('vocab.analyticsCounts', { introduced: introducedCount, ratings: submittedRatings })}
           </dd>
         </div>
         <div className="p-4 space-y-1">

@@ -2,6 +2,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { readerIdentity, type ReaderDocument, type ReaderSource } from '../types/readerSource';
+import type { VocabularyWordLookup } from '../services/vocabulary/identity';
 import { usePronunciationMarkers } from '../hooks/usePronunciationMarkers';
 import { readerTokens } from '../utils/readerTokens';
 import { ReaderWord } from './reader/ReaderWord';
@@ -34,7 +35,7 @@ interface ReaderViewProps {
   readingDocument: ReaderDocument;
   source: ReaderSource;
   onBack: () => void;
-  onWordClick: (word: string, sentence: string) => void;
+  onWordClick: VocabularyWordLookup;
   onSentenceClick: (sentence: string) => void;
   onMissingKey: () => void;
   /** Opens My study → Shadowing at this source. */
@@ -125,7 +126,11 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   // Tapping a word also keeps that sentence's actions visible once the lookup sheet is closed (touch has no hover).
   const clickWord = (word: string, sentenceText: string, id: string) => {
     focusSentence(id);
-    onWordClick(word, sentenceText);
+    onWordClick(word, sentenceText, readingDocument.content, {
+      kind: source.kind === 'article' ? 'article' : 'unit',
+      id: source.kind === 'article' ? source.articleId : source.unitId,
+      title: readingDocument.title,
+    });
   };
 
   const renderSentenceWords = (sentenceText: string, id: string) =>

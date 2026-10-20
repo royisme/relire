@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { FC } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet } from './ui/overlay';
-import { X, Bookmark, BookmarkCheck, Loader2 } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
+import type { VocabularyBookmarkActions } from '../hooks/useVocabularyBookmark';
 import { WordAnalysis } from '../types';
 import { isVerbEntry } from '../services/grammarPack/verbEntry';
 import { Button } from './ui/button';
@@ -24,8 +25,7 @@ interface WordDetailModalProps {
   wordData: WordAnalysis | null;
   isLoading: boolean;
   contextSentence: string;
-  isSavedInVocab: boolean;
-  onToggleVocab: (wordData: WordAnalysis, contextSentence: string) => void;
+  bookmark: VocabularyBookmarkActions;
   onRetry?: () => void;
   activeWord?: string | null;
   errorMessage?: string | null;
@@ -37,8 +37,7 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
   wordData,
   isLoading,
   contextSentence,
-  isSavedInVocab,
-  onToggleVocab,
+  bookmark,
   onRetry,
   activeWord,
   errorMessage,
@@ -217,24 +216,39 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
               )}
             </div>
 
-            <div className="px-4 py-3 border-t border-ink-200 bg-surface flex items-center justify-between gap-3">
-              <Button
-                variant={isSavedInVocab ? 'outline' : 'default'}
-                onClick={() => onToggleVocab(wordData, contextSentence)}
-                aria-pressed={isSavedInVocab}
-                title={isSavedInVocab ? t('wordModal.removeHint') : undefined}
-              >
-                {isSavedInVocab ? (
-                  <BookmarkCheck className="w-4 h-4 text-ok-800" aria-hidden="true" />
-                ) : (
-                  <Bookmark className="w-4 h-4" aria-hidden="true" />
-                )}
-                <span>{isSavedInVocab ? t('wordModal.removeFromVocab') : t('wordModal.addToVocab')}</span>
-              </Button>
-              <Button variant="ghost" onClick={onClose}>
-                {t('common.close')}
-              </Button>
-            </div>
+            <footer className="space-y-2 border-t border-ink-200 bg-surface px-4 py-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  className="whitespace-normal"
+                  disabled={bookmark.busy || bookmark.contextSaved}
+                  variant={bookmark.contextSaved ? 'outline' : 'default'}
+                  onClick={() => void bookmark.save()}
+                >
+                  {t(
+                    bookmark.contextSaved
+                      ? 'vocab.contextSaved'
+                      : bookmark.saved
+                        ? 'vocab.saveContext'
+                        : 'vocab.saveWord',
+                  )}
+                </Button>
+                <Button
+                  className="whitespace-normal"
+                  variant="outline"
+                  disabled={bookmark.busy || !bookmark.saved}
+                  aria-describedby="remove-bookmark-help"
+                  onClick={() => void bookmark.remove()}
+                >
+                  {t('vocab.removeBookmark')}
+                </Button>
+              </div>
+              <p id="remove-bookmark-help" className="text-xs text-ink-600">
+                {t('vocab.removeHelp')}
+              </p>
+              <p role="status" aria-live="polite" className="h-12 overflow-auto break-words text-sm text-bad-700">
+                {bookmark.busy ? t('vocab.saving') : bookmark.error}
+              </p>
+            </footer>
           </>
         )}
       </div>

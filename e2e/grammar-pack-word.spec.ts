@@ -297,13 +297,13 @@ test('a saved pack verb carries no conjugation table', async ({ page, ai }) => {
   await showTenses(page);
   await expect(tense(page, 'Present')).toBeVisible();
   await sheet(page).getByRole('button', { name: 'Save word' }).click();
-  await expect(sheet(page).getByRole('button', { name: 'Saved' })).toBeVisible();
+  await expect(sheet(page).getByRole('button', { name: 'Context saved' })).toBeVisible();
   await expect
     .poll(() =>
       page.evaluate(async () => {
         const { db } = (await import('/src/storage/db.ts' as string)) as typeof import('../src/storage/db');
         const rows = await (await db()).getAll('vocab');
-        return rows.map((row) => ({ word: row.word, keys: Object.keys(row.analysis ?? {}) }));
+        return rows.map((row) => ({ word: row.word, keys: Object.keys(row.contexts[0]?.analysis ?? {}) }));
       }),
     )
     .toEqual([expect.objectContaining({ word: 'vais' })]);

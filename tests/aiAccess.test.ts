@@ -18,6 +18,7 @@ import * as api from '../src/services/api';
 import { contextOf, fakeProvider } from './fixtures/fakeProvider';
 import { draftFixture } from './fixtures/importDraft';
 import { failure, freshDb } from './fixtures/storage';
+import { testAnalysis } from './fixtures/vocabulary';
 
 beforeEach(freshDb);
 afterEach(() => mock.restore());
@@ -145,7 +146,7 @@ describe('feature execution uses AiAccess', () => {
   });
 
   test('lookup/analysis cache hits remain shared across access/model changes', async () => {
-    const first = fakeAccess({ word: 'bonjour' });
+    const first = fakeAccess(testAnalysis('bonjour'));
     const access = spyOn(accessModule, 'getAiAccess').mockReturnValue(first.access);
     const word = await api.fetchWordAnalysis('bonjour', 'Bonjour à tous.');
     expect(word.word).toBe('bonjour');
@@ -155,6 +156,17 @@ describe('feature execution uses AiAccess', () => {
     expect(first.provider.requests).toHaveLength(1);
     expect(second.provider.requests).toHaveLength(0);
     expect(first.text).toHaveBeenCalledWith('text');
+  });
+
+  test('mismatched word analysis is not cached, so explicit Retry can answer the clicked spelling', async () => {
+    const wrong = fakeAccess(testAnalysis('autre-test'));
+    const access = spyOn(accessModule, 'getAiAccess').mockReturnValue(wrong.access);
+    const error = await failure(api.fetchWordAnalysis('test-mot', 'Phrase TEST.'));
+    expect(error).toBeInstanceOf(Error);
+    const correct = fakeAccess(testAnalysis('test-mot'));
+    access.mockReturnValue(correct.access);
+    expect((await api.fetchWordAnalysis('test-mot', 'Phrase TEST.')).word).toBe('test-mot');
+    expect(correct.provider.requests).toHaveLength(1);
   });
 
   test('pronunciation scoring, grading, marker sessions and key checks use the same boundary', async () => {

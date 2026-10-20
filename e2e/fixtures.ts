@@ -64,7 +64,7 @@ export const defaultAnswers: Record<Task, Answer> = {
     translation: 'thing',
     otherMeanings: [],
     contextTense: '',
-    usageExamples: [{ fr: 'Quelle chose !', zh: '', highlight: 'chose' }],
+    usageExamples: [{ fr: 'Quelle chose !', zh: '什么事！', en: 'What a thing!', highlight: 'chose' }],
     cefrLevel: 'A1',
     memoryTrick: '',
   },

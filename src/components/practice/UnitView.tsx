@@ -9,6 +9,7 @@ import { Button } from '../ui/button';
 import { NotFoundView } from '../shell/NotFoundView';
 import { UnitSheet } from './UnitSheet';
 import { TopicWorkbench } from './TopicWorkbench';
+import type { VocabularyWordLookup } from '../../services/vocabulary/identity';
 
 export function UnitView({
   unitId,
@@ -17,7 +18,7 @@ export function UnitView({
 }: {
   unitId: string;
   onMissingKey: () => void;
-  onWord: (word: string, sentence: string, context: string) => void;
+  onWord: VocabularyWordLookup;
 }) {
   const { t } = useTranslation();
   const session = useExerciseUnit(unitId, { onMissingKey });

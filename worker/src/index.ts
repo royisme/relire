@@ -1,5 +1,6 @@
 /** Owns read-only topic and lexicon HTTP delivery; content validation and loading belong to the owner's local pipeline. */
 import type { D1Database, RateLimit } from '@cloudflare/workers-types';
+import { vocabularyResource } from './vocabulary';
 
 export interface Env {
   DB: D1Database;
@@ -73,7 +74,20 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     }
     if (request.method === 'OPTIONS') return respond(null, 204);
 
-    const path = new URL(request.url).pathname;
+    const url = new URL(request.url);
+    const path = url.pathname;
+    if (path.startsWith('/v1/vocabulary/')) {
+      const resource = await vocabularyResource(url, env.DB);
+      if ('error' in resource) return error(resource.error, resource.status);
+      const etag = `"${resource.version}"`;
+      headers.set('ETag', etag);
+      headers.set('Cache-Control', resource.pinned ? 'public, max-age=300' : 'no-cache');
+      const matches = request.headers
+        .get('If-None-Match')
+        ?.split(',')
+        .some((value) => value.trim() === '*' || value.trim().replace(/^W\//, '') === etag);
+      return matches ? respond(null, 304) : respond(resource.body, 200);
+    }
     const topicId = path.startsWith('/v1/topics/') ? path.slice('/v1/topics/'.length) : undefined;
     if (topicId !== undefined && !topicSlug.test(topicId)) return error('invalid-id', 400);
     // `/v1/lexicon/form/:form` has an extra segment, so it cannot collide with a lemma named "form".

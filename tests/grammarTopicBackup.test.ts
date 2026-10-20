@@ -4,7 +4,7 @@ import { freshDb, answered, right, failure, article } from './fixtures/storage';
 import { learningFixture } from './fixtures/grammarLearning';
 import { topicExerciseRevision, topicToExerciseUnit } from '../src/services/grammarTopics/checkpoints';
 import { checkItem, deleteUnit, ensureTopicUnit, ExerciseBackupError, getUnitSnapshot } from '../src/storage/exercises';
-import { exportData, importData } from '../src/storage/db';
+import { db, exportData, importData } from '../src/storage/db';
 
 beforeEach(freshDb);
 async function backup() {
@@ -87,6 +87,19 @@ test('malformed or unpaired metadata rejects the entire restore without strippin
     expect(await failure(importData(probe))).toBeInstanceOf(ExerciseBackupError);
     expect(await exportData()).toEqual(original);
   }
+});
+
+test('vocabulary-only paired replacement preserves accepted topic snapshots, results and missing-row exercise tokens', async () => {
+  const original = await backup();
+  await (await db()).put('meta', 7, 'exerciseReset:deleted-topic-test');
+  const before = await getUnitSnapshot(original.units[0].id);
+  await importData({ vocab: [], vocabularyMeta: { preferences: { newPerDay: 0 }, days: [] } });
+  const restored = await exportData();
+  expect(restored.units).toEqual(original.units);
+  expect(restored.attempts).toEqual(original.attempts);
+  expect(restored.itemStates).toEqual(original.itemStates);
+  expect((await getUnitSnapshot(original.units[0].id)).resetToken).toBe(before.resetToken);
+  expect(await (await db()).get('meta', 'exerciseReset:deleted-topic-test')).toBe(7);
 });
 
 test('partial attempt restore validates against surviving units inside the restore transaction', async () => {

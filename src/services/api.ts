@@ -1,4 +1,6 @@
 import { WordAnalysis, SentenceAnalysis, PronunciationAssessment } from '../types';
+import { vocabularyKey } from './vocabulary/identity';
+import { VocabularyAnalysisSchema } from '../types/vocabulary';
 import { getAppSettings, type AppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as ai from './ai/tasks';
@@ -70,8 +72,17 @@ export function fetchWordAnalysis(
   articleContext?: string,
 ): Promise<WordAnalysis> {
   const ctx = context();
-  return cachedRequest('word', wordKey(ctx.lang, promptFingerprint('word', ctx.lang), word, sentenceContext), () =>
-    ai.analyzeWord({ word, sentenceContext, articleContext }, ctx),
+  return cachedRequest(
+    'word',
+    wordKey(ctx.lang, promptFingerprint('word', ctx.lang), word, sentenceContext),
+    () => ai.analyzeWord({ word, sentenceContext, articleContext }, ctx),
+    false,
+    (value) => {
+      const answer = VocabularyAnalysisSchema.parse(value);
+      if (vocabularyKey(answer.word) !== vocabularyKey(word))
+        throw new Error(i18n.getFixedT(ctx.lang)('vocab.analysisMismatch', { actual: answer.word, requested: word }));
+      return answer;
+    },
   );
 }
 

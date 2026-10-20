@@ -23,9 +23,12 @@ async function vocabularyTexts(): Promise<Set<string>> {
   const d = await db();
   const texts = new Set<string>();
   for (const w of await d.getAll('vocab')) {
-    if (w.word) texts.add(normalizeText(w.word));
-    if (w.contextSentence) texts.add(normalizeText(w.contextSentence));
-    for (const ex of w.analysis?.usageExamples ?? []) if (ex.fr) texts.add(normalizeText(ex.fr));
+    if (!w.bookmarked && !w.schedule) continue;
+    texts.add(normalizeText(w.word));
+    for (const context of w.contexts) {
+      if (context.sentence) texts.add(normalizeText(context.sentence));
+      for (const ex of context.analysis.usageExamples ?? []) texts.add(normalizeText(ex.fr));
+    }
   }
   return texts;
 }

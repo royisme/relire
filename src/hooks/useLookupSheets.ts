@@ -3,6 +3,8 @@ import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 
 import type { TFunction } from 'i18next';
 import type { WordAnalysis, SentenceAnalysis, UserStats } from '../types';
 import { fetchWordAnalysis, fetchSentenceAnalysis, MissingApiKeyError } from '../services/api';
+import i18n from '../i18n';
+import { vocabularyKey, type VocabularyLookup, type VocabularySource } from '../services/vocabulary/identity';
 
 interface LookupSheetsOptions {
   lookupOwner: string;
@@ -23,6 +25,7 @@ export function useLookupSheets({ lookupOwner, content, requestKey, setStats, t 
   const [wordSheetOwner, setWordSheetOwner] = useState<string | null>(null);
   const wordRequest = useRef(0);
   const wordContext = useRef<string | undefined>(undefined);
+  const [lookup, setLookup] = useState<VocabularyLookup | null>(null);
   // A lookup belongs to the address that opened it: Back, Forward or a typed address closes the sheet before
   // the new page paints, and the request is dropped so a late answer or failure cannot show on that page,
   // replace a newer lookup or send the learner to Settings from it.
@@ -72,7 +75,7 @@ export function useLookupSheets({ lookupOwner, content, requestKey, setStats, t 
   };
 
   // Word Click Handler
-  const handleWordClick = async (word: string, sentence: string, context = content) => {
+  const handleWordClick = async (word: string, sentence: string, context = content, source?: VocabularySource) => {
     // Strip leading/trailing punctuation while preserving French accents
     const cleanWord = word.trim().replace(/^[^\p{L}\p{M}]+|[^\p{L}\p{M}]+$/gu, '');
     if (!cleanWord) return;
@@ -87,10 +90,19 @@ export function useLookupSheets({ lookupOwner, content, requestKey, setStats, t 
     setWordData(null);
     setAiError(null);
 
+    const frozen: VocabularyLookup = {
+      word: cleanWord,
+      sentence,
+      requestLanguage: i18n.language === 'zh' ? 'zh' : 'en',
+      ...(source ? { source: { ...source } } : {}),
+    };
+    setLookup(frozen);
     try {
       const data = await fetchWordAnalysis(cleanWord, sentence, context);
       if (request !== wordRequest.current) return;
       if (data && data.word) {
+        if (vocabularyKey(data.word) !== vocabularyKey(frozen.word))
+          throw new Error(t('vocab.analysisMismatch', { actual: data.word, requested: frozen.word }));
         setWordData(data);
       } else {
         throw new Error(t('notebook.emptyWordAnalysis'));
@@ -104,7 +116,7 @@ export function useLookupSheets({ lookupOwner, content, requestKey, setStats, t 
 
   const handleRetryWord = () => {
     if (activeWord) {
-      void handleWordClick(activeWord, activeWordSentence, wordContext.current);
+      void handleWordClick(activeWord, activeWordSentence, wordContext.current, lookup?.source);
     }
   };
 
@@ -137,6 +149,7 @@ export function useLookupSheets({ lookupOwner, content, requestKey, setStats, t 
   };
 
   return {
+    lookup,
     activeWord,
     activeSentence,
     wordData,

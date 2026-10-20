@@ -128,7 +128,12 @@ test('a state pointing at a stored unit that does not exist aborts the transacti
 test('replacing the articles leaves units, their states and attempts untouched', async () => {
   const backup = await backupWithData();
   const before = await snapshot();
-  await importData({ articles: [article('other')], vocab: [], stats: { ...EMPTY_STATS } });
+  await importData({
+    articles: [article('other')],
+    vocab: [],
+    vocabularyMeta: { preferences: { newPerDay: 20 }, days: [] },
+    stats: { ...EMPTY_STATS },
+  });
   expect(await listUnits()).toHaveLength(1);
   expect(await listItemStates('unit-set-1')).toHaveLength(1);
   expect(await listAttempts()).toHaveLength(backup.attempts.length);

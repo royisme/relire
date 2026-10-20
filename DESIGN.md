@@ -65,6 +65,16 @@ typography:
     fontSize: "24px"
     fontWeight: 600
     lineHeight: 1.25
+  flashcard-word-small:
+    fontFamily: "'Source Serif 4', Georgia, 'Songti SC', serif"
+    fontSize: "32px"
+    fontWeight: 600
+    lineHeight: 1.25
+  flashcard-word:
+    fontFamily: "'Source Serif 4', Georgia, 'Songti SC', serif"
+    fontSize: "40px"
+    fontWeight: 600
+    lineHeight: 1.25
   title:
     fontFamily: "'Source Serif 4', Georgia, 'Songti SC', serif"
     fontSize: "18px"
@@ -307,6 +317,14 @@ Grammar topics with authored learning use one flat, page-scrolling workbench, no
 Previous, Redo and Check-to-Next occupy three permanent cells. Checking stays on the question and retains focus; explicit question navigation focuses the new instruction. A local `h-32` result slot reserves status, feedback action, correction and summary/error space from the outset; overflow remains reachable. Corrections never append beside the prompt here. Longer authored feedback opens the existing responsive Sheet. The floating CharacterBar is shared and follows the selected input's editability. No lookup, AI or speech controls appear.
 
 Full reference is one initially closed Collapsible below the Grammar workbench; opening it records nothing. Selectors use `aria-current="step"`, explicit unchecked/right/wrong icons and labels, existing accent/semantic tokens and focus rings. The pilot uses no new theme, typography, motion, mastery display or navigation chrome. Implementation checks use synthetic data; real twelve-question review and local/manual visual acceptance are still pending.
+
+### Words workbench
+
+Words stays in the Quiet Reading Room world. Today and All words use real page links with `aria-current`; Review's Back targets Today and Browse targets All words. The merged browser composes house Table and TanStack v9, 50 rows per page, with details in a Sheet. No level/frequency guesses or mastery badge.
+
+Review is one flat surface: wrapping semibold serif French at 32px phone/40px desktop, explicit selected-engine Listen, then permanent Reveal/Skip cells, reserved four ratings (2×2 on phones, at least 40px), and a bounded `h-16` status region. Controls always precede answer prose. Reveal is the sole fill before reveal; Good after. No answer text, POS, context, gloss or example mounts before the introduction commits. Long prose grows naturally below; long failures use a Sheet. Today's download/update progress/failure also has a permanent `h-16` slot. No flip animation, autoplay, example audio or nested cards.
+
+Reveal focuses the answer heading without scroll; rating/Skip focuses next Reveal or wait heading. Native Enter/Space reveal once, held/repeated/IME events cannot grade or act on the next card, numeric ratings apply only on the answer side outside fields/overlays. Locale/theme changes preserve the card, reveal and focus. Word lookup keeps two permanent save/remove cells and a fixed saving/error slot; bookmark removal never deletes contexts/history. Visual acceptance remains manual.
 
 ### Shadowing log
 Under My study → Shadowing: one section per article or unit passage (serif title, `tnum` count), then sentence-first rows separated by `ink-200` rules. The full-width sentence leads; a related, naturally wrapping group below holds Reference, Play my recording, Compare and All recordings (n), with 40px targets at every width. Last-recorded date and actual duration are quiet metadata, not the primary playback label. The text is a serif button that opens the sentence in the reader. Takes expand below the sentence at full width, with playback, date, duration and deletion even for a sole take; unavailable recordings stay in their changed/removed source groups. No pseudo-table or nested cards.

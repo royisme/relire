@@ -2,7 +2,7 @@
 
 Bun is the only package manager. The delivery checklist (which checks must pass, changelog, commit, report) belongs to the `ship-change` skill (`.claude/skills/ship-change/SKILL.md`); this page only says what each command does.
 
-Development handoff: [Built-in vocabulary and flashcards specification](vocabulary-flashcards-spec.md) defines the shared wordbook/bookmark identity, scheduling, storage and acceptance contract. It describes work to implement, not functionality already available.
+Development handoff: [Built-in vocabulary and flashcards specification](vocabulary-flashcards-spec.md) defines the shared wordbook/bookmark identity, scheduling, storage and acceptance contract. The integrated code path uses synthetic verification; real vocabulary corpus preparation/review/application and public delivery remain separately gated.
 
 ## Run and build
 
@@ -44,6 +44,14 @@ In the app root, create the gitignored `.env.local` with `VITE_CONTENT_SERVICE_U
 From the repository root, `bun scripts/grammar-topics/publish.ts` runs the existing reviewed-only gate over the manifest, hash-bound reviews and private `.local/grammar-topics/drafts-<chapter>.json` arrays, then writes private `.local/grammar-topics/publish.sql`; `--apply-local` also replaces the local D1 topics (apply the migration above first). Excluded ids are listed; zero included topics clears the published set. Static topic/tag-index artifacts and the `build.ts topics` target are gone. CI uses `bun scripts/grammar-topics/publish.ts --check` to validate public metadata and chapter labels only, without reading `.local/`. See `worker/README.md` for owner publishing instructions.
 
 To load the lexicon locally (common verbs' simple tenses and the word sheet's "Verb form" lines for verbs outside the grammar pack), apply both migrations as above, then from the repository root run `MORPHALOU_DIR=/path/to/Morphalou3.1_formatCSV bun scripts/lexicon/import.ts --apply-local` (the original Morphalou 3.1 download is not in the repository; `MORPHALOU_DIR` defaults to `.local/morphalou/csv/Morphalou3.1_formatCSV`). Without the load every lexicon lookup is a 404 and the word sheet looks as it did before; see `worker/README.md` and `worker/NOTICE.md`.
+
+## Vocabulary private tooling and synthetic verification
+
+- `bun scripts/vocabulary/prepare.ts --source <absolute file>` reads one stable byte snapshot, applies recorded `.local/vocabulary/decisions.json` corrections/omissions and writes ignored normalized content, report and review sheet. No default source path or source rewrite. Set actual attribution metadata before preparation; committed metadata remains unprepared and reviews empty. Never run against real content without owner authorization.
+- Owner only for real content: `bun scripts/vocabulary/review.ts print`, then `mark --by <actual authorized reviewer>`. Content changes invalidate review. C1/Canadian-usage/rights decisions are not machine checks and never filter personal bookmarks.
+- `bun scripts/vocabulary/publish.ts --check` validates public metadata only, no private reads. Without flags it prepares private staging SQL only. Owner-authorized `--apply-local` uses installed Worker tooling to stage immutable pages, verify each body and aggregate, mark publication, atomically switch pointer and read it back. No remote mode or migration application; never apply `publish.sql` as a substitute for verified publication. Raw Wrangler output stays ignored; no corpus text printed.
+- `bun test tests/srs.test.ts tests/vocabulary.test.ts tests/vocabularyDurability.test.ts tests/vocabularyBook.test.ts tests/vocabularyPublish.test.ts tests/vocabularyWorker.test.ts tests/grammarTopicBackup.test.ts` uses disposable fake IndexedDB/SQLite and invented content. Worker checks also retain `tests/worker.test.ts` and `tests/lexiconWorker.test.ts`.
+- Lead-owned browser milestone: rewritten `e2e/vocabulary-review.spec.ts` and updated saved-word crosslinks cover real routes, durable reveal, hidden answers, failures/quotas/epochs, focus/keys and complete-cache failures. Preserve the topic no-lookup suite. Require the existing free-5174 guard first; workers do not run browsers/servers. Manual visual, real-provider/content/D1/public checks are separate and unclaimed.
 
 ## Add a UI component
 

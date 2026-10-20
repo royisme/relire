@@ -81,7 +81,7 @@ for (const phone of [false, true]) {
     await expect(item.getByText('Correct', { exact: true })).toBeAttached();
     expect((await stored(page)).attempts).toHaveLength(1);
     expect(await overflowing(page.locator('body'))).toEqual([]);
-    await page.goto('/#/study/words');
+    await page.goto('/#/study/words/all');
     await expect(page.getByText('ami', { exact: true }).first()).toBeVisible();
   });
 
@@ -193,6 +193,74 @@ for (const fail of [false, true]) {
     await expect(page.getByRole('dialog')).toHaveCount(0);
   });
 }
+
+test('lookup freezes clicked spelling, actual unit source and request language; saves/removal never call AI or speech', async ({
+  page,
+  ai,
+}) => {
+  await seedUnits(page);
+  await openUnit(page, UNIT, TITLE);
+  let release!: () => void;
+  const waiting = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  ai.answer({
+    word: async () => {
+      await waiting;
+      return wordAnswer('pain');
+    },
+  });
+  await row(page, 'Je ne').getByRole('button', { name: 'pain', exact: true }).click();
+  await expect.poll(() => ai.calls.word).toBe(1);
+  await page.evaluate(async () => {
+    const locale = await import(/* @vite-ignore */ '/src/i18n/index.ts' as string);
+    locale.setAppLanguage('zh');
+  });
+  release();
+  const sheet = page.getByRole('dialog', { name: 'pain', exact: true });
+  await sheet.getByRole('button', { name: '收藏单词', exact: true }).click();
+  await expect(sheet.getByRole('button', { name: '语境已保存', exact: true })).toBeDisabled();
+  const calls = { ...ai.calls };
+  const read = () =>
+    page.evaluate(async () => {
+      const storage = (await import(
+        /* @vite-ignore */ '/src/storage/db.ts' as string
+      )) as typeof import('../src/storage/db');
+      return (await storage.db()).getAll('vocab');
+    });
+  let rows = await read();
+  expect(rows).toHaveLength(1);
+  expect(rows[0].key).toBe('pain');
+  expect(rows[0].contexts[0].requestLanguage).toBe('en');
+  expect(rows[0].contexts[0].source).toMatchObject({ kind: 'unit', id: UNIT });
+  await sheet.getByRole('button', { name: '取消收藏', exact: true }).click();
+  await expect(sheet.getByRole('button', { name: '收藏单词', exact: true })).toBeEnabled();
+  await sheet.getByRole('button', { name: '收藏单词', exact: true }).click();
+  await expect(sheet.getByRole('button', { name: '语境已保存', exact: true })).toBeDisabled();
+  rows = await read();
+  expect(rows[0].contexts).toHaveLength(1);
+  expect(ai.calls).toEqual(calls);
+  await page.keyboard.press('Escape');
+  ai.answer({ word: wordAnswer('pain') });
+  await row(page, 'Je ne').getByRole('button', { name: 'pain', exact: true }).click();
+  await sheet.getByRole('button', { name: '保存此语境', exact: true }).click();
+  await expect(sheet.getByRole('button', { name: '语境已保存', exact: true })).toBeDisabled();
+  rows = await read();
+  expect(rows[0].contexts.map((context) => context.requestLanguage)).toEqual(['en', 'zh']);
+});
+
+test('a model lemma/spelling mismatch is a real retryable error, never a different bookmark', async ({ page, ai }) => {
+  await seedUnits(page);
+  await openUnit(page, UNIT, TITLE);
+  ai.answer({ word: wordAnswer('manger') });
+  await row(page, 'Je ne').getByRole('button', { name: 'pain', exact: true }).click();
+  const sheet = page.getByRole('dialog', { name: 'pain', exact: true });
+  await expect(sheet.getByRole('alert')).toContainText('not the clicked word');
+  await expect(sheet.getByRole('button', { name: 'Save word', exact: true })).toHaveCount(0);
+  ai.answer({ word: wordAnswer('pain') });
+  await sheet.getByRole('button', { name: 'Retry', exact: true }).click();
+  await expect(sheet.getByRole('button', { name: 'Save word', exact: true })).toBeEnabled();
+});
 
 test('answer choices/tiles never contain lookup controls and dictation audio stays hidden', async ({ page, ai }) => {
   void ai;

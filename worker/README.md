@@ -1,6 +1,6 @@
 # Relire content service (H1)
 
-An optional, public read-only Cloudflare Worker backed by D1. It serves grammar topics without putting their text in the app bundle or repository, and a learner-sized lexicon (Morphalou 3.1, LGPL-LR; see `NOTICE.md`). It has no learner data, AI keys, write endpoint or admin route. Public read access is not paid access control: a reader can still collect individual topics.
+An optional, public read-only Cloudflare Worker backed by D1. It serves grammar topics without putting their text in the app bundle or repository, and a learner-sized lexicon (Morphalou 3.1, LGPL-LR; see `NOTICE.md`). It also supports a complete paged vocabulary book. It has no learner data, AI keys, write endpoint or admin route. Public read access is not paid access control: a reader can still collect individual topics.
 
 ## Endpoints
 
@@ -45,7 +45,7 @@ The following account operations are for the owner, using their own Cloudflare a
    bunx wrangler d1 migrations apply DB --remote
    ```
 
-   The migrations create `topics`, `meta`, `lexicon_entries` and `lexicon_forms` and set the empty versions (`packVersion`, `lexiconVersion`) to `0.0.0`. Local state lives in gitignored `worker/.wrangler/`.
+   The migrations create `topics`, `meta`, `lexicon_entries`, `lexicon_forms` and `vocabulary_pages` and set the empty versions (`packVersion`, `lexiconVersion`) to `0.0.0`. Local state lives in gitignored `worker/.wrangler/`.
 4. Set `vars.ALLOWED_ORIGINS` in `wrangler.jsonc` to the deployment origins, separated by commas, for example `https://app.example.com,https://owner.example.com` (no paths or trailing slashes). The empty default is intentional. Keep the deployment configuration local if it contains owner-specific identifiers.
 5. Run locally:
 
@@ -81,6 +81,16 @@ worker/node_modules/.bin/wrangler d1 execute DB --remote --file .local/grammar-t
 ```
 
 The publisher itself has only a local execution path; it never logs in or deploys. There is no real topic content or seed content in this package; the TEST-only fixture is used only by tests and the local smoke check.
+
+## Vocabulary (code only; real content not published)
+
+Migration `0003_vocabulary.sql` creates immutable `vocabulary_pages(book_id, version, page, body)` without changing topics/lexicon/meta. `/v1/vocabulary/tcf-7000?page=0` resolves the current pointer once; subsequent requests pin `&version=<64 lowercase hex>`. Only published-marker versions serve. Current page0 uses `no-cache`; pinned pages use `public, max-age=300` and their version ETag. Existing methods, CORS, limiter and no-store errors remain shared.
+
+Query errors are 400 `invalid-query`; unknown resources 404 `not-found`; absent current 404 `book-unavailable`; missing pinned marker 410 `version-unavailable`; out-of-bounds page 404 `page-not-found`; corrupt/missing published data or D1 failure 500 `unavailable`. No learner data endpoint exists. Clients intentionally can download the whole book; the shared limiter can interrupt a download.
+
+Run metadata-only CI with `bun scripts/vocabulary/publish.ts --check`. Private preparation needs explicit absolute `--source`, recorded corrections/omissions and actual attribution. Only an authorized owner marks real review (`review.ts mark --by <name>`). Nothing in the public vocabulary metadata claims a reviewed or distributed corpus.
+
+Default `publish.ts` writes ignored staging SQL only. Owner-authorized `--apply-local` uses the already-installed Wrangler, never installs tools or applies migrations: compare existing version bodies, stage without overwrite/delete, read back each exact page plus aggregate hash/count/index/manifest, write/verify publication marker, then one final current-pointer upsert and readback. No BEGIN/COMMIT promise across invocations. A failed command/readback fails publication; reruns are idempotent. Old complete versions and incomplete staging remain. Cleanup, real local application and any public delivery require separate approval; no real D1 application was performed by the code implementation.
 
 ## Lexicon
 

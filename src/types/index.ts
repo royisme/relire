@@ -84,38 +84,6 @@ export interface PronunciationAssessment {
   referenceText?: string;
 }
 
-export interface ReviewRecord {
-  date: string;
-  rating: number; // 0-5 (0: Blackout, 3: Pass, 5: Perfect)
-  intervalDays: number;
-  easeFactor: number;
-}
-
-export interface VocabWord {
-  id: string;
-  word: string;
-  lemma: string;
-  ipa: string;
-  translation: string;
-  translationEn?: string;
-  partOfSpeech: string;
-  contextSentence: string;
-  contextTense?: string;
-  phoneticsGuide?: string;
-  phoneticsGuideEn?: string;
-  addedAt: string;
-  // SM-2 Spaced Repetition parameters
-  repetitions: number;
-  intervalDays: number;
-  easeFactor: number; // default 2.5
-  nextReviewDate: string; // ISO date string YYYY-MM-DD
-  lastReviewedAt?: string;
-  reviewHistory: ReviewRecord[];
-  tags?: string[];
-  /** The full explanation as it was when the word was saved, so the entry stands on its own. */
-  analysis?: WordAnalysis;
-}
-
 /** The levels an article can carry, as the article editor and the article import offer them. */
 export const ARTICLE_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 

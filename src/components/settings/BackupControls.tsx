@@ -67,7 +67,8 @@ export const BackupControls: React.FC<BackupControlsProps> = ({ audioBytes, shad
         await importData({
           shadowing,
           articles: Array.isArray(data.articles) ? data.articles : undefined,
-          vocab: Array.isArray(data.vocab) ? data.vocab : undefined,
+          vocab: data.vocab,
+          vocabularyMeta: data.vocabularyMeta,
           stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
           // Exercise rows are validated in full by importData; an absent key keeps the stored ones.
           units: data.units,

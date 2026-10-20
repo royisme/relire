@@ -70,7 +70,9 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
               to={{ name: 'study', tab }}
               label={t(`study.${tab}`)}
               current={
-                (route.name === 'study' && route.tab === tab) || (route.name === 'grammarTopic' && tab === 'grammar')
+                (route.name === 'study' && route.tab === tab) ||
+                ((route.name === 'wordsAll' || route.name === 'wordsReview') && tab === 'words') ||
+                (route.name === 'grammarTopic' && tab === 'grammar')
                   ? 'page'
                   : undefined
               }

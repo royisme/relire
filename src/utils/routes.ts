@@ -43,6 +43,8 @@ export type Route =
   | { name: 'passage'; unitId: string; sentence?: string }
   /** `verb` prefills the Conjugation page (Grammar tab) and runs it once. */
   | { name: 'study'; tab: StudyTab; section?: 'conjugation'; verb?: string; tag?: GrammarTag }
+  | { name: 'wordsAll' }
+  | { name: 'wordsReview' }
   | { name: 'grammarTopic'; topicId: string }
   | { name: 'practice' }
   | { name: 'practiceSet'; setId: string }
@@ -87,6 +89,10 @@ export function routeHref(route: Route): string {
         return `#/study/grammar${route.tag ? `?tag=${encodeURIComponent(route.tag)}` : ''}`;
       }
       return `#/study/${route.tab}`;
+    case 'wordsAll':
+      return '#/study/words/all';
+    case 'wordsReview':
+      return '#/study/words/review';
     case 'grammarTopic':
       return `#/study/grammar/${encodeURIComponent(route.topicId)}`;
     case 'practice':
@@ -146,6 +152,14 @@ export function parseRoute(
       ...(params.get('key') === '1' ? { focusKey: true } : {}),
       ...(returnTo?.startsWith('#/') && !returnTo.includes('?return=') ? { returnTo } : {}),
     };
+  } else if (
+    area === 'study' &&
+    sub === 'words' &&
+    extra.length === 1 &&
+    !query &&
+    ['all', 'review'].includes(extra[0])
+  ) {
+    route = { name: extra[0] === 'all' ? 'wordsAll' : 'wordsReview' };
   } else if (
     area === 'study' &&
     sub === 'grammar' &&
@@ -222,6 +236,8 @@ export function areaOf(route: Route): Area | null {
     case 'reader':
     case 'passage':
       return 'read';
+    case 'wordsAll':
+    case 'wordsReview':
     case 'grammarTopic':
       return 'study';
     case 'study':

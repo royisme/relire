@@ -11,6 +11,7 @@ import { Button } from '../ui/button';
 import { Link } from '../shell/Link';
 import { LookupText } from '../reader/LookupText';
 import { MistakeExplanationSheet } from './MistakeExplanationSheet';
+import type { VocabularyWordLookup } from '../../services/vocabulary/identity';
 
 const areaLabel = {
   'nouns-determiners': 'nouns',
@@ -24,7 +25,7 @@ const areaLabel = {
 
 interface Props {
   onMissingKey: () => void;
-  onWord: (word: string, sentence: string, context?: string) => void;
+  onWord: VocabularyWordLookup;
 }
 
 export function MistakeNotebook({ onMissingKey, onWord }: Props) {
@@ -39,7 +40,18 @@ export function MistakeNotebook({ onMissingKey, onWord }: Props) {
       : undefined;
   const lookup = (word: string, sentence: string) => {
     setSelectedId(null);
-    onWord(word, sentence, sourceContext);
+    onWord(
+      word,
+      sentence,
+      sourceContext ?? '',
+      selected?.unit
+        ? {
+            kind: 'unit',
+            id: selected.unit.id,
+            title: selected.unit.readingPassage?.title || unitTitle(selected.unit, language),
+          }
+        : undefined,
+    );
   };
   return (
     <>
@@ -79,7 +91,19 @@ export function MistakeNotebook({ onMissingKey, onWord }: Props) {
                     unit && !attempt.topicResult
                       ? [unit.instruction, unit.readingPassage?.content].filter(Boolean).join('\n')
                       : undefined;
-                  const onToken = (word: string, sentence: string) => onWord(word, sentence, context);
+                  const onToken = (word: string, sentence: string) =>
+                    onWord(
+                      word,
+                      sentence,
+                      context ?? '',
+                      unit
+                        ? {
+                            kind: 'unit',
+                            id: unit.id,
+                            title: unit.readingPassage?.title || unitTitle(unit, language),
+                          }
+                        : undefined,
+                    );
                   return (
                     <li key={attempt.id} className="space-y-3 py-5 break-words">
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
