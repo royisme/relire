@@ -7,6 +7,7 @@
  */
 import { z } from 'zod';
 import { GrammarTagSchema, type GrammarTag } from './grammar';
+import { TopicAnswerSchema, TopicOriginSchema, TopicQuestionSchema, topicUnitId } from './grammarCheckpoint';
 
 export const ExerciseTypeSchema = z.enum([
   'WORD_TRANSFORM',
@@ -44,6 +45,7 @@ export const ExerciseItemSchema = z.object({
   grammarTag: GrammarTagSchema,
   audioText: z.string().optional(),
   meta: z.record(z.string(), z.unknown()).optional(),
+  topicQuestion: TopicQuestionSchema.optional(),
 });
 export type ExerciseItem = z.infer<typeof ExerciseItemSchema>;
 
@@ -130,6 +132,7 @@ export const ExtractedUnitSchema = z
     subPart: z.string().optional(),
     title: text,
     instruction: text,
+    topicOrigin: TopicOriginSchema.optional(),
     example: z.string().optional(),
     readingPassage: z
       .object({
@@ -155,6 +158,44 @@ export const ExtractedUnitSchema = z
     unit.items.forEach((item, index) => refineExerciseItem(item.type ?? unit.type, item, ctx, ['items', index]));
     if (new Set(unit.items.map((item) => item.id)).size !== unit.items.length)
       ctx.addIssue({ code: 'custom', message: 'Duplicate item IDs' });
+    unit.items.forEach((item, index) => {
+      const fail = (message: string) => ctx.addIssue({ code: 'custom', path: ['items', index], message });
+      if (Boolean(unit.topicOrigin) !== Boolean(item.topicQuestion)) fail('Topic origin and question must be paired');
+      if (!unit.topicOrigin || !item.topicQuestion) return;
+      const parsed = TopicAnswerSchema.safeParse({ ...item, feedback: item.topicQuestion.feedback });
+      if (!parsed.success)
+        for (const issue of parsed.error.issues) ctx.addIssue({ ...issue, path: ['items', index, ...issue.path] });
+      if (item.meta?.strictAccents !== true) fail('Topic items require strict accents');
+      if (
+        item.explanation !== undefined ||
+        item.audioText !== undefined ||
+        item.options !== undefined ||
+        item.answerSource !== undefined
+      )
+        fail('Topic questions cannot carry worksheet explanation, speech, options or answer source');
+    });
+    if (unit.topicOrigin) {
+      const fail = (message: string) => ctx.addIssue({ code: 'custom', message });
+      if (unit.id !== topicUnitId(unit.topicOrigin)) fail('Topic unit identity does not match origin');
+      if (unit.section !== 'GRAMMAIRE' || unit.unitNumber !== 1 || unit.type !== 'FILL_BLANKS')
+        fail('Invalid topic unit defaults');
+      if (unit.title !== unit.topicOrigin.title.en || unit.instruction !== unit.topicOrigin.instruction.en)
+        fail('Topic required strings must match English metadata');
+      if (unit.items.length !== 6) fail('Topic snapshot requires six questions');
+      const checkpoints = new Set<string>();
+      unit.items.forEach((item, index) => {
+        const question = item.topicQuestion;
+        if (!question) return;
+        if (item.type !== (index % 2 === 0 ? 'CHOICE_SELECT' : 'FILL_BLANKS') || item.itemNumber !== index + 1)
+          fail('Invalid topic question order');
+        if (item.grammarTag !== unit.grammarTags[0]) fail('Topic item must use the first tag');
+        if (index % 2 === 0) {
+          if (checkpoints.has(question.checkpointId)) fail('Duplicate checkpoint ID');
+          checkpoints.add(question.checkpointId);
+        } else if (question.checkpointId !== unit.items[index - 1].topicQuestion?.checkpointId)
+          fail('Each checkpoint must own two adjacent questions');
+      });
+    }
   });
 export type ExtractedUnit = z.infer<typeof ExtractedUnitSchema>;
 
@@ -170,6 +211,9 @@ export const ExerciseUnitSchema = ExtractedUnitSchema.safeExtend({
   setTitle: text.optional(),
   level: ExerciseLevelSchema,
   createdAt: z.number().int().positive(),
+}).superRefine((unit, ctx) => {
+  if (unit.topicOrigin && unit.setId !== unit.id)
+    ctx.addIssue({ code: 'custom', path: ['setId'], message: 'A topic revision is its own set' });
 });
 export type ExerciseUnit = z.infer<typeof ExerciseUnitSchema>;
 

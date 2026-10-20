@@ -6,7 +6,7 @@
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { choicePieces } from '../../../services/exercises/answer';
-import { normalizeFrench } from '../../../services/exercises/grading';
+import { normalizeFrench } from '../../../services/exercises/normalizeFrench';
 import { cn } from '../../../lib/utils';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';

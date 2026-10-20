@@ -32,7 +32,7 @@ const draftAnswer = z.union([z.string().trim().min(1), z.array(z.string().trim()
 
 // Models routinely omit draft-only fields described only in prose; defaults normalize
 // those omissions while every other rule stays strict.
-const DraftItemSchema = ExerciseItemSchema.omit({ answerSource: true, meta: true }).extend({
+const DraftItemSchema = ExerciseItemSchema.omit({ answerSource: true, meta: true, topicQuestion: true }).extend({
   expectedAnswer: draftAnswer,
   /** The answer printed in the source material, when it has a key. */
   printedAnswer: draftAnswer.default(null),
@@ -40,7 +40,7 @@ const DraftItemSchema = ExerciseItemSchema.omit({ answerSource: true, meta: true
   blockers: z.array(z.string().min(1)).default([]),
 });
 
-const { importSource: _importSource, ...unitShape } = ExtractedUnitSchema.shape;
+const { importSource: _importSource, topicOrigin: _topicOrigin, ...unitShape } = ExtractedUnitSchema.shape;
 
 export const ImportDraftSchema = z
   .object({

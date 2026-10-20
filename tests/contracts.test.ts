@@ -16,11 +16,24 @@ import {
   type ExerciseUnit,
 } from '../src/types/exercises';
 import { ITEM_BY_TYPE, ITEMS, unitOf } from './fixtures/units';
+import { exerciseJsonSchema, drillsJsonSchema } from '../src/services/exercises/jsonSchema';
 
 const base = unitOf('WORD_TRANSFORM');
 const item = ITEMS.WORD_TRANSFORM;
 // The playable units, without the batch they were saved with (what a model returns).
 const { setId: _setId, level: _level, ...extracted } = base;
+
+test('model-facing schemas never advertise or retain saved topic capabilities', () => {
+  for (const schema of [exerciseJsonSchema(), drillsJsonSchema()]) {
+    expect(JSON.stringify(schema)).not.toContain('topicOrigin');
+    expect(JSON.stringify(schema)).not.toContain('topicQuestion');
+  }
+  const parsed = GeneratedExercisesSchema.parse({
+    units: [{ ...extracted, topicOrigin: {}, items: [{ ...item, topicQuestion: {} }] }],
+  });
+  expect(parsed.units[0]).not.toHaveProperty('topicOrigin');
+  expect(parsed.units[0].items[0]).not.toHaveProperty('topicQuestion');
+});
 
 test('every exercise type has a valid sample unit', () => {
   for (const type of ExerciseTypeSchema.options) {

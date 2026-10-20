@@ -10,6 +10,16 @@ import {
 } from '../src/services/exercises/importDraft';
 import { draftFixture } from './fixtures/importDraft';
 
+test('import-facing contracts omit saved topic metadata', () => {
+  const draft = ImportDraftSchema.parse({
+    units: [
+      { ...draftFixture.units[0], topicOrigin: {}, items: [{ ...draftFixture.units[0].items[0], topicQuestion: {} }] },
+    ],
+  });
+  expect(draft.units[0]).not.toHaveProperty('topicOrigin');
+  expect(draft.units[0].items[0]).not.toHaveProperty('topicQuestion');
+});
+
 const textSource: ImportSource = { kind: 'text', name: 'Texte collé', pages: [] };
 const options = { setId: 'set-1', level: 'B1' as const, createdAt: 1_700_000_000_000 };
 

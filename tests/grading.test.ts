@@ -8,7 +8,8 @@ import {
   recordedAnswerText,
   spokenPrompt,
 } from '../src/services/exercises/answer';
-import { buildAttempt, gradeItem, gradeUnitItem, normalizeFrench } from '../src/services/exercises/grading';
+import { buildAttempt, gradeItem, gradeUnitItem } from '../src/services/exercises/grading';
+import { normalizeFrench } from '../src/services/exercises/normalizeFrench';
 import type { ExerciseAnswer, ExerciseItem, ExerciseType } from '../src/types/exercises';
 import { itemStateId } from '../src/types/exercises';
 import { ITEM_BY_TYPE, ITEMS, unitOf } from './fixtures/units';

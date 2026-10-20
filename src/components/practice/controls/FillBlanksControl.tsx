@@ -5,7 +5,7 @@
  */
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
-import { normalizeFrench } from '../../../services/exercises/grading';
+import { normalizeFrench } from '../../../services/exercises/normalizeFrench';
 import { ExpectedBeside, UnderlineInput, type BlankState } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
 import { InlineMarkup } from '../InlineMarkup';

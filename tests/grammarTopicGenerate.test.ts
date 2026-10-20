@@ -289,6 +289,11 @@ test('actual CLIs use the private path, report errors on stderr and exit 1 on a 
   await cp(join(repositoryRoot, 'scripts/grammar-topics'), join(repo, 'scripts/grammar-topics'), { recursive: true });
   await cp(join(repositoryRoot, 'scripts/grammar-pack'), join(repo, 'scripts/grammar-pack'), { recursive: true });
   await cp(join(repositoryRoot, 'src/types'), join(repo, 'src/types'), { recursive: true });
+  await mkdir(join(repo, 'src/services/exercises'), { recursive: true });
+  await cp(
+    join(repositoryRoot, 'src/services/exercises/normalizeFrench.ts'),
+    join(repo, 'src/services/exercises/normalizeFrench.ts'),
+  );
   await symlink(join(repositoryRoot, 'node_modules'), join(repo, 'node_modules'));
   const cli = async (file: string, args: string[]) => {
     const child = Bun.spawn(['bun', file, ...args], {

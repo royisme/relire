@@ -38,10 +38,17 @@ function requireDictationAudio(
  * it is optional so a missing quote is not a schema failure, and the generation
  * task checks that a given quote really occurs in the article.
  */
-export const GeneratedItemSchema = ExerciseItemSchema.extend({ articleQuote: text.optional() });
+const WorksheetItemSchema = ExerciseItemSchema.omit({ topicQuestion: true });
+export const GeneratedItemSchema = WorksheetItemSchema.extend({ articleQuote: text.optional() });
 export type GeneratedItem = z.infer<typeof GeneratedItemSchema>;
 
-const GeneratedUnitSchema = ExtractedUnitSchema.safeExtend({ items: z.array(GeneratedItemSchema).min(1) });
+const { topicOrigin: _topicOrigin, ...worksheetShape } = ExtractedUnitSchema.shape;
+const GeneratedUnitSchema = z
+  .object({ ...worksheetShape, items: z.array(GeneratedItemSchema).min(1) })
+  .superRefine((unit, ctx) => {
+    const result = ExtractedUnitSchema.safeParse(unit);
+    if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ ...issue });
+  });
 
 /** Units generated from an article ("Make exercises from this article"). */
 export const GeneratedExercisesSchema = z
@@ -76,7 +83,7 @@ export const DrillsSchema = z
   .object({
     drillTitle: text,
     focusSummary: text,
-    items: z.array(ExerciseItemSchema.extend({ type: ExerciseTypeSchema })).min(1),
+    items: z.array(WorksheetItemSchema.extend({ type: ExerciseTypeSchema })).min(1),
   })
   .superRefine((data, ctx) => {
     if (new Set(data.items.map((item) => item.id)).size !== data.items.length)

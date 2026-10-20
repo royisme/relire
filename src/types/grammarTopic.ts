@@ -1,6 +1,7 @@
 /** Owns topic and block contracts and structural validation; not content generation or review decisions. */
 import { z } from 'zod';
-import { ExerciseLevelSchema } from './exercises';
+import { ExerciseLevelSchema, refineExerciseItem } from './exercises';
+import { CheckpointQuestionSchema, scanTopicStrings } from './grammarCheckpoint';
 import { GrammarTagSchema } from './grammar';
 import { grammarTopicSlug as slug } from './grammarTagIndex';
 
@@ -30,6 +31,38 @@ const block = z.discriminatedUnion('type', [
   z.object({ ...base, type: z.literal('note'), text: bilingual }),
 ]);
 
+const checkpoint = z.object({
+  id: slug,
+  title: bilingual,
+  teaching: z.array(block).min(1),
+  questions: z.tuple([CheckpointQuestionSchema, CheckpointQuestionSchema]),
+});
+const learning = z
+  .object({
+    instruction: bilingual,
+    checkpoints: z.tuple([checkpoint, checkpoint, checkpoint]),
+  })
+  .superRefine((value, ctx) => {
+    const ids = new Set<string>();
+    const checkpointIds = new Set<string>();
+    value.checkpoints.forEach((entry, i) => {
+      const fail = (message: string) => ctx.addIssue({ code: 'custom', path: ['checkpoints', i], message });
+      if (checkpointIds.has(entry.id)) fail('Duplicate checkpoint ID');
+      checkpointIds.add(entry.id);
+      const examples = entry.teaching.reduce(
+        (count, item) => count + (item.type === 'examples' ? item.items.length : 0),
+        0,
+      );
+      if (examples > 2) fail('Teaching permits at most two illustrative examples');
+      entry.questions.forEach((question, j) => {
+        if (ids.has(question.id)) fail('Duplicate question ID');
+        ids.add(question.id);
+        if (question.type !== (j === 0 ? 'CHOICE_SELECT' : 'FILL_BLANKS'))
+          fail('Recognition must precede typed production');
+      });
+    });
+  });
+
 export const TopicProvenanceSchema = z.object({
   origin: z.literal('ai-regenerated'),
   referenceSet: text,
@@ -52,6 +85,7 @@ export const GrammarTopicSchema = z
   .object({
     ...GrammarTopicSummarySchema.shape,
     blocks: z.array(block).min(1),
+    learning: learning.optional(),
     related: z.array(slug),
     provenance: TopicProvenanceSchema,
     status: z.enum(['draft', 'reviewed']),
@@ -65,34 +99,43 @@ export const GrammarTopicSchema = z
       if (!topic.reviewedAt) fail(['reviewedAt'], 'reviewedAt is required when status is reviewed');
     }
     if (new Set(topic.tags).size !== topic.tags.length) fail(['tags'], 'duplicate tag');
-    topic.blocks.forEach((item, i) => {
+    topic.learning?.checkpoints.forEach((entry, i) =>
+      entry.questions.forEach((question, j) => {
+        refineExerciseItem(
+          question.type,
+          {
+            ...question,
+            itemNumber: i * 2 + j + 1,
+            grammarTag: topic.tags[0],
+          },
+          ctx,
+          ['learning', 'checkpoints', i, 'questions', j],
+        );
+      }),
+    );
+    const blocks = [
+      ...topic.blocks.map((item, i) => ({ item, path: ['blocks', i] })),
+      ...(topic.learning?.checkpoints.flatMap((entry, i) =>
+        entry.teaching.map((item, j) => ({
+          item,
+          path: ['learning', 'checkpoints', i, 'teaching', j],
+        })),
+      ) ?? []),
+    ];
+    blocks.forEach(({ item, path }) => {
       if (item.type === 'table') {
         item.rows.forEach((row, j) => {
-          if (row.length !== item.header.length) fail(['blocks', i, 'rows', j], 'row width must match header');
+          if (row.length !== item.header.length) fail([...path, 'rows', j], 'row width must match header');
         });
       }
       if (item.type === 'examples' && item.items.some((example) => example.speaker !== undefined)) {
         item.items.forEach((example, j) => {
           if (example.speaker === undefined)
-            fail(['blocks', i, 'items', j, 'speaker'], 'all examples need a speaker or none');
+            fail([...path, 'items', j, 'speaker'], 'all examples need a speaker or none');
         });
       }
     });
-    const scan = (value: unknown, path: (string | number)[] = []) => {
-      if (typeof value === 'string') {
-        if (value !== value.normalize('NFC')) fail(path, 'string is not NFC');
-        const language = path.at(-1);
-        const cjk = /\p{Script=Han}/u.test(value);
-        if ((language === 'fr' || language === 'en') && cjk) fail(path, 'CJK is not allowed in French or English');
-        if (language === 'zh' && !cjk) fail(path, 'Chinese text needs a CJK character');
-        if (language === 'fr' && value.includes("'")) fail(path, 'use the typographic apostrophe U+2019');
-      } else if (Array.isArray(value)) {
-        value.forEach((item, i) => scan(item, [...path, i]));
-      } else if (value !== null && typeof value === 'object') {
-        for (const [key, item] of Object.entries(value)) scan(item, [...path, key]);
-      }
-    };
-    scan(topic);
+    scanTopicStrings(topic, ctx);
   });
 export type GrammarTopic = z.infer<typeof GrammarTopicSchema>;
 
