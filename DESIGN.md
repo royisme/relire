@@ -353,7 +353,7 @@ AI services is one page for three destinations — Text AI, OCR, Speech synthesi
 When an AI feature needs a key, the app opens AI services on the purpose that needs it — Text AI for lookups, generation and grading, OCR for images and PDFs, Speech synthesis for speech — with the key field focused and a short notice; once the key is checked and saved, "Go back to where you were" (drawn from the start, disabled until then) returns to the page the learner left. The first-run guide stays a dialog.
 
 ### Motion
-160–200ms with `ease-out` (`cubic-bezier(0.22, 1, 0.36, 1)`): sheets slide 24px (up on phones, from the right on md+), dialogs and floating controls fade. The Words card uses a functional 180ms two-sided rotation with the same easing; its shown face determines natural height. Under `prefers-reduced-motion`, it switches faces immediately with no rotation or transition; other motion is disabled too. No bounce, pulse or decorative animation.
+Use motion purposefully, not a blanket ban: it should clarify a state change, spatial relationship or response to input without distracting from reading. Default to 160–200ms with `ease-out` (`cubic-bezier(0.22, 1, 0.36, 1)`): sheets slide 24px (up on phones, from the right on md+), dialogs and floating controls fade. The Words card uses a functional 180ms two-sided rotation with the same easing; its shown face determines natural height. Bounce or pulse needs a clear interaction purpose, not decoration. Respect `prefers-reduced-motion`: the card switches faces immediately without rotation or transition, preserving the same controls and feedback.
 
 ## Do's and Don'ts
 

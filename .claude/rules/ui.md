@@ -28,7 +28,8 @@ Read `DESIGN.md` (tokens in `src/index.css`) and `PRODUCT.md` before changing a 
 - Every screen must work in light, sepia and dark. Use roles: `bg-surface` (never `bg-white`), `text-on-fill` on filled buttons (never `text-white`), `bg-scrim/NN` behind overlays, hue text from steps 800-950 (`text-accent-900`). No hex or arbitrary colour values outside `src/index.css`. Check a new screen in all three themes (`relire_theme` in localStorage).
 - Structure with headings and rules, not nested cards or tinted boxes; no decorative icons beside headings or labels; one filled button per view.
 - Prefer `ui/` primitives (`Button` variants and sizes) and design tokens (`ink-*`, `accent-*`, `ok-*`, `bad-*`) over ad-hoc colour classes.
-- No gradients, glass/blur, emoji icons, bounce/pulse animations, uppercase eyebrow labels.
+- No gradients, glass/blur, emoji icons or uppercase eyebrow labels.
+- Use motion to clarify state, spatial relationships or input feedback, not as decoration; do not impose a blanket animation ban. Keep it brief and respect reduced-motion preferences. Bounce or pulse needs a clear interaction purpose.
 - Icons: lucide-react only, one stroke weight, `aria-hidden` when decorative.
 - Never show invented data (sample stats, fake scores, placeholder streaks). Empty means empty.
 - Run `impeccable detect --json src index.html`; keep it at zero findings.
