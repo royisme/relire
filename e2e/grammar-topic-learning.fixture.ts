@@ -1,7 +1,7 @@
 /** TEST-only topic setup and workbench locators; rejects provider/lookup requests instead of mocking answers. */
 import type { Page } from '@playwright/test';
 import { mockTopics, CONTENT_ORIGIN } from './contentService.helpers';
-import { learningFixture } from '../tests/fixtures/grammarLearning';
+import { learningFixture, secondLearningFixture, referenceOnlyFixture } from '../tests/fixtures/grammarLearning';
 import { topicsFixture } from '../tests/fixtures/grammarTopics';
 import en from '../src/i18n/locales/en.json' with { type: 'json' };
 import zh from '../src/i18n/locales/zh.json' with { type: 'json' };
@@ -18,7 +18,10 @@ export async function setup(page: Page, language: 'en' | 'zh' = 'en', theme = 'l
   );
   const topic = learningFixture();
   topic.blocks.push({ type: 'note', text: { ...topic.title, en: 'TEST full reference' } });
-  await mockTopics(page, { ...topicsFixture(), topics: [topic] });
+  const secondTopic = secondLearningFixture();
+  const referenceTopic = referenceOnlyFixture();
+  const pack = { ...topicsFixture(), topics: [topic, secondTopic, referenceTopic] };
+  await mockTopics(page, pack);
   const forbidden: string[] = [];
   await page.route('**/*', async (route) => {
     const request = route.request();
@@ -26,7 +29,7 @@ export async function setup(page: Page, language: 'en' | 'zh' = 'en', theme = 'l
     if (
       request.method() === 'GET' &&
       url.origin === CONTENT_ORIGIN &&
-      ['/v1/topics', '/v1/topics/test-only', '/v1/tag-index'].includes(url.pathname)
+      ['/v1/topics', '/v1/tag-index', ...pack.topics.map((entry) => `/v1/topics/${entry.id}`)].includes(url.pathname)
     )
       return route.fallback();
     if (request.method() === 'GET' && url.origin === 'http://localhost:5174' && !url.pathname.startsWith('/v1/'))
@@ -36,7 +39,7 @@ export async function setup(page: Page, language: 'en' | 'zh' = 'en', theme = 'l
     forbidden.push(`${request.method()} ${url.origin}${url.pathname}`);
     return route.abort('blockedbyclient');
   });
-  return { topic, forbidden };
+  return { topic, secondTopic, referenceTopic, forbidden };
 }
 
 export const workbench = (page: Page) => page.locator('[data-topic-workbench]');

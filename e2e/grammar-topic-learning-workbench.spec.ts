@@ -19,7 +19,7 @@ for (const language of ['en', 'zh'] as const) {
   for (const theme of ['light', 'sepia', 'dark']) {
     for (const phone of [false, true]) {
       test(`complete and review six questions, ${language} ${theme}${phone ? ' @phone' : ''}`, async ({ page }) => {
-        const { topic, forbidden } = await setup(page, language, theme);
+        const { topic, secondTopic, referenceTopic, forbidden } = await setup(page, language, theme);
         const locale = language === 'en' ? en : zh;
         const strings = locale.grammarTopics.learning;
         await page.goto(TOPIC);
@@ -107,6 +107,29 @@ for (const language of ['en', 'zh'] as const) {
         expect(reset.attempts).toHaveLength(6);
         await expect(workbench(page)).toContainText(
           strings.progress.initial.replace('{{checked}}', '0').replace('{{total}}', '6'),
+        );
+        // A reference-only topic keeps its existing reader and never touches exercise stores.
+        await page.goto(`/#/study/grammar/${referenceTopic.id}`);
+        await expect(page.getByRole('heading', { name: referenceTopic.title[language], exact: true })).toBeVisible();
+        await expect(workbench(page)).toHaveCount(0);
+        expect(await stored(page)).toEqual(reset);
+        await page.goto(`/#/study/grammar/${secondTopic.id}`);
+        await expect(
+          workbench(page).getByRole('heading', { name: secondTopic.title[language], exact: true }),
+        ).toBeVisible();
+        expect(await stored(page)).toEqual(reset);
+        await workbench(page).getByRole('button', { name: 'une lampe', exact: true }).click();
+        await workbench(page).getByRole('button', { name: strings.actions.check, exact: true }).click();
+        await expect(workbench(page).getByRole('status')).toHaveText(strings.result.right);
+        await workbench(page).getByRole('button', { name: strings.actions.next, exact: true }).click();
+        await workbench(page).getByRole('textbox').fill('mes cahiers');
+        await workbench(page).getByRole('textbox').press('Enter');
+        await expect(workbench(page).getByRole('status')).toHaveText(strings.result.right);
+        const pilots = await stored(page);
+        expect(pilots.units).toHaveLength(2);
+        expect(pilots.attempts).toHaveLength(8);
+        expect(new Set(pilots.units.map((unit) => unit.topicOrigin!.topicId))).toEqual(
+          new Set([topic.id, secondTopic.id]),
         );
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
         expect(forbidden).toEqual([]);
