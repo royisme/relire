@@ -104,6 +104,7 @@ for (const language of ['en', 'zh'] as const) {
         expect(checked.units).toHaveLength(1);
         expect(checked.attempts).toHaveLength(1);
         const unit = checked.units[0];
+        const unitHref = `#/practice/${encodeURIComponent(unit.id)}`;
         const original = await page.evaluate(async () => {
           const db: Database = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
           return db.exportData();
@@ -146,7 +147,7 @@ for (const language of ['en', 'zh'] as const) {
         await page.goto('/#/practice');
         await page.locator('main a').filter({ hasText: topic.title[language] }).first().click();
         await expect(page.locator('main')).toContainText(unit.topicOrigin!.exerciseRevision.slice(0, 8));
-        await page.locator(`main a[href="#/practice/${unit.id}"]`).click();
+        await page.locator(`main a[href="${unitHref}"]`).click();
         await expect(workbench(page)).toBeVisible();
         // Resume uses first unchecked, not a persisted cursor. Typed UI remains deferred.
         await expect(index(page, language).getByRole('button').nth(1)).toHaveAttribute('aria-current', 'step');
@@ -169,7 +170,7 @@ for (const language of ['en', 'zh'] as const) {
           await storage.deleteUnit(id);
         }, unit.id);
         await page.reload();
-        await expect(page.locator(`a[href="#/practice/${unit.id}"]`)).toHaveCount(0);
+        await expect(page.locator(`a[href="${unitHref}"]`)).toHaveCount(0);
         await page.getByRole('button', { name: strings.result.readFeedback, exact: true }).click();
         await expect(page.getByRole('dialog')).toContainText(
           topic.learning.checkpoints[0].questions[0].feedback.byAnswer![0].message.summary[language],
@@ -179,7 +180,7 @@ for (const language of ['en', 'zh'] as const) {
           const db: Database = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
           await db.importData(backup);
         }, original);
-        await page.goto(`/#/practice/${unit.id}`);
+        await page.goto(`/${unitHref}`);
         await expect(workbench(page)).toBeVisible();
         await index(page, language).getByRole('button').first().click();
         await expect(workbench(page).getByRole('status')).toHaveText(strings.result.wrong);
