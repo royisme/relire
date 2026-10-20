@@ -85,13 +85,23 @@ for (const language of ['en', 'zh'] as const) {
             ).toBeDisabled();
             if (at === 1) {
               await input.fill('cole');
-              await input.press('Home');
+              // Home does not move the caret in phone emulation; establish the insertion precondition explicitly.
+              await input.evaluate((element: HTMLInputElement) => element.setSelectionRange(0, 0));
+              const readSelection = () =>
+                input.evaluate((element: HTMLInputElement) => ({
+                  start: element.selectionStart,
+                  end: element.selectionEnd,
+                  inputFocused: document.activeElement === element,
+                }));
+              expect(await readSelection()).toEqual({ start: 0, end: 0, inputFocused: true });
               await page.getByRole('button', { name: locale.practice.chars.toggle, exact: true }).click();
+              expect(await readSelection()).toEqual({ start: 0, end: 0, inputFocused: true });
               await page
                 .getByRole('group', { name: locale.practice.chars.label, exact: true })
                 .getByRole('button', { name: 'é', exact: true })
                 .click();
               await expect(input).toHaveValue('école');
+              expect(await readSelection()).toEqual({ start: 1, end: 1, inputFocused: true });
               await expect(input).toBeFocused();
               await input.press('Escape');
             } else await input.fill(at === 3 ? 'ecole' : 'collège');
