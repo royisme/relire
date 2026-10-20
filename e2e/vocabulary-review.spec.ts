@@ -1,16 +1,25 @@
 /** Integrated Words routes/reveal/durability/keyboard/book-cache contracts; invented data, no real providers. Lead runs. */
-import type { Page } from '@playwright/test';
 import { expect, overflowing, settled, test } from './fixtures';
 import { mockConjugationDeviceVoice } from './deviceSpeech.helpers';
 import { testBook } from '../tests/fixtures/vocabulary';
-import { seed, stored } from './vocabulary.helpers';
+import {
+  seed,
+  stored,
+  refuseWrites,
+  holdVocabularyWrites,
+  observeVocabularyTransactions,
+  reviewGeometry,
+  cacheFault,
+  cacheRows,
+} from './vocabulary.helpers';
 import { VOCABULARY_REQUEST } from './contentService.helpers';
 import { vocabularyPages } from '../scripts/vocabulary/publication';
 type Storage = typeof import('../src/storage/vocabulary');
 type Db = typeof import('../src/storage/db');
 const labels = {
   en: {
-    reveal: 'Show answer',
+    reveal: 'Flip card',
+    front: 'Flip to front',
     answer: 'Answer',
     skip: 'Skip for now',
     all: 'All words',
@@ -18,11 +27,12 @@ const labels = {
     start: 'Start / continue review',
     back: 'Back to Words',
     browse: 'Browse words',
-    good: 'Good In 10 minutes',
+    good: 'Remembered',
     error: 'View error details',
   },
   zh: {
-    reveal: '显示答案',
+    reveal: '翻转卡片',
+    front: '翻回正面',
     answer: '答案',
     skip: '暂时跳过',
     all: '全部词汇',
@@ -30,41 +40,14 @@ const labels = {
     start: '开始或继续复习',
     back: '返回词汇',
     browse: '浏览词汇',
-    good: '记得 10 分钟后',
+    good: '记得',
     error: '查看错误详情',
   },
 };
-async function refuseWrites(page: Page, refuse: boolean, reason = 'TEST vocabulary disk refused') {
-  await page.evaluate(
-    ({ refuse, reason }) => {
-      const globals = globalThis as {
-        vocabularyRefuses?: boolean;
-        vocabularyPatched?: boolean;
-        vocabularyReason?: string;
-        ratingOperations?: string[];
-      };
-      globals.vocabularyRefuses = refuse;
-      globals.vocabularyReason = reason;
-      if (globals.vocabularyPatched) return;
-      globals.vocabularyPatched = true;
-      globals.ratingOperations = [];
-      // oxlint-disable-next-line typescript/unbound-method -- Fault injection delegates with the active native store.
-      const put = IDBObjectStore.prototype.put;
-      IDBObjectStore.prototype.put = function (value, key) {
-        if (this.name === 'vocab' && value.history?.length)
-          globals.ratingOperations!.push(value.history.at(-1).operationId);
-        if (globals.vocabularyRefuses && (this.name === 'vocab' || this.name === 'meta'))
-          throw new Error(globals.vocabularyReason);
-        return put.call(this, value, key);
-      };
-    },
-    { refuse, reason },
-  );
-}
 for (const phone of [false, true])
   for (const language of ['en', 'zh'] as const)
     for (const theme of ['light', 'sepia', 'dark']) {
-      test(`Words durable reveal and native keys ${language} ${theme}${phone ? ' @phone' : ''}`, async ({
+      test(`Words two-way flip has no pre-reveal rating dashboard ${language} ${theme}${phone ? ' @phone' : ''}`, async ({
         page,
         ai,
       }) => {
@@ -97,36 +80,149 @@ for (const phone of [false, true])
         await expect(page.locator('main')).not.toContainText('nom TEST');
         await expect(page.locator('main')).not.toContainText('Une phrase');
         await expect(page.locator('main [aria-label*="TEST meaning"], main [title*="TEST meaning"]')).toHaveCount(0);
-        const controls = page.locator('[data-vocabulary-controls]');
-        const before = await controls.boundingBox();
+        const card = page.locator('[data-vocabulary-card]');
+        const backFace = page.locator('[data-vocabulary-face="back"]');
+        await expect(backFace).toHaveCount(0);
+        await expect(page.getByRole('button', { name: /^(Again|Hard|Good|Easy)(\s|$)/ })).toHaveCount(0);
+        await expect(page.locator('[data-vocabulary-recall]')).toHaveCount(0);
+        const before = await card.boundingBox();
         const reveal = page.getByRole('button', { name: text.reveal, exact: true });
+        await expect(reveal).toHaveCount(1);
+        await page.keyboard.press('1');
+        await page.keyboard.press('2');
+        expect((await stored(page))[0].history).toHaveLength(0);
         await reveal.focus();
         await reveal.dispatchEvent('keydown', { key: 'Enter', code: 'Enter', isComposing: true });
         expect((await stored(page))[0].introducedAt).toBeNull();
         await page.keyboard.down('Enter');
         await expect(page.getByRole('heading', { name: text.answer, exact: true })).toBeFocused();
-        await reveal.dispatchEvent('keydown', { key: 'Enter', code: 'Enter', repeat: true });
+        await page.locator('[data-vocabulary-face="front"] [data-vocabulary-flip]').dispatchEvent('keydown', {
+          key: 'Enter',
+          code: 'Enter',
+          repeat: true,
+        });
         await page.keyboard.up('Enter');
         expect((await stored(page))[0].history).toHaveLength(0);
         expect((await stored(page))[0].introducedAt).not.toBeNull();
-        expect((await controls.boundingBox())?.y).toBe(before?.y);
+        await expect(card).toHaveAttribute('data-face', 'back');
+        await expect(page.locator('[data-vocabulary-face="front"]')).toHaveAttribute('inert', '');
+        await settled(page);
+        expect((await card.boundingBox())?.y).toBe(before?.y);
+        const turn = await page.locator('.vocabulary-flashcard-turn').evaluate((element) => ({
+          transform: getComputedStyle(element).transform,
+          transition: getComputedStyle(element).transitionDuration,
+        }));
+        expect(turn.transform).not.toBe('none');
+        expect(turn.transition).toBe('0.18s');
+        const transactions = await observeVocabularyTransactions(page);
+        for (let flip = 0; flip < 4; flip++) {
+          await page.getByRole('button', { name: text.front, exact: true }).click();
+          await expect(reveal).toBeFocused();
+          await expect(backFace).toHaveAttribute('aria-hidden', 'true');
+          await expect(backFace).toHaveAttribute('inert', '');
+          await expect(page.getByRole('heading', { name: text.answer, exact: true })).toHaveCount(0);
+          await expect(page.locator('[data-vocabulary-recall]')).toHaveCount(0);
+          await page.keyboard.press('2');
+          await reveal.click();
+          await expect(page.getByRole('heading', { name: text.answer, exact: true })).toBeFocused();
+        }
+        expect(await transactions()).toBe(0);
+        expect((await stored(page))[0].history).toHaveLength(0);
+        const snapshot = await page.evaluate(async () => {
+          const storage: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
+          return storage.exportData();
+        });
+        expect(snapshot.vocabularyMeta.days.flatMap((day) => day.introducedKeys)).toEqual(['test-a']);
+        await settled(page);
+        expect(await overflowing(page.locator('main'))).toEqual([]);
+        await expect(backFace).toContainText('Une phrase TEST 1.');
+        expect(await backFace.evaluate((face) => face.scrollHeight <= face.clientHeight + 1)).toBe(true);
         await page.keyboard.press('3');
+        expect((await stored(page))[0].history).toHaveLength(0);
+        await page.keyboard.press('1');
         await expect(page.getByRole('heading', { name: 'test-b', exact: true })).toBeVisible();
         await expect(reveal).toBeFocused();
         await page.keyboard.down('Space');
         await page.keyboard.up('Space');
         await expect(page.getByRole('heading', { name: text.answer, exact: true })).toBeFocused();
-        await page.getByRole('button', { name: text.good, exact: true }).click();
+        if (language === 'en') await page.keyboard.press('2');
+        else await page.getByRole('button', { name: text.good, exact: true }).click();
         await expect(
           page.getByRole('heading', { name: language === 'en' ? 'Done for now / waiting' : '暂告一段落，等待复习' }),
         ).toBeFocused();
-        expect((await stored(page)).map((row) => row.history.length)).toEqual([1, 1]);
+        const rows = await stored(page);
+        expect(rows.map((row) => row.history.map((record) => record.rating))).toEqual([[1], [4]]);
+        for (const [index, row] of rows.entries()) {
+          const record = row.history[0];
+          expect(record.next).toEqual({
+            phase: 'learning',
+            step: index === 0 ? 0 : 1,
+            dueAt: record.timestamp + (index === 0 ? 1 : 10) * 60_000,
+            repetitions: 0,
+            intervalDays: 0,
+            easeFactor: 2.5,
+          });
+          expect(row.schedule).toEqual(record.next);
+        }
         expect(await overflowing(page.locator('main'))).toEqual([]);
         await page.getByRole('link', { name: text.browse }).click();
         await expect(page).toHaveURL(/#\/study\/words\/all$/);
         expect(ai.calls.word + ai.calls.sentence + ai.calls.tts).toBe(0);
       });
     }
+test('first flip waits for IndexedDB; reduced motion and held keys never flip-and-grade or reach the next word', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await seed(page);
+  await page.goto('/#/study/words/review');
+  const flip = page.getByRole('button', { name: 'Flip card', exact: true });
+  await expect(flip).toBeFocused();
+  await settled(page);
+  const before = await reviewGeometry(page);
+  const release = await holdVocabularyWrites(page);
+  try {
+    await page.keyboard.down('Enter');
+    await expect(page.getByRole('button', { name: 'Saving…', exact: true })).toBeDisabled();
+    await expect(page.locator('[data-vocabulary-face="back"]')).toHaveCount(0);
+    expect(await reviewGeometry(page)).toEqual(before);
+  } finally {
+    await release();
+  }
+  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeFocused();
+  await page.keyboard.down('Enter');
+  await page.keyboard.up('Enter');
+  expect((await stored(page))[0].history).toHaveLength(0);
+  const front = page.getByRole('button', { name: 'Flip to front', exact: true });
+  await front.focus();
+  await page.keyboard.down('Space');
+  await page.keyboard.down('Space');
+  await page.keyboard.up('Space');
+  await expect(flip).toBeFocused();
+  await page.keyboard.press('2');
+  await page.keyboard.down('Space');
+  await page.keyboard.up('Space');
+  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeFocused();
+  expect(
+    await page.locator('.vocabulary-flashcard-turn').evaluate((turn) => ({
+      transform: getComputedStyle(turn).transform,
+      transition: getComputedStyle(turn).transitionDuration,
+    })),
+  ).toEqual({ transform: 'none', transition: '0s' });
+  await front.dispatchEvent('keydown', { key: 'Enter', code: 'Enter', keyCode: 229 });
+  await expect(page.locator('[data-vocabulary-card]')).toHaveAttribute('data-face', 'back');
+  const remembered = page.getByRole('button', { name: 'Remembered', exact: true });
+  await remembered.focus();
+  await page.keyboard.down('Enter');
+  await expect(flip).toBeFocused();
+  await page.keyboard.down('Enter');
+  await page.keyboard.up('Enter');
+  await expect(page.getByRole('heading', { name: 'test-b', exact: true })).toBeVisible();
+  expect((await stored(page)).map((row) => row.history.length)).toEqual([1, 0]);
+  await page.getByRole('button', { name: 'Skip for now', exact: true }).click();
+  expect((await stored(page))[1].introducedAt).toBeNull();
+});
+
 test('commit failure keeps front hidden; rating failure keeps answer/decision and storage-only retry advances once', async ({
   page,
   ai,
@@ -135,35 +231,42 @@ test('commit failure keeps front hidden; rating failure keeps answer/decision an
   await page.goto('/#/study/words/review');
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   const status = page.locator('[data-vocabulary-status]');
-  const controls = page.locator('[data-vocabulary-controls]');
   await settled(page);
-  const beforeFailure = await controls.boundingBox();
+  const beforeFailure = await reviewGeometry(page);
   const reason = 'TEST vocabulary disk refused. ' + 'Long TEST storage reason. '.repeat(80);
   await refuseWrites(page, true, reason);
-  await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
   await expect(page.locator('main')).not.toContainText('TEST meaning');
   expect((await stored(page))[0].introducedAt).toBeNull();
   await expect(status.getByText(reason, { exact: true })).toBeVisible();
-  expect(await controls.boundingBox()).toEqual(beforeFailure);
-  await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeFocused();
+  expect(await reviewGeometry(page)).toEqual(beforeFailure);
+  await expect(page.getByRole('button', { name: 'Flip card', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'View error details' }).click();
   await expect(page.getByRole('alert')).toHaveText(reason);
   await page.keyboard.press('Escape');
   await refuseWrites(page, false);
-  await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeVisible();
   await refuseWrites(page, true);
-  const good = page.getByRole('button', { name: 'Good In 10 minutes', exact: true });
+  await settled(page);
+  const backGeometry = await reviewGeometry(page);
+  const good = page.getByRole('button', { name: 'Remembered', exact: true });
   await good.click();
   await expect(good).toHaveAttribute('aria-pressed', 'true');
   await expect(good).toBeFocused();
   await expect(status).toContainText('TEST vocabulary disk refused');
-  expect(await controls.boundingBox()).toEqual(beforeFailure);
+  expect(await reviewGeometry(page)).toEqual(backGeometry);
   await page.getByRole('button', { name: 'View error details' }).click();
-  await page.keyboard.press('3');
+  await page.keyboard.press('2');
+  await page.getByRole('button', { name: 'Flip to front', exact: true }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-vocabulary-card]')).toHaveAttribute('data-face', 'back');
   expect((await stored(page))[0].history).toHaveLength(0);
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: 'Again In 1 minute', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'View error details' })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Forgot', exact: true })).toBeDisabled();
+  await page.getByRole('heading', { name: 'Answer', exact: true }).focus();
+  await page.keyboard.press('1');
   await expect(page.locator('main')).toContainText('TEST meaning test-a');
   await refuseWrites(page, false);
   await good.click();
@@ -182,7 +285,7 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     await storage.saveVocabularyPreferences(0);
   });
-  await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
   await expect(page.locator('main')).not.toContainText('TEST meaning');
   expect((await stored(page)).every((row) => row.introducedAt === null)).toBe(true);
   await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
@@ -192,41 +295,29 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
     await storage.saveVocabularyPreferences(20);
   });
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
-  await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     const snapshot = await storage.exportData();
     await storage.importData(snapshot);
   });
-  await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Flip card', exact: true })).toBeEnabled();
   await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toHaveCount(0);
-  await page.keyboard.press('3');
+  await page.keyboard.press('2');
+  expect((await stored(page))[0].history).toHaveLength(0);
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeFocused();
+  await page.evaluate(async () => {
+    const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
+    const snapshot = await storage.getVocabularySnapshot('test-a');
+    await storage.resetVocabularySchedule('test-a', snapshot.tokens, Date.now());
+  });
+  await page.getByRole('button', { name: 'Remembered', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Flip card', exact: true })).toBeFocused();
+  await expect(page.locator('[data-vocabulary-face="back"]')).toHaveCount(0);
   expect((await stored(page))[0].history).toHaveLength(0);
 });
-async function cacheFault(page: Page, refuse: boolean) {
-  await page.evaluate((refuse) => {
-    const globals = globalThis as { restoreVocabularyCache?: () => void };
-    globals.restoreVocabularyCache?.();
-    delete globals.restoreVocabularyCache;
-    if (!refuse) return;
-    // oxlint-disable-next-line typescript/unbound-method -- Restored after the update, including on assertion failure.
-    const put = IDBObjectStore.prototype.put;
-    globals.restoreVocabularyCache = () => {
-      IDBObjectStore.prototype.put = put;
-    };
-    IDBObjectStore.prototype.put = function (value, key) {
-      if (this.name === 'cache' && value.key === 'content:vocabulary:tcf-7000')
-        throw new Error('TEST book cache refused');
-      return put.call(this, value, key);
-    };
-  }, refuse);
-}
-const cacheRows = (page: Page) =>
-  page.evaluate(async () => {
-    const storage: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    return (await storage.db()).getAll('cache');
-  });
 for (const failure of ['partial', 'rate', 'hash', 'storage'] as const) {
   test(`complete-book ${failure} failure keeps the durable old cache; explicit restart/retry recovers from page0`, async ({
     page,
@@ -346,6 +437,8 @@ test('explicit Listen uses the selected device engine and session speech stops o
   await page.getByRole('button', { name: 'Listen', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.deviceSpeechTest.spoken)).toEqual(['test-a']);
+  await expect(page.locator('[data-vocabulary-card]')).toHaveAttribute('data-face', 'front');
+  await expect(page.locator('[data-vocabulary-face="back"]')).toHaveCount(0);
   await page.getByRole('button', { name: 'Skip for now' }).click();
   await expect(page.getByRole('heading', { name: 'test-b', exact: true })).toBeVisible();
   const phase = () =>
@@ -381,19 +474,19 @@ test('7000 synthetic entries paginate at50; unseen fronts create no row and no-k
   await page.getByRole('button', { name: 'Skip for now' }).click();
   await expect(page.getByRole('heading', { name: 'test-1', exact: true })).toBeVisible();
   expect(await stored(page)).toEqual([]);
-  await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeVisible();
   expect((await stored(page))[0].key).toBe('test-1');
   await page.getByRole('link', { name: 'Back to Words' }).click();
   await page.context().setOffline(true);
   await page.getByRole('link', { name: 'Start / continue review' }).click();
-  await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
   await expect(page.locator('main')).toContainText('TEST meaning test-1');
   await page.evaluate(async () => {
     const locale = await import(/* @vite-ignore */ '/src/i18n/index.ts' as string);
     locale.setAppLanguage('zh');
   });
   await expect(page.getByRole('heading', { name: '答案', exact: true })).toBeFocused();
-  await expect(page.getByRole('heading', { name: 'test-1', exact: true })).toBeVisible();
+  await expect(page.locator('[data-vocabulary-face="back"]')).toContainText('test-1');
   expect(ai.calls.word + ai.calls.tts).toBe(0);
 });

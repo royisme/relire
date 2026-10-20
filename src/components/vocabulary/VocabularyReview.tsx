@@ -1,27 +1,28 @@
-/** Flat reveal workbench with permanent controls above prose, guarded physical keys and session-owned speech. */
+/** Owns the visual face and external recall actions, guarded physical keys, errors and session-owned speech. */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { VocabularyBook, VocabularyRating } from '../../types/vocabulary';
+import type { VocabularyBook } from '../../types/vocabulary';
 import type { VocabularyModel } from '../../hooks/useVocabulary';
 import { useVocabularyReview } from '../../hooks/useVocabularyReview';
-import { initialVocabularySchedule, nextVocabularySchedule, vocabularyDue } from '../../utils/srs';
 import { getSpeechState, speechKey, stopSpeech } from '../../utils/speech';
 import { Button } from '../ui/button';
-import { SpeakButton } from '../ui/speak-button';
 import { Sheet, OverlayHeader } from '../ui/overlay';
 import { Link } from '../shell/Link';
-import { VocabularyAnswer } from './VocabularyAnswer';
-const ratings: VocabularyRating[] = [1, 3, 4, 5];
+import { Flashcard } from './Flashcard';
+const outcomes = ['forgot', 'remembered'] as const;
 export function VocabularyReview({ model, book }: { model: VocabularyModel; book?: VocabularyBook }) {
   const { t } = useTranslation();
   const session = useVocabularyReview(model, book);
-  const { active, revealed, busy, pending, error, rate } = session;
+  const { active, revealed, busy, pending, error, recall } = session;
+  const [face, setFace] = useState<'front' | 'back'>('front');
+  // Reset during render, so restore/stale replacement cannot paint a different answer.
+  if (!revealed && face !== 'front') setFace('front');
+  const back = revealed && face === 'back';
   const hasActive = active !== null;
   const message = error ?? (session.quotaReached ? t('vocab.quotaReached') : null);
   const [errorOpen, setErrorOpen] = useState(false);
-  const revealButton = useRef<HTMLButtonElement>(null);
   const submittedControl = useRef<HTMLButtonElement | null>(null);
-  const answerHeading = useRef<HTMLHeadingElement>(null);
+  const recallControls = useRef<Partial<Record<'forgot' | 'remembered', HTMLButtonElement | null>>>({});
   const waitHeading = useRef<HTMLHeadingElement>(null);
   const held = useRef(new Set<string>());
   const ownedSpeech = useRef<string | null>(null);
@@ -32,10 +33,8 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
   const key = active?.candidate.key;
   useEffect(() => () => stopOwned(), [key]);
   useLayoutEffect(() => {
-    (revealed ? answerHeading.current : hasActive ? revealButton.current : waitHeading.current)?.focus({
-      preventScroll: true,
-    });
-  }, [key, revealed, hasActive]);
+    if (!hasActive) waitHeading.current?.focus({ preventScroll: true });
+  }, [hasActive]);
   useLayoutEffect(() => {
     if (busy) return;
     const control = submittedControl.current;
@@ -52,9 +51,10 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
       }
       const repeated = event.repeat || held.current.has(event.code);
       held.current.add(event.code);
+      const overlayOpen = document.querySelector('[role="dialog"],[role="menu"]');
       if (
-        repeated &&
-        ['Enter', ' ', '1', '2', '3', '4'].includes(event.key) &&
+        (repeated || (overlayOpen && !target?.closest('[role="dialog"],[role="menu"]'))) &&
+        ['Enter', ' ', '1', '2'].includes(event.key) &&
         target?.closest('[data-vocabulary-review]')
       ) {
         event.preventDefault();
@@ -63,17 +63,18 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
       if (
         repeated ||
         busy ||
-        !revealed ||
+        !back ||
         !active ||
-        document.querySelector('[role="dialog"]') ||
-        target?.closest('input,textarea,select,[contenteditable="true"]') ||
+        overlayOpen ||
+        target?.closest('input,textarea,select,[contenteditable="true"],a,button:not([data-vocabulary-recall])') ||
         !target?.closest('[data-vocabulary-review]')
       )
         return;
-      const index = ['1', '2', '3', '4'].indexOf(event.key);
-      if (index >= 0) {
+      const outcome = outcomes[['1', '2'].indexOf(event.key)];
+      if (outcome) {
         event.preventDefault();
-        void rate(ratings[index]);
+        submittedControl.current = recallControls.current[outcome] ?? null;
+        void recall(outcome);
       }
     };
     const keyup = (event: KeyboardEvent) => {
@@ -88,26 +89,21 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
       document.removeEventListener('keyup', keyup, true);
       window.removeEventListener('blur', blur);
     };
-  }, [rate, busy, revealed, active]);
-  const due = model.rows.filter((row) => vocabularyDue(row.schedule, session.now)).length;
-  const remaining = Math.max(0, model.preferences.newPerDay - model.day.introducedKeys.length);
-  const schedule = active?.row?.schedule ?? initialVocabularySchedule(session.now);
+  }, [recall, busy, back, active]);
+  const flip = async () => {
+    if (busy) return;
+    if (revealed) setFace(back ? 'front' : 'back');
+    else if (await session.reveal()) setFace('back');
+  };
   return (
     <div
       data-vocabulary-review
       className="space-y-5"
       tabIndex={-1}
-      onKeyDown={(event) => {
-        if (
-          event.target === event.currentTarget &&
-          !event.repeat &&
-          !event.nativeEvent.isComposing &&
-          !revealed &&
-          ['Enter', ' '].includes(event.key)
-        ) {
-          event.preventDefault();
-          void session.reveal();
-        }
+      onClickCapture={(event) => {
+        const target = event.target as HTMLElement;
+        const button = target.closest('button');
+        if (button) submittedControl.current = button;
       }}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
@@ -121,68 +117,43 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
           {t('vocab.sessionCounts', { ratings: session.ratings, introductions: session.introductions })}
         </span>
       </div>
-      <p className="tnum text-sm text-ink-600">{t('vocab.reviewCounts', { due, remaining })}</p>
+      <p className="tnum text-sm text-ink-600">
+        {t('vocab.reviewCounts', { due: session.due, remaining: session.remaining })}
+      </p>
       {active ? (
-        <section className="rounded-lg border border-ink-200 bg-surface p-4 sm:p-6">
-          <header className="space-y-3 py-6 text-center">
-            <h1 lang="fr" className="break-words font-serif text-[32px] font-semibold leading-tight sm:text-[40px]">
-              {active.candidate.word}
-            </h1>
-            <SpeakButton
-              text={active.candidate.word}
-              label={t('wordModal.listen')}
-              stopLabel={t('reader.stop')}
-              variant="ghost"
-              showLabel
-              onClick={() => {
-                ownedSpeech.current = speechKey(active.candidate.word);
-              }}
-            />
-          </header>
-          <div data-vocabulary-controls className="space-y-3 border-y border-ink-200 py-4">
+        <div className="mx-auto max-w-2xl space-y-3">
+          <Flashcard
+            key={key}
+            word={active.candidate.word}
+            answer={revealed ? { ...active.candidate, row: active.row } : null}
+            face={back ? 'back' : 'front'}
+            busy={busy}
+            onFlip={() => void flip()}
+            onListen={() => {
+              ownedSpeech.current = speechKey(active.candidate.word);
+            }}
+          />
+          <div data-vocabulary-controls className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              <Button
-                ref={revealButton}
-                variant={revealed ? 'outline' : 'default'}
-                disabled={busy || revealed}
-                aria-busy={busy && !revealed}
-                onClick={(event) => {
-                  submittedControl.current = event.currentTarget;
-                  void session.reveal();
-                }}
-              >
-                {t(busy && !revealed ? 'vocab.saving' : 'vocab.showAnswer')}
-              </Button>
-              <Button variant="outline" disabled={busy || !!pending} onClick={session.skip}>
+              {back &&
+                outcomes.map((outcome) => (
+                  <Button
+                    key={outcome}
+                    ref={(control) => {
+                      recallControls.current[outcome] = control;
+                    }}
+                    data-vocabulary-recall={outcome}
+                    variant={outcome === 'remembered' ? 'default' : 'outline'}
+                    disabled={busy || (!!pending && pending.outcome !== outcome)}
+                    aria-pressed={pending?.outcome === outcome}
+                    onClick={() => void recall(outcome)}
+                  >
+                    {t(`vocab.${outcome}`)}
+                  </Button>
+                ))}
+              <Button className="col-span-2" variant="ghost" disabled={busy || !!pending} onClick={session.skip}>
                 {t('vocab.skip')}
               </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {ratings.map((rating) => {
-                const preview = nextVocabularySchedule(schedule, rating, session.now);
-                return (
-                  <Button
-                    key={rating}
-                    className="h-16 flex-col whitespace-normal px-2"
-                    variant={revealed && rating === 4 ? 'default' : 'outline'}
-                    disabled={!revealed || busy || (!!pending && pending.rating !== rating)}
-                    aria-pressed={pending?.rating === rating}
-                    onClick={(event) => {
-                      submittedControl.current = event.currentTarget;
-                      void rate(rating);
-                    }}
-                  >
-                    <span>{t(`vocab.rating.${rating}`)}</span>
-                    <span className="tnum text-xs">
-                      {revealed
-                        ? preview.phase === 'review'
-                          ? t('vocab.days', { count: preview.intervalDays })
-                          : t('vocab.minutes', { count: Math.round((preview.dueAt - session.now) / 60_000) })
-                        : '—'}
-                    </span>
-                  </Button>
-                );
-              })}
             </div>
             <div
               data-vocabulary-status
@@ -203,21 +174,12 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
                     {t('vocab.errorDetails')}
                   </Button>
                 </>
-              ) : (
-                t(revealed ? 'vocab.revealed' : 'vocab.recall')
-              )}
+              ) : back ? (
+                t('vocab.revealed')
+              ) : null}
             </div>
           </div>
-          {revealed && (
-            <section className="space-y-5 pt-6">
-              <h2 ref={answerHeading} tabIndex={-1} className="font-serif text-lg font-semibold">
-                {t('vocab.answer')}
-              </h2>
-              <VocabularyAnswer word={{ ...active.candidate, row: active.row }} snapshot />
-              <p className="text-xs text-ink-600">{t('vocab.scheduleHelp')}</p>
-            </section>
-          )}
-        </section>
+        </div>
       ) : (
         <section className="space-y-3 border-y border-ink-200 py-10">
           <h1 ref={waitHeading} tabIndex={-1} className="font-serif text-2xl font-semibold">

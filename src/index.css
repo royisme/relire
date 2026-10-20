@@ -265,6 +265,42 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Functional Words flip: only the shown face sets natural reading height. */
+.vocabulary-flashcard {
+  perspective: 1200px;
+  overflow-anchor: none;
+}
+.vocabulary-flashcard-turn {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 180ms var(--ease-out);
+}
+.vocabulary-flashcard[data-face='back'] .vocabulary-flashcard-turn {
+  transform: rotateY(180deg);
+}
+.vocabulary-flashcard-face {
+  backface-visibility: hidden;
+  overflow-wrap: anywhere;
+}
+.vocabulary-flashcard-back {
+  transform: rotateY(180deg);
+}
+.vocabulary-flashcard-face[inert] {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vocabulary-flashcard .vocabulary-flashcard-turn,
+  .vocabulary-flashcard .vocabulary-flashcard-face {
+    transform: none;
+    transition: none;
+  }
+  .vocabulary-flashcard-face[inert] {
+    visibility: hidden;
+  }
+}
+
 /* Overlay motion */
 @keyframes sheet-in-right {
   from {

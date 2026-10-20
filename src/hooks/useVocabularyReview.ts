@@ -1,6 +1,7 @@
 /** One transient review visit: authoritative captures, durable reveal/rating, retry identity and exclusions. */
 import { useEffect, useRef, useState } from 'react';
-import type { VocabularyBook, VocabularyRating, VocabularyRow, VocabularyTokens } from '../types/vocabulary';
+import type { VocabularyBook, VocabularyRow, VocabularyTokens } from '../types/vocabulary';
+import { vocabularyDue } from '../utils/srs';
 import { vocabularyQueue, type VocabularyJoined } from '../services/vocabulary/queue';
 import {
   getVocabularySnapshot,
@@ -20,7 +21,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quotaReached, setQuotaReached] = useState(false);
-  const [pending, setPending] = useState<{ operationId: string; rating: VocabularyRating } | null>(null);
+  const [pending, setPending] = useState<{ operationId: string; rating: 1 | 4 } | null>(null);
   const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set());
   const [ratings, setRatings] = useState(0);
   const [introductions, setIntroductions] = useState(0);
@@ -98,6 +99,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
         setActive({ candidate: active.candidate, ...result });
         setRevealed(true);
         if (result.introduced) setIntroductions((n) => n + 1);
+        return true;
       }
     } catch (error) {
       await handleFailure(error);
@@ -105,8 +107,10 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
       lock.current = false;
       if (alive.current) setBusy(false);
     }
+    return false;
   };
-  const rate = async (rating: VocabularyRating) => {
+  const recall = async (outcome: 'forgot' | 'remembered') => {
+    const rating = outcome === 'forgot' ? 1 : 4;
     if (!active || !revealed || lock.current || (pending && pending.rating !== rating)) return;
     const operation = pending ?? { operationId: crypto.randomUUID(), rating };
     setPending(operation);
@@ -143,13 +147,15 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     busy,
     error: error ?? model.error,
     quotaReached,
-    pending,
+    pending: pending ? { outcome: pending.rating === 1 ? ('forgot' as const) : ('remembered' as const) } : null,
     ratings,
     introductions,
     now,
     nextDue: queue.nextDue,
+    due: model.rows.filter((row) => vocabularyDue(row.schedule, now)).length,
+    remaining: Math.max(0, model.preferences.newPerDay - model.day.introducedKeys.length),
     reveal,
-    rate,
+    recall,
     skip,
     retry: () => {
       setError(null);

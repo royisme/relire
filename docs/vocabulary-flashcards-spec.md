@@ -4,6 +4,8 @@ Status: **Code accepted and locally integrated; original corpus imported to loca
 
 Source baseline: `e876e6a`, rechecked against `517ba2d`. Revised on 2026-10-19 after the source-checked Argon review and the owner's instruction to revise, then again after a second source-checked review of `517ba2d` (C1 content ceiling, a cut client error extension, file-map corrections). First reveal now commits a new introduction; the existing long-term formula remains an explicit version-one limitation. Both specification reviews' dispositions are recorded in section 14; they do not constitute runtime acceptance. Subsequent implementation acceptance and private preparation are recorded in the joint kickoff's execution checkpoint.
 
+**Approved Words flip-card amendment (2026-10-20):** the owner adopted the two-way card with external binary Forgot/Remembered recall feedback. This supersedes the original flat/no-flip/four-rating UI contract, not the scheduler, storage, quota, identity, backup or historical-rating contracts. No future memory-curve algorithm is selected or promised to reconstruct state from history.
+
 Read `CLAUDE.md`, `PRODUCT.md`, `DESIGN.md`, `docs/conventions.md`, `docs/architecture.md`, `docs/development.md`, `.claude/rules/{ui,storage,i18n,speech,typescript}.md`, and this specification before implementation. Preserve unrelated work. Grammar checkpoints are not a product prerequisite, but [the joint kickoff plan](learning-implementation-kickoff.md) schedules Grammar acceptance first to serialize shared unit/notebook/backup edits. Joint readiness feedback and remaining owner gates are in section 15.
 
 ## 1. Deliverable and fixed boundaries
@@ -12,7 +14,7 @@ Build one vocabulary system, not parallel built-in and personal flashcard engine
 
 1. A built-in TCF wordbook supplies words, meanings and optional examples.
 2. Reading bookmarks attach context to the same canonical word; they never create a second schedule for it.
-3. Study presents French first, then reveals meanings, then accepts a self-rating and commits the next schedule locally.
+3. Study presents French first on a two-sided card, commits first reveal before showing meanings, then accepts explicit Forgot/Remembered recall outside the back face and commits the next schedule locally. Subsequent front/back flips are display-only.
 4. Unseen book words are not automatically due. Default new introductions are limited to 20 unique words per local calendar day.
 5. Short learning/relearning steps supplement the existing SM-2-style long-term calculation. There is one scheduler and no new dependency.
 6. Durable-first writes, offline saved-card review, backup/restore and honest failure states are part of the feature, not later polish.
@@ -147,11 +149,11 @@ Use existing stores `vocab`, `meta` and disposable `cache`; no client DB version
 
 Replace/extend `src/utils/srs.ts` as the one pure scheduling authority. Pass `now` explicitly; do not call the clock repeatedly inside a transition. A preview and a commit use the same transition rules. No scheduler network calls or configurable preset system.
 
-Ratings: **Again=1, Hard=3, Good=4, Easy=5**. The UI says forgotten, difficult-but-recalled, recalled, and easy; never “mastered.”
+Stored scheduler ratings remain **Again=1, Hard=3, Good=4, Easy=5**, including all historical 3/5 records. The current learning-flow seam (`useVocabularyReview.recall`) maps explicit **Forgot → 1** and **Remembered → 4**. These two actions appear outside the card only while the unlocked back is shown, with no four-grade UI. Neither Flip nor Skip is a recall outcome; never call a word “mastered.” The tables below define the unchanged scheduler, not additional visible actions.
 
 ### 5.1 New introduction
 
-Showing a new word's front, navigating Back, reloading it, or skipping before reveal does not introduce it or consume quota. On **first Show answer**, atomically materialize/reuse its row/snapshot, set `introducedAt=now`, assign `learning, step=0, dueAt=now`, and add its key to the current local day's introduction ledger. This is not a rating and appends no history. Only reveal the answer after commit. An introduction failure leaves the front and real error visible; it consumes no quota.
+Showing a new word's front, navigating Back, reloading it, or skipping before reveal does not introduce it or consume quota. On **first Flip card**, atomically materialize/reuse its row/snapshot, set `introducedAt=now`, assign `learning, step=0, dueAt=now`, and add its key to the current local day's introduction ledger. This is not a rating and appends no history. Only reveal the answer after commit. A generic introduction storage failure leaves the unrevealed front and real error available for retry; it consumes no quota. Typed quota/stale failures keep the existing refresh-and-advance contract below, never expose the rejected answer.
 
 The transaction re-reads today's limit/ledger and existing schedule. If another tab already introduced this key, return that current row without another quota charge. If its schedule changed since the displayed front was read, reload it front-side before accepting a rating. If other words exhausted the allowance first, return quota-reached without inserting/revealing; show the current counts and choose a due card or the waiting/end state. Do not silently bypass the limit. A deleted/recreated key already in today's ledger consumes no second unique introduction; it remains eligible even when the new allowance is otherwise exhausted.
 
@@ -176,11 +178,11 @@ Retain the existing SM-2-style rule, stated explicitly:
 - **Hard/Good/Easy:** when prior repetitions is 1, schedule 3 calendar days for Hard and 6 for Good/Easy. Otherwise schedule `round(prior intervalDays × prior easeFactor)` calendar days (at least 1, since review intervals are at least 1 and ease at least 1.3; no clamp). Increment repetitions, then update ease.
 - Ease update: `max(1.3, roundTo2(priorEase + 0.1 - (5-q) × (0.08 + (5-q) × 0.02)))`.
 
-This is intentionally not current Anki's complete legacy scheduler. For prior repetitions at least 2, **Hard, Good and Easy have the same next interval; their ease updates can affect subsequent reviews**, subject to the shared 1.3 floor. This is an explicit version-one limitation, not an open instruction to choose another formula. Add regression cases with prior ease 2.5 proving equal immediate intervals and distinct next ease values, plus a floor case where Hard/Good may converge. UI help explains this limitation without presenting self-ratings as mastery. Do not quietly add easy bonuses, fuzz, automatic parameter optimization or a second scheduler. Replace the `tests/srs.test.ts` cases that demand every first review and every failed recall schedule one day; keep and extend the pure calendar/ease/immutability tests.
+This is intentionally not current Anki's complete legacy scheduler. For prior repetitions at least 2, **Hard, Good and Easy have the same next interval; their ease updates can affect subsequent reviews**, subject to the shared 1.3 floor. This is an explicit version-one limitation, not an open instruction to choose another formula. Add regression cases with prior ease 2.5 proving equal immediate intervals and distinct next ease values, plus a floor case where Hard/Good may converge. The current binary UI omits interval previews; this limitation still applies to stored four-grade history and the unchanged pure scheduling contract. Do not quietly add easy bonuses, fuzz, automatic parameter optimization or a second scheduler. Replace the `tests/srs.test.ts` cases that demand every first review and every failed recall schedule one day; keep and extend the pure calendar/ease/immutability tests.
 
-### 5.4 Previews and time
+### 5.4 Time and presentation boundary
 
-Display the computed delay under each rating: minutes for learning/relearning, calendar days for review. Never hard-code button captions such as 1/3/7 days independent of state. The click captures current `now` and assigns the actual due instant/date; the displayed duration comes from the same pure rule. A preview must not mutate history or advance a card.
+Do not display scheduling interval captions on either face or in the external binary action bar. The recall command captures current `now`; the storage transaction uses the unchanged pure scheduler to assign the actual due instant/date. Pure preview calculations remain side-effect-free and tested, but are not part of Flashcard or VocabularyReview. Move actual due/remaining counts into the session hook, not the rendering component.
 
 A card is due when `dueAt <= now` for minute phases or `dueDate <= local today` for review. The global navigation badge counts actual due introduced cards only. It does not include unseen book words or all bookmarked-but-unintroduced rows.
 
@@ -293,7 +295,7 @@ Keep Words under My study; no new top-level navigation. Define real routes for p
 | --- | --- |
 | `#/study/words` | Today: actual due/new counts, Continue/Start, book download/update status and new-per-day setting. |
 | `#/study/words/all` | Browse the merged dictionary/personal list with search and source/learning-state filters. |
-| `#/study/words/review` | One active flashcard, answer reveal, self-rating and waiting/finish states. |
+| `#/study/words/review` | One active two-sided flashcard, durable answer unlock, external binary recall and waiting/finish states. |
 
 Extend `Route`, `routeHref`, `parseRoute`, `areaOf`, `NavTree`, shell current-area logic and `StudyView`; preserve Back/reload. Use new route variants for the deeper Words places, not Grammar's `section: 'conjugation'`. All three routes keep My study/Words active in expanded sidebar, rail and compact study navigation. No current word/source is sent over the network; transient filters/reveal need no routes.
 
@@ -308,30 +310,30 @@ Browse composes existing `ui/table` with TanStack Table. Search word and actuall
 ### Flashcard wireframe
 
 ```text
-Back to Words                         Session ratings: n
+Back to Words                         Session ratings / introductions
 Due now: n    New remaining today: n
-----------------------------------------------------
-                         French word
-                  [Listen, explicit only]
-----------------------------------------------------
-Fixed control region:
-[Show answer]                         [Skip for now]
-[Again: delay] [Hard: delay] [Good: delay] [Easy: delay]
-Fixed status slot for saving, failure or next due time.
-----------------------------------------------------
-Front: recall its meaning before revealing.
-Back:  POS / meanings / optional examples / saved context
-       (language follows interface; source remains visible)
++----------------------------------------------------+
+| Front: French word, explicit Listen, Flip card      |
+|               < actual two-way flip >              |
+| Back: word, Listen, Flip to front                  |
+|       full POS / meanings / examples / saved context|
+|       (language follows interface; sources visible)|
++----------------------------------------------------+
+External session actions:
+Back only: [Forgot] [Remembered]
+[Skip for now]
+Bounded status slot for saving/failure; details in Sheet.
 ```
 
 - Page follows DESIGN: warm paper, `bg-surface`, `ink-*` rules/text, one blue accent, serif word/headings, 14px body and 12px minimum metadata. Word 32px phone/40px desktop, semibold, wrapping; never fit by shrinking below readable sizes.
-- One flat reading/study surface, not nested gradient cards. Controls `rounded-md`, surfaces `rounded-lg`; no decorative icons, flags, rainbow rating buttons or flipping/3D animation.
-- Show answer is the single filled action before reveal; Good is the single filled action after reveal. Other buttons outline/ghost. Four ratings stay mounted but disabled/hidden from interaction before reveal, with their geometry reserved; phone uses a fixed two-by-two grid of 40px-or-larger controls. Do not insert a new button row on flip.
-- Front/back is deliberate reveal, not a transient spinner: back content may increase normal page height for long definitions. Preserve the top word/viewport anchor. Put the controls **above** the answer detail at every width, so revealing long content below them does not move the controls. Desktop and phone use the same DOM order. Do not fix the entire card/page height or clip definitions to force identical front/back size.
+- One centered, readable two-sided surface, not nested cards. Controls `rounded-md`, surfaces `rounded-lg`; no decorative icons, flags or rainbow ratings. A functional 180ms `ease-out` flip is the sole new motion; reduced motion switches faces immediately without rotation/transition.
+- Flip card is the single filled action on the front; Remembered is filled on the back. Forgot is outline; Skip is independent. External binary actions mount only on the unlocked back, never a disabled four-rating panel. All targets are at least 40px. No interval previews or rating knowledge inside Flashcard.
+- VocabularyReview is the single owner of visual face, separate from the hook's durable `revealed` fact. Flashcard is controlled presentation only: word, nullable unlocked answer, face, busy and flip/listen requests. It imports no scheduler, queue, storage, clock or numeric rating types and reuses VocabularyAnswer/SpeakButton. New active word, restore and stale refresh return to front before paint. Subsequent flips perform no introduction, quota charge, history/rating or I/O.
+- Intentional flips can change natural content height; preserve the card top/viewport anchor. Active full multi-sense/context prose grows in normal page flow, without a fixed total height, clipping or tiny internal reading scroll box. Only the inactive mounted face is removed from layout, inert and aria-hidden, with no focusable controls. Long content may also be read through the explicitly opened existing details Sheet.
 - Reserve a bounded local status slot from first render; saving/error changes that slot/control only. Long error details use a Sheet. Full long definitions/examples remain in normal page flow or an explicitly opened detail Sheet, not a tiny nested reading scroll pane.
-- The word is plain text, not a giant clickable container. Native button Enter/Space performs one Reveal; a study-surface reveal shortcut only handles focus on the surface itself, not bubbling child controls. Before first reveal, the control shows its fixed-size saving state while introduction commits. No rating is enabled until the answer is actually revealed.
-- After a successful reveal, focus the answer-section heading (`tabIndex=-1`, `preventScroll`), not a rating button; Show answer stays mounted/inert in its reserved cell. After a committed rating/Skip, focus the next card's Show answer, or the waiting/session-end heading. Failure keeps focus with the submitted control and announces the error; no automatic jump to another word. Overlay close restores its opener; language/theme changes do not move focus.
-- On the answer side, 1/2/3/4 map to Again/Hard/Good/Easy only outside inputs, editable text, overlays and IME composition. Ignore repeated keydowns and prevent their native default on study action buttons; disable shortcuts while saving. One physical key press/release must never reveal and rate the same card or act on the next card. Test both Enter and Space, including a held key across a fast commit.
+- The word is plain text, not a giant clickable container. Dedicated native Flip controls use Enter/Space once; independent Listen/details controls never flip. Before first reveal, the fixed-size flip control shows saving while introduction commits. No back answer DOM or recall action mounts before actual commit.
+- Back flips focus the answer heading (`tabIndex=-1`, `preventScroll`); front flips focus Flip card. A committed recall/Skip focuses the next Flip card or wait/session-end heading. Generic failures retain the face/decision and restore the submitted control's focus; typed quota/stale failures refresh and advance front-side. Overlay close restores its opener; language/theme changes do not move focus.
+- On the unlocked back, only 1=Forgot and 2=Remembered apply, outside independent child controls, inputs, editable text, overlays and IME composition. No numeric recall on the front or while returning to it. Ignore held/repeated keydowns and prevent their native default on study action buttons; disable shortcuts while saving. One physical key press/release must never flip and grade or act on the next word. Test both Enter and Space, including a hold across a fast commit.
 - Before reveal, no gloss, POS/gender cue, contextual sentence, translated example, hidden answer attributes or accessible answer text is mounted. Manual word audio may be requested but no autoplay or example audio reveals a cue.
 - Optional word Listen uses existing `SpeakButton` and the user's selected engine; explicit remote speech may require its key. Do not switch engines silently. Remove the existing `prefetchSpeech([data.word, contextSentence])` side effect from App's bookmark-save path: saving/removing a bookmark, adding context, downloading, revealing and rating trigger no automatic AI/TTS. Reader playback initiated elsewhere keeps its existing behavior. Moving cards/leaving review stops this session's owned playback through the shared layer. Text review needs no key; version one adds no example-audio controls or bulk prefetch.
 - For optional vocabulary-audio backup/LRU protection, qualify only learner rows with `bookmarked === true` or non-null `schedule`. Include their word, personal context sentences and personal analysis usage-example French text. Do not include unseen catalogue entries or built-in sense examples. Protection only retains already acquired clips; it never synthesizes missing clips. Use that same set for vocabulary-audio export; shadowing keeps its existing separate rules. The existing 200 MiB threshold trims unprotected audio and is not a guaranteed ceiling for protected assets.
@@ -389,7 +391,7 @@ Existing: `src/components/VocabularyView.tsx` (replace, not a second engine), `s
 
 New proposed: `src/components/vocabulary/{VocabularyHome,VocabularyBrowser,VocabularyReview,Flashcard}.tsx`, `src/hooks/useVocabularyReview.ts`, `src/services/vocabulary/queue.ts`.
 
-Home/browser/review share one storage read model and canonical identity. Session hook owns candidate/active id, reveal/skip/operation state and captured epoch/token/revision; Flashcard only renders. Word-sheet membership uses both the canonical word bookmark and the current frozen context key, not a single dictionary-exists boolean. No control performs its own IndexedDB writes. Use existing `ui/` `Button`, `Table`, overlay `Sheet`/`Dialog`, `Segmented` and speech controls. `ui/` has no text/number input: add one for search and the new-per-day limit with `bunx shadcn@latest add input` (Base UI is already a dependency), not a hand-written control; stop and ask if that would add a package.
+Home/browser/review share one storage read model and canonical identity. Session hook owns candidate/active id, durable reveal/skip/operation state, captured epoch/token/revision, semantic binary recall mapping and due/remaining counts. VocabularyReview alone owns visual face and external session actions; Flashcard only renders and focuses the shown face. Word-sheet membership uses both the canonical word bookmark and the current frozen context key, not a single dictionary-exists boolean. No control performs its own IndexedDB writes. Use existing `ui/` `Button`, `Table`, overlay `Sheet`/`Dialog`, `Segmented` and speech controls. `ui/` has no text/number input: add one for search and the new-per-day limit with `bunx shadcn@latest add input` (Base UI is already a dependency), not a hand-written control; stop and ask if that would add a package.
 
 ### Work package D: integrated backup, documentation and real local acceptance
 
@@ -410,8 +412,8 @@ Use synthetic invented French/English/Chinese fixtures only. Do not copy the pri
 | Transactions | Failed rating keeps answer/selected decision; same operation retries once, different rating cannot reuse it; stale revision/token/epoch reloads without adopting fresh tokens for old work. Reset/delete A does not invalidate rating B; same-key delete/recreate rejects old writes. No competing whole-list autosave. |
 | Cache/service | No service/offline/partial pages; published manifests gate pinned reads; exact Worker HTTP error/code matrix; loader branches on `status` (410 restart, 429 real error); no page-cache writes; aggregate version/hash verification and committed single-book cache. Interrupt every publish step: old current stays complete; same-version rerun doesn't overwrite; no cleanup/deletion during staging. Failed refresh/storage keeps old book. |
 | Backup | Paired shape roundtrip; raw malformed fields reject; either key alone rejects; explicit empty days remove old vocabulary-day keys but keep unrelated meta and local per-word tokens; epoch moves on replacement only. Deleted-card ledgers remain valid; imported data cannot lower tokens/epoch. Atomic failure and immediate read-model refresh; restored saved cards work without service. |
-| Browser | Real Today/All words/Review links and active Words state at every shell width; existing bookmark crosslink tests still reach saved lists. Reveal focuses answer heading, rating/Skip focuses next Reveal or wait heading; failure preserves focus, overlays restore it, locale change doesn't move it. No answer DOM/accessibility before reveal; IME/inputs/held Enter/Space/numeric shortcuts cannot reveal and grade in one press. |
-| Layout/audio/network | EN/ZH, 1280×900/360×740, three themes, long text/zoom/reduced motion; fixed transient controls/status, including the Today download/update slot, readable intentional reveal, no horizontal overflow. Remove bookmark prefetch; no automatic AI/TTS on save/download/reveal/rate. Test exact audio-protection/export set (not the whole book); explicit Listen uses selected engine and stops on leave. Worker receives no learner data. |
+| Browser | Real Today/All words/Review links and active Words state at every shell width; existing bookmark crosslink tests still reach saved lists. No pre-reveal rating dashboard; actual two-way flip, back heading/front Flip card focus and next Flip card/wait focus after recall/Skip. Generic failure preserves face/decision/focus, quota/stale refresh advances front-side, overlays restore focus and locale changes keep it. No back DOM/accessibility before durable reveal, including a delayed/failed commit. Repeated unlocked flips do zero DB I/O/quota/history work; front hides answer accessibility. Only back-side binary recall stores ratings 1/4 with the expected schedules; retries retain operation id and reject alternatives. IME/inputs/overlays/held Enter/Space/numeric keys cannot flip-and-grade or act on the next word. |
+| Layout/audio/network | EN/ZH, 1280×900/360×740, three themes, long text/zoom/reduced motion; fixed transient control/status geometry, including Today download/update, natural unclipped long back content, stable top anchor across deliberate flips, no reduced-motion rotation/transition and no horizontal overflow. Remove bookmark prefetch; no automatic AI/TTS on save/download/reveal/rate. Test exact audio-protection/export set (not the whole book); explicit Listen uses selected engine and stops on leave. Worker receives no learner data. |
 
 For each nontrivial new contract, observe a meaningful failing test before implementation, then record passing output. Examples: current minute scheduling cannot express one-minute relearning; current duplicate save creates/deletes the wrong row; current full-list persistence overwrites a restore. A missing module/compiler error alone is not behavioral regression evidence.
 
@@ -458,7 +460,7 @@ The Argon advisory reviewed baseline `e876e6a` and returned FAIL. The lead check
 | R5: backup metadata | Concrete paired export shape and namespace-only replacement, raw validation, preserved unrelated metadata/local tokens and immediate restore refresh (10). |
 | R6: navigation/focus | Real Today/All words/Review links, Words active state, explicit reveal/advance/failure focus and physical-key safety; named crosslink test updates (9, 11, 12). |
 | D1: new-card quota | First successful reveal, not front presentation; specified Skip/Back/reload, quota-race and midnight behavior (5.1, 6). |
-| D2: equal mature intervals | Retain existing formula as an explicit limitation, with truthful previews, floor-aware ease updates and regression coverage; no unapproved scheduler/dependency change (5.3, 12). |
+| D2: equal mature intervals | Retain existing formula as an explicit limitation, with floor-aware ease updates and regression coverage (visible interval previews were removed by the approved flip-card amendment); no unapproved scheduler/dependency change (5.3, 12). |
 
 ### 14.1 Second source-checked review (`517ba2d`)
 
