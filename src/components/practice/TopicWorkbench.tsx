@@ -40,7 +40,7 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
   const checkpoint = topic?.learning?.checkpoints.find((entry) => entry.id === question.checkpointId);
   const submitted = recordedAnswerText(item.type!, item, view.answer);
   const feedback = view.checked ? resolveTopicFeedback(question.feedback, submitted, view.checked.correct) : undefined;
-  const error = view.error ?? session.saveError;
+  const error = view.checked ? null : (view.error ?? session.saveError);
   const recognition = item.type === 'CHOICE_SELECT';
   const busy = Boolean(view.busy) || session.resetting;
   const select = (index: number) => {
@@ -196,7 +196,7 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
               </p>
             )}
             {feedback && <p>{feedback.summary[language]}</p>}
-            {session.saveError && (
+            {!view.checked && session.saveError && (
               <Button variant="ghost" onClick={session.retrySave}>
                 {t('common.retry')}
               </Button>

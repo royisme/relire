@@ -1,5 +1,6 @@
 /** Server-rendered TEST-only control privacy and authored feedback; browser geometry/focus still need e2e. */
-import { expect, test } from 'bun:test';
+import { expect, spyOn, test } from 'bun:test';
+import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
 import i18next from 'i18next';
@@ -8,10 +9,23 @@ import zh from '../src/i18n/locales/zh.json';
 import { learningFixture } from './fixtures/grammarLearning';
 import { topicExerciseRevision, topicToExerciseUnit } from '../src/services/grammarTopics/checkpoints';
 import { TopicFeedbackSheet } from '../src/components/practice/TopicFeedbackSheet';
+
+import type { ExerciseUnitSession } from '../src/hooks/useExerciseUnit';
+import { emptyItems, sheetProgress } from '../src/hooks/exerciseUnit/model';
 import { ChoiceSelectControl } from '../src/components/practice/controls/ChoiceSelectControl';
 import { FillBlanksControl } from '../src/components/practice/controls/FillBlanksControl';
 import { emptyAnswer } from '../src/services/exercises/answer';
 import type { ReactNode } from 'react';
+
+// The route module captures browser history at import time; static rendering never navigates.
+const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+Object.defineProperty(globalThis, 'window', {
+  configurable: true,
+  value: Object.assign(new EventTarget(), { location: { hash: '' }, relireHistory: { read: () => 0 } }),
+});
+const { TopicWorkbench } = await import('../src/components/practice/TopicWorkbench');
+if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
+else Reflect.deleteProperty(globalThis, 'window');
 
 const i18n = i18next.createInstance();
 await i18n.init({
@@ -74,6 +88,76 @@ test('both pilot controls put wrong corrections in feedback only when requested;
     expect(render(<Control {...props} correctionPlacement="feedback" />)).not.toContain('select-all');
   }
 });
+
+for (const verdict of ['right', 'wrong', 'unchecked'] as const) {
+  test(`${verdict} question keeps its own result and Sheet when another question has a draft save error`, async () => {
+    const unit = await fixture();
+    const items = emptyItems(unit);
+    if (verdict !== 'unchecked') {
+      for (const item of unit.items) {
+        items[item.id].checked = { correct: verdict === 'right', strictAccents: true };
+        items[item.id].answer.choiceSelections = [verdict === 'right' ? 'été' : 'hiver'];
+      }
+    }
+    const session: ExerciseUnitSession = {
+      status: 'ready',
+      loadError: null,
+      unit,
+      items,
+      progress: sheetProgress(unit, items),
+      saveError: 'TEST other question storage denied',
+      canReset: true,
+      resetting: false,
+      resetError: null,
+      setAnswer() {},
+      async check() {},
+      async checkAll() {},
+      async requestHint() {},
+      async requestExplanation() {},
+      async reset() {
+        return true;
+      },
+      async resetItem() {},
+      retrySave() {},
+      reload() {},
+    };
+    for (const language of ['en', 'zh'] as const) {
+      await i18n.changeLanguage(language);
+      // Open the real workbench Sheet in a static render without replacing any of its components.
+      const useState = React.useState;
+      let opened = false;
+      const state = spyOn(React, 'useState').mockImplementation(((initial: unknown) => {
+        const open = initial === false && !opened;
+        if (open) opened = true;
+        return useState(open ? true : initial);
+      }) as typeof React.useState);
+      let html: string;
+      try {
+        html = render(<TopicWorkbench session={session} />);
+      } finally {
+        state.mockRestore();
+      }
+      const strings = (language === 'en' ? en : zh).grammarTopics.learning;
+      expect(html).toContain('flex h-32 min-w-0 flex-col');
+      if (verdict === 'unchecked') {
+        expect(html).toContain(strings.result.saveFailed);
+        expect(html.match(/TEST other question storage denied/g)).toHaveLength(2);
+        expect(html).toContain(strings.result.readDetails);
+        expect(html).not.toContain('TEST correct');
+      } else {
+        expect(html.includes(session.saveError!)).toBe(false);
+        expect(html).not.toContain(strings.result.saveFailed);
+        expect(html).toContain(strings.result[verdict]);
+        expect(html).toContain(strings.result.readFeedback);
+        const question = unit.items[0].topicQuestion!;
+        const feedback = verdict === 'right' ? question.feedback.correct : question.feedback.byAnswer![0].message;
+        expect(html.split(feedback.summary[language]).length - 1).toBeGreaterThanOrEqual(2);
+        expect(html).toContain(feedback.detail![language]);
+      }
+    }
+    await i18n.changeLanguage('en');
+  });
+}
 
 test('self-contained authored feedback is bilingual plain text and errors remain readable without leaking a key', async () => {
   const unit = await fixture();

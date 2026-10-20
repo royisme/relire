@@ -94,6 +94,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Checked topic questions keep their verdict and authored feedback when another answer fails to save.
 - Redo no longer restores an old draft answer, checked answers cancel pending drafts, and topic Reset stays available during later saves.
 - Grammar topics scroll with the page instead of inside a fixed-height pane; tables use the available content width while prose keeps a readable line length.
 - Pronominal verbs show their reflexive pronouns in present participles and dictionary conjugations, with elision and imperative clitics; h-initial dictionary entries link to Conjugation instead of guessing elision.
