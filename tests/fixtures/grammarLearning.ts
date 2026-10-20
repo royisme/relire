@@ -8,7 +8,9 @@ export function learningFixture(): GrammarTopic & { learning: NonNullable<Gramma
   const checkpoint = (id: string): NonNullable<GrammarTopic['learning']>['checkpoints'][number] => ({
     id,
     title: testBilingual(`TEST checkpoint ${id}`, `\u6d4b\u8bd5\u68c0\u67e5\u70b9 ${id}`),
-    teaching: [{ type: 'paragraph' as const, text: testBilingual('TEST teaching') }],
+    teaching: [
+      { type: 'paragraph' as const, text: testBilingual(`TEST teaching ${id}`, `\u6d4b\u8bd5\u8bb2\u89e3 ${id}`) },
+    ],
     questions: [
       {
         id: `${id}-choice`,

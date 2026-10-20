@@ -1,66 +1,13 @@
-/** Recognition-only vertical journey with complete TEST-only 3x2 content; never a real content/provider call. */
-import type { Page } from '@playwright/test';
+/** Saved revision and failure journeys with TEST-only 3x2 content; never a real content/provider call. */
 import { expect, settled, test } from './fixtures';
 import { stored } from './practice.helpers';
-import { mockTopics, CONTENT_ORIGIN } from './contentService.helpers';
-import { learningFixture } from '../tests/fixtures/grammarLearning';
-import { topicsFixture } from '../tests/fixtures/grammarTopics';
+import { CONTENT_ORIGIN } from './contentService.helpers';
+import { TOPIC, setup, workbench, index, geometry } from './grammar-topic-learning.fixture';
 import en from '../src/i18n/locales/en.json' with { type: 'json' };
 import zh from '../src/i18n/locales/zh.json' with { type: 'json' };
 
-const TOPIC = '/#/study/grammar/test-only';
 type Storage = typeof import('../src/storage/exercises');
 type Database = typeof import('../src/storage/db');
-
-async function setup(page: Page, language: 'en' | 'zh' = 'en', theme = 'light') {
-  await page.addInitScript(
-    ({ language, theme }) => {
-      localStorage.setItem('relire_onboarded', '1');
-      localStorage.setItem('relire_lang', language);
-      localStorage.setItem('relire_theme', theme);
-      // No AI settings/key: unexpected requests are rejected, not answered with plausible content.
-    },
-    { language, theme },
-  );
-  const topic = learningFixture();
-  topic.blocks.push({ type: 'note', text: { ...topic.title, en: 'TEST full reference' } });
-  const pack = { ...topicsFixture(), topics: [topic] };
-  await mockTopics(page, pack);
-  const forbidden: string[] = [];
-  await page.route('**/*', async (route) => {
-    const request = route.request();
-    const url = new URL(request.url());
-    if (
-      request.method() === 'GET' &&
-      url.origin === CONTENT_ORIGIN &&
-      ['/v1/topics', '/v1/topics/test-only', '/v1/tag-index'].includes(url.pathname)
-    )
-      return route.fallback();
-    if (request.method() === 'GET' && url.origin === 'http://localhost:5174' && !url.pathname.startsWith('/v1/'))
-      return route.fallback();
-    if (request.method() === 'GET' && ['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname))
-      return route.fulfill({ contentType: 'text/css', body: '' });
-    forbidden.push(`${request.method()} ${url.origin}${url.pathname}`);
-    return route.abort('blockedbyclient');
-  });
-  return { topic, forbidden };
-}
-
-const workbench = (page: Page) => page.locator('[data-topic-workbench]');
-const index = (page: Page, language: 'en' | 'zh' = 'en') =>
-  workbench(page).getByRole('group', {
-    name: (language === 'en' ? en : zh).grammarTopics.learning.index.label,
-    exact: true,
-  });
-const geometry = (page: Page) =>
-  page
-    .locator('#topic-instruction, [aria-labelledby="topic-instruction"], [data-topic-actions], [data-topic-result]')
-    .evaluateAll((elements) =>
-      elements.map((element) => {
-        const rect = element.getBoundingClientRect();
-        return { top: rect.top + scrollY, left: rect.left, height: rect.height, width: rect.width };
-      }),
-    );
 
 for (const language of ['en', 'zh'] as const) {
   for (const theme of ['light', 'sepia', 'dark']) {
