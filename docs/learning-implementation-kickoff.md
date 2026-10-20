@@ -1,8 +1,15 @@
 # Grammar and vocabulary: joint implementation kickoff
 
-Status: **Sequencing and readiness handoff; implementation not started.** Requested by the owner on 2026-10-19 to combine feedback on the revised specifications and arrange work. This document is not authorization to launch agents, call content-generation providers, publish real data, push or deploy.
+Status: **Grammar and Vocabulary code accepted and locally integrated; real content gates remain.** Originally requested on 2026-10-19 as a sequencing/readiness handoff. The owner subsequently authorized serial implementation and, on 2026-10-20, integration preserving their Reader edits and continuation of local vocabulary preparation. This is not authorization for external corpus transmission, fabricated reviewer approval, public data publication, push or deployment.
 
-Specifications: [Grammar topic learning](grammar-topic-learning-spec.md) and [Vocabulary flashcards](vocabulary-flashcards-spec.md). Runtime source checked at `517ba2d`; `src/`, `scripts/` and `worker/` still match grammar's `2937d25` baseline. Read the latest committed specifications again at execution; do not dispatch from an old snapshot that lacks the owner's revisions.
+Specifications: [Grammar topic learning](grammar-topic-learning-spec.md) and [Vocabulary flashcards](vocabulary-flashcards-spec.md). The original readiness source was `517ba2d`; implementation used accepted Grammar `d366137` as Vocabulary's baseline.
+
+## Execution checkpoint (2026-10-20)
+
+- Grammar code was accepted at `d366137`. Vocabulary code and acceptance corrections were accepted at `1af72d5`; the real-input adapter correction followed at `9907f8c`. The owner’s Reader modifications were preserved during local integration, not silently committed or discarded.
+- Lead verification of the integrated source, including the owner's Reader edits: 441 browser tests passed in desktop/phone projects, with AI mocked and synthetic content. The adapter candidate also passed 1,094 unit tests and the required static/build/metadata/Worker checks. The main checkout's format check still reports only the owner's pre-existing `.serena/project.yml`; it was not changed.
+- The stable supplied vocabulary snapshot was prepared privately: 7,391 source rows grouped into 7,362 canonical entries, retaining 29 distinct/conflicting-sense groups; 309 missing POS values remain omitted, and all source rows now have complete trilingual examples. These are pre-review counts, not CEFR/quality approval. Public metadata records attribution and the normalized hash only; corpus/report/sheet remain ignored under `.local/vocabulary/`.
+- No C1/Canadian-usage omissions or linguistic corrections have been approved, review records remain empty, and the publisher correctly refuses the real artifact without a matching review. No D1 data application, external corpus transmission or public delivery occurred. Agree the actual review method/authority and target-relevant Canadian usage before marking and completing local application.
 
 ## 1. Recommended order
 
@@ -74,4 +81,4 @@ This deliberately leaves no second full-stack worker racing on shared integratio
 
 The owner can authorize the code lane with: **Implement Grammar first using its current defaults and synthetic fixtures; after its checked local integration, implement Vocabulary from that baseline. Keep real authoring, review marking, data application and public delivery behind their separate approval gates.**
 
-This is a proposed kickoff instruction, not a claim that it was given. If the owner also authorizes real local content work, record that explicitly against G-content/V-content, with reviewer identity and vocabulary omission policy. Do not ask again about already fixed UI/type details.
+This was the proposed kickoff wording; the code lane has since been authorized and completed as recorded above. The owner's later instruction permits local vocabulary preparation, not invented review records. Remaining G-content/V-content review authority and vocabulary omission policy still need explicit decisions. Do not ask again about already fixed UI/type details.

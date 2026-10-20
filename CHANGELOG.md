@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- The supplied vocabulary source has a private normalized draft and recorded attribution/hash metadata. It is not marked reviewed or available for download; content approval is still required before local publication.
 - Words now has Today, paginated All words and reveal-first review routes. Personal contexts and built-in snapshots share canonical cards, minute learning steps, daily introduction limits and durable rating retries; paired backups preserve quota history and Grammar metadata. A private normalization/review/staged-publication pipeline and complete-book offline loader are implemented with synthetic tests only. Real corpus review, C1/Canadian-usage decisions, D1 application and public distribution remain owner gates.
 - The first-chapter Grammar learning pilot supports short teaching slices, six choice and typed questions per topic, accent-sensitive checks and bilingual feedback. Revisit saved answers in Practice, review feedback in Mistakes, or redo/reset without losing history. The private authoring/review pipeline now preserves the complete lesson; code is verified with synthetic data only, and real twelve-question review/local acceptance remain pending.
 - First-chapter noun gender and plural topics are included for local content-service testing after owner-authorized AI review, not human language review.
