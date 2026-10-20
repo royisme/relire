@@ -56,7 +56,14 @@ export const VocabularyManifestSchema = VocabularyBookMetadataSchema.extend({
   entryCount: z.number().int().positive(),
   pageCount: z.number().int().positive(),
   pageSize: z.literal(250),
-  review: VocabularyReviewSchema,
+  review: z.union([
+    VocabularyReviewSchema,
+    z.strictObject({
+      bookId: z.literal('tcf-7000'),
+      contentHash: VocabularyHashSchema,
+      status: z.literal('unreviewed'),
+    }),
+  ]),
 }).refine((m) => m.pageCount === Math.ceil(m.entryCount / m.pageSize), 'Invalid pagination');
 export const VocabularyPageSchema = z.strictObject({
   manifest: VocabularyManifestSchema,

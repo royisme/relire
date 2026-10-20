@@ -11,8 +11,9 @@ import {
 } from './publication';
 import { canonicalVocabularyJson } from '../../src/services/vocabulary/book';
 export async function publish(args: string[], root = vocabularyRepository, testAdapter?: VocabularyPublishAdapter) {
-  if (args.length && (args.length !== 1 || !['--check', '--apply-local'].includes(args[0])))
-    throw new Error('Usage: publish.ts [--check | --apply-local]');
+  if (args.length && (args.length !== 1 || !['--check', '--apply-local', '--apply-local-unreviewed'].includes(args[0])))
+    throw new Error('Usage: publish.ts [--check | --apply-local | --apply-local-unreviewed]');
+  const unreviewed = args[0] === '--apply-local-unreviewed';
   const { manifest, reviews } = checkVocabularyMetadata(
     await Bun.file(new URL('data/vocabulary/manifest.json', root)).json(),
     await Bun.file(new URL('data/vocabulary/reviews.json', root)).json(),
@@ -28,7 +29,9 @@ export async function publish(args: string[], root = vocabularyRepository, testA
     canonicalVocabularyJson(metadata) !== canonicalVocabularyJson(artifact.metadata)
   )
     throw new Error('Vocabulary manifest does not match prepared content');
-  const review = reviews.records.findLast((r) => r.contentHash === artifact.contentHash);
+  const review = unreviewed
+    ? { bookId: 'tcf-7000' as const, contentHash: artifact.contentHash, status: 'unreviewed' as const }
+    : reviews.records.findLast((r) => r.contentHash === artifact.contentHash);
   if (!review) throw new Error('Vocabulary requires an actual matching review');
   const book = await assembleVocabularyBook(artifact, review);
   const statements = vocabularyPages(book).map(
@@ -36,10 +39,10 @@ export async function publish(args: string[], root = vocabularyRepository, testA
       `INSERT OR IGNORE INTO vocabulary_pages (book_id, version, page, body) VALUES ('tcf-7000', ${sqlQuote(book.manifest.version)}, ${page.page}, ${sqlQuote(canonicalVocabularyJson(page))});`,
   );
   statements.push(
-    '-- Staging only. Publication marker and current pointer MUST use --apply-local after body readback.',
+    '-- Staging only. Publication marker/current pointer require verified local publication after body readback.',
   );
   await Bun.write(new URL('.local/vocabulary/publish.sql', root), statements.join('\n') + '\n');
-  if (args[0] !== '--apply-local') {
+  if (args[0] !== '--apply-local' && !unreviewed) {
     console.log('Private immutable staging SQL prepared only; --apply-local performs verified publication');
     return;
   }
@@ -86,7 +89,11 @@ export async function publish(args: string[], root = vocabularyRepository, testA
     read: (sql) => run(sql, true),
   };
   await publishVocabularyBook(book, adapter);
-  console.log('Vocabulary current pointer verified locally');
+  console.log(
+    unreviewed
+      ? 'Unreviewed vocabulary current pointer verified locally; linguistic review waived for local use'
+      : 'Vocabulary current pointer verified locally',
+  );
 }
 if (import.meta.main) {
   try {

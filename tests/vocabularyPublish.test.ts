@@ -14,8 +14,12 @@ import {
 import { prepare } from '../scripts/vocabulary/prepare';
 import { review } from '../scripts/vocabulary/review';
 import { publish } from '../scripts/vocabulary/publish';
-import { publishVocabularyBook, type VocabularyPublishAdapter } from '../scripts/vocabulary/publication';
-import { vocabularyHash, canonicalVocabularyJson } from '../src/services/vocabulary/book';
+import {
+  assembleVocabularyBook,
+  publishVocabularyBook,
+  type VocabularyPublishAdapter,
+} from '../scripts/vocabulary/publication';
+import { vocabularyHash, vocabularyMetadata, canonicalVocabularyJson } from '../src/services/vocabulary/book';
 import { VocabularyEntrySchema } from '../src/types/vocabulary';
 import { handle } from '../worker/src/index';
 const metadata = {
@@ -168,9 +172,18 @@ test('real prepare/review/publish commands work on disposable invented metadata,
     await rm(directory, { recursive: true, force: true });
   }
 });
-test('interrupt before every actual adapter command: current always complete, old rows retained, rerun immutable/idempotent', async () => {
+async function publicationBook(unreviewed: boolean, count = 1, label = 'TEST') {
+  const book = await testBook(count, label);
+  if (!unreviewed) return book;
+  const { contentHash } = book.manifest.review;
+  return assembleVocabularyBook(
+    { metadata: vocabularyMetadata(book.manifest), entries: book.entries, contentHash },
+    { bookId: 'tcf-7000', contentHash, status: 'unreviewed' },
+  );
+}
+test.each([false, true])('unreviewed=%s: safe interruptions and immutable reruns', async (unreviewed) => {
   const old = await testBook(1, 'OLD TEST'),
-    next = await testBook(251, 'NEW TEST');
+    next = await publicationBook(unreviewed, 251, 'NEW TEST');
   for (let interrupt = 1; interrupt <= 10; interrupt++) {
     const { db } = await createWorkerDb();
     let step = 0;
@@ -212,8 +225,8 @@ test('interrupt before every actual adapter command: current always complete, ol
     }
   }
 });
-test('same-version body mismatch or readback corruption prevents marker/switch and never overwrites staged evidence', async () => {
-  const book = await testBook();
+test.each([false, true])('unreviewed=%s: immutable body and readback gates', async (unreviewed) => {
+  const book = await publicationBook(unreviewed);
   for (const mismatch of [true, false]) {
     const { db } = await createWorkerDb();
     const adapter: VocabularyPublishAdapter = {
