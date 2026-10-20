@@ -805,9 +805,6 @@
         "prepareFailed": "Could not prepare the questions: {{msg}}",
         "saveFailed": "Could not save your answer: {{msg}}",
         "loadSavedFailed": "Could not load the saved questions: {{msg}}"
-      },
-      "unavailable": {
-        "typedPending": "Typed questions are not available yet."
       }
     },
     "chapters": {

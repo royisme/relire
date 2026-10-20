@@ -797,9 +797,6 @@
         "prepareFailed": "无法准备题目：{{msg}}",
         "saveFailed": "无法保存作答：{{msg}}",
         "loadSavedFailed": "无法加载已保存的题目：{{msg}}"
-      },
-      "unavailable": {
-        "typedPending": "填空题暂未开放。"
       }
     },
     "chapters": {

@@ -53,12 +53,14 @@ const index = (page: Page, language: 'en' | 'zh' = 'en') =>
     exact: true,
   });
 const geometry = (page: Page) =>
-  page.locator('[data-topic-actions], [data-topic-result]').evaluateAll((elements) =>
-    elements.map((element) => {
-      const rect = element.getBoundingClientRect();
-      return { top: rect.top + scrollY, left: rect.left, height: rect.height, width: rect.width };
-    }),
-  );
+  page
+    .locator('#topic-instruction, [aria-labelledby="topic-instruction"], [data-topic-actions], [data-topic-result]')
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const rect = element.getBoundingClientRect();
+        return { top: rect.top + scrollY, left: rect.left, height: rect.height, width: rect.width };
+      }),
+    );
 
 for (const language of ['en', 'zh'] as const) {
   for (const theme of ['light', 'sepia', 'dark']) {
@@ -190,6 +192,42 @@ for (const language of ['en', 'zh'] as const) {
     }
   }
 }
+
+test('typed blank checks with Enter, ignores IME and keeps correction geometry stable', async ({ page }) => {
+  const { forbidden } = await setup(page);
+  await page.goto(TOPIC);
+  await expect(workbench(page)).toBeVisible();
+  await index(page).getByRole('button').nth(1).click();
+  const input = workbench(page).getByRole('textbox');
+  await expect(input).toBeVisible();
+  const check = workbench(page).getByRole('button', { name: 'Check', exact: true });
+  await expect(check).toBeDisabled();
+  await input.press('Enter');
+  expect((await stored(page)).attempts).toEqual([]);
+  await input.fill('ecole');
+  for (const composition of [{ isComposing: true }, { keyCode: 229 }]) {
+    await input.dispatchEvent('keydown', { key: 'Enter', bubbles: true, ...composition });
+    expect((await stored(page)).attempts).toEqual([]);
+  }
+  await settled(page);
+  const before = await geometry(page);
+  await input.press('Enter');
+  await expect(workbench(page).getByRole('status')).toHaveText('Wrong');
+  await expect(input).toHaveAttribute('readonly', '');
+  await expect(input).toBeFocused();
+  await expect(workbench(page).locator('[data-topic-result]')).toContainText('école');
+  await expect(workbench(page).locator('.select-all')).toHaveCount(0);
+  expect(await geometry(page)).toEqual(before);
+  await input.press('Enter');
+  expect((await stored(page)).attempts).toHaveLength(1);
+  await expect(index(page).getByRole('button').nth(1)).toHaveAttribute('aria-current', 'step');
+  await workbench(page).getByRole('button', { name: 'Redo', exact: true }).click();
+  await input.fill('collège');
+  await input.press('Enter');
+  await expect(workbench(page).getByRole('status')).toHaveText('Right');
+  expect((await stored(page)).attempts).toHaveLength(2);
+  expect(forbidden).toEqual([]);
+});
 
 test('an initial save failure keeps the choice editable, shows the real error and retries locally @phone', async ({
   page,

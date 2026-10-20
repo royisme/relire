@@ -1,5 +1,5 @@
-/** One saved topic session at Grammar or Practice; recognition only, with no lookup/AI/speech capabilities. */
-import { useEffect, useRef, useState } from 'react';
+/** One saved topic session at Grammar or Practice, with no lookup/AI/speech capabilities. */
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Check, Circle, Loader2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { ExerciseUnitSession } from '../../hooks/useExerciseUnit';
@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import { TopicBlocks } from '../study/grammar/TopicBlocks';
 import { CharacterBar } from './CharacterBar';
 import { ChoiceSelectControl } from './controls/ChoiceSelectControl';
+import { FillBlanksControl } from './controls/FillBlanksControl';
 import type { TextInputElement } from './controls/types';
 import { ResetDialog } from './ResetDialog';
 import { TopicFeedbackSheet } from './TopicFeedbackSheet';
@@ -32,6 +33,10 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const [bound, setBound] = useState<TextInputElement | null>(null);
+  const field = useRef<TextInputElement | null>(null);
+  const registerInput = useCallback((_slot: number, element: TextInputElement | null) => {
+    field.current = element;
+  }, []);
   const heading = useRef<HTMLHeadingElement>(null);
   const navigating = useRef(false);
   const item = unit.items[selected];
@@ -41,8 +46,14 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
   const submitted = recordedAnswerText(item.type!, item, view.answer);
   const feedback = view.checked ? resolveTopicFeedback(question.feedback, submitted, view.checked.correct) : undefined;
   const error = view.checked ? null : (view.error ?? session.saveError);
-  const recognition = item.type === 'CHOICE_SELECT';
+  const Control = item.type === 'CHOICE_SELECT' ? ChoiceSelectControl : FillBlanksControl;
   const busy = Boolean(view.busy) || session.resetting;
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' || event.target !== field.current) return;
+    if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+    event.preventDefault();
+    if (!busy && !view.checked && isAnswerFilled(item.type!, view.answer)) void session.check(item.id);
+  };
   const select = (index: number) => {
     if (index === selected) return;
     navigating.current = true;
@@ -147,21 +158,26 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
         <h4 id="topic-instruction" ref={heading} tabIndex={-1} className="font-medium">
           {question.instruction[language]}
         </h4>
-        <div role="group" aria-labelledby="topic-instruction" aria-describedby="topic-result" key={item.id}>
-          {recognition ? (
-            <ChoiceSelectControl
-              item={item}
-              type="CHOICE_SELECT"
-              answer={view.answer}
-              onChange={(answer) => session.setAnswer(item.id, answer)}
-              checked={view.checked}
-              disabled={busy || Boolean(view.checked)}
-              correctionPlacement="feedback"
-              registerInput={(_slot, element) => setBound(element)}
-            />
-          ) : (
-            <p className="text-ink-600">{t('grammarTopics.learning.unavailable.typedPending')}</p>
-          )}
+        <div
+          role="group"
+          aria-labelledby="topic-instruction"
+          aria-describedby="topic-result"
+          key={item.id}
+          onKeyDown={onKeyDown}
+          onFocus={(event) => {
+            if (event.target === field.current) setBound(field.current);
+          }}
+        >
+          <Control
+            item={item}
+            type={item.type!}
+            answer={view.answer}
+            onChange={(answer) => session.setAnswer(item.id, answer)}
+            checked={view.checked}
+            disabled={busy || Boolean(view.checked)}
+            correctionPlacement="feedback"
+            registerInput={registerInput}
+          />
         </div>
         <div id="topic-result" data-topic-result className="flex h-32 min-w-0 flex-col">
           <div className="flex h-10 shrink-0 items-center justify-between gap-2">
@@ -214,10 +230,7 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
             aria-busy={view.busy === 'check'}
             className="px-2"
             disabled={
-              busy ||
-              (view.checked
-                ? selected === unit.items.length - 1
-                : !recognition || !isAnswerFilled(item.type!, view.answer))
+              busy || (view.checked ? selected === unit.items.length - 1 : !isAnswerFilled(item.type!, view.answer))
             }
             onClick={() => (view.checked ? select(selected + 1) : void session.check(item.id))}
           >
