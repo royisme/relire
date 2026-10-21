@@ -1,5 +1,5 @@
 /** Static real-component visibility and escaping; visual and browser interaction acceptance remain owner-manual. */
-import { expect, mock, spyOn, test } from 'bun:test';
+import { expect, spyOn, test } from 'bun:test';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
@@ -15,6 +15,7 @@ import { vocabularyContextKey } from '../src/services/vocabulary/identity';
 
 await import('../src/i18n');
 // Settings → Words owns the wordbook controls; the cache hook itself is covered by its own tests and e2e.
+// A spy on the actual export restores itself; a module mock would leak into the other test files.
 const bookContent = {
   book: undefined,
   busy: false,
@@ -24,7 +25,7 @@ const bookContent = {
   configured: true,
   async download() {},
 };
-void mock.module('../src/hooks/useVocabularyBook', () => ({ useVocabularyBook: () => bookContent }));
+const bookHook = await import('../src/hooks/useVocabularyBook');
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
 Object.defineProperty(globalThis, 'window', {
   configurable: true,
@@ -47,10 +48,12 @@ const render = (node: ReactNode) => {
   const store = spyOn(React, 'useSyncExternalStore').mockImplementation((subscribe, getSnapshot, getServerSnapshot) =>
     useStore(subscribe, getSnapshot, getServerSnapshot ?? getSnapshot),
   );
+  const book = spyOn(bookHook, 'useVocabularyBook').mockImplementation((() => bookContent) as never);
   try {
     return renderToStaticMarkup(<I18nextProvider i18n={i18n}>{node}</I18nextProvider>);
   } finally {
     store.mockRestore();
+    book.mockRestore();
   }
 };
 const model: VocabularyModel = {
@@ -74,7 +77,9 @@ test('Settings Words and waiting Review show the actual bounded reason before an
       'TEST cache disk refused',
     ]) {
       bookContent.error = error;
-      const html = render(<WordsSection model={model} draft={{ value: null, onChange: () => {} }} />);
+      const html = render(
+        <WordsSection model={model} draft={{ value: null, onChange: () => {}, onSaved: () => {} }} />,
+      );
       expect(html).toContain(error);
       expect(html).toContain('line-clamp-2');
       expect(html).not.toContain('role="dialog"');
