@@ -5,12 +5,19 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cellParts } from '../../../services/conjugation/cellParts';
-import { PATTERN_NAMES, estCeQue, inversion, negation, patternNote } from '../../../services/conjugation/patterns';
+import {
+  PATTERN_NAMES,
+  estCeQue,
+  inversion,
+  negation,
+  patternNote,
+  type PatternName,
+} from '../../../services/conjugation/patterns';
 import type { VerifiedVerb } from '../../../services/conjugation/verify';
 import { FINITE_PERSONS, IMPERATIVE_PERSONS, TENSES, type Person, type Tense } from '../../../types/grammarPack';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 
-const PATTERNS = { negation, estCeQue, inversion };
+const PATTERNS: Record<PatternName, typeof negation> = { negation, estCeQue, inversion };
 
 export function Patterns({ verb }: { verb: VerifiedVerb }) {
   const { t } = useTranslation();
