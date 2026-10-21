@@ -86,7 +86,6 @@ export function testRow(word = 'test-mot'): VocabularyRow {
     schedule: null,
     introducedAt: null,
     revision: 0,
-    memoryResetRevision: 0,
     history: [],
   };
 }

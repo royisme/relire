@@ -174,22 +174,66 @@ test('replay returns current schedule, enforces same rating, and reset invalidat
   const reset = (await getVocabularySnapshot(first.row.key)).row!;
   expect(reset.schedule).toEqual(initialVocabularySchedule(now + 3));
   expect(reset.revision).toBe(3);
-  expect(reset.memoryResetRevision).toBe(3);
   expect(reset.history).toEqual(two.row.history);
   expect(reset.introducedAt).toBe(now);
+  const next = await rateVocabularyCard(
+    first.row.key,
+    (await getVocabularySnapshot(first.row.key)).tokens,
+    'after-reset',
+    'fuzzy',
+    now + 4,
+  );
+  expect(next.row.history).toHaveLength(3);
+  expect(next.row.history[2].prior).toEqual(reset.schedule!);
+  expect(next.row.history[2].revision).toBe(4);
+  expect(next.row.schedule!.repetitions).toBe(1);
+});
+test('consecutive resets of unrated and reviewed memory retain content, history, introduction and quota', async () => {
+  const saved = await saveVocabularyBookmark(testLookup(), testAnalysis(), testCandidate().bookSource, now);
+  const introduced = await introduceVocabularyCard(testCandidate(), zero, now);
+  const day = (await readVocabulary(now)).day;
+  let current = introduced;
+  for (let revision = 1; revision <= 2; revision++) {
+    const stale = current.tokens;
+    await resetVocabularySchedule(saved.key, stale, now + revision);
+    const snapshot = await getVocabularySnapshot(saved.key);
+    current = { ...introduced, row: snapshot.row!, tokens: snapshot.tokens };
+    expect(current.tokens).toEqual({ epoch: 0, resetToken: revision, revision });
+    expect(current.row).toEqual({
+      ...introduced.row,
+      schedule: initialVocabularySchedule(now + revision),
+      revision,
+    });
+    expect(await failure(resetVocabularySchedule(saved.key, stale, now + revision))).toBeInstanceOf(
+      StaleVocabularyError,
+    );
+  }
+  const rated = await rateVocabularyCard(saved.key, current.tokens, 'after-unrated-resets', 'remembered', now + 3);
+  for (let revision = 4; revision <= 5; revision++) {
+    await resetVocabularySchedule(saved.key, (await getVocabularySnapshot(saved.key)).tokens, now + revision);
+    const reset = (await getVocabularySnapshot(saved.key)).row!;
+    expect(reset).toEqual({ ...rated.row, schedule: initialVocabularySchedule(now + revision), revision });
+  }
+  expect((await readVocabulary(now)).day).toEqual(day);
+  const backup = await exportData();
+  await importData(backup);
+  expect((await exportData()).vocab).toEqual(backup.vocab);
 });
 test('word A reset/delete leaves B valid; delete/recreate retains token and exhausted-day eligibility', async () => {
   await saveVocabularyPreferences({ newPerDay: 2, retentionPercent: 90 });
   const a = await introduceVocabularyCard(testCandidate('test-a'), zero, now);
   const b = await introduceVocabularyCard(testCandidate('test-b'), zero, now);
-  await deleteVocabularyCard(a.row.key, a.tokens);
+  await resetVocabularySchedule(a.row.key, a.tokens, now + 1);
+  const reset = await getVocabularySnapshot(a.row.key);
+  await rateVocabularyCard(b.row.key, b.tokens, 'valid-after-a-reset', 'remembered', now);
+  await deleteVocabularyCard(a.row.key, reset.tokens);
   const captured = await getVocabularySnapshot(a.row.key);
-  expect(captured.tokens.resetToken).toBe(1);
+  expect(captured.tokens.resetToken).toBe(2);
   await introduceVocabularyCard(testCandidate('test-a'), captured.tokens, now);
   expect(await failure(rateVocabularyCard(a.row.key, a.tokens, 'stale', 'remembered', now))).toBeInstanceOf(
     StaleVocabularyError,
   );
-  await rateVocabularyCard(b.row.key, b.tokens, 'valid', 'remembered', now);
+  await rateVocabularyCard(b.row.key, (await getVocabularySnapshot(b.row.key)).tokens, 'valid', 'remembered', now);
   expect((await readVocabulary(now)).day.introducedKeys).toHaveLength(2);
   const unintroduced = await saveVocabularyBookmark(testLookup('test-new'), testAnalysis('test-new'));
   expect(await failure(resetVocabularySchedule(unintroduced.key, zero, now))).toBeInstanceOf(StaleVocabularyError);
@@ -218,16 +262,17 @@ test('reviews use transaction-time preferences; failed attempts may retry with n
     reviewedAt: now,
     outcome: 'remembered',
     retentionPercent: 95,
-    schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
   });
   await saveVocabularyPreferences({ newPerDay: 100, retentionPercent: 80 });
+  // A committed operation must not even re-read preferences, including a malformed stored row.
+  await (await db()).put('meta', { newPerDay: 100, retentionPercent: 0 }, 'vocabularyPreferences');
   const replayed = await rateVocabularyCard(first.row.key, first.tokens, 'retry-config', 'remembered', now);
   expect(replayed.row).toEqual(committed.row);
   expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'new-stale', 'forgot', now))).toBeInstanceOf(
     StaleVocabularyError,
   );
 });
-test('clock errors write nothing; a corrected fresh observation works, including after a reset boundary', async () => {
+test('clock errors write nothing; a corrected fresh observation works, including after a reset', async () => {
   const first = await introduceVocabularyCard(testCandidate(), zero, now);
   const one = await rateVocabularyCard(first.row.key, first.tokens, 'one', 'remembered', now);
   expect(await failure(rateVocabularyCard(first.row.key, one.tokens, 'bad-clock', 'fuzzy', now - 1))).toBeInstanceOf(
@@ -237,7 +282,6 @@ test('clock errors write nothing; a corrected fresh observation works, including
   await resetVocabularySchedule(first.row.key, one.tokens, now + 1);
   const reset = await getVocabularySnapshot(first.row.key);
   const two = await rateVocabularyCard(first.row.key, reset.tokens, 'new-memory', 'forgot', now + 2);
-  expect(two.row.memoryResetRevision).toBe(2);
   expect(two.row.history).toHaveLength(2);
   expect(two.row.history[1].prior).toEqual(initialVocabularySchedule(now + 1));
   expect(two.row.schedule!.repetitions).toBe(1);

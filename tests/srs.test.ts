@@ -148,6 +148,21 @@ test('actual instants reach published next: its UTC-day difference differs from 
     expect(result).toEqual(saved(fsrs().next(libraryCard(prior), new Date(reviewedAt), Rating.Good).card));
   }
 });
+test('one minute across UTC midnight can change the next interval by more than one day with pinned library parity', () => {
+  const before = Date.parse('2026-10-20T23:59:30Z');
+  const after = before + 60_000;
+  const prior = { ...testMatureSchedule(before), lastReviewedAt: Date.parse('2026-10-20T12:00:00Z') };
+  const results = [before, after].map((reviewedAt) => {
+    const next = nextVocabularySchedule(prior, 'remembered', reviewedAt, preferences);
+    expect(date_diff(new Date(reviewedAt), new Date(prior.lastReviewedAt), 'days')).toBe(0);
+    expect(next).toEqual(saved(fsrs().next(libraryCard(prior), new Date(reviewedAt), Rating.Good).card));
+    expect(next.lastReviewedAt).toBe(reviewedAt);
+    return next;
+  });
+  expect(results.map((next) => next.elapsedDays)).toEqual([0, 1]);
+  expect(results.map((next) => next.scheduledDays)).toEqual([21, 23]);
+  expect(results[1].scheduledDays - results[0].scheduledDays).toBeGreaterThan(1);
+});
 test('local Review day is available before its time; intraday phases require the exact instant across DST/timezones', () => {
   const original = process.env.TZ;
   try {

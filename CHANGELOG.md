@@ -70,7 +70,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
-- Words use FSRS-6 with Forgot/Fuzzy/Remembered recall and a target-retention setting (80–95%, default90%). Reviews keep their actual submission time through save retries; resets preserve history with a fresh-memory boundary. This breaking unreleased schema requires a separately confirmed full backup and guarded vocabulary-only fresh start before real activation; no learner data is reset automatically.
+- Words use FSRS-6 with Forgot/Fuzzy/Remembered recall and a target-retention setting (80–95%, default90%). Reviews keep their actual submission time through save retries; per-card resets preserve history and create New memory without extra reset markers. Backups record scheduler policy once, not on every review. Prior unreleased FSRS rows/backups with the removed fields are rejected, with no automatic conversion or learner-data reset.
 - **Word settings live in Settings, and the Words badge counts words.** Settings has a new Words section (`#/settings/words`) holding the new-words-per-day limit and the built-in wordbook's download, update, count and failure state, moved off Today; an unsaved limit survives switching Settings sections and is dropped when you leave Settings. Today keeps its real counts and Start/continue. The sidebar's due count now sits on the Words row instead of the My study row, beside Mistakes' own unresolved count, so the two numbers are never added together; the icon rail shows no child count. The review page no longer repeats the 1/2/3 recall instructions, though the keys and the labelled buttons still work.
 - Words cards now use a narrow portrait paper layout with subtle depth, generous word whitespace and clearer meanings/example pairs. Clicking either face still flips, with selectable answers and independent Listen; three equal circular Forgot/Fuzzy/Remembered controls use the existing colour palette and save recall as ratings 1/3/4, without visible Flip buttons or stacked answer headings.
 - Words review now uses a two-way flipping card with separate Forgot/Remembered actions, no pre-answer rating dashboard, and full readable answers. First reveal still saves before showing the answer; later flips never change progress or count as recall.
@@ -158,6 +158,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Prose containing the word "rounded" had been rewritten by a find-and-replace.
 
 ### Removed
+- The unused bulk vocabulary-progress reset operation is gone; ordinary confirmed per-card resets still preserve history, bookmarks and introduction quotas.
 - The Words settings shortcut on Today is gone; Settings → Words, reached from the sidebar or Settings, still owns the new-word limit, target retention and the built-in wordbook.
 - Review's duplicate Browse words link is gone; Back to Words still returns to Today, where All words stays one tap away.
 - The old drills (word-order scramble, fill the gap and spoken questions generated from the article, with their prompts and saved sets). Exercises replace them, and unlike drills they keep your attempts.

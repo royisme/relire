@@ -13,6 +13,7 @@ import {
 import { protectedTexts, exportProtectedAudio, audioKey, normalizeText } from '../src/storage/audio';
 import { joinVocabulary, vocabularyQueue } from '../src/services/vocabulary/queue';
 import { initialVocabularySchedule } from '../src/utils/srs';
+import { VocabularyRowSchema } from '../src/types/vocabulary';
 import { areaOf, parseRoute, routeHref } from '../src/utils/routes';
 const zero = { epoch: 0, resetToken: 0, revision: 0 },
   now = new Date(2026, 9, 20, 12).getTime();
@@ -122,13 +123,17 @@ test('raw invalid row/metadata fields reject instead of stripping; retained dele
     ).toBeInstanceOf(Error);
   expect(await exportData()).toEqual(original);
 });
-test('new backups bind FSRS policy, semantic observations and reset boundaries; old or malformed model facts reject atomically', async () => {
+test('backups keep policy only in metadata and reject removed fields or malformed model facts atomically', async () => {
   const first = await introduceVocabularyCard(testCandidate(), zero, now);
   await rateVocabularyCard(first.row.key, first.tokens, 'semantic-test', 'remembered', now);
   const backup = await exportData();
   expect(backup.vocabularyMeta.schedulerPolicy).toBe('fsrs6/ts-fsrs@5.4.2/policy1');
   const row = backup.vocab[0],
     record = row.history[0];
+  expect(row).not.toHaveProperty('memoryResetRevision');
+  expect(record).not.toHaveProperty('schedulerPolicy');
+  await importData(backup);
+  expect((await exportData()).vocab).toEqual(backup.vocab);
   const { schedulerPolicy: _policy, ...oldMetadata } = backup.vocabularyMeta;
   const { outcome: _outcome, ...oldRecord } = record;
   const { retentionPercent: _retention, ...oldPreferences } = backup.vocabularyMeta.preferences;
@@ -137,8 +142,8 @@ test('new backups bind FSRS policy, semantic observations and reset boundaries; 
     { vocabularyMeta: { ...backup.vocabularyMeta, schedulerPolicy: 'another-policy' } },
     { vocabularyMeta: { ...backup.vocabularyMeta, preferences: oldPreferences } },
     { vocab: [{ ...row, history: [{ ...oldRecord, rating: 4 }] }] },
-    { vocab: [{ ...row, memoryResetRevision: 99 }] },
-    { vocab: [{ ...row, memoryResetRevision: record.revision }] },
+    { vocab: [{ ...row, memoryResetRevision: 0 }] },
+    { vocab: [{ ...row, history: [{ ...record, schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1' }] }] },
     { vocab: [{ ...row, schedule: { ...row.schedule, stability: NaN } }] },
     { vocab: [{ ...row, schedule: { ...row.schedule, dueAt: Infinity } }] },
     { vocab: [{ ...row, schedule: { ...row.schedule, lastReviewedAt: null } }] },
@@ -162,6 +167,39 @@ test('new backups bind FSRS policy, semantic observations and reset boundaries; 
     expect(await failure(importData({ ...backup, ...patch }))).toBeInstanceOf(Error);
     expect(await exportData()).toEqual(backup);
   }
+});
+
+test('current memory validation uses row revision and latest observation without reconstructing historical reset gaps', async () => {
+  const introduced = await introduceVocabularyCard(testCandidate(), zero, now);
+  const one = await rateVocabularyCard(introduced.row.key, introduced.tokens, 'one', 'remembered', now);
+  const two = await rateVocabularyCard(introduced.row.key, one.tokens, 'two', 'remembered', now + 1);
+  const row = two.row;
+  const fresh = initialVocabularySchedule(now + 2);
+  for (const valid of [
+    introduced.row,
+    row,
+    { ...row, revision: 3, schedule: fresh },
+    { ...row, revision: 4, schedule: fresh },
+    { ...introduced.row, revision: 2, schedule: fresh },
+    { ...row, revision: 4, history: row.history.map((record) => ({ ...record, revision: record.revision + 2 })) },
+  ])
+    expect(VocabularyRowSchema.safeParse(valid).success).toBe(true);
+  for (const invalid of [
+    { ...testRow(), revision: 1 },
+    { ...testRow(), history: row.history },
+    { ...row, revision: 1 },
+    { ...row, revision: 3 },
+    { ...row, schedule: fresh },
+    { ...introduced.row, schedule: row.schedule },
+    { ...row, schedule: { ...row.schedule, stability: row.schedule!.stability + 1 } },
+    { ...row, revision: 3, schedule: { ...fresh, repetitions: 1 } },
+    { ...row, history: [...row.history].reverse() },
+    { ...row, history: [row.history[0], { ...row.history[1], revision: 1 }] },
+    { ...row, history: [row.history[0], { ...row.history[1], operationId: 'one' }] },
+    { ...row, history: [{ ...row.history[0], reviewedAt: now + 1 }, row.history[1]] },
+    { ...row, history: [{ ...row.history[0], next: { ...row.history[0].next, repetitions: 2 } }, row.history[1]] },
+  ])
+    expect(VocabularyRowSchema.safeParse(invalid).success).toBe(false);
 });
 
 test('only bookmarked or scheduled vocabulary protects/exports word, personal sentence and personal example clips; no synthesis', async () => {

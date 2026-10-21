@@ -63,19 +63,18 @@ New has null last review and zero model facts/counters. Other phases require a p
 Review history contains only submitted observations:
 
 ```ts
-{ operationId, outcome, reviewedAt, retentionPercent, schedulerPolicy,
-  prior, next, revision }
+{ operationId, outcome, reviewedAt, retentionPercent, prior, next, revision }
 ```
 
-`reviewedAt` is the actual captured judgment instant, not retry/commit time. `prior`/`next` are validated schedules; the next lastReviewedAt matches the observation, and repetitions increase by one. Policy is the exact literal above. No redundant opaque library log or manufactured historical observations are stored.
+`reviewedAt` is the actual captured judgment instant, not retry/commit time. `retentionPercent` is the target actually used in that transaction, not measured recall. `prior`/`next` are validated schedules; the next lastReviewedAt matches the observation, and repetitions increase by one. Scheduler policy is bound once at backup level, not repeated per observation. No redundant opaque library log or manufactured historical observations are stored.
 
-Each learner row also has `memoryResetRevision`, initially0. A confirmed ordinary per-card reset retains content, bookmark, introduction, history and day ledgers; it creates fresh New memory due now, increments row revision and the retained per-word reset token, and sets memoryResetRevision to that new revision. It is not a review. Only records whose revision is above that boundary belong to current memory. Submitted-review counts remain `history.length`, not resets or mastery.
+A confirmed ordinary per-card reset retains content, bookmark, introduction, history and day ledgers; it creates fresh New memory due now and increments row revision and the retained per-word reset token. It is not a review. Current memory validation uses only the row revision and latest history record: with no record or a row revision above the latest record, the schedule must be New; at the latest record's revision, the schedule must equal its next schedule. History revisions remain strictly increasing and cannot exceed the row revision; operation ids remain unique. An unintroduced row has revision0 and empty history. No historical reset segments are reconstructed or marked. Submitted-review counts remain `history.length`, not resets or mastery.
 
 ## Time, queue and durability
 
 Store the library's due instant unchanged. New/Learning/Relearning require `dueAt <= now`. Review is available on the device-local calendar date of dueAt, including earlier than its original time of day. Timezone changes affect interpretation of due days, not saved instants. Do not alter model timestamps to implement presentation policy.
 
-**Source-verified distinction from the design probe:** the package's exported `date_diff(..., 'days')` floors actual elapsed milliseconds/86400000. However, the published `AbstractScheduler.init`, used by `fsrs().next`, calls `dateDiffInDays`, counting **UTC calendar-date boundaries**. Consequently23 elapsed hours can count as one model day, and crossing UTC midnight can matter. The wrapper passes actual instants unchanged and preserves that pinned behavior, not a guessed elapsed-ms override or FSRS-7 fractional-day claim. Tests cover both functions, DST and timezone examples. A future model/policy change needs a new explicit decision.
+**Source-verified distinction from the design probe:** the package's exported `date_diff(..., 'days')` floors actual elapsed milliseconds/86400000. However, the published `AbstractScheduler.init`, used by `fsrs().next`, calls `dateDiffInDays`, counting **UTC calendar-date boundaries**. Consequently23 elapsed hours can count as one model day, and one minute across UTC midnight can add one model day. The next interval is nonlinear: that boundary can change it by more than one day, not at most one day. The default20 daily introductions do not bound this model effect. The wrapper passes actual instants unchanged and preserves that pinned behavior, not a guessed elapsed-ms override or FSRS-7 fractional-day claim. Tests cover both functions, DST and timezone examples. A future model/policy change needs a new explicit decision.
 
 Queue order remains due intraday phases (including introduced New), local due-day reviews, quota-eligible personal new, then source-order unseen book entries. Preserve visit exclusions, unique daily introductions and already-ledgered recreation eligibility. No early look-ahead, review cap or hidden overdue backlog. App sidebar, Today and session counts share `vocabularyDue`; Browse maps all active non-Review phases to its existing Learning filter. Analytics counts bookmarks, introductions and actual history observations only. Wake at exact intraday due times, local midnight, focus/visibility return; do not pre-empt an active card.
 
@@ -90,7 +89,7 @@ On submission the review hook captures operationId, semantic outcome and a valid
 
 Stale reset/delete/restore work is never retried with freshly adopted tokens. Reset/delete of wordA does not invalidate wordB. Native transaction aborts leave schedule/history/quota unchanged. A device clock before lastReviewedAt is an error, never a clamped elapsed time.
 
-## Backup and explicit activation
+## Backup
 
 Every new backup pairs `vocab` with:
 
@@ -102,18 +101,10 @@ vocabularyMeta: {
 }
 ```
 
-Raw paired inputs are validated before restore, including schedules/history/reset boundaries, unique rows/days/keys and policy. Either vocabulary field alone rejects; both absent preserve vocabulary. A paired replacement touches only its rows, preference/day namespace and local epoch. It retains per-word token ledgers and unrelated exercise/topic metadata. There is no old backup decoder, migration, replay or mixed-model runtime. Recovery of pre-switch progress requires the matching old code and full pre-switch backup together.
-
-`freshStartVocabularyProgress({ preSwitchBackup, expectedEpoch, backupCompletedAndConfirmed: true }, now)` is an **operator-only** storage operation, not UI or startup behavior. Its preSwitchBackup input supplies raw `vocab` and `vocabularyMeta` from a complete old-build backup. Completion of a full backup file and human confirmation are external operator preconditions; an in-memory object or boolean does not prove that a download completed.
-
-Before opening the transaction it explicitly projects and validates id/key/word/createdAt, optional bookSource, bookmark/time and all contexts/source/analysis, then supplies fresh progress fields. It never parses/replays old schedules or historical grades. New rows have null schedule/introduction, empty history and revision/reset boundary0. Canonical raw snapshot comparison still covers all discarded progress so changed work cannot be wiped by an old receipt.
-
-In one vocab/meta transaction it requires the original epoch and exact canonical current rows/preferences/day snapshot. Then it writes only the projected rows, clears only vocabularyDay ledgers, retains actual newPerDay (including0), sets retention90 and advances epoch. It never lowers/deletes per-word tokens or touches other stores/meta namespaces. Abort rolls everything back. Reusing the receipt fails after epoch/content/progress/preferences/day changes, including later learning. Never call it on a real profile without separate backup/activation approval.
-
-Controlled activation order: old-build full backup and verification → human authorization → controlled code/dependency cutover without mounting strict new readers → explicit same-origin fresh start → reload → new-format backup. Detailed operator instructions accompany the implementation privately. No real reset, backup, merge, dependency install in main or deployment is part of code implementation.
+Raw paired inputs are validated before restore, including schedules/history/current-memory consistency, unique rows/days/keys and policy. Either vocabulary field alone rejects; both absent preserve vocabulary. A paired replacement touches only its rows, preference/day namespace and local epoch. It retains per-word token ledgers and unrelated exercise/topic metadata. There is no old backup decoder, migration, replay, bulk progress reset or mixed-model runtime. Removed row/history fields are rejected by strict schemas, not stripped; prior unreleased FSRS rows/backups containing them are intentionally incompatible. No real learner data is converted or deleted by this shape change.
 
 ## Verification boundary
 
-Bun unit tests use invented content and fake IndexedDB. They cover published-library parity/nonmutation/determinism, all semantic outcomes/phases, mature retention direction, exact minute and local-day availability, actual pinned time behavior, clock recovery, immutable retry identity, quota/introduction, stale/reset/restore guards, strict backups, fresh-start content projection/snapshot rejection/namespace isolation/native abort, and Settings ranges/readiness/drafts/older saves.
+Bun unit tests use invented content and fake IndexedDB. They cover published-library parity/nonmutation/determinism, all semantic outcomes/phases, mature retention direction, exact minute and local-day availability, actual pinned time behavior, clock recovery, immutable retry identity, quota/introduction, stale/reset/restore guards, strict backups/current-memory consistency/namespace isolation/native abort, ordinary and consecutive per-card resets, and Settings ranges/readiness/drafts/older saves.
 
 Static/unit/i18n/shape/format/build checks plus actual Vite bundle delta and PWA precache inclusion are implementation evidence, not browser/offline or real-provider claims. No automatic browser gate: manual visual and actual study acceptance belong to the owner. No optimizer, raw weights/steps UI, new provider/backend, real corpus changes or real-data activation is included.

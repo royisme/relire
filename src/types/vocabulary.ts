@@ -156,7 +156,6 @@ export const VocabularyReviewRecordSchema = z
     reviewedAt: VocabularyTimestampSchema,
     outcome: VocabularyOutcomeSchema,
     retentionPercent: VocabularyRetentionSchema,
-    schedulerPolicy: z.literal(VOCABULARY_SCHEDULER_POLICY),
     prior: VocabularyScheduleSchema,
     next: VocabularyScheduleSchema,
     revision: z.number().int().positive(),
@@ -181,7 +180,6 @@ export const VocabularyRowSchema = z
     schedule: VocabularyScheduleSchema.nullable(),
     introducedAt: timestamp.nullable(),
     revision: integer,
-    memoryResetRevision: integer,
     history: z.array(VocabularyReviewRecordSchema),
   })
   .superRefine((row, ctx) => {
@@ -190,34 +188,26 @@ export const VocabularyRowSchema = z
     if (!row.bookSource && !row.contexts.length) invalid('A row needs content');
     if (row.bookmarked !== (row.bookmarkedAt !== null)) invalid('Bookmark and time must agree');
     if ((row.schedule === null) !== (row.introducedAt === null)) invalid('Schedule and introduction must be paired');
-    if (!row.schedule && (row.revision || row.memoryResetRevision || row.history.length))
-      invalid('Unintroduced row cannot have reviews');
-    if (row.memoryResetRevision > row.revision) invalid('Invalid memory reset boundary');
+    if (!row.schedule && (row.revision || row.history.length)) invalid('Unintroduced row cannot have reviews');
     if (new Set(row.contexts.map((c) => c.id)).size !== row.contexts.length) invalid('Duplicate context');
     if (row.contexts.some((c) => vocabularyKey(c.analysis.word) !== row.key)) invalid('Analysis word mismatch');
     let revision = 0;
     const operations = new Set<string>();
     for (const record of row.history) {
-      if (
-        record.revision <= revision ||
-        record.revision > row.revision ||
-        record.revision === row.memoryResetRevision ||
-        operations.has(record.operationId)
-      )
+      if (record.revision <= revision || record.revision > row.revision || operations.has(record.operationId))
         invalid('Invalid history revision or operation');
       revision = record.revision;
       operations.add(record.operationId);
     }
     if (row.schedule) {
       const latest = row.history.at(-1);
-      if (row.revision !== Math.max(row.memoryResetRevision, latest?.revision ?? 0)) invalid('Invalid row revision');
-      if (latest && latest.revision > row.memoryResetRevision) {
+      if (latest && row.revision === latest.revision) {
         if (
           Object.keys(latest.next).some(
             (key) => latest.next[key as keyof typeof latest.next] !== row.schedule![key as keyof typeof latest.next],
           )
         )
-          invalid('Schedule must match latest active review');
+          invalid('Schedule must match latest review');
       } else if (row.schedule.phase !== 'new') invalid('Unrated memory must be New');
     }
   });
