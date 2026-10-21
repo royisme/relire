@@ -15,10 +15,24 @@ export function parseNewPerDay(value: string): number | null {
   return /^\d+$/.test(value) && Number(value) <= 100 ? Number(value) : null;
 }
 
+/**
+ * The page's draft after a save of `submitted` finished: a newer edit stays, an unchanged draft is dropped.
+ * Only the page can decide, because this section remounts when Settings switches sections.
+ */
+export function draftAfterSave(current: string | null, submitted: string | null): string | null {
+  return current === submitted ? null : current;
+}
+
 interface WordsSectionProps {
   model: VocabularyModel;
-  /** `value` is the unsaved text; null shows the saved preference. */
-  draft: { value: string | null; onChange: (value: string | null) => void };
+  /** The page owns the unsaved text, so it outlives a section switch. */
+  draft: {
+    /** The unsaved text; null shows the saved preference. */
+    value: string | null;
+    onChange: (value: string) => void;
+    /** This save of `submitted` finished: drop the draft only if it still holds that text. */
+    onSaved: (submitted: string | null) => void;
+  };
 }
 
 export function WordsSection({ model, draft }: WordsSectionProps) {
@@ -34,11 +48,14 @@ export function WordsSection({ model, draft }: WordsSectionProps) {
       setStatus(t('vocab.invalidLimit'));
       return;
     }
+    // The text this save submits; the learner may type again while it is in flight.
+    const submitted = draft.value;
     setSaving(true);
     setStatus(null);
     try {
       await model.savePreferences(next);
-      draft.onChange(null);
+      // A newer edit stays unsaved on screen; only the page can tell, since this section may have remounted.
+      draft.onSaved(submitted);
       setStatus(t('vocab.saved'));
     } catch (error) {
       setStatus(error instanceof Error ? error.message : String(error));

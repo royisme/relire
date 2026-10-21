@@ -26,7 +26,7 @@ import { PromptsSection } from './PromptsSection';
 import { SectionList } from './SectionList';
 import { sliceOf, withSlice, type SettingsSlice } from './slices';
 import { useModelCatalogue } from './useModelCatalogue';
-import { WordsSection } from './WordsSection';
+import { WordsSection, draftAfterSave } from './WordsSection';
 
 /** Settings links keep an unsaved AI draft (the page stays mounted); anything else asks first. */
 const isSettingsLink = (href: string) => parseRoute(href).route.name === 'settings';
@@ -61,6 +61,7 @@ export function SettingsPage({
   const [savedPrompts, setSavedPrompts] = useState<PromptOverrides>(getPromptOverrides);
   const [promptDrafts, setPromptDrafts] = useState<PromptOverrides>(savedPrompts);
   // The unsaved new-word limit: it survives section switches and is gone once Settings is left.
+  // A save clears it only while it still holds the text that save submitted.
   const [limitDraft, setLimitDraft] = useState<string | null>(null);
   // A key request focuses the field once (the id changes per request); switching purpose must not pull focus back.
   const keyInput = useRef<HTMLInputElement>(null);
@@ -151,7 +152,14 @@ export function SettingsPage({
             />
           )}
           {active === 'words' && (
-            <WordsSection model={vocabulary} draft={{ value: limitDraft, onChange: setLimitDraft }} />
+            <WordsSection
+              model={vocabulary}
+              draft={{
+                value: limitDraft,
+                onChange: setLimitDraft,
+                onSaved: (submitted) => setLimitDraft((current) => draftAfterSave(current, submitted)),
+              }}
+            />
           )}
           {active === 'data' && <DataSection />}
         </div>
