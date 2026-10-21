@@ -59,7 +59,7 @@ test('AI services is one Settings destination with three real purpose links', as
   void ai;
   await page.goto('/#/settings/ai/text');
   const sidebar = page.locator('[data-sidebar]');
-  await expect(sidebar.locator('a[href^="#/settings/"]')).toHaveCount(4);
+  await expect(sidebar.locator('a[href^="#/settings/"]')).toHaveCount(5);
   await expect(sidebar.getByRole('link', { name: 'AI services' })).toHaveAttribute('aria-current', 'page');
   await expect(sidebar.getByRole('link', { name: 'Text AI' })).toHaveCount(0);
 

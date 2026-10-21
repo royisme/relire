@@ -72,7 +72,7 @@ test('Grammar opens Topics and switches to its distinct Conjugation address', as
 test('About is the final footer link, not a Settings section', async ({ page }) => {
   await page.goto('/#/settings/ai/text');
   const sidebar = page.locator('[data-sidebar]');
-  await expect(sidebar.locator('a[href^="#/settings/"]')).toHaveCount(4);
+  await expect(sidebar.locator('a[href^="#/settings/"]')).toHaveCount(5);
   await expect(sidebar.locator('a[href="#/settings/about"]')).toHaveCount(0);
   const about = sidebar.getByRole('link', { name: 'About', exact: true });
   await expect(sidebar.getByRole('link').last()).toHaveAttribute('href', '#/about');

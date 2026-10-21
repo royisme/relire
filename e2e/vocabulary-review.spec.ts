@@ -168,6 +168,7 @@ for (const failure of ['partial', 'rate', 'hash', 'storage'] as const) {
     const old = await testBook(1, 'OLD TEST'),
       next = await testBook(251, 'NEW TEST');
     await seed(page, 'en', 'light', 0, old);
+    await page.goto('/#/settings/words');
     await expect(page.getByRole('button', { name: 'Check for updates', exact: true })).toBeEnabled();
     const beforeCache = await cacheRows(page);
     const status = page.locator('[data-vocabulary-download-status]');
@@ -221,13 +222,13 @@ for (const failure of ['partial', 'rate', 'hash', 'storage'] as const) {
         await page.keyboard.press('Escape');
         await cacheFault(page, false);
         if (attempt === 0) {
-          await page.getByRole('link', { name: 'All words', exact: true }).click();
+          await page.goto('/#/study/words/all');
           await expect(page.getByRole('button', { name: 'test-0', exact: true })).toBeVisible();
           await expect(page.getByRole('row')).toHaveCount(2);
           await page.reload();
           await expect(page.getByRole('row')).toHaveCount(2);
           expect(await cacheRows(page)).toEqual(beforeCache);
-          await page.getByRole('link', { name: 'Today', exact: true }).click();
+          await page.goto('/#/settings/words');
           held = new Promise<void>((resolve) => {
             release = resolve;
           });
