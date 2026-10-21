@@ -101,16 +101,18 @@ export function Flashcard({
           data-vocabulary-face="front"
           inert={face !== 'front'}
           aria-hidden={face !== 'front'}
-          className="vocabulary-flashcard-face relative flex min-h-80 cursor-pointer flex-col items-center justify-center gap-5 rounded-lg border border-ink-200 bg-surface p-6 text-center"
+          className="vocabulary-flashcard-face relative flex cursor-pointer flex-col items-center gap-6 rounded-lg border border-ink-200 bg-surface p-6 text-center sm:p-8"
         >
           {flipSurface(false)}
-          <h1
-            lang="fr"
-            className="max-w-full break-words font-serif text-[32px] font-semibold leading-tight sm:text-[40px]"
-          >
-            {word}
-          </h1>
-          {listen}
+          <div className="flex w-full min-w-0 flex-1 flex-col items-center justify-center gap-4 py-8">
+            <h1
+              lang="fr"
+              className="max-w-full break-words font-serif text-[32px] font-semibold leading-tight sm:text-[40px]"
+            >
+              {word}
+            </h1>
+            {listen}
+          </div>
           <p className="text-sm text-ink-600">{t('vocab.recall')}</p>
         </section>
         {answer && (
@@ -118,15 +120,15 @@ export function Flashcard({
             data-vocabulary-face="back"
             inert={face !== 'back'}
             aria-hidden={face !== 'back'}
-            className="vocabulary-flashcard-face vocabulary-flashcard-back relative flex cursor-pointer flex-col gap-6 rounded-lg border border-ink-200 bg-surface p-4 sm:p-6"
+            className="vocabulary-flashcard-face vocabulary-flashcard-back relative flex cursor-pointer flex-col gap-8 rounded-lg border border-ink-200 bg-surface p-6 sm:p-8"
           >
             {flipSurface(true)}
-            <header className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-200 pb-4">
+            <header className="flex flex-wrap items-center justify-between gap-3">
               <h2
                 ref={wordHeading}
                 tabIndex={-1}
                 lang="fr"
-                className="min-w-0 break-words font-serif text-2xl font-semibold"
+                className="min-w-0 break-words font-serif text-2xl font-semibold text-ink-700"
               >
                 {word}
               </h2>

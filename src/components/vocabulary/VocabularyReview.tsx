@@ -145,7 +145,7 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
         {t('vocab.reviewCounts', { due: session.due, remaining: session.remaining })}
       </p>
       {active ? (
-        <div className="mx-auto max-w-2xl space-y-3">
+        <div className="mx-auto w-full max-w-[25rem] space-y-6">
           <Flashcard
             key={key}
             word={active.candidate.word}
