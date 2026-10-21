@@ -131,7 +131,11 @@ test('replacing the articles leaves units, their states and attempts untouched',
   await importData({
     articles: [article('other')],
     vocab: [],
-    vocabularyMeta: { preferences: { newPerDay: 20 }, days: [] },
+    vocabularyMeta: {
+      schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
+      preferences: { newPerDay: 20, retentionPercent: 90 },
+      days: [],
+    },
     stats: { ...EMPTY_STATS },
   });
   expect(await listUnits()).toHaveLength(1);

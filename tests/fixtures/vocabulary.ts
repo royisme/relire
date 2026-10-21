@@ -1,6 +1,11 @@
 /** Invented TEST-only vocabulary content; never reads a real corpus. */
 import type { WordAnalysis } from '../../src/types';
-import type { VocabularyCandidate, VocabularyEntry, VocabularyRow } from '../../src/types/vocabulary';
+import type {
+  VocabularyCandidate,
+  VocabularyEntry,
+  VocabularyRow,
+  VocabularySchedule,
+} from '../../src/types/vocabulary';
 import { vocabularyId, vocabularyKey } from '../../src/services/vocabulary/identity';
 import { vocabularyHash } from '../../src/services/vocabulary/book';
 import { assembleVocabularyBook } from '../../scripts/vocabulary/publication';
@@ -56,6 +61,20 @@ export function testCandidate(word = 'test-mot'): VocabularyCandidate {
     },
   };
 }
+export function testMatureSchedule(now: number): VocabularySchedule {
+  return {
+    phase: 'review',
+    dueAt: now,
+    lastReviewedAt: now - 20 * 86400_000,
+    stability: 20,
+    difficulty: 5,
+    elapsedDays: 20,
+    scheduledDays: 20,
+    learningSteps: 0,
+    repetitions: 5,
+    lapses: 0,
+  };
+}
 export function testRow(word = 'test-mot'): VocabularyRow {
   return {
     ...testCandidate(word),
@@ -67,6 +86,7 @@ export function testRow(word = 'test-mot'): VocabularyRow {
     schedule: null,
     introducedAt: null,
     revision: 0,
+    memoryResetRevision: 0,
     history: [],
   };
 }

@@ -1,6 +1,6 @@
 /** Canonical catalogue/learner join and deterministic review selection; unseen fronts never persist rows. */
 import type { VocabularyBook, VocabularyCandidate, VocabularyDay, VocabularyRow } from '../../types/vocabulary';
-import { vocabularyDue } from '../../utils/srs';
+import { formatDate, vocabularyDue } from '../../utils/srs';
 export interface VocabularyJoined extends VocabularyCandidate {
   row?: VocabularyRow;
   builtIn: boolean;
@@ -41,18 +41,14 @@ export function vocabularyQueue(
     .filter(
       (word) => word.row?.schedule && word.row.schedule.phase !== 'review' && vocabularyDue(word.row.schedule, now),
     )
-    .sort(
-      (a, b) =>
-        (a.row!.schedule!.phase !== 'review' ? a.row!.schedule!.dueAt : 0) -
-          (b.row!.schedule!.phase !== 'review' ? b.row!.schedule!.dueAt : 0) || compareKey(a, b),
-    );
+    .sort((a, b) => a.row!.schedule!.dueAt - b.row!.schedule!.dueAt || compareKey(a, b));
   const review = joined
     .filter((word) => word.row?.schedule?.phase === 'review' && vocabularyDue(word.row.schedule, now))
     .sort((a, b) => {
       const left = a.row!.schedule!,
         right = b.row!.schedule!;
       return left.phase === 'review' && right.phase === 'review'
-        ? left.dueDate.localeCompare(right.dueDate) || compareKey(a, b)
+        ? formatDate(new Date(left.dueAt)).localeCompare(formatDate(new Date(right.dueAt))) || compareKey(a, b)
         : 0;
     });
   const eligible = (word: VocabularyJoined) =>

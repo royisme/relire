@@ -1,9 +1,15 @@
 /** Paired vocabulary backup validation and namespace-only replacement within the caller's transaction. */
 import { z } from 'zod';
-import { VocabularyRowSchema, VocabularyDaySchema, VocabularyPreferencesSchema } from '../types/vocabulary';
+import {
+  VocabularyRowSchema,
+  VocabularyDaySchema,
+  VocabularyPreferencesSchema,
+  VOCABULARY_SCHEDULER_POLICY,
+} from '../types/vocabulary';
 import type { RwStore } from './exerciseRows';
 export const VocabularyMetaBackupSchema = z
   .strictObject({
+    schedulerPolicy: z.literal(VOCABULARY_SCHEDULER_POLICY),
     preferences: VocabularyPreferencesSchema,
     days: z.array(VocabularyDaySchema),
   })

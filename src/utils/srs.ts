@@ -1,49 +1,77 @@
-/** Pure vocabulary scheduling; all transitions and previews receive the actual clock explicitly. */
-import type { VocabularyRating, VocabularySchedule } from '../types/vocabulary';
-export const SM2_MIN_EASE = 1.3;
-export const SM2_DEFAULT_EASE = 2.5;
+/** One pure FSRS-6 scheduler; private library serialization, explicit instants and preferences only. */
+import { createEmptyCard, fsrs, Rating, State, type Card } from 'ts-fsrs';
+import {
+  VocabularyOutcomeSchema,
+  VocabularyPreferencesSchema,
+  VocabularyScheduleSchema,
+  VocabularyTimestampSchema,
+  type VocabularyOutcome,
+  type VocabularyPreferences,
+  type VocabularySchedule,
+} from '../types/vocabulary';
+
+export class VocabularyClockError extends Error {
+  constructor() {
+    super('Review time is invalid or earlier than the last review; correct the device clock and submit again');
+  }
+}
 export function formatDate(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
-export function addDays(date: Date, days: number): Date {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
+function reviewTime(now: number, lastReviewedAt: number | null = null) {
+  if (!VocabularyTimestampSchema.safeParse(now).success || (lastReviewedAt !== null && now < lastReviewedAt))
+    throw new VocabularyClockError();
+  return new Date(now);
 }
-export function initialVocabularySchedule(
-  now: number,
-): Extract<VocabularySchedule, { phase: 'learning' | 'relearning' }> {
-  return { phase: 'learning', step: 0, dueAt: now, repetitions: 0, intervalDays: 0, easeFactor: SM2_DEFAULT_EASE };
+const phases = ['new', 'learning', 'review', 'relearning'] as const;
+const states = { new: State.New, learning: State.Learning, review: State.Review, relearning: State.Relearning };
+const grades = { forgot: Rating.Again, fuzzy: Rating.Hard, remembered: Rating.Good } as const;
+function serialize(card: Card): VocabularySchedule {
+  return VocabularyScheduleSchema.parse({
+    phase: phases[card.state],
+    dueAt: card.due.getTime(),
+    lastReviewedAt: card.last_review?.getTime() ?? null,
+    stability: card.stability,
+    difficulty: card.difficulty,
+    elapsedDays: card.elapsed_days,
+    scheduledDays: card.scheduled_days,
+    learningSteps: card.learning_steps,
+    repetitions: card.reps,
+    lapses: card.lapses,
+  });
+}
+export function initialVocabularySchedule(now: number): VocabularySchedule {
+  return serialize(createEmptyCard(reviewTime(now)));
 }
 export function vocabularyDue(schedule: VocabularySchedule | null, now: number): boolean {
+  const date = reviewTime(now);
   return (
     schedule !== null &&
-    (schedule.phase === 'review' ? schedule.dueDate <= formatDate(new Date(now)) : schedule.dueAt <= now)
+    (schedule.phase === 'review' ? formatDate(new Date(schedule.dueAt)) <= formatDate(date) : schedule.dueAt <= now)
   );
 }
 export function nextVocabularySchedule(
   prior: VocabularySchedule,
-  rating: VocabularyRating,
-  now: number,
+  outcome: VocabularyOutcome,
+  reviewedAt: number,
+  preferences: VocabularyPreferences,
 ): VocabularySchedule {
-  const review = (intervalDays: number, repetitions: number, easeFactor: number): VocabularySchedule => ({
-    phase: 'review',
-    intervalDays,
-    repetitions,
-    easeFactor,
-    dueDate: formatDate(addDays(new Date(now), intervalDays)),
-  });
-  if (prior.phase !== 'review') {
-    if (rating === 5 || (prior.step === 1 && rating === 4)) return review(1, 1, prior.easeFactor);
-    const step = rating === 1 ? 0 : rating === 4 ? 1 : prior.step;
-    const minutes = rating === 1 ? 1 : rating === 3 && step === 0 ? 6 : 10;
-    return { ...prior, step, dueAt: now + minutes * 60_000 };
-  }
-  const easeFactor = Math.max(
-    SM2_MIN_EASE,
-    Number((prior.easeFactor + 0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02)).toFixed(2)),
-  );
-  if (rating === 1) return { ...initialVocabularySchedule(now + 60_000), phase: 'relearning', easeFactor };
-  const days = prior.repetitions === 1 ? (rating === 3 ? 3 : 6) : Math.round(prior.intervalDays * prior.easeFactor);
-  return review(days, prior.repetitions + 1, easeFactor);
+  const saved = VocabularyScheduleSchema.parse(prior);
+  const now = reviewTime(reviewedAt, saved.lastReviewedAt);
+  const { retentionPercent } = VocabularyPreferencesSchema.parse(preferences);
+  const grade = grades[VocabularyOutcomeSchema.parse(outcome)];
+  const card: Card = {
+    state: states[saved.phase],
+    due: new Date(saved.dueAt),
+    ...(saved.lastReviewedAt === null ? {} : { last_review: new Date(saved.lastReviewedAt) }),
+    stability: saved.stability,
+    difficulty: saved.difficulty,
+    elapsed_days: saved.elapsedDays,
+    scheduled_days: saved.scheduledDays,
+    learning_steps: saved.learningSteps,
+    reps: saved.repetitions,
+    lapses: saved.lapses,
+  };
+  // All other defaults are pinned by ts-fsrs@5.4.2 and policy1; never share mutable scheduler parameters.
+  return serialize(fsrs({ request_retention: retentionPercent / 100, enable_fuzz: false }).next(card, now, grade).card);
 }

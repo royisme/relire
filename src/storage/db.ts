@@ -4,6 +4,8 @@ import {
   VocabularyRowSchema,
   VocabularyPreferencesSchema,
   VocabularyDaySchema,
+  DEFAULT_VOCABULARY_PREFERENCES,
+  VOCABULARY_SCHEDULER_POLICY,
   type VocabularyRow,
 } from '../types/vocabulary';
 import { parseVocabularyBackup, restoreVocabularyRows, type VocabularyMetaBackup } from './vocabularyBackup';
@@ -269,7 +271,10 @@ export async function exportData(): Promise<BackupData> {
     itemStates,
     attempts,
     vocabularyMeta: {
-      preferences: VocabularyPreferencesSchema.parse(meta.get('vocabularyPreferences') ?? { newPerDay: 20 }),
+      schedulerPolicy: VOCABULARY_SCHEDULER_POLICY,
+      preferences: VocabularyPreferencesSchema.parse(
+        meta.get('vocabularyPreferences') ?? DEFAULT_VOCABULARY_PREFERENCES,
+      ),
       days,
     },
   };

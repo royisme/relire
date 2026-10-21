@@ -4,6 +4,7 @@ import { freshDb, failure } from './fixtures/storage';
 import { testAnalysis, testCandidate, testLookup } from './fixtures/vocabulary';
 import { vocabularyContextKey, vocabularyKey } from '../src/services/vocabulary/identity';
 import { db, exportData, importData } from '../src/storage/db';
+import { initialVocabularySchedule, VocabularyClockError } from '../src/utils/srs';
 import {
   saveVocabularyBookmark,
   removeVocabularyBookmark,
@@ -106,7 +107,7 @@ test('book-first and bookmark-first both keep one card, first context/snapshot a
     const candidate = testCandidate();
     if (!bookFirst) await saveVocabularyBookmark(testLookup(), testAnalysis(), undefined, now);
     const introduced = await introduceVocabularyCard(candidate, zero, now);
-    const rated = await rateVocabularyCard(candidate.key, introduced.tokens, 'first-rating', 4, now);
+    const rated = await rateVocabularyCard(candidate.key, introduced.tokens, 'first-rating', 'remembered', now);
     const saved = await saveVocabularyBookmark(
       testLookup(),
       testAnalysis(),
@@ -130,7 +131,7 @@ test('book-first and bookmark-first both keep one card, first context/snapshot a
 });
 
 test('same-key introductions serialize once; quota race inserts nothing for losing key; midnight uses reveal day', async () => {
-  await saveVocabularyPreferences(1);
+  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
   const candidate = testCandidate();
   const rows = await Promise.all([
     introduceVocabularyCard(candidate, zero, now),
@@ -148,7 +149,7 @@ test('same-key introductions serialize once; quota race inserts nothing for losi
   expect((await readVocabulary(tomorrow)).day.introducedKeys).toEqual(['test-other']);
 });
 test('actual two-key quota race has one winner and no unseen front row', async () => {
-  await saveVocabularyPreferences(1);
+  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
   const results = await Promise.allSettled(
     ['test-a', 'test-b'].map((word) => introduceVocabularyCard(testCandidate(word), zero, now)),
   );
@@ -157,40 +158,113 @@ test('actual two-key quota race has one winner and no unseen front row', async (
 });
 test('replay returns current schedule, enforces same rating, and reset invalidation precedes replay', async () => {
   const first = await introduceVocabularyCard(testCandidate(), zero, now);
-  const one = await rateVocabularyCard(first.row.key, first.tokens, 'op-1', 4, now);
-  const two = await rateVocabularyCard(first.row.key, one.tokens, 'op-2', 5, now + 1);
-  expect((await rateVocabularyCard(first.row.key, first.tokens, 'op-1', 4, now + 2)).row).toEqual(two.row);
-  expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'op-1', 1, now))).toBeInstanceOf(Error);
+  const one = await rateVocabularyCard(first.row.key, first.tokens, 'op-1', 'remembered', now);
+  const two = await rateVocabularyCard(first.row.key, one.tokens, 'op-2', 'remembered', now + 1);
+  await saveVocabularyPreferences({ newPerDay: 20, retentionPercent: 95 });
+  expect((await rateVocabularyCard(first.row.key, first.tokens, 'op-1', 'remembered', now)).row).toEqual(two.row);
+  expect(one.row.history[0].retentionPercent).toBe(90);
+  expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'op-1', 'forgot', now))).toBeInstanceOf(Error);
+  expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'op-1', 'remembered', now + 2))).toBeInstanceOf(
+    Error,
+  );
   await resetVocabularySchedule(first.row.key, two.tokens, now + 3);
-  expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'op-1', 4, now))).toBeInstanceOf(
+  expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'op-1', 'remembered', now))).toBeInstanceOf(
     StaleVocabularyError,
   );
   const reset = (await getVocabularySnapshot(first.row.key)).row!;
-  expect(reset.schedule).toEqual({
-    phase: 'learning',
-    step: 0,
-    dueAt: now + 3,
-    easeFactor: 2.5,
-    repetitions: 0,
-    intervalDays: 0,
-  });
+  expect(reset.schedule).toEqual(initialVocabularySchedule(now + 3));
+  expect(reset.revision).toBe(3);
+  expect(reset.memoryResetRevision).toBe(3);
   expect(reset.history).toEqual(two.row.history);
   expect(reset.introducedAt).toBe(now);
 });
 test('word A reset/delete leaves B valid; delete/recreate retains token and exhausted-day eligibility', async () => {
-  await saveVocabularyPreferences(2);
+  await saveVocabularyPreferences({ newPerDay: 2, retentionPercent: 90 });
   const a = await introduceVocabularyCard(testCandidate('test-a'), zero, now);
   const b = await introduceVocabularyCard(testCandidate('test-b'), zero, now);
   await deleteVocabularyCard(a.row.key, a.tokens);
   const captured = await getVocabularySnapshot(a.row.key);
   expect(captured.tokens.resetToken).toBe(1);
   await introduceVocabularyCard(testCandidate('test-a'), captured.tokens, now);
-  expect(await failure(rateVocabularyCard(a.row.key, a.tokens, 'stale', 4, now))).toBeInstanceOf(StaleVocabularyError);
-  await rateVocabularyCard(b.row.key, b.tokens, 'valid', 4, now);
+  expect(await failure(rateVocabularyCard(a.row.key, a.tokens, 'stale', 'remembered', now))).toBeInstanceOf(
+    StaleVocabularyError,
+  );
+  await rateVocabularyCard(b.row.key, b.tokens, 'valid', 'remembered', now);
   expect((await readVocabulary(now)).day.introducedKeys).toHaveLength(2);
   const unintroduced = await saveVocabularyBookmark(testLookup('test-new'), testAnalysis('test-new'));
   expect(await failure(resetVocabularySchedule(unintroduced.key, zero, now))).toBeInstanceOf(StaleVocabularyError);
 });
+test('reviews use transaction-time preferences; failed attempts may retry with new retention, while committed operations stay unchanged', async () => {
+  const first = await introduceVocabularyCard(testCandidate(), zero, now);
+  await saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 80 });
+  // oxlint-disable-next-line typescript/unbound-method -- Inject one aborted native write and restore its receiver-bound delegate.
+  const put = IDBObjectStore.prototype.put;
+  IDBObjectStore.prototype.put = function (value, key) {
+    const request = put.call(this, value, key);
+    if (this.name === 'vocab') request.addEventListener('success', () => this.transaction.abort());
+    return request;
+  };
+  try {
+    expect(
+      await failure(rateVocabularyCard(first.row.key, first.tokens, 'retry-config', 'remembered', now)),
+    ).toBeInstanceOf(Error);
+  } finally {
+    IDBObjectStore.prototype.put = put;
+  }
+  expect((await getVocabularySnapshot(first.row.key)).row).toEqual(first.row);
+  await saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 95 });
+  const committed = await rateVocabularyCard(first.row.key, first.tokens, 'retry-config', 'remembered', now);
+  expect(committed.row.history[0]).toMatchObject({
+    reviewedAt: now,
+    outcome: 'remembered',
+    retentionPercent: 95,
+    schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
+  });
+  await saveVocabularyPreferences({ newPerDay: 100, retentionPercent: 80 });
+  const replayed = await rateVocabularyCard(first.row.key, first.tokens, 'retry-config', 'remembered', now);
+  expect(replayed.row).toEqual(committed.row);
+  expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'new-stale', 'forgot', now))).toBeInstanceOf(
+    StaleVocabularyError,
+  );
+});
+test('clock errors write nothing; a corrected fresh observation works, including after a reset boundary', async () => {
+  const first = await introduceVocabularyCard(testCandidate(), zero, now);
+  const one = await rateVocabularyCard(first.row.key, first.tokens, 'one', 'remembered', now);
+  expect(await failure(rateVocabularyCard(first.row.key, one.tokens, 'bad-clock', 'fuzzy', now - 1))).toBeInstanceOf(
+    VocabularyClockError,
+  );
+  expect((await getVocabularySnapshot(first.row.key)).row).toEqual(one.row);
+  await resetVocabularySchedule(first.row.key, one.tokens, now + 1);
+  const reset = await getVocabularySnapshot(first.row.key);
+  const two = await rateVocabularyCard(first.row.key, reset.tokens, 'new-memory', 'forgot', now + 2);
+  expect(two.row.memoryResetRevision).toBe(2);
+  expect(two.row.history).toHaveLength(2);
+  expect(two.row.history[1].prior).toEqual(initialVocabularySchedule(now + 1));
+  expect(two.row.schedule!.repetitions).toBe(1);
+  expect(two.row.history[1].revision).toBe(3);
+  const backup = await exportData();
+  await importData(backup);
+  expect((await exportData()).vocab).toEqual(backup.vocab);
+  expect(await failure(rateVocabularyCard(first.row.key, two.tokens, 'new-memory', 'forgot', now + 2))).toBeInstanceOf(
+    StaleVocabularyError,
+  );
+});
+test('the full preferences interface rejects invalid retention and daily-new values without clamping', async () => {
+  for (const newPerDay of [0, 100])
+    for (const retentionPercent of [80, 90, 95]) {
+      await saveVocabularyPreferences({ newPerDay, retentionPercent });
+      expect((await readVocabulary(now)).preferences).toEqual({ newPerDay, retentionPercent });
+    }
+  for (const preferences of [
+    { newPerDay: -1, retentionPercent: 90 },
+    { newPerDay: 101, retentionPercent: 90 },
+    { newPerDay: 20, retentionPercent: 79 },
+    { newPerDay: 20, retentionPercent: 96 },
+    { newPerDay: 20, retentionPercent: 90.5 },
+  ])
+    expect(await failure(saveVocabularyPreferences(preferences))).toBeInstanceOf(Error);
+});
+
 test('paired backup preserves unrelated Grammar metadata/tokens, retains deleted ledgers, and refreshes after commit', async () => {
   const introduced = await introduceVocabularyCard(testCandidate(), zero, now);
   await deleteVocabularyCard(introduced.row.key, introduced.tokens);
@@ -204,7 +278,14 @@ test('paired backup preserves unrelated Grammar metadata/tokens, retains deleted
     observed = (await readVocabulary(now)).epoch;
   });
   try {
-    await importData({ vocab: [], vocabularyMeta: { preferences: { newPerDay: 0 }, days: [] } });
+    await importData({
+      vocab: [],
+      vocabularyMeta: {
+        schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
+        preferences: { newPerDay: 0, retentionPercent: 90 },
+        days: [],
+      },
+    });
     expect(observed).toBe(1);
     expect(await d.get('meta', 'exerciseReset:test-deleted-topic')).toBe(9);
     expect(await d.get('meta', 'vocabularyReset:test-mot')).toBe(1);

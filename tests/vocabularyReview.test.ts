@@ -7,6 +7,7 @@ import { testAnalysis, testCandidate, testLookup } from './fixtures/vocabulary';
 import { useVocabularyReview } from '../src/hooks/useVocabularyReview';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import * as storage from '../src/storage/vocabulary';
+import '../src/i18n';
 const { introduceVocabularyCard, readVocabulary, saveVocabularyBookmark, saveVocabularyPreferences } = storage;
 
 beforeEach(freshDb);
@@ -15,6 +16,7 @@ async function reviewModel(words: string[], now: number): Promise<VocabularyMode
   const model: VocabularyModel = {
     ...(await readVocabulary(now)),
     error: null,
+    ready: true,
     async refresh() {
       Object.assign(model, await readVocabulary(now));
     },
@@ -84,7 +86,7 @@ function reviewHarness(model: VocabularyModel) {
 }
 test('a quota-losing reveal keeps the answer unmounted and still selects an available due card without retry', async () => {
   const now = Date.now();
-  await saveVocabularyPreferences(1);
+  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
   const harness = reviewHarness(await reviewModel(['test-a', 'test-b'], now));
   try {
     let session = await harness.settled();
@@ -100,12 +102,12 @@ test('a quota-losing reveal keeps the answer unmounted and still selects an avai
     harness.dispose();
   }
 });
-for (const [outcome, rating] of [
+for (const [outcome, minutes] of [
   ['forgot', 1],
-  ['fuzzy', 3],
-  ['remembered', 4],
+  ['fuzzy', 6],
+  ['remembered', 10],
 ] as const) {
-  test(`${outcome} commits rating ${rating}; reveal and Skip never count as recall`, async () => {
+  test(`${outcome} commits a semantic observation; reveal and Skip never count as recall`, async () => {
     const now = Date.now();
     const harness = reviewHarness(await reviewModel(['test-a', 'test-b'], now));
     try {
@@ -121,11 +123,11 @@ for (const [outcome, rating] of [
       session = await harness.settled();
       expect(session.ratings).toBe(1);
       const record = (await readVocabulary(now)).rows[0].history[0];
-      expect(record.rating).toBe(rating);
+      expect(record.outcome).toBe(outcome);
       expect(record.next).toMatchObject({
         phase: 'learning',
-        step: rating === 4 ? 1 : 0,
-        dueAt: record.timestamp + (rating === 1 ? 1 : rating === 3 ? 6 : 10) * 60_000,
+        learningSteps: outcome === 'remembered' ? 1 : 0,
+        dueAt: record.reviewedAt + minutes * 60_000,
       });
       session.skip();
       session = harness.render();
@@ -136,14 +138,80 @@ for (const [outcome, rating] of [
     }
   });
 }
+test('a repeated reveal and Skip after introduction keep one quota charge, New memory and no review history', async () => {
+  const now = Date.now(),
+    harness = reviewHarness(await reviewModel(['test-a'], now));
+  try {
+    let session = await harness.settled();
+    await session.reveal();
+    session = harness.render();
+    const introduced = (await readVocabulary(now)).rows[0];
+    expect(introduced.schedule).toMatchObject({ phase: 'new', repetitions: 0, lastReviewedAt: null });
+    await session.reveal();
+    session.skip();
+    session = harness.render();
+    expect(session.active).toBeNull();
+    const saved = await readVocabulary(now);
+    expect(saved.rows[0]).toEqual(introduced);
+    expect(saved.rows[0].history).toHaveLength(0);
+    expect(saved.day.introducedKeys).toEqual(['test-a']);
+    expect(session.introductions).toBe(1);
+    expect(session.ratings).toBe(0);
+  } finally {
+    harness.dispose();
+  }
+});
+
+test('a backward clock clears the invalid pending observation and permits a fresh submission after correction', async () => {
+  const now = Date.now();
+  const first = await introduceVocabularyCard(
+    testCandidate('test-a'),
+    { epoch: 0, resetToken: 0, revision: 0 },
+    now - 20 * 86400_000,
+  );
+  const one = await storage.rateVocabularyCard('test-a', first.tokens, 'prior-1', 'remembered', now - 20 * 86400_000);
+  await storage.rateVocabularyCard('test-a', one.tokens, 'prior-2', 'remembered', now - 19 * 86400_000);
+  const harness = reviewHarness(await reviewModel([], now));
+  const rate = storage.rateVocabularyCard;
+  const attempts: string[] = [];
+  const submit = spyOn(storage, 'rateVocabularyCard').mockImplementation((...args) => {
+    attempts.push(args[2]);
+    return rate(...args);
+  });
+  try {
+    let session = await harness.settled();
+    await session.reveal();
+    session = harness.render();
+    const clock = spyOn(Date, 'now').mockReturnValue(now - 19 * 86400_000 - 1);
+    try {
+      await session.recall('fuzzy');
+    } finally {
+      clock.mockRestore();
+    }
+    session = harness.render();
+    expect(session.error).toContain('Correct this device');
+    expect(session.pending).toBeNull();
+    expect(session.revealed).toBe(true);
+    expect((await readVocabulary(now)).rows[0].history).toHaveLength(2);
+    await session.recall('remembered');
+    expect(attempts).toHaveLength(2);
+    expect(attempts[1]).not.toBe(attempts[0]);
+    expect((await readVocabulary(now)).rows[0].history).toHaveLength(3);
+    expect(harness.render().ratings).toBe(1);
+  } finally {
+    submit.mockRestore();
+    harness.dispose();
+  }
+});
+
 test('failed Fuzzy retains its immutable rating and operation id; alternatives and Skip cannot replace it', async () => {
   const now = Date.now();
   const harness = reviewHarness(await reviewModel(['test-a'], now));
   const rate = storage.rateVocabularyCard;
   let failing = true;
-  const attempts: { operationId: string; rating: number }[] = [];
+  const attempts: { operationId: string; outcome: string; reviewedAt: number }[] = [];
   const submit = spyOn(storage, 'rateVocabularyCard').mockImplementation(async (...args) => {
-    attempts.push({ operationId: args[2], rating: args[3] });
+    attempts.push({ operationId: args[2], outcome: args[3], reviewedAt: args[4] });
     if (failing) throw new Error('TEST rating disk refused');
     return rate(...args);
   });
@@ -165,11 +233,16 @@ test('failed Fuzzy retains its immutable rating and operation id; alternatives a
     expect(session.active?.candidate.key).toBe('test-a');
     expect(session.revealed).toBe(true);
     failing = false;
-    await session.recall('fuzzy');
+    const clock = spyOn(Date, 'now').mockReturnValue(now + 3600_000);
+    try {
+      await session.recall('fuzzy');
+    } finally {
+      clock.mockRestore();
+    }
     expect(attempts).toHaveLength(2);
     expect(attempts[1]).toEqual(attempts[0]);
-    expect(attempts[0].rating).toBe(3);
-    expect((await readVocabulary(now)).rows[0].history.map((record) => record.rating)).toEqual([3]);
+    expect(attempts[0].outcome).toBe('fuzzy');
+    expect((await readVocabulary(now)).rows[0].history.map((record) => record.outcome)).toEqual(['fuzzy']);
     expect(harness.render().ratings).toBe(1);
   } finally {
     submit.mockRestore();

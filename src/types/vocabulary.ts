@@ -21,8 +21,12 @@ export const VocabularyDateSchema = z
     const d = new Date(`${s}T12:00:00Z`);
     return Number.isFinite(d.getTime()) && d.toISOString().slice(0, 10) === s;
   }, 'Invalid calendar date');
-export const VocabularyRatingSchema = z.union([z.literal(1), z.literal(3), z.literal(4), z.literal(5)]);
-export type VocabularyRating = z.infer<typeof VocabularyRatingSchema>;
+export const VOCABULARY_SCHEDULER_POLICY = 'fsrs6/ts-fsrs@5.4.2/policy1' as const;
+export const VocabularyOutcomeSchema = z.enum(['forgot', 'fuzzy', 'remembered']);
+export type VocabularyOutcome = z.infer<typeof VocabularyOutcomeSchema>;
+export const VocabularyRetentionSchema = z.number().int().min(80).max(95);
+export const VocabularyTimestampSchema = z.number().int().min(0).max(8_640_000_000_000_000);
+export const DEFAULT_VOCABULARY_PREFERENCES = { newPerDay: 20, retentionPercent: 90 } as const;
 export const VocabularySenseSchema = z.strictObject({
   pos: text.optional(),
   gloss: z.strictObject({ en: english, zh: chinese }),
@@ -74,23 +78,39 @@ export const VocabularyBookSchema = z.strictObject({
   manifest: VocabularyManifestSchema,
   entries: z.array(VocabularyEntrySchema),
 });
-export const VocabularyScheduleSchema = z.discriminatedUnion('phase', [
-  z.strictObject({
-    phase: z.enum(['learning', 'relearning']),
-    step: z.union([z.literal(0), z.literal(1)]),
-    dueAt: timestamp,
-    repetitions: z.literal(0),
-    intervalDays: z.literal(0),
-    easeFactor: z.number().finite().min(1.3),
-  }),
-  z.strictObject({
-    phase: z.literal('review'),
-    dueDate: VocabularyDateSchema,
-    repetitions: z.number().int().positive(),
-    intervalDays: z.number().int().positive(),
-    easeFactor: z.number().finite().min(1.3),
-  }),
-]);
+export const VocabularyScheduleSchema = z
+  .strictObject({
+    phase: z.enum(['new', 'learning', 'review', 'relearning']),
+    dueAt: VocabularyTimestampSchema,
+    lastReviewedAt: VocabularyTimestampSchema.nullable(),
+    stability: z.number().finite().nonnegative(),
+    difficulty: z.number().finite().min(0).max(10),
+    elapsedDays: integer,
+    scheduledDays: integer,
+    learningSteps: integer.max(1),
+    repetitions: integer,
+    lapses: integer,
+  })
+  .refine((s) => {
+    if (s.phase === 'new')
+      return (
+        s.lastReviewedAt === null &&
+        [s.stability, s.difficulty, s.elapsedDays, s.scheduledDays, s.learningSteps, s.repetitions, s.lapses].every(
+          (n) => n === 0,
+        )
+      );
+    return (
+      s.lastReviewedAt !== null &&
+      s.dueAt >= s.lastReviewedAt &&
+      s.stability > 0 &&
+      s.difficulty >= 1 &&
+      s.repetitions > 0 &&
+      s.lapses <= s.repetitions &&
+      (s.phase === 'review'
+        ? s.scheduledDays > 0 && s.learningSteps === 0
+        : s.scheduledDays === 0 && (s.phase !== 'relearning' || s.learningSteps === 0))
+    );
+  }, 'Invalid FSRS memory state');
 export const VocabularyAnalysisSchema = z.strictObject({
   word: personalText,
   lemma: z.string(),
@@ -130,14 +150,24 @@ export const VocabularyBookSourceSchema = z.strictObject({
   sourceIds: z.array(text).min(1),
   senses: z.array(VocabularySenseSchema).min(1),
 });
-export const VocabularyReviewRecordSchema = z.strictObject({
-  operationId: text,
-  timestamp,
-  rating: VocabularyRatingSchema,
-  prior: VocabularyScheduleSchema,
-  next: VocabularyScheduleSchema,
-  revision: z.number().int().positive(),
-});
+export const VocabularyReviewRecordSchema = z
+  .strictObject({
+    operationId: text,
+    reviewedAt: VocabularyTimestampSchema,
+    outcome: VocabularyOutcomeSchema,
+    retentionPercent: VocabularyRetentionSchema,
+    schedulerPolicy: z.literal(VOCABULARY_SCHEDULER_POLICY),
+    prior: VocabularyScheduleSchema,
+    next: VocabularyScheduleSchema,
+    revision: z.number().int().positive(),
+  })
+  .refine(
+    (r) =>
+      r.next.lastReviewedAt === r.reviewedAt &&
+      (r.prior.lastReviewedAt === null || r.reviewedAt >= r.prior.lastReviewedAt) &&
+      r.next.repetitions === r.prior.repetitions + 1,
+    'Invalid review observation',
+  );
 export const VocabularyRowSchema = z
   .strictObject({
     id: text,
@@ -151,6 +181,7 @@ export const VocabularyRowSchema = z
     schedule: VocabularyScheduleSchema.nullable(),
     introducedAt: timestamp.nullable(),
     revision: integer,
+    memoryResetRevision: integer,
     history: z.array(VocabularyReviewRecordSchema),
   })
   .superRefine((row, ctx) => {
@@ -159,19 +190,41 @@ export const VocabularyRowSchema = z
     if (!row.bookSource && !row.contexts.length) invalid('A row needs content');
     if (row.bookmarked !== (row.bookmarkedAt !== null)) invalid('Bookmark and time must agree');
     if ((row.schedule === null) !== (row.introducedAt === null)) invalid('Schedule and introduction must be paired');
-    if (!row.schedule && (row.revision || row.history.length)) invalid('Unintroduced row cannot have reviews');
+    if (!row.schedule && (row.revision || row.memoryResetRevision || row.history.length))
+      invalid('Unintroduced row cannot have reviews');
+    if (row.memoryResetRevision > row.revision) invalid('Invalid memory reset boundary');
     if (new Set(row.contexts.map((c) => c.id)).size !== row.contexts.length) invalid('Duplicate context');
     if (row.contexts.some((c) => vocabularyKey(c.analysis.word) !== row.key)) invalid('Analysis word mismatch');
     let revision = 0;
     const operations = new Set<string>();
     for (const record of row.history) {
-      if (record.revision <= revision || record.revision > row.revision || operations.has(record.operationId))
+      if (
+        record.revision <= revision ||
+        record.revision > row.revision ||
+        record.revision === row.memoryResetRevision ||
+        operations.has(record.operationId)
+      )
         invalid('Invalid history revision or operation');
       revision = record.revision;
       operations.add(record.operationId);
     }
+    if (row.schedule) {
+      const latest = row.history.at(-1);
+      if (row.revision !== Math.max(row.memoryResetRevision, latest?.revision ?? 0)) invalid('Invalid row revision');
+      if (latest && latest.revision > row.memoryResetRevision) {
+        if (
+          Object.keys(latest.next).some(
+            (key) => latest.next[key as keyof typeof latest.next] !== row.schedule![key as keyof typeof latest.next],
+          )
+        )
+          invalid('Schedule must match latest active review');
+      } else if (row.schedule.phase !== 'new') invalid('Unrated memory must be New');
+    }
   });
-export const VocabularyPreferencesSchema = z.strictObject({ newPerDay: z.number().int().min(0).max(100) });
+export const VocabularyPreferencesSchema = z.strictObject({
+  newPerDay: z.number().int().min(0).max(100),
+  retentionPercent: VocabularyRetentionSchema,
+});
 export const VocabularyDaySchema = z
   .strictObject({ date: VocabularyDateSchema, introducedKeys: z.array(text) })
   .refine(

@@ -55,7 +55,14 @@ export async function seed(page: Page, language = 'en', theme = 'light', count =
   await page.evaluate(
     async ({ vocab, book }) => {
       const storage: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-      await storage.importData({ vocab, vocabularyMeta: { preferences: { newPerDay: 20 }, days: [] } });
+      await storage.importData({
+        vocab,
+        vocabularyMeta: {
+          schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
+          preferences: { newPerDay: 20, retentionPercent: 90 },
+          days: [],
+        },
+      });
       if (book) {
         const cache = await import(/* @vite-ignore */ '/src/storage/vocabularyBook.ts' as string);
         await cache.putVocabularyBook(book);

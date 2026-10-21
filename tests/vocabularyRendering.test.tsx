@@ -58,7 +58,8 @@ const render = (node: ReactNode) => {
 };
 const model: VocabularyModel = {
   rows: [],
-  preferences: { newPerDay: 20 },
+  preferences: { newPerDay: 20, retentionPercent: 90 },
+  ready: true,
   day: { date: '2026-10-20', introducedKeys: [] },
   epoch: 0,
   now: 1,
@@ -78,7 +79,10 @@ test('Settings Words and waiting Review show the actual bounded reason before an
     ]) {
       bookContent.error = error;
       const html = render(
-        <WordsSection model={model} draft={{ value: null, onChange: () => {}, onSaved: () => {} }} />,
+        <WordsSection
+          model={model}
+          draft={{ value: null, retention: null, onChange: () => {}, onRetentionChange: () => {}, onSaved: () => {} }}
+        />,
       );
       expect(html).toContain(error);
       expect(html).toContain('line-clamp-2');

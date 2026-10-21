@@ -93,7 +93,14 @@ test('vocabulary-only paired replacement preserves accepted topic snapshots, res
   const original = await backup();
   await (await db()).put('meta', 7, 'exerciseReset:deleted-topic-test');
   const before = await getUnitSnapshot(original.units[0].id);
-  await importData({ vocab: [], vocabularyMeta: { preferences: { newPerDay: 0 }, days: [] } });
+  await importData({
+    vocab: [],
+    vocabularyMeta: {
+      schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
+      preferences: { newPerDay: 0, retentionPercent: 90 },
+      days: [],
+    },
+  });
   const restored = await exportData();
   expect(restored.units).toEqual(original.units);
   expect(restored.attempts).toEqual(original.attempts);

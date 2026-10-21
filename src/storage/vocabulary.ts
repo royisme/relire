@@ -1,5 +1,6 @@
 /** Row-owned vocabulary transactions, invalidation tokens and durable-first change notifications. */
 import type { IDBPTransaction } from 'idb';
+import { z } from 'zod';
 import type { WordAnalysis } from '../types';
 import {
   VocabularyRowSchema,
@@ -8,7 +9,10 @@ import {
   type VocabularyRow,
   type VocabularyCandidate,
   type VocabularyTokens,
-  type VocabularyRating,
+  type VocabularyOutcome,
+  type VocabularyPreferences,
+  DEFAULT_VOCABULARY_PREFERENCES,
+  VOCABULARY_SCHEDULER_POLICY,
 } from '../types/vocabulary';
 import {
   vocabularyContextKey,
@@ -17,6 +21,7 @@ import {
   type VocabularyLookup,
 } from '../services/vocabulary/identity';
 import { formatDate, initialVocabularySchedule, nextVocabularySchedule } from '../utils/srs';
+import { canonicalVocabularyJson } from '../services/vocabulary/book';
 import { db, type RelireDB } from './db';
 
 const listeners = new Set<() => void | Promise<void>>();
@@ -84,6 +89,7 @@ function materialize(candidate: VocabularyCandidate, now: number): VocabularyRow
     schedule: null,
     introducedAt: null,
     revision: 0,
+    memoryResetRevision: 0,
     history: [],
   };
 }
@@ -102,7 +108,7 @@ export async function readVocabulary(now: number) {
   await tx.done;
   return {
     rows: rows.map((row) => VocabularyRowSchema.parse(row)),
-    preferences: VocabularyPreferencesSchema.parse(preferences ?? { newPerDay: 20 }),
+    preferences: VocabularyPreferencesSchema.parse(preferences ?? DEFAULT_VOCABULARY_PREFERENCES),
     day: VocabularyDaySchema.parse(day ?? { date, introducedKeys: [] }),
     epoch: (epoch as number | undefined) ?? 0,
     now,
@@ -119,8 +125,8 @@ export async function getVocabularySnapshot(key: string) {
     tokens: { epoch, resetToken, revision: row?.revision ?? 0 },
   };
 }
-export async function saveVocabularyPreferences(newPerDay: number) {
-  const preferences = VocabularyPreferencesSchema.parse({ newPerDay });
+export async function saveVocabularyPreferences(input: VocabularyPreferences) {
+  const preferences = VocabularyPreferencesSchema.parse(input);
   await write(async (tx) => {
     await tx.objectStore('meta').put(preferences, 'vocabularyPreferences');
   });
@@ -183,7 +189,7 @@ export async function introduceVocabularyCard(candidate: VocabularyCandidate, ex
       const date = formatDate(new Date(now));
       const meta = tx.objectStore('meta');
       const preferences = VocabularyPreferencesSchema.parse(
-        (await meta.get('vocabularyPreferences')) ?? { newPerDay: 20 },
+        (await meta.get('vocabularyPreferences')) ?? DEFAULT_VOCABULARY_PREFERENCES,
       );
       const day = VocabularyDaySchema.parse((await meta.get(`vocabularyDay:${date}`)) ?? { date, introducedKeys: [] });
       if (!day.introducedKeys.includes(candidate.key)) {
@@ -202,27 +208,44 @@ export async function rateVocabularyCard(
   key: string,
   expected: VocabularyTokens,
   operationId: string,
-  rating: VocabularyRating,
-  now: number,
+  outcome: VocabularyOutcome,
+  reviewedAt: number,
 ) {
   return write(async (tx) => {
     await guard(tx, key, expected);
     const store = tx.objectStore('vocab');
-    const row = await store.get(vocabularyId(key));
-    if (!row?.schedule) throw new StaleVocabularyError();
+    const stored = await store.get(vocabularyId(key));
+    if (!stored?.schedule) throw new StaleVocabularyError();
+    const row = VocabularyRowSchema.parse(stored);
     const priorOperation = row.history.find((record) => record.operationId === operationId);
     if (priorOperation) {
-      if (priorOperation.rating !== rating) throw new Error('Rating operation cannot change its rating');
+      if (priorOperation.outcome !== outcome || priorOperation.reviewedAt !== reviewedAt)
+        throw new Error('Review operation cannot change its outcome or observation time');
       return { row, tokens: await tokens(tx, key, row.revision) };
     }
     if (row.revision !== expected.revision) throw new StaleVocabularyError();
-    const next = nextVocabularySchedule(row.schedule, rating, now);
+    const preferences = VocabularyPreferencesSchema.parse(
+      (await tx.objectStore('meta').get('vocabularyPreferences')) ?? DEFAULT_VOCABULARY_PREFERENCES,
+    );
+    const next = nextVocabularySchedule(row.schedule!, outcome, reviewedAt, preferences);
     const revision = row.revision + 1;
     const updated = {
       ...row,
       schedule: next,
       revision,
-      history: [...row.history, { operationId, timestamp: now, rating, prior: row.schedule, next, revision }],
+      history: [
+        ...row.history,
+        {
+          operationId,
+          reviewedAt,
+          outcome,
+          retentionPercent: preferences.retentionPercent,
+          schedulerPolicy: VOCABULARY_SCHEDULER_POLICY,
+          prior: row.schedule!,
+          next,
+          revision,
+        },
+      ],
     };
     await store.put(VocabularyRowSchema.parse(updated));
     return { row: updated, tokens: await tokens(tx, key, revision) };
@@ -234,10 +257,97 @@ export async function resetVocabularySchedule(key: string, expected: VocabularyT
     const store = tx.objectStore('vocab');
     const row = await store.get(vocabularyId(key));
     if (!row?.schedule || row.revision !== expected.revision) throw new StaleVocabularyError();
-    await store.put({ ...row, schedule: initialVocabularySchedule(now), revision: row.revision + 1 });
+    await store.put(
+      VocabularyRowSchema.parse({
+        ...row,
+        schedule: initialVocabularySchedule(now),
+        revision: row.revision + 1,
+        memoryResetRevision: row.revision + 1,
+      }),
+    );
     await tx.objectStore('meta').put(expected.resetToken + 1, tokenKey(key));
   });
 }
+/** Operator-only domain fresh start. A file download and human confirmation are external preconditions, not proven here. */
+export async function freshStartVocabularyProgress(
+  input: {
+    preSwitchBackup: { vocab: unknown; vocabularyMeta: unknown };
+    expectedEpoch: number;
+    backupCompletedAndConfirmed: true;
+  },
+  now: number,
+) {
+  if (input.backupCompletedAndConfirmed !== true) throw new Error('Complete and confirm the full backup first');
+  const expectedEpoch = z.number().int().nonnegative().parse(input.expectedEpoch);
+  const rawRows = z.array(z.record(z.string(), z.unknown())).parse(input.preSwitchBackup.vocab);
+  // Project content explicitly; historical schedule/history are compared opaquely, never decoded or replayed.
+  const rows = rawRows.map((row) =>
+    VocabularyRowSchema.parse({
+      id: row.id,
+      key: row.key,
+      word: row.word,
+      createdAt: row.createdAt,
+      ...(row.bookSource === undefined ? {} : { bookSource: row.bookSource }),
+      bookmarked: row.bookmarked,
+      bookmarkedAt: row.bookmarkedAt,
+      contexts: row.contexts,
+      schedule: null,
+      introducedAt: null,
+      revision: 0,
+      memoryResetRevision: 0,
+      history: [],
+    }),
+  );
+  if (new Set(rows.map((row) => row.key)).size !== rows.length) throw new Error('Duplicate vocabulary key');
+  const metadata = z
+    .object({
+      preferences: z.object({ newPerDay: z.number().int().min(0).max(100) }).passthrough(),
+      days: z.array(VocabularyDaySchema),
+    })
+    .parse(input.preSwitchBackup.vocabularyMeta);
+  if (new Set(metadata.days.map((day) => day.date)).size !== metadata.days.length)
+    throw new Error('Duplicate vocabulary day');
+  // Canonical comparisons are synchronous inside the transaction; no crypto, file or network awaits.
+  const orderedRows = (values: Record<string, unknown>[]) =>
+    [...values].sort((a, b) => String(a.id).localeCompare(String(b.id)));
+  const expectedRows = canonicalVocabularyJson(orderedRows(rawRows));
+  const expectedPreferences = canonicalVocabularyJson(metadata.preferences);
+  const expectedDays = canonicalVocabularyJson([...metadata.days].sort((a, b) => a.date.localeCompare(b.date)));
+  const preferences = VocabularyPreferencesSchema.parse({
+    newPerDay: metadata.preferences.newPerDay,
+    retentionPercent: 90,
+  });
+  // Validate the activation instant even though new rows remain unintroduced and have no due instant yet.
+  initialVocabularySchedule(now);
+  return write(async (tx) => {
+    const store = tx.objectStore('vocab'),
+      meta = tx.objectStore('meta');
+    const epoch = ((await meta.get('vocabularyEpoch')) as number | undefined) ?? 0;
+    const actualRows = await store.getAll();
+    const actualPreferences = await meta.get('vocabularyPreferences');
+    const dayKeys = (await meta.getAllKeys()).filter((key) => key.startsWith('vocabularyDay:')).sort();
+    const days = [];
+    for (const key of dayKeys) {
+      const day = VocabularyDaySchema.parse(await meta.get(key));
+      if (key !== `vocabularyDay:${day.date}`) throw new Error('Vocabulary day key mismatch');
+      days.push(day);
+    }
+    // No preference row means the pre-switch export's documented effective daily-new default.
+    if (
+      epoch !== expectedEpoch ||
+      canonicalVocabularyJson(orderedRows(actualRows)) !== expectedRows ||
+      canonicalVocabularyJson(actualPreferences ?? { newPerDay: 20 }) !== expectedPreferences ||
+      canonicalVocabularyJson(days) !== expectedDays
+    )
+      throw new StaleVocabularyError();
+    for (const row of rows) await store.put(row);
+    for (const key of dayKeys) await meta.delete(key);
+    await meta.put(preferences, 'vocabularyPreferences');
+    await meta.put(epoch + 1, 'vocabularyEpoch');
+    return { epoch: epoch + 1, rows: rows.length, preferences };
+  });
+}
+
 export async function deleteVocabularyCard(key: string, expected: VocabularyTokens) {
   await write(async (tx) => {
     await guard(tx, key, expected);

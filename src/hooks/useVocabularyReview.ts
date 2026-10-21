@@ -1,7 +1,8 @@
 /** One transient review visit: authoritative captures, durable reveal/rating, retry identity and exclusions. */
 import { useEffect, useRef, useState } from 'react';
-import type { VocabularyBook, VocabularyRow, VocabularyTokens } from '../types/vocabulary';
-import { vocabularyDue } from '../utils/srs';
+import type { VocabularyBook, VocabularyRow, VocabularyTokens, VocabularyOutcome } from '../types/vocabulary';
+import { t } from 'i18next';
+import { vocabularyDue, VocabularyClockError } from '../utils/srs';
 import { vocabularyQueue, type VocabularyJoined } from '../services/vocabulary/queue';
 import {
   getVocabularySnapshot,
@@ -11,7 +12,6 @@ import {
   VocabularyQuotaError,
 } from '../storage/vocabulary';
 import type { VocabularyModel } from './useVocabulary';
-const recallRatings = { forgot: 1, fuzzy: 3, remembered: 4 } as const;
 export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBook) {
   const [active, setActive] = useState<{
     candidate: VocabularyJoined;
@@ -24,8 +24,8 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
   const [quotaReached, setQuotaReached] = useState(false);
   const [pending, setPending] = useState<{
     operationId: string;
-    outcome: keyof typeof recallRatings;
-    rating: 1 | 3 | 4;
+    outcome: VocabularyOutcome;
+    reviewedAt: number;
   } | null>(null);
   const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set());
   const [ratings, setRatings] = useState(0);
@@ -89,6 +89,9 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
         advance();
         if (error instanceof VocabularyQuotaError) setQuotaReached(true);
       }
+    } else if (error instanceof VocabularyClockError) {
+      setPending(null);
+      setError(t('vocab.clockError'));
     } else setError(error instanceof Error ? error.message : String(error));
   };
   const reveal = async () => {
@@ -114,10 +117,9 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     }
     return false;
   };
-  const recall = async (outcome: keyof typeof recallRatings) => {
-    const rating = recallRatings[outcome];
-    if (!active || !revealed || lock.current || (pending && pending.rating !== rating)) return;
-    const operation = pending ?? { operationId: crypto.randomUUID(), outcome, rating };
+  const recall = async (outcome: VocabularyOutcome) => {
+    if (!active || !revealed || lock.current || (pending && pending.outcome !== outcome)) return;
+    const operation = pending ?? { operationId: crypto.randomUUID(), outcome, reviewedAt: Date.now() };
     setPending(operation);
     lock.current = true;
     setBusy(true);
@@ -127,8 +129,8 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
         active.candidate.key,
         active.tokens,
         operation.operationId,
-        operation.rating,
-        Date.now(),
+        operation.outcome,
+        operation.reviewedAt,
       );
       if (alive.current) {
         setRatings((n) => n + 1);

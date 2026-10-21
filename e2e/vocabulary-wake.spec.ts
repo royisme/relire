@@ -15,14 +15,15 @@ for (const future of [false, true]) {
     await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();
     await page.evaluate(async (future) => {
       const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
-      await storage.saveVocabularyPreferences(1);
+      await storage.saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
       const snapshot = await storage.getVocabularySnapshot('test-b');
       const result = await storage.introduceVocabularyCard(
         { key: 'test-b', word: 'test-b' },
         snapshot.tokens,
         Date.now(),
       );
-      if (future) await storage.rateVocabularyCard('test-b', result.tokens, 'TEST other-tab Again', 1, Date.now());
+      if (future)
+        await storage.rateVocabularyCard('test-b', result.tokens, 'TEST other-tab Again', 'forgot', Date.now());
     }, future);
     await page.locator('[data-vocabulary-face="front"] h1').click();
     await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
@@ -54,7 +55,7 @@ test('quota waiting wakes at local midnight, and a later external limit change w
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     const database: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    await storage.saveVocabularyPreferences(1);
+    await storage.saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
     // A deleted word still honestly consumed this day's allowance in the other tab.
     const date = new Date(Date.now());
     const label = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -73,13 +74,13 @@ test('quota waiting wakes at local midnight, and a later external limit change w
   // Lose another reveal to a changed limit, then change it without a same-tab notification.
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
-    await storage.saveVocabularyPreferences(0);
+    await storage.saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 90 });
   });
   await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeVisible();
   await page.evaluate(async () => {
     const database: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    await (await database.db()).put('meta', { newPerDay: 1 }, 'vocabularyPreferences');
+    await (await database.db()).put('meta', { newPerDay: 1, retentionPercent: 90 }, 'vocabularyPreferences');
     window.dispatchEvent(new Event('focus'));
   });
   await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();

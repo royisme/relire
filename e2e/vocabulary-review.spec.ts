@@ -61,18 +61,18 @@ test('Words review commits introduction before answers, flips without writes, an
   await page.getByRole('button', { name: 'Skip for now', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeVisible();
   const rows = await stored(page);
-  expect(rows.map((row) => row.history.map((record) => record.rating))).toEqual([[1], [4], []]);
+  expect(rows.map((row) => row.history.map((record) => record.outcome))).toEqual([['forgot'], ['remembered'], []]);
   expect(rows[2].introducedAt).toBeNull();
   expect(rows[2].schedule).toBeNull();
   for (const [index, row] of rows.slice(0, 2).entries()) {
     const record = row.history[0];
-    expect(record.next).toEqual({
+    expect(record.next).toMatchObject({
       phase: 'learning',
-      step: index === 0 ? 0 : 1,
-      dueAt: record.timestamp + (index === 0 ? 1 : 10) * 60_000,
-      repetitions: 0,
-      intervalDays: 0,
-      easeFactor: 2.5,
+      learningSteps: index === 0 ? 0 : 1,
+      dueAt: record.reviewedAt + (index === 0 ? 1 : 10) * 60_000,
+      lastReviewedAt: record.reviewedAt,
+      repetitions: 1,
+      scheduledDays: 0,
     });
     expect(row.schedule).toEqual(record.next);
   }
@@ -126,7 +126,7 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
-    await storage.saveVocabularyPreferences(0);
+    await storage.saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 90 });
   });
   await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).not.toContainText('TEST meaning');
@@ -135,7 +135,7 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
   await expect(page.getByText('Due now: 0 · New remaining today: 0', { exact: true })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
-    await storage.saveVocabularyPreferences(20);
+    await storage.saveVocabularyPreferences({ newPerDay: 20, retentionPercent: 90 });
   });
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   await page.locator('[data-vocabulary-face="front"] h1').click();

@@ -1,7 +1,7 @@
 /** Native aborts, raw backup rejection, exact acquired-audio eligibility and queue order on disposable learner data. */
 import { beforeEach, expect, test } from 'bun:test';
 import { freshDb, failure, seedUnit } from './fixtures/storage';
-import { testAnalysis, testBook, testCandidate, testLookup, testRow } from './fixtures/vocabulary';
+import { testAnalysis, testBook, testCandidate, testLookup, testRow, testMatureSchedule } from './fixtures/vocabulary';
 import { db, exportData, importData } from '../src/storage/db';
 import {
   saveVocabularyBookmark,
@@ -34,12 +34,12 @@ test('native post-request introduction/rating abort changes neither row nor ledg
     const introduced = await introduceVocabularyCard(testCandidate(), zero, now);
     failing = true;
     expect(
-      await failure(rateVocabularyCard(introduced.row.key, introduced.tokens, 'retry-test', 4, now)),
+      await failure(rateVocabularyCard(introduced.row.key, introduced.tokens, 'retry-test', 'remembered', now)),
     ).toBeInstanceOf(Error);
     expect((await getVocabularySnapshot(introduced.row.key)).row).toEqual(introduced.row);
     failing = false;
-    await rateVocabularyCard(introduced.row.key, introduced.tokens, 'retry-test', 4, now);
-    await rateVocabularyCard(introduced.row.key, introduced.tokens, 'retry-test', 4, now);
+    await rateVocabularyCard(introduced.row.key, introduced.tokens, 'retry-test', 'remembered', now);
+    await rateVocabularyCard(introduced.row.key, introduced.tokens, 'retry-test', 'remembered', now);
     expect((await getVocabularySnapshot(introduced.row.key)).row!.history).toHaveLength(1);
   } finally {
     IDBObjectStore.prototype.put = put;
@@ -53,7 +53,11 @@ test('whole restore late exercise failure rolls vocabulary pair, epoch, articles
     await failure(
       importData({
         vocab: [],
-        vocabularyMeta: { preferences: { newPerDay: 0 }, days: [] },
+        vocabularyMeta: {
+          schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
+          preferences: { newPerDay: 0, retentionPercent: 90 },
+          days: [],
+        },
         itemStates: [
           {
             id: 'missing:missing',
@@ -85,7 +89,8 @@ test('raw invalid row/metadata fields reject instead of stripping; retained dele
   const paired = {
     vocab: [row],
     vocabularyMeta: {
-      preferences: { newPerDay: 20 },
+      schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
+      preferences: { newPerDay: 20, retentionPercent: 90 },
       days: [{ date: '2026-10-19', introducedKeys: ['deleted-test'] }],
     },
   };
@@ -104,10 +109,61 @@ test('raw invalid row/metadata fields reject instead of stripping; retained dele
     [{ date: '2026-10-20', introducedKeys: ['a', 'a'] }],
   ])
     expect(
-      await failure(importData({ ...paired, vocabularyMeta: { preferences: { newPerDay: 20 }, days } })),
+      await failure(
+        importData({
+          ...paired,
+          vocabularyMeta: {
+            schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
+            preferences: { newPerDay: 20, retentionPercent: 90 },
+            days,
+          },
+        }),
+      ),
     ).toBeInstanceOf(Error);
   expect(await exportData()).toEqual(original);
 });
+test('new backups bind FSRS policy, semantic observations and reset boundaries; old or malformed model facts reject atomically', async () => {
+  const first = await introduceVocabularyCard(testCandidate(), zero, now);
+  await rateVocabularyCard(first.row.key, first.tokens, 'semantic-test', 'remembered', now);
+  const backup = await exportData();
+  expect(backup.vocabularyMeta.schedulerPolicy).toBe('fsrs6/ts-fsrs@5.4.2/policy1');
+  const row = backup.vocab[0],
+    record = row.history[0];
+  const { schedulerPolicy: _policy, ...oldMetadata } = backup.vocabularyMeta;
+  const { outcome: _outcome, ...oldRecord } = record;
+  const { retentionPercent: _retention, ...oldPreferences } = backup.vocabularyMeta.preferences;
+  for (const patch of [
+    { vocabularyMeta: oldMetadata },
+    { vocabularyMeta: { ...backup.vocabularyMeta, schedulerPolicy: 'another-policy' } },
+    { vocabularyMeta: { ...backup.vocabularyMeta, preferences: oldPreferences } },
+    { vocab: [{ ...row, history: [{ ...oldRecord, rating: 4 }] }] },
+    { vocab: [{ ...row, memoryResetRevision: 99 }] },
+    { vocab: [{ ...row, memoryResetRevision: record.revision }] },
+    { vocab: [{ ...row, schedule: { ...row.schedule, stability: NaN } }] },
+    { vocab: [{ ...row, schedule: { ...row.schedule, dueAt: Infinity } }] },
+    { vocab: [{ ...row, schedule: { ...row.schedule, lastReviewedAt: null } }] },
+    {
+      vocab: [
+        {
+          ...row,
+          schedule: { phase: 'learning', step: 0, easeFactor: 2.5, repetitions: 0, intervalDays: 0, dueAt: now },
+        },
+      ],
+    },
+    ...[
+      { outcome: 'easy' },
+      { outcome: 3 },
+      { reviewedAt: NaN },
+      { retentionPercent: 0.9 },
+      { schedulerPolicy: 'fsrs7' },
+      { next: { ...record.next, repetitions: 0 } },
+    ].map((bad) => ({ vocab: [{ ...row, history: [{ ...record, ...bad }] }] })),
+  ]) {
+    expect(await failure(importData({ ...backup, ...patch }))).toBeInstanceOf(Error);
+    expect(await exportData()).toEqual(backup);
+  }
+});
+
 test('only bookmarked or scheduled vocabulary protects/exports word, personal sentence and personal example clips; no synthesis', async () => {
   const saved = await saveVocabularyBookmark(
     testLookup('test-personal'),
@@ -174,7 +230,7 @@ test('queue uses minute/review/personal/book order, excludes visits and waits fo
   const minute = { ...testRow('minute-test'), schedule: initialVocabularySchedule(now - 10), introducedAt: now - 10 };
   const review = {
     ...testRow('review-test'),
-    schedule: { phase: 'review' as const, dueDate: '2026-10-19', intervalDays: 1, repetitions: 1, easeFactor: 2.5 },
+    schedule: testMatureSchedule(now - 86400_000),
     introducedAt: now - 20,
   };
   const personal = { ...testRow('personal-test'), bookmarked: true, bookmarkedAt: 1 };
@@ -187,7 +243,10 @@ test('queue uses minute/review/personal/book order, excludes visits and waits fo
     'test-0',
     'test-1',
   ]);
-  const future = { ...minute, schedule: { ...initialVocabularySchedule(now + 60_000), phase: 'relearning' as const } };
+  const future = {
+    ...minute,
+    schedule: { ...testMatureSchedule(now), phase: 'relearning' as const, dueAt: now + 60_000 },
+  };
   expect(vocabularyQueue([future], undefined, day, 0, now, new Set())).toEqual({
     candidates: [],
     nextDue: now + 60_000,

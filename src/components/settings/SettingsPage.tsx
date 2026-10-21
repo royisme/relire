@@ -60,9 +60,10 @@ export function SettingsPage({
   const [draft, setDraft] = useState<AppSettings>(saved);
   const [savedPrompts, setSavedPrompts] = useState<PromptOverrides>(getPromptOverrides);
   const [promptDrafts, setPromptDrafts] = useState<PromptOverrides>(savedPrompts);
-  // The unsaved new-word limit: it survives section switches and is gone once Settings is left.
+  // Both Words drafts survive section switches and are gone once Settings is left.
   // A save clears it only while it still holds the text that save submitted.
   const [limitDraft, setLimitDraft] = useState<string | null>(null);
+  const [retentionDraft, setRetentionDraft] = useState<string | null>(null);
   // A key request focuses the field once (the id changes per request); switching purpose must not pull focus back.
   const keyInput = useRef<HTMLInputElement>(null);
   const focusRequest = keyRequest?.id ?? null;
@@ -156,8 +157,13 @@ export function SettingsPage({
               model={vocabulary}
               draft={{
                 value: limitDraft,
+                retention: retentionDraft,
                 onChange: setLimitDraft,
-                onSaved: (submitted) => setLimitDraft((current) => draftAfterSave(current, submitted)),
+                onRetentionChange: setRetentionDraft,
+                onSaved: (submitted) => {
+                  setLimitDraft((current) => draftAfterSave(current, submitted.newPerDay));
+                  setRetentionDraft((current) => draftAfterSave(current, submitted.retentionPercent));
+                },
               }}
             />
           )}

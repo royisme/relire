@@ -1,6 +1,6 @@
 /**
- * Settings → Words: the daily introduction limit and the built-in wordbook's download/update state.
- * The page owns the unsaved limit text, so switching sections keeps it.
+ * Settings → Words: two learning preferences and the built-in wordbook's download/update state.
+ * The page owns both unsaved values, so switching sections keeps them.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,9 @@ import { Sheet, OverlayHeader } from '../ui/overlay';
 /** The limit the text means (a whole number from 0 to 100), or null when it is not one. */
 export function parseNewPerDay(value: string): number | null {
   return /^\d+$/.test(value) && Number(value) <= 100 ? Number(value) : null;
+}
+export function parseRetentionPercent(value: string): number | null {
+  return /^\d+$/.test(value) && Number(value) >= 80 && Number(value) <= 95 ? Number(value) : null;
 }
 
 /**
@@ -29,9 +32,11 @@ interface WordsSectionProps {
   draft: {
     /** The unsaved text; null shows the saved preference. */
     value: string | null;
+    retention: string | null;
     onChange: (value: string) => void;
-    /** This save of `submitted` finished: drop the draft only if it still holds that text. */
-    onSaved: (submitted: string | null) => void;
+    onRetentionChange: (value: string) => void;
+    /** Each value is cleared only if it still holds the submitted text. */
+    onSaved: (submitted: { newPerDay: string | null; retentionPercent: string | null }) => void;
   };
 }
 
@@ -42,18 +47,25 @@ export function WordsSection({ model, draft }: WordsSectionProps) {
   const [status, setStatus] = useState<string | null>(null);
   const [details, setDetails] = useState(false);
   const limit = draft.value ?? String(model.preferences.newPerDay);
+  const retention = draft.retention ?? String(model.preferences.retentionPercent);
   const save = async () => {
+    if (!model.ready || model.error || saving) return;
     const next = parseNewPerDay(limit);
     if (next === null) {
       setStatus(t('vocab.invalidLimit'));
       return;
     }
     // The text this save submits; the learner may type again while it is in flight.
-    const submitted = draft.value;
+    const retentionPercent = parseRetentionPercent(retention);
+    if (retentionPercent === null) {
+      setStatus(t('vocab.invalidRetention'));
+      return;
+    }
+    const submitted = { newPerDay: draft.value, retentionPercent: draft.retention };
     setSaving(true);
     setStatus(null);
     try {
-      await model.savePreferences(next);
+      await model.savePreferences({ newPerDay: next, retentionPercent });
       // A newer edit stays unsaved on screen; only the page can tell, since this section may have remounted.
       draft.onSaved(submitted);
       setStatus(t('vocab.saved'));
@@ -116,7 +128,7 @@ export function WordsSection({ model, draft }: WordsSectionProps) {
         <label htmlFor="vocabulary-limit" className="block text-sm">
           {t('vocab.newLimit')}
         </label>
-        <div className="flex gap-2">
+        <div>
           <Input
             id="vocabulary-limit"
             className="w-24"
@@ -125,14 +137,36 @@ export function WordsSection({ model, draft }: WordsSectionProps) {
             max={100}
             step={1}
             value={limit}
+            disabled={!model.ready}
             onChange={(event) => draft.onChange(event.target.value)}
           />
-          <Button variant="outline" className="w-28" disabled={saving} onClick={() => void save()}>
-            {t(saving ? 'vocab.saving' : 'common.save')}
-          </Button>
         </div>
+        <label htmlFor="vocabulary-retention" className="block text-sm">
+          {t('vocab.retention')}
+        </label>
+        <Input
+          id="vocabulary-retention"
+          className="w-24"
+          type="number"
+          min={80}
+          max={95}
+          step={1}
+          value={retention}
+          disabled={!model.ready}
+          onChange={(event) => draft.onRetentionChange(event.target.value)}
+        />
+        <p className="text-sm text-ink-600">{t('vocab.retentionHelp')}</p>
+        <p className="text-sm text-ink-600">{t('vocab.outcomeHelp')}</p>
+        <Button
+          variant="outline"
+          className="w-28"
+          disabled={saving || !model.ready || !!model.error}
+          onClick={() => void save()}
+        >
+          {t(saving ? 'vocab.saving' : 'common.save')}
+        </Button>
         <p className="h-12 overflow-auto break-words text-sm text-ink-600" role="status">
-          {status}
+          {model.error ?? status}
         </p>
       </section>
       {details && (
