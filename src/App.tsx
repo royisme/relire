@@ -373,6 +373,7 @@ export default function App() {
                 section={route.section}
                 purpose={route.purpose ?? 'text'}
                 sectionsInSidebar={expanded}
+                vocabulary={vocabulary}
                 keyRequest={keyRequest ?? (route.focusKey ? { id: 0, returnTo: route.returnTo ?? null } : null)}
                 onSettingsSaved={(newSettings) => setHasKey(hasTextKey(newSettings))}
                 onReturn={(hash) => navigate(hash)}

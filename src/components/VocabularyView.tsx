@@ -47,7 +47,7 @@ export function VocabularyView({
       ) : place === 'all' ? (
         <VocabularyBrowser rows={model.rows} book={content.book} />
       ) : (
-        <VocabularyHome model={model} content={content} />
+        <VocabularyHome model={model} />
       )}
     </div>
   );

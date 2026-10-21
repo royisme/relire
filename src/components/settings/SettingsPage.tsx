@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft } from 'lucide-react';
 import { useImportGuard } from '../../hooks/useImportGuard';
+import type { VocabularyModel } from '../../hooks/useVocabulary';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { navigate } from '../../hooks/useRoute';
 import { getPromptOverrides, type PromptOverrides } from '../../services/ai/prompts';
@@ -25,6 +26,7 @@ import { PromptsSection } from './PromptsSection';
 import { SectionList } from './SectionList';
 import { sliceOf, withSlice, type SettingsSlice } from './slices';
 import { useModelCatalogue } from './useModelCatalogue';
+import { WordsSection } from './WordsSection';
 
 /** Settings links keep an unsaved AI draft (the page stays mounted); anything else asks first. */
 const isSettingsLink = (href: string) => parseRoute(href).route.name === 'settings';
@@ -36,6 +38,8 @@ interface SettingsPageProps {
   purpose: AiPurposeRoute;
   /** The sidebar already lists the sections, so the page does not repeat them. */
   sectionsInSidebar: boolean;
+  /** The app's one committed vocabulary model; the Words section saves its preference through it. */
+  vocabulary: VocabularyModel;
   keyRequest: KeyRequest | null;
   onSettingsSaved: (settings: AppSettings) => void;
   onReturn: (hash: string) => void;
@@ -45,6 +49,7 @@ export function SettingsPage({
   section,
   purpose,
   sectionsInSidebar,
+  vocabulary,
   keyRequest,
   onSettingsSaved,
   onReturn,
@@ -55,6 +60,8 @@ export function SettingsPage({
   const [draft, setDraft] = useState<AppSettings>(saved);
   const [savedPrompts, setSavedPrompts] = useState<PromptOverrides>(getPromptOverrides);
   const [promptDrafts, setPromptDrafts] = useState<PromptOverrides>(savedPrompts);
+  // The unsaved new-word limit: it survives section switches and is gone once Settings is left.
+  const [limitDraft, setLimitDraft] = useState<string | null>(null);
   // A key request focuses the field once (the id changes per request); switching purpose must not pull focus back.
   const keyInput = useRef<HTMLInputElement>(null);
   const focusRequest = keyRequest?.id ?? null;
@@ -142,6 +149,9 @@ export function SettingsPage({
                 setPromptDrafts(stored);
               }}
             />
+          )}
+          {active === 'words' && (
+            <WordsSection model={vocabulary} draft={{ value: limitDraft, onChange: setLimitDraft }} />
           )}
           {active === 'data' && <DataSection />}
         </div>

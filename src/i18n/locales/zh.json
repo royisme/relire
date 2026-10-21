@@ -144,6 +144,7 @@
     "learning": "学习与重学中",
     "remaining": "今日剩余新词名额",
     "continue": "开始或继续复习",
+    "settings": "生词设置",
     "book": "内置词书",
     "bookCount_one": "{{count}} 个词可离线使用",
     "bookCount_other": "{{count}} 个词可离线使用",
@@ -193,7 +194,6 @@
     "fuzzy": "模糊",
     "remembered": "记得",
     "recall": "先回想含义，再翻转卡片。",
-    "revealed": "请自评：按 1 表示不记得，按 2 表示模糊，按 3 表示记得。",
     "waiting": "暂告一段落，等待复习",
     "nextDue": "下次学习时间为 {{time}}（{{seconds}} 秒后）。你可以先离开，稍后回来。",
     "noEligible": "现在没有可选卡片。可能还有未到期、已跳过或受名额限制的词，并不代表全部学会了。",
@@ -410,6 +410,10 @@
       "practice": {
         "title": "练习",
         "desc": "练习答案的判定方式，以及听写的播放。"
+      },
+      "words": {
+        "title": "生词",
+        "desc": "每日新词上限，以及本机的内置词书。"
       },
       "prompts": {
         "title": "提示词",

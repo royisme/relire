@@ -1,5 +1,5 @@
 /** Static real-component visibility and escaping; visual and browser interaction acceptance remain owner-manual. */
-import { expect, spyOn, test } from 'bun:test';
+import { expect, mock, spyOn, test } from 'bun:test';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
@@ -14,6 +14,17 @@ import { testRow, testAnalysis, testLookup } from './fixtures/vocabulary';
 import { vocabularyContextKey } from '../src/services/vocabulary/identity';
 
 await import('../src/i18n');
+// Settings → Words owns the wordbook controls; the cache hook itself is covered by its own tests and e2e.
+const bookContent = {
+  book: undefined,
+  busy: false,
+  progress: null,
+  error: null as string | null,
+  restart: false,
+  configured: true,
+  async download() {},
+};
+void mock.module('../src/hooks/useVocabularyBook', () => ({ useVocabularyBook: () => bookContent }));
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
 Object.defineProperty(globalThis, 'window', {
   configurable: true,
@@ -21,6 +32,7 @@ Object.defineProperty(globalThis, 'window', {
 });
 const { VocabularyHome } = await import('../src/components/vocabulary/VocabularyHome');
 const { VocabularyReview } = await import('../src/components/vocabulary/VocabularyReview');
+const { WordsSection } = await import('../src/components/settings/WordsSection');
 if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
 else Reflect.deleteProperty(globalThis, 'window');
 const i18n = i18next.createInstance();
@@ -52,7 +64,7 @@ const model: VocabularyModel = {
   async savePreferences() {},
 };
 
-test('Home and waiting Review show the actual bounded reason before any details Sheet is opened in both locales', async () => {
+test('Settings Words and waiting Review show the actual bounded reason before any details Sheet is opened in both locales', async () => {
   for (const language of ['en', 'zh']) {
     await i18n.changeLanguage(language);
     for (const error of [
@@ -61,28 +73,26 @@ test('Home and waiting Review show the actual bounded reason before any details 
       'Vocabulary content hash mismatch',
       'TEST cache disk refused',
     ]) {
-      const html = render(
-        <VocabularyHome
-          model={model}
-          content={{
-            book: undefined,
-            busy: false,
-            progress: null,
-            error,
-            restart: false,
-            configured: true,
-            async download() {},
-          }}
-        />,
-      );
+      bookContent.error = error;
+      const html = render(<WordsSection model={model} draft={{ value: null, onChange: () => {} }} />);
       expect(html).toContain(error);
       expect(html).toContain('line-clamp-2');
       expect(html).not.toContain('role="dialog"');
     }
+    bookContent.error = null;
     const html = render(<VocabularyReview model={{ ...model, error: 'TEST card read refused' }} />);
     expect(html).toContain('TEST card read refused');
     expect(html).not.toContain('role="dialog"');
   }
+});
+test('Today counts stay and the Words settings link replaces the moved forms', async () => {
+  await i18n.changeLanguage('en');
+  const html = render(<VocabularyHome model={model} />);
+  expect(html).toContain('New remaining today');
+  expect(html).toContain('href="#/settings/words"');
+  expect(html).not.toContain('New words per day');
+  expect(html).not.toContain('Built-in wordbook');
+  expect(html).not.toContain('data-vocabulary-download-status');
 });
 test('the locked real card contains no answer DOM or visible flip action', async () => {
   await i18n.changeLanguage('en');

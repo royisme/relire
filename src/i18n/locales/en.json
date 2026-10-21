@@ -144,6 +144,7 @@
     "learning": "Learning / relearning",
     "remaining": "New remaining today",
     "continue": "Start / continue review",
+    "settings": "Words settings",
     "book": "Built-in wordbook",
     "bookCount_one": "{{count}} word available offline",
     "bookCount_other": "{{count}} words available offline",
@@ -193,7 +194,6 @@
     "fuzzy": "Fuzzy",
     "remembered": "Remembered",
     "recall": "Recall the meaning before flipping.",
-    "revealed": "Report your recall: 1 for Forgot, 2 for Fuzzy, 3 for Remembered.",
     "waiting": "Done for now / waiting",
     "nextDue": "Next learning step at {{time}} ({{seconds}} seconds). You can leave and return.",
     "noEligible": "No eligible card now. Future, skipped or quota-limited words may remain; this does not mean all words are learned.",
@@ -417,6 +417,10 @@
       "practice": {
         "title": "Practice",
         "desc": "How exercises are checked and how dictation is played."
+      },
+      "words": {
+        "title": "Words",
+        "desc": "The daily new-word limit and the built-in wordbook on this device."
       },
       "prompts": {
         "title": "Prompts",
