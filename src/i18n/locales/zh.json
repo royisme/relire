@@ -447,7 +447,9 @@
     "speakAfterCheck": "听写检查后再播放",
     "speakAfterCheckNote": "听写题检查后，再播放一遍它的数字。",
     "remoteAutoSpeak": "允许检查后用语音服务商朗读",
-    "remoteAutoSpeakNote": "关闭时，检查后的自动播放只用本机语音。开启后，检查可能用你选定的语音服务商合成音频，会产生费用。手动点按播放或试听始终使用它。"
+    "remoteAutoSpeakNote": "关闭时，检查后的自动播放只用本机语音。开启后，检查可能用你选定的语音服务商合成音频，会产生费用。手动点按播放或试听始终使用它。",
+    "browserRecognition": "录制时允许浏览器转写我的语音",
+    "browserRecognitionNote": "默认关闭。开启后，浏览器可能把录音发给浏览器厂商的语音服务，生成一段转写文本，在你选的 AI 服务商无法听音频时帮助评分。关闭时不做语音识别，录音只在你点“评测发音”时发送给你选的 AI 服务商。"
   },
   "aiSettings": {
     "purposesLabel": "AI 任务",
