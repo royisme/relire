@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Four more compound tenses.** Plus-que-parfait, futur antérieur, conditionnel passé and subjonctif passé appear on the Conjugation page, the word sheet, in drills and in sentence patterns. Verbs in the grammar pack are reviewed; AI-made tables are not checked.
 - **Noun gender without a key.** My study → Grammar → Gender shows all 17 reviewed ending tendencies with dictionary and A1 counts, examples and sample exceptions. Make local drills from 337 reviewed A1 nouns, including exceptions; checking reveals the saved tendency and exception note. Noun lookups show the longest matching ending under the meaning, without asserting an unknown noun's gender.
 - The supplied vocabulary source has a private normalized draft and recorded attribution/hash metadata. It is not marked reviewed or available for download; content approval is still required before local publication.
 - Words now has Today, paginated All words and reveal-first review routes. Personal contexts and built-in snapshots share canonical cards, minute learning steps, daily introduction limits and durable rating retries; paired backups preserve quota history and Grammar metadata. A private normalization/review/staged-publication pipeline and complete-book offline loader are implemented with synthetic tests only. Real corpus review, C1/Canadian-usage decisions, D1 application and public distribution remain owner gates.
