@@ -11,6 +11,7 @@ import {
   VocabularyQuotaError,
 } from '../storage/vocabulary';
 import type { VocabularyModel } from './useVocabulary';
+const recallRatings = { forgot: 1, fuzzy: 3, remembered: 4 } as const;
 export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBook) {
   const [active, setActive] = useState<{
     candidate: VocabularyJoined;
@@ -21,7 +22,11 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quotaReached, setQuotaReached] = useState(false);
-  const [pending, setPending] = useState<{ operationId: string; rating: 1 | 4 } | null>(null);
+  const [pending, setPending] = useState<{
+    operationId: string;
+    outcome: keyof typeof recallRatings;
+    rating: 1 | 3 | 4;
+  } | null>(null);
   const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set());
   const [ratings, setRatings] = useState(0);
   const [introductions, setIntroductions] = useState(0);
@@ -109,10 +114,10 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     }
     return false;
   };
-  const recall = async (outcome: 'forgot' | 'remembered') => {
-    const rating = outcome === 'forgot' ? 1 : 4;
+  const recall = async (outcome: keyof typeof recallRatings) => {
+    const rating = recallRatings[outcome];
     if (!active || !revealed || lock.current || (pending && pending.rating !== rating)) return;
-    const operation = pending ?? { operationId: crypto.randomUUID(), rating };
+    const operation = pending ?? { operationId: crypto.randomUUID(), outcome, rating };
     setPending(operation);
     lock.current = true;
     setBusy(true);
@@ -147,7 +152,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     busy,
     error: error ?? model.error,
     quotaReached,
-    pending: pending ? { outcome: pending.rating === 1 ? ('forgot' as const) : ('remembered' as const) } : null,
+    pending: pending ? { outcome: pending.outcome } : null,
     ratings,
     introductions,
     now,

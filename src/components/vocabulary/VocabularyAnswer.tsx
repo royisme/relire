@@ -9,7 +9,6 @@ export function VocabularyAnswer({ word, snapshot = false }: { word: VocabularyJ
     <div className="space-y-6 break-words text-sm text-ink-800">
       {source && (
         <section className="space-y-3">
-          <h3 className="font-serif text-lg font-semibold">{t('vocab.builtIn')}</h3>
           {source.senses.map((sense, index) => (
             <div key={index} className="space-y-2">
               {sense.pos && <p className="text-xs text-ink-600">{sense.pos}</p>}
@@ -24,6 +23,7 @@ export function VocabularyAnswer({ word, snapshot = false }: { word: VocabularyJ
               ))}
             </div>
           ))}
+          <p className="text-xs text-ink-600">{t('vocab.builtIn')}</p>
         </section>
       )}
       {word.row?.contexts.map((context) => (

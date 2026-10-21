@@ -23,27 +23,27 @@ test('Words review commits introduction before answers, flips without writes, an
   await page.getByRole('link', { name: 'Start / continue review' }).click();
   await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();
   const backFace = page.locator('[data-vocabulary-face="back"]');
-  const flip = page.getByRole('button', { name: 'Flip card', exact: true });
+  const flip = page.locator('[data-vocabulary-face="front"] h1');
   await expect(backFace).toHaveCount(0);
   await expect(page.locator('[data-vocabulary-recall]')).toHaveCount(0);
   expect((await stored(page))[0].introducedAt).toBeNull();
   const release = await holdVocabularyWrites(page);
   try {
     await flip.click();
-    await expect(page.getByRole('button', { name: 'Saving…', exact: true })).toBeDisabled();
+    await expect(page.locator('[data-vocabulary-face="front"] [data-vocabulary-flip]')).toBeDisabled();
     await expect(backFace).toHaveCount(0);
     await expect(page.locator('[data-vocabulary-recall]')).toHaveCount(0);
     await expect(page.locator('main')).not.toContainText('TEST meaning');
   } finally {
     await release();
   }
-  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeVisible();
+  await expect(backFace.locator('h2')).toBeVisible();
   const introduced = (await stored(page))[0];
   expect(introduced.introducedAt).not.toBeNull();
   expect(introduced.history).toHaveLength(0);
   const transactions = await observeVocabularyTransactions(page);
   for (let turn = 0; turn < 4; turn++) {
-    await page.getByRole('button', { name: 'Flip to front', exact: true }).click();
+    await page.locator('[data-vocabulary-face="back"] h2').click();
     await flip.click();
   }
   expect(await transactions()).toBe(0);
@@ -93,7 +93,7 @@ test('commit failure keeps front hidden; rating failure keeps answer/decision an
   const status = page.locator('[data-vocabulary-status]');
   const reason = 'TEST vocabulary disk refused. ' + 'Long TEST storage reason. '.repeat(80);
   await refuseWrites(page, true, reason);
-  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
+  await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).not.toContainText('TEST meaning');
   expect((await stored(page))[0].introducedAt).toBeNull();
   await expect(status.getByText(reason, { exact: true })).toBeVisible();
@@ -101,8 +101,8 @@ test('commit failure keeps front hidden; rating failure keeps answer/decision an
   await expect(page.getByRole('alert')).toHaveText(reason);
   await page.keyboard.press('Escape');
   await refuseWrites(page, false);
-  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeVisible();
+  await page.locator('[data-vocabulary-face="front"] h1').click();
+  await expect(page.locator('[data-vocabulary-face="back"] h2')).toBeVisible();
   await refuseWrites(page, true);
   const good = page.getByRole('button', { name: 'Remembered', exact: true });
   await good.click();
@@ -128,7 +128,7 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     await storage.saveVocabularyPreferences(0);
   });
-  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
+  await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).not.toContainText('TEST meaning');
   expect((await stored(page)).every((row) => row.introducedAt === null)).toBe(true);
   await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
@@ -138,19 +138,19 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
     await storage.saveVocabularyPreferences(20);
   });
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
-  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeVisible();
+  await page.locator('[data-vocabulary-face="front"] h1').click();
+  await expect(page.locator('[data-vocabulary-face="back"] h2')).toBeVisible();
   await page.evaluate(async () => {
     const storage: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     const snapshot = await storage.exportData();
     await storage.importData(snapshot);
   });
   await expect(page.getByRole('button', { name: 'Flip card', exact: true })).toBeEnabled();
-  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toHaveCount(0);
+  await expect(page.locator('[data-vocabulary-face="back"] h2')).toHaveCount(0);
   await page.keyboard.press('2');
   expect((await stored(page))[0].history).toHaveLength(0);
-  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeVisible();
+  await page.locator('[data-vocabulary-face="front"] h1').click();
+  await expect(page.locator('[data-vocabulary-face="back"] h2')).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     const snapshot = await storage.getVocabularySnapshot('test-a');
@@ -312,19 +312,19 @@ test('7000 synthetic entries paginate at50; unseen fronts create no row and no-k
   await page.getByRole('button', { name: 'Skip for now' }).click();
   await expect(page.getByRole('heading', { name: 'test-1', exact: true })).toBeVisible();
   expect(await stored(page)).toEqual([]);
-  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeVisible();
+  await page.locator('[data-vocabulary-face="front"] h1').click();
+  await expect(page.locator('[data-vocabulary-face="back"] h2')).toBeVisible();
   expect((await stored(page))[0].key).toBe('test-1');
   await page.getByRole('link', { name: 'Back to Words' }).click();
   await page.context().setOffline(true);
   await page.getByRole('link', { name: 'Start / continue review' }).click();
-  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
+  await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).toContainText('TEST meaning test-1');
   await page.evaluate(async () => {
     const locale = await import(/* @vite-ignore */ '/src/i18n/index.ts' as string);
     locale.setAppLanguage('zh');
   });
-  await expect(page.getByRole('heading', { name: '答案', exact: true })).toBeVisible();
+  await expect(page.locator('[data-vocabulary-face="back"] h2')).toHaveText('test-1');
   await expect(page.locator('[data-vocabulary-face="back"]')).toContainText('test-1');
   expect(ai.calls.word + ai.calls.tts).toBe(0);
 });

@@ -69,6 +69,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- Words cards now flip by clicking either face, with selectable answers and independent Listen; three equal circular Forgot/Fuzzy/Remembered controls use the existing colour palette and save recall as ratings 1/3/4, without visible Flip buttons or stacked answer headings.
 - Words review now uses a two-way flipping card with separate Forgot/Remembered actions, no pre-answer rating dashboard, and full readable answers. First reveal still saves before showing the answer; later flips never change progress or count as recall.
 - Owner-authorized local vocabulary use can explicitly waive linguistic review while retaining unreviewed provenance and all structural/hash/publication checks; reviewed publication remains the default and no public delivery rights are granted.
 - Word lookup has explicit Save word / Save this context / Remove bookmark actions with frozen source and request language. Saving no longer prefetches speech. Vocabulary analytics report bookmarks, introductions and self-ratings, not mastery; optional audio backup/protection includes only acquired personal clips for bookmarked or introduced cards.

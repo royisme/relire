@@ -1,6 +1,7 @@
 /** Owns the visual face and external recall actions, guarded physical keys, errors and session-owned speech. */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { X, EqualApproximately, Check } from 'lucide-react';
 import type { VocabularyBook } from '../../types/vocabulary';
 import type { VocabularyModel } from '../../hooks/useVocabulary';
 import { useVocabularyReview } from '../../hooks/useVocabularyReview';
@@ -9,7 +10,13 @@ import { Button } from '../ui/button';
 import { Sheet, OverlayHeader } from '../ui/overlay';
 import { Link } from '../shell/Link';
 import { Flashcard } from './Flashcard';
-const outcomes = ['forgot', 'remembered'] as const;
+const outcomes = ['forgot', 'fuzzy', 'remembered'] as const;
+const recallIcons = { forgot: X, fuzzy: EqualApproximately, remembered: Check };
+const recallColors = {
+  forgot: 'border-bad-200 bg-bad-50 text-bad-700 hover:bg-bad-100',
+  fuzzy: 'border-ink-300 bg-ink-100 text-ink-800 hover:bg-ink-200',
+  remembered: 'border-ok-200 bg-ok-50 text-ok-800 hover:bg-ok-100',
+};
 export function VocabularyReview({ model, book }: { model: VocabularyModel; book?: VocabularyBook }) {
   const { t } = useTranslation();
   const session = useVocabularyReview(model, book);
@@ -22,9 +29,10 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
   const message = error ?? (session.quotaReached ? t('vocab.quotaReached') : null);
   const [errorOpen, setErrorOpen] = useState(false);
   const submittedControl = useRef<HTMLButtonElement | null>(null);
-  const recallControls = useRef<Partial<Record<'forgot' | 'remembered', HTMLButtonElement | null>>>({});
+  const recallControls = useRef<Partial<Record<(typeof outcomes)[number], HTMLButtonElement | null>>>({});
   const waitHeading = useRef<HTMLHeadingElement>(null);
   const held = useRef(new Set<string>());
+  const flipKey = useRef<string | null>(null);
   const ownedSpeech = useRef<string | null>(null);
   const stopOwned = () => {
     if (ownedSpeech.current && getSpeechState().key === ownedSpeech.current) stopSpeech();
@@ -54,10 +62,17 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
       const overlayOpen = document.querySelector('[role="dialog"],[role="menu"]');
       if (
         (repeated || (overlayOpen && !target?.closest('[role="dialog"],[role="menu"]'))) &&
-        ['Enter', ' ', '1', '2'].includes(event.key) &&
+        ['Enter', ' ', '1', '2', '3'].includes(event.key) &&
         target?.closest('[data-vocabulary-review]')
       ) {
         event.preventDefault();
+        return;
+      }
+      const flipControl = target?.closest<HTMLButtonElement>('[data-vocabulary-flip]');
+      if (flipControl && ['Enter', ' '].includes(event.key)) {
+        flipKey.current = event.code;
+        event.preventDefault();
+        if (!repeated && !busy && !overlayOpen) flipControl.click();
         return;
       }
       if (
@@ -66,11 +81,13 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
         !back ||
         !active ||
         overlayOpen ||
-        target?.closest('input,textarea,select,[contenteditable="true"],a,button:not([data-vocabulary-recall])') ||
+        target?.closest(
+          'input,textarea,select,[contenteditable="true"],a,button:not([data-vocabulary-recall]),[data-vocabulary-independent]',
+        ) ||
         !target?.closest('[data-vocabulary-review]')
       )
         return;
-      const outcome = outcomes[['1', '2'].indexOf(event.key)];
+      const outcome = outcomes[['1', '2', '3'].indexOf(event.key)];
       if (outcome) {
         event.preventDefault();
         submittedControl.current = recallControls.current[outcome] ?? null;
@@ -78,9 +95,16 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
       }
     };
     const keyup = (event: KeyboardEvent) => {
+      if (flipKey.current === event.code) {
+        event.preventDefault();
+        flipKey.current = null;
+      }
       held.current.delete(event.code);
     };
-    const blur = () => held.current.clear();
+    const blur = () => {
+      held.current.clear();
+      flipKey.current = null;
+    };
     document.addEventListener('keydown', keydown, true);
     document.addEventListener('keyup', keyup, true);
     window.addEventListener('blur', blur);
@@ -134,27 +158,38 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
             }}
           />
           <div data-vocabulary-controls className="space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              {back &&
-                outcomes.map((outcome) => (
-                  <Button
-                    key={outcome}
-                    ref={(control) => {
-                      recallControls.current[outcome] = control;
-                    }}
-                    data-vocabulary-recall={outcome}
-                    variant={outcome === 'remembered' ? 'default' : 'outline'}
-                    disabled={busy || (!!pending && pending.outcome !== outcome)}
-                    aria-pressed={pending?.outcome === outcome}
-                    onClick={() => void recall(outcome)}
-                  >
-                    {t(`vocab.${outcome}`)}
-                  </Button>
-                ))}
-              <Button className="col-span-2" variant="ghost" disabled={busy || !!pending} onClick={session.skip}>
-                {t('vocab.skip')}
-              </Button>
-            </div>
+            {back && (
+              <div className="mx-auto grid max-w-xs grid-cols-3 gap-3">
+                {outcomes.map((outcome) => {
+                  const Icon = recallIcons[outcome];
+                  return (
+                    <div key={outcome} className="flex min-w-0 flex-col items-center gap-1.5">
+                      <Button
+                        ref={(control) => {
+                          recallControls.current[outcome] = control;
+                        }}
+                        type="button"
+                        data-vocabulary-recall={outcome}
+                        variant="outline"
+                        size="icon"
+                        className={`h-12 w-12 shrink-0 rounded-full ${recallColors[outcome]}`}
+                        disabled={busy || (!!pending && pending.outcome !== outcome)}
+                        aria-label={t(`vocab.${outcome}`)}
+                        aria-pressed={pending?.outcome === outcome}
+                        aria-busy={busy && pending?.outcome === outcome}
+                        onClick={() => void recall(outcome)}
+                      >
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                      </Button>
+                      <span className="text-center text-xs text-ink-700">{t(`vocab.${outcome}`)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <Button className="w-full" variant="ghost" disabled={busy || !!pending} onClick={session.skip}>
+              {t('vocab.skip')}
+            </Button>
             <div
               data-vocabulary-status
               className="flex h-16 min-w-0 items-start gap-2 overflow-hidden text-sm text-ink-600"
