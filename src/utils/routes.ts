@@ -19,14 +19,15 @@
  *   #/practice/:unitId       one exercise unit on one sheet
  *   #/progress               progress
  *   #/settings               section list on phones; desktop resolves it to the first section
- *   #/settings/:section      ai/:purpose | practice | prompts | data
+ *   #/settings/:section      ai/:purpose | practice | words | prompts | data
  *   #/about                  About
  */
 
 import { contentServiceUrl } from '../services/grammarTopics/service';
 import { GRAMMAR_TAGS, type GrammarTag } from '../types/grammar';
 
-export const SETTINGS_SECTIONS = ['ai', 'practice', 'prompts', 'data'] as const;
+// The order is the order Settings lists its sections in (words follows practice).
+export const SETTINGS_SECTIONS = ['ai', 'practice', 'words', 'prompts', 'data'] as const;
 export const AI_PURPOSES = ['text', 'ocr', 'speech'] as const;
 export type AiPurposeRoute = (typeof AI_PURPOSES)[number];
 

@@ -97,7 +97,7 @@ test('About is its own route', () => {
   for (const hash of ['#/about/']) {
     expect(parseRoute(hash)).toEqual({ route, canonical: '#/about' });
   }
-  expect(SETTINGS_SECTIONS).toEqual(['ai', 'practice', 'prompts', 'data']);
+  expect(SETTINGS_SECTIONS).toEqual(['ai', 'practice', 'words', 'prompts', 'data']);
   for (const hash of ['#/about/extra', '#/settings/about', '#/settings/missing']) {
     expect(parseRoute(hash).route.name).toBe('notFound');
   }
@@ -115,6 +115,8 @@ test('all study and remaining Settings sections keep canonical deep links', () =
   }
   expect(parseRoute('#/study')).toEqual({ route: { name: 'study', tab: 'words' }, canonical: '#/study/words' });
   expect(parseRoute('#/settings')).toEqual({ route: { name: 'settings', section: null }, canonical: null });
+  expect(routeHref({ name: 'settings', section: 'words' })).toBe('#/settings/words');
+  expect(parseRoute('#/settings/words')).toEqual({ route: { name: 'settings', section: 'words' }, canonical: null });
 });
 
 test('AI purpose routes are independent and old AI routes are not aliases', () => {
