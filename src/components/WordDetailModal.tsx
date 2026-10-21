@@ -6,6 +6,7 @@ import { X, Loader2 } from 'lucide-react';
 import type { VocabularyBookmarkActions } from '../hooks/useVocabularyBookmark';
 import { WordAnalysis } from '../types';
 import { isVerbEntry } from '../services/grammarPack/verbEntry';
+import { isNounEntry } from '../services/nounGender/match';
 import { Button } from './ui/button';
 import { SpeakButton } from './ui/speak-button';
 import { useWordSheetPack } from '../hooks/useWordSheetPack';
@@ -15,8 +16,8 @@ import { Section } from './word/Section';
  * The word lookup sheet, laid out like a dictionary entry: the word, how it sounds and what it means
  * here, the verb forms the word is (a pack or lexicon form), then plain sections (pronunciation, use in this sentence,
  * examples, memory trick) and, last, the conjugation of a verb. Sections are separated by rules, not tinted
- * boxes. The pack, the lexicon's verb lines and the two sections are settled before the entry is drawn
- * (useWordSheetPack), so they are in its first frame and nothing shifts when they arrive.
+ * boxes. Both packs, the lexicon's verb lines and their sections settle before the entry is drawn
+ * (useWordSheetPack), so noun tendencies use the lemma under the meaning in the first frame too.
  */
 
 interface WordDetailModalProps {
@@ -141,6 +142,14 @@ export const WordDetailModal: FC<WordDetailModalProps> = ({
                   <p className="text-lg font-medium text-ink-900 break-words">
                     {isEn && wordData.translationEn ? wordData.translationEn : wordData.translation}
                   </p>
+                  {isNounEntry(wordData.partOfSpeech) &&
+                    (sections ? (
+                      <sections.NounGenderHint lemma={wordData.lemma} result={pack.nounGender} />
+                    ) : (
+                      <p role="alert" className="break-words text-sm text-bad-700">
+                        {pack.error}
+                      </p>
+                    ))}
                   {wordData.otherMeanings && wordData.otherMeanings.length > 0 && (
                     <p className="text-sm text-ink-600 mt-0.5 break-words">
                       {t('wordModal.otherMeanings')} {wordData.otherMeanings.join(t('common.listSeparator'))}

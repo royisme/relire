@@ -797,6 +797,50 @@
     "mistakes": "Mistakes",
     "grammar": "Grammar"
   },
+  "nounGender": {
+    "title": "Gender",
+    "subtitle": "Noun endings are tendencies, not guarantees. Compare the dictionary and reviewed A1 samples.",
+    "loading": "Loading noun endings…",
+    "groups": {
+      "f": "Feminine tendencies",
+      "m": "Masculine tendencies"
+    },
+    "dictionary": "Dictionary: {{agree}}/{{n}} nouns agree ({{percent}}%).",
+    "a1": "Reviewed A1 sample: {{agree}}/{{n}} nouns agree ({{percent}}%).",
+    "examples": "Reviewed examples:",
+    "exceptions": "Exceptions in the A1 sample:",
+    "noExceptions": "None in this sample; other nouns may differ.",
+    "ruleLine": "{{rule}} ({{percent}}% of {{n}} dictionary nouns). A tendency, not the word’s gender.",
+    "exception": "This noun is a reviewed A1 exception to that ending tendency.",
+    "rules": {
+      "tion": "Ending -tion: usually feminine",
+      "sion": "Ending -sion: usually feminine",
+      "te": "Ending -té: usually feminine",
+      "ure": "Ending -ure: usually feminine",
+      "ette": "Ending -ette: usually feminine",
+      "ance": "Ending -ance: usually feminine",
+      "ence": "Ending -ence: usually feminine",
+      "ie": "Ending -ie: usually feminine",
+      "age": "Ending -age: usually masculine",
+      "ment": "Ending -ment: usually masculine",
+      "isme": "Ending -isme: usually masculine",
+      "eau": "Ending -eau: usually masculine",
+      "oir": "Ending -oir: usually masculine",
+      "ier": "Ending -ier: usually masculine",
+      "ee": "Ending -ée: usually feminine",
+      "esse": "Ending -esse: usually feminine",
+      "ude": "Ending -ude: usually feminine"
+    },
+    "drill": {
+      "title": "Noun gender practice",
+      "description": "Sample the reviewed A1 nouns, including exceptions. No key or content service needed.",
+      "instruction": "Choose the gender of each noun: M for masculine, F for feminine. Ending tendencies appear after checking.",
+      "make": "Make exercises",
+      "making": "Saving…",
+      "open": "Open saved exercises",
+      "countRange": "Choose a whole number from 1 to {{max}}."
+    }
+  },
   "grammarTopics": {
     "sections": "Grammar sections",
     "title": "Topics",

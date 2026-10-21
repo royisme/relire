@@ -7,6 +7,7 @@
 import { useRef, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
+import { nounGenderDrillMeta, tendencyPercent } from '../../../types/nounGenderDrill';
 import { ExpectedBeside } from './UnderlineInput';
 import type { ExerciseControlProps } from './types';
 import { InlineMarkup } from '../InlineMarkup';
@@ -15,6 +16,7 @@ export function GenderCheckControl({ item, onWord, answer, onChange, checked, di
   const { t } = useTranslation();
   const options = item.options ?? ['M', 'F'];
   const expected = String(item.expectedAnswer);
+  const feedback = nounGenderDrillMeta(item.meta);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
 
   const pick = (option: string) => {
@@ -87,6 +89,21 @@ export function GenderCheckControl({ item, onWord, answer, onChange, checked, di
         </span>
         {checked && !checked.correct && <ExpectedBeside text={name(expected)} />}
       </p>
+      {feedback && feedback.rules.length > 0 && (
+        <div className="h-20 overflow-y-auto border-l-2 border-ink-300 pl-3 text-sm text-ink-700" aria-live="polite">
+          {checked &&
+            feedback.rules.map((rule) => (
+              <p key={rule.id} className="break-words">
+                {t('nounGender.ruleLine', {
+                  rule: t(`nounGender.rules.${rule.id}`),
+                  percent: tendencyPercent(rule.percent),
+                  n: rule.n,
+                })}
+              </p>
+            ))}
+          {checked && feedback.exception && <p className="break-words">{t('nounGender.exception')}</p>}
+        </div>
+      )}
     </div>
   );
 }

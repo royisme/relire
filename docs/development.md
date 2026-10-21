@@ -24,9 +24,11 @@ Development handoff: [Built-in vocabulary and flashcards specification](vocabula
 - `MORPHALOU_DIR`: oracle directory, default `.local/morphalou/csv/Morphalou3.1_formatCSV` relative to the repository root; stale attestations are ignored and reported by the build.
 - `bun scripts/noun-gender/measure.ts`: count dictionary figures per candidate noun ending over single-word gendered lemmas of the offline Morphalou commonNoun file (reads `MORPHALOU_DIR`); prints a table and writes integers only to ignored `.local/noun-gender/measurement.json`.
 - `bun scripts/noun-gender/measure.ts attest`: write the last measurement into `data/noun-gender/oracle-attest.json`; owner-only, and only after NQ6 (licence) is confirmed.
-- `bun scripts/noun-gender/build.ts`: assemble `src/data/noun-gender/pack.json` from the A1 noun list, candidates, attest and reviews; candidates below the dictionary threshold (80%, n ≥ 30; a candidate's `override` decision ships it anyway, a `hold` never ships it) or without an attest record are dropped, unreviewed rows fail the build. No pack is committed yet.
-- `bun scripts/noun-gender/build.ts --check`: regenerate in memory and reject any byte difference from the committed pack (fails while no pack exists).
+- `bun scripts/noun-gender/build.ts`: assemble `src/data/noun-gender/pack.json` from the A1 noun list, candidates, attest and reviews; candidates below the dictionary threshold (80%, n ≥ 30; a candidate's `override` decision ships it anyway, a `hold` never ships it) or without an attest record are dropped, unreviewed rows fail the build. The committed pack contains 337 reviewed A1 nouns and 17 rules; `e` and the held `eur` are absent, while the owner's `ure` override retains its measured figures.
+- `bun scripts/noun-gender/build.ts --check`: regenerate in memory and reject any byte difference from the committed pack.
 - `bun scripts/noun-gender/review.ts print <id...>`: print noun rows and derived rule tables (dictionary figure, A1 figure, examples, exceptions) before review; only the owner runs `record <id...> --by "<name>" --ref "<reference>"` to append review records to `data/noun-gender/reviews.json`. An id can name both a noun and a rule (`age` is the noun `âge` and the rule `-age`; so is `eau`): `print` shows both and `record` records both.
+
+- `bun test tests/nounGenderLoad.test.ts tests/nounGenderMatch.test.ts tests/nounGenderRendering.test.tsx tests/fromGender.test.ts tests/routes.test.ts tests/wordSheetPack.test.ts`: noun-pack validation/failure retry/preload, all 17 locale captions and measured figures, noun-only normalized longest-ending matching, reference and saved feedback contracts, drill sampling/metadata/grading, save-only retry with disposable fake IndexedDB, and service-independent Gender routes. No browser, real AI or content service is exercised; visual acceptance remains owner-manual.
 
 ## Run the content service locally
 
@@ -39,7 +41,7 @@ bunx wrangler d1 migrations apply DB --local
 bun run dev --var ALLOWED_ORIGINS:http://localhost:5173
 ```
 
-In the app root, create the gitignored `.env.local` with `VITE_CONTENT_SERVICE_URL=http://127.0.0.1:8787`, then run `bun run dev` in another terminal and open `http://localhost:5173`. Without that variable, Grammar shows only Conjugation. Local D1 starts with no published topics.
+In the app root, create the gitignored `.env.local` with `VITE_CONTENT_SERVICE_URL=http://127.0.0.1:8787`, then run `bun run dev` in another terminal and open `http://localhost:5173`. Without that variable, Grammar shows Conjugation and Gender; noun reference and local drills need neither a service nor an AI key. Local D1 starts with no published topics.
 
 From the repository root, `bun scripts/grammar-topics/publish.ts` runs the existing reviewed-only gate over the manifest, hash-bound reviews and private `.local/grammar-topics/drafts-<chapter>.json` arrays, then writes private `.local/grammar-topics/publish.sql`; `--apply-local` also replaces the local D1 topics (apply the migration above first). Excluded ids are listed; zero included topics clears the published set. Static topic/tag-index artifacts and the `build.ts topics` target are gone. CI uses `bun scripts/grammar-topics/publish.ts --check` to validate public metadata and chapter labels only, without reading `.local/`. See `worker/README.md` for owner publishing instructions.
 

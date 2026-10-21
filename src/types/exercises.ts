@@ -7,6 +7,7 @@
  */
 import { z } from 'zod';
 import { GrammarTagSchema, type GrammarTag } from './grammar';
+import { NounGenderDrillMetaSchema } from './nounGenderDrill';
 import {
   CheckpointQuestionSchema,
   TopicOriginSchema,
@@ -67,6 +68,13 @@ export function refineExerciseItem(
   const issue = (field: string, message: string) => ctx.addIssue({ code: 'custom', path: [...path, field], message });
   const answer = item.expectedAnswer;
   const options = item.options || [];
+  if (item.meta?.source === 'noun-gender') {
+    const parsed = NounGenderDrillMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'GENDER_CHECK' || item.grammarTag !== 'gender-number' || !['M', 'F'].includes(String(answer)))
+      issue('meta', 'Noun-gender metadata requires a gender-number M/F gender check');
+  }
   if (
     ['DIALOGUE_ORDER', 'MATCH_PAIRS', 'ODD_ONE_OUT', 'GENDER_CHECK'].includes(type) &&
     new Set(options).size !== options.length

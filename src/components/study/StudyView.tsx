@@ -16,7 +16,7 @@ interface Props {
   tab: StudyTab;
   /** The Conjugation page's `?verb=` prefill. */
   verb?: string;
-  section?: 'conjugation';
+  section?: 'conjugation' | 'gender';
   tag?: GrammarTag;
   sectionsInSidebar: boolean;
   vocabulary: ComponentProps<typeof VocabularyView>;

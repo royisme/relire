@@ -13,6 +13,7 @@
  *   #/study/mistakes         My study → Mistakes
  *   #/study/grammar          My study → Grammar topics; accepts ?tag=<GrammarTag>
  *   #/study/grammar/conjugation  Conjugation; accepts ?verb=<infinitive>
+ *   #/study/grammar/gender   reviewed noun-gender tendencies and local drills
  *   #/study/grammar/:topicId  a published topic (conjugation and gender are reserved)
  *   #/practice               practice: the exercise sets
  *   #/practice/set/:setId     one set and its exercise table
@@ -43,7 +44,7 @@ export type Route =
   | { name: 'reader'; articleId: string; sentence?: string }
   | { name: 'passage'; unitId: string; sentence?: string }
   /** `verb` prefills the Conjugation page (Grammar tab) and runs it once. */
-  | { name: 'study'; tab: StudyTab; section?: 'conjugation'; verb?: string; tag?: GrammarTag }
+  | { name: 'study'; tab: StudyTab; section?: 'conjugation' | 'gender'; verb?: string; tag?: GrammarTag }
   | { name: 'wordsAll' }
   | { name: 'wordsReview' }
   | { name: 'grammarTopic'; topicId: string }
@@ -85,6 +86,7 @@ export function routeHref(route: Route): string {
       return `#/passage/${encodeURIComponent(route.unitId)}${sentenceQuery(route.sentence)}`;
     case 'study':
       if (route.tab === 'grammar') {
+        if (route.section === 'gender') return '#/study/grammar/gender';
         if (route.section === 'conjugation')
           return `#/study/grammar/conjugation${route.verb ? `?verb=${encodeURIComponent(route.verb)}` : ''}`;
         return `#/study/grammar${route.tag ? `?tag=${encodeURIComponent(route.tag)}` : ''}`;
@@ -164,10 +166,12 @@ export function parseRoute(
   } else if (
     area === 'study' &&
     sub === 'grammar' &&
-    (extra.length === 0 || (extra.length === 1 && extra[0] === 'conjugation'))
+    (extra.length === 0 || (extra.length === 1 && ['conjugation', 'gender'].includes(extra[0])))
   ) {
     const params = new URLSearchParams(query);
-    if (extra[0] === 'conjugation' || !hasContentService) {
+    if (extra[0] === 'gender') {
+      route = { name: 'study', tab: 'grammar', section: 'gender' };
+    } else if (extra[0] === 'conjugation' || !hasContentService) {
       const verb = params.get('verb')?.trim();
       route = {
         name: 'study',

@@ -789,6 +789,50 @@
     "mistakes": "错题本",
     "grammar": "语法"
   },
+  "nounGender": {
+    "title": "名词阴阳性",
+    "subtitle": "词尾只表示倾向，并非定律。可对照词典和已审核的 A1 样本。",
+    "loading": "正在加载名词词尾…",
+    "groups": {
+      "f": "阴性倾向",
+      "m": "阳性倾向"
+    },
+    "dictionary": "词典：{{agree}}/{{n}} 个名词符合此倾向，占 {{percent}}%。",
+    "a1": "已审核的 A1 样本：{{agree}}/{{n}} 个名词符合此倾向，占 {{percent}}%。",
+    "examples": "已审核的例词：",
+    "exceptions": "A1 样本中的例外：",
+    "noExceptions": "此样本中没有例外；其他名词仍可能不同。",
+    "ruleLine": "{{rule}}，词典中 {{n}} 个名词有 {{percent}}% 符合。这是词尾倾向，不代表该词的实际阴阳性。",
+    "exception": "此名词是已审核的 A1 词表中不符合该词尾倾向的例外。",
+    "rules": {
+      "tion": "-tion 结尾通常为阴性",
+      "sion": "-sion 结尾通常为阴性",
+      "te": "-té 结尾通常为阴性",
+      "ure": "-ure 结尾通常为阴性",
+      "ette": "-ette 结尾通常为阴性",
+      "ance": "-ance 结尾通常为阴性",
+      "ence": "-ence 结尾通常为阴性",
+      "ie": "-ie 结尾通常为阴性",
+      "age": "-age 结尾通常为阳性",
+      "ment": "-ment 结尾通常为阳性",
+      "isme": "-isme 结尾通常为阳性",
+      "eau": "-eau 结尾通常为阳性",
+      "oir": "-oir 结尾通常为阳性",
+      "ier": "-ier 结尾通常为阳性",
+      "ee": "-ée 结尾通常为阴性",
+      "esse": "-esse 结尾通常为阴性",
+      "ude": "-ude 结尾通常为阴性"
+    },
+    "drill": {
+      "title": "名词阴阳性练习",
+      "description": "从已审核的 A1 名词中抽题，包含例外。无需密钥或内容服务。",
+      "instruction": "选择各名词的阴阳性：M 表示阳性，F 表示阴性。检查后会显示词尾倾向。",
+      "make": "生成练习",
+      "making": "正在保存…",
+      "open": "打开已保存的练习",
+      "countRange": "请输入 1 到 {{max}} 之间的整数。"
+    }
+  },
   "grammarTopics": {
     "sections": "语法分区",
     "title": "语法专题",

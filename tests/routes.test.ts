@@ -203,6 +203,24 @@ test('without a content service Grammar is Conjugation and topic routes are not 
   });
 });
 
+test('Gender works with or without a content service and ignores unrelated query parameters', () => {
+  const gender: Route = { name: 'study', tab: 'grammar', section: 'gender' };
+  expect(routeHref(gender)).toBe('#/study/grammar/gender');
+  expect(roundTrip(gender)).toEqual({ route: gender, canonical: null });
+  expect(areaOf(gender)).toBe('study');
+  for (const service of [true, false]) {
+    expect(parseConfiguredRoute('#/study/grammar/gender', service)).toEqual({ route: gender, canonical: null });
+    for (const suffix of ['/', '?verb=parler', '?tag=articles', '?x=1'])
+      expect(parseConfiguredRoute(`#/study/grammar/gender${suffix}`, service)).toEqual({
+        route: gender,
+        canonical: '#/study/grammar/gender',
+      });
+    expect(parseConfiguredRoute('#/study/grammar/%67ender', service).route.name).toBe('notFound');
+    expect(parseConfiguredRoute('#/study/grammar/gender/x', service).route.name).toBe('notFound');
+  }
+  expect(parseRoute('#/study/grammar/gender-number').route).toEqual({ name: 'grammarTopic', topicId: 'gender-number' });
+});
+
 test('topic ids decode safely before the extra-path guard; section names are reserved', () => {
   for (const topicId of ['test-only', 'unknown', 'a b', 'é/ü?&=', 'x#y', '100%']) {
     const route: Route = { name: 'grammarTopic', topicId };
@@ -214,7 +232,7 @@ test('topic ids decode safely before the extra-path guard; section names are res
     canonical: '#/study/grammar/test-only',
   });
   for (const hash of [
-    '#/study/grammar/gender',
+    '#/study/grammar/gender/y',
     '#/study/grammar/%63onjugation',
     '#/study/grammar/%67ender',
     '#/study/grammar/%E0%A4%A',
