@@ -20,8 +20,8 @@ import type { GeneratedVerb, SimpleTense } from '../../src/services/conjugation/
 import {
   IMPERATIVE_CLITICS,
   composeLead,
+  compoundForms,
   joinParts,
-  passeComposeForms,
   pastParticiples,
   type Parts,
 } from '../../src/services/conjugation/rules';
@@ -107,7 +107,7 @@ export function checkPasseCompose(g: GeneratedVerb): string[] {
     failures.push(`${where(g, 'participles')}: past participle agreement does not follow from "${past.ms}"`);
   }
   for (const [person, cell] of Object.entries(g.verb.tenses.passeCompose)) {
-    const expected = passeComposeForms(g.verb, person as Person, past);
+    const expected = compoundForms(g.verb, 'present', person as Person, past);
     if (JSON.stringify(cell.forms) !== JSON.stringify(expected)) {
       failures.push(
         `${where(g, 'passeCompose', person)}: ${JSON.stringify(cell.forms)} should be ${JSON.stringify(expected)}`,

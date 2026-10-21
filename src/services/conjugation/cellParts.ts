@@ -4,14 +4,7 @@
  */
 import type { ImperativePerson, Person, Tense } from '../../types/grammarPack';
 import type { VerifiedVerb } from './verify';
-import {
-  AUXILIARY_PRESENT,
-  IMPERATIVE_CLITICS,
-  REFLEXIVE,
-  SUBJECT,
-  passeComposeParticiples,
-  personIndex,
-} from './rules';
+import { AUXILIARY_FORMS, IMPERATIVE_CLITICS, REFLEXIVE, SUBJECT, passeComposeParticiples, personIndex } from './rules';
 
 export interface CellParts {
   tense: Tense;
@@ -36,7 +29,7 @@ export function cellParts(view: VerifiedVerb, tense: Tense, person: Person): Cel
     verb: cell.forms,
   };
   if (tense === 'passeCompose') {
-    parts.aux = AUXILIARY_PRESENT[view.aux][personIndex(person)];
+    parts.aux = AUXILIARY_FORMS[view.aux].present[personIndex(person)];
     parts.participle = passeComposeParticiples(view, person, {
       ms: view.participles.ms!.form,
       fs: view.participles.fs!.form,

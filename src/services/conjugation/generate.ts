@@ -24,8 +24,8 @@ import {
   REGULAR_RULES,
   SUBJONCTIF_ENDINGS,
   composeLead,
+  compoundForms,
   joinParts,
-  passeComposeForms,
   pastParticiples,
   personIndex,
   type Parts,
@@ -181,7 +181,7 @@ export function generateVerb(spec: VerbSpec, irregulars: Record<string, Irregula
     tenses: {
       present: cells('present'),
       passeCompose: forEachPerson(persons, (person) =>
-        cell('passeCompose', person, passeComposeForms(spec, person, participles)),
+        cell('passeCompose', person, compoundForms(spec, 'present', person, participles)),
       ),
       imparfait: cells('imparfait'),
       futur: cells('futur'),

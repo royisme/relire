@@ -206,18 +206,39 @@ export function pastParticiples(ms: string): PastParticiples {
   return { ms, fs, mp: /[sx]$/.test(base) ? base : `${base}s`, fp: `${fs}s` };
 }
 
-export const AUXILIARY_PRESENT = {
-  avoir: ['ai', 'as', 'a', 'avons', 'avez', 'ont'],
-  etre: ['suis', 'es', 'est', 'sommes', 'êtes', 'sont'],
-} as const;
+/** The auxiliary tenses a compound tense can take: passé composé uses `present`, the others their own. */
+export type AuxiliaryTense = 'present' | 'imparfait' | 'futur' | 'conditionnel' | 'subjonctif';
 
-/** Passé composé forms of one cell: agreement variants only with `être` and without `pcInvariable`. */
-export function passeComposeForms(
+/**
+ * The auxiliary in the five tenses a compound tense needs, six persons each in `FINITE_PERSONS` order.
+ * Typed from French grammar, not derived from the irregular table; the reviewed `avoir` and `être`
+ * entries of `data/grammar-pack/irregulars.json` are the proof (tests/conjugationCompoundAuxiliary.test.ts).
+ */
+export const AUXILIARY_FORMS: Record<'avoir' | 'etre', Record<AuxiliaryTense, readonly string[]>> = {
+  avoir: {
+    present: ['ai', 'as', 'a', 'avons', 'avez', 'ont'],
+    imparfait: ['avais', 'avais', 'avait', 'avions', 'aviez', 'avaient'],
+    futur: ['aurai', 'auras', 'aura', 'aurons', 'aurez', 'auront'],
+    conditionnel: ['aurais', 'aurais', 'aurait', 'aurions', 'auriez', 'auraient'],
+    subjonctif: ['aie', 'aies', 'ait', 'ayons', 'ayez', 'aient'],
+  },
+  etre: {
+    present: ['suis', 'es', 'est', 'sommes', 'êtes', 'sont'],
+    imparfait: ['étais', 'étais', 'était', 'étions', 'étiez', 'étaient'],
+    futur: ['serai', 'seras', 'sera', 'serons', 'serez', 'seront'],
+    conditionnel: ['serais', 'serais', 'serait', 'serions', 'seriez', 'seraient'],
+    subjonctif: ['sois', 'sois', 'soit', 'soyons', 'soyez', 'soient'],
+  },
+};
+
+/** Forms of one compound-tense cell: agreement variants only with `être` and without `pcInvariable`. */
+export function compoundForms(
   verb: Pick<Verb, 'aux' | 'pcInvariable'>,
+  tense: AuxiliaryTense,
   person: Person,
   participles: PastParticiples,
 ): string[] {
-  const aux = AUXILIARY_PRESENT[verb.aux][personIndex(person)];
+  const aux = AUXILIARY_FORMS[verb.aux][tense][personIndex(person)];
   return passeComposeParticiples(verb, person, participles).map((form) => `${aux} ${form}`);
 }
 
@@ -270,13 +291,19 @@ export function composePresentParticiple(verb: Pick<LeadVerb, 'pronominal' | 'hA
   return startsWithVowelSound(form, verb.hAspire) ? `s’${form}` : `se ${form}`;
 }
 
-/** All that is printed before the verb group; `firstForm` is forms[0] (the auxiliary in passé composé). */
-export function composeLead(tense: Tense, person: Person, verb: LeadVerb, firstForm: string): string {
+/**
+ * The tenses whose lead can carry a `que`: the subjonctif itself and the compound subjonctif passé, which
+ * #34 will add to the pack (so it is not a `Tense` yet).
+ */
+export type LeadTense = Tense | 'subjonctifPasse';
+
+/** All that is printed before the verb group; `firstForm` is forms[0] (the auxiliary in a compound tense). */
+export function composeLead(tense: LeadTense, person: Person, verb: LeadVerb, firstForm: string): string {
   if (tense === 'imperatif') return '';
   const elides = startsWithVowelSound(firstForm, verb.hAspire);
   const subject = verb.defective === 'impersonal' ? 'il' : SUBJECT[person];
   const pieces: string[] = [];
-  if (tense === 'subjonctif') pieces.push(subject.startsWith('il') ? 'qu’' : 'que');
+  if (tense === 'subjonctif' || tense === 'subjonctifPasse') pieces.push(subject.startsWith('il') ? 'qu’' : 'que');
   // With a reflexive, `je` stays and the reflexive carries the elision (je m’appelle).
   pieces.push(person === '1sg' && !verb.pronominal && elides ? 'j’' : subject);
   if (verb.pronominal) {

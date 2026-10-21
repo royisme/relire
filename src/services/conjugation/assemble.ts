@@ -16,7 +16,7 @@ import {
   type Tense,
   type Verb,
 } from '../../types/grammarPack';
-import { IMPERATIVE_CLITICS, composeLead, passeComposeForms } from './rules';
+import { IMPERATIVE_CLITICS, composeLead, compoundForms } from './rules';
 
 /** What the Conjugation screen renders: a pack row without its id and provenance. */
 export type VerbView = Omit<Verb, 'id' | 'prov'> & { hAspire?: true };
@@ -69,7 +69,7 @@ export function assembleVerb(answer: ConjugationAnswer): VerbView {
       present: simple('present'),
       // The AI is never asked for passé composé: it is the auxiliary plus the AI's participles.
       passeCompose: cellsOf(answer.forms.present, (person) =>
-        cell('passeCompose', person, passeComposeForms({ aux }, person, participles.past)),
+        cell('passeCompose', person, compoundForms({ aux }, 'present', person, participles.past)),
       ),
       imparfait: simple('imparfait'),
       futur: simple('futur'),
