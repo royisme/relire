@@ -67,7 +67,7 @@ const make = (over: Partial<Parameters<typeof prepareConjugationDrills>[0]> = {}
 
 test('one unit per selected tense, each valid, numbered, tagged and named after its tense', () => {
   const units = make({ tenses: [...TENSES] });
-  expect(units).toHaveLength(7);
+  expect(units).toHaveLength(TENSES.length);
   const setId = units[0]!.setId;
   for (const [index, unit] of units.entries()) {
     expect(ExerciseUnitSchema.safeParse(unit).success).toBe(true);
@@ -135,9 +135,13 @@ test('the tense tag mapping', () => {
     present: 'present',
     passeCompose: 'passe-compose',
     imparfait: 'imparfait',
+    plusQueParfait: 'plus-que-parfait',
     futur: 'future',
+    futurAnterieur: 'future',
     conditionnel: 'conditional',
+    conditionnelPasse: 'conditional',
     subjonctif: 'subjunctive',
+    subjonctifPasse: 'subjunctive',
     imperatif: 'imperative',
   };
   const units = make({ tenses: [...TENSES], perUnit: 6, maxPerVerb: 6 });
@@ -212,18 +216,18 @@ describe('the Conjugation page button', () => {
     expect(hasGradableCell(verifyAnswer({ ...parlerAnswer(), rule: 'irregular' }))).toBe(false);
   });
 
-  test('one displayed verb, all seven tenses, the default level and size, one set', () => {
+  test('one displayed verb, every tense, the default level and size, one set', () => {
     const units = make({
       verbs: [verifyPackVerb(packVerb('aller'))],
       tenses: [...TENSES],
       level: DEFAULT_DRILL_LEVEL,
       perUnit: DEFAULT_DRILL_COUNT,
     });
-    expect(units).toHaveLength(7);
+    expect(units).toHaveLength(TENSES.length);
     expect(new Set(units.map((unit) => unit.setId)).size).toBe(1);
-    expect(units.map((unit) => unit.level)).toEqual(Array(7).fill('A2'));
+    expect(units.map((unit) => unit.level)).toEqual(Array(TENSES.length).fill('A2'));
     // One verb: the per-verb cap of 2 decides the size of every unit.
-    expect(units.map((unit) => unit.items.length)).toEqual(Array(7).fill(2));
+    expect(units.map((unit) => unit.items.length)).toEqual(Array(TENSES.length).fill(2));
   });
 
   test('a verb of which only some tenses can be asked yields only those units', () => {

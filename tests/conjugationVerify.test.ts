@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import { verifyAnswer, verifyPackVerb, type VerifiedVerb } from '../src/services/conjugation/verify';
 import { REGULAR_RULES } from '../src/services/conjugation/rules';
 import type { ConjugationAnswer } from '../src/types/conjugationAnswer';
-import { TENSES, type Verb } from '../src/types/grammarPack';
+import { COMPOUND_TENSES, TENSES, type Verb } from '../src/types/grammarPack';
 import { GOLDEN } from './fixtures/grammarPackGolden';
 import { answerFromGolden, erAnswer, falloirAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
 
@@ -42,6 +42,31 @@ describe('a regular verb whose answer equals the engine', () => {
     const verified = verifyAnswer(parlerAnswer());
     expect(verified.tenses.passeCompose['1sg']).toEqual({ lead: 'j’', forms: ['ai parlé'], status: 'ai-only' });
     expect(statusesOf(verified, ['passeCompose'])).toEqual(new Set(['ai-only']));
+  });
+
+  test('every compound tense is ai-only, with no engine parts, and the auxiliary comes from the engine', () => {
+    const verified = verifyAnswer(parlerAnswer());
+    for (const tense of COMPOUND_TENSES) {
+      expect(statusesOf(verified, [tense])).toEqual(new Set(['ai-only']));
+      for (const cell of Object.values(verified.tenses[tense]))
+        expect({ tense, parts: cell.parts, ruleForms: cell.ruleForms }).toEqual({
+          tense,
+          parts: undefined,
+          ruleForms: undefined,
+        });
+    }
+    expect(verified.tenses.plusQueParfait['3pl']).toEqual({
+      lead: 'ils/elles',
+      forms: ['avaient parlé'],
+      status: 'ai-only',
+    });
+    expect(verified.tenses.subjonctifPasse['3sg']).toEqual({
+      lead: 'qu’il/elle',
+      forms: ['ait parlé'],
+      status: 'ai-only',
+    });
+    // The verb is still checked clean: a compound tense never makes it partly differ.
+    expect(verified.status).toBe('rule-checked');
   });
 
   test('a stem change the rule really has: lever under er-e-grave', () => {
@@ -270,6 +295,20 @@ describe('a verb in the pack', () => {
     expect(verified.tenses.passeCompose['1sg']).toMatchObject({
       lead: 'je',
       forms: ['suis allé', 'suis allée'],
+      status: 'reviewed',
+    });
+    for (const tense of COMPOUND_TENSES) expect(statusesOf(verified, [tense])).toEqual(new Set(['reviewed']));
+    // No engine parts on a compound cell: the split comes from cellParts, not from a stem and an ending.
+    expect(verified.tenses.plusQueParfait['1sg']).toEqual({
+      lead: 'j’',
+      forms: ['étais allé', 'étais allée'],
+      status: 'reviewed',
+    });
+    expect(verified.tenses.futurAnterieur['1sg']?.forms).toEqual(['serai allé', 'serai allée']);
+    expect(verified.tenses.conditionnelPasse['1sg']?.lead).toBe('je');
+    expect(verified.tenses.subjonctifPasse['3sg']).toEqual({
+      lead: 'qu’il/elle',
+      forms: ['soit allé', 'soit allée'],
       status: 'reviewed',
     });
     expect(Object.keys(verified.tenses.imperatif)).toEqual(['2sg', '1pl', '2pl']);

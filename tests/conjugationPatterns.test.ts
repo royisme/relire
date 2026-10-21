@@ -92,6 +92,16 @@ const cases: Case[] = [
   ['negation', 's’appeler', 'imperatif', '2sg', 'ne t’appelle pas'],
   ['estCeQue', 'aller', 'present', '1sg', 'est-ce que je vais\u00a0?'],
   ['negation', 'aller', 'present', '1sg', 'je ne vais pas'],
+  ['negation', 'parler', 'plusQueParfait', '1sg', 'je n’avais pas parlé'],
+  ['estCeQue', 'parler', 'plusQueParfait', '1sg', 'est-ce que j’avais parlé\u00a0?'],
+  ['negation', 'se lever', 'plusQueParfait', '1sg', 'je ne m’étais pas levé / levée'],
+  ['inversion', 'parler', 'plusQueParfait', '2sg', 'avais-tu parlé\u00a0?'],
+  ['negation', 'aller', 'futurAnterieur', '1sg', 'je ne serai pas allé / allée'],
+  ['negation', 'aller', 'conditionnelPasse', '1sg', 'je ne serais pas allé / allée'],
+  ['negation', 'parler', 'subjonctifPasse', '1sg', 'que je n’aie pas parlé'],
+  ['negation', 'parler', 'subjonctifPasse', '3sg', 'qu’il/elle n’ait pas parlé'],
+  ['estCeQue', 'parler', 'subjonctifPasse', '1sg', undefined],
+  ['inversion', 'parler', 'subjonctifPasse', '1sg', undefined],
 ];
 for (const [index, [pattern, verb, tense, person, expected]] of cases.entries()) {
   test(`CP6 golden ${index}: ${pattern} ${verb} ${tense} ${person}`, () => {
