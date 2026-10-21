@@ -5,12 +5,19 @@
  */
 import { useTranslation } from 'react-i18next';
 import type { ConjugationResult as Result } from '../../../services/conjugation/resolve';
-import { TENSES } from '../../../types/grammarPack';
+import type { ConjugationAnswer } from '../../../types/conjugationAnswer';
+import { TENSES, type Tense } from '../../../types/grammarPack';
 import { Participles } from './Participles';
 import { Patterns } from './Patterns';
 import { PractiseVerb } from './PractiseVerb';
 import { RuleEndings } from './RuleEndings';
 import { TenseSection } from './TenseSection';
+
+type Examples = ConjugationAnswer['examples'];
+
+/** The AI writes no example for a compound tense, so a missing key renders no example section. */
+const exampleOf = (examples: Examples | undefined, tense: Tense) =>
+  examples && Object.hasOwn(examples, tense) ? examples[tense as keyof Examples] : undefined;
 
 export function ConjugationResult({ result: { verb, examples } }: { result: Result }) {
   const { t } = useTranslation();
@@ -29,7 +36,7 @@ export function ConjugationResult({ result: { verb, examples } }: { result: Resu
         <PractiseVerb key={verb.infinitive} verb={verb} />
       </header>
       {TENSES.filter((tense) => Object.keys(verb.tenses[tense]).length > 0).map((tense) => (
-        <TenseSection key={tense} tense={tense} verb={verb} example={examples?.[tense]} />
+        <TenseSection key={tense} tense={tense} verb={verb} example={exampleOf(examples, tense)} />
       ))}
       <RuleEndings verb={verb} />
       <Patterns key={verb.infinitive} verb={verb} />

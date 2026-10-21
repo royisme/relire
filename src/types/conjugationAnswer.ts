@@ -7,7 +7,14 @@
  * these fields), nor the prompt that asks for it.
  */
 import { z } from 'zod';
-import { FINITE_PERSONS, RuleIdSchema, TENSES, isPronominalInfinitive, type Person } from './grammarPack';
+import {
+  FINITE_PERSONS,
+  RuleIdSchema,
+  TENSES,
+  isCompoundTense,
+  isPronominalInfinitive,
+  type Person,
+} from './grammarPack';
 
 const text = z.string().trim().min(1);
 
@@ -81,7 +88,7 @@ export const ConjugationAnswerSchema = z
           ? ['3sg', '3pl']
           : FINITE_PERSONS;
     for (const tense of TENSES) {
-      if (tense === 'passeCompose' || tense === 'imperatif') continue;
+      if (isCompoundTense(tense) || tense === 'imperatif') continue;
       for (const person of FINITE_PERSONS) {
         const present = answer.forms[tense][person] !== undefined;
         if (persons.includes(person) !== present)
@@ -99,7 +106,7 @@ export const ConjugationAnswerSchema = z
       fail(['participles', 'present'], 'present participle is missing');
 
     for (const tense of TENSES) {
-      if (tense === 'passeCompose') continue;
+      if (isCompoundTense(tense)) continue;
       const cells = tense === 'imperatif' ? answer.forms.imperatif : answer.forms[tense];
       for (const [person, list] of Object.entries(cells ?? {}))
         if (new Set(list).size !== list.length) fail(['forms', tense, person], 'duplicate form');

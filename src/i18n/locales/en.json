@@ -1297,20 +1297,40 @@
         "use": "Use it for ongoing background situations, descriptions, and repeated habits in the past.",
         "form": "Add the endings -ais, -ais, -ait, -ions, -iez, -aient to the stem."
       },
+      "plusQueParfait": {
+        "name": "Plus-que-parfait",
+        "use": "Use it for an action that was already completed before another past action or moment.",
+        "form": "Combine the imparfait of avoir or être with the past participle."
+      },
       "futur": {
         "name": "Future",
         "use": "Use it for actions or events that will happen in the future.",
         "form": "For regular verbs, use the infinitive (dropping the final -e of -re verbs) and add -ai, -as, -a, -ons, -ez, -ont."
+      },
+      "futurAnterieur": {
+        "name": "Futur antérieur",
+        "use": "Use it for an action that will already be completed before a future moment.",
+        "form": "Combine the futur of avoir or être with the past participle."
       },
       "conditionnel": {
         "name": "Conditional",
         "use": "Use it for polite requests, wishes, hypothetical situations, and advice.",
         "form": "Add the imparfait endings -ais, -ais, -ait, -ions, -iez, -aient to the future stem."
       },
+      "conditionnelPasse": {
+        "name": "Conditionnel passé",
+        "use": "Use it for a past hypothesis, a regret, or a reproach about what did not happen.",
+        "form": "Combine the conditionnel of avoir or être with the past participle."
+      },
       "subjonctif": {
         "name": "Subjunctive",
         "use": "Use it after expressions of necessity, doubt, emotion, wish, and judgment.",
         "form": "Preceded by que, add the endings -e, -es, -e, -ions, -iez, -ent to the subjunctive stem."
+      },
+      "subjonctifPasse": {
+        "name": "Subjonctif passé",
+        "use": "Use it after expressions of necessity, doubt, emotion or judgment about something already completed.",
+        "form": "Preceded by que, combine the subjonctif of avoir or être with the past participle."
       },
       "imperatif": {
         "name": "Imperative",
@@ -1351,9 +1371,13 @@
       "present": "présent",
       "passeCompose": "passé composé",
       "imparfait": "imparfait",
+      "plusQueParfait": "plus-que-parfait",
       "futur": "futur",
+      "futurAnterieur": "futur antérieur",
       "conditionnel": "conditionnel",
+      "conditionnelPasse": "conditionnel passé",
       "subjonctif": "subjonctif",
+      "subjonctifPasse": "subjonctif passé",
       "imperatif": "impératif"
     },
     "drill": {

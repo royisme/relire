@@ -16,9 +16,13 @@ const TENSE_TAG: Record<Tense, GrammarTag> = {
   present: 'present',
   passeCompose: 'passe-compose',
   imparfait: 'imparfait',
+  plusQueParfait: 'plus-que-parfait',
   futur: 'future',
+  futurAnterieur: 'future',
   conditionnel: 'conditional',
+  conditionnelPasse: 'conditional',
   subjonctif: 'subjunctive',
+  subjonctifPasse: 'subjunctive',
   imperatif: 'imperative',
 };
 

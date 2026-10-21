@@ -10,6 +10,7 @@ import {
   IMPERATIVE_PERSONS,
   isPronominalInfinitive,
   type Cell,
+  type CompoundTense,
   type ImperativePerson,
   type Person,
   type RuleId,
@@ -17,6 +18,7 @@ import {
   type Verb,
 } from '../../types/grammarPack';
 import {
+  COMPOUND_AUX,
   CONDITIONNEL_ENDINGS,
   FUTUR_ENDINGS,
   IMPARFAIT_ENDINGS,
@@ -60,7 +62,7 @@ export interface IrregularEntry {
   forms?: IrregularForms;
 }
 
-export type SimpleTense = Exclude<Tense, 'passeCompose'>;
+export type SimpleTense = Exclude<Tense, CompoundTense>;
 export type SimpleParts = Record<SimpleTense, Partial<Record<Person, Parts[]>>>;
 
 export interface GeneratedVerb {
@@ -169,6 +171,11 @@ export function generateVerb(spec: VerbSpec, irregulars: Record<string, Irregula
         cell(tense, person as Person, variants.map(joinParts)),
       ]),
     );
+  // Every compound tense is the auxiliary in its own tense plus the past participle, agreement included.
+  const compound = (tense: CompoundTense) =>
+    forEachPerson(persons, (person) =>
+      cell(tense, person, compoundForms(spec, COMPOUND_AUX[tense], person, participles)),
+    );
 
   const verb: Verb = {
     id: spec.id,
@@ -180,13 +187,15 @@ export function generateVerb(spec: VerbSpec, irregulars: Record<string, Irregula
     ...(spec.pcInvariable && { pcInvariable: spec.pcInvariable }),
     tenses: {
       present: cells('present'),
-      passeCompose: forEachPerson(persons, (person) =>
-        cell('passeCompose', person, compoundForms(spec, 'present', person, participles)),
-      ),
+      passeCompose: compound('passeCompose'),
       imparfait: cells('imparfait'),
+      plusQueParfait: compound('plusQueParfait'),
       futur: cells('futur'),
+      futurAnterieur: compound('futurAnterieur'),
       conditionnel: cells('conditionnel'),
+      conditionnelPasse: compound('conditionnelPasse'),
       subjonctif: cells('subjonctif'),
+      subjonctifPasse: compound('subjonctifPasse'),
       ...(!spec.defective && { imperatif: cells('imperatif') }),
     },
     participles: {

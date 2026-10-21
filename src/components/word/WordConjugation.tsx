@@ -26,7 +26,8 @@ export function WordConjugation({ lemma, lookup }: { lemma: string; lookup: stri
   const { status, pack, error } = useGrammarPack();
   const row = useMemo(() => (pack ? findPackVerb(pack, lemma) : undefined), [pack, lemma]);
   const verb = useMemo(() => (row ? verifyPackVerb(row) : undefined), [row]);
-  // Only the finite cells the tapped word writes: passé composé and the participles are not in the reverse index's cells.
+  // Only the finite cells the tapped word writes: the compound tenses and the participles are not in the reverse
+  // index's cells.
   const hits = useMemo(
     () => (pack && row ? reverseLookup(pack, lookup).filter((hit) => hit.verbId === row.id) : []),
     [pack, row, lookup],

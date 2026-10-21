@@ -1288,20 +1288,40 @@
         "use": "用于描述过去的背景、持续状态以及过去的习惯性动作。",
         "form": "在词干后加上词尾 -ais、-ais、-ait、-ions、-iez、-aient。"
       },
+      "plusQueParfait": {
+        "name": "愈过去时",
+        "use": "用于表达在过去另一动作或时刻之前已经完成的动作。",
+        "form": "由助动词 avoir 或 être 的未完成过去时加上动词的过去分词构成。"
+      },
       "futur": {
         "name": "简单将来时",
         "use": "用于表达将来会发生或计划进行的动作与事件。",
         "form": "规则动词以动词原形为基础（-re 动词去掉末尾的 e），加上词尾 -ai、-as、-a、-ons、-ez、-ont。"
+      },
+      "futurAnterieur": {
+        "name": "先将来时",
+        "use": "用于表达在将来某一时刻之前已经完成的动作。",
+        "form": "由助动词 avoir 或 être 的简单将来时加上动词的过去分词构成。"
       },
       "conditionnel": {
         "name": "条件式",
         "use": "用于委婉请求、表达愿望、提出建议或假设情况。",
         "form": "在将来时词干后加上未完成过去时词尾 -ais、-ais、-ait、-ions、-iez、-aient。"
       },
+      "conditionnelPasse": {
+        "name": "过去条件式",
+        "use": "用于表达对过去的假设、遗憾或对未能实现之事的责备。",
+        "form": "由助动词 avoir 或 être 的条件式加上动词的过去分词构成。"
+      },
       "subjonctif": {
         "name": "虚拟式",
         "use": "用于表达必要、怀疑、愿望、情感或主观评价的从句中。",
         "form": "通常由 que 引出，在虚拟式词干后加上词尾 -e、-es、-e、-ions、-iez、-ent。"
+      },
+      "subjonctifPasse": {
+        "name": "过去虚拟式",
+        "use": "用于在必要、怀疑、愿望、情感或评价的从句中表达已经完成的动作。",
+        "form": "通常由 que 引出，由助动词 avoir 或 être 的虚拟式加上动词的过去分词构成。"
       },
       "imperatif": {
         "name": "命令式",
@@ -1342,9 +1362,13 @@
       "present": "présent",
       "passeCompose": "passé composé",
       "imparfait": "imparfait",
+      "plusQueParfait": "plus-que-parfait",
       "futur": "futur",
+      "futurAnterieur": "futur antérieur",
       "conditionnel": "conditionnel",
+      "conditionnelPasse": "conditionnel passé",
       "subjonctif": "subjonctif",
+      "subjonctifPasse": "subjonctif passé",
       "imperatif": "impératif"
     },
     "drill": {

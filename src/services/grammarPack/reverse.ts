@@ -5,7 +5,15 @@
  * pack, own the sheet's wording or decide which verb the sheet is about (6a reads the lemma, not these hits).
  */
 import type { FormKey } from '../conjugation/verify';
-import { FINITE_PERSONS, TENSES, type GrammarPack, type Person, type Tense, type Verb } from '../../types/grammarPack';
+import {
+  FINITE_PERSONS,
+  TENSES,
+  isCompoundTense,
+  type GrammarPack,
+  type Person,
+  type Tense,
+  type Verb,
+} from '../../types/grammarPack';
 import { normalizeLookupToken } from './lookup';
 
 /** A conjugated cell, or one of the participles. */
@@ -25,8 +33,8 @@ function buildIndex(pack: GrammarPack): Map<string, FormHit[]> {
     else index.set(key, [hit]);
   };
   for (const verb of pack.verbs) {
-    // Passé composé is not indexed: its participle and its auxiliary are.
-    for (const tense of TENSES.filter((name) => name !== 'passeCompose'))
+    // A compound tense is not indexed: its participle and its auxiliary are.
+    for (const tense of TENSES.filter((name) => !isCompoundTense(name)))
       for (const [person, cell] of Object.entries(verb.tenses[tense] ?? {}))
         for (const form of cell.forms) add(form, { verbId: verb.id, tense, person: person as Person });
     for (const participle of PARTICIPLES) {

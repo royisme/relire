@@ -4,7 +4,7 @@ import {
   checkFamily,
   checkImperatif,
   checkLead,
-  checkPasseCompose,
+  checkCompoundTenses,
   checkSchema,
   checkShape,
   checkStemEnding,
@@ -50,21 +50,38 @@ test('a broken stem + ending is rejected and named', () => {
 
 test('a wrong auxiliary is rejected and named', () => {
   const g = mutated(aller(), (c) => (c.verb.tenses.passeCompose['1sg']!.forms = ['ai allé', 'ai allée']));
-  expect(checkPasseCompose(g).join()).toContain('aller passeCompose 1sg');
+  expect(checkCompoundTenses(g).join()).toContain('aller passeCompose 1sg');
 });
 
 test('a missing agreement variant is rejected', () => {
   const g = mutated(aller(), (c) => (c.verb.tenses.passeCompose['1pl']!.forms = ['sommes allés']));
-  expect(checkPasseCompose(g).join()).toContain('aller passeCompose 1pl');
+  expect(checkCompoundTenses(g).join()).toContain('aller passeCompose 1pl');
 });
 
 test('missing polite singular vous variants or a changed variant order are rejected', () => {
   for (const control of [aller, appeler]) {
     const missing = mutated(control(), (c) => c.verb.tenses.passeCompose['2pl']!.forms.splice(2));
-    expect(checkPasseCompose(missing).join()).toContain(`${missing.verb.id} passeCompose 2pl`);
+    expect(checkCompoundTenses(missing).join()).toContain(`${missing.verb.id} passeCompose 2pl`);
     const reordered = mutated(control(), (c) => c.verb.tenses.passeCompose['2pl']!.forms.reverse());
-    expect(checkPasseCompose(reordered).join()).toContain(`${reordered.verb.id} passeCompose 2pl`);
+    expect(checkCompoundTenses(reordered).join()).toContain(`${reordered.verb.id} passeCompose 2pl`);
   }
+});
+
+for (const [tense, wrong, person] of [
+  ['plusQueParfait', ['ai allé', 'ai allée'], '1sg'],
+  ['futurAnterieur', ['suis allé', 'suis allée'], '1sg'],
+  ['conditionnelPasse', ['étais allé', 'étais allée'], '3pl'],
+  ['subjonctifPasse', ['aie allé', 'aie allée'], '3sg'],
+] as const) {
+  test(`a wrong auxiliary in ${tense} is rejected and named`, () => {
+    const g = mutated(aller(), (c) => (c.verb.tenses[tense][person]!.forms = [...wrong]));
+    expect(checkCompoundTenses(g).join()).toContain(`aller ${tense} ${person}`);
+  });
+}
+
+test('a missing agreement variant in a compound tense other than passé composé is rejected', () => {
+  const g = mutated(appeler(), (c) => c.verb.tenses.plusQueParfait['1pl']!.forms.splice(1));
+  expect(checkCompoundTenses(g).join()).toContain('s-appeler plusQueParfait 1pl');
 });
 
 test('ç before e is rejected at the stem/ending boundary', () => {

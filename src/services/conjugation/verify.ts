@@ -9,6 +9,7 @@
 import type { ConjugationAnswer } from '../../types/conjugationAnswer';
 import {
   TENSES,
+  isCompoundTense,
   type Cell,
   type ImperativePerson,
   type Person,
@@ -167,7 +168,7 @@ export function verifyPackVerb(row: Verb): VerifiedVerb {
       row,
       (tense, person) => ({
         status: 'reviewed',
-        ...(generated && tense !== 'passeCompose' && { parts: generated.parts.simple[tense][person] }),
+        ...(generated && !isCompoundTense(tense) && { parts: generated.parts.simple[tense][person] }),
       }),
       () => ({ status: 'reviewed' }),
     ),
@@ -184,8 +185,8 @@ export function verifyAnswer(answer: ConjugationAnswer): VerifiedVerb {
   const checked = checkView(
     { ...view, rule },
     (tense, person, cell) => {
-      // Passé composé rests on the AI's auxiliary and agreement claims, which the engine cannot check.
-      if (!generated || tense === 'passeCompose') return { status: 'ai-only' };
+      // A compound tense rests on the AI's auxiliary and agreement claims, which the engine cannot check.
+      if (!generated || isCompoundTense(tense)) return { status: 'ai-only' };
       const ruleForms = ruleFormsOf(generated, tense, person, view.pronominal);
       const parts = generated.parts.simple[tense][person]!;
       return sameForms(cell.forms, ruleForms)
