@@ -186,7 +186,7 @@ This is intentionally not current Anki's complete legacy scheduler. For prior re
 
 Do not display scheduling interval captions on either face or in the external three-outcome action row. The recall command captures current `now`; the storage transaction uses the unchanged pure scheduler to assign the actual due instant/date. Pure preview calculations remain side-effect-free and tested, but are not part of Flashcard or VocabularyReview. Move actual due/remaining counts into the session hook, not the rendering component.
 
-A card is due when `dueAt <= now` for minute phases or `dueDate <= local today` for review. The global navigation badge counts actual due introduced cards only. It does not include unseen book words or all bookmarked-but-unintroduced rows.
+A card is due when `dueAt <= now` for minute phases or `dueDate <= local today` for review. The due badge belongs to the Words row of the navigation tree and counts actual due introduced cards only; it does not include unseen book words or all bookmarked-but-unintroduced rows. Mistakes keeps its own unresolved count, and My study shows no aggregate of the two: they are separate real metrics, never one combined number. The rail shows no child count rather than a misleading one.
 
 ## 6. Queue, sessions and daily quota
 
@@ -283,7 +283,7 @@ Load at the Words entry/download action, never application startup or each flip.
 
 Use an already validated complete cached book directly. Explicit Check for updates downloads a fresh pinned candidate; replace the cache only after complete validation/commit. On HTTP/JSON/schema/hash failure, clear the incomplete in-memory candidate, show the real failure and preserve the old book. Retry restarts at page 0; no unbounded automatic retry. In particular 410 says that version is unavailable and offers Restart download. HTTP 429 shows its real error; it is not a stale-success refresh.
 
-Download, update and their failures show on the Today page's download control and its fixed-size status slot (page n of total while running), reserved from first render; they never insert or remove a row.
+Download, update and their failures show on Settings → Words' download control and its fixed-size status slot (page n of total while running), reserved from first render; they never insert or remove a row.
 
 `putCached` deliberately swallows quota failures: do not use its resolved promise as proof of offline storage. The narrow complete-book storage operation must await commit and propagate errors before “available offline.” On failure, do not mark/install the candidate; keep the old cache and storage Retry/restart action. Do not change AI/topic cache policy globally.
 
@@ -295,7 +295,7 @@ Keep Words under My study; no new top-level navigation. Define real routes for p
 
 | Route | Purpose |
 | --- | --- |
-| `#/study/words` | Today: actual due/new counts, Continue/Start, book download/update status and new-per-day setting. |
+| `#/study/words` | Today: actual due/new counts, Continue/Start, and one link to Settings → Words. |
 | `#/study/words/all` | Browse the merged dictionary/personal list with search and source/learning-state filters. |
 | `#/study/words/review` | One active two-sided flashcard, durable answer unlock, external three-outcome recall and waiting/finish states. |
 
@@ -305,7 +305,9 @@ Today and Browse share two real page links, Today and All words, above their con
 
 ### Today and browser
 
-Today shows real pending review count, learning/relearning count and remaining new introduction allowance. Unavailable book data is not a fake zero-word catalogue. New limit input accepts integer 0..100; save explicitly with fixed-size control/status and default 20. This is the only scheduling preference exposed in version one.
+Today shows real pending review count, learning/relearning count and remaining new introduction allowance, then Start/continue and one plain link to Settings → Words. It no longer holds the book controls or the limit form. Unavailable book data is not a fake zero-word catalogue.
+
+Settings → Words (`#/settings/words`) owns the new-per-day limit and the built-in wordbook's download/update state, count, progress and failure/restart. The limit input accepts an integer 0..100 and saves explicitly with a fixed-size control/status slot, default 20; it saves through the existing `useVocabulary` model into the vocabulary preferences row, not `AppSettings`. The page holds the unsaved text, so switching Settings sections keeps it and leaving Settings drops it. This is the only scheduling preference exposed in version one; a future memory-curve setting belongs here once designed, with no placeholder switches now.
 
 Browse composes existing `ui/table` with TanStack Table. Search word and actually available glosses/context; paginate at 50 rows and do not render 7,000 DOM rows. Filters: source All/Built-in/Bookmarked and learning state All/Unintroduced/Learning/Review. A word may match both source filters. No “mastered after four reviews” filter or invented level/frequency labels. Details use a Sheet; download/update, storage and no-match states belong to the page.
 
