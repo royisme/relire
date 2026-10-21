@@ -315,6 +315,27 @@ describe('a verb in the pack', () => {
   });
 });
 
+test('a pack verb with a regular rule: no engine parts on any compound cell', () => {
+  // s’appeler has an engine rule (er-eler-double), so `generated` exists and only the guard keeps its compound
+  // cells from borrowing a simple tense's stem and ending.
+  const row = { ...GOLDEN['s-appeler'], prov: { origin: 'human', checkedAgainst: [], status: 'draft' } } as Verb;
+  const verified = verifyPackVerb(row);
+  expect(verified.tenses.present['1sg']).toEqual({
+    lead: 'je m’',
+    forms: ['appelle'],
+    status: 'reviewed',
+    parts: [{ stem: 'appell', ending: 'e' }],
+  });
+  for (const tense of COMPOUND_TENSES)
+    for (const cell of Object.values(verified.tenses[tense]))
+      expect({ tense, keys: Object.keys(cell).sort() }).toEqual({ tense, keys: ['forms', 'lead', 'status'] });
+  expect(verified.tenses.plusQueParfait['1sg']).toEqual({
+    lead: 'je m’',
+    forms: ['étais appelé', 'étais appelée'],
+    status: 'reviewed',
+  });
+});
+
 test('pack and AI present participles carry the reflexive; past participles and statuses stay bare', () => {
   const row = { ...GOLDEN['s-appeler'], prov: { origin: 'human', checkedAgainst: [], status: 'draft' } } as Verb;
   const pack = verifyPackVerb(row);
