@@ -70,6 +70,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- Browser speech recognition while recording is now an opt-in setting in Settings → Practice, off by default. It may send the recording to the browser maker's speech service, so it only runs when you turn it on.
 - Words use FSRS-6 with Forgot/Fuzzy/Remembered recall and a target-retention setting (80–95%, default90%). Reviews keep their actual submission time through save retries; per-card resets preserve history and create New memory without extra reset markers. Backups record scheduler policy once, not on every review. Prior unreleased FSRS rows/backups with the removed fields are rejected, with no automatic conversion or learner-data reset.
 - **Word settings live in Settings, and the Words badge counts words.** Settings has a new Words section (`#/settings/words`) holding the new-words-per-day limit and the built-in wordbook's download, update, count and failure state, moved off Today; an unsaved limit survives switching Settings sections and is dropped when you leave Settings. Today keeps its real counts and Start/continue. The sidebar's due count now sits on the Words row instead of the My study row, beside Mistakes' own unresolved count, so the two numbers are never added together; the icon rail shows no child count. The review page no longer repeats the 1/2/3 recall instructions, though the keys and the labelled buttons still work.
 - Words cards now use a narrow portrait paper layout with subtle depth, generous word whitespace and clearer meanings/example pairs. Clicking either face still flips, with selectable answers and independent Listen; three equal circular Forgot/Fuzzy/Remembered controls use the existing colour palette and save recall as ratings 1/3/4, without visible Flip buttons or stacked answer headings.
@@ -103,6 +104,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- A pronunciation check with no audio and no transcript now says so instead of scoring the reference text.
 - Local vocabulary publication now binds page content so large Unicode pages can be imported intact without exceeding SQLite's SQL statement limit.
 - Dictionary preparation no longer rejects unused original-field arrays; raw source data stays out of normalized and published content.
 - Failed vocabulary reveals and ratings return focus to the submitted button once it is ready to retry.
