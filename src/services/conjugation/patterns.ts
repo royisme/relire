@@ -13,7 +13,8 @@ const elide = (word: string, next: string, hAspire?: boolean) =>
   startsWithVowelSound(next, hAspire) && ['je', 'ne', 'me', 'te', 'se'].includes(word)
     ? `${word === 'je' ? 'j' : word[0]}’`
     : word;
-const questionAllowed = ({ tense }: CellParts) => tense !== 'subjonctif' && tense !== 'imperatif';
+const questionAllowed = ({ tense }: CellParts) =>
+  tense !== 'subjonctif' && tense !== 'subjonctifPasse' && tense !== 'imperatif';
 // The engine's onset table explicitly leaves y out; F6 supplies no rule for it or æ.
 const covered = (parts: CellParts) => !(parts.aux ? [parts.aux] : parts.verb).some((form) => /^[yæ]/.test(form));
 const hOf = (parts: CellParts) => (parts.aux ? undefined : parts.hAspire);
@@ -22,7 +23,7 @@ export function negation(parts: CellParts): string | undefined {
   if (!covered(parts)) return undefined;
   const { tense, subject, reflexive, aux, verb, participle } = parts;
   const prefix = tense === 'imperatif' ? [] : [subject];
-  if (tense === 'subjonctif') prefix.unshift(subject.startsWith('il') ? 'qu’' : 'que');
+  if (tense === 'subjonctif' || tense === 'subjonctifPasse') prefix.unshift(subject.startsWith('il') ? 'qu’' : 'que');
   const make = (finite: string) => {
     const ref = reflexive ? elide(reflexive, finite, hOf(parts)) : undefined;
     return join([

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useLexiconVerb } from '../../hooks/useLexiconVerb';
 import { matchVerbForm } from '../../services/lexicon/match';
 import { lexiconTable } from '../../services/lexicon/table';
-import { FINITE_PERSONS, TENSES } from '../../types/grammarPack';
+import { FINITE_PERSONS, TENSES, isCompoundTense } from '../../types/grammarPack';
 import type { ReactNode } from 'react';
 import { cellText } from '../study/grammar/forms';
 import { Link } from '../shell/Link';
@@ -40,7 +40,7 @@ export function DictionaryTenses({ lemma, lookup, fallback }: { lemma: string; l
     <TensesDisclosure>
       <p className="text-xs text-ink-500">{t('wordModal.dictionaryNote')}</p>
       {TENSES.flatMap((tense) => {
-        const cells = tense === 'passeCompose' ? undefined : table.tenses[tense];
+        const cells = isCompoundTense(tense) ? undefined : table.tenses[tense];
         if (!cells) return [];
         const hits = tapped.find((entry) => entry.tense === tense)?.persons ?? [];
         return [

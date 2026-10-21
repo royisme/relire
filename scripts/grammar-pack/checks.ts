@@ -6,10 +6,12 @@
  * generating forms (generate.ts) or deriving a row's status (the build).
  */
 import {
+  COMPOUND_TENSES,
   FINITE_PERSONS,
   IMPERATIVE_PERSONS,
   TENSES,
   VerbSchema,
+  isCompoundTense,
   type Cell,
   type Person,
   type Tense,
@@ -18,6 +20,7 @@ import {
 import { GOLDEN } from '../../tests/fixtures/grammarPackGolden';
 import type { GeneratedVerb, SimpleTense } from '../../src/services/conjugation/generate';
 import {
+  COMPOUND_AUX,
   IMPERATIVE_CLITICS,
   composeLead,
   compoundForms,
@@ -26,7 +29,7 @@ import {
   type Parts,
 } from '../../src/services/conjugation/rules';
 
-const SIMPLE_TENSES = TENSES.filter((tense): tense is SimpleTense => tense !== 'passeCompose');
+const SIMPLE_TENSES = TENSES.filter((tense): tense is SimpleTense => !isCompoundTense(tense));
 
 function* cellsOf({ verb }: GeneratedVerb) {
   for (const tense of TENSES) {
@@ -99,21 +102,23 @@ export function checkLead(g: GeneratedVerb): string[] {
   return failures;
 }
 
-/** Passé composé is the auxiliary plus the participle, including polite singular vous when agreement applies. */
-export function checkPasseCompose(g: GeneratedVerb): string[] {
+/** Every compound tense is its own auxiliary tense plus the participle, with passé composé's agreement rules. */
+export function checkCompoundTenses(g: GeneratedVerb): string[] {
   const failures: string[] = [];
   const { past } = g.verb.participles;
+  // Agreement is a property of the participle, not of one tense: checked once per verb.
   if (JSON.stringify(pastParticiples(past.ms)) !== JSON.stringify(past)) {
     failures.push(`${where(g, 'participles')}: past participle agreement does not follow from "${past.ms}"`);
   }
-  for (const [person, cell] of Object.entries(g.verb.tenses.passeCompose)) {
-    const expected = compoundForms(g.verb, 'present', person as Person, past);
-    if (JSON.stringify(cell.forms) !== JSON.stringify(expected)) {
-      failures.push(
-        `${where(g, 'passeCompose', person)}: ${JSON.stringify(cell.forms)} should be ${JSON.stringify(expected)}`,
-      );
+  for (const tense of COMPOUND_TENSES)
+    for (const [person, cell] of Object.entries(g.verb.tenses[tense])) {
+      const expected = compoundForms(g.verb, COMPOUND_AUX[tense], person as Person, past);
+      if (JSON.stringify(cell.forms) !== JSON.stringify(expected)) {
+        failures.push(
+          `${where(g, tense, person)}: ${JSON.stringify(cell.forms)} should be ${JSON.stringify(expected)}`,
+        );
+      }
     }
-  }
   return failures;
 }
 
@@ -184,13 +189,13 @@ export function checkVerb(g: GeneratedVerb): string[] {
     ...checkShape(g),
     ...checkStemEnding(g),
     ...checkLead(g),
-    ...checkPasseCompose(g),
+    ...checkCompoundTenses(g),
     ...checkImperatif(g),
     ...checkFamily(g),
   ];
 }
 
-/** Every control verb is present and equals its hand-typed golden in all seven tenses and the participles. */
+/** Every control verb is present and equals its hand-typed golden in all tenses and the participles. */
 export function checkControls(generated: GeneratedVerb[]): string[] {
   const failures: string[] = [];
   for (const golden of Object.values(GOLDEN)) {

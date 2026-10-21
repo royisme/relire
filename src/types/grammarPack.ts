@@ -12,16 +12,31 @@ export const TENSES = [
   'present',
   'passeCompose',
   'imparfait',
+  'plusQueParfait',
   'futur',
+  'futurAnterieur',
   'conditionnel',
+  'conditionnelPasse',
   'subjonctif',
+  'subjonctifPasse',
   'imperatif',
+] as const;
+/** Auxiliary plus past participle, with the agreement rules of passé composé. */
+export const COMPOUND_TENSES = [
+  'passeCompose',
+  'plusQueParfait',
+  'futurAnterieur',
+  'conditionnelPasse',
+  'subjonctifPasse',
 ] as const;
 export const FINITE_PERSONS = ['1sg', '2sg', '3sg', '1pl', '2pl', '3pl'] as const;
 export const IMPERATIVE_PERSONS = ['2sg', '1pl', '2pl'] as const;
 export type Tense = (typeof TENSES)[number];
+export type CompoundTense = (typeof COMPOUND_TENSES)[number];
 export type Person = (typeof FINITE_PERSONS)[number];
 export type ImperativePerson = (typeof IMPERATIVE_PERSONS)[number];
+export const isCompoundTense = (tense: Tense): tense is CompoundTense =>
+  (COMPOUND_TENSES as readonly Tense[]).includes(tense);
 
 /** Closed set: one generator function per id, plus the explicit irregular table. */
 export const RuleIdSchema = z.enum([
@@ -86,9 +101,13 @@ export const VerbSchema = z
       present: finite,
       passeCompose: finite,
       imparfait: finite,
+      plusQueParfait: finite,
       futur: finite,
+      futurAnterieur: finite,
       conditionnel: finite,
+      conditionnelPasse: finite,
       subjonctif: finite,
+      subjonctifPasse: finite,
       imperatif: z.partialRecord(z.enum(IMPERATIVE_PERSONS), CellSchema).optional(),
     }),
     participles: z.object({

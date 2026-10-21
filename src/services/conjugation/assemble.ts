@@ -11,12 +11,13 @@ import {
   PRONOMINAL_PREFIX,
   isPronominalInfinitive,
   type Cell,
+  type CompoundTense,
   type ImperativePerson,
   type Person,
   type Tense,
   type Verb,
 } from '../../types/grammarPack';
-import { IMPERATIVE_CLITICS, composeLead, compoundForms } from './rules';
+import { COMPOUND_AUX, IMPERATIVE_CLITICS, composeLead, compoundForms } from './rules';
 
 /** What the Conjugation screen renders: a pack row without its id and provenance. */
 export type VerbView = Omit<Verb, 'id' | 'prov'> & { hAspire?: true };
@@ -57,6 +58,11 @@ export function assembleVerb(answer: ConjugationAnswer): VerbView {
   });
   const simple = (tense: 'present' | 'imparfait' | 'futur' | 'conditionnel' | 'subjonctif') =>
     cellsOf(answer.forms[tense], (person, list) => cell(tense, person, list));
+  // The AI is never asked for a compound tense: it is the auxiliary in its own tense plus the AI's participles.
+  const compound = (tense: CompoundTense) =>
+    cellsOf(answer.forms.present, (person) =>
+      cell(tense, person, compoundForms({ aux }, COMPOUND_AUX[tense], person, participles.past)),
+    );
 
   return {
     infinitive: answer.infinitive,
@@ -67,14 +73,15 @@ export function assembleVerb(answer: ConjugationAnswer): VerbView {
     ...(hAspire && { hAspire }),
     tenses: {
       present: simple('present'),
-      // The AI is never asked for passé composé: it is the auxiliary plus the AI's participles.
-      passeCompose: cellsOf(answer.forms.present, (person) =>
-        cell('passeCompose', person, compoundForms({ aux }, 'present', person, participles.past)),
-      ),
+      passeCompose: compound('passeCompose'),
       imparfait: simple('imparfait'),
+      plusQueParfait: compound('plusQueParfait'),
       futur: simple('futur'),
+      futurAnterieur: compound('futurAnterieur'),
       conditionnel: simple('conditionnel'),
+      conditionnelPasse: compound('conditionnelPasse'),
       subjonctif: simple('subjonctif'),
+      subjonctifPasse: compound('subjonctifPasse'),
       ...(answer.forms.imperatif && {
         imperatif: cellsOf(answer.forms.imperatif, (person, list) =>
           cell('imperatif', person, withClitic(pronominal, person, list)),

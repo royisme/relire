@@ -3,8 +3,17 @@
  * Does not parse composed leads or compound strings, change the grid, or decide status.
  */
 import type { ImperativePerson, Person, Tense } from '../../types/grammarPack';
+import { isCompoundTense } from '../../types/grammarPack';
 import type { VerifiedVerb } from './verify';
-import { AUXILIARY_FORMS, IMPERATIVE_CLITICS, REFLEXIVE, SUBJECT, passeComposeParticiples, personIndex } from './rules';
+import {
+  AUXILIARY_FORMS,
+  COMPOUND_AUX,
+  IMPERATIVE_CLITICS,
+  REFLEXIVE,
+  SUBJECT,
+  passeComposeParticiples,
+  personIndex,
+} from './rules';
 
 export interface CellParts {
   tense: Tense;
@@ -28,8 +37,8 @@ export function cellParts(view: VerifiedVerb, tense: Tense, person: Person): Cel
     ...(view.hAspire && { hAspire: view.hAspire }),
     verb: cell.forms,
   };
-  if (tense === 'passeCompose') {
-    parts.aux = AUXILIARY_FORMS[view.aux].present[personIndex(person)];
+  if (isCompoundTense(tense)) {
+    parts.aux = AUXILIARY_FORMS[view.aux][COMPOUND_AUX[tense]][personIndex(person)];
     parts.participle = passeComposeParticiples(view, person, {
       ms: view.participles.ms!.form,
       fs: view.participles.fs!.form,
