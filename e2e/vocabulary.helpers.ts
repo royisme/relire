@@ -152,14 +152,6 @@ export const cacheRows = (page: Page) =>
     const storage: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     return (await storage.db()).getAll('cache');
   });
-export const reviewGeometry = (page: Page) =>
-  page.evaluate(() => ({
-    height: document.documentElement.scrollHeight,
-    slots: ['[data-vocabulary-card]', '[data-vocabulary-controls]', '[data-vocabulary-status]'].map((selector) => {
-      const rect = document.querySelector(selector)!.getBoundingClientRect();
-      return { top: Math.round(rect.top + scrollY), height: Math.round(rect.height) };
-    }),
-  }));
 export const stored = (page: Page) =>
   page.evaluate(async () => {
     const storage: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);

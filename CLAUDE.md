@@ -19,7 +19,7 @@ Relire is a static, browser-only PWA for French close reading and pronunciation 
 
 - Read before you change: the files you will touch, and the docs below for the area.
 - Minimal diffs. Ask before decisions that are the user's (product scope, new dependencies, a new provider, data shape after release).
-- Prove it works and report what was and was not verified (AI in checks is mocked). Visual acceptance is manual: no screenshot gates unless asked.
+- Run static/unit checks and report what was and was not verified (AI is mocked). UI visual acceptance is owner-manual only; browser automation is exceptional for critical frontend/backend, persistence or backup/restore risk not covered by unit tests, preferring an existing focused spec. No automatic UI/E2E gate; full E2E only by explicit owner request or separately justified broad integration need (see `docs/development.md`).
 - Develop on the designated branch. No PRs, merges or force-push unless asked, except the lead's local merge in `docs/agent-delegation.md`. Finish with `ship-change`.
 
 ## Where to look

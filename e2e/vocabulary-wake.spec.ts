@@ -24,7 +24,7 @@ for (const future of [false, true]) {
       );
       if (future) await storage.rateVocabularyCard('test-b', result.tokens, 'TEST other-tab Again', 1, Date.now());
     }, future);
-    await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+    await page.getByRole('button', { name: 'Flip card', exact: true }).click();
     await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
     await expect(page.locator('main')).not.toContainText('TEST meaning');
     expect((await stored(page)).find((row) => row.key === 'test-a')!.introducedAt).toBeNull();
@@ -36,10 +36,10 @@ for (const future of [false, true]) {
       await page.clock.runFor(1000);
     }
     await expect(page.getByRole('heading', { name: 'test-b', exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Show answer', exact: true })).toBeFocused();
+    await expect(page.getByRole('button', { name: 'Flip card', exact: true })).toBeFocused();
     await expect(page.getByText('Due now: 1 · New remaining today: 0', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toHaveCount(0);
-    await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+    await page.getByRole('button', { name: 'Flip card', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Answer', exact: true })).toBeFocused();
     expect((await stored(page)).find((row) => row.key === 'test-b')!.history).toHaveLength(future ? 1 : 0);
   });
@@ -62,7 +62,7 @@ test('quota waiting wakes at local midnight, and a later external limit change w
       await database.db()
     ).put('meta', { date: label, introducedKeys: ['deleted-test'] }, `vocabularyDay:${label}`);
   });
-  await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
   await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
   await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeVisible();
   await page.clock.runFor(9999);
@@ -75,7 +75,7 @@ test('quota waiting wakes at local midnight, and a later external limit change w
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     await storage.saveVocabularyPreferences(0);
   });
-  await page.getByRole('button', { name: 'Show answer', exact: true }).click();
+  await page.getByRole('button', { name: 'Flip card', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeVisible();
   await page.evaluate(async () => {
     const database: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);

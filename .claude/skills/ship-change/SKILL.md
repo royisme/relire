@@ -14,10 +14,11 @@ bun run test                              # unit tests in tests/: grading, contr
 bun run i18n:check
 bun run build
 bun scripts/check-prosody-schema.ts       # when markers, the prosody prompt or its parser changed
-bun run e2e                               # browser flows, AI mocked; at integration milestones only (see below)
 impeccable detect --json src index.html   # must print []
 ```
-For UI changes, add or extend a spec in `e2e/` for the flow you changed (`verify-ui` skill). Run the e2e suite when a feature batch or phase is assembled, not after every unit of work; a unit is gated by `bun run test` plus the static checks (owner decision 2026-10-18). Report which specs ran; never claim the real provider was exercised.
+Static/unit checks are the normal gate (owner decision 2026-10-20). UI visual acceptance belongs only to the owner, manually; no automatic UI/E2E gate or theme/viewport/focus/animation/screenshot assertion matrix. Browser automation is exceptional for necessary critical frontend/backend, browser persistence or backup/restore risk not covered by units. Prefer an existing focused spec; add coverage only for a necessary uncovered risk (`verify-ui`). Full E2E only on explicit owner request or separately justified broad integration need, never a default batch/phase gate. Preserve unrelated legacy coverage.
+
+Workers run no browsers/servers unless explicitly authorized. Any authorized browser run requires `lsof -iTCP:5174 -sTCP:LISTEN` to print nothing first, then `CI=1` and one run at a time across checkouts; stop if busy, never reuse/kill the listener or start a second server. Preserve owner servers on 5173/8787. Report which checks ran and what was not run; AI is mocked, never claim the real provider was exercised.
 
 ## 2. Re-read your diff
 - Unrelated edits, debug output, screenshots or scratch files in the repo? Remove them.
@@ -32,5 +33,5 @@ For UI changes, add or extend a spec in `e2e/` for the flow you changed (`verify
 - Do not open a PR, merge, or force-push someone else's branch unless the user asks.
 
 ## 4. Report
-- Lead with what changed for the user, then what was verified and how (mocked AI, which viewport sizes), then anything not verified or left for the user.
+- Lead with what changed, then what was verified and how (mocked AI; any risk-justified focused spec), then checks not run and owner-manual visual acceptance still pending.
 - Failures are reported as failures, with the output.
