@@ -166,10 +166,7 @@ test('a dirty article import asks before leaving, and Start over discards the dr
   expect((await savedRows(page)).articles).toEqual([]);
 });
 
-test('only the article import is a sidebar entry; the exercise import is reached from Add exercises', async ({
-  page,
-  ai,
-}) => {
+test('only the article import is a sidebar entry', async ({ page, ai }) => {
   void ai;
   const nav = page.getByRole('navigation', { name: 'Main navigation' });
   await page.goto('/#/read');
