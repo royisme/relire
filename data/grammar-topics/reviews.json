@@ -11,6 +11,18 @@
       "contentHash": "26aa51a8f42fafef6adea33e62282ca2a144fa2dcd3d3ef17703677217e6e7b8",
       "reviewedBy": "AI assistant (owner-authorized local review)",
       "reviewedAt": "2026-10-19"
+    },
+    {
+      "topicId": "noun-gender-feminine",
+      "contentHash": "c0b37f3c6f23cf16e2dcd946a63fc19944915e090f31ebead4fe3d947115bdab",
+      "reviewedBy": "Gemini 4 Argon (AI review; owner-approved local publication)",
+      "reviewedAt": "2026-10-20"
+    },
+    {
+      "topicId": "noun-plurals",
+      "contentHash": "5e20a4dbeaf4ee6529442ca7055517c3b788b089c681a8e43accac26851ca6fe",
+      "reviewedBy": "Gemini 4 Argon (AI review; owner-approved local publication)",
+      "reviewedAt": "2026-10-20"
     }
   ]
 }
