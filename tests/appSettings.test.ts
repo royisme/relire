@@ -1,6 +1,7 @@
 /** BYOK settings keep independent purpose selections and custom model IDs, never a legacy inheritance rule. */
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { getApiKey, getAppSettings, getBaseUrl, saveAppSettings, speechAfterCheck } from '../src/utils/appSettings';
+import { sliceOf, withSlice } from '../src/components/settings/slices';
 
 const storage = new Map<string, string>();
 const original = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
@@ -180,5 +181,42 @@ describe('appSettings BYOK configuration', () => {
     saveAppSettings({ ...exported, apiKeys: {} });
     expect(getAppSettings().baseUrls).toEqual({ openai: 'https://api.qwen.test/v1' });
     expect(getApiKey(getAppSettings(), 'openai')).toBe('');
+  });
+});
+
+describe('browser speech recognition opt-in', () => {
+  test('it is off by default, and a stored true roundtrips', () => {
+    expect(getAppSettings().practiceBrowserRecognition).toBe(false);
+    expect(saveAppSettings({ practiceBrowserRecognition: true }).practiceBrowserRecognition).toBe(true);
+    expect(getAppSettings().practiceBrowserRecognition).toBe(true);
+    saveAppSettings({ practiceBrowserRecognition: false });
+    expect(getAppSettings().practiceBrowserRecognition).toBe(false);
+    // Unreadable storage falls back to the built-in defaults, which are off too.
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: () => {
+          throw new Error('TEST ONLY unreadable storage');
+        },
+        setItem: () => undefined,
+      },
+    });
+    expect(getAppSettings().practiceBrowserRecognition).toBe(false);
+  });
+
+  test('a malformed stored value falls back to off', () => {
+    for (const value of ['true', 1, null, {}, []]) {
+      storage.set('relire_app_settings_v1', JSON.stringify({ practiceBrowserRecognition: value }));
+      expect(getAppSettings().practiceBrowserRecognition).toBe(false);
+    }
+  });
+
+  test('the practice slice carries the field, so Save notices it and copies it into the stored settings', () => {
+    const base = getAppSettings();
+    const changed = { ...base, practiceBrowserRecognition: true };
+    expect(sliceOf(changed, 'practice')).not.toBe(sliceOf(base, 'practice'));
+    expect(withSlice(base, changed, 'practice').practiceBrowserRecognition).toBe(true);
+    // The AI slice never carries it.
+    expect(withSlice(base, changed, 'ai').practiceBrowserRecognition).toBe(base.practiceBrowserRecognition);
   });
 });
