@@ -7,10 +7,10 @@
 
 请以严格的JSON格式返回：
 {
-"overallScore": 86,
-"accuracyScore": 84,
-"fluencyScore": 88,
-"rhythmScore": 86,
+"overallScore": <0到100的整数>,
+"accuracyScore": <0到100的整数>,
+"fluencyScore": <0到100的整数>,
+"rhythmScore": <0到100的整数>,
 "transcribedSpeech": "{{transcript}}",
 "phonemeFeedback": [
   {
