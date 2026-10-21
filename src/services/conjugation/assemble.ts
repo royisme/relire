@@ -1,5 +1,5 @@
 /**
- * Builds the view of a verb from an AI answer: leads, passé composé and the
+ * Builds the view of a verb from an AI answer: leads, the compound tenses and the
  * hyphenated imperative clitics, composed by the engine from the AI's forms and
  * participles, for any rule (including `irregular` and rule misfits). Also owns
  * the small helpers that take an infinitive apart for the engine (`bareInfinitive`, `engineBase`).

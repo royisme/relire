@@ -1,8 +1,8 @@
 /**
  * Grammar pack rules: the ending tables, the stem changes of the regular rule
- * families, participle agreement, the passé composé auxiliaries and the lead
- * algorithm. Pure data and functions with no I/O. Does not own building a whole
- * verb (generate.ts) or verifying one (checks.ts).
+ * families, participle agreement, the auxiliary forms of the five compound
+ * tenses and the lead algorithm. Pure data and functions with no I/O. Does not
+ * own building a whole verb (generate.ts) or verifying one (checks.ts).
  */
 import type { CompoundTense, ImperativePerson, Person, RuleId, Tense, Verb } from '../../types/grammarPack';
 import { FINITE_PERSONS } from '../../types/grammarPack';
