@@ -140,7 +140,6 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           key={token.start}
           token={token.word}
           annotation={markers.mode ? markers.displayed[id]?.words[token.word.ordinal] : undefined}
-          decorating={markers.mode}
           layers={markers.layers}
           activeWord={activeWord}
           onClick={(word) => clickWord(word, sentenceText, id)}
