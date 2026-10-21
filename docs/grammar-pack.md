@@ -498,9 +498,9 @@ Not verified by the author, for the language reviewer: the tense "use" and "form
 
 # Part 4: Noun gender tendencies (owner decision 2026-10-18)
 
-Status: NP1 (schema, `measure.ts`, `build.ts`, seed list) is built; no pack is committed, and NQ6 plus the owner's review gate the first pack.
+Status: NP1 (schema, `measure.ts`, `build.ts`), NP2 (A1 noun list) and NP4 (candidate review and publish) are complete. The owner reviewed 337 A1 nouns and 17 rules on 2026-10-19 and the reviewed pack is committed. `-e` stays below the threshold and `-eur` is held, so neither ships; `-ure` keeps its owner override with its honest figures (74.1% of dictionary nouns, 12 of 12 A1 nouns).
 
-Status: design for review, nothing built. Ids: `N1` to `N7`, `NQ1` to `NQ6`, `NP1` to `NP4`. It reuses Part 1's conventions (schema validation at load, provenance, the review gate, the offline Morphalou oracle) and Part 2's tab pattern. Paths marked **(new)** do not exist yet.
+Status: NP3 (tab, word-sheet line, drills, feedback) is built and independently verified with static and unit checks on 2026-10-21; human visual, browser and offline runtime acceptance is still pending. Ids: `N1` to `N7`, `NQ1` to `NQ6`, `NP1` to `NP4`. It reuses Part 1's conventions (schema validation at load, provenance, the review gate, the offline Morphalou oracle) and Part 2's tab pattern. The paths named below exist.
 
 ## N1. Goals and non-goals
 - Goal: the learner gets rules of thumb for the gender of French nouns by ending, with the real accuracy of each rule and its exceptions, and drills that teach the rule after each answer. The owner's argument: a rule that is right 80% of the time still raises a beginner's score; Part 1 wrongly listed noun gender as a non-goal.
@@ -514,7 +514,7 @@ Status: design for review, nothing built. Ids: `N1` to `N7`, `NQ1` to `NQ6`, `NP
 - Per-candidate decision (owner, 2026-10-19): the threshold stays the default, but the owner can decide one candidate with `"decision": { "kind": "hold" | "override", "reason": "<one sentence>" }` in `candidates.json` (no other option, no config file). `hold`: the build never ships the rule and lists it in the report as held with its reason. `override`: the build ships the rule even below the dictionary threshold; it still needs an attest record, at least 3 agreeing A1 nouns and an owner review, and it keeps its honest numbers (dictionary and A1 both stored and shown, so the shortfall is visible). The build reports every override with its figures and reason. Decisions so far: `eur` held ("Dictionary 97% is carried by agent nouns; only 14 of 22 A1 nouns follow it; to be split by meaning before publishing."); `ure` overridden ("Dictionary 74% is lowered by chemical terms (chlorure, sulfure); every A1 noun in -ure is feminine."). The decision is part of the candidate row, so changing it lapses the attest until `measure.ts` is re-run.
 - Licence: only our own examples and aggregate counts ship, no Morphalou text and no per-word data from it; the attest records versions and counts only. Review: Part 1 Q12 covers only a diff that retains nothing; shipping derived integer counts is a different act. The author's reading is that counts are not a "portion of the Linguistic Resource" in the LGPL-LR sense (section 3 of the licence), which is unverified and not legal advice: the owner confirmed on 2026-10-18 (NQ6) that shipping the counts is acceptable, because they are public information.
 
-## N3. Data (`data/noun-gender/` (new), `src/types/nounGender.ts` (new))
+## N3. Data (`data/noun-gender/`, `src/types/nounGender.ts`)
 ```
 nouns.json        A1 noun list: { id, lemma, gender: 'm'|'f', ... } reviewed by the owner; origin clarte-seed | agy-drafted | human
 candidates.json   endings to measure, written by hand: { id, ending, gender, decision? }   (a candidate list, not a claim)
@@ -522,7 +522,7 @@ oracle-attest.json dictionary counts per candidate { ending, gender, n, agree, m
 ```
 Shipped: `src/data/noun-gender/pack.json` (build artifact, committed, lazily loaded like Part 1): `{ schemaVersion, packVersion, nouns[], rules[] }`, each rule `{ id, ending, gender, dictionary: { n, agree }, a1: { n, agree }, examples: string[] (min 3, from nouns[]), exceptions: string[] (from nouns[]), prov }`; the schema re-derives `a1` from `nouns` at load, so the shipped numbers cannot disagree with the list. Rule text is a locale key `nounGender.rules.<id>` (en and zh), not stored. Overlapping endings (`-tion` and `-sion` end in `-ion`; `-age`, `-ette`, `-ure`, `-ance`, `-ie`, `-isme`, `-ée` all end in `-e`): `measure.ts` counts every candidate independently over all nouns with that ending, so overlaps are counted under each; the word sheet and the drill's `meta.rules` use the LONGEST shipped rule that matches the noun, one line only. `-e` is expected to fail the threshold and is then dropped. Candidate endings to measure (a list to be measured, not asserted): `-tion`, `-sion`, `-té`, `-ure`, `-ette`, `-ance`, `-ence`, `-ie`, `-age`, `-ment`, `-isme`, `-eau`, `-oir`, `-ier`, `-eur`, `-e`, `-ée`, plus `-esse` and `-ude` (feminine predictions added 2026-10-19; the real measurement is 183 of 185 and 115 of 120 dictionary lemmas).
 
-## N4. Pipeline (`scripts/noun-gender/` (new))
+## N4. Pipeline (`scripts/noun-gender/`)
 `measure.ts` reads `MORPHALOU_DIR` (the adapter is the one written for Part 1 P3, so NP1 depends on P3), counts per candidate over single-gender noun lemmas and writes `oracle-attest.json` with no Morphalou strings; `build.ts` assembles the pack, recomputes the A1 figures, drops candidates below the threshold (unless the owner overrode it; a held candidate never ships), refuses a changed candidate whose attest hash lapsed, and runs `--check` in CI like Part 1. Status per rule follows Part 1: `reviewed` by the owner is required to ship.
 
 ## N5. UI and drills (NP3)
@@ -535,7 +535,7 @@ Shipped: `src/data/noun-gender/pack.json` (build artifact, committed, lazily loa
 | --- | --- | --- |
 | NP1 | Schema, `measure.ts`, `build.ts`, seed list from the owner's earlier demo nouns, tests | counts reproducible; a candidate below the threshold is dropped; the shipped `a1` figures equal the recomputed ones; no Morphalou string committed |
 | NP2 | A1 noun list fill (agy drafts about 300 nouns with gender, checked against Morphalou, owner reviews) | each noun has provenance; disagreements with Morphalou listed for the owner |
-| NP3 | Tab, word-sheet line, drills, control feedback, locale keys, e2e | e2e: tab lists rules with figures, a drill shows the rule after the answer, an exception drill; `i18n:check`; `impeccable detect` `[]` |
+| NP3 | Tab, word-sheet line, drills, control feedback, locale keys | focused unit and static tests: the route with and without a content service, the reference with both figures, the saved feedback after a check, and an exception drill; `i18n:check`; `impeccable detect` `[]`. Owner-manual visual acceptance; a browser check only for an integration, persistence or backup/restore risk the units cannot cover (`docs/development.md`), no e2e batch |
 | NP4 | Candidate list review and publish | owner marks `reviewed`; only rules above the threshold appear |
 
 ## N7. Risks and questions
