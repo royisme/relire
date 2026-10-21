@@ -8,6 +8,17 @@ import * as React from 'react';
 import { useShadowingRecorder } from '../src/hooks/useShadowingRecorder';
 import { cancelCapture } from '../src/utils/speech/recorder';
 
+/**
+ * What the environment had before this file mocked it. Bun provides a native `navigator`, and every test
+ * file shares one process, so a mock that is deleted instead of restored leaks into the next file.
+ */
+const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+const nativeNavigator = globalThis.navigator;
+/** What `beforeEach` found before mocking it: whatever the previous test's cleanup left behind. */
+let navigatorBeforeMocking: unknown;
+const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+const originalMediaRecorder = Object.getOwnPropertyDescriptor(globalThis, 'MediaRecorder');
+
 const storage = new Map<string, string>();
 const originalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
 
@@ -61,6 +72,7 @@ let effect: React.EffectCallback = () => undefined;
 const spies: Array<{ mockRestore(): void }> = [];
 
 beforeEach(() => {
+  navigatorBeforeMocking = globalThis.navigator;
   built.length = 0;
   storage.clear();
   Object.defineProperty(globalThis, 'localStorage', {
@@ -99,15 +111,20 @@ beforeEach(() => {
   Object.defineProperty(globalThis, 'MediaRecorder', { configurable: true, value: FakeMediaRecorder });
 });
 
+/** Puts a global back the way this file found it: the original value, or absent when there was none. */
+const restoreGlobal = (key: string, original: PropertyDescriptor | undefined) => {
+  if (original) Object.defineProperty(globalThis, key, original);
+  else Reflect.deleteProperty(globalThis, key);
+};
+
 afterEach(() => {
   // A failed assertion would otherwise leave the microphone claimed for the next test.
   cancelCapture();
   for (const spy of spies.splice(0)) spy.mockRestore();
-  Reflect.deleteProperty(globalThis, 'window');
-  Reflect.deleteProperty(globalThis, 'navigator');
-  Reflect.deleteProperty(globalThis, 'MediaRecorder');
-  if (originalStorage) Object.defineProperty(globalThis, 'localStorage', originalStorage);
-  else Reflect.deleteProperty(globalThis, 'localStorage');
+  restoreGlobal('navigator', originalNavigator);
+  restoreGlobal('window', originalWindow);
+  restoreGlobal('MediaRecorder', originalMediaRecorder);
+  restoreGlobal('localStorage', originalStorage);
 });
 
 /** Steps a mounted hook, as `tests/grammarTopicsHooks.test.ts` does. */
@@ -154,4 +171,12 @@ test('the setting is read when recording starts, not once at import', async () =
   await recorder.start();
   expect(built).toHaveLength(1);
   await recorder.stop();
+});
+
+/**
+ * `beforeEach` mocks the navigator for every test, so this one cannot look at it directly: it looks at the
+ * navigator the previous test left behind, which is the state the next test file would have inherited.
+ */
+test('the native navigator is back once the mocking tests above have run', () => {
+  expect(navigatorBeforeMocking).toBe(nativeNavigator);
 });
