@@ -159,6 +159,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Removed
 - The Words settings shortcut on Today is gone; Settings → Words, reached from the sidebar or Settings, still owns the new-word limit, target retention and the built-in wordbook.
+- Review's duplicate Browse words link is gone; Back to Words still returns to Today, where All words stays one tap away.
 - The old drills (word-order scramble, fill the gap and spoken questions generated from the article, with their prompts and saved sets). Exercises replace them, and unlike drills they keep your attempts.
 - Invented first-run data: sample statistics, three sample vocabulary words, the study-streak tile.
 - The hard-coded "AI coach" diagnosis and per-sound status chips on the Progress page.

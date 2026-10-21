@@ -283,7 +283,7 @@ Keep Words under My study; no new top-level navigation. Define real routes for p
 
 Extend `Route`, `routeHref`, `parseRoute`, `areaOf`, `NavTree`, shell current-area logic and `StudyView`; preserve Back/reload. Use new route variants for the deeper Words places, not Grammar's `section: 'conjugation'`. All three routes keep My study/Words active in expanded sidebar, rail and compact study navigation. No current word/source is sent over the network; transient filters/reveal need no routes.
 
-Today and Browse share two real page links, Today and All words, above their content, with `aria-current="page"` on the matching destination; these are not Segmented radios. Today's Start/Continue links to Review; Browse has an outline Review due words link to that same review route (it does not bypass queue/quota). Review's Back to Words always targets Today and its Browse words link targets All words. Do not add a second sidebar or label Review as the All words destination.
+Today and Browse share two real page links, Today and All words, above their content, with `aria-current="page"` on the matching destination; these are not Segmented radios. Today's Start/Continue links to Review; Browse has an outline Review due words link to that same review route (it does not bypass queue/quota). Review's Back to Words always targets Today. Do not add a second sidebar or label Review as the All words destination.
 
 ### Today and browser
 

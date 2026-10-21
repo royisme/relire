@@ -76,7 +76,8 @@ test('Words review commits introduction before answers, flips without writes, an
     });
     expect(row.schedule).toEqual(record.next);
   }
-  await page.getByRole('link', { name: 'Browse words' }).click();
+  await page.getByRole('link', { name: 'Back to Words' }).click();
+  await page.getByRole('link', { name: 'All words', exact: true }).click();
   await page.reload();
   await expect(page.getByRole('table')).toBeVisible();
   expect(await stored(page)).toEqual(rows);

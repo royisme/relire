@@ -252,9 +252,6 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
           </div>
         </section>
       )}
-      <Link to={{ name: 'wordsAll' }} className="inline-flex min-h-10 items-center text-sm text-accent-900 underline">
-        {t('vocab.browse')}
-      </Link>
       {errorOpen && (
         <Sheet label={t('vocab.errorDetails')} onClose={() => setErrorOpen(false)}>
           <OverlayHeader

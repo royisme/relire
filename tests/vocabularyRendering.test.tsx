@@ -103,6 +103,13 @@ test('Today counts stay and keep no Words settings link or form', async () => {
   expect(html).not.toContain('Built-in wordbook');
   expect(html).not.toContain('data-vocabulary-download-status');
 });
+test('Review has only Back to Words, with no footer Browse words link', async () => {
+  await i18n.changeLanguage('en');
+  const html = render(<VocabularyReview model={model} />);
+  expect(html).toContain('Back to Words');
+  expect(html).not.toContain('href="#/study/words/all"');
+  expect(html).not.toContain('Browse words');
+});
 test('the locked real card contains no answer DOM or visible flip action', async () => {
   await i18n.changeLanguage('en');
   const html = render(
