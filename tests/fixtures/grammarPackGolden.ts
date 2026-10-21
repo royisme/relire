@@ -53,6 +53,15 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['vous', 'étiez'],
         ['ils/elles', 'étaient'],
       ]),
+      // UNVERIFIED: drafted by the worker, the owner reviews these 96 cells
+      plusQueParfait: rows([
+        ['j’', 'avais été'],
+        ['tu', 'avais été'],
+        ['il/elle', 'avait été'],
+        ['nous', 'avions été'],
+        ['vous', 'aviez été'],
+        ['ils/elles', 'avaient été'],
+      ]),
       futur: rows([
         ['je', 'serai'],
         ['tu', 'seras'],
@@ -60,6 +69,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['nous', 'serons'],
         ['vous', 'serez'],
         ['ils/elles', 'seront'],
+      ]),
+      futurAnterieur: rows([
+        ['j’', 'aurai été'],
+        ['tu', 'auras été'],
+        ['il/elle', 'aura été'],
+        ['nous', 'aurons été'],
+        ['vous', 'aurez été'],
+        ['ils/elles', 'auront été'],
       ]),
       conditionnel: rows([
         ['je', 'serais'],
@@ -69,6 +86,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['vous', 'seriez'],
         ['ils/elles', 'seraient'],
       ]),
+      conditionnelPasse: rows([
+        ['j’', 'aurais été'],
+        ['tu', 'aurais été'],
+        ['il/elle', 'aurait été'],
+        ['nous', 'aurions été'],
+        ['vous', 'auriez été'],
+        ['ils/elles', 'auraient été'],
+      ]),
       subjonctif: rows([
         ['que je', 'sois'],
         ['que tu', 'sois'],
@@ -76,6 +101,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['que nous', 'soyons'],
         ['que vous', 'soyez'],
         ['qu’ils/elles', 'soient'],
+      ]),
+      subjonctifPasse: rows([
+        ['que j’', 'aie été'],
+        ['que tu', 'aies été'],
+        ['qu’il/elle', 'ait été'],
+        ['que nous', 'ayons été'],
+        ['que vous', 'ayez été'],
+        ['qu’ils/elles', 'aient été'],
       ]),
       imperatif: imperatif([
         ['', 'sois'],
@@ -116,6 +149,15 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['vous', 'aviez'],
         ['ils/elles', 'avaient'],
       ]),
+      // UNVERIFIED: drafted by the worker, the owner reviews these 96 cells
+      plusQueParfait: rows([
+        ['j’', 'avais eu'],
+        ['tu', 'avais eu'],
+        ['il/elle', 'avait eu'],
+        ['nous', 'avions eu'],
+        ['vous', 'aviez eu'],
+        ['ils/elles', 'avaient eu'],
+      ]),
       futur: rows([
         ['j’', 'aurai'],
         ['tu', 'auras'],
@@ -123,6 +165,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['nous', 'aurons'],
         ['vous', 'aurez'],
         ['ils/elles', 'auront'],
+      ]),
+      futurAnterieur: rows([
+        ['j’', 'aurai eu'],
+        ['tu', 'auras eu'],
+        ['il/elle', 'aura eu'],
+        ['nous', 'aurons eu'],
+        ['vous', 'aurez eu'],
+        ['ils/elles', 'auront eu'],
       ]),
       conditionnel: rows([
         ['j’', 'aurais'],
@@ -132,6 +182,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['vous', 'auriez'],
         ['ils/elles', 'auraient'],
       ]),
+      conditionnelPasse: rows([
+        ['j’', 'aurais eu'],
+        ['tu', 'aurais eu'],
+        ['il/elle', 'aurait eu'],
+        ['nous', 'aurions eu'],
+        ['vous', 'auriez eu'],
+        ['ils/elles', 'auraient eu'],
+      ]),
       subjonctif: rows([
         ['que j’', 'aie'],
         ['que tu', 'aies'],
@@ -139,6 +197,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['que nous', 'ayons'],
         ['que vous', 'ayez'],
         ['qu’ils/elles', 'aient'],
+      ]),
+      subjonctifPasse: rows([
+        ['que j’', 'aie eu'],
+        ['que tu', 'aies eu'],
+        ['qu’il/elle', 'ait eu'],
+        ['que nous', 'ayons eu'],
+        ['que vous', 'ayez eu'],
+        ['qu’ils/elles', 'aient eu'],
       ]),
       imperatif: imperatif([
         ['', 'aie'],
@@ -179,6 +245,15 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['vous', 'alliez'],
         ['ils/elles', 'allaient'],
       ]),
+      // UNVERIFIED: drafted by the worker, the owner reviews these 96 cells
+      plusQueParfait: rows([
+        ['j’', 'étais allé', 'étais allée'],
+        ['tu', 'étais allé', 'étais allée'],
+        ['il/elle', 'était allé', 'était allée'],
+        ['nous', 'étions allés', 'étions allées'],
+        ['vous', 'étiez allés', 'étiez allées', 'étiez allé', 'étiez allée'],
+        ['ils/elles', 'étaient allés', 'étaient allées'],
+      ]),
       futur: rows([
         ['j’', 'irai'],
         ['tu', 'iras'],
@@ -186,6 +261,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['nous', 'irons'],
         ['vous', 'irez'],
         ['ils/elles', 'iront'],
+      ]),
+      futurAnterieur: rows([
+        ['je', 'serai allé', 'serai allée'],
+        ['tu', 'seras allé', 'seras allée'],
+        ['il/elle', 'sera allé', 'sera allée'],
+        ['nous', 'serons allés', 'serons allées'],
+        ['vous', 'serez allés', 'serez allées', 'serez allé', 'serez allée'],
+        ['ils/elles', 'seront allés', 'seront allées'],
       ]),
       conditionnel: rows([
         ['j’', 'irais'],
@@ -195,6 +278,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['vous', 'iriez'],
         ['ils/elles', 'iraient'],
       ]),
+      conditionnelPasse: rows([
+        ['je', 'serais allé', 'serais allée'],
+        ['tu', 'serais allé', 'serais allée'],
+        ['il/elle', 'serait allé', 'serait allée'],
+        ['nous', 'serions allés', 'serions allées'],
+        ['vous', 'seriez allés', 'seriez allées', 'seriez allé', 'seriez allée'],
+        ['ils/elles', 'seraient allés', 'seraient allées'],
+      ]),
       subjonctif: rows([
         ['que j’', 'aille'],
         ['que tu', 'ailles'],
@@ -202,6 +293,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['que nous', 'allions'],
         ['que vous', 'alliez'],
         ['qu’ils/elles', 'aillent'],
+      ]),
+      subjonctifPasse: rows([
+        ['que je', 'sois allé', 'sois allée'],
+        ['que tu', 'sois allé', 'sois allée'],
+        ['qu’il/elle', 'soit allé', 'soit allée'],
+        ['que nous', 'soyons allés', 'soyons allées'],
+        ['que vous', 'soyez allés', 'soyez allées', 'soyez allé', 'soyez allée'],
+        ['qu’ils/elles', 'soient allés', 'soient allées'],
       ]),
       imperatif: imperatif([
         ['', 'va'],
@@ -242,6 +341,15 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['vous vous', 'appeliez'],
         ['ils/elles s’', 'appelaient'],
       ]),
+      // UNVERIFIED: drafted by the worker, the owner reviews these 96 cells
+      plusQueParfait: rows([
+        ['je m’', 'étais appelé', 'étais appelée'],
+        ['tu t’', 'étais appelé', 'étais appelée'],
+        ['il/elle s’', 'était appelé', 'était appelée'],
+        ['nous nous', 'étions appelés', 'étions appelées'],
+        ['vous vous', 'étiez appelés', 'étiez appelées', 'étiez appelé', 'étiez appelée'],
+        ['ils/elles s’', 'étaient appelés', 'étaient appelées'],
+      ]),
       futur: rows([
         ['je m’', 'appellerai'],
         ['tu t’', 'appelleras'],
@@ -249,6 +357,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['nous nous', 'appellerons'],
         ['vous vous', 'appellerez'],
         ['ils/elles s’', 'appelleront'],
+      ]),
+      futurAnterieur: rows([
+        ['je me', 'serai appelé', 'serai appelée'],
+        ['tu te', 'seras appelé', 'seras appelée'],
+        ['il/elle se', 'sera appelé', 'sera appelée'],
+        ['nous nous', 'serons appelés', 'serons appelées'],
+        ['vous vous', 'serez appelés', 'serez appelées', 'serez appelé', 'serez appelée'],
+        ['ils/elles se', 'seront appelés', 'seront appelées'],
       ]),
       conditionnel: rows([
         ['je m’', 'appellerais'],
@@ -258,6 +374,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['vous vous', 'appelleriez'],
         ['ils/elles s’', 'appelleraient'],
       ]),
+      conditionnelPasse: rows([
+        ['je me', 'serais appelé', 'serais appelée'],
+        ['tu te', 'serais appelé', 'serais appelée'],
+        ['il/elle se', 'serait appelé', 'serait appelée'],
+        ['nous nous', 'serions appelés', 'serions appelées'],
+        ['vous vous', 'seriez appelés', 'seriez appelées', 'seriez appelé', 'seriez appelée'],
+        ['ils/elles se', 'seraient appelés', 'seraient appelées'],
+      ]),
       subjonctif: rows([
         ['que je m’', 'appelle'],
         ['que tu t’', 'appelles'],
@@ -265,6 +389,14 @@ export const GOLDEN: Record<string, GoldenVerb> = {
         ['que nous nous', 'appelions'],
         ['que vous vous', 'appeliez'],
         ['qu’ils/elles s’', 'appellent'],
+      ]),
+      subjonctifPasse: rows([
+        ['que je me', 'sois appelé', 'sois appelée'],
+        ['que tu te', 'sois appelé', 'sois appelée'],
+        ['qu’il/elle se', 'soit appelé', 'soit appelée'],
+        ['que nous nous', 'soyons appelés', 'soyons appelées'],
+        ['que vous vous', 'soyez appelés', 'soyez appelées', 'soyez appelé', 'soyez appelée'],
+        ['qu’ils/elles se', 'soient appelés', 'soient appelées'],
       ]),
       imperatif: imperatif([
         ['', 'appelle-toi'],

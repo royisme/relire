@@ -17,7 +17,8 @@ import { cellText, showsFormLine } from './forms';
 interface Props {
   tense: Tense;
   verb: VerifiedVerb;
-  example?: ConjugationAnswer['examples'][Tense];
+  /** The AI's sentence for this tense; a compound tense has none (the record has no key for it). */
+  example?: ConjugationAnswer['examples'][keyof ConjugationAnswer['examples']];
   compact?: boolean;
   tapped?: Person[];
 }

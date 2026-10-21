@@ -123,6 +123,44 @@
             ]
           }
         },
+        "plusQueParfait": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "avais été"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "avais été"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "avait été"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "avions été"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "aviez été"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "avaient été"
+            ]
+          }
+        },
         "futur": {
           "1sg": {
             "lead": "je",
@@ -158,6 +196,44 @@
             "lead": "ils/elles",
             "forms": [
               "seront"
+            ]
+          }
+        },
+        "futurAnterieur": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "aurai été"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "auras été"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "aura été"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "aurons été"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "aurez été"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "auront été"
             ]
           }
         },
@@ -199,6 +275,44 @@
             ]
           }
         },
+        "conditionnelPasse": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "aurais été"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "aurais été"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "aurait été"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "aurions été"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "auriez été"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "auraient été"
+            ]
+          }
+        },
         "subjonctif": {
           "1sg": {
             "lead": "que je",
@@ -237,6 +351,44 @@
             ]
           }
         },
+        "subjonctifPasse": {
+          "1sg": {
+            "lead": "que j’",
+            "forms": [
+              "aie été"
+            ]
+          },
+          "2sg": {
+            "lead": "que tu",
+            "forms": [
+              "aies été"
+            ]
+          },
+          "3sg": {
+            "lead": "qu’il/elle",
+            "forms": [
+              "ait été"
+            ]
+          },
+          "1pl": {
+            "lead": "que nous",
+            "forms": [
+              "ayons été"
+            ]
+          },
+          "2pl": {
+            "lead": "que vous",
+            "forms": [
+              "ayez été"
+            ]
+          },
+          "3pl": {
+            "lead": "qu’ils/elles",
+            "forms": [
+              "aient été"
+            ]
+          }
+        },
         "imperatif": {
           "2sg": {
             "lead": "",
@@ -272,10 +424,9 @@
         "checkedAgainst": [
           "consistency",
           "control-verbs",
-          "morphalou-3.1",
           "human"
         ],
-        "checkedAt": "2026-10-18",
+        "checkedAt": "2026-10-21",
         "status": "reviewed",
         "reviewedBy": "Roy Zhu"
       }
@@ -409,6 +560,52 @@
             ]
           }
         },
+        "plusQueParfait": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "étais allé",
+              "étais allée"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "étais allé",
+              "étais allée"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "était allé",
+              "était allée"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "étions allés",
+              "étions allées"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "étiez allés",
+              "étiez allées",
+              "étiez allé",
+              "étiez allée"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "étaient allés",
+              "étaient allées"
+            ]
+          }
+        },
         "futur": {
           "1sg": {
             "lead": "j’",
@@ -444,6 +641,52 @@
             "lead": "ils/elles",
             "forms": [
               "iront"
+            ]
+          }
+        },
+        "futurAnterieur": {
+          "1sg": {
+            "lead": "je",
+            "forms": [
+              "serai allé",
+              "serai allée"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "seras allé",
+              "seras allée"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "sera allé",
+              "sera allée"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "serons allés",
+              "serons allées"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "serez allés",
+              "serez allées",
+              "serez allé",
+              "serez allée"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "seront allés",
+              "seront allées"
             ]
           }
         },
@@ -485,6 +728,52 @@
             ]
           }
         },
+        "conditionnelPasse": {
+          "1sg": {
+            "lead": "je",
+            "forms": [
+              "serais allé",
+              "serais allée"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "serais allé",
+              "serais allée"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "serait allé",
+              "serait allée"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "serions allés",
+              "serions allées"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "seriez allés",
+              "seriez allées",
+              "seriez allé",
+              "seriez allée"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "seraient allés",
+              "seraient allées"
+            ]
+          }
+        },
         "subjonctif": {
           "1sg": {
             "lead": "que j’",
@@ -523,6 +812,52 @@
             ]
           }
         },
+        "subjonctifPasse": {
+          "1sg": {
+            "lead": "que je",
+            "forms": [
+              "sois allé",
+              "sois allée"
+            ]
+          },
+          "2sg": {
+            "lead": "que tu",
+            "forms": [
+              "sois allé",
+              "sois allée"
+            ]
+          },
+          "3sg": {
+            "lead": "qu’il/elle",
+            "forms": [
+              "soit allé",
+              "soit allée"
+            ]
+          },
+          "1pl": {
+            "lead": "que nous",
+            "forms": [
+              "soyons allés",
+              "soyons allées"
+            ]
+          },
+          "2pl": {
+            "lead": "que vous",
+            "forms": [
+              "soyez allés",
+              "soyez allées",
+              "soyez allé",
+              "soyez allée"
+            ]
+          },
+          "3pl": {
+            "lead": "qu’ils/elles",
+            "forms": [
+              "soient allés",
+              "soient allées"
+            ]
+          }
+        },
         "imperatif": {
           "2sg": {
             "lead": "",
@@ -558,10 +893,9 @@
         "checkedAgainst": [
           "consistency",
           "control-verbs",
-          "morphalou-3.1",
           "human"
         ],
-        "checkedAt": "2026-10-19",
+        "checkedAt": "2026-10-21",
         "status": "reviewed",
         "reviewedBy": "Roy Zhu"
       }
@@ -687,6 +1021,44 @@
             ]
           }
         },
+        "plusQueParfait": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "avais eu"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "avais eu"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "avait eu"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "avions eu"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "aviez eu"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "avaient eu"
+            ]
+          }
+        },
         "futur": {
           "1sg": {
             "lead": "j’",
@@ -722,6 +1094,44 @@
             "lead": "ils/elles",
             "forms": [
               "auront"
+            ]
+          }
+        },
+        "futurAnterieur": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "aurai eu"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "auras eu"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "aura eu"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "aurons eu"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "aurez eu"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "auront eu"
             ]
           }
         },
@@ -763,6 +1173,44 @@
             ]
           }
         },
+        "conditionnelPasse": {
+          "1sg": {
+            "lead": "j’",
+            "forms": [
+              "aurais eu"
+            ]
+          },
+          "2sg": {
+            "lead": "tu",
+            "forms": [
+              "aurais eu"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle",
+            "forms": [
+              "aurait eu"
+            ]
+          },
+          "1pl": {
+            "lead": "nous",
+            "forms": [
+              "aurions eu"
+            ]
+          },
+          "2pl": {
+            "lead": "vous",
+            "forms": [
+              "auriez eu"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles",
+            "forms": [
+              "auraient eu"
+            ]
+          }
+        },
         "subjonctif": {
           "1sg": {
             "lead": "que j’",
@@ -801,6 +1249,44 @@
             ]
           }
         },
+        "subjonctifPasse": {
+          "1sg": {
+            "lead": "que j’",
+            "forms": [
+              "aie eu"
+            ]
+          },
+          "2sg": {
+            "lead": "que tu",
+            "forms": [
+              "aies eu"
+            ]
+          },
+          "3sg": {
+            "lead": "qu’il/elle",
+            "forms": [
+              "ait eu"
+            ]
+          },
+          "1pl": {
+            "lead": "que nous",
+            "forms": [
+              "ayons eu"
+            ]
+          },
+          "2pl": {
+            "lead": "que vous",
+            "forms": [
+              "ayez eu"
+            ]
+          },
+          "3pl": {
+            "lead": "qu’ils/elles",
+            "forms": [
+              "aient eu"
+            ]
+          }
+        },
         "imperatif": {
           "2sg": {
             "lead": "",
@@ -836,10 +1322,9 @@
         "checkedAgainst": [
           "consistency",
           "control-verbs",
-          "morphalou-3.1",
           "human"
         ],
-        "checkedAt": "2026-10-18",
+        "checkedAt": "2026-10-21",
         "status": "reviewed",
         "reviewedBy": "Roy Zhu"
       }
@@ -973,6 +1458,52 @@
             ]
           }
         },
+        "plusQueParfait": {
+          "1sg": {
+            "lead": "je m’",
+            "forms": [
+              "étais appelé",
+              "étais appelée"
+            ]
+          },
+          "2sg": {
+            "lead": "tu t’",
+            "forms": [
+              "étais appelé",
+              "étais appelée"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle s’",
+            "forms": [
+              "était appelé",
+              "était appelée"
+            ]
+          },
+          "1pl": {
+            "lead": "nous nous",
+            "forms": [
+              "étions appelés",
+              "étions appelées"
+            ]
+          },
+          "2pl": {
+            "lead": "vous vous",
+            "forms": [
+              "étiez appelés",
+              "étiez appelées",
+              "étiez appelé",
+              "étiez appelée"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles s’",
+            "forms": [
+              "étaient appelés",
+              "étaient appelées"
+            ]
+          }
+        },
         "futur": {
           "1sg": {
             "lead": "je m’",
@@ -1008,6 +1539,52 @@
             "lead": "ils/elles s’",
             "forms": [
               "appelleront"
+            ]
+          }
+        },
+        "futurAnterieur": {
+          "1sg": {
+            "lead": "je me",
+            "forms": [
+              "serai appelé",
+              "serai appelée"
+            ]
+          },
+          "2sg": {
+            "lead": "tu te",
+            "forms": [
+              "seras appelé",
+              "seras appelée"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle se",
+            "forms": [
+              "sera appelé",
+              "sera appelée"
+            ]
+          },
+          "1pl": {
+            "lead": "nous nous",
+            "forms": [
+              "serons appelés",
+              "serons appelées"
+            ]
+          },
+          "2pl": {
+            "lead": "vous vous",
+            "forms": [
+              "serez appelés",
+              "serez appelées",
+              "serez appelé",
+              "serez appelée"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles se",
+            "forms": [
+              "seront appelés",
+              "seront appelées"
             ]
           }
         },
@@ -1049,6 +1626,52 @@
             ]
           }
         },
+        "conditionnelPasse": {
+          "1sg": {
+            "lead": "je me",
+            "forms": [
+              "serais appelé",
+              "serais appelée"
+            ]
+          },
+          "2sg": {
+            "lead": "tu te",
+            "forms": [
+              "serais appelé",
+              "serais appelée"
+            ]
+          },
+          "3sg": {
+            "lead": "il/elle se",
+            "forms": [
+              "serait appelé",
+              "serait appelée"
+            ]
+          },
+          "1pl": {
+            "lead": "nous nous",
+            "forms": [
+              "serions appelés",
+              "serions appelées"
+            ]
+          },
+          "2pl": {
+            "lead": "vous vous",
+            "forms": [
+              "seriez appelés",
+              "seriez appelées",
+              "seriez appelé",
+              "seriez appelée"
+            ]
+          },
+          "3pl": {
+            "lead": "ils/elles se",
+            "forms": [
+              "seraient appelés",
+              "seraient appelées"
+            ]
+          }
+        },
         "subjonctif": {
           "1sg": {
             "lead": "que je m’",
@@ -1087,6 +1710,52 @@
             ]
           }
         },
+        "subjonctifPasse": {
+          "1sg": {
+            "lead": "que je me",
+            "forms": [
+              "sois appelé",
+              "sois appelée"
+            ]
+          },
+          "2sg": {
+            "lead": "que tu te",
+            "forms": [
+              "sois appelé",
+              "sois appelée"
+            ]
+          },
+          "3sg": {
+            "lead": "qu’il/elle se",
+            "forms": [
+              "soit appelé",
+              "soit appelée"
+            ]
+          },
+          "1pl": {
+            "lead": "que nous nous",
+            "forms": [
+              "soyons appelés",
+              "soyons appelées"
+            ]
+          },
+          "2pl": {
+            "lead": "que vous vous",
+            "forms": [
+              "soyez appelés",
+              "soyez appelées",
+              "soyez appelé",
+              "soyez appelée"
+            ]
+          },
+          "3pl": {
+            "lead": "qu’ils/elles se",
+            "forms": [
+              "soient appelés",
+              "soient appelées"
+            ]
+          }
+        },
         "imperatif": {
           "2sg": {
             "lead": "",
@@ -1122,10 +1791,9 @@
         "checkedAgainst": [
           "consistency",
           "control-verbs",
-          "morphalou-3.1",
           "human"
         ],
-        "checkedAt": "2026-10-19",
+        "checkedAt": "2026-10-21",
         "status": "reviewed",
         "reviewedBy": "Roy Zhu"
       }

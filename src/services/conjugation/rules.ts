@@ -1,10 +1,10 @@
 /**
  * Grammar pack rules: the ending tables, the stem changes of the regular rule
- * families, participle agreement, the passé composé auxiliaries and the lead
- * algorithm. Pure data and functions with no I/O. Does not own building a whole
- * verb (generate.ts) or verifying one (checks.ts).
+ * families, participle agreement, the auxiliary forms of the five compound
+ * tenses and the lead algorithm. Pure data and functions with no I/O. Does not
+ * own building a whole verb (generate.ts) or verifying one (checks.ts).
  */
-import type { ImperativePerson, Person, RuleId, Tense, Verb } from '../../types/grammarPack';
+import type { CompoundTense, ImperativePerson, Person, RuleId, Tense, Verb } from '../../types/grammarPack';
 import { FINITE_PERSONS } from '../../types/grammarPack';
 
 /** One simple-tense cell variant; the form is stem + ending + clitic (imperatif of a pronominal verb). */
@@ -209,6 +209,15 @@ export function pastParticiples(ms: string): PastParticiples {
 /** The auxiliary tenses a compound tense can take: passé composé uses `present`, the others their own. */
 export type AuxiliaryTense = 'present' | 'imparfait' | 'futur' | 'conditionnel' | 'subjonctif';
 
+/** Which auxiliary tense each compound tense puts the auxiliary in. */
+export const COMPOUND_AUX: Record<CompoundTense, AuxiliaryTense> = {
+  passeCompose: 'present',
+  plusQueParfait: 'imparfait',
+  futurAnterieur: 'futur',
+  conditionnelPasse: 'conditionnel',
+  subjonctifPasse: 'subjonctif',
+};
+
 /**
  * The auxiliary in the five tenses a compound tense needs, six persons each in `FINITE_PERSONS` order.
  * Typed from French grammar, not derived from the irregular table; the reviewed `avoir` and `être`
@@ -291,14 +300,8 @@ export function composePresentParticiple(verb: Pick<LeadVerb, 'pronominal' | 'hA
   return startsWithVowelSound(form, verb.hAspire) ? `s’${form}` : `se ${form}`;
 }
 
-/**
- * The tenses whose lead can carry a `que`: the subjonctif itself and the compound subjonctif passé, which
- * #34 will add to the pack (so it is not a `Tense` yet).
- */
-export type LeadTense = Tense | 'subjonctifPasse';
-
 /** All that is printed before the verb group; `firstForm` is forms[0] (the auxiliary in a compound tense). */
-export function composeLead(tense: LeadTense, person: Person, verb: LeadVerb, firstForm: string): string {
+export function composeLead(tense: Tense, person: Person, verb: LeadVerb, firstForm: string): string {
   if (tense === 'imperatif') return '';
   const elides = startsWithVowelSound(firstForm, verb.hAspire);
   const subject = verb.defective === 'impersonal' ? 'il' : SUBJECT[person];

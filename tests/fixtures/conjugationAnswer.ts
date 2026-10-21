@@ -5,7 +5,7 @@
  * small variations. Test data, not reviewed pack data.
  */
 import type { ConjugationAnswer } from '../../src/types/conjugationAnswer';
-import { TENSES, isPronominalInfinitive, type Person } from '../../src/types/grammarPack';
+import { TENSES, isCompoundTense, isPronominalInfinitive, type Person } from '../../src/types/grammarPack';
 import { GOLDEN } from './grammarPackGolden';
 
 type Forms = Record<Person, string[]>;
@@ -18,8 +18,12 @@ const six = (a: string, b: string, c: string, d: string, e: string, f: string): 
   '3pl': [f],
 });
 
+/** The AI is asked for one example per tense of its `examples` record: the simple tenses and passé composé. */
 export const EXAMPLES: ConjugationAnswer['examples'] = Object.fromEntries(
-  TENSES.map((tense) => [tense, { fr: `Phrase ${tense}.`, gloss: `Sentence ${tense}.` }]),
+  TENSES.filter((tense) => !isCompoundTense(tense) || tense === 'passeCompose').map((tense) => [
+    tense,
+    { fr: `Phrase ${tense}.`, gloss: `Sentence ${tense}.` },
+  ]),
 ) as ConjugationAnswer['examples'];
 
 /**

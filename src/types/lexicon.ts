@@ -1,8 +1,9 @@
 /** Owns the lexicon service contract: the two response shapes and the per-part-of-speech `data`. Not the import or the HTTP code. */
 import { z } from 'zod';
-import { FINITE_PERSONS, IMPERATIVE_PERSONS, TENSES } from './grammarPack';
+import { FINITE_PERSONS, IMPERATIVE_PERSONS, TENSES, isCompoundTense } from './grammarPack';
 
-export const LEXICON_TENSES = TENSES.filter((tense) => tense !== 'passeCompose');
+/** The simple tenses the content service sends; a compound tense is never one of them. */
+export const LEXICON_TENSES = TENSES.filter((tense) => !isCompoundTense(tense));
 export const AGREEMENTS = ['ms', 'fs', 'mp', 'fp'] as const;
 export const LEXICON_POS = ['verb', 'noun', 'adjective'] as const;
 

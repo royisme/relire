@@ -2,7 +2,7 @@
 import { mkdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TENSES, type Verb } from '../../src/types/grammarPack';
+import { TENSES, isCompoundTense, type Verb } from '../../src/types/grammarPack';
 import { generateRows, OracleAttestSchema, readInputs, type OracleAttest } from './build';
 import { rowHash } from './gate';
 import { loadMorphalou, morphalouForms, type MorphalouIndex, type OracleTense } from './oracle-morphalou';
@@ -42,7 +42,7 @@ export function compareVerb(verb: Verb, index: MorphalouIndex, decisions: Oracle
     }
   };
   for (const tense of TENSES) {
-    if (tense === 'passeCompose') continue;
+    if (isCompoundTense(tense)) continue;
     for (const [person, cell] of Object.entries(verb.tenses[tense] ?? {})) compare(tense, person, cell.forms);
   }
   if (verb.participles.present) compare('participlePresent', '-', [verb.participles.present]);

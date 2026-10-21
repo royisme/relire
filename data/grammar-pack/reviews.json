@@ -41,6 +41,34 @@
       "reviewedBy": "Roy Zhu",
       "reviewedAt": "2026-10-19",
       "reference": "Owner confirmed the printed tables in a session on 2026-10-18; changed cell: polite singular vous in the passé composé; no external reference"
+    },
+    {
+      "verbId": "etre",
+      "rowHash": "acc63013a203dbe9d25d7720177b1c333779539f3f6a7ef725f58409bec7cc2f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-21",
+      "reference": "owner reviewed the four compound tenses 2026-10-21; the seven earlier tenses were reviewed before and not re-reviewed"
+    },
+    {
+      "verbId": "avoir",
+      "rowHash": "fc658aa75919b1f17a874c825d9fcdb5a3b1a70ce89d052e2c948aeb60c9abef",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-21",
+      "reference": "owner reviewed the four compound tenses 2026-10-21; the seven earlier tenses were reviewed before and not re-reviewed"
+    },
+    {
+      "verbId": "aller",
+      "rowHash": "1fc40505238e6ddcce0419d859421a7985ad9c5f2af3df9c4d23cfb52ac23285",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-21",
+      "reference": "owner reviewed the four compound tenses 2026-10-21; the seven earlier tenses were reviewed before and not re-reviewed"
+    },
+    {
+      "verbId": "s-appeler",
+      "rowHash": "06e76ade58324d6180a0eaef28fd683bc1b53e19f42e1e6051ca9e7f0ed41c99",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-21",
+      "reference": "owner reviewed the four compound tenses 2026-10-21; the seven earlier tenses were reviewed before and not re-reviewed"
     }
   ],
   "rejected": []

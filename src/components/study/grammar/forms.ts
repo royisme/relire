@@ -3,7 +3,7 @@
  * the Conjugation page only. Does not own any status wording or layout.
  */
 import type { CheckedCell, VerifiedVerb } from '../../../services/conjugation/verify';
-import { TENSES } from '../../../types/grammarPack';
+import { TENSES, isCompoundTense } from '../../../types/grammarPack';
 import type { Person, RuleId, Tense } from '../../../types/grammarPack';
 
 /**
@@ -17,7 +17,7 @@ export const showsFormLine = (tense: Tense, rule: RuleId | undefined) =>
 
 /** The rule's ending table comes from the same engine parts that write the cells, never a second table. */
 export function ruleEndingRows(verb: VerifiedVerb) {
-  return TENSES.filter((tense) => tense !== 'passeCompose').flatMap((tense) => {
+  return TENSES.filter((tense) => !isCompoundTense(tense)).flatMap((tense) => {
     const endings = Object.fromEntries(
       Object.entries(verb.tenses[tense]).flatMap(([person, cell]) => {
         const parts = cell.ruleParts ?? cell.parts;
