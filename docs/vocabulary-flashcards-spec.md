@@ -277,7 +277,7 @@ Keep Words under My study; no new top-level navigation. Define real routes for p
 
 | Route | Purpose |
 | --- | --- |
-| `#/study/words` | Today: actual due/new counts, Continue/Start, and one link to Settings → Words. |
+| `#/study/words` | Today: actual due/new counts and Continue/Start; Settings → Words owns the forms and the book controls. |
 | `#/study/words/all` | Browse the merged dictionary/personal list with search and source/learning-state filters. |
 | `#/study/words/review` | One active two-sided flashcard, durable answer unlock, external three-outcome recall and waiting/finish states. |
 
@@ -287,7 +287,7 @@ Today and Browse share two real page links, Today and All words, above their con
 
 ### Today and browser
 
-Today shows real pending review count, learning/relearning count and remaining new introduction allowance, then Start/continue and one plain link to Settings → Words. It no longer holds the book controls or the limit form. Unavailable book data is not a fake zero-word catalogue.
+Today shows real pending review count, learning/relearning count and remaining new introduction allowance, then Start/continue. It holds neither the book controls nor the limit form; Settings → Words solely owns them. Unavailable book data is not a fake zero-word catalogue.
 
 Settings → Words (`#/settings/words`) owns the new-per-day limit and the built-in wordbook's download/update state, count, progress and failure/restart. Daily-new accepts integer0..100, default20; target retention accepts integer80..95%, default90. Both save together through the one ready `useVocabulary` model into vocabulary preferences, not AppSettings. The page holds both nullable text drafts across section switches and an older save cannot clear newer input. Save waits for the initial read; saving/errors keep a fixed control/status slot. Retention is a scheduling target, not measured memory; higher targets mean more reviews. Brief settings-only copy clarifies pre-flip Fuzzy versus post-reveal recognition.
 

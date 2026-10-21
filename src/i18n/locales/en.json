@@ -144,7 +144,6 @@
     "learning": "Learning / relearning",
     "remaining": "New remaining today",
     "continue": "Start / continue review",
-    "settings": "Words settings",
     "book": "Built-in wordbook",
     "bookCount_one": "{{count}} word available offline",
     "bookCount_other": "{{count}} words available offline",

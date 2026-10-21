@@ -94,11 +94,11 @@ test('Settings Words and waiting Review show the actual bounded reason before an
     expect(html).not.toContain('role="dialog"');
   }
 });
-test('Today counts stay and the Words settings link replaces the moved forms', async () => {
+test('Today counts stay and keep no Words settings link or form', async () => {
   await i18n.changeLanguage('en');
   const html = render(<VocabularyHome model={model} />);
   expect(html).toContain('New remaining today');
-  expect(html).toContain('href="#/settings/words"');
+  expect(html).not.toContain('href="#/settings/words"');
   expect(html).not.toContain('New words per day');
   expect(html).not.toContain('Built-in wordbook');
   expect(html).not.toContain('data-vocabulary-download-status');

@@ -1,4 +1,4 @@
-/** Today: truthful introduced-card counts, the review entry and the way to the Words settings. */ import { useTranslation } from 'react-i18next';
+/** Today: truthful introduced-card counts and the review entry. */ import { useTranslation } from 'react-i18next';
 import type { VocabularyModel } from '../../hooks/useVocabulary';
 import { vocabularyDue } from '../../utils/srs';
 import { Link } from '../shell/Link';
@@ -27,14 +27,6 @@ export function VocabularyHome({ model }: { model: VocabularyModel }) {
       >
         {t('vocab.continue')}
       </Link>
-      <p className="border-t border-ink-200 pt-6">
-        <Link
-          to={{ name: 'settings', section: 'words' }}
-          className="inline-flex min-h-10 items-center text-sm text-accent-900 underline"
-        >
-          {t('vocab.settings')}
-        </Link>
-      </p>
     </div>
   );
 }
