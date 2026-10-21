@@ -39,7 +39,7 @@ export function useAdaptiveDrills(onMissingKey: () => void) {
       guard.release();
       payload.current = null;
       setPrepared(null);
-      navigate({ name: 'unit', unitId: result.id });
+      navigate({ name: 'unit', area: result.learningArea, unitId: result.id });
     } catch (err) {
       if (mine === session.current) setError(aiErrorText(err));
     }
@@ -54,7 +54,7 @@ export function useAdaptiveDrills(onMissingKey: () => void) {
       const mistakes = await listMistakes();
       if (mine !== session.current) return;
       const recentMistakes = mistakes
-        .filter(({ attempt }) => targets.includes(attempt.grammarTag))
+        .filter(({ attempt }) => attempt.learningArea === 'grammar' && targets.includes(attempt.grammarTag))
         .slice(0, MAX_RECENT_MISTAKES)
         .map(({ attempt: { prompt, userAnswer, expectedAnswer } }) => ({ prompt, userAnswer, expectedAnswer }));
       const drills = await generateAdaptiveDrills({ targets, level, count, recentMistakes });

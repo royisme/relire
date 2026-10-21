@@ -8,6 +8,7 @@
 import { GRAMMAR_TAGS, type GrammarTag } from '../types/grammar';
 import { itemStateId, type ExerciseAttempt } from '../types/exercises';
 import { db } from './db';
+import { ExerciseAttemptSchema } from './exerciseBackup';
 
 export const DEFAULT_ATTEMPT_LIMIT = 50;
 
@@ -23,12 +24,15 @@ export async function listAttempts(query: AttemptQuery = {}): Promise<ExerciseAt
   const d = await db();
   if (query.unitId) {
     const rows = await d.getAllFromIndex('attempts', 'unitId', query.unitId);
-    return rows.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
+    return rows
+      .map((row) => ExerciseAttemptSchema.parse(row))
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, limit);
   }
   const out: ExerciseAttempt[] = [];
   let cursor = await d.transaction('attempts').store.index('timestamp').openCursor(null, 'prev');
   while (cursor && out.length < limit) {
-    out.push(cursor.value);
+    out.push(ExerciseAttemptSchema.parse(cursor.value));
     cursor = await cursor.continue();
   }
   return out;
@@ -45,7 +49,9 @@ export interface TagAccuracy {
 /** Accuracy per grammar tag over all attempts. Only tags with at least one attempt appear, in taxonomy order. */
 export async function accuracyByGrammarTag(): Promise<TagAccuracy[]> {
   const counts = new Map<GrammarTag, { correct: number; total: number }>();
-  for (const attempt of await (await db()).getAll('attempts')) {
+  for (const row of await (await db()).getAll('attempts')) {
+    const attempt = ExerciseAttemptSchema.parse(row);
+    if (attempt.learningArea !== 'grammar') continue;
     const entry = counts.get(attempt.grammarTag) ?? { correct: 0, total: 0 };
     entry.total++;
     if (attempt.correct) entry.correct++;
@@ -73,7 +79,8 @@ export async function listMistakes(limit?: number): Promise<MistakeEntry[]> {
   const rows = await (await db()).getAllFromIndex('attempts', 'timestamp');
   const latestWrong = new Map<string, ExerciseAttempt>();
   const latestAny = new Map<string, ExerciseAttempt>();
-  for (const attempt of rows) {
+  for (const row of rows) {
+    const attempt = ExerciseAttemptSchema.parse(row);
     const key = itemStateId(attempt.unitId, attempt.itemId);
     latestAny.set(key, attempt);
     if (!attempt.correct) latestWrong.set(key, attempt);

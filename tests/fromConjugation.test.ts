@@ -74,6 +74,7 @@ test('one unit per selected tense, each valid, numbered, tagged and named after 
     expect(unit.id).toBe(`${setId}:${TENSES[index]}`);
     expect(unit.unitNumber).toBe(index + 1);
     expect(unit.section).toBe('CONJUGAISON');
+    expect(unit.learningArea).toBe('grammar');
     expect(unit.type).toBe('WORD_TRANSFORM');
     expect(unit.setTitle).toBeTypeOf('string');
     expect(unit.createdAt).toBe(1_700_000_000_001); // one read, shared by every unit

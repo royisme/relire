@@ -40,31 +40,31 @@ test('set action starts in number order, continues the first unfinished exercise
     { ...first, unitNumber: 2, setTitle: 'Mon cahier' },
     { ...second, unitNumber: 1, setTitle: 'Mon cahier' },
   ]);
-  await page.goto('/#/practice/set/set-1');
+  await page.goto('/#/grammar/exercises/set/set-1');
   const start = page.getByRole('button', { name: 'Start', exact: true });
   await expect(start).toBeVisible();
   await expect(start).toHaveClass(/bg-accent-700/);
-  await expect(page.getByRole('link', { name: 'Back to Practice', exact: true }).locator('svg')).toHaveClass(
+  await expect(page.getByRole('link', { name: 'Back to exercises', exact: true }).locator('svg')).toHaveClass(
     /lucide-arrow-left/,
   );
   const del = page.getByRole('button', { name: 'Delete set', exact: true });
   await expect(del).not.toHaveClass(/bg-accent-700|bg-surface/);
   await expect(del.locator('svg')).toHaveClass(/lucide-trash-2/);
   await start.click();
-  await expect(page).toHaveURL(new RegExp(`#/practice/${second.id}$`));
+  await expect(page).toHaveURL(new RegExp(`#/grammar/exercises/unit/${second.id}$`));
   await checkItems(page, second.id, [second.items[0]], false);
-  await page.goto('/#/practice/set/set-1');
+  await page.goto('/#/grammar/exercises/set/set-1');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`#/practice/${second.id}$`));
+  await expect(page).toHaveURL(new RegExp(`#/grammar/exercises/unit/${second.id}$`));
   await checkItems(page, second.id, [second.items[1]], true);
-  await page.goto('/#/practice/set/set-1');
+  await page.goto('/#/grammar/exercises/set/set-1');
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`#/practice/${first.id}$`));
+  await expect(page).toHaveURL(new RegExp(`#/grammar/exercises/unit/${first.id}$`));
   await checkItems(page, first.id, first.items, true);
-  await page.goto('/#/practice/set/set-1');
+  await page.goto('/#/grammar/exercises/set/set-1');
   const again = page.getByRole('button', { name: 'Practise again', exact: true });
   await again.click();
-  await expect(page).toHaveURL(new RegExp(`#/practice/${second.id}$`));
+  await expect(page).toHaveURL(new RegExp(`#/grammar/exercises/unit/${second.id}$`));
 });
 
 for (const phone of [false, true]) {
@@ -112,15 +112,13 @@ for (const phone of [false, true]) {
           });
         expect(levelHeight).toBeLessThan(30);
       }
-      const actionBox = (await row.getByRole('button').boundingBox())!;
-      const rowBox = (await row.boundingBox())!;
-      expect(Math.abs(actionBox.y + actionBox.height / 2 - rowBox.y - rowBox.height / 2)).toBeLessThan(2);
+      await expect(row.getByRole('button', { name: /Delete/ })).toHaveCount(0);
       expect(await overflowing(page.locator('body'))).toEqual([]);
       await row.getByRole('link').click();
       await expect(page.getByRole('table')).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       const exercise = page.locator('main tbody tr');
-      await expect(exercise).toContainText('1 of 1 checked · 1 correct');
+      await expect(exercise.filter({ hasText: first.title })).toContainText('1 of 1 checked · 1 correct');
       if (phone) {
         await expect(exercise.locator('td').first()).toBeHidden();
         await expect(exercise.getByRole('link')).toContainText(`1. ${first.title}`);
@@ -138,10 +136,9 @@ for (const phone of [false, true]) {
     void ai;
     await page.goto(PRACTICE);
     const main = page.getByRole('main');
-    await expect(main.getByRole('link', { name: 'Import a worksheet', exact: true })).toBeVisible();
-    await expect(main.getByRole('button', { name: 'Make from an article', exact: true })).toBeVisible();
-    await main.getByRole('button', { name: 'Conjugation drills', exact: true }).click();
+    await main.getByRole('button', { name: 'Add exercises', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: 'Add exercises' });
+    await dialog.getByRole('button', { name: 'Conjugation drills', exact: true }).click();
     const article = dialog.getByRole('button', { name: 'Make from an article', exact: true });
     const drills = dialog.getByRole('button', { name: 'Conjugation drills', exact: true });
     await expect(drills).toHaveAttribute('aria-pressed', 'true');

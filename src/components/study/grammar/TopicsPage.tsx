@@ -40,7 +40,7 @@ function TopicsContent({ topicId, tag, onRetry }: { topicId?: string; tag?: Gram
           </Button>
           {topicId && (
             <Link
-              to={{ name: 'practice' }}
+              to={{ name: 'practice', area: 'grammar' }}
               className="inline-flex min-h-10 items-center px-3 text-sm text-accent-900 underline"
             >
               {t('grammarTopics.learning.reference.savedPractice')}
@@ -50,7 +50,7 @@ function TopicsContent({ topicId, tag, onRetry }: { topicId?: string; tag?: Gram
       ) : topicId ? (
         <>
           <Link
-            to={{ name: 'study', tab: 'grammar' }}
+            to={{ name: 'grammar' }}
             className="mb-5 inline-flex min-h-10 items-center text-sm text-accent-900 underline underline-offset-2"
           >
             {t('grammarTopics.back')}
@@ -75,7 +75,7 @@ function TopicsContent({ topicId, tag, onRetry }: { topicId?: string; tag?: Gram
             <h2 className="font-serif text-2xl font-semibold">{t('grammarTopics.title')}</h2>
             {tag && (
               <Link
-                to={{ name: 'study', tab: 'grammar' }}
+                to={{ name: 'grammar' }}
                 aria-label={t('grammarTopics.clearTag', { tag: t(`grammarTags.${tag}`) })}
                 className="inline-flex min-h-10 items-center gap-2 rounded-full border border-ink-300 px-3 text-sm text-ink-700"
               >

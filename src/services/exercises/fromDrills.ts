@@ -25,6 +25,7 @@ export function prepareDrills(
     setTitle: drills.drillTitle,
     level,
     createdAt: Date.now(),
+    learningArea: 'grammar',
     section: 'EXTRA',
     unitNumber: 1,
     title: drills.drillTitle,

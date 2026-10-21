@@ -190,7 +190,7 @@ test('opening a sentence from the log scrolls to it once', async ({ page }) => {
   await expect(far).toBeInViewport();
 
   await page.getByRole('link', { name: 'Progress' }).click();
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await page.getByText('Le Petit Prince').first().click();
   await expect(page.locator('article [data-sentence]').first()).toBeVisible();
   // The pointer is still where the library row was; hovering a sentence would show its actions.

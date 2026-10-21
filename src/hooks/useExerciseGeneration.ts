@@ -10,9 +10,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { generateExercises, MissingApiKeyError } from '../services/api';
 import { toStoredUnits } from '../services/exercises/fromGenerated';
-import { saveUnits } from '../storage/exercises';
+import { createUnitSaver } from './useUnitSaver';
 import type { Article } from '../types';
 import type { ExerciseLevel } from '../types/exercises';
+import type { ArticleExerciseArea } from '../types/learningArea';
 import { aiErrorText } from '../utils/aiErrorText';
 import { cleanArticleTitle } from '../utils/i18nHelpers';
 
@@ -28,10 +29,13 @@ export type GenerationState =
   /** `items` were saved in `units` units; `dropped` could not be checked against the article and were left out. */
   | { status: 'done'; units: number; items: number; dropped: number };
 
-export function useExerciseGeneration(article: Article, onMissingKey: () => void) {
+export function useExerciseGeneration(article: Article, learningArea: ArticleExerciseArea, onMissingKey: () => void) {
   const [state, setState] = useState<GenerationState>({ status: 'idle' });
   const session = useRef(0);
   const working = useRef(false);
+  const [saver] = useState(createUnitSaver);
+  const droppedCount = useRef(0);
+  const [prepared, setPrepared] = useState(false);
 
   // Leaving the page (or the article) ends the session; the screen is keyed by article.
   const endSession = useCallback(() => {
@@ -49,21 +53,24 @@ export function useExerciseGeneration(article: Article, onMissingKey: () => void
       const mine = session.current;
       setState({ status: 'working' });
       try {
-        const set = await generateExercises({ articleText: article.content, count, level }, true);
-        const saved = await saveUnits(
-          toStoredUnits(set.units, {
+        const saved = await saver.run(async () => {
+          const set = await generateExercises({ articleText: article.content, count, level, learningArea }, true);
+          droppedCount.current = set.dropped;
+          if (mine === session.current) setPrepared(true);
+          return toStoredUnits(set.units, {
             setId: crypto.randomUUID(),
             setTitle: cleanArticleTitle(article.title) || undefined,
             level,
             createdAt: Date.now(),
-          }),
-        );
-        if (mine !== session.current) return;
+          });
+        });
+        if (mine !== session.current || !saved) return;
+        setPrepared(false);
         setState({
           status: 'done',
           units: saved.length,
           items: saved.reduce((sum, unit) => sum + unit.items.length, 0),
-          dropped: set.dropped,
+          dropped: droppedCount.current,
         });
         return true;
       } catch (err) {
@@ -78,8 +85,8 @@ export function useExerciseGeneration(article: Article, onMissingKey: () => void
         working.current = false;
       }
     },
-    [article.content, article.title, onMissingKey],
+    [article.content, article.title, learningArea, onMissingKey, saver],
   );
 
-  return { state, make };
+  return { state, make, prepared };
 }

@@ -7,7 +7,7 @@ import { expect, overflowing, test, type MockAi } from './fixtures';
 import { PRACTICE, row, stored, waitForArticle } from './practice.helpers';
 import type { Page } from '@playwright/test';
 
-const setLinks = (page: Page) => page.locator('main tbody a[href^="#/practice/set/"]');
+const setLinks = (page: Page) => page.locator('main tbody a[href^="#/grammar/exercises/set/"]');
 
 type StoredUnit = { id: string; setId: string; title: string; type: string; items: unknown[] };
 
@@ -118,8 +118,8 @@ test('a correct answer passes; an accent-less answer is wrong with the preferenc
   await withoutKey(page);
   const [unit] = await makeDrillSet(page);
   expect(aiCalls(ai)).toBe(0);
-  await page.locator(`main a[href="#/practice/set/${unit.setId}"]`).click();
-  await page.locator(`main a[href="#/practice/${encodeURIComponent(unit.id)}"]`).click();
+  await page.locator(`main a[href="#/grammar/exercises/set/${unit.setId}"]`).click();
+  await page.locator(`main a[href="#/grammar/exercises/unit/${encodeURIComponent(unit.id)}"]`).click();
   const items = unit.items as {
     prompt: string;
     expectedAnswer: string;

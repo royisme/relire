@@ -20,6 +20,7 @@ test('complete 3x2 payload maps a validated self-contained unit and shares brows
   expect(ExerciseUnitSchema.parse(unit)).toEqual(unit);
   expect(unit.id).toBe(`topic:${topic.id}:${revision}`);
   expect(unit.setId).toBe(unit.id);
+  expect(unit.learningArea).toBe('grammar');
   expect(unit.items).toHaveLength(6);
   expect(unit.items.map((item) => item.itemNumber)).toEqual([1, 2, 3, 4, 5, 6]);
   expect(unit.items[0].topicQuestion?.feedback).toEqual(topic.learning.checkpoints[0].questions[0].feedback);

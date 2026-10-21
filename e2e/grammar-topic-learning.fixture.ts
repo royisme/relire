@@ -6,7 +6,7 @@ import { topicsFixture } from '../tests/fixtures/grammarTopics';
 import en from '../src/i18n/locales/en.json' with { type: 'json' };
 import zh from '../src/i18n/locales/zh.json' with { type: 'json' };
 
-export const TOPIC = '/#/study/grammar/test-only';
+export const TOPIC = '/#/grammar/topics/test-only';
 export async function setup(page: Page, language: 'en' | 'zh' = 'en', theme = 'light') {
   await page.addInitScript(
     ({ language, theme }) => {

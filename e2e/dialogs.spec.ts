@@ -17,7 +17,7 @@ test('settings come back with the saved values; an unsaved edit is not kept', as
   await expect(page.getByText('Unsaved changes')).toBeVisible();
 
   // Leaving with an unsaved AI draft asks first; discarding keeps the stored key as it was.
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await page
     .getByRole('dialog', { name: 'Discard the unsaved AI settings?' })
     .getByRole('button', { name: 'Discard', exact: true })

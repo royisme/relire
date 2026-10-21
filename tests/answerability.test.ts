@@ -70,10 +70,10 @@ test('hint and explanation keys follow language, prompt version and the normaliz
 });
 
 test('exercise keys follow article text, count and level, never the provider', () => {
-  const key = exercisesKey('en', 'fp', 'B1', 6, article);
-  expect(exercisesKey('en', 'fp', ' b1 ', 6, article)).toBe(key);
-  expect(exercisesKey('en', 'fp', 'B1', 8, article)).not.toBe(key);
-  expect(exercisesKey('en', 'fp', 'A2', 6, article)).not.toBe(key);
-  expect(exercisesKey('en', 'fp', 'B1', 6, article + ' ')).not.toBe(key);
-  expect(exercisesKey('en', 'other', 'B1', 6, article)).not.toBe(key);
+  const key = exercisesKey('en', 'fp', 'B1', 6, article, 'reading');
+  expect(exercisesKey('en', 'fp', ' b1 ', 6, article, 'reading')).toBe(key);
+  expect(exercisesKey('en', 'fp', 'B1', 8, article, 'reading')).not.toBe(key);
+  expect(exercisesKey('en', 'fp', 'A2', 6, article, 'reading')).not.toBe(key);
+  expect(exercisesKey('en', 'fp', 'B1', 6, article + ' ', 'reading')).not.toBe(key);
+  expect(exercisesKey('en', 'other', 'B1', 6, article, 'reading')).not.toBe(key);
 });

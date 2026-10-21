@@ -14,13 +14,15 @@ import { LeaveDialog } from './LeaveDialog';
 import { Button } from '../ui/button';
 import { PageHeader } from '../ui/page-header';
 import { field } from './fields';
+import type { LearningArea } from '../../types/learningArea';
+import { importDestination } from '../../services/exercises/importDraft';
 
-export function ImportExercisesPage() {
+export function ImportExercisesPage({ area }: { area: LearningArea }) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<ImportMode>('complete');
   const source = useImportSource(
     async ({ text, images, signal, access }) => ({
-      draft: await extractMaterial({ mode, text, images, signal }, access),
+      draft: await extractMaterial({ mode, learningArea: area, text, images, signal }, access),
       mode,
     }),
     true,
@@ -101,7 +103,7 @@ export function ImportExercisesPage() {
       await saveUnits(units);
       session.release();
       source.dispose();
-      navigate({ name: 'practiceSet', setId: units[0].setId });
+      navigate(importDestination(units, area));
     } catch (err) {
       setError(t('importExercises.saveFailed', { msg: err instanceof Error ? err.message : String(err) }));
     } finally {
@@ -116,7 +118,7 @@ export function ImportExercisesPage() {
         <SourceInput
           kind="exercises"
           source={source}
-          page={{ name: 'importExercises' }}
+          page={{ name: 'importExercises', area }}
           onDiscard={session.discardSource}
           leaveOpen={session.leaveOpen}
         >

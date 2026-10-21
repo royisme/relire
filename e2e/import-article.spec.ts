@@ -179,18 +179,21 @@ test('each import is a sidebar entry of its own area, and the library and Practi
     'aria-current',
     'page',
   );
-  await expect(nav.getByRole('link', { name: 'Read', exact: true })).toHaveAttribute('aria-current', 'true');
-  // The exercise import is not offered while in Read, and the old single address is gone.
-  await expect(nav.getByRole('link', { name: 'Import exercises' })).toHaveCount(0);
-  await page.goto('/#/practice');
+  await expect(nav.getByRole('link', { name: 'Reading', exact: true })).toHaveAttribute('aria-current', 'true');
+  // Each domain's exercise import carries its explicit entry context.
+  await expect(nav.getByRole('link', { name: 'Import exercises' })).toHaveAttribute(
+    'href',
+    '#/import/exercises?area=reading',
+  );
+  await page.goto('/#/grammar/exercises');
   await expect(nav.getByRole('link', { name: 'Import an article' })).toHaveCount(0);
   await nav.getByRole('link', { name: 'Import exercises', exact: true }).click();
-  await expect(page).toHaveURL(/#\/import\/exercises$/);
+  await expect(page).toHaveURL(/#\/import\/exercises\?area=grammar$/);
   await expect(nav.getByRole('link', { name: 'Import exercises', exact: true })).toHaveAttribute(
     'aria-current',
     'page',
   );
-  await expect(nav.getByRole('link', { name: 'Practice', exact: true })).toHaveAttribute('aria-current', 'true');
+  await expect(nav.getByRole('link', { name: 'Grammar', exact: true })).toHaveAttribute('aria-current', 'true');
   await page.goto('/#/import');
   await expect(page.getByRole('heading', { name: 'This page is not here' })).toBeVisible();
 });

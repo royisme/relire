@@ -44,6 +44,7 @@ export function topicToExerciseUnit(input: GrammarTopic, exerciseRevision: strin
   return ExerciseUnitSchema.parse({
     id,
     setId: id,
+    learningArea: 'grammar',
     section: 'GRAMMAIRE',
     unitNumber: 1,
     type: 'FILL_BLANKS',

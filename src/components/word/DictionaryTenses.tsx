@@ -82,7 +82,7 @@ export function DictionaryTenses({ lemma, lookup, fallback }: { lemma: string; l
         ];
       })}
       <Link
-        to={{ name: 'study', tab: 'grammar', section: 'conjugation', verb: lemma }}
+        to={{ name: 'grammar', section: 'conjugation', verb: lemma }}
         className="text-sm text-accent-900 underline underline-offset-2"
       >
         {t('wordModal.compoundTenses')}

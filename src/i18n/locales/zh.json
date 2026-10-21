@@ -13,9 +13,7 @@
     "listSeparator": "；"
   },
   "nav": {
-    "reader": "精读",
     "vocab": "我的学习",
-    "practice": "练习",
     "analytics": "进度",
     "installApp": "安装应用",
     "settings": "设置",
@@ -28,6 +26,29 @@
     "toReview": "{{count}} 道待复习",
     "importArticle": "导入文章",
     "importExercises": "导入练习"
+  },
+  "learning": {
+    "areas": { "reading": "阅读", "grammar": "语法", "listening": "听力", "writing": "写作" },
+    "area": "学习领域",
+    "navigation": "学习导航",
+    "library": "文章库",
+    "exercises": "练习",
+    "exercisesTitle": "{{area}}练习",
+    "scopedCounts": "数量和进度仅统计当前领域。打开题组可查看完整批次，其中可能包含其他领域。",
+    "completeSet_one": "完整题组：跨所有学习领域的 {{count}} 份练习。删除题组会删除整个批次。",
+    "completeSet_other": "完整题组：跨所有学习领域的 {{count}} 份练习。删除题组会删除整个批次。",
+    "emptyTitle": "此领域还没有已保存的练习",
+    "emptyDesc": "通过“添加练习”导入练习单，或为此领域生成支持的练习。",
+    "listeningSupport": "听力目前仅支持数字听写，不支持通用音频理解训练。",
+    "listeningEmpty": "导入含可练习数字听写的练习单，核对各单元的学习领域后保存。",
+    "unsupportedListening": "听力要求每道题均为数字听写且有听写文本。请选择其他领域或排除此单元；朗读题干不算听力练习。",
+    "speaking": "口语",
+    "readAloud": "朗读",
+    "speakingDesc": "听文章中的一句话，录下自己的朗读，也可请 AI 给出发音评估。",
+    "shadowingContext": "要保存跟读录音，请使用阅读页句子旁的麦克风。录音保存在“我的学习 → 跟读”。",
+    "chooseArticle": "选择文章",
+    "speakingEmpty": "请先在阅读中添加文章，再练习朗读。",
+    "sourceUnavailable": "所选文章或句子已不可用。请明确选择新的来源后继续。"
   },
   "theme": {
     "label": "主题",
@@ -209,7 +230,6 @@
     "removeHelp": "取消收藏会保留语境、复习计划和自评历史。"
   },
   "practice": {
-    "title": "练习",
     "setCount_other": "{{count}} 个题组",
     "exercises_other": "{{count}} 份练习",
     "add": "添加练习",
@@ -233,8 +253,6 @@
     "colType": "题型",
     "actions": "操作",
     "checkedProgress": "已检查 {{checked}}/{{total}} 题 · 答对 {{correct}} 题",
-    "emptyTitle": "还没有题组",
-    "emptyDesc": "导入练习单、由文章出题，或练习动词变位。作答和进度保存在本机。",
     "noMatch": "没有符合条件的题组。",
     "back": "返回练习",
     "backToSet": "返回「{{title}}」",
@@ -258,8 +276,6 @@
     "items_other": "{{count}} 题",
     "notStarted": "未开始",
     "progress": "已检查 {{checked}}/{{total}} 题，答对 {{correct}} 题",
-    "oralTitle": "朗读",
-    "oralDesc": "朗读文章中的一句话，由 AI 给出发音评分。",
     "sentenceOf": "第 {{current}} 句，共 {{total}} 句",
     "previousSentence": "上一句",
     "nextSentence": "下一句",
@@ -278,7 +294,7 @@
     "deleteSet": "删除题组",
     "deleteSetNamed": "删除题组「{{title}}」",
     "deleteSetTitle": "删除这个题组？",
-    "deleteSetBody_other": "题组「{{title}}」、其中 {{count}} 份练习及其作答将从本机删除。作答历史会留在错题本。",
+    "deleteSetBody_other": "删除完整题组「{{title}}」：所有学习领域中的 {{count}} 份练习、作答和短文录音均会从本机删除。作答历史会留在错题本。",
     "deleteSetFailed": "无法删除题组：{{reason}}",
     "saveFailed": "最近的修改未能保存：{{msg}}",
     "right": "答对",
@@ -767,7 +783,7 @@
     "saved": "已保存。",
     "tooShort": "太短了，没有保存。请再录一次。",
     "listeningEnded": "卡片播放了声音，全文朗读已停止。",
-    "busy": "句子分析或练习页正在录音。",
+    "busy": "句子分析或朗读页正在录音。",
     "error": "无法录音：{{msg}}",
     "saveFailed": "录音没能保存：{{msg}}",
     "retry": "重试",
@@ -784,8 +800,7 @@
     "label": "我的学习",
     "words": "生词",
     "shadowing": "跟读",
-    "mistakes": "错题本",
-    "grammar": "语法"
+    "mistakes": "错题本"
   },
   "nounGender": {
     "title": "名词阴阳性",
@@ -1023,7 +1038,7 @@
     "toLibrary": "回到文章库",
     "unit": "找不到这组练习。它可能已被删除，或者链接来自另一个浏览器。",
     "set": "找不到这个题组。它可能已被删除，或链接来自另一个浏览器。",
-    "toPractice": "去练习"
+    "toPractice": "前往此领域的练习"
   },
   "importMaterial": {
     "fileType": "请选择 PNG、JPEG、WebP 图片或 PDF 文件。",
@@ -1119,7 +1134,7 @@
     "level": "这些练习的等级",
     "chooseLevel": "选择等级",
     "levelRequired": "保存前请选择题组难度。",
-    "confirm": "我已审阅所选练习和参考答案，确认将题组保存在本机。",
+    "confirm": "我已审阅每个所选单元的学习领域、练习和参考答案，确认将题组保存在本机。",
     "save": "确认保存",
     "selectUnits": "请至少包含一个可练习的单元。",
     "saveFailed": "保存失败，草稿已保留，可重试。{{msg}}",
@@ -1164,7 +1179,7 @@
   },
   "exerciseProgress": {
     "title": "语法正确率",
-    "history": "统计所有已检查的作答，包括已删除材料的历史记录。",
+    "history": "仅统计语法作答，包括来源已删除的语法历史记录。",
     "accuracy": "{{percent}}% · 答对 {{correct}} / {{total}}",
     "readFailed": "无法读取练习记录：{{reason}}",
     "loading": "正在读取练习记录…",

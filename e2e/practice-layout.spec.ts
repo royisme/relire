@@ -16,6 +16,7 @@ const longUnit = {
   id: 'long',
   setId: 'set-long',
   setTitle: `Un titre de série très long pour vérifier que tout passe à la ligne ${LONG}`,
+  learningArea: 'grammar',
   section: 'GRAMMAIRE',
   unitNumber: 12,
   title: `Un titre de série très long pour vérifier que tout passe à la ligne ${LONG}`,
@@ -138,11 +139,11 @@ for (const phone of [false, true]) {
     expect(await overflowing(page.locator('body'))).toEqual([]);
     expect((await layout(page, 'main')).width).toBeLessThanOrEqual(page.viewportSize()!.width);
 
-    await page.locator('main a[href="#/practice/set/set-long"]').click();
+    await page.locator('main a[href="#/grammar/exercises/set/set-long"]').click();
     await expect(page.getByRole('heading', { name: /Un titre de série très long/ })).toBeVisible();
     await settled(page);
     expect(await overflowing(page.locator('body'))).toEqual([]);
-    await page.locator('main a[href="#/practice/long"]').click();
+    await page.locator('main a[href="#/grammar/exercises/unit/long"]').click();
     await expect(page.getByRole('heading', { name: /Un titre de série très long/ })).toBeVisible();
     await settled(page);
     expect(await overflowing(page.locator('body'))).toEqual([]);
@@ -200,15 +201,15 @@ for (const phone of [false, true]) {
     await row(page, 'Je ne').getByRole('button', { name: 'Hint' }).click();
     await expect(row(page, 'Je ne').getByText('Rule:')).toBeVisible();
     await page.goto(PRACTICE);
-    await expect(page.locator('main tbody tr')).toContainText('1 of 15 checked');
+    await expect(page.locator('main tbody tr')).toContainText('1 of 6 checked');
 
     for (const mode of ['light', 'sepia', 'dark']) {
       await page.evaluate((m) => localStorage.setItem('relire_theme', m), mode);
       await page.reload();
-      await expect(page.locator('main a[href="#/practice/set/set-1"]')).toBeVisible();
+      await expect(page.locator('main a[href="#/grammar/exercises/set/set-1"]')).toBeVisible();
       await settled(page);
       expect(await overflowing(page.locator('body'))).toEqual([]);
-      await page.locator('main a[href="#/practice/set/set-1"]').click();
+      await page.locator('main a[href="#/grammar/exercises/set/set-1"]').click();
       await settled(page);
       expect(await overflowing(page.locator('body'))).toEqual([]);
       await openUnit(page, 'unit-fill-blanks', 'Conjuguer au présent et au futur');

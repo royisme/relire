@@ -135,7 +135,7 @@ for (const language of ['en', 'zh'] as const) {
         await expect(workbench(page).getByRole('textbox')).toBeFocused();
         await workbench(page).getByRole('textbox').fill('TEST learner draft');
         await selectors.nth(5).click();
-        await page.goto(`/#/study/grammar/${referenceTopic.id}`);
+        await page.goto(`/#/grammar/topics/${referenceTopic.id}`);
         await expect(page.getByRole('heading', { name: referenceTopic.title[language], exact: true })).toBeVisible();
         await expect.poll(async () => (await stored(page)).itemStates.length).toBe(1);
         const draft = await stored(page);
@@ -248,11 +248,11 @@ for (const language of ['en', 'zh'] as const) {
           strings.progress.initial.replace('{{checked}}', '0').replace('{{total}}', '6'),
         );
         // A reference-only topic keeps its existing reader and never touches exercise stores.
-        await page.goto(`/#/study/grammar/${referenceTopic.id}`);
+        await page.goto(`/#/grammar/topics/${referenceTopic.id}`);
         await expect(page.getByRole('heading', { name: referenceTopic.title[language], exact: true })).toBeVisible();
         await expect(workbench(page)).toHaveCount(0);
         expect(await stored(page)).toEqual(reset);
-        await page.goto(`/#/study/grammar/${secondTopic.id}`);
+        await page.goto(`/#/grammar/topics/${secondTopic.id}`);
         await expect(
           workbench(page).getByRole('heading', { name: secondTopic.title[language], exact: true }),
         ).toBeVisible();

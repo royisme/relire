@@ -15,6 +15,8 @@
 {{/if}}
 {{#if customTitle}}用户建议的标题是：“{{customTitle}}”。如果与材料相符，请将其用作 materialTitle。
 {{/if}}
+入口学习领域：{{learningArea}}（仅供参考，不限制混合练习单）。每个单元必须明确包含 learningArea：reading | grammar | listening | writing，按主要学习目标分类，不按输入格式、题型、section 或语法标签推断。reading 考查阅读理解，grammar 考查语言规则，writing 要求造句或写作。listening 目前仅支持每道题的实际题型均为 NUMBER_DICTATION 且有真实 audioText 的单元。朗读题干不算听力练习。保留不支持的原题并明确标记 blockers，不要编造缺失音频。学习者会逐一审核确认分类。
+
 题型（请原样使用题型 ID）：
 - WORD_TRANSFORM：改写词语，例如从阴性变为阳性（femme -> mari/homme，étudiante -> étudiant）。
 - FILL_BLANKS：补全对话或句子，空处用 [___] 标出。
@@ -32,7 +34,7 @@
 - materialTitle：课程标题，或课外测试的标题。材料没有标题时不要填写此字段。
 - warnings：你注意到的问题，例如无法辨认的文字或不清晰的版式。没有问题时留空。
 - units：练习单元。如果材料中没有问题，则留空。
-- 每个单元包含：id（在草稿内唯一，例如 u1）、section（GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber（正整数）、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，单元需要阅读材料时；标题和译文可以省略）、type（上面的题型之一）、grammarTags（其练习题使用的标签，至少一个）以及 items。
+- 每个单元包含：learningArea（必填，明确的主要学习目标）、id（在草稿内唯一，例如 u1）、section（GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber（正整数）、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，单元需要阅读材料时；标题和译文可以省略）、type（上面的题型之一）、grammarTags（其练习题使用的标签，至少一个）以及 items。
 - 每道题包含：id（在所属单元内唯一）、itemNumber（数字，或类似 "a" 的文字）、type（仅当该题与所属单元的题型不同时填写）、prompt（空处为 [___]；CHOICE_SELECT 的选项写作 {a|b}）、secondaryPrompt（有则填写）、audioText（听写或数字题需要朗读的法语文本）、options（有选项或判断项时；其中不能有空白项）、expectedAnswer（字符串；多空时为字符串数组；无答案时为 null）、printedAnswer（仅限材料中确实印出的答案，否则为 null）、acceptableAnswers、explanation（简明的中文语法讲解）、grammarTag（下面列表中恰好一个标签）以及 blockers（缺少哪些内容导致该题无法使用，例如音频、图示、选项或背景；没有缺失时留空）。
 
 答案格式（单元能否用于练习，应用会按此检查）：

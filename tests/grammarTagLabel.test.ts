@@ -14,8 +14,7 @@ test('one published topic goes direct; several go to the tag-filtered list', () 
     topicId: 'test-only',
   });
   expect(grammarTagDestination({ present: ['test-only', 'another-test'] }, 'present')).toEqual({
-    name: 'study',
-    tab: 'grammar',
+    name: 'grammar',
     tag: 'present',
   });
 });

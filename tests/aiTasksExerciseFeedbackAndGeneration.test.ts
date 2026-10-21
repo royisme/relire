@@ -136,7 +136,7 @@ describe('generateAdaptiveDrills', () => {
 
 describe('generateExercises', () => {
   const article = 'Le matin, Léa prend le train pour Lyon. Elle a rendez-vous avec une amie.';
-  const input = { articleText: article, count: 2, level: 'A2' };
+  const input = { articleText: article, count: 2, level: 'A2', learningArea: 'grammar' as const };
   const {
     setId: _setId,
     level: _level,

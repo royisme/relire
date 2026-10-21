@@ -28,7 +28,7 @@ test('a preview sound stops with its request when Settings is left', async ({ pa
   await page.goto('/#/settings/ai/speech');
   await page.getByRole('button', { name: 'Preview voice' }).click();
   await expect.poll(() => pausedAudios(page)).toHaveLength(1);
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await expect.poll(async () => (await pausedAudios(page))[0]).toBe(true);
 });
 
@@ -95,7 +95,7 @@ test('leaving Settings cancels a device preview that is still speaking', async (
   await expect.poll(() => page.evaluate(() => (window as unknown as { spoken: string[] }).spoken)).toHaveLength(1);
   // The preview's own setup cancels once; leaving the page must cancel the speaking preview itself.
   const before = await counter(page);
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await expect.poll(() => counter(page)).toBeGreaterThan(before);
 });
 

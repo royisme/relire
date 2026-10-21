@@ -54,7 +54,7 @@ for (const [language, locale] of [
     expect(Object.keys(status).sort()).toEqual([...STATUSES].sort());
     expect(Object.keys(page.participle as object).sort()).toEqual(['fp', 'fs', 'mp', 'ms', 'present']);
     expect(Object.keys(page.auxiliary as object).sort()).toEqual(['avoir', 'etre']);
-    expect(locale.study.grammar.trim()).toBeTruthy();
+    expect(locale.learning.areas.grammar.trim()).toBeTruthy();
   });
 
   test(`${language}: the copy uses the typographic apostrophe and no exclamation marks`, () => {

@@ -82,13 +82,13 @@ for (const phone of [false, true]) {
     await page.goto(PRACTICE);
     await expect(titles(page)).toHaveText(['Le lot récent', 'Le lot ancien']);
     expect(await overflowing(page.locator('body'))).toEqual([]);
-    const del = page.getByRole('button', { name: 'Delete set Le lot ancien', exact: true });
-    await expect(del).toHaveAttribute('title', 'Delete set Le lot ancien');
+    await page.locator('main a[href="#/grammar/exercises/set/set-old"]').click();
+    const del = page.getByRole('button', { name: 'Delete set', exact: true });
     await del.click();
     const dialog = page.getByRole('dialog', { name: 'Delete this exercise set?' });
-    await expect(dialog).toContainText('“Le lot ancien”, its 1 exercise');
+    await expect(dialog).toContainText('“Le lot ancien”: 1 exercise across all learning areas');
     await expect(dialog).toContainText('answers');
-    await expect(dialog).toContainText('attempt history stays in the mistake notebook');
+    await expect(dialog).toContainText('Attempt history stays in Mistakes');
     await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
     expect((await stored(page)).units).toHaveLength(2);
     await del.click();
@@ -115,11 +115,12 @@ test('failed set delete keeps the dialog, real error and rows', async ({ page, a
       return original.call(this, key);
     };
   });
-  await page.getByRole('button', { name: 'Delete set Le lot ancien' }).click();
+  await page.locator('main a[href="#/grammar/exercises/set/set-old"]').click();
+  await page.getByRole('button', { name: 'Delete set', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: 'Delete this exercise set?' });
   await dialog.getByRole('button', { name: 'Delete set', exact: true }).click();
   await expect(dialog.getByRole('alert')).toContainText('Storage test failure');
-  await expect(titles(page)).toHaveCount(2);
+  await expect(page.getByRole('heading', { name: 'Le lot ancien', exact: true })).toBeVisible();
   expect((await stored(page)).units).toHaveLength(2);
 });
 
@@ -133,14 +134,14 @@ test('set page lists numbered exercises; deleting one refreshes and deleting the
     { ...second, unitNumber: 1, setTitle: 'Mon cahier' },
   ]);
   await page.goto(PRACTICE);
-  await page.locator('main a[href="#/practice/set/set-1"]').click();
-  await expect(page).toHaveURL(/#\/practice\/set\/set-1$/);
+  await page.locator('main a[href="#/grammar/exercises/set/set-1"]').click();
+  await expect(page).toHaveURL(/#\/grammar\/exercises\/set\/set-1$/);
   await expect(page.getByRole('heading', { name: 'Mon cahier', exact: true })).toBeVisible();
   await expect(page.getByRole('main')).toContainText('B1 · Intermediate · 14 Nov 2023 · 2 exercises');
   for (const name of ['Number', 'Title', 'Type', 'Items', 'Progress'])
     await expect(page.getByRole('columnheader', { name, exact: true })).toBeVisible();
   await expect(page.locator('main tbody tr td:first-child')).toHaveText(['1', '2']);
-  await page.locator(`main a[href="#/practice/${second.id}"]`).click();
+  await page.locator(`main a[href="#/grammar/exercises/unit/${second.id}"]`).click();
   await expect(page.getByRole('heading', { name: second.title, exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'Back to Mon cahier', exact: true }).click();
   const del = page.getByRole('button', { name: `Delete exercise ${second.title}`, exact: true });
@@ -155,30 +156,30 @@ test('set page lists numbered exercises; deleting one refreshes and deleting the
   await dialog.getByRole('button', { name: 'Delete exercise', exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await expect(page.locator('main tbody tr')).toHaveCount(1);
-  await expect(page).toHaveURL(/#\/practice\/set\/set-1$/);
+  await expect(page).toHaveURL(/#\/grammar\/exercises\/set\/set-1$/);
   await page.getByRole('button', { name: `Delete exercise ${first.title}`, exact: true }).click();
   await expect(dialog).toContainText('last exercise');
   await expect(dialog).toContainText('exercise set will also be removed');
   await dialog.getByRole('button', { name: 'Delete exercise', exact: true }).click();
-  await expect(page).toHaveURL(/#\/practice$/);
-  await expect(page.getByText('No exercise sets yet')).toBeVisible();
+  await expect(page).toHaveURL(/#\/grammar\/exercises$/);
+  await expect(page.getByText('No saved exercises in this area')).toBeVisible();
   expect((await stored(page)).units).toEqual([]);
 });
 
 test('set page supports quiet set deletion and unknown-set recovery', async ({ page, ai }) => {
   void ai;
   await seedTwoSets(page);
-  await page.goto('/#/practice/set/set-new');
+  await page.goto('/#/grammar/exercises/set/set-new');
   const del = page.getByRole('main').getByRole('button', { name: 'Delete set', exact: true });
   await expect(del).toHaveClass(/text-ink-600/);
   await expect(del).not.toHaveClass(/bg-surface|bg-accent-700/);
   await del.click();
   await page.getByRole('dialog').getByRole('button', { name: 'Delete set', exact: true }).click();
-  await expect(page).toHaveURL(/#\/practice$/);
-  await page.goto('/#/practice/set/missing');
+  await expect(page).toHaveURL(/#\/grammar\/exercises$/);
+  await page.goto('/#/grammar/exercises/set/missing');
   await expect(page.getByRole('heading', { name: 'This page is not here' })).toBeVisible();
-  await page.getByRole('link', { name: 'Go to Practice' }).click();
-  await expect(page).toHaveURL(/#\/practice$/);
+  await page.getByRole('link', { name: 'Go to area exercises' }).click();
+  await expect(page).toHaveURL(/#\/grammar\/exercises$/);
 });
 
 test('loading owns a fixed-height busy region and load failures stay inline', async ({ page, ai }) => {
@@ -198,7 +199,7 @@ test('loading owns a fixed-height busy region and load failures stay inline', as
     const { navigate } = (await import(
       /* @vite-ignore */ '/src/hooks/useRoute.ts' as string
     )) as typeof import('../src/hooks/useRoute');
-    navigate({ name: 'practice' });
+    navigate({ name: 'practice', area: 'grammar' });
   });
   const busy = page.locator('main [aria-busy="true"]');
   await expect(busy).toBeVisible();
@@ -223,16 +224,16 @@ test('loading owns a fixed-height busy region and load failures stay inline', as
     const { navigate } = (await import(
       /* @vite-ignore */ '/src/hooks/useRoute.ts' as string
     )) as typeof import('../src/hooks/useRoute');
-    navigate({ name: 'practice' });
+    navigate({ name: 'practice', area: 'grammar' });
   });
   await expect(page.getByRole('main').getByRole('alert')).toContainText('Exercise list read failed');
-  await expect(page.getByText('No exercise sets yet', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('No saved exercises in this area', { exact: true })).toHaveCount(0);
 });
 
 test('exercise delete failure stays open without removing the row', async ({ page, ai }) => {
   void ai;
   await seedUnits(page, [first]);
-  await page.goto('/#/practice/set/set-1');
+  await page.goto('/#/grammar/exercises/set/set-1');
   await page.evaluate(() => {
     // oxlint-disable-next-line typescript/unbound-method -- Invoked with its store below.
     const original = IDBObjectStore.prototype.delete;

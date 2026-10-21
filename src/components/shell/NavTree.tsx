@@ -1,63 +1,126 @@
-/**
- * The app's places as one tree, drawn by the sidebar (expanded or as a rail) and by the phone drawer:
- * Read (with its article import while in Read), My study (Words, Shadowing, Mistakes, Grammar), Practice (with its exercise import
- * and the units of the open unit's batch) and Progress at the top;
- * install, Settings (with its sections while on a settings page) and About at the bottom. Owns which row is current,
- * and the counts on Words (due today) and Mistakes (still unresolved); navigation itself is `Link`.
- */
+/** One learning-first navigation tree for desktop, rail and phone drawer; only real saved writing enables Writing. */
 import { useTranslation } from 'react-i18next';
-import { BarChart3, BookmarkCheck, BookOpen, Download, Dumbbell, Info, Settings } from 'lucide-react';
+import {
+  BarChart3,
+  BookmarkCheck,
+  BookOpen,
+  Download,
+  Headphones,
+  Info,
+  Languages,
+  Mic,
+  PenLine,
+  Settings,
+} from 'lucide-react';
 import { PWAInstallButton } from '../PWAInstallButton';
-import { areaOf, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../../utils/routes';
-import { NavItem } from './NavItem';
+import { areaOf, routeHref, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../../utils/routes';
+import { contentServiceUrl } from '../../services/grammarTopics/service';
+import { useReaderUnits } from '../../hooks/useReaderUnits';
 import { useMistakes } from '../../hooks/useMistakes';
+import { NavItem } from './NavItem';
 import { PracticeSubnav } from './PracticeSubnav';
 
 interface NavTreeProps {
   route: Route;
-  /** Words saved that are due for review today. */
   dueCount: number;
-  /** Icon-only rows; sub-pages are left out (pages offer their own section list instead). */
   rail?: boolean;
-  /** Called after a link is followed, so the phone drawer can close. */
   onNavigate?: () => void;
 }
-
 export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
   const { t } = useTranslation();
   const area = areaOf(route);
-  // Resolved mistakes stay in the notebook as history, so only the unresolved ones are counted.
   const mistakes = useMistakes().rows.filter((row) => !row.resolved).length;
+  const writing = useReaderUnits().units?.some((unit) => unit.learningArea === 'writing');
   const item = { rail, onNavigate };
-  // An area with sub-pages is `area` while one of them is shown; the sub-page itself is `page`.
-  const areaState = (name: NonNullable<typeof area>, hasChildren: boolean) =>
-    area !== name ? undefined : hasChildren && !rail ? ('area' as const) : ('page' as const);
-
+  const links = [
+    { to: { name: 'library' } as Route, area: 'read', icon: BookOpen, label: t('learning.areas.reading') },
+    { to: { name: 'grammar' } as Route, area: 'grammar', icon: Languages, label: t('learning.areas.grammar') },
+    {
+      to: { name: 'practice', area: 'listening' } as Route,
+      area: 'listening',
+      icon: Headphones,
+      label: t('learning.areas.listening'),
+    },
+    { to: { name: 'speaking' } as Route, area: 'speaking', icon: Mic, label: t('learning.speaking') },
+    ...(writing
+      ? [
+          {
+            to: { name: 'practice', area: 'writing' } as Route,
+            area: 'writing',
+            icon: PenLine,
+            label: t('learning.areas.writing'),
+          },
+        ]
+      : []),
+  ];
+  const children: { to: Route; label: string }[] =
+    area === 'read'
+      ? [
+          { to: { name: 'library' }, label: t('learning.library') },
+          { to: { name: 'practice', area: 'reading' }, label: t('learning.exercises') },
+          { to: { name: 'importArticle' }, label: t('nav.importArticle') },
+        ]
+      : area === 'grammar'
+        ? [
+            ...(contentServiceUrl() ? [{ to: { name: 'grammar' } as Route, label: t('grammarTopics.title') }] : []),
+            { to: { name: 'grammar', section: 'conjugation' }, label: t('conjugation.page.title') },
+            { to: { name: 'grammar', section: 'gender' }, label: t('nounGender.title') },
+            { to: { name: 'practice', area: 'grammar' }, label: t('learning.exercises') },
+          ]
+        : area === 'speaking'
+          ? [{ to: { name: 'readAloud' }, label: t('learning.readAloud') }]
+          : [];
+  if (area === 'read' || area === 'grammar' || area === 'listening' || area === 'writing') {
+    children.push({
+      to: { name: 'importExercises', area: area === 'read' ? 'reading' : area },
+      label: t('nav.importExercises'),
+    });
+  }
   return (
     <nav aria-label={t('nav.main')} className="flex flex-1 flex-col">
-      <div className="px-2 py-3 space-y-0.5">
-        <NavItem
-          {...item}
-          to={{ name: 'library' }}
-          icon={BookOpen}
-          label={t('nav.reader')}
-          // The library and the reader are both "Read"; only the library row is a page of its own.
-          current={area === 'read' ? (route.name === 'importArticle' && !rail ? 'area' : 'page') : undefined}
-        />
-        {!rail && area === 'read' && (
-          <NavItem
-            {...item}
-            to={{ name: 'importArticle' }}
-            label={t('nav.importArticle')}
-            current={route.name === 'importArticle' ? 'page' : undefined}
-          />
-        )}
+      <div className="space-y-0.5 px-2 py-3">
+        {links.map((link) => (
+          <div key={link.area}>
+            <NavItem
+              {...item}
+              to={link.to}
+              icon={link.icon}
+              label={link.label}
+              current={area === link.area ? (!rail && children.length > 0 ? 'area' : 'page') : undefined}
+            />
+            {!rail && area === link.area && (
+              <>
+                {children.map(({ to, label }) => (
+                  <NavItem
+                    key={routeHref(to)}
+                    {...item}
+                    to={to}
+                    label={label}
+                    current={
+                      (
+                        to.name === 'grammar'
+                          ? (route.name === 'grammar' && route.section === to.section) ||
+                            (!to.section && route.name === 'grammarTopic')
+                          : routeHref(route) === routeHref(to)
+                      )
+                        ? 'page'
+                        : undefined
+                    }
+                  />
+                ))}
+                <PracticeSubnav route={route} onNavigate={onNavigate} />
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="space-y-0.5 border-t border-ink-200 px-2 py-3">
         <NavItem
           {...item}
           to={{ name: 'study', tab: 'words' }}
           icon={BookmarkCheck}
           label={t('nav.vocab')}
-          current={areaState('study', true)}
+          current={area === 'study' ? (rail ? 'page' : 'area') : undefined}
         />
         {!rail &&
           area === 'study' &&
@@ -69,8 +132,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
               label={t(`study.${tab}`)}
               current={
                 (route.name === 'study' && route.tab === tab) ||
-                ((route.name === 'wordsAll' || route.name === 'wordsReview') && tab === 'words') ||
-                (route.name === 'grammarTopic' && tab === 'grammar')
+                ((route.name === 'wordsAll' || route.name === 'wordsReview') && tab === 'words')
                   ? 'page'
                   : undefined
               }
@@ -86,37 +148,13 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
           ))}
         <NavItem
           {...item}
-          to={{ name: 'practice' }}
-          icon={Dumbbell}
-          label={t('nav.practice')}
-          // The list is a page of its own; an open set, unit or import makes Practice its parent.
-          current={
-            (route.name === 'unit' || route.name === 'practiceSet' || route.name === 'importExercises') && !rail
-              ? 'area'
-              : areaState('practice', false)
-          }
-        />
-        {!rail && area === 'practice' && (
-          <>
-            <NavItem
-              {...item}
-              to={{ name: 'importExercises' }}
-              label={t('nav.importExercises')}
-              current={route.name === 'importExercises' ? 'page' : undefined}
-            />
-            <PracticeSubnav route={route} onNavigate={onNavigate} />
-          </>
-        )}
-        <NavItem
-          {...item}
           to={{ name: 'progress' }}
           icon={BarChart3}
           label={t('nav.analytics')}
-          current={areaState('progress', false)}
+          current={area === 'progress' ? 'page' : undefined}
         />
       </div>
-
-      <div className="mt-auto border-t border-ink-200 px-2 py-3 space-y-0.5">
+      <div className="mt-auto space-y-0.5 border-t border-ink-200 px-2 py-3">
         <PWAInstallButton onDone={onNavigate}>
           {({ label, onClick }) => <NavItem {...item} icon={Download} label={label} onClick={onClick} />}
         </PWAInstallButton>
@@ -125,7 +163,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
           to={{ name: 'settings', section: null }}
           icon={Settings}
           label={t('nav.settings')}
-          current={areaState('settings', true)}
+          current={area === 'settings' ? (rail ? 'page' : 'area') : undefined}
         />
         {!rail &&
           area === 'settings' &&
@@ -143,7 +181,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
           to={{ name: 'about' }}
           icon={Info}
           label={t('settings.about.title')}
-          current={areaState('about', false)}
+          current={area === 'about' ? 'page' : undefined}
         />
       </div>
     </nav>

@@ -31,6 +31,7 @@ async function history(page: Page) {
     for (const [index, row] of rows.entries())
       await tx.store.add({
         id: `history-${index}`,
+        learningArea: 'grammar',
         unitId: 'deleted-unit',
         itemId: `item-${index}`,
         ...row,
@@ -107,7 +108,7 @@ for (const phone of [false, true]) {
     expect(await make.boundingBox()).toEqual(buttonBox);
     expect(await overflowing(page.locator('body'))).toEqual([]);
     finish();
-    await expect(page).toHaveURL(/#\/practice\/unit-/);
+    await expect(page).toHaveURL(/#\/grammar\/exercises\/unit\/unit-/);
     await expect(page.getByRole('heading', { name: CATALOG_DRILLS.drillTitle })).toBeVisible();
     expect(ai.calls.adaptive).toBe(1);
     expect(ai.prompts.adaptive[0]).toContain(CATALOG_DRILLS.items[0].prompt);
@@ -117,11 +118,11 @@ for (const phone of [false, true]) {
     expect(after.units).toHaveLength(1);
     expect(after.units[0]).toMatchObject({ setTitle: CATALOG_DRILLS.drillTitle, level: 'B1' });
     expect(after.units[0]).not.toHaveProperty('materialId');
-    await page.goto('/#/practice');
+    await page.goto('/#/grammar/exercises');
     await expect(page.locator('main tbody a').filter({ hasText: CATALOG_DRILLS.drillTitle })).toBeVisible();
     await page.reload();
-    await page.locator(`main a[href="#/practice/set/${after.units[0].setId}"]`).click();
-    await page.locator(`main a[href="#/practice/${after.units[0].id}"]`).click();
+    await page.locator(`main a[href="#/grammar/exercises/set/${after.units[0].setId}"]`).click();
+    await page.locator(`main a[href="#/grammar/exercises/unit/${after.units[0].id}"]`).click();
     await page.reload();
     await expect(page.getByRole('heading', { name: CATALOG_DRILLS.drillTitle })).toBeVisible();
     for (const item of CATALOG_DRILLS.items.slice(0, 2)) {
@@ -160,7 +161,7 @@ test('failed save keeps IDs, blocks edits, guards leave, retry makes no AI reque
   const writes = await page.evaluate(
     () => (window as unknown as { preparedWrites: { store: string; value: { id: string } }[] }).preparedWrites,
   );
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Discard this drill set?' })).toBeVisible();
   await page.getByRole('button', { name: 'Keep this set' }).click();
   await expect(page).toHaveURL(/#\/progress$/);
@@ -177,11 +178,11 @@ test('failed save keeps IDs, blocks edits, guards leave, retry makes no AI reque
   });
   await page.getByRole('button', { name: 'Retry saving' }).dblclick();
   await expect(page.getByRole('button', { name: 'Retry saving' })).toBeDisabled();
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('dialog').getByRole('button', { name: 'Discard', exact: true })).toBeDisabled();
   await page.evaluate(() => sessionStorage.setItem('releaseAdaptiveWrite', '1'));
-  await expect(page).toHaveURL(/#\/practice\/unit-/);
+  await expect(page).toHaveURL(/#\/grammar\/exercises\/unit\/unit-/);
   const after = await stored(page);
   expect(after.units).toHaveLength(1);
   expect(after.units[0]).toEqual(writes.find((row) => row.store === 'units')!.value);
@@ -223,7 +224,7 @@ test('pending generation disables edits, leaving drops late paid output before s
   await page.getByRole('button', { name: 'Make a drill set' }).dblclick();
   await expect(page.getByRole('combobox', { name: 'Level', exact: true })).toBeDisabled();
   await expect.poll(() => ai.calls.adaptive).toBe(1);
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await expect(page).toHaveURL(/#\/read$/);
   const response = page.waitForResponse((value) => value.url().includes('generativelanguage'));
   resolve();

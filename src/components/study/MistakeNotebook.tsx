@@ -107,6 +107,7 @@ export function MistakeNotebook({ onMissingKey, onWord }: Props) {
                   return (
                     <li key={attempt.id} className="space-y-3 py-5 break-words">
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                        <span className="text-ink-600">{t(`learning.areas.${attempt.learningArea}`)}</span>
                         <span className="text-ink-600">
                           {attempt.topicResult ? (
                             t(`grammarTags.${attempt.grammarTag}`)
@@ -147,7 +148,7 @@ export function MistakeNotebook({ onMissingKey, onWord }: Props) {
                         </Button>
                         {unit ? (
                           <Link
-                            to={{ name: 'unit', unitId: unit.id }}
+                            to={{ name: 'unit', area: unit.learningArea, unitId: unit.id }}
                             className="inline-flex min-h-10 items-center px-3 text-sm text-accent-900 underline"
                           >
                             {t('notebook.retryUnit')}

@@ -64,8 +64,15 @@ export const hintKey = itemKey;
 export const explanationKey = itemKey;
 
 /** Generated exercises are kept per article text, item count and level. */
-export const exercisesKey = (lang: string, fingerprint: string, level: string, count: number, articleText: string) =>
-  `${fingerprint}|${lang}|${normalize(level)}|${count}|${hashText(articleText)}.${articleText.length}`;
+export const exercisesKey = (
+  lang: string,
+  fingerprint: string,
+  level: string,
+  count: number,
+  articleText: string,
+  learningArea: string,
+) =>
+  `${fingerprint}|${lang}|${learningArea}|${normalize(level)}|${count}|${hashText(articleText)}.${articleText.length}`;
 
 export const sentenceKey = (lang: string, fingerprint: string, sentence: string) =>
   `${fingerprint}|${lang}|${normalize(sentence)}`;

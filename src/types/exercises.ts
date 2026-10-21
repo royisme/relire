@@ -6,6 +6,7 @@
  * import drafts (services/exercises/importDraft) or storage.
  */
 import { z } from 'zod';
+import { LearningAreaSchema, supportsListening, type LearningArea } from './learningArea';
 import { GrammarTagSchema, type GrammarTag } from './grammar';
 import { NounGenderDrillMetaSchema } from './nounGenderDrill';
 import {
@@ -141,6 +142,7 @@ export const EXERCISE_LEVELS = ExerciseLevelSchema.options;
 export const ExtractedUnitSchema = z
   .object({
     id: text,
+    learningArea: LearningAreaSchema,
     section: z.enum(['GRAMMAIRE', 'VOCABULAIRE', 'CONJUGAISON', 'COMPRENDRE', 'EXTRA']),
     unitNumber: z.number().int().positive(),
     subPart: z.string().optional(),
@@ -169,6 +171,12 @@ export const ExtractedUnitSchema = z
     isExtracurricular: z.boolean().optional(),
   })
   .superRefine((unit, ctx) => {
+    if (unit.learningArea === 'listening' && !supportsListening(unit))
+      ctx.addIssue({
+        code: 'custom',
+        path: ['learningArea'],
+        message: 'Listening requires number dictation with audio text for every item',
+      });
     if (unit.id.startsWith('topic:') !== Boolean(unit.topicOrigin))
       ctx.addIssue({ code: 'custom', message: 'Topic unit identity and origin must be paired' });
     unit.items.forEach((item, index) => refineExerciseItem(item.type ?? unit.type, item, ctx, ['items', index]));
@@ -197,7 +205,12 @@ export const ExtractedUnitSchema = z
     if (unit.topicOrigin) {
       const fail = (message: string) => ctx.addIssue({ code: 'custom', message });
       if (unit.id !== topicUnitId(unit.topicOrigin)) fail('Topic unit identity does not match origin');
-      if (unit.section !== 'GRAMMAIRE' || unit.unitNumber !== 1 || unit.type !== 'FILL_BLANKS')
+      if (
+        unit.learningArea !== 'grammar' ||
+        unit.section !== 'GRAMMAIRE' ||
+        unit.unitNumber !== 1 ||
+        unit.type !== 'FILL_BLANKS'
+      )
         fail('Invalid topic unit defaults');
       if (unit.title !== unit.topicOrigin.title.en || unit.instruction !== unit.topicOrigin.instruction.en)
         fail('Topic required strings must match English metadata');
@@ -290,6 +303,7 @@ export interface ExerciseItemState {
  */
 export interface ExerciseAttempt {
   id: string;
+  learningArea: LearningArea;
   unitId: string;
   itemId: string;
   grammarTag: GrammarTag;

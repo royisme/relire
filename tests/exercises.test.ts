@@ -108,6 +108,7 @@ test('a failed attempt write rolls the item state back and rejects', async () =>
 async function seedAttempt(unitId: string) {
   return {
     id: 'seed',
+    learningArea: 'grammar' as const,
     unitId,
     itemId: FIRST,
     grammarTag: 'present' as const,

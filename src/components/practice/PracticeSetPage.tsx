@@ -4,7 +4,8 @@ import { ArrowLeft, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '../../hooks/useRoute';
 import { useUnitRows } from '../../hooks/useUnitRows';
-import { aggregateSets } from '../../services/exercises/sets';
+import type { LearningArea } from '../../types/learningArea';
+import { completeAreaSet } from '../../services/exercises/sets';
 import type { ExerciseUnit } from '../../types/exercises';
 import { Link } from '../shell/Link';
 import { NotFoundView } from '../shell/NotFoundView';
@@ -14,12 +15,12 @@ import { DeleteSetDialog } from './DeleteSetDialog';
 import { DeleteUnitDialog } from './DeleteUnitDialog';
 import { UnitTable } from './UnitTable';
 
-export function PracticeSetPage({ setId }: { setId: string }) {
+export function PracticeSetPage({ area, setId }: { area: LearningArea; setId: string }) {
   const { t, i18n } = useTranslation();
   const { rows, loading, error } = useUnitRows();
   const set = useMemo(
-    () => aggregateSets(rows, t, i18n.resolvedLanguage).find((candidate) => candidate.setId === setId),
-    [rows, t, setId, i18n.resolvedLanguage],
+    () => completeAreaSet(rows, area, setId, t, i18n.resolvedLanguage),
+    [rows, area, t, setId, i18n.resolvedLanguage],
   );
   const [deletingSet, setDeletingSet] = useState(false);
   const [deletingUnit, setDeletingUnit] = useState<ExerciseUnit | null>(null);
@@ -30,7 +31,7 @@ export function PracticeSetPage({ setId }: { setId: string }) {
         {error}
       </p>
     );
-  if (!set) return <NotFoundView reason="set" />;
+  if (!set) return <NotFoundView reason="set" area={area} />;
   const ordered = [...set.rows].sort((a, b) => a.unit.unitNumber - b.unit.unitNumber);
   const unfinished = ordered.find(({ progress }) => progress.checked < progress.total);
   const next = unfinished ?? ordered[0];
@@ -43,7 +44,7 @@ export function PracticeSetPage({ setId }: { setId: string }) {
   return (
     <div className="mx-auto max-w-5xl space-y-4 px-4 py-6 sm:px-6">
       <Link
-        to={{ name: 'practice' }}
+        to={{ name: 'practice', area }}
         className="inline-flex h-10 items-center gap-1.5 text-sm text-ink-700 hover:text-ink-900"
       >
         <ArrowLeft aria-hidden="true" className="h-4 w-4" />
@@ -54,7 +55,9 @@ export function PracticeSetPage({ setId }: { setId: string }) {
         subtitle={`${t(`levels.${set.level}`)} · ${date} · ${t('practice.exercises', { count: set.rows.length })}`}
         actions={
           <div className="flex w-full flex-wrap items-center gap-2">
-            <Button onClick={() => navigate({ name: 'unit', unitId: next.unit.id })}>{t(`practice.${action}`)}</Button>
+            <Button onClick={() => navigate({ name: 'unit', area: next.unit.learningArea, unitId: next.unit.id })}>
+              {t(`practice.${action}`)}
+            </Button>
             <Button variant="ghost" className="ml-auto" onClick={() => setDeletingSet(true)}>
               <Trash2 aria-hidden="true" className="h-4 w-4" />
               {t('practice.deleteSet')}
@@ -62,6 +65,8 @@ export function PracticeSetPage({ setId }: { setId: string }) {
           </div>
         }
       />
+      <p className="text-sm text-ink-600">{t('learning.completeSet', { count: set.rows.length })}</p>
+      <p className="tnum text-sm text-ink-600">{t('practice.checkedProgress', set.progress)}</p>
       <UnitTable rows={set.rows} onDelete={setDeletingUnit} />
       {deletingSet && (
         <DeleteSetDialog
@@ -69,7 +74,7 @@ export function PracticeSetPage({ setId }: { setId: string }) {
           title={set.title}
           count={set.rows.length}
           onClose={() => setDeletingSet(false)}
-          onDeleted={() => navigate({ name: 'practice' })}
+          onDeleted={() => navigate({ name: 'practice', area })}
         />
       )}
       {deletingUnit && (
@@ -79,7 +84,8 @@ export function PracticeSetPage({ setId }: { setId: string }) {
           onClose={() => setDeletingUnit(null)}
           onDeleted={() => {
             setDeletingUnit(null);
-            if (set.rows.length === 1) navigate({ name: 'practice' });
+            if (!set.rows.some(({ unit }) => unit.id !== deletingUnit.id && unit.learningArea === area))
+              navigate({ name: 'practice', area });
           }}
         />
       )}

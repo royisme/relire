@@ -68,8 +68,11 @@ describe('BYOK access', () => {
     configured.apiKeys.gemini = 'edited-key';
     const provider = fakeProvider(draftFixture);
     const generate = spyOn(geminiText, 'generateJson').mockImplementation(provider.generateJson.bind(provider));
-    await api.extractMaterial({ mode: 'complete', text: 'Bonjour' }, access);
-    await api.extractMaterial({ mode: 'complete', images: [page], text: 'Page instructions' }, access);
+    await api.extractMaterial({ mode: 'complete', learningArea: 'grammar', text: 'Bonjour' }, access);
+    await api.extractMaterial(
+      { mode: 'complete', learningArea: 'grammar', images: [page], text: 'Page instructions' },
+      access,
+    );
     expect(generate).toHaveBeenCalledTimes(2);
     expect(provider.configs).toEqual([
       { model: 'custom-text', apiKey: 'fixture-key' },
@@ -112,14 +115,14 @@ describe('BYOK access', () => {
       ocrModel: 'gemini-3.8-flash-lite-tts',
       speechModel: 'gemini-2.5-flash',
     });
-    expect(await failure(api.extractMaterial({ mode: 'complete', images: [page] }, access))).toBeInstanceOf(
-      api.ImageInputUnsupportedError,
-    );
+    expect(
+      await failure(api.extractMaterial({ mode: 'complete', learningArea: 'grammar', images: [page] }, access)),
+    ).toBeInstanceOf(api.ImageInputUnsupportedError);
     expect(await failure(Promise.resolve().then(() => access.synthesize({ text: 'Bonjour' })))).toBeInstanceOf(Error);
     expect(generate).not.toHaveBeenCalled();
     expect(synthesize).not.toHaveBeenCalled();
     const unknown = accessModule.createByokAccess(settings());
-    await api.extractMaterial({ mode: 'complete', images: [page] }, unknown);
+    await api.extractMaterial({ mode: 'complete', learningArea: 'grammar', images: [page] }, unknown);
     await unknown.synthesize({ text: 'Bonjour' });
     expect(generate).toHaveBeenCalledTimes(1);
     expect(synthesize).toHaveBeenCalledWith(
@@ -138,8 +141,8 @@ describe('feature execution uses AiAccess', () => {
 
   test('image extraction asks for OCR while pasted text always asks for Text AI', async () => {
     const fake = fakeAccess(draftFixture);
-    await api.extractMaterial({ mode: 'complete', text: 'Bonjour' }, fake.access);
-    await api.extractMaterial({ mode: 'complete', images: [page] }, fake.access);
+    await api.extractMaterial({ mode: 'complete', learningArea: 'grammar', text: 'Bonjour' }, fake.access);
+    await api.extractMaterial({ mode: 'complete', learningArea: 'grammar', images: [page] }, fake.access);
     expect(fake.text.mock.calls.map(([purpose]) => purpose)).toEqual(['text', 'ocr']);
     expect(api.extractionPurpose({ images: [] })).toBe('text');
     expect(api.extractionPurpose({ images: [page] })).toBe('ocr');

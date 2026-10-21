@@ -82,7 +82,7 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
     <article data-topic-workbench lang={language} className="min-w-0 space-y-6 break-words text-sm leading-relaxed">
       {!topic && (
         <Link
-          to={{ name: 'practiceSet', setId: unit.setId }}
+          to={{ name: 'practiceSet', area: unit.learningArea, setId: unit.setId }}
           className="inline-flex min-h-10 items-center text-accent-900 underline"
         >
           {t('practice.backToSet', { title: origin.title[language] })}

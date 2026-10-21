@@ -12,6 +12,7 @@ import { MAX_GENERATED_ITEMS } from '../../services/api';
 import type { Article } from '../../types';
 import { EXERCISE_LEVELS, type ExerciseLevel } from '../../types/exercises';
 import { Button } from '../ui/button';
+import type { ArticleExerciseArea } from '../../types/learningArea';
 
 const DEFAULT_COUNT = 8;
 const field =
@@ -23,15 +24,17 @@ const startLevel = (article: Article): ExerciseLevel =>
 
 export function GenerateForm({
   article,
+  area,
   onMissingKey,
   onSaved,
 }: {
   article: Article;
+  area: ArticleExerciseArea;
   onMissingKey: () => void;
   onSaved: () => void;
 }) {
   const { t } = useTranslation();
-  const { state, make } = useExerciseGeneration(article, onMissingKey);
+  const { state, make, prepared } = useExerciseGeneration(article, area, onMissingKey);
   const [level, setLevel] = useState<ExerciseLevel>(() => startLevel(article));
   const [count, setCount] = useState(String(DEFAULT_COUNT));
   const number = Number(count);
@@ -52,6 +55,7 @@ export function GenerateForm({
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-ink-800">{t('practice.level')}</span>
           <select
+            disabled={working || prepared}
             value={level}
             onChange={(event) => setLevel(event.target.value as ExerciseLevel)}
             className={`${field} cursor-pointer`}
@@ -70,6 +74,7 @@ export function GenerateForm({
             inputMode="numeric"
             min={1}
             max={MAX_GENERATED_ITEMS}
+            disabled={working || prepared}
             value={count}
             onChange={(event) => setCount(event.target.value)}
             aria-invalid={!valid || undefined}

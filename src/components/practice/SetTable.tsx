@@ -1,6 +1,5 @@
 /** Owns the exercise-set table and sorting; PracticePage owns filtering and delete confirmation. */
 import { useMemo } from 'react';
-import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   createColumnHelper,
@@ -13,7 +12,7 @@ import {
 import type { SetRow } from '../../services/exercises/sets';
 import { Link } from '../shell/Link';
 import { SortableHeader } from '../SortableHeader';
-import { Button } from '../ui/button';
+import type { LearningArea } from '../../types/learningArea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 const features = tableFeatures({ rowSortingFeature, sortedRowModel: createSortedRowModel() });
@@ -27,7 +26,7 @@ const classes: Record<string, string> = {
   actions: 'w-12 pr-2 pl-0',
 };
 
-export function SetTable({ sets, onDelete }: { sets: SetRow[]; onDelete: (set: SetRow) => void }) {
+export function SetTable({ sets, area }: { sets: SetRow[]; area: LearningArea }) {
   const { t, i18n } = useTranslation();
   const columns = useMemo(
     () =>
@@ -37,7 +36,7 @@ export function SetTable({ sets, onDelete }: { sets: SetRow[]; onDelete: (set: S
           header: t('practice.colTitle'),
           sortDescFirst: false,
           cell: ({ row: { original: set } }) => (
-            <Link to={{ name: 'practiceSet', setId: set.setId }} className="block min-w-0 break-words">
+            <Link to={{ name: 'practiceSet', area, setId: set.setId }} className="block min-w-0 break-words">
               <span className="block font-serif text-base font-semibold text-ink-900 hover:text-accent-900">
                 {set.title}
               </span>
@@ -92,27 +91,8 @@ export function SetTable({ sets, onDelete }: { sets: SetRow[]; onDelete: (set: S
               year: 'numeric',
             }),
         }),
-        helper.display({
-          id: 'actions',
-          header: () => <span className="sr-only">{t('practice.actions')}</span>,
-          cell: ({ row }) => {
-            const label = t('practice.deleteSetNamed', { title: row.original.title });
-            return (
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={label}
-                title={label}
-                onClick={() => onDelete(row.original)}
-                className="hover:text-bad-700"
-              >
-                <Trash2 aria-hidden="true" className="h-4 w-4" />
-              </Button>
-            );
-          },
-        }),
       ]),
-    [t, i18n.language, onDelete],
+    [t, i18n.language, area],
   );
   const table = useTable({
     features,

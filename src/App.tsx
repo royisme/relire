@@ -37,6 +37,8 @@ import { useArticleLibrary } from './hooks/useArticleLibrary';
 import { passageDocument, readerIdentity, type ReaderSource } from './types/readerSource';
 import { sourceOfRecording } from './storage/shadowing';
 import { setLabel } from './services/exercises/setLabel';
+import { LearningNavigation } from './components/shell/LearningNavigation';
+import { SpeakingPage } from './components/practice/SpeakingPage';
 
 const PracticePage = lazy(() =>
   import('./components/practice/PracticePage').then((module) => ({ default: module.PracticePage })),
@@ -257,7 +259,22 @@ export default function App() {
             {route.name === 'importArticle' && (
               <ImportArticlePage onCreated={(article) => setArticles((prev) => [article, ...prev])} />
             )}
-            {route.name === 'importExercises' && <ImportExercisesPage />}
+            {route.name === 'importExercises' && <ImportExercisesPage key={route.area} area={route.area} />}
+            {(route.name === 'library' ||
+              route.name === 'grammar' ||
+              route.name === 'grammarTopic' ||
+              (route.name === 'practice' && (route.area === 'reading' || route.area === 'grammar'))) && (
+              <div className="mx-auto max-w-5xl px-4 pt-6 sm:px-6">
+                <LearningNavigation
+                  area={
+                    route.name === 'library' || (route.name === 'practice' && route.area === 'reading')
+                      ? 'read'
+                      : 'grammar'
+                  }
+                  current={route}
+                />
+              </div>
+            )}
             {route.name === 'library' && (
               <LibraryView
                 articles={articles}
@@ -277,7 +294,11 @@ export default function App() {
                   readingDocument={readerDocument}
                   source={readerSource}
                   onBack={() =>
-                    navigate(readerSource.kind === 'passage' ? { name: 'unit', unitId: readerSource.unitId } : LIBRARY)
+                    navigate(
+                      readerSource.kind === 'passage' && passageUnit
+                        ? { name: 'unit', area: passageUnit.learningArea, unitId: readerSource.unitId }
+                        : LIBRARY,
+                    )
                   }
                   onWordClick={handleWordClick}
                   onSentenceClick={handleSentenceClick}
@@ -306,9 +327,6 @@ export default function App() {
             {(route.name === 'study' || route.name === 'wordsAll' || route.name === 'wordsReview') && (
               <StudyView
                 tab={route.name === 'study' ? route.tab : 'words'}
-                verb={route.name === 'study' ? route.verb : undefined}
-                section={route.name === 'study' ? route.section : undefined}
-                tag={route.name === 'study' ? route.tag : undefined}
                 sectionsInSidebar={expanded}
                 mistakes={{
                   onMissingKey: requestKey,
@@ -337,31 +355,49 @@ export default function App() {
               />
             )}
 
-            {route.name === 'grammarTopic' && (
+            {(route.name === 'grammar' || route.name === 'grammarTopic') && (
               <div className="max-w-5xl min-w-0 mx-auto px-4 sm:px-6 py-6">
                 <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
-                  <GrammarSection topicId={route.topicId} />
+                  <GrammarSection
+                    topicId={route.name === 'grammarTopic' ? route.topicId : undefined}
+                    section={route.name === 'grammar' ? route.section : undefined}
+                    verb={route.name === 'grammar' ? route.verb : undefined}
+                    tag={route.name === 'grammar' ? route.tag : undefined}
+                  />
                 </Suspense>
               </div>
             )}
 
             {route.name === 'practice' && (
               <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
-                <PracticePage
-                  articles={articles}
-                  onMissingKey={requestKey}
-                  onAssessed={handleRecordAssessmentComplete}
-                />
+                <PracticePage key={route.area} area={route.area} articles={articles} onMissingKey={requestKey} />
               </Suspense>
             )}
 
             {route.name === 'practiceSet' && (
               <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
-                <PracticeSetPage key={route.setId} setId={route.setId} />
+                <PracticeSetPage key={`${route.area}:${route.setId}`} area={route.area} setId={route.setId} />
               </Suspense>
             )}
             {route.name === 'unit' && (
-              <UnitView key={route.unitId} unitId={route.unitId} onMissingKey={requestKey} onWord={handleWordClick} />
+              <UnitView
+                key={`${route.area}:${route.unitId}`}
+                area={route.area}
+                unitId={route.unitId}
+                onMissingKey={requestKey}
+                onWord={handleWordClick}
+              />
+            )}
+
+            {(route.name === 'speaking' || route.name === 'readAloud') && (
+              <SpeakingPage
+                key={route.name === 'readAloud' ? route.articleId : 'speaking'}
+                articles={articles}
+                workspace={route.name === 'readAloud'}
+                articleId={route.name === 'readAloud' ? route.articleId : undefined}
+                sentence={route.name === 'readAloud' ? route.sentence : undefined}
+                onAssessed={handleRecordAssessmentComplete}
+              />
             )}
 
             {route.name === 'progress' && (

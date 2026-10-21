@@ -1,7 +1,8 @@
 /** Editable review of an in-memory import draft; selection is explicit and promotion belongs to prepareImport. */
 import { useTranslation } from 'react-i18next';
 import { answerKey, type ImportDraft } from '../../services/exercises/importDraft';
-import { TextField } from './fields';
+import { TextField, field } from './fields';
+import { LEARNING_AREAS, type LearningArea, supportsListening } from '../../types/learningArea';
 import { DraftItem } from './DraftItem';
 export function DraftReview({
   draft,
@@ -45,6 +46,26 @@ export function DraftReview({
             />
             {t('importExercises.includeUnit', { title: unit.title })}
           </label>
+          <label className="block text-sm">
+            {t('learning.area')}
+            <select
+              className={field}
+              required
+              value={unit.learningArea}
+              onChange={(event) => editUnit(ui, { learningArea: event.target.value as LearningArea })}
+            >
+              {LEARNING_AREAS.map((area) => (
+                <option key={area} value={area}>
+                  {t(`learning.areas.${area}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          {unit.learningArea === 'listening' && !supportsListening(unit) && (
+            <p role="alert" className="text-sm text-bad-700">
+              {t('learning.unsupportedListening')}
+            </p>
+          )}
           <TextField
             label={t('importExercises.unitTitle')}
             value={unit.title}

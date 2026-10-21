@@ -5,6 +5,7 @@ import {
   DrillsSchema,
   ExplanationSchema,
   GeneratedExercisesSchema,
+  validateGeneratedArea,
   HintSchema,
   OpenGradeSchema,
   type Drills,
@@ -39,6 +40,7 @@ import { guardAnswer, parseAnswer } from './validate';
 import type { Lang, TextExecution } from './types';
 import { TranscriptionSchema, type Transcription } from '../../types/transcription';
 import type { ImageInput } from './types';
+import { ArticleExerciseAreaSchema, type ArticleExerciseArea } from '../../types/learningArea';
 import { parseProsodyResponse } from '../../utils/prosodyResponse';
 
 /**
@@ -169,16 +171,18 @@ export async function generateAdaptiveDrills(input: AdaptiveInput, ctx: TextCont
  * the rest kept. Only when nothing is left does the call fail.
  */
 export async function generateExercises(
-  input: { articleText: string; count: number; level: string },
+  input: { articleText: string; count: number; level: string; learningArea: ArticleExerciseArea },
   ctx: TextContext,
 ): Promise<GeneratedSet> {
   checkCount(input.count);
   checkLevel(input.level);
+  ArticleExerciseAreaSchema.parse(input.learningArea);
   const article = exerciseArticleText(input.articleText);
   if (!article) throw new Error('The article is empty.');
 
   const value = await ctx.execution.generateJson<unknown>(exercisesRequest(input, ctx.lang));
   const exercises = parseAnswer('the exercises', GeneratedExercisesSchema, value);
+  validateGeneratedArea(exercises, input.learningArea);
   const { units, dropped, missing } = keepAnswerable(exercises.units, article);
   if (!units.length)
     throw new InvalidAnswerError(

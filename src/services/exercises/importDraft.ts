@@ -17,7 +17,15 @@ import {
   type ImportMode,
 } from '../../types/exercises';
 
+import type { LearningArea } from '../../types/learningArea';
+import type { Route } from '../../utils/routes';
 export { ImportModeSchema, type ImportMode };
+
+/** Entry context is retained for mixed batches only when that domain is actually present. */
+export function importDestination(units: ExerciseUnit[], entryArea: LearningArea): Route {
+  const area = units.some((unit) => unit.learningArea === entryArea) ? entryArea : units[0].learningArea;
+  return { name: 'practiceSet', area, setId: units[0].setId };
+}
 
 /** Which file the draft came from; the mode is added on promotion. */
 export const ImportSourceSchema = z.object({

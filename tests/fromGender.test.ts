@@ -44,6 +44,7 @@ test('one standalone batch defaults to A1/eight, fresh set/unit IDs, one timesta
     createdAt: 123,
     level: 'A1',
     section: 'GRAMMAIRE',
+    learningArea: 'grammar',
     type: 'GENDER_CHECK',
     unitNumber: 1,
     grammarTags: ['gender-number'],

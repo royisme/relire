@@ -4,7 +4,8 @@
  * outside the sentence sheet; the recording itself is `ShadowingRecorder`.
  * Does not touch exercises.
  */
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { navigate } from '../../hooks/useRoute';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Article, PronunciationAssessment } from '../../types';
@@ -15,14 +16,16 @@ import { SpeakButton } from '../ui/speak-button';
 
 interface OralPracticeProps {
   article: Article;
+  index: number;
   onAssessed: (assessment: PronunciationAssessment, sentence: string) => void;
 }
 
-export function OralPractice({ article, onAssessed }: OralPracticeProps) {
+export function OralPractice({ article, index, onAssessed }: OralPracticeProps) {
   const { t } = useTranslation();
   const sentences = useMemo(() => splitArticle(article.content).flat(), [article.content]);
-  const [index, setIndex] = useState(0);
-  const current = sentences[Math.min(index, sentences.length - 1)];
+  const current = sentences[index];
+  const setIndex = (next: number) =>
+    navigate({ name: 'readAloud', articleId: article.id, sentence: sentences[next].text });
   if (!current) return null;
   const at = sentences.indexOf(current);
 

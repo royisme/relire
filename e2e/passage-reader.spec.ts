@@ -48,7 +48,7 @@ for (const phone of [false, true]) {
     await page.goForward();
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Back to exercises' }).click();
-    await expect(page).toHaveURL(/#\/practice\/unit-reading-cloze$/);
+    await expect(page).toHaveURL(/#\/read\/exercises\/unit\/unit-reading-cloze$/);
     expect(await storedSource()).toBe(sourceBefore);
   });
 
@@ -87,7 +87,7 @@ for (const phone of [false, true]) {
     await expect(page.getByRole('heading', { name: 'Compléter le passage', exact: true })).toBeVisible();
     await page.waitForTimeout(800);
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    await expect(page).toHaveURL(/#\/practice\/unit-reading-cloze$/);
+    await expect(page).toHaveURL(/#\/read\/exercises\/unit\/unit-reading-cloze$/);
   });
 }
 

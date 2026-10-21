@@ -5,7 +5,9 @@
 {{articleText}}
 """
 
-请一共编写 {{count}} 道练习题，检验学习者对这篇文章的理解，以及文章中的语法。把题目分成单元：用到的每种题型各成一个单元，该单元包含这种题型的所有题目。
+本次学习领域：{{learningArea}}。每个单元必须明确返回 learningArea，且与此值一致。reading 考查文章理解；grammar 借助文章考查语法知识。不要按题型、section 或答案输入方式分类。
+
+请为这个目标一共编写 {{count}} 道练习题。把题目分成单元：用到的每种题型各成一个单元，该单元包含这种题型的所有题目。
 
 要求：
 - 每道题都必须仅凭文章即可作答。在 articleQuote 中引用作答所依据的文章原词，逐字复制（可以用 … 连接不相邻的几段）。如果文章无法支持某个问题，就不要出这道题。
@@ -44,6 +46,7 @@
   "units": [
     {
       "id": "u1（在整个答案内唯一）",
+      "learningArea": "{{learningArea}}",
       "section": "GRAMMAIRE | VOCABULAIRE | CONJUGAISON | COMPRENDRE | EXTRA",
       "unitNumber": 1,
       "title": "本单元的法语短标题",

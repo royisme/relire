@@ -90,7 +90,10 @@ describe('extractMaterial', () => {
 
   test('reads pasted text into a validated draft', async () => {
     const provider = fakeProvider(draftFixture);
-    const draft = await extractMaterial({ mode: 'complete', text: 'Un exercice sans corrigé.' }, contextOf(provider));
+    const draft = await extractMaterial(
+      { mode: 'complete', learningArea: 'grammar', text: 'Un exercice sans corrigé.' },
+      contextOf(provider),
+    );
     expect(draft.units[0].items[0].expectedAnswer).toBeNull();
     const request = provider.requests[0];
     expectSchemaSent(request);
@@ -104,7 +107,10 @@ describe('extractMaterial', () => {
     const provider = fakeProvider(draftFixture);
     const controller = new AbortController();
     const images = Array.from({ length: MAX_EXTRACT_IMAGES }, (_, index) => ({ ...page, data: `page-${index}` }));
-    await extractMaterial({ mode: 'extract', images, signal: controller.signal }, contextOf(provider));
+    await extractMaterial(
+      { mode: 'extract', learningArea: 'grammar', images, signal: controller.signal },
+      contextOf(provider),
+    );
     expect(provider.requests[0].images).toEqual(images);
     expect(provider.requests[0].prompt).toContain('up to five pages');
     expect(provider.requests[0].signal).toBe(controller.signal);
@@ -114,7 +120,7 @@ describe('extractMaterial', () => {
   test('refuses images for a model that cannot read them, before any request', async () => {
     const provider = fakeProvider(draftFixture);
     const err = await rejection(
-      extractMaterial({ mode: 'complete', images: [page] }, contextOf(provider, 'text-only')),
+      extractMaterial({ mode: 'complete', learningArea: 'grammar', images: [page] }, contextOf(provider, 'text-only')),
     );
     expect(err).toBeInstanceOf(ImageInputUnsupportedError);
     expect(err.message).toContain('text-only');
@@ -124,7 +130,9 @@ describe('extractMaterial', () => {
   test('an explicitly selected unknown image model reaches the provider and surfaces its real error', async () => {
     const failure = new Error('The selected model does not accept image input.');
     const provider = fakeProvider(failure);
-    const err = await rejection(extractMaterial({ mode: 'complete', images: [page] }, contextOf(provider, 'unknown')));
+    const err = await rejection(
+      extractMaterial({ mode: 'complete', learningArea: 'grammar', images: [page] }, contextOf(provider, 'unknown')),
+    );
     expect(err).toBe(failure);
     expect(provider.requests).toHaveLength(1);
     expect(provider.configs[0].model).toBe('unknown');
@@ -133,30 +141,48 @@ describe('extractMaterial', () => {
 
   test('text alone works on a model without image input', async () => {
     const provider = fakeProvider(draftFixture);
-    await extractMaterial({ mode: 'complete', text: 'Bonjour' }, contextOf(provider, 'text-only'));
+    await extractMaterial(
+      { mode: 'complete', learningArea: 'grammar', text: 'Bonjour' },
+      contextOf(provider, 'text-only'),
+    );
     expect(provider.requests).toHaveLength(1);
   });
 
   test('refuses nothing to read, too many pages and bad images', async () => {
     const provider = fakeProvider(draftFixture);
     const ctx = contextOf(provider);
-    await rejection(extractMaterial({ mode: 'complete' }, ctx));
-    await rejection(extractMaterial({ mode: 'complete', text: '   ' }, ctx));
-    await rejection(extractMaterial({ mode: 'complete', images: new Array(MAX_EXTRACT_IMAGES + 1).fill(page) }, ctx));
-    await rejection(extractMaterial({ mode: 'complete', images: [{ data: '', mimeType: 'image/png' }] }, ctx));
+    await rejection(extractMaterial({ mode: 'complete', learningArea: 'grammar' }, ctx));
+    await rejection(extractMaterial({ mode: 'complete', learningArea: 'grammar', text: '   ' }, ctx));
     await rejection(
-      extractMaterial({ mode: 'complete', images: [{ data: 'AAAA', mimeType: 'application/pdf' }] }, ctx),
+      extractMaterial(
+        { mode: 'complete', learningArea: 'grammar', images: new Array(MAX_EXTRACT_IMAGES + 1).fill(page) },
+        ctx,
+      ),
+    );
+    await rejection(
+      extractMaterial(
+        { mode: 'complete', learningArea: 'grammar', images: [{ data: '', mimeType: 'image/png' }] },
+        ctx,
+      ),
+    );
+    await rejection(
+      extractMaterial(
+        { mode: 'complete', learningArea: 'grammar', images: [{ data: 'AAAA', mimeType: 'application/pdf' }] },
+        ctx,
+      ),
     );
     expect(provider.requests).toHaveLength(0);
   });
 
   test('a malformed draft throws with the schema reason', async () => {
     const bad = { ...draftFixture, units: [{ ...draftFixture.units[0], section: 'NOPE' }] };
-    const err = await rejection(extractMaterial({ mode: 'complete', text: 'x' }, contextOf(fakeProvider(bad))));
+    const err = await rejection(
+      extractMaterial({ mode: 'complete', learningArea: 'grammar', text: 'x' }, contextOf(fakeProvider(bad))),
+    );
     expect(err).toBeInstanceOf(InvalidAnswerError);
     expect(err.message).toContain('section');
     const notAnObject = await rejection(
-      extractMaterial({ mode: 'complete', text: 'x' }, contextOf(fakeProvider('oops'))),
+      extractMaterial({ mode: 'complete', learningArea: 'grammar', text: 'x' }, contextOf(fakeProvider('oops'))),
     );
     expect(notAnObject).toBeInstanceOf(InvalidAnswerError);
   });
@@ -166,15 +192,23 @@ describe('extractMaterial', () => {
       ...draftFixture,
       units: [{ ...draftFixture.units[0], items: [{ ...draftFixture.units[0].items[0], expectedAnswer: 'étudiant' }] }],
     };
-    const extractOnly = await extractMaterial({ mode: 'extract', text: 'x' }, contextOf(fakeProvider(answered)));
+    const extractOnly = await extractMaterial(
+      { mode: 'extract', learningArea: 'grammar', text: 'x' },
+      contextOf(fakeProvider(answered)),
+    );
     expect(extractOnly.units[0].items[0].expectedAnswer).toBeNull();
-    const completed = await extractMaterial({ mode: 'complete', text: 'x' }, contextOf(fakeProvider(answered)));
+    const completed = await extractMaterial(
+      { mode: 'complete', learningArea: 'grammar', text: 'x' },
+      contextOf(fakeProvider(answered)),
+    );
     expect(completed.units[0].items[0].expectedAnswer).toBe('étudiant');
   });
 
   test('a cancelled request surfaces as an abort, not a bad answer', async () => {
     const abort = new DOMException('The request was cancelled.', 'AbortError');
-    const err = await rejection(extractMaterial({ mode: 'complete', text: 'x' }, contextOf(fakeProvider(abort))));
+    const err = await rejection(
+      extractMaterial({ mode: 'complete', learningArea: 'grammar', text: 'x' }, contextOf(fakeProvider(abort))),
+    );
     expect(isAbortError(err)).toBe(true);
   });
 });

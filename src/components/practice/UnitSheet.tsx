@@ -125,7 +125,7 @@ export function UnitSheet({
   return (
     <div className="mx-auto max-w-3xl space-y-4 px-4 pb-28 pt-6 sm:px-6">
       <Link
-        to={{ name: 'practiceSet', setId: unit.setId }}
+        to={{ name: 'practiceSet', area: unit.learningArea, setId: unit.setId }}
         className="-ml-2 inline-flex min-h-10 max-w-full items-center gap-1.5 rounded-md px-2 py-2 text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900"
       >
         <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -134,7 +134,9 @@ export function UnitSheet({
 
       <section aria-labelledby="unit-title" className="rounded-lg border border-ink-200 bg-surface">
         <header className="space-y-1 border-b border-ink-200 px-4 py-5 sm:px-6">
-          <p className="text-xs text-ink-500">{t(`exerciseTypes.${unit.type}.name`)}</p>
+          <p className="text-xs text-ink-500">
+            {t(`learning.areas.${unit.learningArea}`)} · {t(`exerciseTypes.${unit.type}.name`)}
+          </p>
           <h2 id="unit-title" className="break-words font-serif text-2xl font-semibold text-ink-900">
             {unit.title}
           </h2>

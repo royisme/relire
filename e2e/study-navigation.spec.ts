@@ -15,7 +15,7 @@ async function touchTarget(control: Locator) {
 async function studyLinks(page: Page, location: 'sidebar' | 'page', active: string) {
   const sidebar = page.locator('[data-sidebar]');
   const main = page.getByRole('main');
-  for (const name of ['Words', 'Shadowing', 'Mistakes', 'Grammar']) {
+  for (const name of ['Words', 'Shadowing', 'Mistakes']) {
     const link = page.getByRole('link', { name, exact: true });
     await expect(link).toHaveCount(1);
     await expect(link).toBeVisible();
@@ -39,7 +39,7 @@ test('expanded, collapsed and tablet study pages keep just one visible set of pa
   const buttonBox = (await collapse.boundingBox())!;
   const firstRow = (await page
     .locator('[data-sidebar]')
-    .getByRole('link', { name: 'Read', exact: true })
+    .getByRole('link', { name: 'Reading', exact: true })
     .boundingBox())!;
   expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(firstRow.y);
   await collapse.click();
@@ -53,15 +53,15 @@ test('expanded, collapsed and tablet study pages keep just one visible set of pa
 });
 
 test('Grammar opens Topics and switches to its distinct Conjugation address', async ({ page }) => {
-  await page.goto('/#/study/grammar');
-  await expect(page).toHaveURL(/#\/study\/grammar$/);
+  await page.goto('/#/grammar');
+  await expect(page).toHaveURL(/#\/grammar$/);
   await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
   await expect(page.getByText('No topics are published yet.', { exact: true })).toBeVisible();
-  await page.getByRole('radio', { name: 'Conjugation', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/grammar\/conjugation$/);
+  await page.getByRole('main').getByRole('link', { name: 'Conjugation', exact: true }).click();
+  await expect(page).toHaveURL(/#\/grammar\/conjugation$/);
   await expect(page.getByRole('heading', { name: 'Conjugation', exact: true })).toBeVisible();
-  await studyLinks(page, 'sidebar', 'Grammar');
-  await page.getByRole('link', { name: 'Words', exact: true }).click();
+  await expect(page.locator('a[href="#/study/grammar"]')).toHaveCount(0);
+  await page.getByRole('link', { name: 'My study', exact: true }).click();
   await expect(page).toHaveURL(/#\/study\/words$/);
   await page.getByRole('link', { name: 'Grammar', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
@@ -130,9 +130,10 @@ test('phone study links stay local; the drawer has About last and no collapse co
   await studyLinks(page, 'page', 'Mistakes');
   await page.goBack();
   await studyLinks(page, 'page', 'Words');
-  await page.getByRole('link', { name: 'Grammar', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/grammar$/);
-  await studyLinks(page, 'page', 'Grammar');
+  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Menu' }).getByRole('link', { name: 'Grammar', exact: true }).click();
+  await expect(page).toHaveURL(/#\/grammar$/);
+  await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
   await page.goBack();
   await studyLinks(page, 'page', 'Words');
   await page.getByRole('button', { name: 'Menu', exact: true }).click();
@@ -159,14 +160,14 @@ test('phone Library filters retain 40px radio targets and selection @phone', asy
 });
 
 for (const [lang, names] of [
-  ['zh', ['生词', '跟读', '错题本', '语法']],
-  ['en', ['Words', 'Shadowing', 'Mistakes', 'Grammar']],
+  ['zh', ['生词', '跟读', '错题本']],
+  ['en', ['Words', 'Shadowing', 'Mistakes']],
 ] as const) {
-  test(`the four study tabs fit a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
+  test(`the three study tabs fit a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
     page,
   }) => {
     await page.addInitScript((value) => localStorage.setItem('relire_lang', value), lang);
-    await page.goto('/#/study/grammar');
+    await page.goto('/#/study/words');
     const tabs = page.getByRole('main').getByRole('navigation').first();
     for (const name of names) await expect(tabs.getByRole('link', { name, exact: true })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);

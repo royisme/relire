@@ -69,7 +69,10 @@ export function TopicLearning({ topic }: { topic: GrammarTopic }) {
         >
           {t('common.retry')}
         </Button>
-        <Link to={{ name: 'practice' }} className="inline-flex min-h-10 items-center text-accent-900 underline">
+        <Link
+          to={{ name: 'practice', area: 'grammar' }}
+          className="inline-flex min-h-10 items-center text-accent-900 underline"
+        >
           {t('grammarTopics.learning.reference.savedPractice')}
         </Link>
         <TopicBlocks blocks={topic.blocks} language={i18n.resolvedLanguage === 'zh' ? 'zh' : 'en'} />

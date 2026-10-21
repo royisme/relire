@@ -20,7 +20,7 @@ Object.defineProperty(globalThis, 'window', {
   value: Object.assign(new EventTarget(), { location: { hash: '' }, relireHistory: { read: () => 0 } }),
 });
 const { default: GenderPage } = await import('../src/components/study/grammar/GenderPage');
-const { default: GrammarSection } = await import('../src/components/study/grammar/GrammarSection');
+const { LearningNavigation } = await import('../src/components/shell/LearningNavigation');
 if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
 else Reflect.deleteProperty(globalThis, 'window');
 
@@ -126,11 +126,13 @@ test('Grammar offers Gender and Conjugation without a service and Topics only wi
     for (const hasService of [false, true]) {
       if (hasService) process.env.VITE_CONTENT_SERVICE_URL = 'https://TEST.invalid';
       else delete process.env.VITE_CONTENT_SERVICE_URL;
-      const html = render(<GrammarSection section="gender" />);
+      const html = render(<LearningNavigation area="grammar" current={{ name: 'grammar', section: 'gender' }} />);
       expect(html).toContain(i18n.t('nounGender.title'));
       expect(html).toContain(i18n.t('conjugation.page.title'));
       expect(html.includes(`>${i18n.t('grammarTopics.title')}<`)).toBe(hasService);
-      expect(html.match(/role="radio"/g)).toHaveLength(hasService ? 3 : 2);
+      expect(html).toContain('href="#/grammar/exercises"');
+      expect(html).toContain('aria-current="page"');
+      expect(html).not.toContain('role="radio"');
     }
   } finally {
     if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;

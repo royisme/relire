@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { TopicResultSchema, topicUnitId, scanTopicStrings, resolveTopicFeedback } from '../types/grammarCheckpoint';
 import { expectedAnswerText } from '../services/exercises/answer';
 import { GrammarTagSchema } from '../types/grammar';
+import { LearningAreaSchema } from '../types/learningArea';
 import {
   ExerciseUnitSchema,
   itemStateId,
@@ -59,6 +60,7 @@ export const ExerciseAttemptSchema = z
     id: z.string().min(1),
     unitId: z.string().min(1),
     itemId: z.string().min(1),
+    learningArea: LearningAreaSchema,
     grammarTag: GrammarTagSchema,
     prompt: z.string(),
     userAnswer: z.string(),
@@ -71,6 +73,8 @@ export const ExerciseAttemptSchema = z
     if (attempt.unitId.startsWith('topic:') !== Boolean(attempt.topicResult))
       ctx.addIssue({ code: 'custom', message: 'Topic attempt identity and result must be paired' });
     if (attempt.topicResult) {
+      if (attempt.learningArea !== 'grammar')
+        ctx.addIssue({ code: 'custom', message: 'Topic attempts require grammar area' });
       if (attempt.unitId !== topicUnitId(attempt.topicResult))
         ctx.addIssue({ code: 'custom', message: 'Topic attempt identity does not match result' });
       scanTopicStrings({ prompt: attempt.prompt, expectedAnswer: attempt.expectedAnswer }, ctx);
@@ -133,6 +137,8 @@ export function parseExerciseBackup(data: {
 /** Deleted sources are valid history; a surviving snapshot must agree with its topic attempt. */
 function validateTopicAttempt(attempt: ExerciseAttempt, unit: ExerciseUnit | undefined) {
   if (!unit) return;
+  if (attempt.learningArea !== unit.learningArea)
+    throw new ExerciseBackupError('attempts: learning area does not match saved unit');
   if (Boolean(unit.topicOrigin) !== Boolean(attempt.topicResult))
     throw new ExerciseBackupError('attempts: topic source and result must be paired');
   if (!attempt.topicResult) return;

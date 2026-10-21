@@ -25,11 +25,11 @@ export function createUnitSaver(save: (units: ExerciseUnit[]) => Promise<unknown
       payload = null;
     },
     /** Saves the pending batch, or `prepare()`'s; resolves to the saved units, or rejects with the real error. Undefined while another save runs. */
-    async run(prepare: () => ExerciseUnit[]): Promise<ExerciseUnit[] | undefined> {
+    async run(prepare: () => ExerciseUnit[] | Promise<ExerciseUnit[]>): Promise<ExerciseUnit[] | undefined> {
       if (busy) return undefined;
       busy = true;
       try {
-        const units = (payload ??= prepare());
+        const units = (payload ??= await prepare());
         await save(units);
         payload = null;
         return units;

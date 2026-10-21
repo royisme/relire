@@ -13,13 +13,19 @@ export function PracticeSubnav({ route, onNavigate }: { route: Route; onNavigate
   const { t, i18n } = useTranslation();
   const { rows } = useUnitRows();
   const open = rows.find(({ unit }) =>
-    route.name === 'unit' ? unit.id === route.unitId : route.name === 'practiceSet' && unit.setId === route.setId,
+    route.name === 'unit'
+      ? unit.id === route.unitId && unit.learningArea === route.area
+      : route.name === 'practiceSet' && unit.setId === route.setId && unit.learningArea === route.area,
   );
   return (
     <>
       {open && (
         <NavItem
-          to={{ name: 'practiceSet', setId: open.unit.setId }}
+          to={{
+            name: 'practiceSet',
+            area: route.name === 'unit' || route.name === 'practiceSet' ? route.area : open.unit.learningArea,
+            setId: open.unit.setId,
+          }}
           label={setLabel(t, open.unit, i18n.resolvedLanguage)}
           current={route.name === 'practiceSet' ? 'page' : undefined}
           onNavigate={onNavigate}
@@ -30,7 +36,7 @@ export function PracticeSubnav({ route, onNavigate }: { route: Route; onNavigate
         .map(({ unit }) => (
           <NavItem
             key={unit.id}
-            to={{ name: 'unit', unitId: unit.id }}
+            to={{ name: 'unit', area: unit.learningArea, unitId: unit.id }}
             label={unitTitle(unit, i18n.resolvedLanguage)}
             current={route.name === 'unit' && route.unitId === unit.id ? 'page' : undefined}
             onNavigate={onNavigate}

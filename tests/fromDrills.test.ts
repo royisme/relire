@@ -14,6 +14,7 @@ test('one mixed unit, fresh set/unit/item IDs, the form level, explicit types an
   expect(second.level).toBe('B2');
   expect(first).not.toHaveProperty('materialId');
   expect(first.unitNumber).toBe(1);
+  expect(first.learningArea).toBe('grammar');
   expect(first.importSource).toBeUndefined();
   expect(first.readingPassage).toBeUndefined();
   expect(ExerciseUnitSchema.safeParse(first).success).toBe(true);

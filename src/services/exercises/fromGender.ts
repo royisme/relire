@@ -43,6 +43,7 @@ export function prepareGenderDrills({
       setTitle: title,
       createdAt,
       level,
+      learningArea: 'grammar',
       section: 'GRAMMAIRE',
       unitNumber: 1,
       title,

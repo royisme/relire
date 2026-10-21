@@ -37,7 +37,7 @@ try {
   const page = await context.newPage();
   const failures: string[] = [];
   page.on('pageerror', (error) => failures.push(error.message));
-  await page.goto('http://localhost:5174/app/#/import/exercises');
+  await page.goto('http://localhost:5174/app/#/import/exercises?area=grammar');
   await page.getByLabel('Text to send').waitFor();
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;

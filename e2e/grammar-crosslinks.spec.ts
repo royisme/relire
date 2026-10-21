@@ -12,8 +12,8 @@ import { CONTENT_ORIGIN, INDEX_REQUEST, mockIndex, mockTopics as mockTopicServic
 const INDEX: GrammarTagIndex = { present: ['test-only'], 'hypothesis-si': ['another-test', 'third-test'] };
 const UNIT = 'unit-fill-blanks';
 const tags = ['present', 'hypothesis-si', 'adjective-agreement'] as const;
-const direct = '#/study/grammar/test-only';
-const filtered = '#/study/grammar?tag=hypothesis-si';
+const direct = '#/grammar/topics/test-only';
+const filtered = '#/grammar?tag=hypothesis-si';
 type Copy = typeof en | typeof zh;
 
 function testPack() {
@@ -31,6 +31,8 @@ async function mockTopics(page: Page) {
   await mockTopicService(page, testPack());
 }
 async function go(page: Page, href: string, copy: Copy = en) {
+  if (href === '#/grammar/exercises' && !(await page.locator(`a[href="${href}"]`).first().isVisible()))
+    await go(page, '#/grammar', copy);
   if (href === '#/study/mistakes' && !(await page.locator(`a[href="${href}"]`).first().isVisible())) {
     await go(page, '#/study/words', copy);
   }
@@ -39,7 +41,7 @@ async function go(page: Page, href: string, copy: Copy = en) {
   await page.locator(`a[href="${href}"]`).filter({ visible: true }).first().click();
 }
 async function openPractice(page: Page, copy: Copy = en) {
-  await go(page, '#/practice', copy);
+  await go(page, '#/grammar/exercises', copy);
   await openListedUnit(page, 'set-1', UNIT);
 }
 async function wrong(item: Locator, copy: Copy = en) {
@@ -52,7 +54,7 @@ async function history(page: Page, copy: Copy = en) {
   await openPractice(page, copy);
   await wrong(row(page, 'Je ne'), copy);
   await wrong(row(page, 'Si tu'), copy);
-  await go(page, '#/practice', copy);
+  await go(page, '#/grammar/exercises', copy);
   await openListedUnit(page, 'set-1', 'unit-word-transform');
   await wrong(row(page, 'intrigué'), copy);
 }
@@ -72,7 +74,7 @@ async function label(scope: Locator, tag: GrammarTag, published: boolean, copy: 
 }
 async function destination(page: Page, tag: GrammarTag, copy: Copy = en) {
   await expect(page).toHaveURL(
-    new RegExp(tag === 'present' ? '#/study/grammar/test-only$' : '#/study/grammar\\?tag=hypothesis-si$'),
+    new RegExp(tag === 'present' ? '#/grammar/topics/test-only$' : '#/grammar\\?tag=hypothesis-si$'),
   );
   await expect(page.getByRole('dialog')).toHaveCount(0);
   if (tag === 'present') await expect(page.getByRole('article')).toBeVisible();
@@ -113,7 +115,7 @@ for (const phone of [false, true]) {
     await row(page, 'intrigué').getByRole('button', { name: copy.practice.explain, exact: true }).click();
     await label(page.getByRole('dialog'), 'adjective-agreement', true, copy);
     await page.keyboard.press('Escape');
-    await go(page, '#/practice', copy);
+    await go(page, '#/grammar/exercises', copy);
     await openListedUnit(page, 'set-1', UNIT);
     // Source labels request only the index, never summaries or topic content.
     expect(modules.some((url) => url.includes('/v1/topics'))).toBe(false);
@@ -193,7 +195,7 @@ for (const failure of [false, true]) {
     expect(modules).toEqual([]);
     await history(page);
     await label(row(page, 'intrigué'), 'adjective-agreement', false);
-    await go(page, '#/practice');
+    await go(page, '#/grammar/exercises');
     await openListedUnit(page, 'set-1', UNIT);
     await label(row(page, 'Je ne'), 'present', false);
     await row(page, 'Je ne').getByRole('button', { name: en.practice.explain, exact: true }).click();

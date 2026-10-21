@@ -110,7 +110,7 @@ test('taxonomy order, deep links, reload and Back; deleting the unit retains a r
   expect(headings).toEqual(['Adjectives and adverbs', 'Verbs: forms']);
   await expect(page.getByRole('link', { name: 'Open in material' })).toHaveCount(0);
   await entry(page).getByRole('link', { name: 'Retry in unit' }).click();
-  await expect(page).toHaveURL(/#\/practice\/unit-fill-blanks$/);
+  await expect(page).toHaveURL(/#\/grammar\/exercises\/unit\/unit-fill-blanks$/);
   await page.goBack();
   await expect(entry(page)).toBeVisible();
   await page.reload();

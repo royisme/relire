@@ -286,7 +286,7 @@ test('leaving with an unsaved AI draft asks first, by link, Back or reload', asy
   const leaving = page.getByRole('dialog', { name: 'Discard the unsaved AI settings?' });
 
   // A link out of Settings asks; keeping the draft stays on the page with the edits.
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await expect(leaving).toBeVisible();
   await leaving.getByRole('button', { name: 'Keep editing' }).click();
   await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
@@ -310,7 +310,7 @@ test('leaving with an unsaved AI draft asks first, by link, Back or reload', asy
   await expect(keyField(page)).toHaveValue('UNSAVED');
 
   // Discarding keeps what was stored and leaves.
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await leaving.getByRole('button', { name: 'Discard', exact: true }).click();
   await expect(page).toHaveURL(/#\/read$/);
   await page.goto('/#/settings/ai/text');

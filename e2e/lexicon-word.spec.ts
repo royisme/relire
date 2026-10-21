@@ -90,7 +90,7 @@ test('tapping a form of a verb outside the pack names it and shows the dictionar
   await expect(tense(page, 'Passé composé')).toHaveCount(0);
   await expect(sheet(page).getByRole('link', { name: 'Compound tenses are on the Conjugation page.' })).toHaveAttribute(
     'href',
-    '#/study/grammar/conjugation?verb=chanter',
+    '#/grammar/conjugation?verb=chanter',
   );
   expect(ai.calls.conjugate).toBe(0);
   expect(await overflowing(sheet(page))).toEqual([]);
@@ -158,7 +158,7 @@ for (const lemma of ["s'habiller", 'se hisser']) {
     await tap(page, word);
     await expect(sheet(page).getByRole('link', { name: 'Conjugate this verb' })).toHaveAttribute(
       'href',
-      `#/study/grammar/conjugation?verb=${encodeURIComponent(lemma)}`,
+      `#/grammar/conjugation?verb=${encodeURIComponent(lemma)}`,
     );
     await expect(sheet(page).getByRole('button', { name: 'Show all tenses' })).toHaveCount(0);
     await expect(sheet(page).getByRole('table')).toHaveCount(0);
@@ -181,7 +181,7 @@ test("a word the lexicon does not have leaves today's link and no Verb form sect
   await tap(page, 'chantons');
   await expect(sheet(page).getByRole('heading', { name: 'chantons' })).toBeVisible();
   const link = sheet(page).getByRole('link', { name: 'Conjugate this verb' });
-  await expect(link).toHaveAttribute('href', '#/study/grammar/conjugation?verb=chanter');
+  await expect(link).toHaveAttribute('href', '#/grammar/conjugation?verb=chanter');
   expect((await link.boundingBox())!.height).toBe(40);
   await expect(sheet(page).getByRole('heading', { name: 'Verb form' })).toHaveCount(0);
   await expect(sheet(page).getByRole('alert')).toHaveCount(0);

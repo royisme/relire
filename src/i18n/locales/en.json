@@ -13,9 +13,7 @@
     "listSeparator": "; "
   },
   "nav": {
-    "reader": "Read",
     "vocab": "My study",
-    "practice": "Practice",
     "analytics": "Progress",
     "installApp": "Install app",
     "settings": "Settings",
@@ -28,6 +26,29 @@
     "toReview": "{{count}} to review",
     "importArticle": "Import an article",
     "importExercises": "Import exercises"
+  },
+  "learning": {
+    "areas": { "reading": "Reading", "grammar": "Grammar", "listening": "Listening", "writing": "Writing" },
+    "area": "Learning area",
+    "navigation": "Learning destinations",
+    "library": "Library",
+    "exercises": "Exercises",
+    "exercisesTitle": "{{area}} exercises",
+    "scopedCounts": "Counts and progress include only this area. Open a set to see its complete batch, which may contain other areas.",
+    "completeSet_one": "Complete set: {{count}} exercise across all its learning areas. Deleting the set removes the whole batch.",
+    "completeSet_other": "Complete set: {{count}} exercises across all its learning areas. Deleting the set removes the whole batch.",
+    "emptyTitle": "No saved exercises in this area",
+    "emptyDesc": "Use Add exercises to bring in a worksheet or make supported exercises for this area.",
+    "listeningSupport": "Listening currently supports number dictation only, not general audio comprehension.",
+    "listeningEmpty": "Import a worksheet with playable number dictation, then review its learning areas before saving.",
+    "unsupportedListening": "Listening requires number dictation with dictation text for every item. Choose another area or exclude this unit; prompt read-aloud is not listening practice.",
+    "speaking": "Speaking",
+    "readAloud": "Read aloud",
+    "speakingDesc": "Listen to an article sentence, record yourself and optionally ask your AI for a pronunciation estimate.",
+    "shadowingContext": "For saved shadowing takes, use the microphone beside a sentence in the reader. Find those recordings in My study → Shadowing.",
+    "chooseArticle": "Choose an article",
+    "speakingEmpty": "Add an article in Reading before practising it aloud.",
+    "sourceUnavailable": "The selected article or sentence is no longer available. Choose a source explicitly to continue."
   },
   "theme": {
     "label": "Theme",
@@ -209,7 +230,6 @@
     "removeHelp": "Removing a bookmark keeps saved contexts, learning schedule and rating history."
   },
   "practice": {
-    "title": "Practice",
     "setCount_one": "{{count}} exercise set",
     "setCount_other": "{{count}} exercise sets",
     "exercises_one": "{{count}} exercise",
@@ -235,10 +255,8 @@
     "colType": "Type",
     "actions": "Actions",
     "checkedProgress": "{{checked}} of {{total}} checked · {{correct}} correct",
-    "emptyTitle": "No exercise sets yet",
-    "emptyDesc": "Import a worksheet, make exercises from an article or practise conjugation. Your answers and progress stay on this device.",
     "noMatch": "No exercise sets match your filters.",
-    "back": "Back to Practice",
+    "back": "Back to exercises",
     "backToSet": "Back to {{title}}",
     "deleteUnit": "Delete exercise",
     "deleteUnitNamed": "Delete exercise {{title}}",
@@ -263,8 +281,6 @@
     "items_other": "{{count}} items",
     "notStarted": "Not started",
     "progress": "{{checked}} of {{total}} checked, {{correct}} right",
-    "oralTitle": "Read aloud",
-    "oralDesc": "Read a sentence from the article aloud and get a pronunciation score from the AI.",
     "sentenceOf": "Sentence {{current}} of {{total}}",
     "previousSentence": "Previous sentence",
     "nextSentence": "Next sentence",
@@ -283,8 +299,8 @@
     "deleteSet": "Delete set",
     "deleteSetNamed": "Delete set {{title}}",
     "deleteSetTitle": "Delete this exercise set?",
-    "deleteSetBody_one": "The exercise set “{{title}}”, its {{count}} exercise and the answers on it will be removed from this device. Your attempt history stays in the mistake notebook.",
-    "deleteSetBody_other": "The exercise set “{{title}}”, its {{count}} exercises and the answers on them will be removed from this device. Your attempt history stays in the mistake notebook.",
+    "deleteSetBody_one": "Delete the complete set “{{title}}”: {{count}} exercise across all learning areas, its saved answers and passage recordings will be removed from this device. Attempt history stays in Mistakes.",
+    "deleteSetBody_other": "Delete the complete set “{{title}}”: {{count}} exercises across all learning areas, their saved answers and passage recordings will be removed from this device. Attempt history stays in Mistakes.",
     "deleteSetFailed": "Could not delete the exercise set: {{reason}}",
     "saveFailed": "Your last change could not be saved: {{msg}}",
     "right": "Correct",
@@ -775,7 +791,7 @@
     "saved": "Saved.",
     "tooShort": "Too short, nothing was saved. Record again.",
     "listeningEnded": "Listening to the article stopped, because the card played audio.",
-    "busy": "The sentence sheet or Practice is recording.",
+    "busy": "The sentence sheet or Read aloud is recording.",
     "error": "Could not record: {{msg}}",
     "saveFailed": "Could not save the recording: {{msg}}",
     "retry": "Try again",
@@ -792,8 +808,7 @@
     "label": "My study",
     "words": "Words",
     "shadowing": "Shadowing",
-    "mistakes": "Mistakes",
-    "grammar": "Grammar"
+    "mistakes": "Mistakes"
   },
   "nounGender": {
     "title": "Gender",
@@ -881,7 +896,7 @@
       "reference": {
         "fullReference": "Full reference",
         "openCurrent": "Open current reference",
-        "savedPractice": "Open saved Practice"
+        "savedPractice": "Open saved grammar exercises"
       },
       "practice": {
         "savedOnlyNote": "This set contains saved questions only.",
@@ -1031,7 +1046,7 @@
     "toLibrary": "Go to the library",
     "unit": "That exercise is not here. It may have been deleted, or the link comes from another browser.",
     "set": "That exercise set is not here. It may have been deleted, or the link comes from another browser.",
-    "toPractice": "Go to Practice"
+    "toPractice": "Go to area exercises"
   },
   "importMaterial": {
     "fileType": "Choose a PNG, JPEG, WebP image or a PDF file.",
@@ -1128,7 +1143,7 @@
     "level": "Level of these exercises",
     "chooseLevel": "Choose a level",
     "levelRequired": "Choose the level of these exercises before saving.",
-    "confirm": "I have reviewed the included exercises and reference answers. Save this exercise set on this device.",
+    "confirm": "I have reviewed the learning area, exercises and reference answers of every included unit. Save this exercise set on this device.",
     "save": "Confirm and save",
     "selectUnits": "Include at least one playable exercise unit.",
     "saveFailed": "Not saved. Your draft is kept; retry when ready. {{msg}}",
@@ -1173,7 +1188,7 @@
   },
   "exerciseProgress": {
     "title": "Grammar accuracy",
-    "history": "All checked attempts count, including history from deleted material.",
+    "history": "Only grammar attempts count, including grammar history from deleted sources.",
     "accuracy": "{{percent}}% · {{correct}} / {{total}} correct",
     "readFailed": "Could not read exercise history: {{reason}}",
     "loading": "Reading exercise history…",

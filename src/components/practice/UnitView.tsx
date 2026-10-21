@@ -1,8 +1,9 @@
 /**
- * The screen for `#/practice/:unitId`: reads the unit and shows its sheet, a
+ * The screen for an area's `/exercises/unit/:unitId`: reads the unit and shows its sheet, a
  * not-found page when the unit does not exist, or the real reason when it could
  * not be read. Keyed by the unit in `App`, so each unit starts a fresh session.
  */
+import type { LearningArea } from '../../types/learningArea';
 import { useTranslation } from 'react-i18next';
 import { useExerciseUnit } from '../../hooks/useExerciseUnit';
 import { Button } from '../ui/button';
@@ -13,17 +14,20 @@ import type { VocabularyWordLookup } from '../../services/vocabulary/identity';
 
 export function UnitView({
   unitId,
+  area,
   onMissingKey,
   onWord,
 }: {
   unitId: string;
+  area: LearningArea;
   onMissingKey: () => void;
   onWord: VocabularyWordLookup;
 }) {
   const { t } = useTranslation();
   const session = useExerciseUnit(unitId, { onMissingKey });
 
-  if (session.status === 'missing') return <NotFoundView reason="unit" />;
+  if (session.status === 'missing' || (session.unit && session.unit.learningArea !== area))
+    return <NotFoundView reason="unit" area={area} />;
   if (session.status === 'error')
     return (
       <div className="mx-auto max-w-3xl space-y-3 px-4 py-16 text-center sm:px-6">

@@ -110,7 +110,7 @@ export const gradeUnitItem = (
 
 /** The attempt row for a finished check. Carries its own prompt and answer text. */
 export function buildAttempt(
-  unit: Pick<ExerciseUnit, 'id'>,
+  unit: Pick<ExerciseUnit, 'id' | 'learningArea'>,
   item: ExerciseItem,
   recordedAnswer: string,
   correct: boolean,
@@ -119,6 +119,7 @@ export function buildAttempt(
   return {
     id: meta.id,
     unitId: unit.id,
+    learningArea: unit.learningArea,
     itemId: item.id,
     grammarTag: item.grammarTag,
     prompt: item.prompt,

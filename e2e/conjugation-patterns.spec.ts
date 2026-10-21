@@ -46,7 +46,7 @@ for (const mode of ['light', 'sepia', 'dark']) {
         localStorage.setItem('relire_lang', 'en');
         localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: {} }));
       }, mode);
-      await page.goto('/#/study/grammar/conjugation?verb=aller');
+      await page.goto('/#/grammar/conjugation?verb=aller');
       await expect(section(page)).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       await section(page).scrollIntoViewIfNeeded();
@@ -111,7 +111,7 @@ test('CP6 each pattern row reserves the height of a two-line sentence and its no
     localStorage.setItem('relire_lang', 'en');
     localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: {} }));
   });
-  await page.goto('/#/study/grammar/conjugation?verb=aller');
+  await page.goto('/#/grammar/conjugation?verb=aller');
   await expect(section(page)).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   await settled(page);
@@ -140,7 +140,7 @@ test('CP6 patterns inherit unchecked and differing cell notes without another re
   const answer = parlerAnswer();
   answer.forms.present['2sg'] = ['parle'];
   ai.answer({ conjugate: answer });
-  await page.goto('/#/study/grammar/conjugation?verb=parler');
+  await page.goto('/#/grammar/conjugation?verb=parler');
   await expect(section(page)).toBeVisible();
   await expect(section(page).getByText('AI-made, not checked', { exact: true })).toHaveCount(0);
   await select(page, person(page), 'you (singular)');
@@ -152,7 +152,7 @@ test('CP6 patterns inherit unchecked and differing cell notes without another re
 
 test('CP6 a defective verb offers only its available person and no imperative', async ({ page, ai }) => {
   ai.answer({ conjugate: falloirAnswer() });
-  await page.goto('/#/study/grammar/conjugation?verb=falloir');
+  await page.goto('/#/grammar/conjugation?verb=falloir');
   await expect(section(page)).toBeVisible();
   await expect(row(page, 'Negation').locator('dd p').first()).toHaveText('il ne faut pas');
   await person(page).click();
@@ -173,7 +173,7 @@ test('CP6 long pattern variants stay inside their fixed row at 360 px @phone', a
   });
   answer.forms.conditionnel['3pl'] = ['désapprovisionneraient', 'désapprovisionneront'];
   ai.answer({ conjugate: answer });
-  await page.goto('/#/study/grammar/conjugation?verb=désapprovisionner');
+  await page.goto('/#/grammar/conjugation?verb=désapprovisionner');
   await expect(section(page)).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   await settled(page);

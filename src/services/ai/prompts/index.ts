@@ -6,6 +6,7 @@ import { enumeratedReaderWords } from '../../../utils/readerTokens';
 import { prosodySchema } from '../prosodySchema';
 import type { GrammarTag } from '../../../types/grammar';
 import type { ImportMode } from '../../../types/exercises';
+import type { LearningArea, ArticleExerciseArea } from '../../../types/learningArea';
 import {
   conjugationJsonSchema,
   drillsJsonSchema,
@@ -104,6 +105,7 @@ export const exerciseArticleText = (articleText: string) => articleText.trim().s
 
 export interface ExtractInput {
   mode: ImportMode;
+  learningArea: LearningArea;
   /** Pasted text; with images it travels as extra context. */
   text?: string;
   images?: ImageInput[];
@@ -117,6 +119,7 @@ export function extractRequest(input: ExtractInput, lang: Lang): JsonRequest {
   return {
     prompt: render('extract', lang, {
       source: images ? 'image' : 'text',
+      learningArea: input.learningArea,
       mode: input.mode,
       rawText: input.text?.trim(),
       customTitle: input.title?.trim(),
@@ -219,11 +222,12 @@ export function adaptiveRequest(input: AdaptiveInput, lang: Lang): JsonRequest {
 }
 
 export function exercisesRequest(
-  input: { articleText: string; count: number; level: string },
+  input: { articleText: string; count: number; level: string; learningArea: ArticleExerciseArea },
   lang: Lang,
 ): JsonRequest {
   return {
     prompt: render('exercises', lang, {
+      learningArea: input.learningArea,
       level: input.level.trim(),
       articleText: exerciseArticleText(input.articleText),
       count: String(input.count),

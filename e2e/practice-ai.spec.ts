@@ -324,7 +324,7 @@ test.describe('history', () => {
     await checkButton(item).click();
     await expect.poll(() => ai.calls.grade).toBe(1);
     await page.goto(PRACTICE);
-    await expect(page.getByRole('heading', { name: 'Practice' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Grammar exercises' })).toBeVisible();
 
     await page.waitForTimeout(1600);
     await expect(page.getByRole('alert')).toHaveCount(0);

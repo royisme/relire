@@ -99,6 +99,7 @@ test('a pending save cannot resurrect a deleted unit, while reset retains record
   const d = await db();
   await d.put('attempts', {
     id: 'attempt',
+    learningArea: 'reading',
     unitId: 'passage-1',
     itemId: 'rc-1',
     grammarTag: 'reading-comprehension',
@@ -130,6 +131,7 @@ test('deleting an article removes only its own recordings; deleting a set remove
   const d = await db();
   await d.put('attempts', {
     id: 'attempt',
+    learningArea: 'reading',
     unitId: 'passage-1',
     itemId: 'rc-1',
     grammarTag: 'reading-comprehension',

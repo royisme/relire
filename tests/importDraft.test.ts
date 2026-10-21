@@ -158,6 +158,7 @@ test('model output omitting draft-only fields is normalized instead of rejected'
     units: [
       {
         id: 'u1',
+        learningArea: 'grammar',
         section: 'GRAMMAIRE',
         unitNumber: 1,
         title: 'Exercices',

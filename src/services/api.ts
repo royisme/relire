@@ -29,6 +29,7 @@ import {
 import {
   ExplanationSchema,
   GeneratedSetSchema,
+  validateGeneratedArea,
   HintSchema,
   type Drills,
   type Explanation,
@@ -37,6 +38,7 @@ import {
   type OpenGrade,
 } from '../types/exerciseAi';
 import { ConjugationAnswerSchema, type ConjugationAnswer } from '../types/conjugationAnswer';
+import type { ArticleExerciseArea } from '../types/learningArea';
 import type { ImportDraft } from './exercises/importDraft';
 import { engineInfinitive } from './conjugation/infinitive';
 import type { Transcription } from '../types/transcription';
@@ -253,7 +255,7 @@ export function transcribeMaterial(
  * cached set stays exactly that.
  */
 export function generateExercises(
-  input: { articleText: string; count: number; level: string },
+  input: { articleText: string; count: number; level: string; learningArea: ArticleExerciseArea },
   fresh = false,
 ): Promise<GeneratedSet> {
   const ctx = context();
@@ -265,10 +267,11 @@ export function generateExercises(
       input.level,
       input.count,
       exerciseArticleText(input.articleText),
+      input.learningArea,
     ),
     () => ai.generateExercises(input, ctx),
     fresh,
-    (value) => GeneratedSetSchema.parse(value),
+    (value) => validateGeneratedArea(GeneratedSetSchema.parse(value), input.learningArea),
   );
 }
 

@@ -143,11 +143,12 @@ export async function ensureTopicUnit(preparedUnit: ExerciseUnit, expectedResetT
 /** Every unit, ordered by unit number; the UI groups them by `setId`. */
 export async function listUnits(): Promise<ExerciseUnit[]> {
   const rows = await (await db()).getAll('units');
-  return rows.sort((a, b) => a.unitNumber - b.unitNumber);
+  return rows.map((row) => ExerciseUnitSchema.parse(row)).sort((a, b) => a.unitNumber - b.unitNumber);
 }
 
 export async function getUnit(unitId: string): Promise<ExerciseUnit | undefined> {
-  return (await db()).get('units', unitId);
+  const unit = await (await db()).get('units', unitId);
+  return unit ? ExerciseUnitSchema.parse(unit) : undefined;
 }
 
 /** The sheet's unit, states and reset token from one consistent read, never across a reset or restore. */
@@ -163,7 +164,7 @@ export async function getUnitSnapshot(unitId: string): Promise<{
     readResetToken(tx.objectStore('meta'), unitId),
   ]);
   await tx.done;
-  return { unit, states, resetToken };
+  return { unit: unit ? ExerciseUnitSchema.parse(unit) : undefined, states, resetToken };
 }
 
 /** Deletes a unit and its item states in one transaction. Its attempts stay. Resolves false when there was no such unit. */
@@ -304,6 +305,7 @@ export async function checkItem(input: CheckInput): Promise<CheckOutcome> {
       id: crypto.randomUUID(),
       unitId,
       itemId,
+      learningArea: unit.learningArea,
       grammarTag: item.grammarTag,
       prompt: item.prompt,
       userAnswer: recordedAnswerText(effectiveItemType(item, unit), item, answer),

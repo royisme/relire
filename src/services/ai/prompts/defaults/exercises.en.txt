@@ -5,7 +5,9 @@ Article:
 {{articleText}}
 """
 
-Write {{count}} exercise items in total that check the learner's understanding of this article and the grammar in it. Group the items into units: one unit for each exercise type you use, holding all the items of that type.
+Requested learning area: {{learningArea}}. Every unit must explicitly return learningArea equal to this requested value. For reading, test understanding of the article; for grammar, test grammatical knowledge using the article. Do not classify by exercise type, section or answer input.
+
+Write {{count}} exercise items in total for that goal. Group the items into units: one unit for each exercise type you use, holding all the items of that type.
 
 Rules:
 - Every item must be answerable from the article alone. In articleQuote, quote the exact article words the answer depends on, copied character for character (you may join separate stretches with …). If the article does not support a question, do not write that question.
@@ -44,6 +46,7 @@ Output only JSON in this shape (every field below is accepted; leave out the opt
   "units": [
     {
       "id": "u1 (unique in the answer)",
+      "learningArea": "{{learningArea}}",
       "section": "GRAMMAIRE | VOCABULAIRE | CONJUGAISON | COMPRENDRE | EXTRA",
       "unitNumber": 1,
       "title": "Short French title for this unit",

@@ -53,7 +53,7 @@ for (const language of ['en', 'zh'] as const) {
         expect(checked.units).toHaveLength(1);
         expect(checked.attempts).toHaveLength(1);
         const unit = checked.units[0];
-        const unitHref = `#/practice/${encodeURIComponent(unit.id)}`;
+        const unitHref = `#/grammar/exercises/unit/${encodeURIComponent(unit.id)}`;
         const original = await page.evaluate(async () => {
           const db: Database = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
           return db.exportData();
@@ -311,7 +311,7 @@ test('a replacement topic revision leaves Mistakes Retry on the original saved q
   expect(revisions.units.find((unit) => unit.id === original.id)).toEqual(original);
   expect(new Set(revisions.units.map((unit) => unit.topicOrigin!.exerciseRevision)).size).toBe(2);
   await page.goto('/#/study/mistakes');
-  const originalHref = `#/practice/${encodeURIComponent(original.id)}`;
+  const originalHref = `#/grammar/exercises/unit/${encodeURIComponent(original.id)}`;
   await page.locator(`a[href="${originalHref}"]`).click();
   await expect(
     workbench(page).getByRole('heading', { name: original.topicOrigin!.title.en, exact: true }),

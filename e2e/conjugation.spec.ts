@@ -9,7 +9,7 @@ import type { Page } from '@playwright/test';
 import { mockConjugationDeviceVoice } from './deviceSpeech.helpers';
 import { CONTENT_ORIGIN } from './contentService.helpers';
 
-const PAGE = '/#/study/grammar/conjugation';
+const PAGE = '/#/grammar/conjugation';
 
 const verbInput = (page: Page) => page.getByLabel('Verb in the infinitive');
 const conjugateButton = (page: Page) => page.getByRole('button', { name: /^(Conjugate|Working…)$/ });
@@ -150,7 +150,7 @@ test('without a key, a verb outside the pack shows the real error next to the in
   await page.goto(PAGE);
   await conjugate(page, 'parler');
   await expect(page.getByRole('alert')).toHaveText('API key is not set');
-  await expect(page).toHaveURL(/#\/study\/grammar\/conjugation$/);
+  await expect(page).toHaveURL(/#\/grammar\/conjugation$/);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByRole('article')).toHaveCount(0);
   expect(totalCalls(ai)).toBe(0);
@@ -178,13 +178,13 @@ test('a failed request shows its reason and a later one replaces it', async ({ p
 
 test('?verb= prefills the Conjugation address and runs once for each verb', async ({ page, ai }) => {
   await noKey(page);
-  await page.goto('/#/study/grammar/conjugation?verb=aller');
+  await page.goto('/#/grammar/conjugation?verb=aller');
   await expect(verbInput(page)).toHaveValue('aller');
   await expect(page.getByRole('article', { name: 'aller' })).toBeVisible();
   expect(totalCalls(ai)).toBe(0);
 
-  await page.goto('/#/study/grammar/conjugation?verb=s%27appeler');
-  await expect(page).toHaveURL(/#\/study\/grammar\/conjugation\?verb=/);
+  await page.goto('/#/grammar/conjugation?verb=s%27appeler');
+  await expect(page).toHaveURL(/#\/grammar\/conjugation\?verb=/);
   await expect(verbInput(page)).toHaveValue("s'appeler");
   await expect(page.getByRole('article', { name: 's’appeler' })).toBeVisible();
   await expect(section(page, 'Participles').getByText('s’appelant', { exact: true })).toBeVisible();
@@ -227,7 +227,7 @@ test('a differing pronominal present participle composes both Model and Rule, no
 
 test('?verb= for a verb outside the pack makes exactly one request', async ({ page, ai }) => {
   ai.answer({ conjugate: parlerAnswer() });
-  await page.goto('/#/study/grammar/conjugation?verb=parler');
+  await page.goto('/#/grammar/conjugation?verb=parler');
   await expect(page.getByRole('article', { name: 'parler' })).toBeVisible();
   expect(ai.calls.conjugate).toBe(1);
 });

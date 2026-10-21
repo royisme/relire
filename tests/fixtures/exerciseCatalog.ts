@@ -24,6 +24,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
   units: [
     {
       id: 'unit-word-transform',
+      learningArea: 'grammar',
       section: 'VOCABULAIRE',
       unitNumber: 1,
       title: 'Le féminin des adjectifs',
@@ -43,6 +44,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-fill-blanks',
+      learningArea: 'grammar',
       section: 'CONJUGAISON',
       unitNumber: 2,
       title: 'Conjuguer au présent et au futur',
@@ -70,6 +72,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-gender-check',
+      learningArea: 'grammar',
       section: 'GRAMMAIRE',
       unitNumber: 3,
       title: 'Le genre des noms',
@@ -98,6 +101,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-odd-one-out',
+      learningArea: 'reading',
       section: 'VOCABULAIRE',
       unitNumber: 4,
       title: 'Le vocabulaire du texte',
@@ -118,6 +122,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-match-pairs',
+      learningArea: 'reading',
       section: 'COMPRENDRE',
       unitNumber: 5,
       title: 'Associer la question et la réponse',
@@ -138,6 +143,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-dialogue-order',
+      learningArea: 'reading',
       section: 'COMPRENDRE',
       unitNumber: 6,
       title: 'Remettre le dialogue dans l’ordre',
@@ -163,6 +169,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-choice-select',
+      learningArea: 'grammar',
       section: 'GRAMMAIRE',
       unitNumber: 7,
       title: 'Les pronoms personnels',
@@ -182,6 +189,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-sentence-build',
+      learningArea: 'writing',
       section: 'EXTRA',
       unitNumber: 8,
       title: 'Reformuler une idée',
@@ -203,6 +211,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-reading-cloze',
+      learningArea: 'reading',
       section: 'COMPRENDRE',
       unitNumber: 9,
       title: 'Compléter le passage',
@@ -235,6 +244,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-number-dictation',
+      learningArea: 'listening',
       section: 'VOCABULAIRE',
       unitNumber: 10,
       title: 'Les nombres',
@@ -265,6 +275,7 @@ export const CATALOG_EXERCISES: GeneratedExercises = {
     },
     {
       id: 'unit-open-qa',
+      learningArea: 'reading',
       section: 'COMPRENDRE',
       unitNumber: 11,
       title: 'Questions sur le texte',

@@ -42,7 +42,7 @@ export function WordConjugation({ lemma, lookup }: { lemma: string; lookup: stri
   if (!verb) {
     const link = (
       <Link
-        to={{ name: 'study', tab: 'grammar', section: 'conjugation', verb: lemma }}
+        to={{ name: 'grammar', section: 'conjugation', verb: lemma }}
         className={buttonVariants({ variant: 'outline', className: 'w-56 max-w-full' })}
       >
         {t('wordModal.conjugateThis')}

@@ -99,10 +99,11 @@ export const PROMPTS: PromptDefinition[] = [
   },
   {
     id: 'extract',
-    variables: ['source', 'mode', 'rawText', 'customTitle'],
+    variables: ['source', 'mode', 'rawText', 'customTitle', 'learningArea'],
     defaults: { en: extractEn, zh: extractZh },
     sample: {
       source: 'text',
+      learningArea: 'grammar',
       mode: 'complete',
       rawText: 'Exercice 1. Complétez avec être.\n1. Je [___] étudiante.\n2. Tu [___] polonais.',
       customTitle: 'Unité 1',
@@ -162,9 +163,10 @@ export const PROMPTS: PromptDefinition[] = [
   },
   {
     id: 'exercises',
-    variables: ['level', 'articleText', 'count'],
+    variables: ['level', 'articleText', 'count', 'learningArea'],
     defaults: { en: exercisesEn, zh: exercisesZh },
     sample: {
+      learningArea: 'reading',
       level: 'B1',
       articleText:
         'Le matin, Léa prend le train pour Lyon. Elle a rendez-vous avec une amie qu’elle n’a pas vue depuis deux ans.',

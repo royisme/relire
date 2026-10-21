@@ -21,13 +21,13 @@ importSourceChecks({
   review: 'Review and correct',
 });
 async function enter(page: import('@playwright/test').Page) {
-  await page.goto('/#/practice');
+  await page.goto('/#/grammar/exercises');
   await page.getByRole('button', { name: 'Add exercises', exact: true }).click();
   await page
     .getByRole('dialog', { name: 'Add exercises' })
     .getByRole('button', { name: 'Import a worksheet', exact: true })
     .click();
-  await expect(page).toHaveURL(/#\/import\/exercises$/);
+  await expect(page).toHaveURL(/#\/import\/exercises\?area=grammar$/);
 }
 const chooseLevel = (page: import('@playwright/test').Page, level = 'B2') =>
   page.getByLabel('Level of these exercises', { exact: true }).selectOption(level);
@@ -46,7 +46,7 @@ const savedRows = (page: import('@playwright/test').Page) =>
     return { articles: await d.getAll('articles'), units: await d.getAll('units') };
   });
 
-const setUrl = /#\/practice\/set\/[0-9a-f-]+$/;
+const setUrl = /#\/grammar\/exercises\/set\/[0-9a-f-]+$/;
 
 for (const phone of [false, true]) {
   test(`text review, blocker exclusion, required level and a durable exercises batch ${phone ? '@phone' : ''}`, async ({
@@ -69,7 +69,7 @@ for (const phone of [false, true]) {
     await page.getByRole('button', { name: 'Confirm and save' }).click();
     // The level is chosen once per import and is required; nothing is saved without it.
     await expect(page.getByRole('status')).toContainText('Choose the level');
-    await expect(page).toHaveURL(/#\/import\/exercises$/);
+    await expect(page).toHaveURL(/#\/import\/exercises\?area=grammar$/);
     expect((await savedRows(page)).units).toEqual([]);
     await expect(page.getByLabel('Level of these exercises', { exact: true })).toHaveValue('');
     await chooseLevel(page, 'B2');
@@ -82,10 +82,10 @@ for (const phone of [false, true]) {
     expect(saved.units).toHaveLength(1);
     expect(saved.units[0]).toMatchObject({ setTitle: 'Imported workbook', level: 'B2' });
     expect(saved.units[0]).not.toHaveProperty('materialId');
-    await expect(page).toHaveURL(new RegExp(`#/practice/set/${saved.units[0].setId}$`));
+    await expect(page).toHaveURL(new RegExp(`#/grammar/exercises/set/${saved.units[0].setId}$`));
     await expect(page.getByRole('heading', { name: 'Imported workbook' })).toBeVisible();
     await expect(page.locator('main').getByRole('link', { name: saved.units[0].title })).toBeVisible();
-    await page.goto('/#/practice');
+    await page.goto('/#/grammar/exercises');
     await expect(page.locator('main tbody tr').filter({ hasText: 'Imported workbook' })).toContainText('B2');
   });
 }
@@ -110,7 +110,7 @@ test('one batch: every unit shares the set id, the level and the creation time',
   expect(new Set(units.map((unit) => unit.createdAt)).size).toBe(1);
   expect(units[0].createdAt).toBeGreaterThanOrEqual(before);
   // It opens on the new set, which lists every exercise of the batch.
-  await expect(page).toHaveURL(new RegExp(`#/practice/set/${units[0].setId}$`));
+  await expect(page).toHaveURL(new RegExp(`#/grammar/exercises/set/${units[0].setId}$`));
   await expect(page.getByRole('heading', { name: 'Mon document' })).toBeVisible();
   await expect(page.locator('main').getByRole('link', { name: 'Deuxième unité' })).toBeVisible();
   await expect(
@@ -128,7 +128,7 @@ for (const phone of [false, true]) {
     expect(await overflowing(page.locator('body'))).toEqual([]);
     await page.getByRole('button', { name: 'Confirm and save' }).click();
     await expect(page.getByRole('status')).toContainText('Enter a title');
-    await expect(page).toHaveURL(/#\/import\/exercises$/);
+    await expect(page).toHaveURL(/#\/import\/exercises\?area=grammar$/);
     expect((await savedRows(page)).units).toEqual([]);
     await page.getByLabel('Exercise set title', { exact: true }).fill('Mon lot');
     await page.getByLabel('I have reviewed').check();
@@ -228,7 +228,7 @@ test('blockers cannot partially save; explicit exclusion lets the rest through',
   await page.getByLabel('I have reviewed').check();
   await page.getByRole('button', { name: 'Confirm and save' }).click();
   await expect(page.getByRole('status')).toContainText('resolve or exclude');
-  await expect(page).toHaveURL(/#\/import\/exercises$/);
+  await expect(page).toHaveURL(/#\/import\/exercises\?area=grammar$/);
   await page
     .locator('details')
     .filter({ has: page.locator('summary', { hasText: 'Question illisible' }) })
@@ -289,7 +289,7 @@ test('consent pins model across asynchronous PDF rendering; unsupported images m
     )) as typeof import('../src/utils/appSettings');
     saveAppSettings({ ocrModel: 'gemini-3.8-flash-lite-tts' });
     const { navigate } = (await import('/src/hooks/useRoute.ts' as string)) as typeof import('../src/hooks/useRoute');
-    navigate({ name: 'importExercises' });
+    navigate({ name: 'importExercises', area: 'grammar' });
   });
   await page
     .getByLabel('Choose an image or PDF')

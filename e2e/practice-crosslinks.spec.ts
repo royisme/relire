@@ -22,7 +22,7 @@ for (const phone of [false, true]) {
     await page.goto('/#/read/cafe-parisien');
     await expect(page.getByRole('heading', { name: /Café Parisien/ })).toBeVisible();
     await page.evaluate((id) => {
-      location.hash = `#/practice/${id}`;
+      location.hash = `#/grammar/exercises/unit/${id}`;
     }, UNIT);
     await expect(page.getByRole('heading', { name: TITLE })).toBeVisible();
     await settled(page);
@@ -182,7 +182,7 @@ for (const fail of [false, true]) {
     await row(page, 'Je ne').getByRole('button', { name: 'pain', exact: true }).click();
     await expect.poll(() => ai.calls.word).toBe(1);
     await page.evaluate(() => {
-      location.hash = '#/practice/unit-word-transform';
+      location.hash = '#/grammar/exercises/unit/unit-word-transform';
     });
     await expect(page.getByRole('heading', { name: 'Le féminin des adjectifs' })).toBeVisible();
     await expect(page.getByRole('dialog')).toHaveCount(0);

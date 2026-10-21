@@ -1,6 +1,8 @@
 # Relire Plus: merging FrenchLab AI into Relire
 
 Status: approved direction, implementation in phases.
+
+Navigation amendment (owner-approved 2026-10-21): the historical generic Practice and Study → Grammar navigation below is superseded by `learning-navigation-tasks.md` and the current route/ownership contracts in `architecture.md`. Reading, Grammar, Listening and Speaking are learning destinations; saved Writing is conditional. Units and attempts require explicit learningArea; imports confirm each unit's area; mixed sets remain whole; Read aloud owns a durable workspace. Historical phase evidence below is not a compatibility-route contract.
 Date: 2026-10-16.
 Source projects: Relire (this repository, the host) and FrenchLab AI (`royisme/frenchPracticeApp`, merged in and then archived).
 

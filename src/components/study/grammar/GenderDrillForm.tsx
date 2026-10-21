@@ -94,7 +94,7 @@ export function GenderDrillForm({ pack }: { pack: NounGenderPack }) {
         {!valid && <p className="text-bad-700">{t('nounGender.drill.countRange', { max: pack.nouns.length })}</p>}
         {status.kind === 'done' && (
           <Link
-            to={{ name: 'practiceSet', setId: status.units[0].setId }}
+            to={{ name: 'practiceSet', area: 'grammar', setId: status.units[0].setId }}
             className="inline-flex min-h-10 items-center text-accent-900 underline underline-offset-2"
           >
             {t('nounGender.drill.open')}

@@ -1,243 +1,134 @@
+/** Canonical learning destinations and strict rejection of removed addresses; pure, no browser. */
 import { expect, test } from 'bun:test';
-import {
-  areaOf,
-  parseRoute as parseConfiguredRoute,
-  routeHref,
-  SETTINGS_SECTIONS,
-  STUDY_TABS,
-  type Route,
-} from '../src/utils/routes';
+import { LEARNING_AREAS, learningAreaPath } from '../src/types/learningArea';
+import { areaOf, parseRoute, routeHref, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../src/utils/routes';
+const parse = (hash: string) => parseRoute(hash, true);
+const roundTrip = (route: Route) => expect(parse(routeHref(route))).toEqual({ route, canonical: null });
 
-const parseRoute = (hash: string) => parseConfiguredRoute(hash, true);
-
-const roundTrip = (route: Route) => parseRoute(routeHref(route));
-
-test('practice addresses: the list and one unit; a stray query is dropped', () => {
-  expect(parseRoute('#/practice')).toEqual({ route: { name: 'practice' }, canonical: null });
-  expect(parseRoute('#/practice?x=1')).toEqual({
-    route: { name: 'practice' },
-    canonical: '#/practice',
-  });
-  expect(parseRoute('#/practice/unit-1').route).toEqual({ name: 'unit', unitId: 'unit-1' });
-  expect(parseRoute('#/practice/').canonical).toBe('#/practice');
-  expect(areaOf({ name: 'unit', unitId: 'x' })).toBe('practice');
+test('each domain has scoped list, unit, complete-set and import roundtrips with encoded ids', () => {
+  for (const area of LEARNING_AREAS) {
+    roundTrip({ name: 'practice', area });
+    roundTrip({ name: 'importExercises', area });
+    expect(areaOf({ name: 'practice', area })).toBe(learningAreaPath(area));
+    for (const id of ['u1', 'a b', 'é/ü?&=', 'x#y', '100%', 'set', 'exercises']) {
+      roundTrip({ name: 'unit', area, unitId: id });
+      roundTrip({ name: 'practiceSet', area, setId: id });
+    }
+  }
+  expect(routeHref({ name: 'practice', area: 'reading' })).toBe('#/read/exercises');
+  expect(routeHref({ name: 'practice', area: 'grammar' })).toBe('#/grammar/exercises');
+  expect(routeHref({ name: 'practice', area: 'listening' })).toBe('#/listening');
+  expect(routeHref({ name: 'practice', area: 'writing' })).toBe('#/writing');
+  expect(parse('#/read/exercises').route).toEqual({ name: 'practice', area: 'reading' });
+  expect(parse('#/read/import').route).toEqual({ name: 'reader', articleId: 'import' });
+  expect(parse('#/read/exercises/').canonical).toBe('#/read/exercises');
 });
 
-test('exercise sets have a distinct Practice route before unit matching', () => {
-  const route: Route = { name: 'practiceSet', setId: 'set-1' };
-  expect(roundTrip(route)).toEqual({ route, canonical: null });
-  expect(areaOf(route)).toBe('practice');
-  expect(parseRoute('#/practice/set/set-1/').canonical).toBe('#/practice/set/set-1');
-  for (const id of ['a b', 'é/ü?&=', 'x#y', '100%', 'unit-1']) {
-    expect(roundTrip({ name: 'practiceSet', setId: id }).route).toEqual({ name: 'practiceSet', setId: id });
-  }
+test('removed routes, bare imports, invalid areas, reserved paths and broken encodings have no alias', () => {
   for (const hash of [
-    '#/practice/set',
-    '#/practice/set/',
-    '#/practice/set/a/b',
-    '#/practice/set/%E0%A4%A',
-    '#/practice/set/a?x=1',
-  ]) {
-    expect(parseRoute(hash).route.name).toBe('notFound');
-  }
-  expect(parseRoute('#/practice/unit-set').route).toEqual({ name: 'unit', unitId: 'unit-set' });
+    '#/practice',
+    '#/practice/set/a',
+    '#/practice/unit-a',
+    '#/study/grammar',
+    '#/study/grammar/conjugation',
+    '#/study/grammar/gender',
+    '#/study/grammar/topic',
+    '#/import',
+    '#/import/exercises',
+    '#/import/exercises?area=speaking',
+    '#/import/exercises?area=',
+    '#/grammar/topics',
+    '#/grammar/%67ender',
+    '#/read/%65xercises',
+    '#/read/exercises/unit',
+    '#/read/exercises/set/a/b',
+    '#/grammar/exercises/unit/%E0%A4%A',
+    '#/read/exercises/unit/u?x=1',
+    '#/passage',
+    '#/passage/a/b',
+    '#/passage/%E0%A4%A',
+    '#/read//',
+    '#/speaking/read-aloud/%E0%A4%A',
+    '#/grammar/topics/%E0%A4%A',
+    '#/settings/about',
+    '#/settings/missing',
+    '#/about/x',
+    '#/import/article/x',
+  ])
+    expect(parse(hash).route.name).toBe('notFound');
 });
 
-test('the two import pages have their own addresses and areas; the bare import address is not a place', () => {
-  expect(parseRoute('#/import/article')).toEqual({ route: { name: 'importArticle' }, canonical: null });
-  expect(parseRoute('#/import/exercises')).toEqual({ route: { name: 'importExercises' }, canonical: null });
-  expect(parseRoute('#/import/exercises/').canonical).toBe('#/import/exercises');
-  expect(areaOf({ name: 'importArticle' })).toBe('read');
-  expect(areaOf({ name: 'importExercises' })).toBe('practice');
-  for (const hash of ['#/import', '#/import/', '#/import/other', '#/import/article/x'])
-    expect(parseRoute(hash).route.name).toBe('notFound');
-  // The reader still owns every article id, including `import`.
-  expect(parseRoute('#/read/import').route).toEqual({ name: 'reader', articleId: 'import' });
-});
-
-test('ids with odd characters survive the round trip', () => {
-  for (const id of ['a b', 'é/ü?&=', 'x#y', '100%']) {
-    expect(roundTrip({ name: 'unit', unitId: id }).route).toEqual({ name: 'unit', unitId: id });
-  }
-});
-
-test('addresses that are not practice places stay not found', () => {
-  expect(parseRoute('#/practice/a/b').route.name).toBe('notFound');
-  expect(parseRoute('#/practice/a?x=1').route.name).toBe('notFound');
-  expect(parseRoute('#/practice/%E0%A4%A').route.name).toBe('notFound');
-  expect(parseRoute('#/read/abc').route).toEqual({ name: 'reader', articleId: 'abc' });
-});
-
-test('mistake notebook has a canonical study address', () => {
-  const route: Route = { name: 'study', tab: 'mistakes' };
-  expect(roundTrip(route)).toEqual({ route, canonical: null });
-  expect(areaOf(route)).toBe('study');
-});
-
-test('passage routes and durable sentence focus roundtrip without taking article ids', () => {
+test('reader, distinct passage and speaking preserve source and sentence values', () => {
   const sentence = 'L’oiseau chante ? Oui, près du café & du jardin.';
-  const route: Route = { name: 'passage', unitId: 'u|/é%', sentence };
-  expect(roundTrip(route)).toEqual({ route, canonical: null });
-  expect(areaOf(route)).toBe('read');
-  const article: Route = { name: 'reader', articleId: 'passage', sentence };
-  expect(roundTrip(article)).toEqual({ route: article, canonical: null });
-  for (const hash of ['#/passage', '#/passage/m/u', '#/passage/', '#/passage/%E0%A4%A'])
-    expect(parseRoute(hash).route.name).toBe('notFound');
+  for (const id of ['a b', 'é/ü?&=', 'x#y', '100%']) {
+    roundTrip({ name: 'reader', articleId: id, sentence });
+    roundTrip({ name: 'passage', unitId: id, sentence });
+    roundTrip({ name: 'readAloud', articleId: id, sentence });
+  }
+  roundTrip({ name: 'speaking' });
+  roundTrip({ name: 'readAloud' });
+  expect(areaOf({ name: 'readAloud' })).toBe('speaking');
+  expect(areaOf({ name: 'passage', unitId: 'u' })).toBe('read');
   for (const value of ['', '   ', 'a'.repeat(4001)]) {
-    const hash = `#/passage/u?sentence=${encodeURIComponent(value)}`;
-    expect(parseRoute(hash).route).toEqual({ name: 'passage', unitId: 'u' });
-    expect(parseRoute(hash).canonical).toBe('#/passage/u');
+    const result = parse(`#/passage/u?sentence=${encodeURIComponent(value)}`);
+    expect(result.route).toEqual({ name: 'passage', unitId: 'u' });
+    expect(result.canonical).toBe('#/passage/u');
   }
 });
 
-test('About is its own route', () => {
-  const route: Route = { name: 'about' };
-  expect(roundTrip(route)).toEqual({ route, canonical: null });
-  expect(areaOf(route)).toBe('about');
-  for (const hash of ['#/about/']) {
-    expect(parseRoute(hash)).toEqual({ route, canonical: '#/about' });
+test('Grammar is separate from My study and local references/exercises survive service absence', () => {
+  expect(STUDY_TABS).toEqual(['words', 'shadowing', 'mistakes']);
+  for (const tab of STUDY_TABS) roundTrip({ name: 'study', tab });
+  roundTrip({ name: 'wordsAll' });
+  roundTrip({ name: 'wordsReview' });
+  expect(parse('#/study').canonical).toBe('#/study/words');
+  roundTrip({ name: 'grammar' });
+  roundTrip({ name: 'grammar', tag: 'articles' });
+  expect(areaOf({ name: 'grammarTopic', topicId: 'topic' })).toBe('grammar');
+  for (const verb of ['s’habiller', 'se lever', "s'appeler", 'éternuer'])
+    roundTrip({ name: 'grammar', section: 'conjugation', verb });
+  for (const service of [true, false]) {
+    for (const section of ['gender', 'conjugation'] as const) {
+      const route: Route = { name: 'grammar', section };
+      expect(parseRoute(routeHref(route), service)).toEqual({ route, canonical: null });
+    }
+    expect(parseRoute('#/grammar/exercises', service).route).toEqual({ name: 'practice', area: 'grammar' });
   }
+  expect(parseRoute('#/grammar', false)).toEqual({
+    route: { name: 'grammar', section: 'conjugation' },
+    canonical: '#/grammar/conjugation',
+  });
+  expect(parseRoute('#/grammar/topics/topic', false).route.name).toBe('notFound');
+  for (const topicId of ['test-only', 'a b', 'é/ü?&=', 'x#y', '100%', 'gender'])
+    roundTrip({ name: 'grammarTopic', topicId });
+  for (const query of ['tag=unknown', 'tag=', 'verb=parler'])
+    expect(parse(`#/grammar?${query}`).canonical).toBe('#/grammar');
+  expect(parse('#/grammar/conjugation?verb=%20').canonical).toBe('#/grammar/conjugation');
+});
+
+test('Settings preferences, About, AI purpose and return addresses remain intact', () => {
   expect(SETTINGS_SECTIONS).toEqual(['ai', 'practice', 'words', 'prompts', 'data']);
-  for (const hash of ['#/about/extra', '#/settings/about', '#/settings/missing']) {
-    expect(parseRoute(hash).route.name).toBe('notFound');
-  }
-});
-
-test('all study and remaining Settings sections keep canonical deep links', () => {
-  for (const tab of STUDY_TABS) {
-    const route: Route = { name: 'study', tab };
-    expect(roundTrip(route)).toEqual({ route, canonical: null });
-  }
-  for (const section of SETTINGS_SECTIONS) {
-    const route: Route = { name: 'settings', section, ...(section === 'ai' ? { purpose: 'text' as const } : {}) };
-    expect(roundTrip(route)).toEqual({ route, canonical: null });
-    expect(areaOf(route)).toBe('settings');
-  }
-  expect(parseRoute('#/study')).toEqual({ route: { name: 'study', tab: 'words' }, canonical: '#/study/words' });
-  expect(parseRoute('#/settings')).toEqual({ route: { name: 'settings', section: null }, canonical: null });
-  expect(routeHref({ name: 'settings', section: 'words' })).toBe('#/settings/words');
-  expect(parseRoute('#/settings/words')).toEqual({ route: { name: 'settings', section: 'words' }, canonical: null });
-});
-
-test('AI purpose routes are independent and old AI routes are not aliases', () => {
-  for (const purpose of ['text', 'ocr', 'speech'] as const) {
-    const route: Route = { name: 'settings', section: 'ai', purpose };
-    expect(roundTrip(route)).toEqual({ route, canonical: null });
-  }
-  expect(parseRoute('#/settings/ai').canonical).toBe('#/settings/ai/text');
-  for (const hash of ['#/settings/text-ai', '#/settings/speech', '#/settings/ai/nope'])
-    expect(parseRoute(hash).route.name).toBe('notFound');
-});
-
-test('a missing-key request keeps its purpose and where to return', () => {
+  for (const section of SETTINGS_SECTIONS)
+    roundTrip({ name: 'settings', section, ...(section === 'ai' ? { purpose: 'text' as const } : {}) });
+  for (const purpose of ['text', 'ocr', 'speech'] as const) roundTrip({ name: 'settings', section: 'ai', purpose });
+  roundTrip({ name: 'settings', section: null });
+  roundTrip({ name: 'about' });
+  roundTrip({ name: 'progress' });
+  expect(parse('#/settings/ai').canonical).toBe('#/settings/ai/text');
   const route: Route = {
     name: 'settings',
     section: 'ai',
     purpose: 'ocr',
     focusKey: true,
-    returnTo: '#/import/article',
+    returnTo: '#/import/exercises?area=grammar',
   };
-  expect(roundTrip(route)).toEqual({ route, canonical: null });
-  expect(routeHref(route)).toBe('#/settings/ai/ocr?key=1&return=%23%2Fimport%2Farticle');
-  expect(parseRoute('#/settings/ai/text?key=1').route).toEqual({
-    name: 'settings',
-    section: 'ai',
-    purpose: 'text',
-    focusKey: true,
-  });
-  // A return address outside the app, or one that would nest another return, is dropped.
-  for (const query of ['return=https%3A%2F%2Fexample.com', 'return=%23%2Fread%3Freturn%3D%23%2Fimport%2Farticle']) {
-    expect(parseRoute(`#/settings/ai/speech?key=1&${query}`).route).toEqual({
+  roundTrip(route);
+  for (const query of ['return=https%3A%2F%2Fexample.com', 'return=%23%2Fread%3Freturn%3D%23%2Fimport%2Farticle'])
+    expect(parse(`#/settings/ai/speech?key=1&${query}`).route).toEqual({
       name: 'settings',
       section: 'ai',
       purpose: 'speech',
       focusKey: true,
     });
-  }
-});
-
-test('Grammar topics and Conjugation have distinct addresses and query values', () => {
-  expect(STUDY_TABS).toEqual(['words', 'shadowing', 'mistakes', 'grammar']);
-  const bare: Route = { name: 'study', tab: 'grammar' };
-  expect(routeHref(bare)).toBe('#/study/grammar');
-  expect(roundTrip(bare)).toEqual({ route: bare, canonical: null });
-  expect(areaOf(bare)).toBe('study');
-  expect(parseRoute('#/study/grammar')).toEqual({ route: bare, canonical: null });
-  const conjugation: Route = { name: 'study', tab: 'grammar', section: 'conjugation' };
-  expect(roundTrip(conjugation)).toEqual({ route: conjugation, canonical: null });
-  const filtered: Route = { ...bare, tag: 'articles' };
-  expect(routeHref(filtered)).toBe('#/study/grammar?tag=articles');
-  expect(roundTrip(filtered)).toEqual({ route: filtered, canonical: null });
-  for (const query of ['tag=unknown', 'tag=', 'verb=parler']) {
-    expect(parseRoute(`#/study/grammar?${query}`)).toEqual({ route: bare, canonical: '#/study/grammar' });
-  }
-  for (const verb of ['s’habiller', 'se lever', "s'appeler", 'éternuer']) {
-    const route: Route = { ...conjugation, verb };
-    expect(roundTrip(route)).toEqual({ route, canonical: null });
-  }
-  // The generic tab branch must not drop the verb, and an empty one is no verb.
-  expect(parseRoute('#/study/grammar/conjugation?verb=')).toEqual({
-    route: conjugation,
-    canonical: '#/study/grammar/conjugation',
-  });
-  expect(parseRoute('#/study/grammar/conjugation?verb=%20').route).toEqual(conjugation);
-  expect(parseRoute('#/study/grammar/conjugation?tag=articles').canonical).toBe('#/study/grammar/conjugation');
-});
-
-test('without a content service Grammar is Conjugation and topic routes are not found', () => {
-  expect(parseConfiguredRoute('#/study/grammar', false)).toEqual({
-    route: { name: 'study', tab: 'grammar', section: 'conjugation' },
-    canonical: '#/study/grammar/conjugation',
-  });
-  expect(parseConfiguredRoute('#/study/grammar?tag=articles', false).route).toEqual({
-    name: 'study',
-    tab: 'grammar',
-    section: 'conjugation',
-  });
-  expect(parseConfiguredRoute('#/study/grammar/test-only', false).route).toEqual({ name: 'notFound' });
-  expect(parseConfiguredRoute('#/study/grammar/conjugation?verb=aller', false).route).toEqual({
-    name: 'study',
-    tab: 'grammar',
-    section: 'conjugation',
-    verb: 'aller',
-  });
-});
-
-test('Gender works with or without a content service and ignores unrelated query parameters', () => {
-  const gender: Route = { name: 'study', tab: 'grammar', section: 'gender' };
-  expect(routeHref(gender)).toBe('#/study/grammar/gender');
-  expect(roundTrip(gender)).toEqual({ route: gender, canonical: null });
-  expect(areaOf(gender)).toBe('study');
-  for (const service of [true, false]) {
-    expect(parseConfiguredRoute('#/study/grammar/gender', service)).toEqual({ route: gender, canonical: null });
-    for (const suffix of ['/', '?verb=parler', '?tag=articles', '?x=1'])
-      expect(parseConfiguredRoute(`#/study/grammar/gender${suffix}`, service)).toEqual({
-        route: gender,
-        canonical: '#/study/grammar/gender',
-      });
-    expect(parseConfiguredRoute('#/study/grammar/%67ender', service).route.name).toBe('notFound');
-    expect(parseConfiguredRoute('#/study/grammar/gender/x', service).route.name).toBe('notFound');
-  }
-  expect(parseRoute('#/study/grammar/gender-number').route).toEqual({ name: 'grammarTopic', topicId: 'gender-number' });
-});
-
-test('topic ids decode safely before the extra-path guard; section names are reserved', () => {
-  for (const topicId of ['test-only', 'unknown', 'a b', 'é/ü?&=', 'x#y', '100%']) {
-    const route: Route = { name: 'grammarTopic', topicId };
-    expect(roundTrip(route)).toEqual({ route, canonical: null });
-    expect(areaOf(route)).toBe('study');
-  }
-  expect(parseRoute('#/study/grammar/%74est-only?tag=articles')).toEqual({
-    route: { name: 'grammarTopic', topicId: 'test-only' },
-    canonical: '#/study/grammar/test-only',
-  });
-  for (const hash of [
-    '#/study/grammar/gender/y',
-    '#/study/grammar/%63onjugation',
-    '#/study/grammar/%67ender',
-    '#/study/grammar/%E0%A4%A',
-    '#/study/grammar/conjugation/y',
-    '#/study/grammar//',
-  ])
-    expect(parseRoute(hash).route.name).toBe('notFound');
+  expect(parse('').canonical).toBe('#/read');
 });

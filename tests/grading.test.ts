@@ -265,6 +265,7 @@ describe('attempts', () => {
       buildAttempt(unit, ITEMS.FILL_BLANKS_MULTI, result.recordedAnswer, result.correct, { id: 'a1', timestamp: 7 }),
     ).toEqual({
       id: 'a1',
+      learningArea: 'grammar',
       unitId: unit.id,
       itemId: 'fb-2',
       grammarTag: 'present',

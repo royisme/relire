@@ -244,7 +244,7 @@ test('a verb outside the pack shows one link; following it opens the Conjugation
   await tap(page, 'parle');
   const link = sheet(page).getByRole('link', { name: 'Conjugate this verb' });
   await expect(link).toBeVisible();
-  await expect(link).toHaveAttribute('href', '#/study/grammar/conjugation?verb=parler');
+  await expect(link).toHaveAttribute('href', '#/grammar/conjugation?verb=parler');
   // It reads as an action: an outline button-sized link with an arrow, 40 px high.
   expect((await link.boundingBox())!.height).toBe(40);
   await expect(link).toHaveCSS('border-top-width', '1px');
@@ -253,7 +253,7 @@ test('a verb outside the pack shows one link; following it opens the Conjugation
   expect(ai.calls.conjugate).toBe(0);
 
   await link.click();
-  await expect(page).toHaveURL(/#\/study\/grammar\/conjugation\?verb=parler$/);
+  await expect(page).toHaveURL(/#\/grammar\/conjugation\?verb=parler$/);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByLabel('Verb in the infinitive')).toHaveValue('parler');
   await expect(page.getByRole('article', { name: 'parler' })).toBeVisible();
@@ -416,7 +416,7 @@ for (const module of ['data/grammar-pack/pack.json', 'components/word/packSectio
   });
 }
 
-const PAGE = '/#/study/grammar/conjugation';
+const PAGE = '/#/grammar/conjugation';
 const practise = (page: Page) => page.getByRole('button', { name: /^(Practise this verb|Making exercises…)$/ });
 const box = async (locator: Locator) => (await locator.boundingBox())!;
 
@@ -455,11 +455,11 @@ test('Practise this verb makes one set of seven tenses with no AI request, and l
   expect(units.map((unit) => unit.items)).toEqual(Array(7).fill(2));
   // A pack verb's items name the pack they came from, as the Practice entry's do.
   expect(units.flatMap((unit) => unit.packVersions)).toEqual(Array(14).fill('string'));
-  await expect(link).toHaveAttribute('href', `#/practice/set/${units[0].setId}`);
+  await expect(link).toHaveAttribute('href', `#/grammar/exercises/set/${units[0].setId}`);
   expect(totalCalls(ai)).toBe(0);
 
   await link.click();
-  await expect(page).toHaveURL(new RegExp(`#/practice/set/${units[0].setId}$`));
+  await expect(page).toHaveURL(new RegExp(`#/grammar/exercises/set/${units[0].setId}$`));
 });
 
 test('Practise this verb is offered for a verb the rule checked, and not for one nothing could check', async ({

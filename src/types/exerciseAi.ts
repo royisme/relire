@@ -5,6 +5,7 @@
  * (types/exercises) or the prompts that ask for them.
  */
 import { z } from 'zod';
+import type { ArticleExerciseArea } from './learningArea';
 import {
   ExerciseItemSchema,
   ExerciseTypeSchema,
@@ -77,6 +78,13 @@ export type GeneratedExercises = z.infer<typeof GeneratedExercisesSchema>;
  */
 export const GeneratedSetSchema = GeneratedExercisesSchema.safeExtend({ dropped: z.number().int().min(0) });
 export type GeneratedSet = z.infer<typeof GeneratedSetSchema>;
+
+/** Applies equally to fresh answers and cached results; never relabel model output. */
+export function validateGeneratedArea<T extends GeneratedExercises>(set: T, area: ArticleExerciseArea): T {
+  if (set.units.some((unit) => unit.learningArea !== area))
+    throw new Error(`Generated exercises must use requested learning area: ${area}`);
+  return set;
+}
 
 /** Adaptive drills: every item names its own type, since the set has no unit default. */
 export const DrillsSchema = z

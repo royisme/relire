@@ -27,15 +27,15 @@ Not building: all remaining chapters, a generic course engine, accounts, another
 
 ## 2. Places, entry and navigation
 
-Use existing routes through `routeHref` and `shell/Link`, not manually concatenated addresses:
+Use existing routes through `routeHref` and `shell/Link`, not manually concatenated addresses. Addresses below follow the owner-approved learning-navigation amendment; historical uses of saved Practice refer to the same shared exercise workspace under Grammar, not a separate top-level area:
 
 | Place | Proposed behavior |
 | --- | --- |
-| `#/study/grammar` | Existing chapter/topic list. No new progress query or list badges in the pilot; opening the topic shows its actual progress. |
-| `#/study/grammar/:topicId` | Primary teaching-and-question experience for a topic with `learning`; reference-only topics keep their existing reader. |
-| `#/practice` | Once the learner has answered, the saved topic revision appears as an ordinary saved set with its localized topic title and real item counts. |
-| `#/practice/set/:setId` | Existing set table; each topic revision is a one-unit set, not a global cross-level topic collection. |
-| `#/practice/:unitId` | Opens that exact saved revision with the same question workbench and authored feedback, without fetching the topic. Includes an explicitly optional link to the current topic reference. |
+| `#/grammar` | Existing chapter/topic list. No new progress query or list badges in the pilot; opening the topic shows its actual progress. |
+| `#/grammar/topics/:topicId` | Primary teaching-and-question experience for a topic with `learning`; reference-only topics keep their existing reader. |
+| `#/grammar/exercises` | Once the learner has answered, the saved topic revision appears as an ordinary saved set with its localized topic title and real item counts. |
+| `#/grammar/exercises/set/:setId` | Existing set table; each topic revision is a one-unit set, not a global cross-level topic collection. |
+| `#/grammar/exercises/unit/:unitId` | Opens that exact saved revision with the same question workbench and authored feedback, without fetching the topic. Includes an explicitly optional link to the current topic reference. |
 | `#/study/mistakes` | Retry opens the original saved unit, never today's replacement question. A deleted unit retains readable attempts but loses its retry link. |
 
 ### Start and resume
@@ -195,6 +195,7 @@ Proposed mapping:
 | --- | --- |
 | `id` | `topic:<topicId>:<full exerciseRevision>` |
 | `setId` | Same deterministic identity, one unit per revision/set. This avoids mixed levels and misleading shared batch dates in a global set. |
+| `learningArea` | Explicit `grammar`, also snapshotted on every attempt; no type/section inference. |
 | `section`, `unitNumber` | `GRAMMAIRE`, `1` |
 | `type` | `FILL_BLANKS` as the required unit default; every item explicitly overrides its type. Mixed items are already supported. |
 | `title`, `instruction` | English values of the topic title and authored `learning.instruction`, satisfying existing required string fields. Topic-aware consumers use the bilingual metadata below, not these strings as a language fallback. |

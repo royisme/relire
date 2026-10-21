@@ -10,7 +10,7 @@ import { CATALOG_EXERCISES } from '../tests/fixtures/exerciseCatalog';
 type Storage = typeof import('../src/storage/exercises');
 type Db = typeof import('../src/storage/db');
 
-export const PRACTICE = '/#/practice';
+export const PRACTICE = '/#/grammar/exercises';
 
 /** Wait for committed sample initialization (the app has started and the database exists). */
 export async function waitForArticle(page: Page) {
@@ -51,8 +51,10 @@ export async function openGenerator(page: Page) {
 
 /** Opens a set from the Practice table, then its requested exercise. */
 export async function openListedUnit(page: Page, setId: string, unitId: string) {
-  await page.locator(`main a[href="#/practice/set/${setId}"]`).click();
-  await page.locator(`main a[href="#/practice/${unitId}"]`).click();
+  await page.locator(`main a[href="#/grammar/exercises/set/${setId}"]`).click();
+  const unit = (await stored(page)).units.find((unit) => unit.id === unitId)!;
+  const area = unit.learningArea === 'reading' ? 'read' : unit.learningArea;
+  await page.locator(`main a[href="#/${area}/exercises/unit/${encodeURIComponent(unitId)}"]`).click();
 }
 
 /** Every exercise row in IndexedDB. */
@@ -75,7 +77,9 @@ export const checkButton = (item: Locator) => item.getByRole('button', { name: '
 
 /** Opens a seeded unit's sheet and waits for it. */
 export async function openUnit(page: Page, unitId: string, title: string) {
-  await page.goto(`/#/practice/${unitId}`);
+  const unit = (await stored(page)).units.find((unit) => unit.id === unitId)!;
+  const area = unit.learningArea === 'reading' ? 'read' : unit.learningArea;
+  await page.goto(`/#/${area}/exercises/unit/${encodeURIComponent(unitId)}`);
   await expect(page.getByRole('heading', { name: title })).toBeVisible();
   await settled(page);
 }

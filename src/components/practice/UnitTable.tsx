@@ -44,13 +44,16 @@ export function UnitTable({ rows, onDelete }: { rows: UnitRow[]; onDelete: (unit
             },
           }) => (
             <Link
-              to={{ name: 'unit', unitId: unit.id }}
+              to={{ name: 'unit', area: unit.learningArea, unitId: unit.id }}
               className="block min-w-0 break-words font-serif text-base font-semibold text-ink-900 hover:text-accent-900"
             >
               <span className="sm:hidden">
                 {t('practice.numberedTitle', { number: unit.unitNumber, title: unitTitle(unit, language) })}
               </span>
               <span className="hidden sm:inline">{unitTitle(unit, language)}</span>
+              <span className="mt-0.5 block font-sans text-xs font-normal text-ink-600">
+                {t(`learning.areas.${unit.learningArea}`)}
+              </span>
               {unit.topicOrigin && (
                 <span className="mt-0.5 block font-sans text-xs font-normal text-ink-500">
                   {t('grammarTopics.learning.practice.revision', {

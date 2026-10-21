@@ -159,6 +159,7 @@ export function prepareConjugationDrills({
         setTitle,
         level,
         createdAt,
+        learningArea: 'grammar',
         section: 'CONJUGAISON',
         unitNumber: units.length + 1,
         title: t('conjugation.drill.title', { tense: t(`conjugation.tenses.${tense}.name`) }),

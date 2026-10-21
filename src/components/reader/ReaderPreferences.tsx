@@ -92,7 +92,7 @@ export function ReaderPreferences({
 
       {sourceKind === 'article' && (
         <Link
-          to={{ name: 'practice' }}
+          to={{ name: 'practice', area: 'reading' }}
           className={buttonVariants({ variant: 'outline' })}
           title={t('reader.makeExercisesHint')}
         >

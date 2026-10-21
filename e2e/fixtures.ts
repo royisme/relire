@@ -98,7 +98,13 @@ export const defaultAnswers: Record<Task, Answer> = {
   exercises: (prompt: string) =>
     // The prompt embeds the article trimmed (the app's 8,000-character cap is far above the sample).
     prompt.includes(CATALOG_ARTICLE.trim())
-      ? CATALOG_EXERCISES
+      ? {
+          units: CATALOG_EXERCISES.units.filter(
+            (unit) =>
+              prompt.includes(`Requested learning area: ${unit.learningArea}.`) ||
+              prompt.includes(`本次学习领域：${unit.learningArea}。`),
+          ),
+        }
       : noCatalogAnswer('exercises', 'an article other than CATALOG_ARTICLE'),
   hint: (prompt: string) =>
     catalogueItem(prompt)?.id === 'fb-1' ? CATALOG_HINT : noCatalogAnswer('hint', 'an item other than fb-1'),

@@ -25,9 +25,9 @@ test.describe('sidebar', () => {
     await expect(sidebar(page)).toHaveAttribute('data-sidebar', 'rail');
     expect((await sidebar(page).boundingBox())!.width).toBe(56);
     // Icon only: the label is the tooltip and the accessible name.
-    const read = sidebar(page).getByRole('link', { name: 'Read', exact: true });
-    await expect(read).toHaveAttribute('title', 'Read');
-    await expect(read).not.toContainText('Read');
+    const read = sidebar(page).getByRole('link', { name: 'Reading', exact: true });
+    await expect(read).toHaveAttribute('title', 'Reading');
+    await expect(read).not.toContainText('Reading');
     expect(await stored(page, 'relire_sidebar')).toBe('collapsed');
 
     await page.reload();
@@ -286,8 +286,8 @@ test.describe('layout', () => {
     '#/read',
     '#/study/words',
     '#/study/shadowing',
-    '#/study/grammar',
-    '#/practice',
+    '#/grammar',
+    '#/grammar/exercises',
     '#/progress',
     '#/settings/ai/text',
     '#/settings/ai/ocr',
@@ -358,13 +358,14 @@ test.describe('phones', () => {
     await page.getByRole('button', { name: 'Menu' }).click();
     const drawer = page.getByRole('dialog', { name: 'Menu' });
     for (const name of [
-      'Read',
+      'Reading',
       'My study',
       'Words',
       'Shadowing',
       'Mistakes',
       'Grammar',
-      'Practice',
+      'Listening',
+      'Speaking',
       'Progress',
       'Settings',
       'About',

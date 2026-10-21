@@ -6,7 +6,7 @@ import type { GrammarTopicsPack } from '../src/types/grammarTopic';
 import zh from '../src/i18n/locales/zh.json' with { type: 'json' };
 
 import { mockTopics, TOPICS_REQUEST } from './contentService.helpers';
-const LIST = '/#/study/grammar';
+const LIST = '/#/grammar';
 
 function testPack(): GrammarTopicsPack {
   const pack = topicsFixture();
@@ -65,7 +65,7 @@ test('list groups by chapter, shows levels and reads every block kind', async ({
   await expect(page.getByRole('link', { name: /TEST TOPIC A1/ })).toBeVisible();
   await expect(page.getByRole('link', { name: /ANOTHER TEST TOPIC B1/ })).toBeVisible();
   await page.getByRole('link', { name: /TEST TOPIC A1/ }).click();
-  await expect(page).toHaveURL(/#\/study\/grammar\/test-only$/);
+  await expect(page).toHaveURL(/#\/grammar\/topics\/test-only$/);
   const article = page.getByRole('article');
   await expect(article.getByRole('heading', { name: 'TEST TOPIC', exact: true })).toBeVisible();
   await expect(article.getByRole('heading', { name: 'TEST HEADING', exact: true })).toBeVisible();
@@ -75,7 +75,7 @@ test('list groups by chapter, shows levels and reads every block kind', async ({
   await expect(article.getByRole('rowheader', { name: 'TEST TEST ONLY', exact: true })).toBeVisible();
   await expect(article.locator('li [lang="fr"]')).toHaveCount(2);
   await page.getByRole('link', { name: 'Back to Topics', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/grammar$/);
+  await expect(page).toHaveURL(/#\/grammar$/);
   await page.getByRole('link', { name: /ANOTHER TEST TOPIC B1/ }).click();
   await expect(page.getByRole('article').getByText('A : TEST', { exact: true })).toBeVisible();
   await expect(page.getByRole('article').getByText('B : TEST', { exact: true })).toBeVisible();
@@ -89,28 +89,25 @@ test('tag filter and dismissible chip are route-owned, including no-match and in
   await expect(page.getByRole('link', { name: /TEST TOPIC A1/ })).toBeVisible();
   await expect(page.getByRole('link', { name: /ANOTHER TEST TOPIC/ })).toHaveCount(0);
   await page.getByRole('link', { name: 'Clear tag filter: Articles', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/grammar$/);
+  await expect(page).toHaveURL(/#\/grammar$/);
   await expect(page.getByRole('link', { name: /ANOTHER TEST TOPIC/ })).toBeVisible();
   await page.goto(`${LIST}?tag=negation`);
   await expect(page.getByText('No published topics match this tag.', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Clear tag filter: Negation', exact: true })).toBeVisible();
   await page.goto(`${LIST}?tag=not-a-tag`);
-  await expect(page).toHaveURL(/#\/study\/grammar$/);
+  await expect(page).toHaveURL(/#\/grammar$/);
   await expect(page.getByRole('link', { name: /Clear tag filter/ })).toHaveCount(0);
 });
 
 test('unknown and unpublished ids use the topic-specific not-found view', async ({ page }) => {
   await mockPack(page);
   for (const id of ['unknown', 'unpublished']) {
-    await page.goto(`${LIST}/${id}`);
+    await page.goto(`${LIST}/topics/${id}`);
     await expect(page.getByRole('heading', { name: 'This page is not here', exact: true })).toBeVisible();
     await expect(
       page.getByText('This grammar topic is not published or does not exist.', { exact: true }),
     ).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Back to Topics', exact: true })).toHaveAttribute(
-      'href',
-      '#/study/grammar',
-    );
+    await expect(page.getByRole('link', { name: 'Back to Topics', exact: true })).toHaveAttribute('href', '#/grammar');
   }
 });
 
@@ -127,7 +124,7 @@ test('a service 500 displays its real reason once without a retry loop', async (
   await noPageOverflow(page);
 });
 
-for (const destination of ['', '/test-only']) {
+for (const destination of ['', '/topics/test-only']) {
   test(`loading ${destination ? 'the reader' : 'the list'} keeps the section control and content start still @phone`, async ({
     page,
   }) => {
@@ -147,7 +144,7 @@ for (const destination of ['', '/test-only']) {
     await page.goto(`${LIST}${destination}`);
     await expect(page.getByRole('status')).toHaveText('Loading topics…');
     await settled(page);
-    const control = page.getByRole('radiogroup');
+    const control = page.getByRole('navigation', { name: 'Learning destinations' });
     const before = await control.boundingBox();
     const region = page.locator('[data-grammar-topics]');
     const top = await region.evaluate((el) => el.getBoundingClientRect().top);
@@ -173,7 +170,7 @@ for (const language of ['en', 'zh'] as const) {
       }
       pack.topics[0].blocks.push({ type: 'paragraph', text: { en: 'TEST END', zh: topicFixture().title.zh } });
       await mockPack(page, pack);
-      await page.goto(`${LIST}/test-only`);
+      await page.goto(`${LIST}/topics/test-only`);
       const article = page.getByRole('article');
       await expect(article).toBeVisible();
       await settled(page);
@@ -218,14 +215,14 @@ for (const theme of ['light', 'sepia', 'dark']) {
     await mockPack(page);
     await page.goto(LIST);
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-    await page.getByRole('radio', { name: 'Conjugation', exact: true }).click();
-    await expect(page).toHaveURL(/#\/study\/grammar\/conjugation$/);
+    await page.getByRole('main').getByRole('link', { name: 'Conjugation', exact: true }).click();
+    await expect(page).toHaveURL(/#\/grammar\/conjugation$/);
     await page.getByRole('textbox', { name: 'Verb in the infinitive', exact: true }).fill('aller');
     await page.getByRole('button', { name: 'Conjugate', exact: true }).click();
     await expect(page.getByRole('article', { name: 'aller', exact: true })).toBeVisible();
     await noPageOverflow(page);
-    await page.getByRole('radio', { name: 'Topics', exact: true }).click();
-    await expect(page).toHaveURL(/#\/study\/grammar$/);
+    await page.getByRole('main').getByRole('link', { name: 'Topics', exact: true }).click();
+    await expect(page).toHaveURL(/#\/grammar$/);
     await page.getByRole('link', { name: /TEST TOPIC A1/ }).click();
     const table = page.getByRole('table');
     await expect(table).toBeVisible();
@@ -241,7 +238,7 @@ for (const theme of ['light', 'sepia', 'dark']) {
   });
 }
 
-for (const destination of ['', '/test-only']) {
+for (const destination of ['', '/topics/test-only']) {
   test(`offline fallback retains ${destination ? 'one topic' : 'the summary list'} after a successful load`, async ({
     page,
   }) => {
@@ -265,7 +262,7 @@ for (const destination of ['', '/test-only']) {
 
 test('a topic 500 is a real load error, not a not-found or stale success', async ({ page }) => {
   await mockPack(page);
-  await page.goto(`${LIST}/test-only`);
+  await page.goto(`${LIST}/topics/test-only`);
   await expect(page.getByRole('article')).toBeVisible();
   await page.route(TOPICS_REQUEST, (route) => route.fulfill({ status: 500, json: { error: 'unavailable' } }));
   await page.reload();
@@ -276,12 +273,12 @@ test('a topic 500 is a real load error, not a not-found or stale success', async
 test('Chinese UI selects Chinese prose but keeps French cells and examples @phone', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('relire_lang', 'zh'));
   await mockPack(page);
-  await page.goto(`${LIST}/test-only`);
+  await page.goto(`${LIST}/topics/test-only`);
   const article = page.getByRole('article');
   await expect(article).toHaveAttribute('lang', 'zh');
   await expect(article.getByRole('heading').first()).toHaveText(topicFixture().title.zh);
   await expect(article.getByText('TEST PARAGRAPH', { exact: true })).toHaveCount(0);
   await expect(article.locator('li [lang="fr"]').first()).toHaveText('TEST');
-  await expect(page.getByRole('radiogroup', { name: zh.grammarTopics.sections, exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: zh.learning.navigation, exact: true })).toBeVisible();
   await noPageOverflow(page);
 });

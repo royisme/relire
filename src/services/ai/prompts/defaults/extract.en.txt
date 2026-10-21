@@ -15,6 +15,8 @@ Pass 2, exercise structure: map the actual questions to items, options, expected
 {{/if}}
 {{#if customTitle}}The user suggested this title: "{{customTitle}}". Use it for materialTitle when it fits the material.
 {{/if}}
+Entry learning area: {{learningArea}} (a suggestion, not a restriction on a mixed worksheet). Each unit must explicitly include learningArea: reading | grammar | listening | writing, based on its primary instructional goal, not its input format, exercise type, section or grammar tag. Reading checks understanding; grammar checks language rules; writing asks for sentence/text production. Listening is supported only when every effective item is NUMBER_DICTATION with actual audioText. Prompt TTS alone does not make a listening exercise. Preserve unsupported source tasks with clear blockers; never invent missing audio. The learner will review and confirm every classification.
+
 Exercise types (use these type IDs exactly):
 - WORD_TRANSFORM: change a word, for example feminine to masculine (femme -> mari/homme, étudiante -> étudiant).
 - FILL_BLANKS: complete a dialogue or a sentence, with the gap marked [___].
@@ -32,7 +34,7 @@ Fields (the app sends the exact schema):
 - materialTitle: the title of the lesson or of the extracurricular test. Leave it out when the source has none.
 - warnings: problems you noticed, such as illegible text or an unclear layout. Empty when there are none.
 - units: the exercise units. Empty when the source has no questions.
-- Each unit has: id (unique in the draft, such as u1), section (GRAMMAIRE, VOCABULAIRE, CONJUGAISON, COMPRENDRE or EXTRA), unitNumber (a positive whole number), subPart (A or B, when the source uses them), title (French), instruction (English), example (when the source gives one), isExtracurricular (true for material from outside the workbook), readingPassage (title, content and English translation, when the unit reads a passage; title and translation may be left out), type (one of the exercise types above), grammarTags (the tags its items use, at least one), and items.
+- Each unit has: learningArea (required explicit primary goal), id (unique in the draft, such as u1), section (GRAMMAIRE, VOCABULAIRE, CONJUGAISON, COMPRENDRE or EXTRA), unitNumber (a positive whole number), subPart (A or B, when the source uses them), title (French), instruction (English), example (when the source gives one), isExtracurricular (true for material from outside the workbook), readingPassage (title, content and English translation, when the unit reads a passage; title and translation may be left out), type (one of the exercise types above), grammarTags (the tags its items use, at least one), and items.
 - Each item has: id (unique in its unit), itemNumber (a number, or text such as "a"), type (only when the item differs from its unit's type), prompt (blanks as [___]; choices as {a|b} for CHOICE_SELECT), secondaryPrompt (when present), audioText (the French text to read aloud for dictation or numbers), options (when the item has choices or checks; none of them blank), expectedAnswer (a string, an array of strings for several blanks, or null), printedAnswer (only an answer literally printed in the source, otherwise null), acceptableAnswers, explanation (a brief grammar explanation in English), grammarTag (exactly one tag from the list below), and blockers (what is missing for the item to be used, such as audio, a figure, options or context; empty when nothing is missing).
 
 Answer shapes (the app checks these before a unit can be practised):
