@@ -58,8 +58,6 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
           icon={BookmarkCheck}
           label={t('nav.vocab')}
           current={areaState('study', true)}
-          badge={dueCount}
-          badgeLabel={t('nav.due', { count: dueCount })}
         />
         {!rail &&
           area === 'study' &&
@@ -76,8 +74,14 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
                   ? 'page'
                   : undefined
               }
-              badge={tab === 'mistakes' ? mistakes : undefined}
-              badgeLabel={tab === 'mistakes' ? t('nav.toReview', { count: mistakes }) : undefined}
+              badge={tab === 'words' ? dueCount : tab === 'mistakes' ? mistakes : undefined}
+              badgeLabel={
+                tab === 'words'
+                  ? t('nav.due', { count: dueCount })
+                  : tab === 'mistakes'
+                    ? t('nav.toReview', { count: mistakes })
+                    : undefined
+              }
             />
           ))}
         <NavItem
