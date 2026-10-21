@@ -3,6 +3,7 @@
  * Owns word order, elision and inversion, not conjugation, verification, UI or AI.
  * Goldens test the stated rules, not linguistic correctness.
  */
+import type { Person, Tense } from '../../types/grammarPack';
 import type { CellParts } from './cellParts';
 import { startsWithVowelSound } from './rules';
 
@@ -13,8 +14,20 @@ const elide = (word: string, next: string, hAspire?: boolean) =>
   startsWithVowelSound(next, hAspire) && ['je', 'ne', 'me', 'te', 'se'].includes(word)
     ? `${word === 'je' ? 'j' : word[0]}’`
     : word;
-const questionAllowed = ({ tense }: CellParts) =>
+/** The tenses the author's F6 rules give no question form: the subjunctive (both) and the imperative. */
+export const takesQuestion = (tense: Tense) =>
   tense !== 'subjonctif' && tense !== 'subjonctifPasse' && tense !== 'imperatif';
+const questionAllowed = ({ tense }: CellParts) => takesQuestion(tense);
+
+/** The three fixed rows, in the order the page shows them. */
+export const PATTERN_NAMES = ['negation', 'estCeQue', 'inversion'] as const;
+export type PatternName = (typeof PATTERN_NAMES)[number];
+
+/** Why a row has no sentence: the same rule as `questionAllowed`, so the note and the refusal cannot disagree. */
+export function patternNote(name: PatternName, tense: Tense, person: Person): 'noQuestions' | 'noJe' | 'notCovered' {
+  if (name !== 'negation' && !takesQuestion(tense)) return 'noQuestions';
+  return name === 'inversion' && person === '1sg' ? 'noJe' : 'notCovered';
+}
 // The engine's onset table explicitly leaves y out; F6 supplies no rule for it or æ.
 const covered = (parts: CellParts) => !(parts.aux ? [parts.aux] : parts.verb).some((form) => /^[yæ]/.test(form));
 const hOf = (parts: CellParts) => (parts.aux ? undefined : parts.hAspire);

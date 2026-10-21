@@ -5,7 +5,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cellParts } from '../../../services/conjugation/cellParts';
-import { estCeQue, inversion, negation } from '../../../services/conjugation/patterns';
+import { PATTERN_NAMES, estCeQue, inversion, negation, patternNote } from '../../../services/conjugation/patterns';
 import type { VerifiedVerb } from '../../../services/conjugation/verify';
 import { FINITE_PERSONS, IMPERATIVE_PERSONS, TENSES, type Person, type Tense } from '../../../types/grammarPack';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
@@ -82,14 +82,9 @@ export function Patterns({ verb }: { verb: VerifiedVerb }) {
         </div>
       </div>
       <dl className="mt-4 divide-y divide-ink-200" aria-live="polite">
-        {Object.entries(PATTERNS).map(([name, make]) => {
-          const sentence = make(parts);
-          const reason =
-            name !== 'negation' && (tense === 'subjonctif' || tense === 'imperatif')
-              ? 'noQuestions'
-              : name === 'inversion' && person === '1sg'
-                ? 'noJe'
-                : 'notCovered';
+        {PATTERN_NAMES.map((name) => {
+          const sentence = PATTERNS[name](parts);
+          const reason = patternNote(name, tense, person);
           return (
             // Exactly a two-line sentence plus the note line, so a row never changes height with the selection:
             // py-3 (24) + label 20 + gap 4 + 2 x 28 + note gap 4 + 16 = 124px, plus the 1px divider.

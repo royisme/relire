@@ -4,9 +4,16 @@
  */
 import { expect, test } from 'bun:test';
 import { cellParts, type CellParts } from '../src/services/conjugation/cellParts';
-import { estCeQue, inversion, negation } from '../src/services/conjugation/patterns';
+import {
+  estCeQue,
+  inversion,
+  negation,
+  patternNote,
+  takesQuestion,
+  type PatternName,
+} from '../src/services/conjugation/patterns';
 import { verifyAnswer, verifyPackVerb } from '../src/services/conjugation/verify';
-import type { Person, Tense, Verb } from '../src/types/grammarPack';
+import { FINITE_PERSONS, TENSES, type Person, type Tense, type Verb } from '../src/types/grammarPack';
 import { answerFromGolden, erAnswer, falloirAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
 import { GOLDEN } from './fixtures/grammarPackGolden';
 
@@ -268,4 +275,38 @@ test('CP6 parts 9: AI golden compound', () => {
     verb: [],
     participle: ['allé', 'allée'],
   });
+});
+
+// The note a row shows and the refusal of the sentence it explains come from one rule (`takesQuestion`).
+const questions: PatternName[] = ['estCeQue', 'inversion'];
+for (const tense of ['subjonctif', 'subjonctifPasse', 'imperatif'] as const)
+  for (const name of questions)
+    for (const person of FINITE_PERSONS) {
+      test(`CP6 note ${name} ${tense} ${person} says no questions`, () => {
+        expect(patternNote(name, tense, person)).toBe('noQuestions');
+      });
+    }
+for (const tense of TENSES)
+  for (const person of FINITE_PERSONS) {
+    test(`CP6 note negation ${tense} ${person} never says no questions`, () => {
+      expect(patternNote('negation', tense, person)).not.toBe('noQuestions');
+    });
+  }
+test('CP6 note inversion present 1sg sends je to est-ce que', () => {
+  expect(patternNote('inversion', 'present', '1sg')).toBe('noJe');
+});
+for (const person of ['2sg', '3sg', '1pl', '2pl', '3pl'] as const) {
+  test(`CP6 note inversion present ${person} is not covered`, () => {
+    expect(patternNote('inversion', 'present', person)).toBe('notCovered');
+  });
+}
+
+test('CP6 note: takesQuestion agrees with estCeQue for every tense of a reviewed verb', () => {
+  for (const tense of TENSES) {
+    if (tense === 'imperatif') {
+      expect(takesQuestion(tense)).toBe(estCeQue(cellParts(views.parler, tense, '2sg')) !== undefined);
+      continue;
+    }
+    expect(takesQuestion(tense)).toBe(estCeQue(cellParts(views.parler, tense, '3sg')) !== undefined);
+  }
 });
