@@ -24,8 +24,7 @@
     "expand": "展开侧边栏",
     "due": "{{count}} 个待复习",
     "toReview": "{{count}} 道待复习",
-    "importArticle": "导入文章",
-    "importExercises": "导入练习"
+    "importArticle": "导入文章"
   },
   "learning": {
     "areas": { "reading": "阅读", "grammar": "语法", "listening": "听力", "writing": "写作" },
@@ -807,17 +806,14 @@
   },
   "nounGender": {
     "title": "名词阴阳性",
-    "subtitle": "词尾只表示倾向，并非定律。可对照词典和已审核的 A1 样本。",
+    "subtitle": "词尾只表示倾向，并非定律。可参考已审核的例词。",
     "loading": "正在加载名词词尾…",
     "groups": {
       "f": "阴性倾向",
       "m": "阳性倾向"
     },
-    "dictionary": "词典：{{agree}}/{{n}} 个名词符合此倾向，占 {{percent}}%。",
-    "a1": "已审核的 A1 样本：{{agree}}/{{n}} 个名词符合此倾向，占 {{percent}}%。",
     "examples": "已审核的例词：",
     "exceptions": "A1 样本中的例外：",
-    "noExceptions": "此样本中没有例外；其他名词仍可能不同。",
     "ruleLine": "{{rule}}，词典中 {{n}} 个名词有 {{percent}}% 符合。这是词尾倾向，不代表该词的实际阴阳性。",
     "exception": "此名词是已审核的 A1 词表中不符合该词尾倾向的例外。",
     "rules": {

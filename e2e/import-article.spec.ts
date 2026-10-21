@@ -166,7 +166,7 @@ test('a dirty article import asks before leaving, and Start over discards the dr
   expect((await savedRows(page)).articles).toEqual([]);
 });
 
-test('each import is a sidebar entry of its own area, and the library and Practice link to them', async ({
+test('only the article import is a sidebar entry; the exercise import is reached from Add exercises', async ({
   page,
   ai,
 }) => {
@@ -180,20 +180,12 @@ test('each import is a sidebar entry of its own area, and the library and Practi
     'page',
   );
   await expect(nav.getByRole('link', { name: 'Reading', exact: true })).toHaveAttribute('aria-current', 'true');
-  // Each domain's exercise import carries its explicit entry context.
-  await expect(nav.getByRole('link', { name: 'Import exercises' })).toHaveAttribute(
-    'href',
-    '#/import/exercises?area=reading',
-  );
-  await page.goto('/#/grammar/exercises');
+  // The exercise import is not repeated under each area; Practice's Add exercises opens it.
+  for (const hash of ['/#/read', '/#/grammar/exercises']) {
+    await page.goto(hash);
+    await expect(nav.getByRole('link', { name: 'Import exercises' })).toHaveCount(0);
+  }
   await expect(nav.getByRole('link', { name: 'Import an article' })).toHaveCount(0);
-  await nav.getByRole('link', { name: 'Import exercises', exact: true }).click();
-  await expect(page).toHaveURL(/#\/import\/exercises\?area=grammar$/);
-  await expect(nav.getByRole('link', { name: 'Import exercises', exact: true })).toHaveAttribute(
-    'aria-current',
-    'page',
-  );
-  await expect(nav.getByRole('link', { name: 'Grammar', exact: true })).toHaveAttribute('aria-current', 'true');
   await page.goto('/#/import');
   await expect(page.getByRole('heading', { name: 'This page is not here' })).toBeVisible();
 });

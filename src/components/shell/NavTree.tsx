@@ -70,12 +70,6 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
         : area === 'speaking'
           ? [{ to: { name: 'readAloud' }, label: t('learning.readAloud') }]
           : [];
-  if (area === 'read' || area === 'grammar' || area === 'listening' || area === 'writing') {
-    children.push({
-      to: { name: 'importExercises', area: area === 'read' ? 'reading' : area },
-      label: t('nav.importExercises'),
-    });
-  }
   return (
     <nav aria-label={t('nav.main')} className="flex flex-1 flex-col">
       <div className="space-y-0.5 px-2 py-3">

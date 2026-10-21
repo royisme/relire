@@ -1,7 +1,6 @@
-/** Grammar's noun-gender reference: reviewed examples and sample-scoped exceptions, with local drill creation. */
+/** Grammar's noun-gender reference: reviewed examples and the sample's real exceptions, with local drill creation. */
 import { useTranslation } from 'react-i18next';
 import { useNounGenderPack } from '../../../hooks/useNounGenderPack';
-import { tendencyPercent } from '../../../types/nounGenderDrill';
 import { PageHeader } from '../../ui/page-header';
 import { GenderDrillForm } from './GenderDrillForm';
 
@@ -38,36 +37,20 @@ export default function GenderPage() {
                           {t(`nounGender.rules.${rule.id}`)}
                         </dt>
                         <dd className="space-y-1">
-                          <p className="tnum break-words text-sm text-ink-700">
-                            {t('nounGender.dictionary', {
-                              percent: tendencyPercent((100 * rule.dictionary.agree) / rule.dictionary.n),
-                              agree: rule.dictionary.agree,
-                              n: rule.dictionary.n,
-                            })}
-                          </p>
-                          <p className="tnum break-words text-sm text-ink-700">
-                            {t('nounGender.a1', {
-                              percent: tendencyPercent((100 * rule.a1.agree) / rule.a1.n),
-                              agree: rule.a1.agree,
-                              n: rule.a1.n,
-                            })}
-                          </p>
                           <p className="break-words text-sm text-ink-600">
                             {t('nounGender.examples')}{' '}
                             <span lang="fr" className="font-serif text-base text-ink-900">
                               {lemmas(rule.examples)}
                             </span>
                           </p>
-                          <p className="break-words text-sm text-ink-600">
-                            {t('nounGender.exceptions')}{' '}
-                            {rule.exceptions.length ? (
+                          {rule.exceptions.length > 0 && (
+                            <p className="break-words text-sm text-ink-600">
+                              {t('nounGender.exceptions')}{' '}
                               <span lang="fr" className="font-serif text-base text-ink-900">
                                 {lemmas(rule.exceptions)}
                               </span>
-                            ) : (
-                              t('nounGender.noExceptions')
-                            )}
-                          </p>
+                            </p>
+                          )}
                         </dd>
                       </div>
                     ))}

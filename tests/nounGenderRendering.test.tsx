@@ -85,18 +85,21 @@ for (const language of ['en', 'zh'] as const) {
     );
   });
 
-  test(`${language}: the reference includes all 17 rules and honest ure figures, French lemmas and sample-scoped empty exceptions`, async () => {
+  test(`${language}: the reference keeps every rule and its reviewed examples, shows real exceptions only, and no aggregate audit figures`, async () => {
     await i18n.changeLanguage(language);
     const html = render(<GenderPage />);
     for (const rule of pack.rules) expect(html).toContain(`data-rule="${rule.id}"`);
     expect(html.match(/data-rule=/g)).toHaveLength(17);
-    expect(html).toContain('902/1216');
-    expect(html).toContain('74.1');
-    expect(html).toContain('12/12');
-    expect(html).toContain('100');
+    expect(html).toContain(i18n.t('nounGender.examples'));
     expect(html).toContain('télévision');
     expect(html).toContain('été');
-    expect(html).toContain(i18n.t('nounGender.noExceptions'));
+    // Real exceptions stay; the empty sample-exception sentence is gone.
+    const exceptionRules = pack.rules.filter((rule) => rule.exceptions.length > 0);
+    expect(exceptionRules.length).toBeGreaterThan(0);
+    expect(html.split(i18n.t('nounGender.exceptions')).length - 1).toBe(exceptionRules.length);
+    // The dictionary and reviewed-A1 aggregate lines are no longer shown.
+    for (const absent of ['902/1216', '74.1', '12/12', 'Dictionary:', 'Reviewed A1 sample:'])
+      expect(html).not.toContain(absent);
     expect(html).not.toContain('nounGender.rules.');
     expect(html).not.toContain('bg-accent-100');
   });

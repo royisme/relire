@@ -205,6 +205,32 @@ test('learning-first sidebar has no generic Practice or study Grammar; Writing r
   }
 });
 
+test('exercise import is not repeated in the sidebar while the reading article import stays', () => {
+  const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({
+    units: [{ ...unitOf('OPEN_QA'), learningArea: 'writing' }],
+    error: null,
+  });
+  const mistakes = spyOn(mistakesHook, 'useMistakes').mockReturnValue({
+    rows: [],
+    loading: false,
+    error: null,
+    retry: () => {},
+  });
+  try {
+    expect(render(<NavTree route={{ name: 'library' }} dueCount={0} />)).toContain('href="#/import/article"');
+    for (const route of [
+      { name: 'library' },
+      { name: 'grammar', section: 'gender' },
+      { name: 'practice', area: 'listening' },
+      { name: 'practice', area: 'writing' },
+    ] as const)
+      expect(render(<NavTree route={route} dueCount={0} />)).not.toContain('/import/exercises');
+  } finally {
+    units.mockRestore();
+    mistakes.mockRestore();
+  }
+});
+
 test('Grammar local references and exercises remain linked without a service; filters preserve current destination', () => {
   const service = spyOn(contentService, 'contentServiceUrl').mockReturnValue(undefined);
   try {
