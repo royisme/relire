@@ -106,6 +106,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- The pronunciation check prompts no longer show example scores the model could copy.
 - A pronunciation check with no audio and no transcript now says so instead of scoring the reference text.
 - Local vocabulary publication now binds page content so large Unicode pages can be imported intact without exceeding SQLite's SQL statement limit.
 - Dictionary preparation no longer rejects unused original-field arrays; raw source data stays out of normalized and published content.
