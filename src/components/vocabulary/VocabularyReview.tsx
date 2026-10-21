@@ -209,8 +209,6 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
                     {t('vocab.errorDetails')}
                   </Button>
                 </>
-              ) : back ? (
-                t('vocab.revealed')
               ) : null}
             </div>
           </div>
