@@ -15,7 +15,7 @@ Relire Plus runs entirely in your browser. There is no application server and no
 - Pronunciation feedback on sounds, liaisons and intonation.
 - Exercises generated from your material, including dictation and AI-graded writing.
 - Material import from images, PDFs or text, with a mistake notebook and progress counted from real practice.
-- Spaced-repetition vocabulary review with SM-2.
+- Spaced-repetition vocabulary review with FSRS-6.
 - Local-first storage and cached audio/AI results.
 - English and Simplified Chinese interfaces.
 
@@ -55,7 +55,7 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 - **Break down a hard sentence.** Translation, syntax segments, grammar points, common collocations and a shadowing guide (rhythm groups, liaisons, intonation).
 - **Shadow and get feedback.** Record yourself reading a sentence and receive an overall score, plus feedback on individual sounds, liaisons and intonation.
 - **Look up any French sound.** A chart of the sounds of French in IPA, each with an example word you can tap to hear.
-- **Review vocabulary with spaced repetition.** An SM-2 schedule decides what is due today.
+- **Review vocabulary with spaced repetition.** An FSRS-6 schedule decides what is due today.
 - **Exercises from your articles.** Make fill-in-the-blank, multiple-choice, word-form and open questions from any article, answer them on one sheet with hints, explanations and a French character bar, and read a sentence aloud for a pronunciation score.
 - **Choose your AI.** The AI that writes explanations and the AI that reads aloud are separate settings, each with its own provider, model and key, and the code is built so more providers can be added.
 - **Edit the prompts.** The instructions sent to the AI are plain-text templates you can view, change and reset in Settings.
@@ -102,7 +102,7 @@ src/services/ai/         providers, prompt templates and tasks; the UI calls src
 src/App.tsx              app state and screen navigation
 src/storage/             IndexedDB persistence, answer cache and audio storage
 src/components/          one file per screen or overlay
-src/utils/srs.ts         SM-2 scheduling
+src/utils/srs.ts         FSRS-6 scheduling
 ```
 
 `bun run typecheck` runs the TypeScript check, `bun run lint` runs oxlint, `bun run format` formats with oxfmt, and `bun run e2e` runs the Playwright specs with every AI call mocked.
