@@ -470,7 +470,9 @@
     "speakAfterCheck": "Speak dictation after checking",
     "speakAfterCheckNote": "After a dictation item is checked, its number is spoken again.",
     "remoteAutoSpeak": "Let checks speak with my speech provider",
-    "remoteAutoSpeakNote": "Off, automatic playback uses this device’s voice. On, a check may synthesize a clip with your Speech synthesis provider, which can cost money. Pressing Listen or Preview always uses it."
+    "remoteAutoSpeakNote": "Off, automatic playback uses this device’s voice. On, a check may synthesize a clip with your Speech synthesis provider, which can cost money. Pressing Listen or Preview always uses it.",
+    "browserRecognition": "Let my browser transcribe while I record",
+    "browserRecognitionNote": "Off by default. On, your browser may send the recording to the browser maker's speech service to produce a transcript, which helps scoring when your AI provider cannot listen. Off, no recognition runs and the recording only goes to your AI provider when you press Check pronunciation."
   },
   "aiSettings": {
     "purposesLabel": "AI tasks",
@@ -628,6 +630,7 @@
   "errors": {
     "badResponse": "The AI returned a response that could not be read. Please try again.",
     "noAudio": "Could not generate speech audio.",
+    "noSpeechToScore": "Nothing to score: this recording has no audio your AI provider can listen to, and the browser gave no transcript.",
     "speechPlayback": "The speech clip could not be played.",
     "allModelsFailed": "Every model failed. Please try again.",
     "invalidAnswer": "The AI answer could not be used: {{msg}}",

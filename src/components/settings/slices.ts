@@ -61,6 +61,7 @@ export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
       settings.practiceDictationSpeed,
       settings.practiceSpeakAfterCheck,
       settings.practiceRemoteAutoSpeak,
+      settings.practiceBrowserRecognition,
     ]);
   const providers = [...new Set(usedProviders(settings))].sort();
   return JSON.stringify([
@@ -85,6 +86,7 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
       practiceDictationSpeed: from.practiceDictationSpeed,
       practiceSpeakAfterCheck: from.practiceSpeakAfterCheck,
       practiceRemoteAutoSpeak: from.practiceRemoteAutoSpeak,
+      practiceBrowserRecognition: from.practiceBrowserRecognition,
     };
   const providers = usedProviders(from);
   return {

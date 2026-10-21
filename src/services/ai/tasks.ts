@@ -67,11 +67,16 @@ export const analyzeWord = (input: Parameters<typeof wordRequest>[0], ctx: TextC
 export const analyzeSentence = (input: Parameters<typeof sentenceRequest>[0], ctx: TextContext) =>
   ctx.execution.generateJson<SentenceAnalysis>(sentenceRequest(input, ctx.lang));
 
-export const assessPronunciation = (input: Parameters<typeof pronunciationRequest>[0], ctx: TextContext) =>
-  ctx.execution.generateJson<PronunciationAssessment>(
-    // A provider that cannot listen is scored on the transcript alone.
-    pronunciationRequest({ ...input, audio: ctx.execution.supportsAudioInput ? input.audio : undefined }, ctx.lang),
-  );
+export async function assessPronunciation(
+  input: Parameters<typeof pronunciationRequest>[0],
+  ctx: TextContext,
+): Promise<PronunciationAssessment> {
+  // A provider that cannot listen is scored on the learner's own transcript alone.
+  const audio = ctx.execution.supportsAudioInput ? input.audio : undefined;
+  // With no audio and no words the reference text would be scored as if it had been read aloud.
+  if (!audio && !input.userTranscript?.trim()) throw new Error(i18n.t('errors.noSpeechToScore'));
+  return ctx.execution.generateJson<PronunciationAssessment>(pronunciationRequest({ ...input, audio }, ctx.lang));
+}
 
 /* ------------------------------ exercise tasks ------------------------------ */
 

@@ -39,6 +39,9 @@ export interface AppSettings {
   practiceSpeakAfterCheck: boolean;
   /** Let automatic playback synthesize remotely; off, it may only use the device voice. */
   practiceRemoteAutoSpeak: boolean;
+  /** Transcribe a recording with the browser's speech recognition, which helps scoring; on, the browser
+   *  may send the audio to its vendor's speech service. */
+  practiceBrowserRecognition: boolean;
 }
 
 /** The playback rates the Practice section offers, as the reader's speed control does. */
@@ -107,6 +110,7 @@ function defaults(): AppSettings {
     practiceDictationSpeed: DEFAULT_DICTATION_SPEED,
     practiceSpeakAfterCheck: false,
     practiceRemoteAutoSpeak: false,
+    practiceBrowserRecognition: false,
   };
 }
 
@@ -148,6 +152,7 @@ function normalize(value: unknown): AppSettings {
     practiceDictationSpeed: speedOr(raw.practiceDictationSpeed),
     practiceSpeakAfterCheck: boolOr(raw.practiceSpeakAfterCheck, false),
     practiceRemoteAutoSpeak: boolOr(raw.practiceRemoteAutoSpeak, false),
+    practiceBrowserRecognition: boolOr(raw.practiceBrowserRecognition, false),
   };
 }
 

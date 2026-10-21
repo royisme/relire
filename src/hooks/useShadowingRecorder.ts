@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { PronunciationAssessment } from '../types';
 import { assessPronunciation } from '../services/api';
 import { errorMessage } from '../services/ai/errors';
+import { getAppSettings } from '../utils/appSettings';
 import { FrenchAudioRecorder, stopSpeech } from '../utils/speech';
 import { CaptureBusyError } from '../utils/speech/recorder';
 
@@ -130,8 +131,10 @@ export function useShadowingRecorder(
     setSeconds(0);
     timer.current = window.setInterval(() => setSeconds((s) => s + 1), 1000);
 
-    // Where the browser can, a transcript helps the scorer; it is optional.
+    // Where the browser can, a transcript helps the scorer; it is optional and only runs on opt-in. Read
+    // now, not at import, so a setting saved in another tab applies to the next recording.
     transcript.current = '';
+    if (!getAppSettings().practiceBrowserRecognition) return;
     const speechWindow = window as unknown as {
       SpeechRecognition?: RecognizerClass;
       webkitSpeechRecognition?: RecognizerClass;

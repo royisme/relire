@@ -87,10 +87,12 @@ export function pronunciationRequest(
   input: { referenceText: string; audio?: { mimeType: string; base64: string }; userTranscript?: string },
   lang: Lang,
 ): JsonRequest {
+  // The reference text is never a stand-in for the learner's speech: with no transcript it stays empty.
+  const transcript = input.userTranscript ?? '';
   const vars = {
     referenceText: input.referenceText,
-    userTranscript: input.userTranscript ?? '',
-    transcript: input.userTranscript || input.referenceText,
+    userTranscript: transcript,
+    transcript,
   };
   return input.audio
     ? { prompt: render('pronunciationAudio', lang, vars), audio: input.audio }

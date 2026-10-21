@@ -1,7 +1,8 @@
 /**
  * Settings → Practice: how answers are compared and dictation is played —
- * strict accents, the dictation speed, speaking again after a check, and whether
- * that automatic playback may synthesize remotely. Saves on its own like the other sections.
+ * strict accents, the dictation speed, speaking again after a check, whether
+ * that automatic playback may synthesize remotely, and whether a recording may be
+ * transcribed by the browser. Saves on its own like the other sections.
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -72,6 +73,12 @@ export const PracticeSection: React.FC<PracticeSectionProps> = ({ draft, saved, 
           label={t('settings.remoteAutoSpeak')}
           note={t('settings.remoteAutoSpeakNote')}
           onToggle={() => edit({ ...draft, practiceRemoteAutoSpeak: !draft.practiceRemoteAutoSpeak })}
+        />
+        <CheckField
+          checked={draft.practiceBrowserRecognition}
+          label={t('settings.browserRecognition')}
+          note={t('settings.browserRecognitionNote')}
+          onToggle={() => edit({ ...draft, practiceBrowserRecognition: !draft.practiceBrowserRecognition })}
         />
       </div>
 
