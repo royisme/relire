@@ -115,6 +115,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- The Grammar entry in the sidebar no longer shares its icon with the language switcher.
 - The pronunciation check prompts no longer show example scores the model could copy.
 - A pronunciation check with no audio and no transcript now says so instead of scoring the reference text.
 - **The Azure read-aloud result shows each word's score.** The words of the sentence appear in order with their accuracy score, a plain label for an omitted, extra or mispronounced word, and the completeness score when Azure gives one. There are no pass or fail colours and no phoneme scores. Not tried against real speech in a browser yet.
