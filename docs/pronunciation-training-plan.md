@@ -148,4 +148,4 @@ Rules: only reviewed pairs ship, as in the noun-gender gate. A pair with a regio
 | Keep drill recordings (new `shadowing` owner kind)? | No in v1 |
 | Fix the `index.ts:92` transcript fallback and the example numbers in the assessment prompts as a separate issue now? | Yes, open GitHub issues |
 | Make browser speech recognition opt-in? | Yes, decided with that issue |
-| Show Azure's per-phoneme scores without names? | Only if phase 0 shows the order matches the reviewed IPA; otherwise word-level only |
+| Show Azure's per-phoneme scores without names? | **Decided 2026-10-22: no.** Word-level scores only; French returns no phoneme names and the order against our IPA is unverified |
