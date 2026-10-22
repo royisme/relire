@@ -192,14 +192,11 @@ export function TopicWorkbench({ session, topic }: { session: ExerciseUnitSessio
                     )
                   : ''}
             </p>
-            <Button
-              variant="ghost"
-              className="shrink-0"
-              disabled={!feedback && !error}
-              onClick={() => setFeedbackOpen(true)}
-            >
-              {t(error ? 'grammarTopics.learning.result.readDetails' : 'grammarTopics.learning.result.readFeedback')}
-            </Button>
+            {(feedback || error) && (
+              <Button variant="ghost" className="shrink-0" onClick={() => setFeedbackOpen(true)}>
+                {t(error ? 'grammarTopics.learning.result.readDetails' : 'grammarTopics.learning.result.readFeedback')}
+              </Button>
+            )}
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto whitespace-pre-wrap">
             {error && <p className="text-bad-700">{t('grammarTopics.learning.errors.saveFailed', { msg: error })}</p>}
