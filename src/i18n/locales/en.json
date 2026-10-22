@@ -1249,6 +1249,7 @@
         "tense": "Tense",
         "person": "Person",
         "impersonal": "it (impersonal)",
+        "on": "one (on)",
         "negation": "Negation",
         "estCeQue": "Question with est-ce que",
         "inversion": "Question with inversion",

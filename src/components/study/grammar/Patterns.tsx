@@ -4,7 +4,7 @@
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { cellParts } from '../../../services/conjugation/cellParts';
+import { cellParts, takesOn, type SubjectChoice } from '../../../services/conjugation/cellParts';
 import {
   PATTERN_NAMES,
   estCeQue,
@@ -23,17 +23,29 @@ export function Patterns({ verb }: { verb: VerifiedVerb }) {
   const { t } = useTranslation();
   const persons = (tense: Tense) =>
     (tense === 'imperatif' ? IMPERATIVE_PERSONS : FINITE_PERSONS).filter((person) => verb.tenses[tense][person]);
+  // `on` is one more subject next to the third person singular; the imperative has no subject.
+  const choices = (tense: Tense): SubjectChoice[] =>
+    tense !== 'imperatif' && takesOn(verb)
+      ? persons(tense).flatMap((person) => (person === '3sg' ? [person, 'on' as const] : [person]))
+      : persons(tense);
   const [tense, setTense] = useState<Tense>('present');
-  const [person, setPerson] = useState<Person>(() => persons('present')[0]);
-  const parts = cellParts(verb, tense, person);
+  const [subject, setSubject] = useState<SubjectChoice>(() => choices('present')[0]);
+  const person: Person = subject === 'on' ? '3sg' : subject;
+  const parts = cellParts(verb, tense, subject);
   const status = verb.tenses[tense][person]!.status;
   const tenseItems = TENSES.filter((key) => persons(key).length).map((key) => ({
     value: key,
     label: t(`conjugation.tenses.${key}.name`),
   }));
-  const personItems = persons(tense).map((key) => ({
+  const personItems = choices(tense).map((key) => ({
     value: key,
-    label: t(verb.defective === 'impersonal' ? 'conjugation.page.patterns.impersonal' : `conjugation.persons.${key}`),
+    label: t(
+      key === 'on'
+        ? 'conjugation.page.patterns.on'
+        : verb.defective === 'impersonal'
+          ? 'conjugation.page.patterns.impersonal'
+          : `conjugation.persons.${key}`,
+    ),
   }));
   return (
     <section aria-label={t('conjugation.page.patterns.title')} className="border-t border-ink-200 py-5">
@@ -49,7 +61,7 @@ export function Patterns({ verb }: { verb: VerifiedVerb }) {
             onValueChange={(value) => {
               if (!value) return;
               setTense(value);
-              if (!persons(value).includes(person)) setPerson(persons(value)[0]);
+              if (!choices(value).includes(subject)) setSubject(persons(value)[0]);
             }}
           >
             <SelectTrigger aria-labelledby="patterns-tense-label">
@@ -70,9 +82,9 @@ export function Patterns({ verb }: { verb: VerifiedVerb }) {
           </label>
           <Select
             items={personItems}
-            value={person}
+            value={subject}
             onValueChange={(value) => {
-              if (value) setPerson(value);
+              if (value) setSubject(value);
             }}
           >
             <SelectTrigger aria-labelledby="patterns-person-label">

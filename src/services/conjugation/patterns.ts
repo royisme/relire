@@ -10,6 +10,8 @@ import { startsWithVowelSound } from './rules';
 const join = (pieces: string[]) =>
   pieces.reduce((text, piece) => (!text || text.endsWith('’') ? text + piece : `${text} ${piece}`), '');
 const variants = (forms: string[]) => forms.join(' / ');
+// F6: `que` elides before the vowel-initial subjects il/elle, ils/elles and the impersonal il; the owner adds `on`.
+const elidesQue = (subject: string) => subject.startsWith('il') || subject === 'on';
 const elide = (word: string, next: string, hAspire?: boolean) =>
   startsWithVowelSound(next, hAspire) && ['je', 'ne', 'me', 'te', 'se'].includes(word)
     ? `${word === 'je' ? 'j' : word[0]}’`
@@ -36,7 +38,7 @@ export function negation(parts: CellParts): string | undefined {
   if (!covered(parts)) return undefined;
   const { tense, subject, reflexive, aux, verb, participle } = parts;
   const prefix = tense === 'imperatif' ? [] : [subject];
-  if (tense === 'subjonctif' || tense === 'subjonctifPasse') prefix.unshift(subject.startsWith('il') ? 'qu’' : 'que');
+  if (tense === 'subjonctif' || tense === 'subjonctifPasse') prefix.unshift(elidesQue(subject) ? 'qu’' : 'que');
   const make = (finite: string) => {
     const ref = reflexive ? elide(reflexive, finite, hOf(parts)) : undefined;
     return join([
@@ -57,7 +59,7 @@ export function estCeQue(parts: CellParts): string | undefined {
   const make = (finite: string) => {
     const ref = reflexive ? elide(reflexive, finite, hOf(parts)) : undefined;
     return `${join([
-      subject.startsWith('il') ? 'est-ce qu’' : 'est-ce que',
+      elidesQue(subject) ? 'est-ce qu’' : 'est-ce que',
       ref ? subject : elide(subject, finite, hOf(parts)),
       ...(ref ? [ref] : []),
       finite,
