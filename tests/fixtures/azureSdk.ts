@@ -20,6 +20,7 @@ export function mockAzureSdk() {
     region: string;
     speechRecognitionLanguage: string;
     close: ReturnType<typeof mock>;
+    setProperty: ReturnType<typeof mock>;
   }[] = [];
   const formats: { close: ReturnType<typeof mock> }[] = [];
   const streams: { write: ReturnType<typeof mock>; close: ReturnType<typeof mock> }[] = [];
@@ -42,6 +43,7 @@ export function mockAzureSdk() {
       this.success = success;
       this.error = error;
     });
+    stopContinuousRecognitionAsync = mock((success: () => void, _error: (error: string) => void) => success());
     close = mock((success: () => void, error: (error: string) => void) => {
       this.closed = success;
       this.closeFailed = error;
@@ -59,7 +61,13 @@ export function mockAzureSdk() {
   const sdk = {
     SpeechConfig: {
       fromSubscription: mock((apiKey: string, region: string) => {
-        const config = { apiKey, region, speechRecognitionLanguage: '', close: mock(() => {}) };
+        const config = {
+          apiKey,
+          region,
+          speechRecognitionLanguage: '',
+          close: mock(() => {}),
+          setProperty: mock(() => {}),
+        };
         speechConfigs.push(config);
         return config;
       }),
@@ -86,6 +94,7 @@ export function mockAzureSdk() {
       }),
     },
     SpeechRecognizer: Recognizer,
+    PropertyId: { Recognizer_StopTimeoutMs: 67 },
     PronunciationAssessmentConfig: class {
       constructor(reference: string, grading: number, granularity: number, miscue: boolean) {
         const assessment = { reference, grading, granularity, miscue, applyTo: this.applyTo };

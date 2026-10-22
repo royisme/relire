@@ -1,6 +1,5 @@
 /** Browser-direct Azure assessment/checks. One local queue, no retries, microphone or endpoint override. */
 import type {
-  AudioConfig,
   AudioStreamFormat,
   PushAudioInputStream,
   SpeechConfig,
@@ -60,7 +59,6 @@ async function recognize(request: AssessmentRequest, config: AssessmentConfig, c
   let speech: SpeechConfig | undefined;
   let format: AudioStreamFormat | undefined;
   let stream: PushAudioInputStream | undefined;
-  let audio: AudioConfig | undefined;
   let recognizer: SpeechRecognizer | undefined;
   let streamClosed = false;
   let operationError: unknown;
@@ -74,9 +72,10 @@ async function recognize(request: AssessmentRequest, config: AssessmentConfig, c
   try {
     speech = sdk.SpeechConfig.fromSubscription(config.apiKey, config.region);
     speech.speechRecognitionLanguage = request.locale;
+    speech.setProperty(sdk.PropertyId.Recognizer_StopTimeoutMs, '1000');
     format = sdk.AudioStreamFormat.getWaveFormatPCM(ASSESSMENT_SAMPLE_RATE, 16, 1);
     stream = sdk.AudioInputStream.createPushStream(format);
-    audio = sdk.AudioConfig.fromStreamInput(stream);
+    const audio = sdk.AudioConfig.fromStreamInput(stream);
     recognizer = new sdk.SpeechRecognizer(speech, audio);
     if (!check) {
       const assessment = new sdk.PronunciationAssessmentConfig(
@@ -153,11 +152,16 @@ async function recognize(request: AssessmentRequest, config: AssessmentConfig, c
   } catch (error) {
     operationError = request.signal?.aborted ? cancelled() : new Error(errorMessage(error, config.apiKey));
   } finally {
-    // Wait for recognizer disposal before admitting the next operation, including after cancellation.
+    // Stop separately: SDK timeout awaits transport disconnect but throws before close's base disposal.
+    // A subsequent close can finish disposal without waiting on the abandoned service turn again.
     const resources: (() => void | Promise<void>)[] = [
+      () =>
+        recognizer
+          ? new Promise<void>((resolve, reject) => recognizer!.stopContinuousRecognitionAsync(resolve, reject))
+          : undefined,
       () => (recognizer ? new Promise<void>((resolve, reject) => recognizer!.close(resolve, reject)) : undefined),
+      // AudioConfig only wraps our push stream; its close assumes turnOff returns a Promise (SDK 1.52.0).
       closeStream,
-      () => audio?.close(),
       () => format?.close(),
       () => speech?.close(),
     ];

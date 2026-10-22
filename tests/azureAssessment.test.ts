@@ -27,9 +27,10 @@ beforeEach(() => {
 afterEach(() => load.mockRestore());
 
 function expectClosed(index = 0) {
+  expect(sdk.recognizers[index].stopContinuousRecognitionAsync).toHaveBeenCalledTimes(1);
   expect(sdk.recognizers[index].close).toHaveBeenCalledTimes(1);
   expect(sdk.streams[index].close).toHaveBeenCalledTimes(1);
-  expect(sdk.audioConfigs[index].close).toHaveBeenCalledTimes(1);
+  expect(sdk.audioConfigs[index].close).not.toHaveBeenCalled();
   expect(sdk.formats[index].close).toHaveBeenCalledTimes(1);
   expect(sdk.speechConfigs[index].close).toHaveBeenCalledTimes(1);
 }
@@ -43,6 +44,7 @@ test('uses the chosen French locale and exact PCM view bytes, word assessment wi
     region: 'canadaeast',
     speechRecognitionLanguage: 'fr-CA',
   });
+  expect(sdk.speechConfigs[0].setProperty).toHaveBeenCalledWith(sdk.sdk.PropertyId.Recognizer_StopTimeoutMs, '1000');
   expect(sdk.calls.AudioStreamFormat.getWaveFormatPCM).toHaveBeenCalledWith(16000, 16, 1);
   expect(sdk.calls.AudioInputStream.createPushStream).toHaveBeenCalledWith(sdk.formats[0]);
   expect(sdk.calls.AudioConfig.fromStreamInput).toHaveBeenCalledWith(sdk.streams[0]);
@@ -324,6 +326,7 @@ test('setup failure closes resources already created, without masking its real r
   sdk.failConstruction(new Error('TEST recognizer construction failed'));
   expect(((await failure(assess())) as Error).message).toBe('TEST recognizer construction failed');
   expect(sdk.recognizers).toHaveLength(0);
-  for (const resources of [sdk.streams, sdk.audioConfigs, sdk.formats, sdk.speechConfigs])
+  expect(sdk.audioConfigs[0].close).not.toHaveBeenCalled();
+  for (const resources of [sdk.streams, sdk.formats, sdk.speechConfigs])
     expect(resources[0].close).toHaveBeenCalledTimes(1);
 });
