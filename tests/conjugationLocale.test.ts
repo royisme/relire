@@ -109,6 +109,7 @@ for (const [language, locale] of [
         'tense',
         'person',
         'impersonal',
+        'on',
         'negation',
         'estCeQue',
         'inversion',

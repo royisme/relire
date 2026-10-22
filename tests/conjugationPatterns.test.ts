@@ -3,7 +3,7 @@
  * Owns pattern and unelided-cell contracts; no AI requests or linguistic extensions.
  */
 import { expect, test } from 'bun:test';
-import { cellParts, type CellParts } from '../src/services/conjugation/cellParts';
+import { cellParts, takesOn, type CellParts } from '../src/services/conjugation/cellParts';
 import {
   estCeQue,
   inversion,
@@ -14,7 +14,8 @@ import {
 } from '../src/services/conjugation/patterns';
 import { verifyAnswer, verifyPackVerb } from '../src/services/conjugation/verify';
 import { FINITE_PERSONS, TENSES, type Person, type Tense, type Verb } from '../src/types/grammarPack';
-import { answerFromGolden, erAnswer, falloirAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
+import type { ConjugationAnswer } from '../src/types/conjugationAnswer';
+import { EXAMPLES, answerFromGolden, erAnswer, falloirAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
 import { GOLDEN } from './fixtures/grammarPackGolden';
 
 const fromPack = (id: string, pcInvariable?: true) =>
@@ -39,8 +40,28 @@ const views = {
   's’appeler': fromPack('s-appeler'),
   falloir: verifyAnswer(falloirAnswer()),
 };
+
+/** A verb used only in the third person (like se passer): 3sg and 3pl cells, no imperatif, as an AI answer. */
+const thirdPersonAnswer = (): ConjugationAnswer => ({
+  infinitive: 'se passer',
+  pronominal: true,
+  aux: 'etre',
+  rule: 'er-regular',
+  defective: 'third-person',
+  forms: {
+    present: { '3sg': ['passe'], '3pl': ['passent'] },
+    imparfait: { '3sg': ['passait'], '3pl': ['passaient'] },
+    futur: { '3sg': ['passera'], '3pl': ['passeront'] },
+    conditionnel: { '3sg': ['passerait'], '3pl': ['passeraient'] },
+    subjonctif: { '3sg': ['passe'], '3pl': ['passent'] },
+  },
+  participles: { past: { ms: 'passé', fs: 'passée', mp: 'passés', fp: 'passées' } },
+  examples: Object.fromEntries(
+    Object.entries(EXAMPLES).filter(([tense]) => tense !== 'imperatif'),
+  ) as ConjugationAnswer['examples'],
+});
 const patterns = { negation, estCeQue, inversion };
-type Case = [keyof typeof patterns, keyof typeof views, Tense, Person, string | undefined];
+type Case = [keyof typeof patterns, keyof typeof views, Tense, Person | 'on', string | undefined];
 const cases: Case[] = [
   ['negation', 'aimer', 'present', '1sg', 'je n’aime pas'],
   ['negation', 'parler', 'present', '2sg', 'tu ne parles pas'],
@@ -109,6 +130,24 @@ const cases: Case[] = [
   ['negation', 'parler', 'subjonctifPasse', '3sg', 'qu’il/elle n’ait pas parlé'],
   ['estCeQue', 'parler', 'subjonctifPasse', '1sg', undefined],
   ['inversion', 'parler', 'subjonctifPasse', '1sg', undefined],
+  ['negation', 'parler', 'present', 'on', 'on ne parle pas'],
+  ['negation', 'aimer', 'present', 'on', 'on n’aime pas'],
+  ['negation', 'parler', 'passeCompose', 'on', 'on n’a pas parlé'],
+  ['negation', 'aller', 'passeCompose', 'on', 'on n’est pas allé'],
+  ['negation', 'se lever', 'present', 'on', 'on ne se lève pas'],
+  ['negation', 'se lever', 'passeCompose', 'on', 'on ne s’est pas levé'],
+  ['negation', 'parler', 'subjonctif', 'on', 'qu’on ne parle pas'],
+  ['negation', 'parler', 'subjonctifPasse', 'on', 'qu’on n’ait pas parlé'],
+  ['estCeQue', 'parler', 'present', 'on', 'est-ce qu’on parle\u00a0?'],
+  ['estCeQue', 'aller', 'passeCompose', 'on', 'est-ce qu’on est allé\u00a0?'],
+  ['inversion', 'parler', 'present', 'on', 'parle-t-on\u00a0?'],
+  ['inversion', 'aimer', 'present', 'on', 'aime-t-on\u00a0?'],
+  ['inversion', 'avoir', 'present', 'on', 'a-t-on\u00a0?'],
+  ['inversion', 'être', 'present', 'on', 'est-on\u00a0?'],
+  ['inversion', 'parler', 'passeCompose', 'on', 'a-t-on parlé\u00a0?'],
+  ['inversion', 'aller', 'passeCompose', 'on', 'est-on allé\u00a0?'],
+  ['inversion', 'se lever', 'present', 'on', 'se lève-t-on\u00a0?'],
+  ['inversion', 'se lever', 'passeCompose', 'on', 's’est-on levé\u00a0?'],
 ];
 for (const [index, [pattern, verb, tense, person, expected]] of cases.entries()) {
   test(`CP6 golden ${index}: ${pattern} ${verb} ${tense} ${person}`, () => {
@@ -122,6 +161,7 @@ const edges: [keyof typeof patterns, CellParts, string | undefined][] = [
     { tense: 'present', person: '3sg', subject: 'il/elle', verb: ['prend'] },
     'prend-il\u00a0? / prend-elle\u00a0?',
   ],
+  ['inversion', { tense: 'present', person: '3sg', subject: 'on', verb: ['prend'] }, 'prend-on\u00a0?'],
   [
     'inversion',
     { tense: 'present', person: '3pl', subject: 'ils/elles', verb: ['aiment'] },
@@ -214,6 +254,11 @@ const partsCases: [string, ReturnType<typeof cellParts>, CellParts][] = [
     { tense: 'present', person: '3sg', subject: 'il', verb: ['faut'] },
   ],
   [
+    'on subject',
+    cellParts(views.aller, 'passeCompose', 'on'),
+    { tense: 'passeCompose', person: '3sg', subject: 'on', aux: 'est', verb: [], participle: ['allé'] },
+  ],
+  [
     'no split compound',
     cellParts(
       {
@@ -263,6 +308,13 @@ test('invariable participles serve both complete inversion sentences', () => {
   expect(inversion(cellParts(fromPack('aller', true), 'passeCompose', '3sg'))).toBe(
     'est-il allé\u00a0? / est-elle allé\u00a0?',
   );
+});
+
+// The owner's rule: `on` is offered for the patterns of a full verb only, never of a defective one.
+test('CP6 on subject: defective verbs take no on', () => {
+  expect(takesOn(views.parler)).toBe(true);
+  expect(takesOn(views.falloir)).toBe(false);
+  expect(takesOn(verifyAnswer(thirdPersonAnswer()))).toBe(false);
 });
 
 // AI assembly must preserve the same structured contract as the pack, with no new AI call.

@@ -1240,6 +1240,7 @@
         "tense": "时态",
         "person": "人称",
         "impersonal": "无人称 il",
+        "on": "泛指 on",
         "negation": "否定句",
         "estCeQue": "est-ce que 疑问句",
         "inversion": "倒装疑问句",
