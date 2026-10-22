@@ -1,4 +1,5 @@
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import { retryableLazy } from '../utils/retryableLazy';
 import type { SortingState } from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
 import { FilePlus2, Search } from 'lucide-react';
@@ -12,9 +13,9 @@ import { navigate } from '../hooks/useRoute';
 import { listShadowing } from '../storage/shadowing';
 
 // Lazy so TanStack Table loads with the table instead of the startup chunks.
-const LibraryArticlesTable = lazy(() =>
-  import('./LibraryArticlesTable').then((module) => ({ default: module.LibraryArticlesTable })),
-);
+const LibraryArticlesTable = retryableLazy(async () => ({
+  default: (await import('./LibraryArticlesTable')).LibraryArticlesTable,
+}));
 
 interface LibraryViewProps {
   articles: Article[];

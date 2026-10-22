@@ -1,5 +1,6 @@
 /** Owns the three add choices and the article picker; each form owns its own work, not navigation. */
-import { lazy, Suspense, useState } from 'react';
+import { Suspense, useState } from 'react';
+import { retryableLazy } from '../../utils/retryableLazy';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '../../hooks/useRoute';
 import type { Article } from '../../types';
@@ -11,9 +12,9 @@ import { Dialog, OverlayHeader } from '../ui/overlay';
 import { GenerateForm } from './GenerateForm';
 
 // Lazy so the conjugation engine and the pack that the drill form needs stay out of the main chunk.
-const ConjugationDrillForm = lazy(() =>
-  import('./ConjugationDrillForm').then((module) => ({ default: module.ConjugationDrillForm })),
-);
+const ConjugationDrillForm = retryableLazy(async () => ({
+  default: (await import('./ConjugationDrillForm')).ConjugationDrillForm,
+}));
 
 export function AddExercisesDialog({
   articles,

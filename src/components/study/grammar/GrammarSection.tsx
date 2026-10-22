@@ -1,12 +1,15 @@
 /** Owns Grammar section navigation and lazy screens; topic loading stays in TopicsPage. */
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
+import { retryableLazy } from '../../../utils/retryableLazy';
 import { contentServiceUrl } from '../../../services/grammarTopics/service';
 import type { VocabularyWordLookup } from '../../../services/vocabulary/identity';
 import type { GrammarTag } from '../../../types/grammar';
 
-const TopicsPage = lazy(() => import('./TopicsPage'));
-const GenderPage = lazy(() => import('./GenderPage'));
-const ConjugationPage = lazy(() => import('./ConjugationPage').then((module) => ({ default: module.ConjugationPage })));
+const TopicsPage = retryableLazy(() => import('./TopicsPage'));
+const GenderPage = retryableLazy(() => import('./GenderPage'));
+const ConjugationPage = retryableLazy(async () => ({
+  default: (await import('./ConjugationPage')).ConjugationPage,
+}));
 
 export default function GrammarSection({
   section,

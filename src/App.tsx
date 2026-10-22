@@ -1,5 +1,7 @@
 /** Owns app startup, shared vocabulary/stats and route wiring; lookup sheets and library actions live in hooks. */
-import React, { lazy, Suspense, useState, useEffect, type CSSProperties } from 'react';
+import React, { Suspense, useState, useEffect, type CSSProperties } from 'react';
+import { retryableLazy } from './utils/retryableLazy';
+import { PageContentBoundary } from './components/shell/PageContentBoundary';
 import { useTranslation } from 'react-i18next';
 import { Header } from './components/shell/Header';
 import { Sidebar } from './components/shell/Sidebar';
@@ -40,13 +42,13 @@ import { setLabel } from './services/exercises/setLabel';
 import { LearningNavigation } from './components/shell/LearningNavigation';
 import { SpeakingPage } from './components/practice/SpeakingPage';
 
-const PracticePage = lazy(() =>
-  import('./components/practice/PracticePage').then((module) => ({ default: module.PracticePage })),
-);
-const PracticeSetPage = lazy(() =>
-  import('./components/practice/PracticeSetPage').then((module) => ({ default: module.PracticeSetPage })),
-);
-const GrammarSection = lazy(() => import('./components/study/grammar/GrammarSection'));
+const PracticePage = retryableLazy(async () => ({
+  default: (await import('./components/practice/PracticePage')).PracticePage,
+}));
+const PracticeSetPage = retryableLazy(async () => ({
+  default: (await import('./components/practice/PracticeSetPage')).PracticeSetPage,
+}));
+const GrammarSection = retryableLazy(() => import('./components/study/grammar/GrammarSection'));
 
 const ONBOARDING_KEY = 'relire_onboarded';
 const storedFlag = (key: string) => {
@@ -255,7 +257,7 @@ export default function App() {
             </div>
           )}
 
-          <main className="flex-1 pb-16">
+          <PageContentBoundary routeKey={routeHref(route)}>
             {route.name === 'importArticle' && (
               <ImportArticlePage onCreated={(article) => setArticles((prev) => [article, ...prev])} />
             )}
@@ -421,7 +423,7 @@ export default function App() {
             {route.name === 'about' && <AboutSection />}
 
             {route.name === 'notFound' && <NotFoundView reason="page" />}
-          </main>
+          </PageContentBoundary>
         </div>
       </div>
 
