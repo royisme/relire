@@ -57,13 +57,15 @@ function UnitDrill({
 export function ConjugationPractice({ result, onWord, onMissingKey }: Props) {
   const { t } = useTranslation();
   const pack = useGrammarPack();
-  const { status, save } = useUnitSaver();
+  const { status, save, drop } = useUnitSaver();
   const [index, setIndex] = useState(0);
   const [busy, setBusy] = useState<'all' | Tense | null>(null);
   const { verb } = result;
   const units = status.kind === 'done' ? status.units : [];
 
   const make = async (tenses: Tense[], which: 'all' | Tense) => {
+    // A failed save keeps its payload, so drop it: the press must make the tense the learner just pressed.
+    drop();
     setBusy(which);
     const saved = await save(() =>
       prepareConjugationDrills({
@@ -95,12 +97,21 @@ export function ConjugationPractice({ result, onWord, onMissingKey }: Props) {
           aria-busy={status.kind === 'working'}
           className="mt-5 min-h-96 rounded-lg border border-ink-200 bg-surface px-4 py-5 sm:px-6"
         >
-          {status.kind === 'working' && <p className="text-sm text-ink-600">{t('conjugation.page.practising')}</p>}
-          {status.kind === 'error' && (
-            <p role="alert" className="break-words text-sm text-bad-700">
-              {status.message}
-            </p>
-          )}
+          <div className="min-h-10 text-sm" aria-live="polite">
+            {status.kind === 'working' && <p className="text-ink-600">{t('conjugation.page.practising')}</p>}
+            {status.kind === 'error' && (
+              <p role="alert" className="break-words text-bad-700">
+                {status.message}
+              </p>
+            )}
+            {status.kind === 'done' && (
+              <p className="text-ink-700">
+                {t('conjugation.drill.made', {
+                  count: status.units.reduce((sum, saved) => sum + saved.items.length, 0),
+                })}
+              </p>
+            )}
+          </div>
           {unit && (
             <>
               <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
