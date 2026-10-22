@@ -190,11 +190,12 @@ export async function assessPronunciation(params: {
       access.assess({ pcm, referenceText, locale: 'fr-FR', signal }),
     );
   }
-  const { referenceText, userTranscript, audioBase64, mimeType } = params;
+  const { referenceText, userTranscript, audioBase64, mimeType, signal } = params;
   return ai.assessPronunciation(
     {
       referenceText,
       userTranscript,
+      signal,
       audio: audioBase64 ? { base64: audioBase64, mimeType: mimeType || 'audio/webm' } : undefined,
     },
     context(),
