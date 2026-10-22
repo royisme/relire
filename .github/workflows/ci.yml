@@ -26,6 +26,8 @@ jobs:
         run: bun scripts/grammar-pack/build.ts --check
       - name: Noun gender
         run: bun scripts/noun-gender/build.ts --check
+      - name: Minimal pairs
+        run: bun scripts/minimal-pairs/build.ts --check
       - name: Grammar topics
         run: bun scripts/grammar-topics/publish.ts --check
       - name: Translations
