@@ -1,12 +1,16 @@
 /** One Words area: real Today/Browse/Review routes share the same learner model and complete-book cache. */
+import { lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { VocabularyModel } from '../hooks/useVocabulary';
 import { useVocabularyBook } from '../hooks/useVocabularyBook';
 import { PageHeader } from './ui/page-header';
 import { Link } from './shell/Link';
 import { VocabularyHome } from './vocabulary/VocabularyHome';
-import { VocabularyBrowser } from './vocabulary/VocabularyBrowser';
 import { VocabularyReview } from './vocabulary/VocabularyReview';
+// Lazy so TanStack Table loads with Browse instead of the startup chunks.
+const VocabularyBrowser = lazy(() =>
+  import('./vocabulary/VocabularyBrowser').then((module) => ({ default: module.VocabularyBrowser })),
+);
 export function VocabularyView({
   place = 'today',
   model,
@@ -45,7 +49,9 @@ export function VocabularyView({
       {place === 'review' ? (
         <VocabularyReview model={model} book={content.book} />
       ) : place === 'all' ? (
-        <VocabularyBrowser rows={model.rows} book={content.book} />
+        <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
+          <VocabularyBrowser rows={model.rows} book={content.book} />
+        </Suspense>
       ) : (
         <VocabularyHome model={model} />
       )}
