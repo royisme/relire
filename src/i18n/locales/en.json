@@ -643,6 +643,11 @@
     "consonants": "Consonants",
     "play": "Play {{word}}, sound {{symbol}}"
   },
+  "minimalPairs": {
+    "notes": {
+      "tendency": "A tendency, not a fixed rule: many standard speakers merge these two vowels in open syllables."
+    }
+  },
   "levels": {
     "A1": "A1 · Beginner",
     "A2": "A2 · Elementary",
