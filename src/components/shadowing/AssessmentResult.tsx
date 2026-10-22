@@ -52,6 +52,32 @@ export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }>
         ))}
       </dl>
 
+      {assessment.completenessScore !== undefined && (
+        <dl className="flex flex-wrap items-baseline gap-x-2 text-sm">
+          <dt className="text-ink-600">{t('shadowing.completeness')}</dt>
+          <dd className="text-ink-900 tnum">{assessment.completenessScore}</dd>
+        </dl>
+      )}
+
+      {!!assessment.wordResults?.length && (
+        <section className="space-y-2">
+          <Heading>{t('shadowing.wordAccuracy')}</Heading>
+          <ul className="flex flex-wrap gap-x-4 gap-y-2">
+            {assessment.wordResults.map((item, i) => (
+              <li key={i} className="min-w-0 max-w-full break-words text-sm text-ink-800">
+                <span className="font-serif text-ink-900">{item.word}</span>
+                {item.accuracyScore !== undefined && <span className="ml-2 tnum">{item.accuracyScore}</span>}
+                {item.errorType && item.errorType !== 'None' && (
+                  <span className="block text-xs text-ink-600">
+                    {t(`shadowing.wordError.${item.errorType}`, { defaultValue: item.errorType })}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {sounds.length > 0 && (
         <section className="space-y-2">
           <Heading>{t('shadowing.sounds')}</Heading>

@@ -146,6 +146,13 @@
     "accuracy": "Accuracy",
     "fluency": "Fluency",
     "rhythm": "Rhythm",
+    "completeness": "Completeness",
+    "wordAccuracy": "Word accuracy",
+    "wordError": {
+      "Mispronunciation": "Mispronunciation",
+      "Omission": "Omitted word",
+      "Insertion": "Extra word"
+    },
     "sounds": "Sounds to work on",
     "words": "Words to fix",
     "strengths": "What worked",
