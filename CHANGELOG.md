@@ -71,6 +71,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- The pronunciation result now shows only the fields your provider actually returned, including the strengths it mentions.
 - Words without a pronunciation marker are now plain text in the reader: the grey elided prefix (`l'`, `qu'`) no longer appears unless you turn on pronunciation markers.
 - Learning navigation now separates Reading, Grammar, Listening and Speaking, with Writing shown for saved writing units only. Grammar reference and exercises are linked; Read aloud has durable article/sentence addresses. Imports confirm each unit's explicit learning area, mixed sets stay whole, and deletion names its complete cross-area scope. Attempts retain their area and grammar accuracy uses grammar history only. Old unreleased unit/attempt/backup shapes are intentionally rejected, without migration or data reset.
 - Browser speech recognition while recording is now an opt-in setting in Settings → Practice, off by default. It may send the recording to the browser maker's speech service, so it only runs when you turn it on.
