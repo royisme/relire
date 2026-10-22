@@ -5,6 +5,21 @@
     { "id": "etre", "infinitive": "être", "rule": "irregular", "aux": "avoir" },
     { "id": "aller", "infinitive": "aller", "rule": "irregular", "aux": "etre" },
     { "id": "avoir", "infinitive": "avoir", "rule": "irregular", "aux": "avoir" },
-    { "id": "s-appeler", "infinitive": "s’appeler", "base": "appel", "rule": "er-eler-double", "aux": "etre" }
+    { "id": "s-appeler", "infinitive": "s’appeler", "base": "appel", "rule": "er-eler-double", "aux": "etre" },
+    { "id": "faire", "infinitive": "faire", "rule": "irregular", "aux": "avoir" },
+    { "id": "prendre", "infinitive": "prendre", "rule": "irregular", "aux": "avoir" },
+    { "id": "pouvoir", "infinitive": "pouvoir", "rule": "irregular", "aux": "avoir" },
+    { "id": "vouloir", "infinitive": "vouloir", "rule": "irregular", "aux": "avoir" },
+    { "id": "savoir", "infinitive": "savoir", "rule": "irregular", "aux": "avoir" },
+    { "id": "voir", "infinitive": "voir", "rule": "irregular", "aux": "avoir" },
+    { "id": "dire", "infinitive": "dire", "rule": "irregular", "aux": "avoir" },
+    { "id": "mettre", "infinitive": "mettre", "rule": "irregular", "aux": "avoir" },
+    { "id": "lire", "infinitive": "lire", "rule": "irregular", "aux": "avoir" },
+    { "id": "ecrire", "infinitive": "écrire", "rule": "irregular", "aux": "avoir" },
+    { "id": "boire", "infinitive": "boire", "rule": "irregular", "aux": "avoir" },
+    { "id": "croire", "infinitive": "croire", "rule": "irregular", "aux": "avoir" },
+    { "id": "venir", "infinitive": "venir", "rule": "irregular", "aux": "etre" },
+    { "id": "partir", "infinitive": "partir", "base": "part", "rule": "ir-sortir", "aux": "etre" },
+    { "id": "sortir", "infinitive": "sortir", "base": "sort", "rule": "ir-sortir", "aux": "etre" }
   ]
 }
