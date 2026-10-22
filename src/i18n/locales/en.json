@@ -644,6 +644,12 @@
     "play": "Play {{word}}, sound {{symbol}}"
   },
   "minimalPairs": {
+    "progress": {
+      "title": "Sound-pair answers",
+      "history": "Counts every answer, including repeats, to sound-pair exercises that are still saved. Deleting a set removes its answers from these counts.",
+      "contrast": "/{{first}}/ ↔ /{{second}}/",
+      "counts": "{{correct}} of {{total}} correct"
+    },
     "readAloud": {
       "title": "Read aloud",
       "word": "Word to practise",

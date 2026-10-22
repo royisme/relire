@@ -1,12 +1,13 @@
 /**
  * Read-only queries over the `attempts` store: recent attempts, accuracy per
- * grammar tag and the mistake notebook. Only real attempts count; an empty
+ * grammar tag, saved sound contrast and the mistake notebook. Only real attempts count; an empty
  * store gives empty answers, never placeholders. Writing attempts belongs to
  * `exercises.ts` (an attempt exists only together with the item state it
  * checked). Does not group tags into areas; the UI does that with `grammarAreaOf`.
  */
 import { GRAMMAR_TAGS, type GrammarTag } from '../types/grammar';
-import { itemStateId, type ExerciseAttempt } from '../types/exercises';
+import { ExerciseUnitSchema, itemStateId, type ExerciseAttempt } from '../types/exercises';
+import { ContrastIdSchema } from '../types/minimalPairs';
 import { db } from './db';
 import { ExerciseAttemptSchema } from './exerciseBackup';
 
@@ -61,6 +62,38 @@ export async function accuracyByGrammarTag(): Promise<TagAccuracy[]> {
     const { correct, total } = counts.get(tag)!;
     return { grammarTag: tag, correct, total, accuracy: correct / total };
   });
+}
+
+export interface ContrastCount {
+  contrast: string;
+  correct: number;
+  total: number;
+}
+
+/** All checks, including repeats, of minimal-pairs items whose units are still saved. */
+export async function countsBySoundContrast(): Promise<ContrastCount[]> {
+  const d = await db();
+  const tx = d.transaction(['attempts', 'units'], 'readonly');
+  const [rows, unitRows] = await Promise.all([tx.objectStore('attempts').getAll(), tx.objectStore('units').getAll()]);
+  await tx.done;
+  const units = new Map(
+    unitRows.map((row) => {
+      const unit = ExerciseUnitSchema.parse(row);
+      return [unit.id, unit];
+    }),
+  );
+  const counts = new Map<string, ContrastCount>();
+  for (const row of rows) {
+    const attempt = ExerciseAttemptSchema.parse(row);
+    const item = units.get(attempt.unitId)?.items.find((item) => item.id === attempt.itemId);
+    if (item?.meta?.source !== 'minimal-pairs') continue;
+    const contrast = ContrastIdSchema.parse(item.meta.contrast);
+    const entry = counts.get(contrast) ?? { contrast, correct: 0, total: 0 };
+    entry.total++;
+    if (attempt.correct) entry.correct++;
+    counts.set(contrast, entry);
+  }
+  return [...counts.values()].sort((a, b) => a.contrast.localeCompare(b.contrast));
 }
 
 export interface MistakeEntry {

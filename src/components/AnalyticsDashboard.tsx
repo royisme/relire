@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExerciseProgress } from './progress/ExerciseProgress';
+import { SoundContrastProgress } from './progress/SoundContrastProgress';
 import { UserStats } from '../types';
 import type { VocabularyRow } from '../types/vocabulary';
 import { toggleSpeech } from '../utils/speech';
@@ -97,24 +98,31 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, v
         </section>
       )}
 
-      <section className="space-y-4">
-        <div>
-          <h3 className="font-serif font-semibold text-lg text-ink-900">{t('ipa.title')}</h3>
-          <p className="text-sm text-ink-500 mt-0.5">{t('ipa.subtitle')}</p>
-        </div>
-        {GROUPS.map((group) => (
-          <div key={group} className="space-y-2">
-            <h4 className="text-sm font-medium text-ink-700">{t(`ipa.${group}`)}</h4>
-            <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-              {FRENCH_IPA[group].map((s) => (
-                <li key={s.symbol}>
-                  <IpaTile symbol={s.symbol} word={s.word} label={t('ipa.play', { word: s.word, symbol: s.symbol })} />
-                </li>
-              ))}
-            </ul>
+      <div className="grid grid-cols-1 lg:grid-cols-3 items-start gap-8 min-w-0">
+        <section className="space-y-4 min-w-0 lg:col-span-2">
+          <div>
+            <h3 className="font-serif font-semibold text-lg text-ink-900">{t('ipa.title')}</h3>
+            <p className="text-sm text-ink-500 mt-0.5">{t('ipa.subtitle')}</p>
           </div>
-        ))}
-      </section>
+          {GROUPS.map((group) => (
+            <div key={group} className="space-y-2">
+              <h4 className="text-sm font-medium text-ink-700">{t(`ipa.${group}`)}</h4>
+              <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                {FRENCH_IPA[group].map((s) => (
+                  <li key={s.symbol}>
+                    <IpaTile
+                      symbol={s.symbol}
+                      word={s.word}
+                      label={t('ipa.play', { word: s.word, symbol: s.symbol })}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+        <SoundContrastProgress />
+      </div>
     </div>
   );
 };

@@ -36,9 +36,11 @@ import { clearUnitStates, deleteUnitRows, readResetToken } from './exerciseRows'
 export { subscribeExercises } from './exerciseEvents';
 export {
   accuracyByGrammarTag,
+  countsBySoundContrast,
   listAttempts,
   listMistakes,
   type AttemptQuery,
+  type ContrastCount,
   type MistakeEntry,
   type TagAccuracy,
 } from './exerciseAttempts';
