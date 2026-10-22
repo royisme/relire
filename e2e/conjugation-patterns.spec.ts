@@ -62,7 +62,7 @@ for (const mode of ['light', 'sepia', 'dark']) {
       await expect(row(page, 'Negation').locator('dd')).toHaveText('je ne vais pas');
       await expect(row(page, 'Question with est-ce que').locator('dd')).toHaveText('est-ce que je vais\u00a0?');
       await expect(row(page, 'Question with inversion').locator('dd')).toHaveText(
-        '— Inversion is rarely used with je; use est-ce que.',
+        '— Inversion with je is not offered here; use est-ce que.',
       );
       expect(await row(page, 'Question with est-ce que').locator('dd').textContent()).toBe('est-ce que je vais\u00a0?');
       const before = await boxes(page);
@@ -74,7 +74,7 @@ for (const mode of ['light', 'sepia', 'dark']) {
         'est-ce que je suis allé / allée\u00a0?',
       );
       expect(await boxes(page)).toEqual(before);
-      await select(page, person(page), 'he, she');
+      await select(page, person(page), 'he, she, it');
       await expect(row(page, 'Question with inversion').locator('dd')).toHaveText(
         'est-il allé\u00a0? / est-elle allée\u00a0?',
       );

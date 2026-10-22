@@ -1257,7 +1257,7 @@
         "inversion": "倒装疑问句",
         "unavailable": "— {{reason}}",
         "noQuestions": "此时态不提供疑问句。",
-        "noJe": "je 通常不使用倒装，请用 est-ce que 提问。",
+        "noJe": "此处不提供 je 的倒装疑问句，请用 est-ce que 提问。",
         "notCovered": "所列规则未涵盖此情况。",
         "aiOnly": "AI 生成，未核对",
         "differs": "AI 生成；此变位与规则不符。"
@@ -1321,7 +1321,7 @@
       "imparfait": {
         "name": "未完成过去时",
         "use": "用于描述过去的背景、持续状态以及过去的习惯性动作。",
-        "form": "在词干后加上词尾 -ais、-ais、-ait、-ions、-iez、-aient。"
+        "form": "取直陈式现在时 nous 形式，去掉 -ons，再加上 -ais、-ais、-ait、-ions、-iez、-aient；être 使用词干 ét-。"
       },
       "plusQueParfait": {
         "name": "愈过去时",
@@ -1350,29 +1350,29 @@
       },
       "subjonctif": {
         "name": "虚拟式",
-        "use": "用于表达必要、怀疑、愿望、情感或主观评价的从句中。",
-        "form": "通常由 que 引出，在虚拟式词干后加上词尾 -e、-es、-e、-ions、-iez、-ent。"
+        "use": "某些表示必要、怀疑、愿望、情感或主观评价的表达后，从句使用虚拟式；是否使用虚拟式取决于具体表达和语境。",
+        "form": "通常由 que 引出。多数动词使用词尾 -e、-es、-e、-ions、-iez、-ent，词干可能随人称变化；部分动词形式不规则，如 que je sois、que j’aie。"
       },
       "subjonctifPasse": {
         "name": "过去虚拟式",
-        "use": "用于在必要、怀疑、愿望、情感或评价的从句中表达已经完成的动作。",
+        "use": "用于需要虚拟式的从句，表示在参照时间之前已完成的动作；参照时间可以在过去、现在或将来。",
         "form": "通常由 que 引出，由助动词 avoir 或 être 的虚拟式加上动词的过去分词构成。"
       },
       "imperatif": {
         "name": "命令式",
         "use": "用于直接给出指令、建议、要求或禁令。",
-        "form": "使用现在时的 tu、nous、vous 形式且不加主语代词；-er 动词、aller（va）及类似 ouvrir 的动词在 tu 形式中省去词尾 -s。"
+        "form": "通常使用直陈式现在时的 tu、nous、vous 形式，不加主语代词。-er 动词、aller 及类似 ouvrir 的动词，其 tu 命令式不带词尾 -s，如 parle、va、ouvre；但直接连接代词 y 或 en 时要加 -s，如 vas-y、parles-en。être、avoir、savoir、vouloir 有特殊命令式形式。"
       }
     },
     "rules": {
       "er-regular": "规则 -er 动词在所有时态中保持词干不变并使用标准词尾，如 nous parlons。",
       "er-cer": "以 -cer 结尾的动词在元音 a 和 o 前将 c 改为 ç 以保持发音，如 nous commençons。",
       "er-ger": "以 -ger 结尾的动词在元音 a 和 o 前在 g 后加上不发音的 e 以保持发音，如 nous mangeons。",
-      "er-yer-i": "以 -yer 结尾的动词在不发音的 e 前将 y 改为 i，如 ils nettoient。",
-      "er-e-grave": "词干末音节带 e 的动词在含不发音 e 的词尾前（以及将来时和条件式中）将 e 改为 è，如 il lève。",
-      "er-eacute-egrave": "词干末音节带 é 的动词在含不发音 e 的词尾前将 é 改为 è，但在将来时和条件式中保持 é，如 je préfère。",
+      "er-yer-i": "-oyer、-uyer 动词在不发音的 e 前把 y 改为 i，如 ils nettoient、ils essuient；-ayer 动词可保留 y，也可改为 i；-eyer 动词保留 y。envoyer、renvoyer 的将来时和条件式词干不规则。",
+      "er-e-grave": "按 lever 模式变位的动词，词干中的哑音 e 在含哑音 e 的音节前变为 è；将来时和条件式也如此，如 il lève、il lèvera。",
+      "er-eacute-egrave": "按 préférer 模式变位的动词，词干中的 é 在含哑音 e 的音节前变为 è，如 je préfère。将来时和条件式可用传统拼写 je préférerai、je préférerais，也可用修订拼写 je préfèrerai、je préfèrerais。",
       "er-eler-double": "类似 appeler 和 jeter 的 -eler/-eter 动词在含不发音 e 的词尾前以及将来时和条件式中双写 l 或 t，如 j’appelle。",
-      "ir-issons": "第二组规则 -ir 动词在现在时复数、未完成过去时、虚拟式和现在分词中加入 -iss-，如 nous choisissons。",
+      "ir-issons": "第二组规则 -ir 动词在直陈式现在时复数、未完成过去时、现在虚拟式和现在分词中使用 -iss-，如 nous choisissons。",
       "ir-sortir": "类似 sortir 和 partir 的动词在现在时单数人称中去掉词根末尾的辅音，如 je sors。",
       "ir-ouvrir": "类似 ouvrir 和 offrir 的动词在现在时中使用规则 -er 动词的词尾，如 j’ouvre。",
       "re-regular": "类似 vendre 的规则 -dre 动词在现在时单数中分别加 -s、-s，第三人称不加词尾，如 il vend。"
@@ -1380,10 +1380,10 @@
     "persons": {
       "1sg": "我",
       "2sg": "你",
-      "3sg": "他/她",
+      "3sg": "他/她/它",
       "1pl": "我们",
       "2pl": "你们/您",
-      "3pl": "他们/她们"
+      "3pl": "他们/她们/它们"
     },
     "pronouns": {
       "1sg": "je",
