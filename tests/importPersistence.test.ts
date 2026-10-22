@@ -4,14 +4,34 @@ import { article, failure, freshDb, seedUnit } from './fixtures/storage';
 import { ITEMS, unitOf } from './fixtures/units';
 import { db, saveArticle } from '../src/storage/db';
 import { listUnits, saveUnits } from '../src/storage/exercises';
-import { prepareImport } from '../src/services/exercises/importDraft';
-import { draftFixture } from './fixtures/importDraft';
+import { prepareImport, parseImportDraft } from '../src/services/exercises/importDraft';
+import { draftFixture, worksheetDraftFixture } from './fixtures/importDraft';
 
 beforeEach(freshDb);
 const batch = () => [
   { ...unitOf('WORD_TRANSFORM', [ITEMS.WORD_TRANSFORM]), id: 'new-1', unitNumber: 1, setId: 'import-1' },
   { ...unitOf('OPEN_QA'), id: 'new-2', unitNumber: 2, setId: 'import-1' },
 ];
+
+test('one worksheet import saves as one unit with per-item types', async () => {
+  const draft = parseImportDraft(structuredClone(worksheetDraftFixture), 'complete');
+  const prepared = prepareImport(draft, { kind: 'text', name: 'Worksheet', pages: [] }, 'complete', {
+    setId: 'import-one',
+    level: 'A1',
+    createdAt: 1_700_000_000_000,
+  });
+  expect(prepared.errors).toEqual([]);
+  await saveUnits(prepared.units);
+  const d = await db();
+  const saved = await d.getAllFromIndex('units', 'setId', 'import-one');
+  expect(saved).toHaveLength(1);
+  expect(saved[0].items.map((item) => item.type ?? saved[0].type)).toEqual([
+    'FILL_BLANKS',
+    'FILL_BLANKS',
+    'CHOICE_SELECT',
+    'MATCH_PAIRS',
+  ]);
+});
 
 test('an article import writes the article and started, and touches no unit', async () => {
   const existing = await seedUnit();

@@ -33,9 +33,9 @@
 字段说明（应用会另行提供完整的结构）：
 - materialTitle：课程标题，或课外测试的标题。材料没有标题时不要填写此字段。
 - warnings：你注意到的问题，例如无法辨认的文字或不清晰的版式。没有问题时留空。
-- units：练习单元。如果材料中没有问题，则留空。
-- 每个单元包含：learningArea（必填，明确的主要学习目标）、id（在草稿内唯一，例如 u1）、section（GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber（正整数）、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，单元需要阅读材料时；标题和译文可以省略）、type（上面的题型之一）、grammarTags（其练习题使用的标签，至少一个）以及 items。
-- 每道题包含：id（在所属单元内唯一）、itemNumber（数字，或类似 "a" 的文字）、type（仅当该题与所属单元的题型不同时填写）、prompt（空处为 [___]；CHOICE_SELECT 的选项写作 {a|b}）、secondaryPrompt（有则填写）、audioText（听写或数字题需要朗读的法语文本）、options（有选项或判断项时；其中不能有空白项）、expectedAnswer（字符串；多空时为字符串数组；无答案时为 null）、printedAnswer（仅限材料中确实印出的答案，否则为 null）、acceptableAnswers、explanation（简明的中文语法讲解）、grammarTag（下面列表中恰好一个标签）以及 blockers（缺少哪些内容导致该题无法使用，例如音频、图示、选项或背景；没有缺失时留空）。
+- units：练习单元。如果材料中没有问题，则留空。整份材料就是一份练习：即使材料分为多个板块，也把所有题目放进同一个单元，绝不按板块拆分单元。唯一例外是依托自己阅读材料（题目所依据的文本）的题目：每篇阅读材料单独成为一个单元，与其余题目分开。
+- 每个单元包含：learningArea（必填，明确的主要学习目标）、id（在草稿内唯一，例如 u1）、section（其第一题所属的板块：GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber（在返回的单元中的位置，从 1 开始；单独保留的阅读材料单元依次取下一个编号）、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明；各板块说明不同时，按原文顺序每行一条合并）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，仅限依托阅读材料的单元；标题和译文可以省略）、type（其第一题的题型）、grammarTags（所有练习题使用的标签，至少一个）以及 items。
+- 每道题包含：id（在所属单元内唯一）、itemNumber（数字，或类似 "a" 的文字）、type（仅当该题与所属单元的题型不同时填写；一份练习单的不同题型正是这样保留在同一个单元里）、prompt（空处为 [___]；CHOICE_SELECT 的选项写作 {a|b}）、secondaryPrompt（有则填写）、audioText（听写或数字题需要朗读的法语文本）、options（有选项或判断项时；其中不能有空白项）、expectedAnswer（字符串；多空时为字符串数组；无答案时为 null）、printedAnswer（仅限材料中确实印出的答案，否则为 null）、acceptableAnswers、explanation（简明的中文语法讲解）、grammarTag（下面列表中恰好一个标签）以及 blockers（缺少哪些内容导致该题无法使用，例如音频、图示、选项或背景；没有缺失时留空）。
 
 答案格式（单元能否用于练习，应用会按此检查）：
 - WORD_TRANSFORM、SENTENCE_BUILD、OPEN_QA、NUMBER_DICTATION：expectedAnswer 为一个字符串。

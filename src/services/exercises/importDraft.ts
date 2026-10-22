@@ -2,8 +2,9 @@
  * Import drafts: the lenient shape a model returns when it reads a worksheet
  * (answers may be missing, items may be blocked), and `prepareImport`, the one
  * explicit step that promotes a reviewed draft into strict exercise units.
- * Owns the draft contract, answer provenance and promotion. Does not own
- * extraction requests, the review UI or saving; promotion has no side effects.
+ * Owns the draft contract, answer provenance, the one-unit-per-import merge and
+ * promotion. Does not own extraction requests, the review UI or saving;
+ * promotion has no side effects.
  */
 import { z } from 'zod';
 import {
@@ -73,12 +74,53 @@ export type ImportDraft = z.infer<typeof ImportDraftSchema>;
 type DraftItem = ImportDraft['units'][number]['items'][number];
 
 /**
- * Parses model output and settles which answers may stand for the mode:
- * `generate` has no printed key, `complete` and `extract` prefer the printed
- * one, `extract` drops answers the model inferred, and a blocked item keeps none.
+ * One import is one exercise, whatever sections the source has: every unit the
+ * model split by section merges into the first of them, so mixed question
+ * kinds live as per-item `type` overrides. The merged unit keeps the first
+ * unit's unit-level fields, joins the section instructions in source order
+ * (identical lines are not repeated) and unions the grammar tags; items stay in
+ * source order and an id that collides in the merge is prefixed with its unit
+ * id, then numbered until it is unique. The only exception is a unit with its own `readingPassage`: one unit
+ * holds one passage, so each such unit stays separate and untouched.
+ */
+function mergeIntoOneUnit(draft: ImportDraft): ImportDraft {
+  const toMerge = draft.units.filter((unit) => !unit.readingPassage);
+  if (toMerge.length < 2) return draft;
+  const [first, ...rest] = toMerge;
+  const seen = new Set(first.items.map((item) => item.id));
+  const items = [...first.items];
+  const instructions = [first.instruction];
+  const grammarTags = new Set(first.grammarTags);
+  for (const unit of rest) {
+    for (const item of unit.items) {
+      let id = seen.has(item.id) ? `${unit.id}-${item.id}` : item.id;
+      for (let n = 2; seen.has(id); n++) id = `${unit.id}-${item.id}-${n}`;
+      seen.add(id);
+      // An item that leaves a unit of another type carries its effective type on itself.
+      items.push(unit.type === first.type ? { ...item, id } : { ...item, id, type: item.type ?? unit.type });
+    }
+    if (!instructions.includes(unit.instruction)) instructions.push(unit.instruction);
+    unit.grammarTags.forEach((tag) => grammarTags.add(tag));
+  }
+  const merged: ImportDraft['units'][number] = {
+    ...first,
+    instruction: instructions.join('\n'),
+    grammarTags: [...grammarTags],
+    items,
+  };
+  const separate = new Set(draft.units.filter((unit) => unit.readingPassage));
+  const units = draft.units.flatMap((unit) => (unit === first ? [merged] : separate.has(unit) ? [unit] : []));
+  return { ...draft, units };
+}
+
+/**
+ * Parses model output, merges it into one exercise per import and settles which
+ * answers may stand for the mode: `generate` has no printed key, `complete` and
+ * `extract` prefer the printed one, `extract` drops answers the model inferred,
+ * and a blocked item keeps none.
  */
 export function parseImportDraft(input: unknown, mode: ImportMode): ImportDraft {
-  const draft = ImportDraftSchema.parse(input);
+  const draft = mergeIntoOneUnit(ImportDraftSchema.parse(input));
   for (const unit of draft.units)
     for (const item of unit.items) {
       if (mode === 'generate') item.printedAnswer = null;
