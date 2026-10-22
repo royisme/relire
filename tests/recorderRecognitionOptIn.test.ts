@@ -1,12 +1,14 @@
 /**
  * The recording hook starts the browser's speech recognition only when the Practice opt-in is on, and
- * reads that setting when the recording starts. There is no DOM in these tests: React's state, refs,
- * effects and callbacks are stubbed, and the microphone and the recognizer are fakes.
+ * reads that setting when the recording starts; a new take also takes over from a Check still in
+ * flight (issue #60). There is no DOM in these tests: React's state, refs, effects and callbacks are
+ * stubbed, and the microphone, the recognizer and the assessment are fakes.
  */
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import * as React from 'react';
 import { useShadowingRecorder } from '../src/hooks/useShadowingRecorder';
 import { cancelCapture } from '../src/utils/speech/recorder';
+import * as apiModule from '../src/services/api';
 
 /**
  * What the environment had before this file mocked it. Bun provides a native `navigator`, and every test
@@ -66,7 +68,23 @@ const stream = { getTracks: () => [], getAudioTracks: () => [] };
 interface Controls {
   start: () => Promise<void>;
   stop: () => Promise<void>;
+  assess: () => Promise<void>;
 }
+
+/** The state slots of one hook instance, in `useState` call order; setters write back into them. The
+ * cursor moves through methods so a hook-named helper can step it without a direct write. */
+const store = {
+  slots: [] as unknown[],
+  index: 0,
+  reset() {
+    this.slots.length = 0;
+    this.index = 0;
+  },
+  /** Points the cursor at the first slot again: the next hook pass reads current values, like a re-render. */
+  startRender() {
+    this.index = 0;
+  },
+};
 
 let effect: React.EffectCallback = () => undefined;
 const spies: Array<{ mockRestore(): void }> = [];
@@ -75,6 +93,7 @@ beforeEach(() => {
   navigatorBeforeMocking = globalThis.navigator;
   built.length = 0;
   storage.clear();
+  store.reset();
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
     value: {
@@ -83,10 +102,17 @@ beforeEach(() => {
     },
   });
   spies.push(
-    spyOn(React, 'useState').mockImplementation(((initial: unknown) => [
-      typeof initial === 'function' ? (initial as () => unknown)() : initial,
-      () => undefined,
-    ]) as unknown as typeof React.useState),
+    spyOn(React, 'useState').mockImplementation(((initial: unknown) => {
+      const index = store.index++;
+      if (index === store.slots.length)
+        store.slots.push(typeof initial === 'function' ? (initial as () => unknown)() : initial);
+      return [
+        store.slots[index],
+        (next: unknown) => {
+          store.slots[index] = next;
+        },
+      ];
+    }) as unknown as typeof React.useState),
     spyOn(React, 'useEffect').mockImplementation((callback) => {
       effect = callback;
     }),
@@ -127,10 +153,21 @@ afterEach(() => {
   restoreGlobal('localStorage', originalStorage);
 });
 
+/** One pass of the hook, named as a hook so lint accepts the call: reads the current slot values, like a re-render that runs no effect. */
+const useView = (reference: string) => {
+  store.startRender();
+  return useShadowingRecorder(reference);
+};
+
 /** Steps a mounted hook, as `tests/grammarTopicsHooks.test.ts` does. */
 const controls = (hook: unknown): Controls => {
   effect();
   return hook as Controls;
+};
+
+/** Lets a settled promise's continuations run; no timers, no real waiting. */
+const flushMicrotasks = async () => {
+  for (let i = 0; i < 4; i++) await Promise.resolve();
 };
 
 const optIn = (on: boolean) =>
@@ -170,6 +207,32 @@ test('the setting is read when recording starts, not once at import', async () =
   optIn(true);
   await recorder.start();
   expect(built).toHaveLength(1);
+  await recorder.stop();
+});
+
+test('a new take cancels a Check still in flight, frees its button and drops the stale result', async () => {
+  let signal: AbortSignal | undefined;
+  let settleAssess!: (value: { overallScore: number }) => void;
+  const assessment = spyOn(apiModule, 'assessPronunciation').mockImplementation(((params: { signal?: AbortSignal }) => {
+    signal = params.signal;
+    return new Promise((resolve) => {
+      settleAssess = resolve;
+    });
+  }) as never);
+  spies.push(assessment);
+  const recorder = controls(useView('Bonjour le monde.'));
+  void recorder.assess(); // pending until this test settles it
+  expect(useView('Bonjour le monde.').isEvaluating).toBe(true);
+  await recorder.start();
+  expect(signal?.aborted).toBe(true);
+  expect(useView('Bonjour le monde.').isEvaluating).toBe(false);
+  settleAssess({ overallScore: 90 });
+  await flushMicrotasks();
+  // The stale Check settles after its take was dropped: no assessment, no error, button still free.
+  const view = useView('Bonjour le monde.');
+  expect(view.assessment).toBeNull();
+  expect(view.error).toBeNull();
+  expect(view.isEvaluating).toBe(false);
   await recorder.stop();
 });
 

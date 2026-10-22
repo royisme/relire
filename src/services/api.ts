@@ -184,7 +184,7 @@ export async function assessPronunciation(params: {
   const access = getAiAccess();
   if (access.isConfigured('assessment')) {
     // The reference text alone must never pass for a read: without the take there is nothing to score.
-    if (!params.audio) throw new Error(i18n.t('errors.noSpeechToScore'));
+    if (!params.audio) throw new Error(i18n.t('errors.noRecordingToScore'));
     const { referenceText, signal } = params;
     return decodeTakeToPcm16k(params.audio).then((pcm) =>
       access.assess({ pcm, referenceText, locale: 'fr-FR', signal }),

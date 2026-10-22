@@ -100,6 +100,10 @@ export function useShadowingRecorder(
     setAssessment(null);
     setError(null);
     const mine = ++session.current;
+    // A Check still running for the dropped take is cancelled, so the button serves the new take.
+    assessAbort.current?.abort();
+    assessAbort.current = null;
+    setIsEvaluating(false);
 
     const rec = new FrenchAudioRecorder();
     let ok: boolean;

@@ -642,6 +642,7 @@
     "badResponse": "AI 返回的内容无法解析，请重试。",
     "noAudio": "没能生成语音。",
     "noSpeechToScore": "没有可以评分的内容：这段录音没有你的 AI 服务商能听的音频，浏览器也没有给出转录文字。",
+    "noRecordingToScore": "没有可以评分的内容：请先录下自己朗读这句话，再按“评测发音”。",
     "speechPlayback": "这段语音没能播放。",
     "allModelsFailed": "所有模型都失败了，请重试。",
     "invalidAnswer": "无法使用 AI 的回答：{{msg}}",

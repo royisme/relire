@@ -650,6 +650,7 @@
     "badResponse": "The AI returned a response that could not be read. Please try again.",
     "noAudio": "Could not generate speech audio.",
     "noSpeechToScore": "Nothing to score: this recording has no audio your AI provider can listen to, and the browser gave no transcript.",
+    "noRecordingToScore": "Nothing to score: record yourself reading the sentence, then press Check.",
     "speechPlayback": "The speech clip could not be played.",
     "allModelsFailed": "Every model failed. Please try again.",
     "invalidAnswer": "The AI answer could not be used: {{msg}}",
