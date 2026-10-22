@@ -69,6 +69,111 @@
       "reviewedBy": "Roy Zhu",
       "reviewedAt": "2026-10-21",
       "reference": "owner reviewed the four compound tenses 2026-10-21; the seven earlier tenses were reviewed before and not re-reviewed"
+    },
+    {
+      "verbId": "faire",
+      "rowHash": "6290a4304ecfc0fa5e92a5b142c98201c926c367914d82af84da069f1cc55978",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "prendre",
+      "rowHash": "06726a28df733dc735ec8c94af64aa1e4b36e27800c8da6427de10f61b3a8c9a",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "pouvoir",
+      "rowHash": "944c4a9f15fc828120de4741ccd6d45d6e6ca9a013f1acba2548bd5d31136976",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "vouloir",
+      "rowHash": "4461692d400d66b924a1355cc941354dd0db1b1470e964acaca113bac6c8c144",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "savoir",
+      "rowHash": "370ee1176614c7629ca12aaf2c34b13e8555561a166cdeec092a74cd0361f516",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "voir",
+      "rowHash": "44157f941d55ffb7223712028aa2761821d675270287b963157177b218a7ad95",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "dire",
+      "rowHash": "dcdd120d01c7e1e13c69758ca7590774c1d990b95ece93ca6602f956976dc778",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "mettre",
+      "rowHash": "cadfef62f838dc52d307f73b0a671091760194cd0c3a19f311e2676aed1066ea",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "lire",
+      "rowHash": "906dd3885c77175172d6810d032469e72c90daf35ced4ba32639b936e30749c5",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "ecrire",
+      "rowHash": "0b6e9bd9517e377d06d49aaee5de0054e2c4b09dde28e40629575535bbe6d800",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "boire",
+      "rowHash": "166d197cadbe66a65a2f353eb768ea7151b435a6eb15bb335b309bf33c9e2389",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "croire",
+      "rowHash": "395ed5d4a44adf4d196388cc4083e3890543fcdce745c2bf98a6e0bf39deb591",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "venir",
+      "rowHash": "27d77bae509ae65bf4eb45b321b9a4bbb2824b23b66e5ce40dfd9b3f5bd21686",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "partir",
+      "rowHash": "f7258468f3320e9fee40d3bcc26751aff4e1a3525d810ce1021dc51f12586451",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
+    },
+    {
+      "verbId": "sortir",
+      "rowHash": "55aff90b8e1131009591b64f9271660123e51739a802e7d038deb76d3fb06f0b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner reviewed the 15 new verbs on 2026-10-22 (issue #43); Morphalou is advisory only and its disagreements were deferred; an independent French review of the tables found no wrong cell"
     }
   ],
   "rejected": []
