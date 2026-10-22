@@ -51,8 +51,10 @@ export interface VerifiedVerb {
   defective?: Verb['defective'];
   hAspire?: true;
   pcInvariable?: true;
+  /** Every person of every finite tense exists, but the verb has no imperative. */
+  noImperative?: true;
   status: VerbStatus;
-  /** Every tense of the view; imperatif is empty for a defective verb. */
+  /** Every tense of the view; imperatif is empty for a defective or noImperative verb. */
   tenses: Record<Tense, Partial<Record<Person, CheckedCell>>>;
   participles: Partial<Record<FormKey, CheckedForm>>;
 }
@@ -149,6 +151,7 @@ function checkView(
     ...(view.defective && { defective: view.defective }),
     ...(view.hAspire && { hAspire: view.hAspire }),
     ...(view.pcInvariable && { pcInvariable: view.pcInvariable }),
+    ...(view.noImperative && { noImperative: view.noImperative }),
     tenses,
     participles,
   };
