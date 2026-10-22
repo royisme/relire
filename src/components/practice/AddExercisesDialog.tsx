@@ -1,4 +1,4 @@
-/** Owns the three add choices and the article picker; each form owns its own work, not navigation. */
+/** Owns the area-specific add choices and article picker; each form owns its own work, not navigation. */
 import { Suspense, useState } from 'react';
 import { retryableLazy } from '../../utils/retryableLazy';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,13 @@ const ConjugationDrillForm = retryableLazy(async () => ({
   default: (await import('./ConjugationDrillForm')).ConjugationDrillForm,
 }));
 
+const GenderDrillEntry = retryableLazy(async () => ({
+  default: (await import('../study/grammar/GenderDrillForm')).GenderDrillEntry,
+}));
+const PairsDrillForm = retryableLazy(async () => ({
+  default: (await import('./PairsDrillForm')).PairsDrillForm,
+}));
+
 export function AddExercisesDialog({
   articles,
   area,
@@ -30,7 +37,7 @@ export function AddExercisesDialog({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const [choice, setChoice] = useState(initialChoice);
+  const [choice, setChoice] = useState<'article' | 'conjugation' | 'gender' | 'pairs' | null>(initialChoice);
   const generatorArea = ArticleExerciseAreaSchema.safeParse(area);
   const [pickedId, setPickedId] = useState(articles[0]?.id);
   const article = articles.find((candidate) => candidate.id === pickedId);
@@ -84,6 +91,38 @@ export function AddExercisesDialog({
               </p>
             </div>
           )}
+          {area === 'grammar' && (
+            <div>
+              <Button
+                variant="outline"
+                className="w-full justify-start aria-pressed:border-accent-700 aria-pressed:bg-accent-100 aria-pressed:text-accent-900"
+                aria-pressed={choice === 'gender'}
+                aria-describedby="practice-choice-gender"
+                onClick={() => setChoice('gender')}
+              >
+                {t('nounGender.drill.title')}
+              </Button>
+              <p id="practice-choice-gender" className="mt-1 text-xs text-ink-500">
+                {t('nounGender.drill.description')}
+              </p>
+            </div>
+          )}
+          {(area === 'grammar' || area === 'listening') && (
+            <div>
+              <Button
+                variant="outline"
+                className="w-full justify-start aria-pressed:border-accent-700 aria-pressed:bg-accent-100 aria-pressed:text-accent-900"
+                aria-pressed={choice === 'pairs'}
+                aria-describedby="practice-choice-pairs"
+                onClick={() => setChoice('pairs')}
+              >
+                {t('minimalPairs.drill.title')}
+              </Button>
+              <p id="practice-choice-pairs" className="mt-1 text-xs text-ink-500">
+                {t('minimalPairs.drill.description')}
+              </p>
+            </div>
+          )}
         </div>
         {choice === 'article' &&
           generatorArea.success &&
@@ -124,6 +163,20 @@ export function AddExercisesDialog({
           <div className="border-t border-ink-200 pt-4">
             <Suspense fallback={<div className="min-h-24" />}>
               <ConjugationDrillForm onSaved={onClose} />
+            </Suspense>
+          </div>
+        )}
+        {area === 'grammar' && choice === 'gender' && (
+          <div className="border-t border-ink-200 pt-4">
+            <Suspense fallback={<div className="min-h-64" />}>
+              <GenderDrillEntry />
+            </Suspense>
+          </div>
+        )}
+        {(area === 'grammar' || area === 'listening') && choice === 'pairs' && (
+          <div className="border-t border-ink-200 pt-4">
+            <Suspense fallback={<div className="min-h-96" />}>
+              <PairsDrillForm />
             </Suspense>
           </div>
         )}

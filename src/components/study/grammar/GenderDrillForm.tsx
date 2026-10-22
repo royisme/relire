@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUnitSaver } from '../../../hooks/useUnitSaver';
+import { useNounGenderPack } from '../../../hooks/useNounGenderPack';
 import {
   DEFAULT_GENDER_COUNT,
   DEFAULT_GENDER_LEVEL,
@@ -14,6 +15,23 @@ import { Link } from '../../shell/Link';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+
+/** The Add exercises entry loads the same pack as Grammar → Gender, without its reference table. */
+export function GenderDrillEntry() {
+  const { t } = useTranslation();
+  const state = useNounGenderPack();
+  return (
+    <div className="min-h-64" aria-busy={state.status === 'loading'}>
+      {state.status === 'loading' && <p className="text-sm text-ink-500">{t('nounGender.loading')}</p>}
+      {state.status === 'error' && (
+        <p role="alert" className="break-words text-sm text-bad-700">
+          {state.error}
+        </p>
+      )}
+      {state.status === 'ready' && <GenderDrillForm pack={state.pack} />}
+    </div>
+  );
+}
 
 export function GenderDrillForm({ pack }: { pack: NounGenderPack }) {
   const { t } = useTranslation();

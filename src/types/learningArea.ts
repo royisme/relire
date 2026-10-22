@@ -8,10 +8,19 @@ export const learningAreaPath = (area: LearningArea) => (area === 'reading' ? 'r
 export const ArticleExerciseAreaSchema = LearningAreaSchema.extract(['reading', 'grammar']);
 export type ArticleExerciseArea = z.infer<typeof ArticleExerciseAreaSchema>;
 
-/** Prompt TTS alone is not a listening interaction. */
-export function supportsListening(unit: { type: string; items: { type?: string; audioText?: string }[] }) {
+/** Prompt TTS alone is not listening: only dictation and pack-backed sound choices qualify. */
+export function supportsListening(unit: {
+  type: string;
+  items: { type?: string; audioText?: string; meta?: Record<string, unknown> }[];
+}) {
   return (
     unit.items.length > 0 &&
-    unit.items.every((item) => (item.type ?? unit.type) === 'NUMBER_DICTATION' && !!item.audioText?.trim())
+    unit.items.every((item) => {
+      const type = item.type ?? unit.type;
+      return (
+        !!item.audioText?.trim() &&
+        (type === 'NUMBER_DICTATION' || (type === 'CHOICE_SELECT' && item.meta?.source === 'minimal-pairs'))
+      );
+    })
   );
 }

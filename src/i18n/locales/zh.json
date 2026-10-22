@@ -42,9 +42,9 @@
     "completeSet_other": "完整题组：跨所有学习领域的 {{count}} 份练习。删除题组会删除整个批次。",
     "emptyTitle": "此领域还没有已保存的练习",
     "emptyDesc": "通过“添加练习”导入练习单，或为此领域生成支持的练习。",
-    "listeningSupport": "听力目前仅支持数字听写，不支持通用音频理解训练。",
-    "listeningEmpty": "导入含可练习数字听写的练习单，核对各单元的学习领域后保存。",
-    "unsupportedListening": "听力要求每道题均为数字听写且有听写文本。请选择其他领域或排除此单元；朗读题干不算听力练习。",
+    "listeningSupport": "听力支持数字听写和近音辨听，不支持通用音频理解训练。",
+    "listeningEmpty": "通过“添加练习”创建近音辨听练习，或导入含可练习数字听写的练习单。",
+    "unsupportedListening": "听力要求每道题均为数字听写或来自词对包的近音辨听，且有朗读文本。请选择其他领域或排除此单元；朗读题干不算听力练习。",
     "speaking": "口语",
     "readAloud": "朗读",
     "speakingDesc": "听文章中的一句话，录下自己的朗读，也可请 AI 给出发音评估。",
@@ -636,6 +636,24 @@
     "play": "播放 {{word}}，音标 {{symbol}}"
   },
   "minimalPairs": {
+    "drill": {
+      "title": "近音辨听",
+      "description": "用已审核的词对创建辨听练习。创建和判题无需 AI 或密钥，保存后可在“听力”中找到题组。",
+      "instruction": "听单词，选出你听到的词。重音符号也算拼写的一部分。",
+      "contrasts": "对比音组",
+      "sound": "/{{symbol}}/ · {{word}}",
+      "contrast": "{{first}} ↔ {{second}}",
+      "pickContrast": "请选择一个或多个对比音组。",
+      "unknownContrast": "未知的对比音组：{{contrast}}。",
+      "countRange": "请根据所选音组的题量，输入 1 到 {{max}} 之间的整数。",
+      "make": "创建练习",
+      "making": "正在创建练习",
+      "open": "在听力中打开已保存题组",
+      "tips": {
+        "b-p": "法语 p 不送气。普通话 b 和 p 靠送气与否区分，法语 b 和 p 则靠声带是否振动区分。",
+        "y-u": "法语 u 的发音对应拼音 ü，法语 ou 的发音对应拼音 u，注意拼写区别。"
+      }
+    },
     "notes": {
       "tendency": "这是倾向而不是固定规则：许多讲标准法语的人会在开音节中合并这两个元音。"
     }
