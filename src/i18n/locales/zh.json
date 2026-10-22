@@ -146,6 +146,13 @@
     "accuracy": "准确度",
     "fluency": "流畅度",
     "rhythm": "节奏",
+    "completeness": "完整度",
+    "wordAccuracy": "逐词准确度",
+    "wordError": {
+      "Mispronunciation": "发音不准",
+      "Omission": "漏读",
+      "Insertion": "多读"
+    },
     "sounds": "需要练习的发音",
     "words": "需要纠正的词",
     "strengths": "做得好的地方",
