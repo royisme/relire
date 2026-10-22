@@ -113,7 +113,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ### Fixed
 - The pronunciation check prompts no longer show example scores the model could copy.
 - A pronunciation check with no audio and no transcript now says so instead of scoring the reference text.
-- Pressing Record again while a read-aloud check is running now cancels that check, so the Check button works for the new take instead of spinning until the sentence changes. When Azure scoring is on and nothing is recorded, the message now asks you to record the sentence instead of mentioning a browser transcript.
+- Pressing Record again while a read-aloud check is running now cancels that check, so the Check button works for the new take instead of spinning until the sentence changes. When Azure scoring is on and nothing is recorded, the message now asks you to record the sentence instead of mentioning a browser transcript. The Check button also stays disabled while Record again waits for the microphone, so it can no longer score the take you just dropped.
 - Local vocabulary publication now binds page content so large Unicode pages can be imported intact without exceeding SQLite's SQL statement limit.
 - Dictionary preparation no longer rejects unused original-field arrays; raw source data stays out of normalized and published content.
 - Failed vocabulary reveals and ratings return focus to the submitted button once it is ready to retry.
