@@ -69,9 +69,10 @@ export const VerbSchema = z.object({
   rule: RuleIdSchema,
   defective: z.enum(['impersonal','third-person']).optional(), // impersonal: falloir, pleuvoir, 3sg only; third-person: se passer, 3sg and 3pl; neither has an imperatif
   pcInvariable: z.literal(true).optional(),                 // passé composé cells carry only the masculine singular participle, for every person (A5, Q15)
+  noImperative: z.literal(true).optional(),                 // every person of every finite tense, but no imperative (pouvoir); `participles.present` is still required, and `defective` with it is an error (a defective verb already has no imperatif)
   tenses: z.object({ present: finite, passeCompose: finite, imparfait: finite, futur: finite,
     conditionnel: finite, subjonctif: finite,
-    imperatif: z.partialRecord(z.enum(IMPERATIVE_PERSONS), CellSchema).optional() }),  // absent iff defective
+    imperatif: z.partialRecord(z.enum(IMPERATIVE_PERSONS), CellSchema).optional() }),  // absent iff defective or noImperative
   participles: z.object({ present: text.optional(),   // absent for falloir: no attested form, none invented
     past: z.object({ ms: text, fs: text, mp: text, fp: text }) }),  // invariable ones repeat the form
   prov: ProvenanceSchema,         // forms and participles
@@ -93,7 +94,7 @@ The shipped schema has no `parts`, `ipa`, `ipaProv`, `base`, rule texts or Chine
 - `imperatif` has `lead: ""`; pronominal imperative forms carry the hyphenated clitic (`lève-toi`, `levons-nous`).
 
 Invariants checked at load by `superRefine` (cheap, structural; linguistic checks run only in the build, section 5):
-- verb ids unique; a `pronominal` verb has `aux: 'etre'`; `defective: 'impersonal'` has only `3sg` cells, `'third-person'` only `3sg` and `3pl`, neither has `imperatif`, both may omit `participles.present`; any other verb has all six persons per finite tense, all three imperative persons and a present participle.
+- verb ids unique; a `pronominal` verb has `aux: 'etre'`; `defective: 'impersonal'` has only `3sg` cells, `'third-person'` only `3sg` and `3pl`, neither has `imperatif`, both may omit `participles.present`; a `noImperative` verb (owner decision 2026-10-22, for `pouvoir`) keeps all six persons per finite tense, has no `tenses.imperatif` and keeps its `participles.present`, and never combines with `defective`; any other verb has all six persons per finite tense, all three imperative persons and a present participle.
 - `forms` unique inside a cell; `lead` empty iff tense is `imperatif`.
 - every `prov.status` in the file is `auto-checked` or `reviewed` (the gate, Q3); `rejected` and `draft` never appear in a shipped pack.
 - shipped strings are NFC with the typographic apostrophe U+2019 (as in the owner's list and in article text); lookup normalises, section 6b.

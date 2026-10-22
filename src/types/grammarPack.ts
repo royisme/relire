@@ -97,6 +97,8 @@ export const VerbSchema = z
     defective: z.enum(['impersonal', 'third-person']).optional(),
     /** Passé composé cells carry only the masculine singular participle, for every person. */
     pcInvariable: z.literal(true).optional(),
+    /** Every person of every finite tense exists, but the verb has no imperative (pouvoir). */
+    noImperative: z.literal(true).optional(),
     tenses: z.object({
       present: finite,
       passeCompose: finite,
@@ -136,11 +138,17 @@ export const VerbSchema = z
     }
 
     const imperatif = verb.tenses.imperatif;
-    if (verb.defective) {
+    if (verb.noImperative && verb.defective) {
+      fail(['noImperative'], 'a defective verb already has no imperatif');
+    } else if (verb.noImperative) {
+      if (imperatif) fail(['tenses', 'imperatif'], 'a noImperative verb has no imperatif');
+    } else if (verb.defective) {
       if (imperatif) fail(['tenses', 'imperatif'], 'a defective verb has no imperatif');
-      // participles.present may be omitted for a defective verb
-    } else {
-      if (!imperatif) fail(['tenses', 'imperatif'], 'imperatif is missing');
+    } else if (!imperatif) {
+      fail(['tenses', 'imperatif'], 'imperatif is missing');
+    }
+    // participles.present may be omitted only for a defective verb (falloir); a noImperative verb keeps it.
+    if (!verb.defective) {
       for (const person of IMPERATIVE_PERSONS) {
         if (imperatif && !imperatif[person]) fail(['tenses', 'imperatif', person], 'cell is missing');
       }

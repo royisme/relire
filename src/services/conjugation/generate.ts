@@ -43,6 +43,8 @@ export interface VerbSpec {
   aux: Verb['aux'];
   defective?: Verb['defective'];
   pcInvariable?: true;
+  /** Every person of every finite tense exists, but the verb has no imperative. */
+  noImperative?: true;
   hAspire?: true;
 }
 
@@ -147,7 +149,7 @@ export function generateVerb(spec: VerbSpec, irregulars: Record<string, Irregula
 
   // The imperatif comes from the present (nous and vous as is, tu without its s) unless the table overrides it.
   const imperatifParts: Partial<Record<Person, Parts[]>> = {};
-  if (!spec.defective) {
+  if (!spec.defective && !spec.noImperative) {
     for (const person of IMPERATIVE_PERSONS) {
       const clitic = pronominal ? IMPERATIVE_CLITICS[person] : undefined;
       const variants: Parts[] = built.imperatif
@@ -185,6 +187,7 @@ export function generateVerb(spec: VerbSpec, irregulars: Record<string, Irregula
     rule: spec.rule,
     ...(spec.defective && { defective: spec.defective }),
     ...(spec.pcInvariable && { pcInvariable: spec.pcInvariable }),
+    ...(spec.noImperative && { noImperative: spec.noImperative }),
     tenses: {
       present: cells('present'),
       passeCompose: compound('passeCompose'),
@@ -196,7 +199,7 @@ export function generateVerb(spec: VerbSpec, irregulars: Record<string, Irregula
       conditionnelPasse: compound('conditionnelPasse'),
       subjonctif: cells('subjonctif'),
       subjonctifPasse: compound('subjonctifPasse'),
-      ...(!spec.defective && { imperatif: cells('imperatif') }),
+      ...(!spec.defective && !spec.noImperative && { imperatif: cells('imperatif') }),
     },
     participles: {
       ...(built.presentParticiple && { present: joinParts(built.presentParticiple) }),
