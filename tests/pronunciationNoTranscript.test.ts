@@ -32,6 +32,9 @@ function fakeAccess(answer: unknown, listen = false) {
     }),
     text: mock((_purpose: TextPurpose) => execution),
     synthesize: mock(async () => new Blob(['audio'], { type: 'audio/wav' })),
+    assess: mock(async () => {
+      throw new Error('assessment not used here');
+    }),
     checkConnection: mock(async (_purpose: TextPurpose) => {}),
     listModels: mock(async () => []),
   };

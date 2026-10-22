@@ -1,6 +1,7 @@
 import type { Provider, SpeechProvider, TextProvider } from '../types';
 import { anthropic } from './anthropic';
 import { device } from './device';
+import { azure } from './azure';
 import { gemini } from './gemini';
 import { fish } from './fish';
 import { ollama } from './ollama';
@@ -12,10 +13,11 @@ import { openai } from './openai';
  * `providers.<id>` in the locale files; the settings screen picks it up.
  * `device` is the platform's own voice, offered beside the remote speech providers.
  */
-const PROVIDERS: Provider[] = [gemini, openai, anthropic, ollama, fish, device];
+const PROVIDERS: Provider[] = [gemini, openai, anthropic, ollama, fish, device, azure];
 
 export const textProviders = () => PROVIDERS.filter((p) => p.text);
 export const speechProviders = () => PROVIDERS.filter((p) => p.speech);
+export const assessmentProviders = () => PROVIDERS.filter((p) => p.assessment);
 
 export function getProvider(id: string): Provider {
   return PROVIDERS.find((p) => p.info.id === id) ?? PROVIDERS[0];

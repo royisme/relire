@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { getApiKey, getAppSettings, getBaseUrl, saveAppSettings, speechAfterCheck } from '../src/utils/appSettings';
 import { sliceOf, withSlice } from '../src/components/settings/slices';
+import { exportSettingsBackup, restoreSettingsBackup } from '../src/components/settings/backupSettings';
 
 const storage = new Map<string, string>();
 const original = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
@@ -175,10 +176,9 @@ describe('appSettings BYOK configuration', () => {
     expect(getAppSettings().baseUrls).toEqual({});
 
     saveAppSettings({ baseUrls: { openai: 'https://api.qwen.test/v1' }, apiKeys: { openai: 'local-key' } });
-    // BackupControls exports the settings without their keys and restores them over the stored key.
-    const { apiKeys: _keys, ...exported } = getAppSettings();
+    const exported = exportSettingsBackup();
     storage.clear();
-    saveAppSettings({ ...exported, apiKeys: {} });
+    restoreSettingsBackup(exported);
     expect(getAppSettings().baseUrls).toEqual({ openai: 'https://api.qwen.test/v1' });
     expect(getApiKey(getAppSettings(), 'openai')).toBe('');
   });

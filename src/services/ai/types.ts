@@ -1,3 +1,5 @@
+import type { PronunciationAssessment } from '../../types';
+
 export type Lang = 'zh' | 'en';
 
 /** An image for providers that can read pictures. `data` is plain base64, without a `data:` prefix. */
@@ -34,8 +36,27 @@ export interface SpeechConfig extends TextConfig {
 
 /** Unknown is selectable with consent, not evidence of support or a reason to block a request. */
 export type Capability = 'supported' | 'unsupported' | 'unknown';
-export type AiPurpose = 'text' | 'ocr' | 'speech';
-export type TextPurpose = Exclude<AiPurpose, 'speech'>;
+export type AiPurpose = 'text' | 'ocr' | 'speech' | 'assessment';
+export type TextPurpose = 'text' | 'ocr';
+
+/** Recorded audio only: 16 kHz mono signed 16-bit PCM, never a microphone handle. */
+export interface AssessmentRequest {
+  pcm: Int16Array;
+  referenceText: string;
+  locale: 'fr-FR' | 'fr-CA';
+  signal?: AbortSignal;
+}
+
+/** Assessment has a region, not a model or an editable endpoint. */
+export interface AssessmentConfig {
+  apiKey: string;
+  region: string;
+}
+
+export interface AssessmentProvider {
+  assess(request: AssessmentRequest, config: AssessmentConfig): Promise<PronunciationAssessment>;
+  checkKey(config: AssessmentConfig, signal?: AbortSignal): Promise<void>;
+}
 
 export interface ModelCapabilities {
   textGeneration: Capability;
@@ -90,7 +111,8 @@ export interface AiAccess {
   /** A playable clip. A `device` engine has none: it throws `DeviceVoiceError`, and playback speaks with the
    * platform's voice instead. */
   synthesize(request: { text: string; style?: string; voice?: string; signal?: AbortSignal }): Promise<Blob>;
-  checkConnection(purpose: TextPurpose, signal?: AbortSignal): Promise<void>;
+  assess(request: AssessmentRequest): Promise<PronunciationAssessment>;
+  checkConnection(purpose: TextPurpose | 'assessment', signal?: AbortSignal): Promise<void>;
   listModels(purpose: AiPurpose, signal?: AbortSignal): Promise<ModelInfo[]>;
 }
 
@@ -147,4 +169,5 @@ export interface Provider {
   catalogue?: ModelCatalogue;
   text?: TextProvider;
   speech?: SpeechProvider;
+  assessment?: AssessmentProvider;
 }

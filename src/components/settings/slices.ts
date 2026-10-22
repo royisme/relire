@@ -1,8 +1,9 @@
-/** AI selections, shared provider credentials and endpoints save together, independently of Practice. */
+/** AI selections, shared provider credentials, regions and endpoints save together, independently of Practice. */
 import i18n from '../../i18n';
 import { normalizeBaseUrl } from '../../services/ai/baseUrl';
 import { normalizeModelId } from '../../services/ai/catalogue';
 import { getProvider } from '../../services/ai/providers';
+import { normalizeAzureRegion } from '../../services/ai/providers/azure/region';
 import { getAppSettings, saveAppSettings, type AppSettings, type SpeechChoice } from '../../utils/appSettings';
 
 export type SettingsSlice = 'ai' | 'practice';
@@ -19,7 +20,12 @@ const canonicalModel = (id: string) => normalizeModelId(id) ?? id;
 const canonicalBaseUrl = (url: string) => normalizeBaseUrl(url) ?? '';
 
 /** The providers the AI slice holds: every purpose's provider, saved once each. */
-const usedProviders = (from: AppSettings) => [from.textProvider, from.ocrProvider, from.speechProvider];
+const usedProviders = (from: AppSettings) => [
+  from.textProvider,
+  from.ocrProvider,
+  from.speechProvider,
+  from.assessmentProvider,
+];
 
 /** An empty endpoint means the provider's default; anything nonempty must be a usable address. */
 const baseUrlRefused = (url: string) => !!url.trim() && !normalizeBaseUrl(url);
@@ -72,6 +78,9 @@ export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
     settings.speechProvider,
     settings.speechModel,
     settings.speechVoice,
+    settings.assessmentProvider,
+    settings.assessmentModel,
+    providers.map((id) => [id, settings.providerRegions[id] ?? '']),
     speechChoicesOf(settings),
     providers.map((id) => [id, settings.apiKeys[id] ?? '']),
     providers.map((id) => [id, settings.baseUrls[id] ?? '']),
@@ -98,13 +107,28 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
     speechProvider: from.speechProvider,
     speechModel: canonicalModel(from.speechModel),
     speechVoice: from.speechVoice.trim(),
+    assessmentProvider: from.assessmentProvider,
+    assessmentModel: '',
+    providerRegions: {
+      ...base.providerRegions,
+      ...Object.fromEntries(
+        providers
+          .filter((id) => id in from.providerRegions || id in base.providerRegions)
+          .map((id) => [id, from.providerRegions[id]?.trim() ?? '']),
+      ),
+    },
     speechChoices: Object.fromEntries(
       Object.entries(speechChoicesOf(from)).map(([id, choice]) => [
         id,
         { model: canonicalModel(choice.model), voice: choice.voice.trim() },
       ]),
     ),
-    apiKeys: { ...base.apiKeys, ...Object.fromEntries(providers.map((id) => [id, from.apiKeys[id] ?? ''])) },
+    apiKeys: {
+      ...base.apiKeys,
+      ...Object.fromEntries(
+        providers.filter((id) => id in from.apiKeys || id in base.apiKeys).map((id) => [id, from.apiKeys[id] ?? '']),
+      ),
+    },
     baseUrls: {
       ...base.baseUrls,
       ...Object.fromEntries(providers.map((id) => [id, canonicalBaseUrl(from.baseUrls[id] ?? '')])),
@@ -114,6 +138,12 @@ export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsS
 
 /** Read back because saveAppSettings catches storage errors. Never mark a failed write as saved. */
 export function saveSlice(draft: AppSettings, slice: SettingsSlice): AppSettings {
+  if (slice === 'ai') {
+    const region = draft.providerRegions[draft.assessmentProvider] ?? '';
+    // An unused assessment can stay unconfigured; a nonempty invalid draft is never silently dropped.
+    if ((region.trim() || draft.apiKeys[draft.assessmentProvider]?.trim()) && !normalizeAzureRegion(region))
+      throw new Error(i18n.t('azureAssessment.invalidRegion'));
+  }
   // A model ID storage cannot keep would be silently replaced by the provider default: refuse the whole save.
   if (slice === 'ai' && aiModelFields(draft).some((field) => !normalizeModelId(draft[field])))
     throw new Error(i18n.t('aiSettings.modelNotValid'));
