@@ -83,5 +83,6 @@ test('the authored source is exactly the 32 owner-confirmed pairs and their char
     { id: 'fee-fait', note: 'minimalPairs.notes.tendency' },
   ]);
   for (const locale of [en, zh]) expect(locale.minimalPairs.notes.tendency).toBeTruthy();
-  expect(ReviewsSchema.parse(reviews)).toEqual({ records: [] });
+  // The owner's review is recorded for exactly these pairs (the build refuses a pair whose row changed since).
+  expect(ReviewsSchema.parse(reviews).records.map(({ pairId }) => pairId)).toEqual(source.pairs.map(({ id }) => id));
 });
