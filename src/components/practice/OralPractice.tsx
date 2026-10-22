@@ -59,16 +59,21 @@ export function OralPractice({ article, index, onAssessed }: OralPracticeProps) 
 
       <p className="break-words font-serif text-xl leading-relaxed text-ink-900">« {current.text} »</p>
 
-      <SpeakButton
-        text={current.text}
-        rate={0.85}
-        label={t('practice.listenSlowly')}
-        stopLabel={t('reader.stop')}
-        variant="outline"
-        showLabel
+      <ShadowingRecorder
+        key={current.id}
+        referenceText={current.text}
+        onAssessed={onAssessed}
+        leading={
+          <SpeakButton
+            text={current.text}
+            rate={0.85}
+            label={t('practice.listenSlowly')}
+            stopLabel={t('reader.stop')}
+            variant="outline"
+            showLabel
+          />
+        }
       />
-
-      <ShadowingRecorder key={current.id} referenceText={current.text} onAssessed={onAssessed} quiet />
     </div>
   );
 }
