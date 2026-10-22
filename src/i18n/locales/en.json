@@ -42,9 +42,9 @@
     "completeSet_other": "Complete set: {{count}} exercises across all its learning areas. Deleting the set removes the whole batch.",
     "emptyTitle": "No saved exercises in this area",
     "emptyDesc": "Use Add exercises to bring in a worksheet or make supported exercises for this area.",
-    "listeningSupport": "Listening currently supports number dictation only, not general audio comprehension.",
-    "listeningEmpty": "Import a worksheet with playable number dictation, then review its learning areas before saving.",
-    "unsupportedListening": "Listening requires number dictation with dictation text for every item. Choose another area or exclude this unit; prompt read-aloud is not listening practice.",
+    "listeningSupport": "Listening supports number dictation and sound pairs, not general audio comprehension.",
+    "listeningEmpty": "Use Add exercises to practise sound pairs or import a worksheet with playable number dictation.",
+    "unsupportedListening": "Listening requires number dictation or pack-backed sound pairs with audio text for every item. Choose another area or exclude this unit; prompt read-aloud is not listening practice.",
     "speaking": "Speaking",
     "readAloud": "Read aloud",
     "speakingDesc": "Listen to an article sentence, record yourself and optionally ask your AI for a pronunciation estimate.",
@@ -644,6 +644,24 @@
     "play": "Play {{word}}, sound {{symbol}}"
   },
   "minimalPairs": {
+    "drill": {
+      "title": "Sound pairs",
+      "description": "Make listening exercises from reviewed word pairs. No AI or key is needed to make or check them. Saved sets appear in Listening.",
+      "instruction": "Listen to each word, then choose the word you heard. Accents count.",
+      "contrasts": "Sound contrasts",
+      "sound": "/{{symbol}}/ · {{word}}",
+      "contrast": "{{first}} ↔ {{second}}",
+      "pickContrast": "Choose one or more sound contrasts.",
+      "unknownContrast": "Unknown sound contrast: {{contrast}}.",
+      "countRange": "Choose a whole number from 1 to {{max}} for the selected contrasts.",
+      "make": "Make exercises",
+      "making": "Making exercises",
+      "open": "Open saved set in Listening",
+      "tips": {
+        "b-p": "French p is not aspirated; Mandarin b and p differ by aspiration, French b and p differ by voicing.",
+        "y-u": "French u is the sound of pinyin ü and French ou is the sound of pinyin u: watch the spelling."
+      }
+    },
     "notes": {
       "tendency": "A tendency, not a fixed rule: many standard speakers merge these two vowels in open syllables."
     }

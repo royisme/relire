@@ -175,7 +175,7 @@ export const ExtractedUnitSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['learningArea'],
-        message: 'Listening requires number dictation with audio text for every item',
+        message: 'Listening requires number dictation or pack-backed sound pairs with audio text for every item',
       });
     if (unit.id.startsWith('topic:') !== Boolean(unit.topicOrigin))
       ctx.addIssue({ code: 'custom', message: 'Topic unit identity and origin must be paired' });
