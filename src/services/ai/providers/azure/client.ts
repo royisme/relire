@@ -73,6 +73,12 @@ async function recognize(request: AssessmentRequest, config: AssessmentConfig, c
     speech = sdk.SpeechConfig.fromSubscription(config.apiKey, config.region);
     speech.speechRecognitionLanguage = request.locale;
     speech.setProperty(sdk.PropertyId.Recognizer_StopTimeoutMs, '1000');
+    // Undocumented SDK property (read once when the recognizer is constructed), not a PropertyId.
+    // Cleanup must not open another transport: with the default limit of 4, the SDK retries a
+    // disconnected socket while draining its receive loop, so an aborted request leaves a live
+    // connection behind and the next queued operation waits on it. 0 makes a failure final.
+    // tests/azureTransport.test.ts guards this against the pinned 1.52.0 SDK.
+    speech.setProperty('SPEECH-Error-MaxRetryCount', '0');
     format = sdk.AudioStreamFormat.getWaveFormatPCM(ASSESSMENT_SAMPLE_RATE, 16, 1);
     stream = sdk.AudioInputStream.createPushStream(format);
     const audio = sdk.AudioConfig.fromStreamInput(stream);
