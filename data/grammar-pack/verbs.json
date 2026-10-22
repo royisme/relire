@@ -8,7 +8,7 @@
     { "id": "s-appeler", "infinitive": "s’appeler", "base": "appel", "rule": "er-eler-double", "aux": "etre" },
     { "id": "faire", "infinitive": "faire", "rule": "irregular", "aux": "avoir" },
     { "id": "prendre", "infinitive": "prendre", "rule": "irregular", "aux": "avoir" },
-    { "id": "pouvoir", "infinitive": "pouvoir", "rule": "irregular", "aux": "avoir" },
+    { "id": "pouvoir", "infinitive": "pouvoir", "rule": "irregular", "aux": "avoir", "noImperative": true },
     { "id": "vouloir", "infinitive": "vouloir", "rule": "irregular", "aux": "avoir" },
     { "id": "savoir", "infinitive": "savoir", "rule": "irregular", "aux": "avoir" },
     { "id": "voir", "infinitive": "voir", "rule": "irregular", "aux": "avoir" },

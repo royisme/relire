@@ -190,7 +190,7 @@ export const REGULAR_RULES: Record<Exclude<RuleId, 'irregular'>, (base: string) 
 
 // ---- Participles and passé composé -----------------------------------------
 
-const INVARIABLE_PARTICIPLES = new Set(['été', 'fallu', 'plu']);
+const INVARIABLE_PARTICIPLES = new Set(['été', 'fallu', 'plu', 'pu']);
 
 export interface PastParticiples {
   ms: string;

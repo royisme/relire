@@ -61,6 +61,8 @@ for (const [ms, fs, mp, fp] of [
   ['été', 'été', 'été', 'été'],
   ['fallu', 'fallu', 'fallu', 'fallu'],
   ['plu', 'plu', 'plu', 'plu'],
+  ['pu', 'pu', 'pu', 'pu'],
+  ['su', 'sue', 'sus', 'sues'],
 ]) {
   test(`${ms}: participle agreement`, () => {
     expect(pastParticiples(ms)).toEqual({ ms, fs, mp, fp });
