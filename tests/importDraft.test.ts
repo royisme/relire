@@ -51,6 +51,40 @@ test('one import merges sections into one unit with per-item types in source ord
   expect(parseImportDraft(same, 'complete').units[0].instruction).toBe('Faites les exercices.');
 });
 
+test('a merged id that is already taken keeps numbering until it is unique', () => {
+  const unit = (id: string, itemIds: string[]) => ({
+    ...draftFixture.units[0],
+    id,
+    title: `Section ${id}`,
+    instruction: `Instruction ${id}`,
+    items: itemIds.map((itemId, index) => ({
+      ...draftFixture.units[0].items[0],
+      id: itemId,
+      itemNumber: index + 1,
+      prompt: itemId,
+      expectedAnswer: 'étudiant',
+    })),
+  });
+  // The prefixed id `u2-fb-1` is already taken by an item of the first unit.
+  const across = parseImportDraft(
+    { ...draftFixture, units: [unit('u1', ['fb-1', 'u2-fb-1']), unit('u2', ['fb-1'])] },
+    'complete',
+  );
+  const acrossIds = across.units[0].items.map((item) => item.id);
+  expect(acrossIds).toEqual(['fb-1', 'u2-fb-1', 'u2-fb-1-2']);
+  expect(new Set(acrossIds).size).toBe(acrossIds.length);
+  expect(across.units[0].items).toHaveLength(3);
+  // Two colliding items inside the same unit keep distinct ids too.
+  const within = parseImportDraft(
+    { ...draftFixture, units: [unit('u1', ['fb-1', 'u2-fb-1']), unit('u2', ['fb-1', 'u2-fb-1'])] },
+    'complete',
+  );
+  const withinIds = within.units[0].items.map((item) => item.id);
+  expect(withinIds).toEqual(['fb-1', 'u2-fb-1', 'u2-fb-1-2', 'u2-u2-fb-1']);
+  expect(new Set(withinIds).size).toBe(withinIds.length);
+  expect(within.units[0].items).toHaveLength(4);
+});
+
 test('a draft that already has one unit is unchanged', () => {
   const draft = ImportDraftSchema.parse(draftFixture);
   draft.units[0].items[0].expectedAnswer = 'étudiant';

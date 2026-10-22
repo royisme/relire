@@ -80,7 +80,7 @@ type DraftItem = ImportDraft['units'][number]['items'][number];
  * unit's unit-level fields, joins the section instructions in source order
  * (identical lines are not repeated) and unions the grammar tags; items stay in
  * source order and an id that collides in the merge is prefixed with its unit
- * id. The only exception is a unit with its own `readingPassage`: one unit
+ * id, then numbered until it is unique. The only exception is a unit with its own `readingPassage`: one unit
  * holds one passage, so each such unit stays separate and untouched.
  */
 function mergeIntoOneUnit(draft: ImportDraft): ImportDraft {
@@ -93,7 +93,8 @@ function mergeIntoOneUnit(draft: ImportDraft): ImportDraft {
   const grammarTags = new Set(first.grammarTags);
   for (const unit of rest) {
     for (const item of unit.items) {
-      const id = seen.has(item.id) ? `${unit.id}-${item.id}` : item.id;
+      let id = seen.has(item.id) ? `${unit.id}-${item.id}` : item.id;
+      for (let n = 2; seen.has(id); n++) id = `${unit.id}-${item.id}-${n}`;
       seen.add(id);
       // An item that leaves a unit of another type carries its effective type on itself.
       items.push(unit.type === first.type ? { ...item, id } : { ...item, id, type: item.type ?? unit.type });
