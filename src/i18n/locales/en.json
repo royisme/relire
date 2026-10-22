@@ -644,6 +644,11 @@
     "play": "Play {{word}}, sound {{symbol}}"
   },
   "minimalPairs": {
+    "readAloud": {
+      "title": "Read aloud",
+      "word": "Word to practise",
+      "guide": "Practise both words. Switching words clears the recording; an AI check is optional."
+    },
     "drill": {
       "title": "Sound pairs",
       "description": "Make listening exercises from reviewed word pairs. No AI or key is needed to make or check them. Saved sets appear in Listening.",

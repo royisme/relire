@@ -636,6 +636,11 @@
     "play": "播放 {{word}}，音标 {{symbol}}"
   },
   "minimalPairs": {
+    "readAloud": {
+      "title": "朗读练习",
+      "word": "选择要练习的词",
+      "guide": "两个词都读一读。切换词语会清除当前录音；也可以选择让 AI 给出反馈。"
+    },
     "drill": {
       "title": "近音辨听",
       "description": "用已审核的词对创建辨听练习。创建和判题无需 AI 或密钥，保存后可在“听力”中找到题组。",

@@ -18,6 +18,7 @@ import { GrammarTagLabel } from '../GrammarTagLabel';
 import { SpeakButton } from '../ui/speak-button';
 import { ItemActions } from './ItemActions';
 import { ItemNotes } from './ItemNotes';
+import { PairsReadAloud } from './PairsReadAloud';
 
 interface ItemRowProps {
   unit: ExerciseUnit;
@@ -132,7 +133,14 @@ export function ItemRow({
           onExplain={onExplain}
           onRedo={onRedo}
         />
-        <ItemNotes item={item} runtime={runtime} onWord={onWord} />
+        {item.meta?.source === 'minimal-pairs' ? (
+          <div className="h-72 overflow-y-auto space-y-3">
+            <ItemNotes item={item} runtime={runtime} onWord={onWord} />
+            {checked && <PairsReadAloud key={`${unit.id}:${item.id}`} item={item} />}
+          </div>
+        ) : (
+          <ItemNotes item={item} runtime={runtime} onWord={onWord} />
+        )}
       </div>
     </li>
   );
