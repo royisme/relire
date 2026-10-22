@@ -76,11 +76,25 @@ test('a configured assessment provider receives the caller abort signal', async 
   expect(fake.assess.mock.calls[0][0].signal).toBe(controller.signal);
 });
 
-test('configured with no take refuses before decoding or calling any provider', async () => {
+test('configured with no take refuses with its own wording before decoding or calling any provider', async () => {
   const fake = fakeAccess(scores, true);
   spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
   const decode = spyOn(pcmModule, 'decodeTakeToPcm16k');
-  expect(await failure(api.assessPronunciation({ referenceText, userTranscript: 'bonjour' }))).toEqual(
+  const message = ((await failure(api.assessPronunciation({ referenceText, userTranscript: 'bonjour' }))) as Error)
+    .message;
+  // The Azure path never uses a transcript, so it must not show the transcript-aware refusal.
+  expect(message).toBe(i18n.t('errors.noRecordingToScore'));
+  expect(message).not.toBe(i18n.t('errors.noSpeechToScore'));
+  expect(decode).not.toHaveBeenCalled();
+  expect(fake.assess).not.toHaveBeenCalled();
+  expect(fake.provider.requests).toHaveLength(0);
+});
+
+test('without a configured assessment provider a take with no audio and no transcript keeps the old refusal', async () => {
+  const fake = fakeAccess(scores, false);
+  spyOn(accessModule, 'getAiAccess').mockReturnValue(fake.access);
+  const decode = spyOn(pcmModule, 'decodeTakeToPcm16k');
+  expect(await failure(api.assessPronunciation({ referenceText }))).toEqual(
     new Error(i18n.t('errors.noSpeechToScore')),
   );
   expect(decode).not.toHaveBeenCalled();
