@@ -1,12 +1,16 @@
 /**
- * The recording hook starts the browser's speech recognition only when the Practice opt-in is on, and
- * reads that setting when the recording starts. There is no DOM in these tests: React's state, refs,
- * effects and callbacks are stubbed, and the microphone and the recognizer are fakes.
+ * the recording hook starts the browser's speech recognition only when the Practice opt-in is on, and
+ * reads that setting when the recording starts; a new take also takes over from a Check still in
+ * flight (issue #60) and cannot be checked while its microphone is still starting (issue #61). There
+ * is no DOM in these tests: React's state, refs, effects and callbacks are stubbed, and the
+ * microphone, the recognizer, the file reader and the assessment are fakes.
  */
-import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
+import { afterEach, beforeEach, expect, mock, spyOn, test } from 'bun:test';
 import * as React from 'react';
 import { useShadowingRecorder } from '../src/hooks/useShadowingRecorder';
-import { cancelCapture } from '../src/utils/speech/recorder';
+import { cancelCapture, claimCapture, releaseCapture } from '../src/utils/speech/recorder';
+import { PronunciationAssessment } from '../src/types';
+import * as apiModule from '../src/services/api';
 
 /**
  * What the environment had before this file mocked it. Bun provides a native `navigator`, and every test
@@ -18,6 +22,7 @@ const nativeNavigator = globalThis.navigator;
 let navigatorBeforeMocking: unknown;
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
 const originalMediaRecorder = Object.getOwnPropertyDescriptor(globalThis, 'MediaRecorder');
+const originalFileReader = Object.getOwnPropertyDescriptor(globalThis, 'FileReader');
 
 const storage = new Map<string, string>();
 const originalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
@@ -60,13 +65,39 @@ class FakeMediaRecorder {
   }
 }
 
+/** `stop` base64-encodes the take through a `FileReader`, which Bun does not provide. */
+class FakeFileReader {
+  result: string | null = null;
+  onloadend: (() => void) | null = null;
+  readAsDataURL(_blob: Blob) {
+    this.result = 'data:;base64,QUJD';
+    queueMicrotask(() => this.onloadend?.());
+  }
+}
+
 const stream = { getTracks: () => [], getAudioTracks: () => [] };
 
 /** What the sheet uses: the hook's controls, with the mount effect already run. */
 interface Controls {
   start: () => Promise<void>;
   stop: () => Promise<void>;
+  assess: () => Promise<void>;
 }
+
+/** The state slots of one hook instance, in `useState` call order; setters write back into them. The
+ * cursor moves through methods so a hook-named helper can step it without a direct write. */
+const store = {
+  slots: [] as unknown[],
+  index: 0,
+  reset() {
+    this.slots.length = 0;
+    this.index = 0;
+  },
+  /** Points the cursor at the first slot again: the next hook pass reads current values, like a re-render. */
+  startRender() {
+    this.index = 0;
+  },
+};
 
 let effect: React.EffectCallback = () => undefined;
 const spies: Array<{ mockRestore(): void }> = [];
@@ -75,6 +106,7 @@ beforeEach(() => {
   navigatorBeforeMocking = globalThis.navigator;
   built.length = 0;
   storage.clear();
+  store.reset();
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
     value: {
@@ -83,10 +115,17 @@ beforeEach(() => {
     },
   });
   spies.push(
-    spyOn(React, 'useState').mockImplementation(((initial: unknown) => [
-      typeof initial === 'function' ? (initial as () => unknown)() : initial,
-      () => undefined,
-    ]) as unknown as typeof React.useState),
+    spyOn(React, 'useState').mockImplementation(((initial: unknown) => {
+      const index = store.index++;
+      if (index === store.slots.length)
+        store.slots.push(typeof initial === 'function' ? (initial as () => unknown)() : initial);
+      return [
+        store.slots[index],
+        (next: unknown) => {
+          store.slots[index] = next;
+        },
+      ];
+    }) as unknown as typeof React.useState),
     spyOn(React, 'useEffect').mockImplementation((callback) => {
       effect = callback;
     }),
@@ -109,6 +148,7 @@ beforeEach(() => {
     value: { mediaDevices: { getUserMedia: async () => stream } },
   });
   Object.defineProperty(globalThis, 'MediaRecorder', { configurable: true, value: FakeMediaRecorder });
+  Object.defineProperty(globalThis, 'FileReader', { configurable: true, value: FakeFileReader });
 });
 
 /** Puts a global back the way this file found it: the original value, or absent when there was none. */
@@ -124,13 +164,25 @@ afterEach(() => {
   restoreGlobal('navigator', originalNavigator);
   restoreGlobal('window', originalWindow);
   restoreGlobal('MediaRecorder', originalMediaRecorder);
+  restoreGlobal('FileReader', originalFileReader);
   restoreGlobal('localStorage', originalStorage);
 });
+
+/** One pass of the hook, named as a hook so lint accepts the call: reads the current slot values, like a re-render that runs no effect. */
+const useView = (reference: string, onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void) => {
+  store.startRender();
+  return useShadowingRecorder(reference, onAssessed);
+};
 
 /** Steps a mounted hook, as `tests/grammarTopicsHooks.test.ts` does. */
 const controls = (hook: unknown): Controls => {
   effect();
   return hook as Controls;
+};
+
+/** Lets a settled promise's continuations run; no timers, no real waiting. */
+const flushMicrotasks = async () => {
+  for (let i = 0; i < 4; i++) await Promise.resolve();
 };
 
 const optIn = (on: boolean) =>
@@ -171,6 +223,96 @@ test('the setting is read when recording starts, not once at import', async () =
   await recorder.start();
   expect(built).toHaveLength(1);
   await recorder.stop();
+});
+
+test('a new take cancels a Check still in flight, frees its button and drops the stale result', async () => {
+  let signal: AbortSignal | undefined;
+  let settleAssess!: (value: { overallScore: number }) => void;
+  const assessment = spyOn(apiModule, 'assessPronunciation').mockImplementation(((params: { signal?: AbortSignal }) => {
+    signal = params.signal;
+    return new Promise((resolve) => {
+      settleAssess = resolve;
+    });
+  }) as never);
+  spies.push(assessment);
+  const onAssessed = mock((_assessment: PronunciationAssessment, _sentence: string) => undefined);
+  spies.push(onAssessed);
+  const recorder = controls(useView('Bonjour le monde.', onAssessed));
+  void recorder.assess(); // pending until this test settles it
+  expect(useView('Bonjour le monde.').isEvaluating).toBe(true);
+  await recorder.start();
+  expect(signal?.aborted).toBe(true);
+  expect(useView('Bonjour le monde.').isEvaluating).toBe(false);
+  settleAssess({ overallScore: 90 });
+  await flushMicrotasks();
+  // The stale Check settles after its take was dropped: no assessment, no error, no callback, button still free.
+  const view = useView('Bonjour le monde.', onAssessed);
+  expect(view.assessment).toBeNull();
+  expect(view.error).toBeNull();
+  expect(view.isEvaluating).toBe(false);
+  expect(onAssessed).not.toHaveBeenCalled();
+  await recorder.stop();
+});
+
+test('while the microphone for a new take is starting, the old take cannot be checked', async () => {
+  const recorder = controls(useView('Bonjour le monde.'));
+  await recorder.start();
+  await recorder.stop();
+  expect(useView('Bonjour le monde.').phase).toBe('recorded');
+  // The second take hangs at the permission prompt until the test lets it through.
+  let allowMic!: () => void;
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: { mediaDevices: { getUserMedia: () => new Promise((resolve) => (allowMic = () => resolve(stream))) } },
+  });
+  const starting = recorder.start();
+  const during = useView('Bonjour le monde.');
+  expect(during.isStarting).toBe(true);
+  // The old take is still the one on screen; the Check button is disabled against it.
+  expect(during.phase).toBe('recorded');
+  allowMic();
+  await starting;
+  const after = useView('Bonjour le monde.');
+  expect(after.isStarting).toBe(false);
+  expect(after.phase).toBe('recording');
+  await recorder.stop();
+});
+
+test('a microphone failure on Record again ends the starting window and keeps the old take checkable', async () => {
+  let prompts = 0;
+  Object.defineProperty(globalThis, 'navigator', {
+    configurable: true,
+    value: {
+      mediaDevices: {
+        // The first prompt is granted; the second is denied, as when the user refuses again.
+        getUserMedia: () =>
+          ++prompts === 1 ? Promise.resolve(stream) : Promise.reject(new DOMException('denied', 'NotAllowedError')),
+      },
+    },
+  });
+  const recorder = controls(useView('Bonjour le monde.'));
+  await recorder.start();
+  await recorder.stop();
+  await recorder.start();
+  const view = useView('Bonjour le monde.');
+  expect(view.isStarting).toBe(false);
+  expect(view.isEvaluating).toBe(false);
+  // The take before the failed restart is untouched, so Check works on it again.
+  expect(view.phase).toBe('recorded');
+  expect(view.audioUrl).not.toBeNull();
+  expect(view.error).toEqual({ kind: 'mic' });
+});
+
+test('a busy microphone on Record again also ends the starting window', async () => {
+  const recorder = controls(useView('Bonjour le monde.'));
+  await recorder.start();
+  await recorder.stop();
+  const token = claimCapture('card', () => undefined);
+  await recorder.start();
+  releaseCapture(token);
+  const view = useView('Bonjour le monde.');
+  expect(view.error).toEqual({ kind: 'busy' });
+  expect(view.isStarting).toBe(false);
 });
 
 /**

@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import type { SortingState } from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
 import { FilePlus2, Search } from 'lucide-react';
-import { LibraryArticlesTable } from './LibraryArticlesTable';
 import { Article } from '../types';
 import { Button } from './ui/button';
 import { PageHeader } from './ui/page-header';
@@ -11,6 +10,11 @@ import { Dialog, OverlayHeader } from './ui/overlay';
 import { cleanArticleTitle } from '../utils/i18nHelpers';
 import { navigate } from '../hooks/useRoute';
 import { listShadowing } from '../storage/shadowing';
+
+// Lazy so TanStack Table loads with the table instead of the startup chunks.
+const LibraryArticlesTable = lazy(() =>
+  import('./LibraryArticlesTable').then((module) => ({ default: module.LibraryArticlesTable })),
+);
 
 interface LibraryViewProps {
   articles: Article[];
@@ -132,14 +136,16 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           </Button>
         </div>
       ) : (
-        <LibraryArticlesTable
-          articles={rows}
-          sorting={sorting}
-          onSortingChange={setSorting}
-          onOpen={onOpen}
-          onEdit={onEdit}
-          onDelete={setPendingDelete}
-        />
+        <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
+          <LibraryArticlesTable
+            articles={rows}
+            sorting={sorting}
+            onSortingChange={setSorting}
+            onOpen={onOpen}
+            onEdit={onEdit}
+            onDelete={setPendingDelete}
+          />
+        </Suspense>
       )}
 
       {articles.length > 0 && missingSamples > 0 && (

@@ -3,6 +3,7 @@ import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { normalizeBaseUrl } from '../../services/ai/baseUrl';
+import { normalizeAzureRegion } from '../../services/ai/providers/azure/region';
 import { getProvider, providerRequiresKey } from '../../services/ai/providers';
 import { getApiKey, type AppSettings } from '../../utils/appSettings';
 
@@ -96,6 +97,37 @@ export function BaseUrlField({ providerId, defaultUrl, value, onChange }: BaseUr
       <p id={`${inputId}-help`} className={`text-xs mt-1 leading-relaxed ${valid ? 'text-ink-500' : 'text-bad-700'}`}>
         {t(valid ? 'aiSettings.baseUrlHelp' : 'aiSettings.invalidBaseUrl', { url: defaultUrl })}
       </p>
+    </div>
+  );
+}
+
+/** Azure's required region stays local beside its key; it is not an endpoint override. */
+export function RegionField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { t } = useTranslation();
+  const valid = !value.trim() || !!normalizeAzureRegion(value);
+  return (
+    <div>
+      <label htmlFor="assessment-region" className={fieldLabel}>
+        {t('azureAssessment.regionLabel')}
+      </label>
+      <input
+        id="assessment-region"
+        required
+        autoComplete="off"
+        spellCheck={false}
+        value={value}
+        aria-invalid={!valid}
+        aria-describedby="assessment-region-help"
+        onChange={(event) => onChange(event.target.value)}
+        className={selectClass}
+      />
+      <p
+        id="assessment-region-help"
+        className={`h-20 overflow-y-auto text-xs mt-1 leading-relaxed ${valid ? 'text-ink-500' : 'text-bad-700'}`}
+      >
+        {t(valid ? 'azureAssessment.regionHelp' : 'azureAssessment.invalidRegion')}
+      </p>
+      <p className="text-xs text-ink-500 leading-relaxed">{t('azureAssessment.checkHelp')}</p>
     </div>
   );
 }

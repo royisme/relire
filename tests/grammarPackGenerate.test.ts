@@ -10,7 +10,7 @@ import {
   type RuleId,
   type Verb,
 } from '../src/types/grammarPack';
-import { CONTROL_SPECS, generate, generateControls } from './fixtures/grammarPackVerbs';
+import { CONTROL_SPECS, generate, generateControls, POUVOIR_SPEC } from './fixtures/grammarPackVerbs';
 
 /** What a learner reads: lead and primary form, no space after an elided lead. */
 const say = ({ lead, forms }: { lead: string; forms: string[] }) =>
@@ -358,6 +358,22 @@ test('falloir, pleuvoir and se passer only have the cells they can take', () => 
     forms: ['sont passés', 'sont passées'],
   });
   expect(checkVerb(passer)).toEqual([]);
+});
+
+test('a noImperative verb gets every tense and person except the imperatif, and keeps the flag', () => {
+  const pouvoir = generate(POUVOIR_SPEC);
+  expect(pouvoir.verb.tenses.imperatif).toBeUndefined();
+  expect(pouvoir.verb.noImperative).toBe(true);
+  expect(pouvoir.parts.simple.imperatif).toEqual({});
+  expect(sayTense(pouvoir.verb, 'present')).toEqual(
+    list('je peux, tu peux, il/elle peut, nous pouvons, vous pouvez, ils/elles peuvent'),
+  );
+  expect(sayTense(pouvoir.verb, 'imparfait')).toContain('il/elle pouvait');
+  expect(sayTense(pouvoir.verb, 'futur')).toContain('je pourrai');
+  expect(sayTense(pouvoir.verb, 'conditionnel')).toContain('nous pourrions');
+  expect(sayTense(pouvoir.verb, 'subjonctif')).toContain('que je puisse');
+  expect(sayTense(pouvoir.verb, 'passeCompose')).toContain('j’ai pu');
+  expect(checkVerb(pouvoir)).toEqual([]);
 });
 
 test('the generator fails loudly on authored data that cannot be generated', () => {

@@ -33,7 +33,7 @@ Read `DESIGN.md` (tokens in `src/index.css`) and `PRODUCT.md` before changing a 
 - Use motion to clarify state, spatial relationships or input feedback, not as decoration; do not impose a blanket animation ban. Keep it brief and respect reduced-motion preferences. Bounce or pulse needs a clear interaction purpose.
 - Icons: lucide-react only, one stroke weight, `aria-hidden` when decorative.
 - Never show invented data (sample stats, fake scores, placeholder streaks). Empty means empty.
-- Run `impeccable detect --json src index.html`; keep it at zero findings.
+- Run `~/.agents/skills/impeccable/scripts/impeccable detect --json src index.html` (`impeccable` is not on PATH; `command -v` finding nothing does not mean it is missing); keep it at zero findings.
 
 ## Text
 - Follow the voice in `DESIGN.md`: plain words, no hype, jargon, emoji, exclamation marks or numbered section titles.

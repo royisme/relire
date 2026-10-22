@@ -17,6 +17,7 @@ export type RecorderPhase = 'idle' | 'recording' | 'recorded';
 export type RecorderError = { kind: 'mic' } | { kind: 'busy' } | { kind: 'assess'; detail: string };
 
 interface Recording {
+  blob: Blob;
   base64: string;
   mimeType: string;
 }
@@ -40,6 +41,8 @@ export function useShadowingRecorder(
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [assessment, setAssessment] = useState<PronunciationAssessment | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  /** True while the microphone for a new take is still starting, so the old take cannot be checked. */
+  const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<RecorderError | null>(null);
 
   const recorder = useRef<FrenchAudioRecorder | null>(null);
@@ -48,6 +51,8 @@ export function useShadowingRecorder(
   const transcript = useRef('');
   const recording = useRef<Recording | null>(null);
   const urlRef = useRef<string | null>(null);
+  /** Cancels the in-flight assessment when the session is invalidated. */
+  const assessAbort = useRef<AbortController | null>(null);
   /** Bumped on every reset, so work that finishes for an earlier sentence is dropped. */
   const session = useRef(0);
   const onAssessedRef = useRef(onAssessed);
@@ -71,6 +76,8 @@ export function useShadowingRecorder(
   // Ends whatever the previous sentence left running; work that finishes for it is dropped.
   const invalidate = useCallback(() => {
     session.current++;
+    assessAbort.current?.abort();
+    assessAbort.current = null;
     releaseResources();
     recording.current = null;
     transcript.current = '';
@@ -85,6 +92,7 @@ export function useShadowingRecorder(
     setAudioUrl(null);
     setAssessment(null);
     setIsEvaluating(false);
+    setIsStarting(false);
     setError(null);
   }
   // ...and leaving it, or the screen, closes the microphone.
@@ -95,6 +103,12 @@ export function useShadowingRecorder(
     setAssessment(null);
     setError(null);
     const mine = ++session.current;
+    // A Check still running for the dropped take is cancelled, so the button serves the new take.
+    assessAbort.current?.abort();
+    assessAbort.current = null;
+    setIsEvaluating(false);
+    // The old take stays on screen until the microphone answers; it must not be checkable meanwhile.
+    setIsStarting(true);
 
     const rec = new FrenchAudioRecorder();
     let ok: boolean;
@@ -109,7 +123,10 @@ export function useShadowingRecorder(
         setPhase('idle');
       });
     } catch (err) {
-      if (mine === session.current) setError(err instanceof CaptureBusyError ? { kind: 'busy' } : { kind: 'mic' });
+      if (mine === session.current) {
+        setError(err instanceof CaptureBusyError ? { kind: 'busy' } : { kind: 'mic' });
+        setIsStarting(false);
+      }
       return;
     }
     if (mine !== session.current) {
@@ -118,6 +135,7 @@ export function useShadowingRecorder(
     }
     if (!ok) {
       setError({ kind: 'mic' });
+      setIsStarting(false);
       return;
     }
     recorder.current = rec;
@@ -128,6 +146,7 @@ export function useShadowingRecorder(
     recording.current = null;
     setAudioUrl(null);
     setPhase('recording');
+    setIsStarting(false);
     setSeconds(0);
     timer.current = window.setInterval(() => setSeconds((s) => s + 1), 1000);
 
@@ -173,21 +192,25 @@ export function useShadowingRecorder(
     }
     const url = URL.createObjectURL(result.blob);
     urlRef.current = url;
-    recording.current = { base64: result.base64, mimeType: result.mimeType };
+    recording.current = { blob: result.blob, base64: result.base64, mimeType: result.mimeType };
     setAudioUrl(url);
     setPhase('recorded');
   }, []);
 
   const assess = useCallback(async () => {
     const mine = session.current;
+    const controller = new AbortController();
+    assessAbort.current = controller;
     setIsEvaluating(true);
     setError(null);
     try {
       const res = await assessPronunciation({
         referenceText,
+        audio: recording.current?.blob,
         audioBase64: recording.current?.base64,
         mimeType: recording.current?.mimeType,
         userTranscript: transcript.current || undefined,
+        signal: controller.signal,
       });
       if (mine !== session.current) return;
       setAssessment(res);
@@ -197,9 +220,10 @@ export function useShadowingRecorder(
       console.error('Assessment failed:', err);
       setError({ kind: 'assess', detail: errorMessage(err) });
     } finally {
+      if (assessAbort.current === controller) assessAbort.current = null;
       if (mine === session.current) setIsEvaluating(false);
     }
   }, [referenceText]);
 
-  return { phase, seconds, audioUrl, assessment, isEvaluating, error, start, stop, assess };
+  return { phase, seconds, audioUrl, assessment, isEvaluating, isStarting, error, start, stop, assess };
 }

@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
-import { GrammarPackSchema, ProvenanceSchema, type GrammarPack, type Verb } from '../src/types/grammarPack';
+import { GrammarPackSchema, ProvenanceSchema, TENSES, type GrammarPack, type Verb } from '../src/types/grammarPack';
 import { GOLDEN } from './fixtures/grammarPackGolden';
-import { generate } from './fixtures/grammarPackVerbs';
+import { generate, POUVOIR_SPEC } from './fixtures/grammarPackVerbs';
 
 const prov: Verb['prov'] = {
   origin: 'rule',
@@ -84,6 +84,31 @@ test('a defective verb takes only its persons, and may omit the present particip
   const extra = structuredClone(ok);
   extra.verbs[0].tenses.present['2sg'] = { lead: 'tu', forms: ['faux'] };
   expect(GrammarPackSchema.safeParse(extra).error?.issues[0].message).toContain('cell is not allowed');
+});
+
+test('a noImperative verb validates with all persons, and is rejected with an imperatif or with defective', () => {
+  const pouvoir = generate(POUVOIR_SPEC).verb;
+  expect(pouvoir.tenses.imperatif).toBeUndefined();
+  for (const tense of TENSES) if (tense !== 'imperatif') expect(Object.keys(pouvoir.tenses[tense])).toHaveLength(6);
+  expect(pouvoir.participles.present).toBe('pouvant');
+  const ok = { schemaVersion: 1, packVersion: '0.1.0', verbs: [{ ...pouvoir, prov }] };
+  expect(GrammarPackSchema.safeParse(ok).success).toBe(true);
+  const withImperatif = structuredClone(ok);
+  withImperatif.verbs[0].tenses.imperatif = { '2sg': { lead: '', forms: ['peux'] } };
+  expect(GrammarPackSchema.safeParse(withImperatif).error?.issues[0].message).toContain(
+    'a noImperative verb has no imperatif',
+  );
+  const falloir = generate({
+    id: 'falloir',
+    infinitive: 'falloir',
+    rule: 'irregular',
+    aux: 'avoir',
+    defective: 'impersonal',
+  }).verb;
+  const both = { schemaVersion: 1, packVersion: '0.1.0', verbs: [{ ...falloir, noImperative: true, prov }] };
+  expect(GrammarPackSchema.safeParse(both).error?.issues[0].message).toContain(
+    'a defective verb already has no imperatif',
+  );
 });
 
 test('lead rules: set on imperatif and empty elsewhere are rejected', () => {

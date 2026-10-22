@@ -1,14 +1,19 @@
 /**
- * One tense of the result: its name, when it is used, how it is formed, the persons as dictionary rows and the
- * AI's example sentence when there is one. The form line shows only when it is true for the verb's rule
+ * One tense of the result: its name, when it is used, how it is formed, the persons as dictionary rows, the
+ * AI's example sentence when there is one, and, when the page can make drills, one practice button for this tense
+ * that appears only if a cell of it can be asked. The form line shows only when it is true for the verb's rule
  * (`showsFormLine`). `compact` is the word sheet's form: no use and form lines, tighter rows; `tapped` marks the
- * persons whose cell is the word the learner tapped. Owns that section only. Does not own the verb header, the participles or any request.
+ * persons whose cell is the word the learner tapped. Owns that section only. Does not own the verb header, the
+ * participles, the drills or any request.
  */
+import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { CheckedCell, VerifiedVerb } from '../../../services/conjugation/verify';
 import type { ConjugationAnswer } from '../../../types/conjugationAnswer';
 import type { Person, Tense } from '../../../types/grammarPack';
 import { composeLead } from '../../../services/conjugation/rules';
+import { hasGradableTense } from '../../../services/exercises/fromConjugation';
+import { Button } from '../../ui/button';
 import { CellForm } from './CellForm';
 import { ComparedLines } from './ComparedLines';
 import { ConjugationSpeakButton } from './ConjugationSpeakButton';
@@ -21,9 +26,15 @@ interface Props {
   example?: ConjugationAnswer['examples'][keyof ConjugationAnswer['examples']];
   compact?: boolean;
   tapped?: Person[];
+  /** Makes this tense's drill in place; absent where the section is only a table (the word sheet). */
+  onPractise?: () => void;
+  /** This tense's drill is being made. */
+  practising?: boolean;
+  /** Another drill is being made: every practise button is disabled, so none moves. */
+  busy?: boolean;
 }
 
-export function TenseSection({ tense, verb, example, compact, tapped }: Props) {
+export function TenseSection({ tense, verb, example, compact, tapped, onPractise, practising, busy }: Props) {
   const { t } = useTranslation();
   const cells = Object.entries(verb.tenses[tense]) as [Person, CheckedCell][];
   const aiOnly = cells.some(([, cell]) => cell.status === 'ai-only');
@@ -92,6 +103,19 @@ export function TenseSection({ tense, verb, example, compact, tapped }: Props) {
           </li>
         ))}
       </ul>
+      {onPractise && !compact && hasGradableTense(verb, tense) && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-3"
+          disabled={busy}
+          aria-busy={practising}
+          onClick={onPractise}
+        >
+          {practising && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+          {t('conjugation.page.practiseTense')}
+        </Button>
+      )}
       {example && (
         <div className="mt-4">
           <p className="text-xs text-ink-500">{t('conjugation.page.example')}</p>

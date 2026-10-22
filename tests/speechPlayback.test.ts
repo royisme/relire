@@ -110,6 +110,9 @@ function fakeAccess(answer: (() => Promise<Blob>) | (() => never), device = fals
       throw new Error('not used here');
     }),
     synthesize,
+    assess: mock(async () => {
+      throw new Error('assessment not used here');
+    }),
     checkConnection: mock(async () => {}),
     listModels: mock(async () => []),
   };

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Upload } from 'lucide-react';
-import { getAppSettings, saveAppSettings } from '../../utils/appSettings';
+import { exportSettingsBackup, restoreSettingsBackup } from './backupSettings';
 import { exportProtectedAudio, importAudio } from '../../storage/audio';
 import { exportData, importData } from '../../storage/db';
 import { getPromptOverrides, savePromptOverrides } from '../../services/ai/prompts';
@@ -14,7 +14,7 @@ interface BackupControlsProps {
   shadowingBytes: number;
 }
 
-/** Settings → Data and backup: export everything to one JSON file, or restore from one. API keys are never included. */
+/** Settings → Data and backup: export everything to one JSON file, or restore from one. API keys and provider regions are never included. */
 export const BackupControls: React.FC<BackupControlsProps> = ({ audioBytes, shadowingBytes }) => {
   const { t } = useTranslation();
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
@@ -25,11 +25,10 @@ export const BackupControls: React.FC<BackupControlsProps> = ({ audioBytes, shad
   // Export everything into one JSON file. API keys are left out on purpose; prompt edits are included.
   const handleExportData = async () => {
     try {
-      const { apiKeys: _keys, ...settingsWithoutKeys } = getAppSettings();
       const backupData = {
         version: '1.1',
         exportedAt: new Date().toISOString(),
-        settings: settingsWithoutKeys,
+        settings: exportSettingsBackup(),
         prompts: getPromptOverrides(),
         ...(await exportData()),
         ...(includeAudio ? { audio: await exportProtectedAudio() } : {}),
@@ -79,8 +78,8 @@ export const BackupControls: React.FC<BackupControlsProps> = ({ audioBytes, shad
         const audioResult = Array.isArray(data.audio) ? await importAudio(data.audio) : { imported: 0, failed: 0 };
         if (data.prompts && typeof data.prompts === 'object') savePromptOverrides(data.prompts);
         if (data.settings && typeof data.settings === 'object') {
-          // A backup never carries API keys, so keep the ones already saved.
-          saveAppSettings({ ...data.settings, apiKeys: getAppSettings().apiKeys });
+          // Ignore supplied credentials/regions, even in a hand-edited backup.
+          restoreSettingsBackup(data.settings);
         }
 
         // Give a partial audio restore time to be read before the page reloads.

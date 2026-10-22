@@ -14,7 +14,7 @@ bun run test                              # unit tests in tests/: grading, contr
 bun run i18n:check
 bun run build
 bun scripts/check-prosody-schema.ts       # when markers, the prosody prompt or its parser changed
-impeccable detect --json src index.html   # must print []
+~/.agents/skills/impeccable/scripts/impeccable detect --json src index.html   # must print [] (not on PATH; use this launcher)
 ```
 Static/unit checks are the normal gate (owner decision 2026-10-20). UI visual acceptance belongs only to the owner, manually; no automatic UI/E2E gate or theme/viewport/focus/animation/screenshot assertion matrix. Browser automation is exceptional for necessary critical frontend/backend, browser persistence or backup/restore risk not covered by units. Prefer an existing focused spec; add coverage only for a necessary uncovered risk (`verify-ui`). Full E2E only on explicit owner request or separately justified broad integration need, never a default batch/phase gate. Preserve unrelated legacy coverage.
 

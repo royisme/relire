@@ -10,6 +10,7 @@ import {
   DEFAULT_DRILL_COUNT,
   DEFAULT_DRILL_LEVEL,
   hasGradableCell,
+  hasGradableTense,
   prepareConjugationDrills,
 } from '../src/services/exercises/fromConjugation';
 import { effectiveStrictAccents, gradeItem } from '../src/services/exercises/grading';
@@ -19,6 +20,7 @@ import { ExerciseUnitSchema, type ExerciseItem } from '../src/types/exercises';
 import type { GrammarTag } from '../src/types/grammar';
 import { TENSES, type Tense, type Verb } from '../src/types/grammarPack';
 import { GOLDEN } from './fixtures/grammarPackGolden';
+import { generate, POUVOIR_SPEC } from './fixtures/grammarPackVerbs';
 import { parlerAnswer } from './fixtures/conjugationAnswer';
 
 const t = i18n.t;
@@ -208,6 +210,20 @@ test('only reviewed and match cells become items', () => {
 test('a tense whose cells are all ungradable yields no unit', () => {
   // Outside the pack the passé composé is always ai-only (Part 3 F4).
   expect(make({ verbs: [verifyAnswer(parlerAnswer())], tenses: ['passeCompose'] })).toEqual([]);
+});
+
+test('a noImperative verb has no imperative cells, drill or unit, and its other tenses still drill', () => {
+  const verb = verifyPackVerb({ ...generate(POUVOIR_SPEC).verb, prov: packVerb('aller').prov });
+  expect(verb.noImperative).toBe(true);
+  // The table consumers (ConjugationResult, WordConjugation) filter on exactly this empty record.
+  expect(verb.tenses.imperatif).toEqual({});
+  expect(hasGradableTense(verb, 'imperatif')).toBe(false);
+  expect(hasGradableTense(verb, 'present')).toBe(true);
+  expect(hasGradableCell(verb)).toBe(true);
+  expect(make({ verbs: [verb], tenses: ['imperatif'] })).toEqual([]);
+  const units = make({ verbs: [verb], tenses: [...TENSES] });
+  expect(units).toHaveLength(TENSES.length - 1);
+  expect(units.some((unit) => unit.id.endsWith(':imperatif'))).toBe(false);
 });
 
 describe('the Conjugation page button', () => {

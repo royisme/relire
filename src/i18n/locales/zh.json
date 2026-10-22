@@ -142,11 +142,13 @@
     "stopOther": "停止那次录音",
     "assessError": "发音评测失败。",
     "overall": "综合评分",
+    "estimate": "仅供练习参考的估计，不是分数。",
     "accuracy": "准确度",
     "fluency": "流畅度",
     "rhythm": "节奏",
     "sounds": "需要练习的发音",
     "words": "需要纠正的词",
+    "strengths": "做得好的地方",
     "notes": "点评",
     "status": {
       "excellent": "不错",
@@ -373,7 +375,8 @@
     "needsKeyNotice": {
       "text": "请先填写 API Key，才能使用单词和句子解析、朗读和发音反馈。",
       "ocr": "请先填写 API Key，才能读取图片和 PDF。",
-      "speech": "请先填写 API Key，才能把法语朗读出来。"
+      "speech": "请先填写 API Key，才能把法语朗读出来。",
+      "assessment": "请填写 Azure Speech 密钥和资源区域，以便连接音频评测服务。"
     },
     "storageProtected": "已受保护，浏览器不会自动清理",
     "storageNotProtected": "空间不足或长期不使用时，浏览器可能会清掉这些数据",
@@ -423,7 +426,7 @@
     "sections": {
       "ai": {
         "title": "AI 服务",
-        "desc": "你自己的提供方 Key，以及每项 AI 任务使用的模型。"
+        "desc": "你自己的提供方密钥，以及每项 AI 任务的设置。"
       },
       "practice": {
         "title": "练习",
@@ -471,18 +474,20 @@
     "purposes": {
       "text": "文字 AI",
       "ocr": "图像识别",
-      "speech": "语音合成"
+      "speech": "语音合成",
+      "assessment": "发音评测"
     },
     "purposeDesc": {
       "text": "查词、分析句子、生成练习，并批改开放题。",
       "ocr": "识别图片和 PDF，并从导入的材料里整理出练习结构；粘贴的文字仍使用文字 AI。",
-      "speech": "用你选择的模型和音色朗读法语。"
+      "speech": "用你选择的模型和音色朗读法语。",
+      "assessment": "Azure 音频评测设置。配置好此连接后，朗读评测会使用它；未配置时仍使用文字 AI。"
     },
     "purposeSettings": "{{purpose}}设置",
     "sharedKey": "同一个 Key 也用于{{purposes}}。",
     "modelHelp": "从建议里选一个模型，或直接填写模型 ID。",
     "invalidModel": "请输入不超过 512 个字符的模型 ID，不能为空或包含控制字符。",
-    "modelNotValid": "三个 AI 页面中有模型 ID 无效，请在那里修改后再保存。",
+    "modelNotValid": "有一个 AI 模型 ID 无效，请在那里修改后再保存。",
     "baseUrlLabel": "Base URL",
     "baseUrlHelp": "留空即使用 {{url}}。使用 DeepSeek、通义千问等兼容服务时填写它们的地址。",
     "invalidBaseUrl": "请填写 http 或 https 地址，不要包含 Key、查询参数或片段，最多 2048 个字符。",
@@ -511,6 +516,21 @@
     "unknownOcr": "这个模型能否读图尚未确认，导入可能会返回提供方自己的错误。",
     "savedNote": "保存只会保留你的选择，不会测试它们。",
     "deviceNote": "用设备自带的声音朗读：不需要密钥，不产生费用，也不会保存音频。听起来是否自然，取决于设备上安装的法语语音。"
+  },
+  "azureAssessment": {
+    "regionLabel": "Azure 资源区域（必填）",
+    "regionHelp": "填写 Azure Speech 资源显示的区域，只用字母、数字和连字符。区域只保存在本浏览器，不含在备份中。无需模型，连接检查使用法国法语（fr-FR）。",
+    "invalidRegion": "请填写 Azure 资源区域，只用字母、数字和连字符。应用不会自动选择区域。",
+    "check": "检查连接",
+    "checkHelp": "检查会用你的密钥和区域，直接向 Azure 发送 100 毫秒的静音音频，可能消耗配额。本标签页内的请求逐个执行，不限制其他标签页或设备。",
+    "checkSuccess": "Azure 已完成识别请求。这只验证连接，不代表发音质量。",
+    "checkTimeout": "Azure 未在 15 秒内完成连接检查。",
+    "emptyInput": "发音评测需要录音和参考文本。",
+    "emptyResult": "Azure 没有返回发音评测。",
+    "invalidResult": "Azure 返回的发音评测无法使用：{{reason}}",
+    "noMatch": "Azure 未识别到语音：{{reason}}",
+    "canceled": "Azure 取消了识别（{{code}}）：{{reason}}",
+    "unexpectedResult": "Azure 返回了非预期的识别结果：{{reason}}"
   },
   "importer": {
     "articleTitle": "标题",
@@ -622,6 +642,7 @@
     "badResponse": "AI 返回的内容无法解析，请重试。",
     "noAudio": "没能生成语音。",
     "noSpeechToScore": "没有可以评分的内容：这段录音没有你的 AI 服务商能听的音频，浏览器也没有给出转录文字。",
+    "noRecordingToScore": "没有可以评分的内容：请先录下自己朗读这句话，再按“评测发音”。",
     "speechPlayback": "这段语音没能播放。",
     "allModelsFailed": "所有模型都失败了，请重试。",
     "invalidAnswer": "无法使用 AI 的回答：{{msg}}",
@@ -710,7 +731,8 @@
     "fish-audio": "Fish Audio",
     "anthropic": "Anthropic Claude",
     "ollama": "Ollama（本地）",
-    "device": "本机语音"
+    "device": "本机语音",
+    "azure": "Microsoft Azure Speech"
   },
   "prompts": {
     "word": "单词解析",
@@ -1205,8 +1227,13 @@
       "inputLabel": "动词原形",
       "button": "变位",
       "working": "处理中…",
-      "practise": "练习这个动词",
+      "practise": "练习全部时态",
       "practising": "正在生成练习…",
+      "practiseTense": "练习此时态",
+      "practiseTitle": "练习",
+      "practisePrevious": "上一个时态",
+      "practiseNext": "下一个时态",
+      "packVerbs": "已审校动词：",
       "practiseOpen": "打开新的练习集",
       "patterns": {
         "title": "句式",

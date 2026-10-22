@@ -2,10 +2,11 @@ import type { GradingOptions } from '../services/exercises/grading';
 import { getProvider, providerRequiresKey } from '../services/ai/providers';
 import { normalizeModelId } from '../services/ai/catalogue';
 import { normalizeBaseUrl } from '../services/ai/baseUrl';
+import { normalizeAzureRegion } from '../services/ai/providers/azure/region';
 
 /**
  * User settings: which provider and model write the answers, which provider
- * reads page images, which provider speaks them, one shared key per provider, the
+ * reads page images, which provider speaks them or assesses recordings, shared keys/regions,
  * endpoint overrides, and the practice preferences (how answers are compared and
  * dictation is played). Display names live in the locale files (providers.*, models.*, voices.*).
  */
@@ -24,6 +25,11 @@ export interface AppSettings {
   speechProvider: string;
   speechModel: string;
   speechVoice: string;
+  assessmentProvider: string;
+  /** Empty: assessment is model-less, retained only for indexed purpose selection. */
+  assessmentModel: string;
+  /** Provider regions stay local beside keys, never in backups. */
+  providerRegions: Record<string, string>;
   /** Model and voice per speech engine, by provider id; the selected engine's own choice is `speechModel` /
    * `speechVoice`, and its entry here is kept in step when the AI slice saves. */
   speechChoices: Record<string, SpeechChoice>;
@@ -104,6 +110,9 @@ function defaults(): AppSettings {
     speechModel: speech.defaultModel,
     speechVoice: speech.defaultVoice,
     speechChoices: {},
+    assessmentProvider: 'azure',
+    assessmentModel: '',
+    providerRegions: {},
     apiKeys: {},
     baseUrls: {},
     practiceStrictAccents: false,
@@ -121,6 +130,8 @@ function normalize(value: unknown): AppSettings {
   const textProvider = getProvider(raw.textProvider ?? base.textProvider).info;
   const ocrProvider = getProvider(raw.ocrProvider ?? base.ocrProvider).info;
   const speechProvider = getProvider(raw.speechProvider ?? base.speechProvider).info;
+  const candidate = getProvider(raw.assessmentProvider ?? base.assessmentProvider);
+  const assessmentProvider = candidate.assessment ? candidate.info.id : base.assessmentProvider;
   const text = textProvider.text ?? textDefaults(DEFAULT_PROVIDER)!;
   const ocr = ocrProvider.text ?? textDefaults(DEFAULT_PROVIDER)!;
   const speech = speechProvider.speech ?? speechDefaults(DEFAULT_PROVIDER)!;
@@ -137,6 +148,15 @@ function normalize(value: unknown): AppSettings {
       .map(([id, value]) => [id, normalizeBaseUrl(value)] as const)
       .filter((entry): entry is readonly [string, string] => entry[1] !== undefined),
   );
+  const providerRegions = Object.fromEntries(
+    Object.entries(
+      raw.providerRegions && typeof raw.providerRegions === 'object' && !Array.isArray(raw.providerRegions)
+        ? raw.providerRegions
+        : {},
+    )
+      .map(([id, value]) => [id, normalizeAzureRegion(value)] as const)
+      .filter((entry): entry is readonly [string, string] => entry[1] !== undefined),
+  );
   return {
     textProvider: textProvider.id,
     textModel: normalizeModelId(raw.textModel) ?? text.defaultModel,
@@ -146,6 +166,9 @@ function normalize(value: unknown): AppSettings {
     speechModel: deviceSpeech ? '' : (normalizeModelId(raw.speechModel) ?? speech.defaultModel),
     speechVoice: deviceSpeech ? '' : (storedVoice(speechProvider.id, raw.speechVoice) ?? speech.defaultVoice),
     speechChoices: storedSpeechChoices(raw.speechChoices),
+    assessmentProvider,
+    assessmentModel: '',
+    providerRegions,
     apiKeys,
     baseUrls,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),

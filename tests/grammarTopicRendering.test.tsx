@@ -89,6 +89,35 @@ test('both pilot controls put wrong corrections in feedback only when requested;
   }
 });
 
+function makeSession(
+  unit: Awaited<ReturnType<typeof fixture>>,
+  items: ReturnType<typeof emptyItems>,
+  saveError: string | null,
+): ExerciseUnitSession {
+  return {
+    status: 'ready',
+    loadError: null,
+    unit,
+    items,
+    progress: sheetProgress(unit, items),
+    saveError,
+    canReset: true,
+    resetting: false,
+    resetError: null,
+    setAnswer() {},
+    async check() {},
+    async checkAll() {},
+    async requestHint() {},
+    async requestExplanation() {},
+    async reset() {
+      return true;
+    },
+    async resetItem() {},
+    retrySave() {},
+    reload() {},
+  };
+}
+
 for (const verdict of ['right', 'wrong', 'unchecked'] as const) {
   test(`${verdict} question keeps its own result and Sheet when another question has a draft save error`, async () => {
     const unit = await fixture();
@@ -99,28 +128,7 @@ for (const verdict of ['right', 'wrong', 'unchecked'] as const) {
         items[item.id].answer.choiceSelections = [verdict === 'right' ? 'été' : 'hiver'];
       }
     }
-    const session: ExerciseUnitSession = {
-      status: 'ready',
-      loadError: null,
-      unit,
-      items,
-      progress: sheetProgress(unit, items),
-      saveError: 'TEST other question storage denied',
-      canReset: true,
-      resetting: false,
-      resetError: null,
-      setAnswer() {},
-      async check() {},
-      async checkAll() {},
-      async requestHint() {},
-      async requestExplanation() {},
-      async reset() {
-        return true;
-      },
-      async resetItem() {},
-      retrySave() {},
-      reload() {},
-    };
+    const session = makeSession(unit, items, 'TEST other question storage denied');
     for (const language of ['en', 'zh'] as const) {
       await i18n.changeLanguage(language);
       // Open the real workbench Sheet in a static render without replacing any of its components.
@@ -158,6 +166,13 @@ for (const verdict of ['right', 'wrong', 'unchecked'] as const) {
     await i18n.changeLanguage('en');
   });
 }
+
+test('the feedback button appears only when there is feedback or an error to read', async () => {
+  const unit = await fixture();
+  const unchecked = render(<TopicWorkbench session={makeSession(unit, emptyItems(unit), null)} />);
+  expect(unchecked).not.toContain(en.grammarTopics.learning.result.readFeedback);
+  expect(unchecked).not.toContain(en.grammarTopics.learning.result.readDetails);
+});
 
 test('self-contained authored feedback is bilingual plain text and errors remain readable without leaking a key', async () => {
   const unit = await fixture();

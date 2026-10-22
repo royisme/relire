@@ -81,8 +81,11 @@ function gradableCells(verbs: VerifiedVerb[], tense: Tense): GradableCell[] {
   return cells;
 }
 
+/** Whether one tense of the verb can be asked: its section on the Conjugation page offers a drill only then. */
+export const hasGradableTense = (verb: VerifiedVerb, tense: Tense) => gradableCells([verb], tense).length > 0;
+
 /** Whether any cell of the verb can be asked: the Conjugation page offers drills only then. */
-export const hasGradableCell = (verb: VerifiedVerb) => TENSES.some((tense) => gradableCells([verb], tense).length > 0);
+export const hasGradableCell = (verb: VerifiedVerb) => TENSES.some((tense) => hasGradableTense(verb, tense));
 
 function sampleCells(pool: GradableCell[], perUnit: number, maxPerVerb: number, rng: () => number): GradableCell[] {
   // Fisher-Yates on a copy, then a greedy walk: the cap is per verb, so any

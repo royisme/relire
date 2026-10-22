@@ -68,18 +68,26 @@ export interface PronunciationCorrection {
   advice: string;
 }
 
+/**
+ * What one read-aloud attempt was scored with. Only the three scores are certain: a provider that
+ * measures less (audio assessment without rhythm, prosody or coaching) leaves the rest absent, and
+ * nothing here is filled in for it.
+ */
 export interface PronunciationAssessment {
   overallScore: number;
   accuracyScore: number;
   fluencyScore: number;
-  rhythmScore: number;
+  completenessScore?: number;
+  /** Literal word-level service results, not IPA/phoneme coaching. */
+  wordResults?: { word: string; accuracyScore?: number; errorType?: string }[];
+  rhythmScore?: number;
   transcribedSpeech?: string;
-  phonemeFeedback: PhonemeFeedback[];
+  phonemeFeedback?: PhonemeFeedback[];
   liaisonFeedback?: string;
   intonationFeedback?: string;
-  corrections: PronunciationCorrection[];
+  corrections?: PronunciationCorrection[];
   strengths?: string[];
-  coachingNotes: string;
+  coachingNotes?: string;
   evaluatedAt?: string;
   referenceText?: string;
 }

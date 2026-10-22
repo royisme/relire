@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Azure pronunciation assessment access.** Settings has a new Pronunciation assessment purpose where you enter your own Azure Speech key and region; Check proves them with a short silent request and no microphone. Key and region stay on this device and are never in backups. When it is configured, the read-aloud check scores your recording with Azure instead of Text AI; otherwise Text AI scores it as before, with no fallback between them, and a failure shows its real error. Results from either now say they are an estimate, not a score. It has not been tried against the real Azure service or a real microphone.
 - **Four more compound tenses.** Plus-que-parfait, futur antérieur, conditionnel passé and subjonctif passé appear on the Conjugation page, the word sheet, in drills and in sentence patterns. Verbs in the grammar pack are reviewed; AI-made tables are not checked.
 - **Noun gender without a key.** My study → Grammar → Gender shows all 17 reviewed ending tendencies with dictionary and A1 counts, examples and sample exceptions. Make local drills from 337 reviewed A1 nouns, including exceptions; checking reveals the saved tendency and exception note. Noun lookups show the longest matching ending under the meaning, without asserting an unknown noun's gender.
 - The supplied vocabulary source has a private normalized draft and recorded attribution/hash metadata. It is not marked reviewed or available for download; content approval is still required before local publication.
@@ -71,6 +72,10 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- Read aloud puts Listen slowly beside Record on one row, and Record is the page's one filled button again, so the main action no longer looks the same as hearing the sentence.
+- **Practising a conjugation no longer leaves the page.** Each tense on the Conjugation page has its own small drill, and the header's "Practise all tenses" makes one exercise per tense the page shows; either one saves real Grammar exercises and draws the set's own sheet in place under the result, one tense at a time with previous and next, so answers and attempts are recorded as usual. The link to the saved set in Practice is still there. The reviewed verbs are also a row of buttons above the input, so a common verb needs no typing, and the input stays for any other verb.
+- A grammar topic question no longer shows a greyed "Read feedback" before you check it; the button appears only once there is feedback or a save error to read.
+- The pronunciation result now shows only the fields your provider actually returned, including the strengths it mentions.
 - Words without a pronunciation marker are now plain text in the reader: the grey elided prefix (`l'`, `qu'`) no longer appears unless you turn on pronunciation markers.
 - Learning navigation now separates Reading, Grammar, Listening and Speaking, with Writing shown for saved writing units only. Grammar reference and exercises are linked; Read aloud has durable article/sentence addresses. Imports confirm each unit's explicit learning area, mixed sets stay whole, and deletion names its complete cross-area scope. Attempts retain their area and grammar accuracy uses grammar history only. Old unreleased unit/attempt/backup shapes are intentionally rejected, without migration or data reset.
 - Browser speech recognition while recording is now an opt-in setting in Settings → Practice, off by default. It may send the recording to the browser maker's speech service, so it only runs when you turn it on.
@@ -109,6 +114,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ### Fixed
 - The pronunciation check prompts no longer show example scores the model could copy.
 - A pronunciation check with no audio and no transcript now says so instead of scoring the reference text.
+- Pressing Record again while a read-aloud check is running now cancels that check, so the Check button works for the new take instead of spinning until the sentence changes. When Azure scoring is on and nothing is recorded, the message now asks you to record the sentence instead of mentioning a browser transcript. The Check button also stays disabled while Record again waits for the microphone, so it can no longer score the take you just dropped.
 - Local vocabulary publication now binds page content so large Unicode pages can be imported intact without exceeding SQLite's SQL statement limit.
 - Dictionary preparation no longer rejects unused original-field arrays; raw source data stays out of normalized and published content.
 - Failed vocabulary reveals and ratings return focus to the submitted button once it is ready to retry.

@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { CircleAlert, CircleCheck, CircleDot } from 'lucide-react';
 import { PronunciationAssessment, PhonemeFeedback } from '../../types';
 
-/** The score and feedback for one read-aloud attempt. Every text block wraps; nothing here has a fixed width. */
+/**
+ * The score and feedback for one read-aloud attempt. Only the scores a provider measured are drawn;
+ * a missing rhythm score or an empty list leaves no bar, no heading and no gap. Every text block
+ * wraps; nothing here has a fixed width.
+ */
 
 const STATUS_ICON: Record<PhonemeFeedback['status'], { Icon: typeof CircleCheck; tone: string }> = {
   excellent: { Icon: CircleCheck, tone: 'text-ok-800' },
@@ -21,21 +25,25 @@ export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }>
     { label: t('shadowing.accuracy'), value: assessment.accuracyScore },
     { label: t('shadowing.fluency'), value: assessment.fluencyScore },
     { label: t('shadowing.rhythm'), value: assessment.rhythmScore },
-  ];
+  ].filter((m): m is { label: string; value: number } => m.value !== undefined);
   const sounds = assessment.phonemeFeedback ?? [];
   const words = assessment.corrections ?? [];
+  const strengths = assessment.strengths ?? [];
 
   return (
     <div className="rounded-lg border border-ink-200 bg-ink-50 p-4 sm:p-5 space-y-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <h4 className="text-sm font-medium text-ink-800">{t('shadowing.overall')}</h4>
-        <p className="font-serif text-ink-900 tnum">
-          <span className="text-3xl font-semibold">{assessment.overallScore}</span>
-          <span className="ml-1 text-sm text-ink-500">/ 100</span>
-        </p>
+      <div className="space-y-1">
+        <div className="flex items-baseline justify-between gap-3">
+          <h4 className="text-sm font-medium text-ink-800">{t('shadowing.overall')}</h4>
+          <p className="font-serif text-ink-900 tnum">
+            <span className="text-3xl font-semibold">{assessment.overallScore}</span>
+            <span className="ml-1 text-sm text-ink-500">/ 100</span>
+          </p>
+        </div>
+        <p className="text-xs text-ink-500">{t('shadowing.estimate')}</p>
       </div>
 
-      <dl className="grid grid-cols-3 gap-2">
+      <dl className={`grid gap-2 ${assessment.rhythmScore === undefined ? 'grid-cols-2' : 'grid-cols-3'}`}>
         {metrics.map((m) => (
           <div key={m.label} className="min-w-0 rounded-md bg-surface border border-ink-200 px-2 py-2 text-center">
             <dt className="text-xs text-ink-500 truncate">{m.label}</dt>
@@ -77,6 +85,19 @@ export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }>
                 <span className="font-serif font-semibold text-ink-900">« {c.word} »</span>
                 {c.expectedIPA && <span className="ml-1.5 font-mono text-xs text-ink-600">{c.expectedIPA}</span>}
                 <p className="text-ink-600">{c.advice}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {strengths.length > 0 && (
+        <section className="space-y-1.5">
+          <Heading>{t('shadowing.strengths')}</Heading>
+          <ul className="space-y-1 text-sm text-ink-800">
+            {strengths.map((s, i) => (
+              <li key={i} className="break-words">
+                {s}
               </li>
             ))}
           </ul>

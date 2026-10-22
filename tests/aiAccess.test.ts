@@ -39,7 +39,8 @@ function fakeAccess(answer: unknown) {
   const synthesize = mock(async () => new Blob(['audio'], { type: 'audio/wav' }));
   const checkConnection = mock(async (_purpose: TextPurpose) => {});
   const listModels = mock(async () => []);
-  const isConfigured = mock((_purpose: AiPurpose) => true);
+  // Only the assessment path is off here: the text/OCR/speech paths this file exercises stay configured.
+  const isConfigured = mock((purpose: AiPurpose) => purpose !== 'assessment');
   const access: AiAccess = {
     isConfigured,
     selection: (purpose: AiPurpose) => ({
@@ -51,6 +52,9 @@ function fakeAccess(answer: unknown) {
     }),
     text,
     synthesize,
+    assess: mock(async () => {
+      throw new Error('assessment not used here');
+    }),
     checkConnection,
     listModels,
   };

@@ -363,6 +363,8 @@ export default function App() {
                     section={route.name === 'grammar' ? route.section : undefined}
                     verb={route.name === 'grammar' ? route.verb : undefined}
                     tag={route.name === 'grammar' ? route.tag : undefined}
+                    onWord={handleWordClick}
+                    onMissingKey={requestKey}
                   />
                 </Suspense>
               </div>
