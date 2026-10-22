@@ -10,6 +10,8 @@ export function normalizeModelId(value: unknown): string | undefined {
 }
 
 export function purposeCapability(capabilities: ModelCapabilities, purpose: AiPurpose): Capability {
+  // Recorded-audio assessment has no model catalogue.
+  if (purpose === 'assessment') return 'unsupported';
   if (purpose === 'ocr') return capabilities.imageInput;
   if (purpose === 'speech') return capabilities.speechOutput;
   return capabilities.textGeneration;

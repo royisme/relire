@@ -1,5 +1,5 @@
 /**
- * Settings → AI services: one page for the text, OCR and speech purposes, sharing one provider key per
+ * Settings → AI services: one page for text, OCR, speech and recorded-audio assessment, sharing one provider key per
  * provider and one page-wide Save. Test and discovery use the draft and never save it.
  */
 import { useEffect, useRef, useState, type RefObject } from 'react';
@@ -7,14 +7,21 @@ import { useTranslation } from 'react-i18next';
 import { getAiAccess } from '../../services/ai/access';
 import { normalizeModelId } from '../../services/ai/catalogue';
 import { errorMessage } from '../../services/ai/errors';
-import { getProvider, providerRequiresKey, speechProviders, textProviders } from '../../services/ai/providers';
+import {
+  assessmentProviders,
+  getProvider,
+  providerRequiresKey,
+  speechProviders,
+  textProviders,
+} from '../../services/ai/providers';
+import { normalizeAzureRegion } from '../../services/ai/providers/azure/region';
 import { getApiKey, type AppSettings } from '../../utils/appSettings';
 import { AI_PURPOSES, type AiPurposeRoute } from '../../utils/routes';
 import { testSpeech } from '../../utils/speech';
 import { useSaveStatus } from '../../hooks/useSaveStatus';
 import { Link } from '../shell/Link';
 import { Button } from '../ui/button';
-import { fieldLabel, BaseUrlField, KeyBadge, KeyField, selectClass, useProviderNames } from './fields';
+import { fieldLabel, BaseUrlField, KeyBadge, KeyField, RegionField, selectClass, useProviderNames } from './fields';
 import type { KeyRequest } from './keyRequest';
 import { ModelField } from './ModelField';
 import { saveSlice, sliceOf } from './slices';
@@ -70,7 +77,9 @@ export function AiSection({
   const needsKey = !device && providerRequiresKey(providerId);
   const savedProviderId = saved[`${purpose}Provider`];
   const missingKey = providerRequiresKey(savedProviderId) && !getApiKey(saved, savedProviderId);
-  const modelReady = !!normalizeModelId(model) || device;
+  const assessment = purpose === 'assessment';
+  const regionReady = !assessment || !!normalizeAzureRegion(draft.providerRegions[providerId]);
+  const modelReady = !!normalizeModelId(model) || device || assessment;
   // A provider with its own voice check shows a free-text field; the value is refused before it can be saved.
   const voiceAccepts = (voice: string) => provider.speech?.acceptsVoice?.(voice) ?? true;
   const voiceValid = voiceAccepts(draft.speechVoice);
@@ -111,7 +120,10 @@ export function AiSection({
   // or with its defaults until the learner chooses something for it.
   const pickProvider = (id: string) => {
     const chosen = getProvider(id).info;
-    if (purpose === 'speech') {
+    if (purpose === 'assessment') {
+      if (!getProvider(id).assessment) return;
+      edit({ ...draft, assessmentProvider: id, assessmentModel: '' });
+    } else if (purpose === 'speech') {
       if (!chosen.speech) return;
       const remembered = normalizeModelId(draft.speechModel);
       const entry = draft.speechChoices[id];
@@ -143,7 +155,7 @@ export function AiSection({
 
   // Checks the key (or previews the voice) with the settings on screen. Never saves.
   const check = async () => {
-    if ((needsKey && !key.trim()) || checking || !modelReady) return;
+    if ((needsKey && !key.trim()) || checking || !modelReady || !regionReady) return;
     const token = ++checkToken.current;
     checkRequest.current?.abort();
     const request = new AbortController();
@@ -157,7 +169,13 @@ export function AiSection({
       if (token === checkToken.current)
         setChecked({
           ok: true,
-          message: t(purpose === 'speech' ? 'settings.testSuccess' : 'aiSettings.checkSuccess'),
+          message: t(
+            purpose === 'speech'
+              ? 'settings.testSuccess'
+              : assessment
+                ? 'azureAssessment.checkSuccess'
+                : 'aiSettings.checkSuccess',
+          ),
         });
     } catch (err) {
       if (token === checkToken.current)
@@ -177,7 +195,7 @@ export function AiSection({
 
   const info = purpose === 'speech' ? provider.info.speech : provider.info.text;
   const returnTo = keyRequest?.returnTo ?? null;
-  const canReturn = !dirty && !missingKey;
+  const canReturn = !dirty && !missingKey && getAiAccess(saved).isConfigured(purpose);
 
   return (
     <div className="space-y-6">
@@ -210,11 +228,13 @@ export function AiSection({
         <label className="block">
           <span className={fieldLabel}>{t('settings.providerLabel')}</span>
           <select className={selectClass} value={providerId} onChange={(event) => pickProvider(event.target.value)}>
-            {(purpose === 'speech' ? speechProviders() : textProviders()).map((entry) => (
-              <option key={entry.info.id} value={entry.info.id}>
-                {providerName(entry.info.id)}
-              </option>
-            ))}
+            {(assessment ? assessmentProviders() : purpose === 'speech' ? speechProviders() : textProviders()).map(
+              (entry) => (
+                <option key={entry.info.id} value={entry.info.id}>
+                  {providerName(entry.info.id)}
+                </option>
+              ),
+            )}
           </select>
         </label>
 
@@ -242,7 +262,16 @@ export function AiSection({
           />
         )}
 
-        {!device && <ModelField draft={draft} purpose={purpose} catalogue={catalogue} onChange={setModel} />}
+        {assessment && (
+          <RegionField
+            value={draft.providerRegions[providerId] ?? ''}
+            onChange={(value) => edit({ ...draft, providerRegions: { ...draft.providerRegions, [providerId]: value } })}
+          />
+        )}
+
+        {!device && !assessment && (
+          <ModelField draft={draft} purpose={purpose} catalogue={catalogue} onChange={setModel} />
+        )}
 
         {!device &&
           purpose === 'speech' &&
@@ -297,7 +326,8 @@ export function AiSection({
             type="button"
             variant="outline"
             onClick={() => void check()}
-            disabled={checking || (needsKey && !key.trim()) || !modelReady}
+            className={assessment ? 'w-44' : undefined}
+            disabled={checking || (needsKey && !key.trim()) || !modelReady || !regionReady}
           >
             {t(
               checking
@@ -306,9 +336,11 @@ export function AiSection({
                   : 'settings.checking'
                 : purpose === 'speech'
                   ? 'aiSettings.preview'
-                  : needsKey
-                    ? 'aiSettings.check'
-                    : 'aiSettings.checkServer',
+                  : assessment
+                    ? 'azureAssessment.check'
+                    : needsKey
+                      ? 'aiSettings.check'
+                      : 'aiSettings.checkServer',
             )}
           </Button>
           <Button type="button" onClick={save} disabled={!dirty}>
@@ -316,7 +348,7 @@ export function AiSection({
           </Button>
         </div>
         {/* Fixed height, so the outcome appears without moving the page. */}
-        <div className="min-h-10 text-sm">
+        <div className="h-24 overflow-y-auto text-sm">
           {checked && (
             <p
               role={checked.ok ? 'status' : 'alert'}

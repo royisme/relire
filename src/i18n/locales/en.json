@@ -381,7 +381,8 @@
     "needsKeyNotice": {
       "text": "Add your API key to use word and sentence analysis, audio and pronunciation feedback.",
       "ocr": "Add your API key to read images and PDFs.",
-      "speech": "Add your API key to have French read aloud."
+      "speech": "Add your API key to have French read aloud.",
+      "assessment": "Add your Azure Speech key and resource region for audio assessment."
     },
     "storageProtected": "Protected from automatic clearing",
     "storageNotProtected": "Browser may clear this data if it runs low on space or you stay away for a while",
@@ -431,7 +432,7 @@
     "sections": {
       "ai": {
         "title": "AI services",
-        "desc": "Your own provider key, and the model each AI task uses."
+        "desc": "Your own provider keys and settings for each AI task."
       },
       "practice": {
         "title": "Practice",
@@ -479,18 +480,20 @@
     "purposes": {
       "text": "Text AI",
       "ocr": "OCR",
-      "speech": "Speech synthesis"
+      "speech": "Speech synthesis",
+      "assessment": "Pronunciation assessment"
     },
     "purposeDesc": {
       "text": "Checks and explains words and sentences, makes exercises, and grades open answers.",
       "ocr": "Reads images and PDFs, and pulls the exercise structure out of imported material. Pasted text still uses Text AI.",
-      "speech": "Reads French aloud with the model and voice you choose."
+      "speech": "Reads French aloud with the model and voice you choose.",
+      "assessment": "Azure audio assessment settings. Current read-aloud checks still use Text AI; this connection is not used by the recorder yet."
     },
     "purposeSettings": "{{purpose}} settings",
     "sharedKey": "This key is also used by {{purposes}}.",
     "modelHelp": "Pick a suggested model or type its ID.",
     "invalidModel": "Enter a model ID of at most 512 characters, without control characters.",
-    "modelNotValid": "A model ID on one of the three AI pages is not valid. Fix it there, then save again.",
+    "modelNotValid": "An AI model ID is not valid. Fix it there, then save again.",
     "baseUrlLabel": "Base URL",
     "baseUrlHelp": "Leave it empty to use {{url}}. Change it for a compatible service such as DeepSeek or Qwen.",
     "invalidBaseUrl": "Enter an http or https address without a key, a query or a fragment, at most 2048 characters.",
@@ -519,6 +522,21 @@
     "unknownOcr": "Image support for this model is unconfirmed. The import may fail with the provider's own error.",
     "savedNote": "Saving keeps your choices; it does not test them.",
     "deviceNote": "Speaks with this device’s own voice: no key, no cost, and nothing is stored. Whether it sounds natural depends on the French voices installed on the device."
+  },
+  "azureAssessment": {
+    "regionLabel": "Azure resource region (required)",
+    "regionHelp": "Enter the region from your Azure Speech resource, using letters, digits and hyphens. It stays in this browser and is never backed up. No model is needed; the connection check uses French (fr-FR).",
+    "invalidRegion": "Enter your Azure resource region using only letters, digits and hyphens. No default region is supplied.",
+    "check": "Check connection",
+    "checkHelp": "Check sends 100 ms of silent audio directly to Azure with your key and region. It may consume quota. Requests run one at a time in this tab, not across tabs or devices.",
+    "checkSuccess": "Azure completed the recognition request. This checks connectivity, not pronunciation quality.",
+    "checkTimeout": "Azure did not finish the connection check within 15 seconds.",
+    "emptyInput": "A recording and reference text are required for pronunciation assessment.",
+    "emptyResult": "Azure returned no pronunciation assessment.",
+    "invalidResult": "Azure returned an unusable pronunciation assessment: {{reason}}",
+    "noMatch": "Azure recognized no speech: {{reason}}",
+    "canceled": "Azure canceled recognition ({{code}}): {{reason}}",
+    "unexpectedResult": "Azure returned an unexpected recognition result: {{reason}}"
   },
   "importer": {
     "articleTitle": "Title",
@@ -719,7 +737,8 @@
     "fish-audio": "Fish Audio",
     "anthropic": "Anthropic Claude",
     "ollama": "Ollama (local)",
-    "device": "This device"
+    "device": "This device",
+    "azure": "Microsoft Azure Speech"
   },
   "prompts": {
     "word": "Word analysis",

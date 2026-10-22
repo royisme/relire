@@ -5,11 +5,17 @@ import i18n from '../../i18n';
 import { getApiKey, getAppSettings, getBaseUrl, type AppSettings } from '../../utils/appSettings';
 import { normalizeModelId } from './catalogue';
 import { getProvider } from './providers';
+import { normalizeAzureRegion } from './providers/azure/region';
 import type { AiAccess, AiPurpose, AiSelection, SpeechConfig, SpeechSelection, TextPurpose } from './types';
 
 /** Snapshot credentials in memory so later edits cannot redirect an already-consented request. Never persist it. */
 export function createByokAccess(settings: AppSettings): AiAccess {
-  const snapshot = { ...settings, apiKeys: { ...settings.apiKeys }, baseUrls: { ...settings.baseUrls } };
+  const snapshot = {
+    ...settings,
+    apiKeys: { ...settings.apiKeys },
+    baseUrls: { ...settings.baseUrls },
+    providerRegions: { ...settings.providerRegions },
+  };
   const providerFor = (purpose: AiPurpose) => {
     const id = snapshot[`${purpose}Provider`];
     const provider = getProvider(id);
@@ -22,16 +28,24 @@ export function createByokAccess(settings: AppSettings): AiAccess {
     const provider = providerFor(purpose);
     // The device voice is chosen by its provider alone: it has no model and no voice id to resolve.
     const deviceVoice = purpose === 'speech' && provider.info.speech?.device === true;
-    const model = deviceVoice ? '' : normalizeModelId(snapshot[`${purpose}Model`]);
-    if (!model && !deviceVoice) throw new Error(i18n.t('errors.invalidModelId'));
+    const modelLess = deviceVoice || purpose === 'assessment';
+    const model = modelLess ? '' : normalizeModelId(snapshot[`${purpose}Model`]);
+    if (!model && !modelLess) throw new Error(i18n.t('errors.invalidModelId'));
     const selected: AiSelection = {
       providerId: provider.info.id,
       model: model ?? '',
-      capabilities: provider.catalogue?.capabilities(model ?? '') ?? {
-        textGeneration: 'unknown',
-        imageInput: 'unknown',
-        speechOutput: 'unknown',
-      },
+      capabilities:
+        purpose === 'assessment'
+          ? {
+              textGeneration: 'unsupported',
+              imageInput: 'unsupported',
+              speechOutput: 'unsupported',
+            }
+          : (provider.catalogue?.capabilities(model ?? '') ?? {
+              textGeneration: 'unknown',
+              imageInput: 'unknown',
+              speechOutput: 'unknown',
+            }),
     };
     return purpose === 'speech'
       ? { ...selected, voice: deviceVoice ? '' : snapshot.speechVoice, device: deviceVoice }
@@ -53,10 +67,21 @@ export function createByokAccess(settings: AppSettings): AiAccess {
       ...(baseUrl ? { baseUrl } : {}),
     };
   };
+  const assessmentConfig = () => {
+    const id = providerFor('assessment').info.id;
+    return { apiKey: getApiKey(snapshot, id), region: snapshot.providerRegions[id] ?? '' };
+  };
   return {
     // A local provider needs no key, so its features are ready as soon as it is selected.
     isConfigured: (purpose) => {
-      const provider = providerFor(purpose).info;
+      const resolved = providerFor(purpose);
+      const provider = resolved.info;
+      if (purpose === 'assessment')
+        return (
+          !!resolved.assessment &&
+          !!getApiKey(snapshot, provider.id) &&
+          !!normalizeAzureRegion(snapshot.providerRegions[provider.id])
+        );
       return provider.requiresKey === false || !!getApiKey(snapshot, provider.id);
     },
     selection,
@@ -81,7 +106,17 @@ export function createByokAccess(settings: AppSettings): AiAccess {
       // A device engine throws `DeviceVoiceError` here: it speaks directly and has no clip to return.
       return provider.synthesize(request, { ...speechConfig(), voice: voice || snapshot.speechVoice });
     },
+    assess(request) {
+      const provider = providerFor('assessment').assessment;
+      if (!provider) throw new Error(i18n.t('errors.purposeUnavailable'));
+      return provider.assess(request, assessmentConfig());
+    },
     checkConnection(purpose, signal) {
+      if (purpose === 'assessment') {
+        const provider = providerFor(purpose).assessment;
+        if (!provider) throw new Error(i18n.t('errors.purposeUnavailable'));
+        return provider.checkKey(assessmentConfig(), signal);
+      }
       const provider = providerFor(purpose).text;
       if (!provider) throw new Error(i18n.t('errors.purposeUnavailable'));
       return provider.checkKey(textConfig(purpose), signal);

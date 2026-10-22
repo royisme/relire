@@ -51,6 +51,9 @@ function fakeAccess(answer: unknown) {
     }),
     text,
     synthesize,
+    assess: mock(async () => {
+      throw new Error('assessment not used here');
+    }),
     checkConnection,
     listModels,
   };

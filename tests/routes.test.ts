@@ -110,7 +110,8 @@ test('Settings preferences, About, AI purpose and return addresses remain intact
   expect(SETTINGS_SECTIONS).toEqual(['ai', 'practice', 'words', 'prompts', 'data']);
   for (const section of SETTINGS_SECTIONS)
     roundTrip({ name: 'settings', section, ...(section === 'ai' ? { purpose: 'text' as const } : {}) });
-  for (const purpose of ['text', 'ocr', 'speech'] as const) roundTrip({ name: 'settings', section: 'ai', purpose });
+  for (const purpose of ['text', 'ocr', 'speech', 'assessment'] as const)
+    roundTrip({ name: 'settings', section: 'ai', purpose });
   roundTrip({ name: 'settings', section: null });
   roundTrip({ name: 'about' });
   roundTrip({ name: 'progress' });

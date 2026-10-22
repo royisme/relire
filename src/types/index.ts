@@ -77,6 +77,9 @@ export interface PronunciationAssessment {
   overallScore: number;
   accuracyScore: number;
   fluencyScore: number;
+  completenessScore?: number;
+  /** Literal word-level service results, not IPA/phoneme coaching. */
+  wordResults?: { word: string; accuracyScore?: number; errorType?: string }[];
   rhythmScore?: number;
   transcribedSpeech?: string;
   phonemeFeedback?: PhonemeFeedback[];

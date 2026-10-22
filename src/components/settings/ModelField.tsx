@@ -17,7 +17,7 @@ export function ModelField({
   onChange,
 }: {
   draft: AppSettings;
-  purpose: AiPurpose;
+  purpose: Exclude<AiPurpose, 'assessment'>;
   catalogue: ReturnType<typeof useModelCatalogue>;
   onChange: (model: string) => void;
 }) {
