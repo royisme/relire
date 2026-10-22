@@ -84,7 +84,12 @@ export function sentenceRequest(input: { sentence: string; articleContext?: stri
 }
 
 export function pronunciationRequest(
-  input: { referenceText: string; audio?: { mimeType: string; base64: string }; userTranscript?: string },
+  input: {
+    referenceText: string;
+    audio?: { mimeType: string; base64: string };
+    userTranscript?: string;
+    signal?: AbortSignal;
+  },
   lang: Lang,
 ): JsonRequest {
   // The reference text is never a stand-in for the learner's speech: with no transcript it stays empty.
@@ -94,9 +99,12 @@ export function pronunciationRequest(
     userTranscript: transcript,
     transcript,
   };
-  return input.audio
-    ? { prompt: render('pronunciationAudio', lang, vars), audio: input.audio }
-    : { prompt: render('pronunciationText', lang, vars) };
+  return {
+    ...(input.audio
+      ? { prompt: render('pronunciationAudio', lang, vars), audio: input.audio }
+      : { prompt: render('pronunciationText', lang, vars) }),
+    signal: input.signal,
+  };
 }
 
 /* ----------------------------- exercise requests ----------------------------- */

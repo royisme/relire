@@ -77,8 +77,8 @@ type DraftItem = ImportDraft['units'][number]['items'][number];
  * One import is one exercise, whatever sections the source has: every unit the
  * model split by section merges into the first of them, so mixed question
  * kinds live as per-item `type` overrides. The merged unit keeps the first
- * unit's unit-level fields, joins the section instructions in source order
- * (identical lines are not repeated) and unions the grammar tags; items stay in
+ * unit's other unit-level fields, joins distinct section instructions and examples
+ * in source order (one per line) and unions the grammar tags; items stay in
  * source order and an id that collides in the merge is prefixed with its unit
  * id, then numbered until it is unique. The only exception is a unit with its own `readingPassage`: one unit
  * holds one passage, so each such unit stays separate and untouched.
@@ -90,6 +90,7 @@ function mergeIntoOneUnit(draft: ImportDraft): ImportDraft {
   const seen = new Set(first.items.map((item) => item.id));
   const items = [...first.items];
   const instructions = [first.instruction];
+  const examples = first.example ? [first.example] : [];
   const grammarTags = new Set(first.grammarTags);
   for (const unit of rest) {
     for (const item of unit.items) {
@@ -100,11 +101,13 @@ function mergeIntoOneUnit(draft: ImportDraft): ImportDraft {
       items.push(unit.type === first.type ? { ...item, id } : { ...item, id, type: item.type ?? unit.type });
     }
     if (!instructions.includes(unit.instruction)) instructions.push(unit.instruction);
+    if (unit.example && !examples.includes(unit.example)) examples.push(unit.example);
     unit.grammarTags.forEach((tag) => grammarTags.add(tag));
   }
   const merged: ImportDraft['units'][number] = {
     ...first,
     instruction: instructions.join('\n'),
+    example: examples.join('\n') || undefined,
     grammarTags: [...grammarTags],
     items,
   };

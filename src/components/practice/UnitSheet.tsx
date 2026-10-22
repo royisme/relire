@@ -142,7 +142,7 @@ export function UnitSheet({
           </h2>
           <p className="break-words text-sm text-ink-700">{unit.instruction}</p>
           {unit.example && (
-            <p className="break-words text-sm text-ink-500">
+            <p className="whitespace-pre-line break-words text-sm text-ink-500">
               {t('practice.example')}: {unit.example}
             </p>
           )}
