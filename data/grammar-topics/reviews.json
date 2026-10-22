@@ -23,6 +23,18 @@
       "contentHash": "5e20a4dbeaf4ee6529442ca7055517c3b788b089c681a8e43accac26851ca6fe",
       "reviewedBy": "Gemini 4 Argon (AI review; owner-approved local publication)",
       "reviewedAt": "2026-10-20"
+    },
+    {
+      "topicId": "noun-gender-feminine",
+      "contentHash": "c0b37f3c6f23cf16e2dcd946a63fc19944915e090f31ebead4fe3d947115bdab",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "topicId": "noun-plurals",
+      "contentHash": "5e20a4dbeaf4ee6529442ca7055517c3b788b089c681a8e43accac26851ca6fe",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-22"
     }
   ]
 }
