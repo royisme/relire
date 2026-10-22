@@ -7,10 +7,10 @@ import {
   Download,
   Headphones,
   Info,
-  Languages,
   Mic,
   PenLine,
   Settings,
+  SpellCheck,
 } from 'lucide-react';
 import { PWAInstallButton } from '../PWAInstallButton';
 import { areaOf, routeHref, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../../utils/routes';
@@ -34,7 +34,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
   const item = { rail, onNavigate };
   const links = [
     { to: { name: 'library' } as Route, area: 'read', icon: BookOpen, label: t('learning.areas.reading') },
-    { to: { name: 'grammar' } as Route, area: 'grammar', icon: Languages, label: t('learning.areas.grammar') },
+    { to: { name: 'grammar' } as Route, area: 'grammar', icon: SpellCheck, label: t('learning.areas.grammar') },
     {
       to: { name: 'practice', area: 'listening' } as Route,
       area: 'listening',
