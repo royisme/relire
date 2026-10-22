@@ -142,6 +142,7 @@
     "stopOther": "Stop that recording",
     "assessError": "Could not check the pronunciation.",
     "overall": "Overall score",
+    "estimate": "An estimate to help you practise, not a score.",
     "accuracy": "Accuracy",
     "fluency": "Fluency",
     "rhythm": "Rhythm",
@@ -487,7 +488,7 @@
       "text": "Checks and explains words and sentences, makes exercises, and grades open answers.",
       "ocr": "Reads images and PDFs, and pulls the exercise structure out of imported material. Pasted text still uses Text AI.",
       "speech": "Reads French aloud with the model and voice you choose.",
-      "assessment": "Azure audio assessment settings. Current read-aloud checks still use Text AI; this connection is not used by the recorder yet."
+      "assessment": "Azure audio assessment settings. The read-aloud check uses this connection when it is configured, and Text AI otherwise."
     },
     "purposeSettings": "{{purpose}} settings",
     "sharedKey": "This key is also used by {{purposes}}.",

@@ -49,6 +49,7 @@ import {
 } from '../types/pronunciation';
 import { hasGraphemeSupport } from '../utils/readerTokens';
 import { validatePronunciationMarkers } from '../utils/pronunciationMarkers';
+import { decodeTakeToPcm16k } from '../utils/speech/pcm';
 
 /**
  * What the UI calls: reads the user's settings and language, decides what is
@@ -166,16 +167,36 @@ export function fetchPronunciationMarkers(source: string, session = createPronun
   return session.fetch(source);
 }
 
-/** Not cached: every recording is different. */
-export function assessPronunciation(params: {
+/**
+ * Not cached: every recording is different. A configured audio assessment provider scores the take
+ * itself (the browser transcript is not sent to it); without one the text AI keeps the old path.
+ * There is no fallback between the two: a failure on the chosen path reaches the UI as is.
+ */
+export async function assessPronunciation(params: {
   referenceText: string;
   audioBase64?: string;
   mimeType?: string;
+  /** The recorded take, decoded to PCM for the audio assessment provider. */
+  audio?: Blob;
   userTranscript?: string;
+  signal?: AbortSignal;
 }): Promise<PronunciationAssessment> {
-  const { audioBase64, mimeType, ...rest } = params;
+  const access = getAiAccess();
+  if (access.isConfigured('assessment')) {
+    // The reference text alone must never pass for a read: without the take there is nothing to score.
+    if (!params.audio) throw new Error(i18n.t('errors.noSpeechToScore'));
+    const { referenceText, signal } = params;
+    return decodeTakeToPcm16k(params.audio).then((pcm) =>
+      access.assess({ pcm, referenceText, locale: 'fr-FR', signal }),
+    );
+  }
+  const { referenceText, userTranscript, audioBase64, mimeType } = params;
   return ai.assessPronunciation(
-    { ...rest, audio: audioBase64 ? { base64: audioBase64, mimeType: mimeType || 'audio/webm' } : undefined },
+    {
+      referenceText,
+      userTranscript,
+      audio: audioBase64 ? { base64: audioBase64, mimeType: mimeType || 'audio/webm' } : undefined,
+    },
     context(),
   );
 }
