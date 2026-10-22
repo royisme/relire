@@ -624,6 +624,11 @@
     "consonants": "辅音",
     "play": "播放 {{word}}，音标 {{symbol}}"
   },
+  "minimalPairs": {
+    "notes": {
+      "tendency": "这是倾向而不是固定规则：许多讲标准法语的人会在开音节中合并这两个元音。"
+    }
+  },
   "levels": {
     "A1": "A1 · 入门",
     "A2": "A2 · 初级",
