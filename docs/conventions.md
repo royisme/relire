@@ -22,6 +22,8 @@ Technical documentation, code comments, commit messages and PR text are in Engli
 
 Use a shadcn/ui component (Base UI) first: `bunx shadcn@latest add <name>`. Generated files live in `src/components/ui/` and are edited only to fit our tokens. Write a custom component only when no library component exists. Data tables compose `ui/table` with `@tanstack/react-table` at the page that needs them, not through a shared DataTable abstraction. Existing hand-written components are not migrated by this setup. Owner decision 2026-10-18.
 
+Kept hand-written on purpose (owner decision 2026-10-22, issue #22): `overlay` (`Dialog`, `Sheet`, `Drawer`), `segmented`, `menu-button`. They work and their behaviour is pinned by the specs, so replacing them would change how they feel for no gain. A library equivalent exists for each; use it only if one of these has to be rewritten anyway. New components still follow the rule above.
+
 ## Controls never move the page
 
 A transient state (loading, playing, recording, an error) shows on the control itself or in an overlay, never as a row that appears and disappears. The full UI form is in `.claude/rules/ui.md`; `verify-ui` checks it with before/after layout assertions.
