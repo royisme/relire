@@ -44,7 +44,7 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed, 
         )}
 
         {hasRecording && (
-          <Button variant={quiet ? 'outline' : 'default'} onClick={r.assess} disabled={r.isEvaluating}>
+          <Button variant={quiet ? 'outline' : 'default'} onClick={r.assess} disabled={r.isEvaluating || r.isStarting}>
             {r.isEvaluating ? (
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
             ) : (

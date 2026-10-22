@@ -41,6 +41,8 @@ export function useShadowingRecorder(
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [assessment, setAssessment] = useState<PronunciationAssessment | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  /** True while the microphone for a new take is still starting, so the old take cannot be checked. */
+  const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<RecorderError | null>(null);
 
   const recorder = useRef<FrenchAudioRecorder | null>(null);
@@ -90,6 +92,7 @@ export function useShadowingRecorder(
     setAudioUrl(null);
     setAssessment(null);
     setIsEvaluating(false);
+    setIsStarting(false);
     setError(null);
   }
   // ...and leaving it, or the screen, closes the microphone.
@@ -104,6 +107,8 @@ export function useShadowingRecorder(
     assessAbort.current?.abort();
     assessAbort.current = null;
     setIsEvaluating(false);
+    // The old take stays on screen until the microphone answers; it must not be checkable meanwhile.
+    setIsStarting(true);
 
     const rec = new FrenchAudioRecorder();
     let ok: boolean;
@@ -118,7 +123,10 @@ export function useShadowingRecorder(
         setPhase('idle');
       });
     } catch (err) {
-      if (mine === session.current) setError(err instanceof CaptureBusyError ? { kind: 'busy' } : { kind: 'mic' });
+      if (mine === session.current) {
+        setError(err instanceof CaptureBusyError ? { kind: 'busy' } : { kind: 'mic' });
+        setIsStarting(false);
+      }
       return;
     }
     if (mine !== session.current) {
@@ -127,6 +135,7 @@ export function useShadowingRecorder(
     }
     if (!ok) {
       setError({ kind: 'mic' });
+      setIsStarting(false);
       return;
     }
     recorder.current = rec;
@@ -137,6 +146,7 @@ export function useShadowingRecorder(
     recording.current = null;
     setAudioUrl(null);
     setPhase('recording');
+    setIsStarting(false);
     setSeconds(0);
     timer.current = window.setInterval(() => setSeconds((s) => s + 1), 1000);
 
@@ -215,5 +225,5 @@ export function useShadowingRecorder(
     }
   }, [referenceText]);
 
-  return { phase, seconds, audioUrl, assessment, isEvaluating, error, start, stop, assess };
+  return { phase, seconds, audioUrl, assessment, isEvaluating, isStarting, error, start, stop, assess };
 }
