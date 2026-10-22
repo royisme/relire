@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- **Azure pronunciation assessment access.** Settings has a new Pronunciation assessment purpose where you enter your own Azure Speech key and region; Check proves them with a short silent request and no microphone. Key and region stay on this device and are never in backups. Nothing scores your recordings with it yet: the practice screens are not wired to it, and it has not been tried against the real Azure service.
 - **Four more compound tenses.** Plus-que-parfait, futur antérieur, conditionnel passé and subjonctif passé appear on the Conjugation page, the word sheet, in drills and in sentence patterns. Verbs in the grammar pack are reviewed; AI-made tables are not checked.
 - **Noun gender without a key.** My study → Grammar → Gender shows all 17 reviewed ending tendencies with dictionary and A1 counts, examples and sample exceptions. Make local drills from 337 reviewed A1 nouns, including exceptions; checking reveals the saved tendency and exception note. Noun lookups show the longest matching ending under the meaning, without asserting an unknown noun's gender.
 - The supplied vocabulary source has a private normalized draft and recorded attribution/hash metadata. It is not marked reviewed or available for download; content approval is still required before local publication.
