@@ -1,11 +1,12 @@
 import { expect, test } from 'bun:test';
 import { cellAt, checkControls, checkVerb } from '../scripts/grammar-pack/checks';
-import type { VerbSpec } from '../src/services/conjugation/generate';
+import { generateVerb, type IrregularEntry, type VerbSpec } from '../src/services/conjugation/generate';
 import { composeLead } from '../src/services/conjugation/rules';
 import {
   FINITE_PERSONS,
   IMPERATIVE_PERSONS,
   RuleIdSchema,
+  type ImperativePerson,
   type Tense,
   type RuleId,
   type Verb,
@@ -288,6 +289,37 @@ test('imperatif has no lead and pronominal verbs carry the hyphenated clitic', (
   expect(lever.tenses.imperatif!['2sg']!.forms).toEqual(['lève-toi']);
   expect(lever.tenses.imperatif!['1pl']!.forms).toEqual(['levons-nous']);
   expect(lever.tenses.imperatif!['2pl']!.forms).toEqual(['levez-vous']);
+});
+
+test('an imperatif override may list second forms after the primary; a string value still yields one', () => {
+  // Synthetic entry: the forms are not French data, only the override shape is under test.
+  const entry = (imperatif: Record<ImperativePerson, string | string[]>): IrregularEntry => ({
+    participles: { present: 'vant', past: 'vu' },
+    forms: {
+      present: { '1sg': 'va', '2sg': 'vas', '3sg': 'vat', '1pl': 'vons', '2pl': 'vez', '3pl': 'vent' },
+      imparfaitStem: 'v',
+      futurStem: 'vr',
+      subjonctif: { '1sg': 've', '2sg': 'ves', '3sg': 've', '1pl': 'vions', '2pl': 'viez', '3pl': 'vent' },
+      imperatif,
+    },
+  });
+  const spec: VerbSpec = { id: 'synthetic', infinitive: 'synthetic', rule: 'irregular', aux: 'avoir' };
+  const listed = generateVerb(spec, {
+    synthetic: entry({ '2sg': ['a', 'b'], '1pl': ['c', 'd', 'e'], '2pl': 'f' }),
+  }).verb;
+  expect(listed.tenses.imperatif).toEqual({
+    '2sg': { lead: '', forms: ['a', 'b'] },
+    '1pl': { lead: '', forms: ['c', 'd', 'e'] },
+    '2pl': { lead: '', forms: ['f'] },
+  });
+  const single = generateVerb(spec, {
+    synthetic: entry({ '2sg': 'a', '1pl': 'c', '2pl': 'f' }),
+  }).verb;
+  expect(single.tenses.imperatif).toEqual({
+    '2sg': { lead: '', forms: ['a'] },
+    '1pl': { lead: '', forms: ['c'] },
+    '2pl': { lead: '', forms: ['f'] },
+  });
 });
 
 test('passé composé: agreement variants, avoir without them, pcInvariable without them', () => {

@@ -69,7 +69,7 @@
       "imparfaitStem": "voul",
       "futurStem": "voudr",
       "subjonctif": { "1sg": "veuille", "2sg": "veuilles", "3sg": "veuille", "1pl": "voulions", "2pl": "vouliez", "3pl": "veuillent" },
-      "imperatif": { "2sg": "veuille", "1pl": "veuillons", "2pl": "veuillez" }
+      "imperatif": { "2sg": ["veuille", "veux"], "1pl": ["veuillons", "voulons"], "2pl": ["veuillez", "voulez"] }
     }
   },
   "savoir": {

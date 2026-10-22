@@ -124,6 +124,7 @@ export const GOLDEN_LC1_AVOIR: Record<string, GoldenVerb> = {
     subjonctifPasse:
       'que j’|aie pu; que tu|aies pu; qu’il/elle|ait pu; que nous|ayons pu; que vous|ayez pu; qu’ils/elles|aient pu',
   }),
+  // vouloir's imperative second forms (veux/voulons/voulez) are the owner's decision (2026-10-22), not worker knowledge.
   vouloir: golden('vouloir|vouloir|avoir|irregular|voulant|voulu|voulue|voulus|voulues', {
     present: 'je|veux; tu|veux; il/elle|veut; nous|voulons; vous|voulez; ils/elles|veulent',
     passeCompose: 'j’|ai voulu; tu|as voulu; il/elle|a voulu; nous|avons voulu; vous|avez voulu; ils/elles|ont voulu',
@@ -140,7 +141,7 @@ export const GOLDEN_LC1_AVOIR: Record<string, GoldenVerb> = {
       'que je|veuille; que tu|veuilles; qu’il/elle|veuille; que nous|voulions; que vous|vouliez; qu’ils/elles|veuillent',
     subjonctifPasse:
       'que j’|aie voulu; que tu|aies voulu; qu’il/elle|ait voulu; que nous|ayons voulu; que vous|ayez voulu; qu’ils/elles|aient voulu',
-    imperatif: '|veuille; |veuillons; |veuillez',
+    imperatif: '|veuille|veux; |veuillons|voulons; |veuillez|voulez',
   }),
   savoir: golden('savoir|savoir|avoir|irregular|sachant|su|sue|sus|sues', {
     present: 'je|sais; tu|sais; il/elle|sait; nous|savons; vous|savez; ils/elles|savent',
