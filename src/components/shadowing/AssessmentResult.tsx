@@ -32,12 +32,15 @@ export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }>
 
   return (
     <div className="rounded-lg border border-ink-200 bg-ink-50 p-4 sm:p-5 space-y-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <h4 className="text-sm font-medium text-ink-800">{t('shadowing.overall')}</h4>
-        <p className="font-serif text-ink-900 tnum">
-          <span className="text-3xl font-semibold">{assessment.overallScore}</span>
-          <span className="ml-1 text-sm text-ink-500">/ 100</span>
-        </p>
+      <div className="space-y-1">
+        <div className="flex items-baseline justify-between gap-3">
+          <h4 className="text-sm font-medium text-ink-800">{t('shadowing.overall')}</h4>
+          <p className="font-serif text-ink-900 tnum">
+            <span className="text-3xl font-semibold">{assessment.overallScore}</span>
+            <span className="ml-1 text-sm text-ink-500">/ 100</span>
+          </p>
+        </div>
+        <p className="text-xs text-ink-500">{t('shadowing.estimate')}</p>
       </div>
 
       <dl className={`grid gap-2 ${assessment.rhythmScore === undefined ? 'grid-cols-2' : 'grid-cols-3'}`}>

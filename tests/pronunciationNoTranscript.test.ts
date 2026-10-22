@@ -22,7 +22,8 @@ function fakeAccess(answer: unknown, listen = false) {
   provider.supportsAudioInput = listen;
   const execution = contextOf(provider, 'unknown').execution;
   const access: AiAccess = {
-    isConfigured: mock((_purpose: AiPurpose) => true),
+    // Text AI is what this file exercises; the assessment provider stays unconfigured so its path is not taken.
+    isConfigured: mock((purpose: AiPurpose) => purpose !== 'assessment'),
     selection: (purpose: AiPurpose) => ({
       providerId: 'gemini',
       model: `custom-${purpose}`,
