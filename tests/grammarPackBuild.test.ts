@@ -39,8 +39,11 @@ function failure(input: BuildInputs): string {
   throw new Error('Expected the build to fail');
 }
 
-test('authored seed contains exactly the control specs', () => {
-  expect(sourceJson.verbs).toEqual(CONTROL_SPECS);
+test('authored seed starts with exactly the control specs', () => {
+  // The seed grows verb by verb as batches are reviewed; the controls stay its first rows, unchanged.
+  // The JSON literal widens flags to boolean, so the slice is asserted as the specs it feeds the build.
+  expect(sourceJson.verbs.slice(0, CONTROL_SPECS.length) as generator.VerbSpec[]).toEqual(CONTROL_SPECS);
+  expect(new Set(sourceJson.verbs.map(({ id }) => id)).size).toBe(sourceJson.verbs.length);
   expect(sourceJson.packVersion).toBe('0.1.0');
 });
 

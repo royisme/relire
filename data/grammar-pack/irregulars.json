@@ -34,5 +34,124 @@
       "subjonctif": { "1sg": "aie", "2sg": "aies", "3sg": "ait", "1pl": "ayons", "2pl": "ayez", "3pl": "aient" },
       "imperatif": { "2sg": "aie", "1pl": "ayons", "2pl": "ayez" }
     }
+  },
+  "faire": {
+    "participles": { "present": "faisant", "past": "fait" },
+    "forms": {
+      "present": { "1sg": "fais", "2sg": "fais", "3sg": "fait", "1pl": "faisons", "2pl": "faites", "3pl": "font" },
+      "imparfaitStem": "fais",
+      "futurStem": "fer",
+      "subjonctif": { "1sg": "fasse", "2sg": "fasses", "3sg": "fasse", "1pl": "fassions", "2pl": "fassiez", "3pl": "fassent" }
+    }
+  },
+  "prendre": {
+    "participles": { "present": "prenant", "past": "pris" },
+    "forms": {
+      "present": { "1sg": "prends", "2sg": "prends", "3sg": "prend", "1pl": "prenons", "2pl": "prenez", "3pl": "prennent" },
+      "imparfaitStem": "pren",
+      "futurStem": "prendr",
+      "subjonctif": { "1sg": "prenne", "2sg": "prennes", "3sg": "prenne", "1pl": "prenions", "2pl": "preniez", "3pl": "prennent" }
+    }
+  },
+  "pouvoir": {
+    "participles": { "present": "pouvant", "past": "pu" },
+    "forms": {
+      "present": { "1sg": "peux", "2sg": "peux", "3sg": "peut", "1pl": "pouvons", "2pl": "pouvez", "3pl": "peuvent" },
+      "imparfaitStem": "pouv",
+      "futurStem": "pourr",
+      "subjonctif": { "1sg": "puisse", "2sg": "puisses", "3sg": "puisse", "1pl": "puissions", "2pl": "puissiez", "3pl": "puissent" }
+    }
+  },
+  "vouloir": {
+    "participles": { "present": "voulant", "past": "voulu" },
+    "forms": {
+      "present": { "1sg": "veux", "2sg": "veux", "3sg": "veut", "1pl": "voulons", "2pl": "voulez", "3pl": "veulent" },
+      "imparfaitStem": "voul",
+      "futurStem": "voudr",
+      "subjonctif": { "1sg": "veuille", "2sg": "veuilles", "3sg": "veuille", "1pl": "voulions", "2pl": "vouliez", "3pl": "veuillent" },
+      "imperatif": { "2sg": ["veuille", "veux"], "1pl": ["veuillons", "voulons"], "2pl": ["veuillez", "voulez"] }
+    }
+  },
+  "savoir": {
+    "participles": { "present": "sachant", "past": "su" },
+    "forms": {
+      "present": { "1sg": "sais", "2sg": "sais", "3sg": "sait", "1pl": "savons", "2pl": "savez", "3pl": "savent" },
+      "imparfaitStem": "sav",
+      "futurStem": "saur",
+      "subjonctif": { "1sg": "sache", "2sg": "saches", "3sg": "sache", "1pl": "sachions", "2pl": "sachiez", "3pl": "sachent" },
+      "imperatif": { "2sg": "sache", "1pl": "sachons", "2pl": "sachez" }
+    }
+  },
+  "voir": {
+    "participles": { "present": "voyant", "past": "vu" },
+    "forms": {
+      "present": { "1sg": "vois", "2sg": "vois", "3sg": "voit", "1pl": "voyons", "2pl": "voyez", "3pl": "voient" },
+      "imparfaitStem": "voy",
+      "futurStem": "verr",
+      "subjonctif": { "1sg": "voie", "2sg": "voies", "3sg": "voie", "1pl": "voyions", "2pl": "voyiez", "3pl": "voient" }
+    }
+  },
+  "dire": {
+    "participles": { "present": "disant", "past": "dit" },
+    "forms": {
+      "present": { "1sg": "dis", "2sg": "dis", "3sg": "dit", "1pl": "disons", "2pl": "dites", "3pl": "disent" },
+      "imparfaitStem": "dis",
+      "futurStem": "dir",
+      "subjonctif": { "1sg": "dise", "2sg": "dises", "3sg": "dise", "1pl": "disions", "2pl": "disiez", "3pl": "disent" }
+    }
+  },
+  "mettre": {
+    "participles": { "present": "mettant", "past": "mis" },
+    "forms": {
+      "present": { "1sg": "mets", "2sg": "mets", "3sg": "met", "1pl": "mettons", "2pl": "mettez", "3pl": "mettent" },
+      "imparfaitStem": "mett",
+      "futurStem": "mettr",
+      "subjonctif": { "1sg": "mette", "2sg": "mettes", "3sg": "mette", "1pl": "mettions", "2pl": "mettiez", "3pl": "mettent" }
+    }
+  },
+  "lire": {
+    "participles": { "present": "lisant", "past": "lu" },
+    "forms": {
+      "present": { "1sg": "lis", "2sg": "lis", "3sg": "lit", "1pl": "lisons", "2pl": "lisez", "3pl": "lisent" },
+      "imparfaitStem": "lis",
+      "futurStem": "lir",
+      "subjonctif": { "1sg": "lise", "2sg": "lises", "3sg": "lise", "1pl": "lisions", "2pl": "lisiez", "3pl": "lisent" }
+    }
+  },
+  "ecrire": {
+    "participles": { "present": "écrivant", "past": "écrit" },
+    "forms": {
+      "present": { "1sg": "écris", "2sg": "écris", "3sg": "écrit", "1pl": "écrivons", "2pl": "écrivez", "3pl": "écrivent" },
+      "imparfaitStem": "écriv",
+      "futurStem": "écrir",
+      "subjonctif": { "1sg": "écrive", "2sg": "écrives", "3sg": "écrive", "1pl": "écrivions", "2pl": "écriviez", "3pl": "écrivent" }
+    }
+  },
+  "boire": {
+    "participles": { "present": "buvant", "past": "bu" },
+    "forms": {
+      "present": { "1sg": "bois", "2sg": "bois", "3sg": "boit", "1pl": "buvons", "2pl": "buvez", "3pl": "boivent" },
+      "imparfaitStem": "buv",
+      "futurStem": "boir",
+      "subjonctif": { "1sg": "boive", "2sg": "boives", "3sg": "boive", "1pl": "buvions", "2pl": "buviez", "3pl": "boivent" }
+    }
+  },
+  "croire": {
+    "participles": { "present": "croyant", "past": "cru" },
+    "forms": {
+      "present": { "1sg": "crois", "2sg": "crois", "3sg": "croit", "1pl": "croyons", "2pl": "croyez", "3pl": "croient" },
+      "imparfaitStem": "croy",
+      "futurStem": "croir",
+      "subjonctif": { "1sg": "croie", "2sg": "croies", "3sg": "croie", "1pl": "croyions", "2pl": "croyiez", "3pl": "croient" }
+    }
+  },
+  "venir": {
+    "participles": { "present": "venant", "past": "venu" },
+    "forms": {
+      "present": { "1sg": "viens", "2sg": "viens", "3sg": "vient", "1pl": "venons", "2pl": "venez", "3pl": "viennent" },
+      "imparfaitStem": "ven",
+      "futurStem": "viendr",
+      "subjonctif": { "1sg": "vienne", "2sg": "viennes", "3sg": "vienne", "1pl": "venions", "2pl": "veniez", "3pl": "viennent" }
+    }
   }
 }

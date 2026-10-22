@@ -54,8 +54,8 @@ export interface IrregularForms {
   imparfaitStem: string;
   futurStem: string;
   subjonctif: Partial<Record<Person, string>>;
-  /** Overrides the imperatif derived from the present (être, avoir). */
-  imperatif?: Record<ImperativePerson, string>;
+  /** Overrides the imperatif derived from the present; a list value carries second forms after the primary (vouloir). */
+  imperatif?: Record<ImperativePerson, string | string[]>;
 }
 
 /** `forms` is required for rule `irregular`; other rules read only the past participle (`ouvert`). */
@@ -96,7 +96,7 @@ interface TensesAndParticiples {
   simple: Omit<SimpleParts, 'imperatif'>;
   presentParticiple?: Parts;
   past: string;
-  imperatif?: Record<ImperativePerson, string>;
+  imperatif?: Record<ImperativePerson, string | string[]>;
 }
 
 function regularParts(spec: VerbSpec, persons: readonly Person[], entry?: IrregularEntry): TensesAndParticiples {
@@ -152,9 +152,11 @@ export function generateVerb(spec: VerbSpec, irregulars: Record<string, Irregula
   if (!spec.defective && !spec.noImperative) {
     for (const person of IMPERATIVE_PERSONS) {
       const clitic = pronominal ? IMPERATIVE_CLITICS[person] : undefined;
-      const variants: Parts[] = built.imperatif
-        ? [{ stem: built.imperatif[person], ending: '' }]
-        : (built.simple.present[person] ?? []).map((parts) => (person === '2sg' ? dropS(parts) : parts));
+      const override = built.imperatif?.[person];
+      const variants: Parts[] =
+        override !== undefined
+          ? (typeof override === 'string' ? [override] : override).map((form) => ({ stem: form, ending: '' }))
+          : (built.simple.present[person] ?? []).map((parts) => (person === '2sg' ? dropS(parts) : parts));
       imperatifParts[person] = variants.map((parts) => (clitic ? { ...parts, clitic } : parts));
     }
   }
