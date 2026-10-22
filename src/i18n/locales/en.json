@@ -12,6 +12,10 @@
     "done": "Done",
     "listSeparator": "; "
   },
+  "pageFailure": {
+    "message": "This page could not be shown: {{msg}}",
+    "retry": "Try again"
+  },
   "nav": {
     "vocab": "My study",
     "analytics": "Progress",

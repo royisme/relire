@@ -12,6 +12,10 @@
     "done": "完成",
     "listSeparator": "；"
   },
+  "pageFailure": {
+    "message": "页面未能显示：{{msg}}",
+    "retry": "重试"
+  },
   "nav": {
     "vocab": "我的学习",
     "analytics": "进度",
