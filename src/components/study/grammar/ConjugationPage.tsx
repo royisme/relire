@@ -1,21 +1,34 @@
 /**
- * My study → Grammar → Conjugation: one input and a Conjugate button, and the result below. The input and
- * button never change size and the result region keeps a minimum height, so a request moves nothing; a failure
- * shows its real reason at the top of that region. Owns the typed text and the prefill from `?verb=`. Does not
- * own the request (hooks/useConjugation) or the result's drawing (ConjugationResult).
+ * My study → Grammar → Conjugation: one input, a compact row of the reviewed pack's verbs beside it so the common
+ * case needs no typing, and a Conjugate button; the result below. The input and button never change size and the
+ * result region keeps a minimum height, so a request moves nothing; a failure shows its real reason at the top of
+ * that region. Pressing a practise button makes the drills in place, in a region under the result, and never
+ * navigates. Owns the typed text, the prefill from `?verb=` and that region. Does not own the request
+ * (hooks/useConjugation) or the result's drawing (ConjugationResult).
  */
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConjugation } from '../../../hooks/useConjugation';
+import { useGrammarPack } from '../../../hooks/useGrammarPack';
+import type { VocabularyWordLookup } from '../../../services/vocabulary/identity';
 import { Button } from '../../ui/button';
 import { PageHeader } from '../../ui/page-header';
-import { ConjugationResult } from './ConjugationResult';
+import { ConjugationPractice } from './ConjugationPractice';
 
-export function ConjugationPage({ initialVerb }: { initialVerb?: string }) {
+export function ConjugationPage({
+  initialVerb,
+  onWord,
+  onMissingKey,
+}: {
+  initialVerb?: string;
+  onWord: VocabularyWordLookup;
+  onMissingKey: () => void;
+}) {
   const { t } = useTranslation();
   const [typed, setTyped] = useState(initialVerb ?? '');
   const { working, result, error, run } = useConjugation();
+  const pack = useGrammarPack();
 
   // The page is keyed by the address's verb, so this runs once per prefill.
   useEffect(() => {
@@ -52,6 +65,27 @@ export function ConjugationPage({ initialVerb }: { initialVerb?: string }) {
             {t(working ? 'conjugation.page.working' : 'conjugation.page.button')}
           </Button>
         </div>
+        {/* The reviewed verbs, so the usual case is one press and no typing; the input stays for any other verb. */}
+        {pack.status === 'ready' && pack.pack && (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <span className="mr-1 text-xs text-ink-500">{t('conjugation.page.packVerbs')}</span>
+            {pack.pack.verbs.map((verb) => (
+              <Button
+                key={verb.id}
+                type="button"
+                variant="ghost"
+                size="sm"
+                lang="fr"
+                onClick={() => {
+                  setTyped(verb.infinitive);
+                  run(verb.infinitive);
+                }}
+              >
+                {verb.infinitive}
+              </Button>
+            ))}
+          </div>
+        )}
       </form>
       <div aria-busy={working} className="min-h-96">
         {error ? (
@@ -59,7 +93,12 @@ export function ConjugationPage({ initialVerb }: { initialVerb?: string }) {
             {error}
           </p>
         ) : result ? (
-          <ConjugationResult result={result} />
+          <ConjugationPractice
+            key={result.verb.infinitive}
+            result={result}
+            onWord={onWord}
+            onMissingKey={onMissingKey}
+          />
         ) : (
           <p className="text-sm text-ink-500">{t('conjugation.page.empty')}</p>
         )}
