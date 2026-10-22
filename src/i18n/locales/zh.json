@@ -636,6 +636,12 @@
     "play": "播放 {{word}}，音标 {{symbol}}"
   },
   "minimalPairs": {
+    "progress": {
+      "title": "近音辨听作答",
+      "history": "统计仍保存的近音辨听练习的每次作答，包括重复作答。删除题组后，其作答不再计入这里的统计。",
+      "contrast": "/{{first}}/ ↔ /{{second}}/",
+      "counts": "共 {{total}} 次，答对 {{correct}} 次"
+    },
     "readAloud": {
       "title": "朗读练习",
       "word": "选择要练习的词",
