@@ -115,6 +115,9 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ### Fixed
 - The pronunciation check prompts no longer show example scores the model could copy.
 - A pronunciation check with no audio and no transcript now says so instead of scoring the reference text.
+- **The Azure read-aloud result shows each word's score.** The words of the sentence appear in order with their accuracy score, a plain label for an omitted, extra or mispronounced word, and the completeness score when Azure gives one. There are no pass or fail colours and no phoneme scores. Not tried against real speech in a browser yet.
+- **A page that fails to load no longer blanks the app.** If a page's code cannot be fetched (for example an interrupted first load), the page area shows the real error and a Try again button while the navigation stays usable.
+- **The Conjugation page wording is more accurate.** The subtitle, the imparfait, subjunctive and imperative notes, the -yer, -e/è and -é/è rule captions, the -iss- caption, the third person labels and the note on inversion with je were corrected in English and Chinese. Other wording suggestions from the language review are waiting for your decision.
 - Pressing Record again while a read-aloud check is running now cancels that check, so the Check button works for the new take instead of spinning until the sentence changes. When Azure scoring is on and nothing is recorded, the message now asks you to record the sentence instead of mentioning a browser transcript. The Check button also stays disabled while Record again waits for the microphone, so it can no longer score the take you just dropped.
 - Local vocabulary publication now binds page content so large Unicode pages can be imported intact without exceeding SQLite's SQL statement limit.
 - Dictionary preparation no longer rejects unused original-field arrays; raw source data stays out of normalized and published content.
