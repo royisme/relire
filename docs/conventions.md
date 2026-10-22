@@ -26,7 +26,7 @@ Kept hand-written on purpose (owner decision 2026-10-22, issue #22): `overlay` (
 
 ## Controls never move the page
 
-A transient state (loading, playing, recording, an error) shows on the control itself or in an overlay, never as a row that appears and disappears. The full UI form is in `.claude/rules/ui.md`; `verify-ui` checks it with before/after layout assertions.
+A transient state (loading, playing, recording, an error) shows on the control itself or in an overlay, never as a row that appears and disappears. The full UI form is in `.claude/rules/ui.md`; the owner checks it by hand, and `verify-ui` says when browser automation is justified.
 
 ## Changelog
 
