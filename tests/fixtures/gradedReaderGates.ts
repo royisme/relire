@@ -32,6 +32,8 @@ export const testRows: (LexiconCandidate & { form: string })[] = [
 export function gateFixture(): { draft: ReaderDraft; context: GateContext } {
   const body = gradedReaderFixture();
   const syllabus = ReaderSyllabusSchema.parse(structuredClone(syllabusJson));
+  // Publication state of the committed syllabus changes as readers are reviewed; start from a known one.
+  for (const stage of syllabus.stages) Object.assign(stage, { include: false, bundled: false });
   syllabus.stages[0].readerId = body.id;
   syllabus.stages[0].include = true;
   const core = body.glossary
