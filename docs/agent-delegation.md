@@ -141,7 +141,7 @@ Browser automation is exceptional for necessary critical frontend/backend, brows
 
 ## 6. Worker prompt template
 
-pi loads relire's `CLAUDE.md` (context-file discovery covers `AGENTS.md` and `CLAUDE.md`), but **not** `.claude/rules/*.md`, which only Claude Code auto-loads. agy-lean is told to read repo rules, but does not inherit them. Name the rule files in the prompt. In the template, `<worktree>` is the absolute path of the task's worktree and `<lead-checkout>` the absolute path of the lead's own checkout; fill both in before dispatching.
+pi loads relire's `AGENTS.md` (context-file discovery covers `AGENTS.md` and `CLAUDE.md`; `CLAUDE.md` only imports `AGENTS.md`), but **not** `.claude/rules/*.md`, which only Claude Code auto-loads. agy-lean is told to read repo rules, but does not inherit them. Name the rule files in the prompt. In the template, `<worktree>` is the absolute path of the task's worktree and `<lead-checkout>` the absolute path of the lead's own checkout; fill both in before dispatching.
 
 ```markdown
 You are the implementer for one task in Relire, working in the git worktree <worktree> on branch pi/<task>.

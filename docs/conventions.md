@@ -1,6 +1,6 @@
 # Conventions
 
-The long form of the hard rules in `CLAUDE.md`. Area-specific rules live in `.claude/rules/*.md` and are not repeated here.
+The long form of the hard rules in `AGENTS.md`. Area-specific rules live in `.claude/rules/*.md` and are not repeated here.
 
 ## Strings and locales
 
