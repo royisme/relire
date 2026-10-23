@@ -50,6 +50,12 @@ const PracticeSetPage = retryableLazy(async () => ({
   default: (await import('./components/practice/PracticeSetPage')).PracticeSetPage,
 }));
 const GrammarSection = retryableLazy(() => import('./components/study/grammar/GrammarSection'));
+const GradedReadersPage = retryableLazy(async () => ({
+  default: (await import('./components/graded/GradedReadersPage')).GradedReadersPage,
+}));
+const GradedReaderPage = retryableLazy(async () => ({
+  default: (await import('./components/graded/GradedReaderPage')).GradedReaderPage,
+}));
 
 const ONBOARDING_KEY = 'relire_onboarded';
 /** The reader the guide opens: the first bundled one, or none while the app bundles no reader yet. */
@@ -67,7 +73,9 @@ export default function App() {
   // Where the learner is: the address decides the screen (see utils/routes.ts).
   const route = useRoute();
   const breakpoint = useBreakpoint();
-  const sidebar = useSidebar(route.name === 'reader' || route.name === 'passage' || route.name === 'unit');
+  const sidebar = useSidebar(
+    route.name === 'reader' || route.name === 'passage' || route.name === 'gradedReader' || route.name === 'unit',
+  );
   // The source the log opens at (set when the reader sends the learner to its recordings).
   const [logSourceId, setLogSourceId] = useState<string | null>(null);
 
@@ -266,13 +274,16 @@ export default function App() {
             )}
             {route.name === 'importExercises' && <ImportExercisesPage key={route.area} area={route.area} />}
             {(route.name === 'library' ||
+              route.name === 'gradedReaders' ||
               route.name === 'grammar' ||
               route.name === 'grammarTopic' ||
               (route.name === 'practice' && (route.area === 'reading' || route.area === 'grammar'))) && (
               <div className="mx-auto max-w-5xl px-4 pt-6 sm:px-6">
                 <LearningNavigation
                   area={
-                    route.name === 'library' || (route.name === 'practice' && route.area === 'reading')
+                    route.name === 'library' ||
+                    route.name === 'gradedReaders' ||
+                    (route.name === 'practice' && route.area === 'reading')
                       ? 'read'
                       : 'grammar'
                   }
@@ -290,6 +301,22 @@ export default function App() {
                 onDelete={handleDeleteArticle}
                 onRestoreSamples={handleRestoreSamples}
               />
+            )}
+
+            {(route.name === 'gradedReaders' || route.name === 'gradedReader') && (
+              <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+                {route.name === 'gradedReaders' ? (
+                  <GradedReadersPage />
+                ) : (
+                  <GradedReaderPage
+                    key={`${route.readerId}:${route.version ?? ''}`}
+                    readerId={route.readerId}
+                    version={route.version}
+                    sentence={route.sentence}
+                    vocabulary={vocabulary}
+                  />
+                )}
+              </Suspense>
             )}
 
             {(route.name === 'reader' || route.name === 'passage') &&

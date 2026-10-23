@@ -33,7 +33,14 @@ export function SentenceAuthored({ sentence, revealed, onToggle, extra }: Senten
       </section>
 
       <div className="space-y-2">
-        <Button variant="outline" size="sm" aria-expanded={revealed} aria-controls={slot} onClick={onToggle}>
+        <Button
+          variant="outline"
+          className="min-h-10"
+          size="sm"
+          aria-expanded={revealed}
+          aria-controls={slot}
+          onClick={onToggle}
+        >
           {t(revealed ? 'gradedReader.hideTranslation' : 'gradedReader.showTranslation')}
         </Button>
         {/* Fixed height in both states, so revealing never moves the controls around it. */}
