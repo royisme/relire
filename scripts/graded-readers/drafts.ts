@@ -102,7 +102,7 @@ export type Core = z.infer<typeof CoreSchema>;
 export type Candidates = z.infer<typeof CandidatesSchema>;
 export const privateDraftDirectory = join(repositoryRoot, '.local/graded-readers');
 
-async function writeJson(file: string, value: unknown): Promise<void> {
+export async function writeJson(file: string, value: unknown): Promise<void> {
   const temporary = `${file}.${randomUUID()}.tmp`;
   try {
     await Bun.write(temporary, JSON.stringify(value, null, 2) + '\n');

@@ -267,9 +267,10 @@ export const StageSchema = z
   });
 export type Stage = z.infer<typeof StageSchema>;
 
+const semver = text.regex(/^\d+\.\d+\.\d+$/);
 export const ReaderSyllabusSchema = z
   .strictObject({
-    syllabusVersion: text.regex(/^\d+\.\d+\.\d+$/),
+    syllabusVersion: semver,
     stages: z.array(StageSchema).length(12),
   })
   .superRefine((syllabus, ctx) => {
@@ -296,3 +297,11 @@ export const ReaderReviewsSchema = z.strictObject({
   records: z.array(review.safeExtend({ readerId: slug })),
 });
 export type ReaderReviews = z.infer<typeof ReaderReviewsSchema>;
+
+/** The bundled starter export: strict at every level, so no private annotation can ride along. */
+export const StarterFileSchema = z.strictObject({
+  schemaVersion: z.literal(1),
+  syllabusVersion: semver,
+  readers: z.array(PublishedReaderSchema),
+});
+export type StarterFile = z.infer<typeof StarterFileSchema>;

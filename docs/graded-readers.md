@@ -1,6 +1,6 @@
 # Graded readers: authoring pipeline
 
-How the pilot readers for zero-basis learners are produced and reviewed. Scope, syllabus, owner decisions and risks: [graded-readers-plan.md](graded-readers-plan.md). Status: tooling built (R0); no pilot content exists yet, every stage in `data/graded-readers/syllabus.json` is `include: false`, and nothing ships to learners until R1.
+How the pilot readers for zero-basis learners are produced and reviewed. Scope, syllabus, owner decisions and risks: [graded-readers-plan.md](graded-readers-plan.md). Status: tooling built (R0); pilot drafts exist only under gitignored `.local/graded-readers/`, no stage is `bundled: true` yet, and nothing ships to learners until R1.
 
 Reader text is private; only metadata is committed. A machine gate verifies forms under a supplied rule — it never verifies French. The release gate for real beginners is a qualified human language review of every final sentence, translation, gloss and checkpoint (owner decision 4). An AI review is a second filter, never human certification.
 
@@ -24,6 +24,7 @@ Everything below lives in gitignored `.local/graded-readers/` and is never commi
 4. Independent review of the sheet by a model of the other family, then fix and re-check.
 5. Owner only: `bun scripts/graded-readers/review.ts mark <readerId...> --by "<name>" --kind ai|human` appends a content-hash record to `data/graded-readers/reviews.json`; `unmark <readerId...>` removes records. The record's `reviewedBy` carries the prefix `AI review: ` or `Human review: `. Any later body edit lapses the record (hash mismatch). A worker never marks or unmarks a review.
 6. `bun scripts/graded-readers/assemble.ts --check` — the metadata-only check (also a CI step): syllabus and reviews parse, no review names an unknown reader, every included stage has a review record, excluded readers are listed. It reads nothing under `.local/` and passes without any private file.
+7. Owner only: `bun scripts/graded-readers/publish.ts` — assemble the reviewed bundled stages (the existing gates, review hashes and privacy scan re-run through `assemble`) and atomically write `src/data/graded-readers/starter.json` = `{schemaVersion, syllabusVersion, readers}` in syllabus order, then read it back through the check below. `publish.ts --check` (also a CI step) is metadata-and-artifact only: the committed starter parses as the strict public shape, is exactly the bundled stages of the committed syllabus in order under the committed `syllabusVersion`, every `version` is the canonical body hash and matches the current `reviews.json` record, and the file stays within the 100 KiB budget. The emitted lazy chunk for the same file was measured at 64 kB minified for a 165 KiB TEST starter (well inside the 120 KiB chunk budget the loader's design sets), because minification collapses the JSON. It reads nothing under `.local/` and passes with an empty reader list.
 
 ## What the gates check
 
@@ -41,8 +42,9 @@ Whether a sentence is correct, idiomatic French; whether the English and Chinese
 ## File map
 
 - `src/types/gradedReader.ts` — public Zod contracts (syllabus, review records, published reader).
-- `data/graded-readers/syllabus.json` — committed public syllabus, twelve stages, currently all excluded.
+- `data/graded-readers/syllabus.json` — committed public syllabus, twelve stages.
 - `data/graded-readers/reviews.json` — committed review records, hashes and names only, no prose.
-- `scripts/graded-readers/` — `prompt.txt`, `generate.ts`/`generator.ts`, `tokenize.ts`, the `gate*.ts` set, `check.ts`, `sheet.ts`, `review.ts`, `assemble.ts`.
+- `src/data/graded-readers/starter.json` — committed generated starter export (empty until a stage is `bundled: true`); loaded lazily and validated whole by `src/services/gradedReaders/load.ts`, never seeded into IndexedDB.
+- `scripts/graded-readers/` — `prompt.txt`, `generate.ts`/`generator.ts`, `tokenize.ts`, the `gate*.ts` set, `check.ts`, `sheet.ts`, `review.ts`, `assemble.ts`, `publish.ts`.
 - `tests/gradedReader*.test.ts` — synthetic fixtures with a fake dispatch; no real model or private file.
 - `docs/graded-readers-plan.md` — the plan this pipeline implements.

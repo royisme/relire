@@ -20,6 +20,7 @@
     "marketing/**",
     "src/data/grammar-pack/pack.json",
     "src/data/noun-gender/pack.json",
+    "src/data/graded-readers/starter.json",
     "data/grammar-pack/*.json",
     "data/grammar-topics/*.json"
   ]
