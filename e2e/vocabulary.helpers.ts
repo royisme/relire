@@ -41,12 +41,15 @@ export async function seed(page: Page, language = 'en', theme = 'light', count =
           sentence: lookup.sentence,
           savedAt: 1,
           requestLanguage: lookup.requestLanguage,
-          analysis: {
-            ...testAnalysis(row.word),
-            translation: `TEST meaning ${row.word}. ${'Long TEST definition. '.repeat(100)}`,
-            usageExamples: [
-              { fr: 'anticonstitutionnellement'.repeat(12), en: 'Long TEST example.', zh: '\u6d4b\u8bd5' },
-            ],
+          definition: {
+            kind: 'ai' as const,
+            analysis: {
+              ...testAnalysis(row.word),
+              translation: `TEST meaning ${row.word}. ${'Long TEST definition. '.repeat(100)}`,
+              usageExamples: [
+                { fr: 'anticonstitutionnellement'.repeat(12), en: 'Long TEST example.', zh: '\u6d4b\u8bd5' },
+              ],
+            },
           },
         },
       ],

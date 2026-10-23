@@ -1,7 +1,7 @@
 /** Canonical identity and durable row transactions using only disposable fake IndexedDB. */
 import { beforeEach, expect, test } from 'bun:test';
 import { freshDb, failure } from './fixtures/storage';
-import { testAnalysis, testCandidate, testLookup } from './fixtures/vocabulary';
+import { testAnalysis, testDefinition, testCandidate, testLookup } from './fixtures/vocabulary';
 import { vocabularyContextKey, vocabularyKey } from '../src/services/vocabulary/identity';
 import { db, exportData, importData } from '../src/storage/db';
 import { initialVocabularySchedule, VocabularyClockError } from '../src/utils/srs';
@@ -30,16 +30,21 @@ test('canonical spelling folds NFC, whitespace, French case and apostrophe, not 
 });
 test('frozen source/text/language context identity ignores title, analysis and timestamp', async () => {
   const lookup = { ...testLookup(), source: { kind: 'unit' as const, id: 'unit-test', title: 'TEST title' } };
-  const first = await saveVocabularyBookmark(lookup, { ...testAnalysis(), cefrLevel: 'C2' }, undefined, now);
-  expect(first.contexts[0].analysis.cefrLevel).toBe('C2');
+  const first = await saveVocabularyBookmark(
+    lookup,
+    { kind: 'ai', analysis: { ...testAnalysis(), cefrLevel: 'C2' } },
+    undefined,
+    now,
+  );
+  expect(first.contexts[0].definition).toMatchObject({ kind: 'ai', analysis: { cefrLevel: 'C2' } });
   const again = await saveVocabularyBookmark(
     { ...lookup, sentence: `  ${lookup.sentence}  `, source: { ...lookup.source, title: 'Changed title' } },
-    { ...testAnalysis(), translation: 'changed' },
+    { kind: 'ai', analysis: { ...testAnalysis(), translation: 'changed' } },
     undefined,
     now + 1,
   );
   expect(again.contexts).toEqual(first.contexts);
-  const next = await saveVocabularyBookmark({ ...lookup, requestLanguage: 'zh' }, testAnalysis(), undefined, now + 2);
+  const next = await saveVocabularyBookmark({ ...lookup, requestLanguage: 'zh' }, testDefinition(), undefined, now + 2);
   expect(next.contexts).toHaveLength(2);
   expect(next.bookmarkedAt).toBe(now);
   await removeVocabularyBookmark(next.key);
@@ -47,7 +52,7 @@ test('frozen source/text/language context identity ignores title, analysis and t
   expect(unmarked.bookmarked).toBe(false);
   expect(unmarked.contexts).toHaveLength(2);
   expect(vocabularyContextKey(lookup)).not.toBe(vocabularyContextKey({ ...lookup, source: undefined }));
-  expect(await failure(saveVocabularyBookmark(lookup, testAnalysis('another')))).toBeInstanceOf(Error);
+  expect(await failure(saveVocabularyBookmark(lookup, testDefinition('another')))).toBeInstanceOf(Error);
 });
 test('literal source markup and original Unicode snapshots survive personal save and paired backup without weakening book text', async () => {
   const lookup = {
@@ -60,19 +65,21 @@ test('literal source markup and original Unicode snapshots survive personal save
     translation: 'TEST <em>e\u0301cole</em>',
     usageExamples: [{ fr: 'TEST <script>alert(1)</script> e\u0301cole', zh: '\u6d4b\u8bd5', en: 'TEST <b>school</b>' }],
   };
-  const saved = await saveVocabularyBookmark(lookup, analysis, undefined, now);
+  const saved = await saveVocabularyBookmark(lookup, { kind: 'ai', analysis }, undefined, now);
   expect(saved.contexts[0]).toEqual({
     id: vocabularyContextKey(lookup),
     sentence: lookup.sentence,
     source: lookup.source,
     requestLanguage: 'en',
     savedAt: now,
-    analysis,
+    definition: { kind: 'ai', analysis },
   });
   const backup = await exportData();
   await importData(backup);
   expect((await exportData()).vocab).toEqual(backup.vocab);
-  expect((await saveVocabularyBookmark(lookup, analysis, undefined, now + 1)).contexts).toEqual(saved.contexts);
+  expect((await saveVocabularyBookmark(lookup, { kind: 'ai', analysis }, undefined, now + 1)).contexts).toEqual(
+    saved.contexts,
+  );
   const { VocabularyEntrySchema, VocabularyRowSchema } = await import('../src/types/vocabulary');
   const { testEntry } = await import('./fixtures/vocabulary');
   expect(VocabularyEntrySchema.safeParse(testEntry('<b>TEST</b>')).success).toBe(false);
@@ -89,14 +96,17 @@ test('literal source markup and original Unicode snapshots survive personal save
   for (const field of ['word', 'translation'] as const)
     expect(
       await failure(
-        saveVocabularyBookmark({ ...lookup, sentence: 'Another TEST context' }, { ...analysis, [field]: ' ' }),
+        saveVocabularyBookmark(
+          { ...lookup, sentence: 'Another TEST context' },
+          { kind: 'ai', analysis: { ...analysis, [field]: ' ' } },
+        ),
       ),
     ).toBeInstanceOf(Error);
   expect(
     await failure(
       saveVocabularyBookmark(
         { ...lookup, sentence: 'Another TEST context', source: { ...lookup.source, title: ' ' } },
-        analysis,
+        { kind: 'ai', analysis },
       ),
     ),
   ).toBeInstanceOf(Error);
@@ -105,12 +115,12 @@ test('book-first and bookmark-first both keep one card, first context/snapshot a
   for (const bookFirst of [false, true]) {
     await freshDb();
     const candidate = testCandidate();
-    if (!bookFirst) await saveVocabularyBookmark(testLookup(), testAnalysis(), undefined, now);
+    if (!bookFirst) await saveVocabularyBookmark(testLookup(), testDefinition(), undefined, now);
     const introduced = await introduceVocabularyCard(candidate, zero, now);
     const rated = await rateVocabularyCard(candidate.key, introduced.tokens, 'first-rating', 'remembered', now);
     const saved = await saveVocabularyBookmark(
       testLookup(),
-      testAnalysis(),
+      testDefinition(),
       { ...candidate.bookSource!, version: 'b'.repeat(64) },
       now + 1,
     );
@@ -121,7 +131,7 @@ test('book-first and bookmark-first both keep one card, first context/snapshot a
     await removeVocabularyBookmark(candidate.key);
     const again = await saveVocabularyBookmark(
       testLookup(),
-      { ...testAnalysis(), translation: 'replacement TEST' },
+      { kind: 'ai', analysis: { ...testAnalysis(), translation: 'replacement TEST' } },
       undefined,
       now + 2,
     );
@@ -189,7 +199,7 @@ test('replay returns current schedule, enforces same rating, and reset invalidat
   expect(next.row.schedule!.repetitions).toBe(1);
 });
 test('consecutive resets of unrated and reviewed memory retain content, history, introduction and quota', async () => {
-  const saved = await saveVocabularyBookmark(testLookup(), testAnalysis(), testCandidate().bookSource, now);
+  const saved = await saveVocabularyBookmark(testLookup(), testDefinition(), testCandidate().bookSource, now);
   const introduced = await introduceVocabularyCard(testCandidate(), zero, now);
   const day = (await readVocabulary(now)).day;
   let current = introduced;
@@ -235,7 +245,7 @@ test('word A reset/delete leaves B valid; delete/recreate retains token and exha
   );
   await rateVocabularyCard(b.row.key, (await getVocabularySnapshot(b.row.key)).tokens, 'valid', 'remembered', now);
   expect((await readVocabulary(now)).day.introducedKeys).toHaveLength(2);
-  const unintroduced = await saveVocabularyBookmark(testLookup('test-new'), testAnalysis('test-new'));
+  const unintroduced = await saveVocabularyBookmark(testLookup('test-new'), testDefinition('test-new'));
   expect(await failure(resetVocabularySchedule(unintroduced.key, zero, now))).toBeInstanceOf(StaleVocabularyError);
 });
 test('reviews use transaction-time preferences; failed attempts may retry with new retention, while committed operations stay unchanged', async () => {

@@ -14,6 +14,7 @@ export const VocabularyMetaBackupSchema = z
     days: z.array(VocabularyDaySchema),
   })
   .refine((m) => new Set(m.days.map((day) => day.date)).size === m.days.length, 'Duplicate vocabulary day');
+// Complete AI/reader definitions belong to the learner backup, not the disposable content cache.
 const VocabularyBackupSchema = z
   .strictObject({ vocab: z.array(VocabularyRowSchema), vocabularyMeta: VocabularyMetaBackupSchema })
   .refine((b) => new Set(b.vocab.map((row) => row.key)).size === b.vocab.length, 'Duplicate vocabulary key');
