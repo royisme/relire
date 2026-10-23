@@ -155,7 +155,7 @@ export default function App() {
     sentenceSheet,
   } = useLookupSheets({ lookupOwner, content: readerDocument?.content, requestKey, setStats, t });
 
-  const bookmark = useVocabularyBookmark(vocabulary, lookup, wordData);
+  const bookmark = useVocabularyBookmark(vocabulary, lookup, wordData ? { kind: 'ai', analysis: wordData } : null);
 
   const finishOnboarding = () => {
     try {

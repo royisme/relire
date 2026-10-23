@@ -27,8 +27,17 @@ export function VocabularyBrowser({ rows, book }: { rows: VocabularyRow[]; book?
     const text = [
       word.word,
       ...(word.bookSource?.senses.flatMap((s) => [s.gloss.en, s.gloss.zh]) ?? []),
-      ...(word.row?.contexts.flatMap((c) => [c.sentence, c.analysis.translation, c.analysis.translationEn ?? '']) ??
-        []),
+      ...(word.row?.contexts.flatMap((c) =>
+        c.definition.kind === 'ai'
+          ? [c.sentence, c.definition.analysis.translation, c.definition.analysis.translationEn ?? '']
+          : [
+              c.sentence,
+              c.definition.entry.gloss.en,
+              c.definition.entry.gloss.zh,
+              c.definition.sentenceTranslation.en,
+              c.definition.sentenceTranslation.zh,
+            ],
+      ) ?? []),
     ].join(' ');
     return text.toLocaleLowerCase().includes(search.toLocaleLowerCase());
   });

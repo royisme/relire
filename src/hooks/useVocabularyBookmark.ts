@@ -1,6 +1,6 @@
 /** Lookup-scoped explicit bookmark/context actions; membership is personal, never mere book existence. */
 import { useEffect, useRef, useState } from 'react';
-import type { WordAnalysis } from '../types';
+import type { VocabularyDefinition } from '../types/vocabulary';
 import type { VocabularyLookup } from '../services/vocabulary/identity';
 import { vocabularyContextKey, vocabularyKey } from '../services/vocabulary/identity';
 import { saveVocabularyBookmark, removeVocabularyBookmark } from '../storage/vocabulary';
@@ -9,7 +9,7 @@ import { getVocabularyBook } from '../storage/vocabularyBook';
 export function useVocabularyBookmark(
   model: VocabularyModel,
   lookup: VocabularyLookup | null,
-  analysis: WordAnalysis | null,
+  definition: VocabularyDefinition | null,
 ) {
   const [status, setStatus] = useState<{ owner: VocabularyLookup | null; busy: boolean; error: string | null }>({
     owner: null,
@@ -28,7 +28,7 @@ export function useVocabularyBookmark(
   const contextSaved =
     saved && !!lookup && !!row?.contexts.some((context) => context.id === vocabularyContextKey(lookup));
   const act = async (remove: boolean) => {
-    if (!lookup || !analysis || (status.owner === lookup && status.busy)) return;
+    if (!lookup || !definition || (status.owner === lookup && status.busy)) return;
     const owner = lookup;
     setStatus({ owner, busy: true, error: null });
     try {
@@ -45,7 +45,7 @@ export function useVocabularyBookmark(
                 senses: entry.senses,
               }
             : undefined;
-        await saveVocabularyBookmark(owner, analysis, source);
+        await saveVocabularyBookmark(owner, definition, source);
       }
       if (current.current === owner) setStatus({ owner, busy: false, error: null });
     } catch (error) {

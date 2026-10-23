@@ -9,6 +9,8 @@ import zh from '../src/i18n/locales/zh.json';
 import type { ReactNode } from 'react';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import { VocabularyAnswer } from '../src/components/vocabulary/VocabularyAnswer';
+import { testReaderDefinition, testReaderLookup } from './fixtures/vocabularyReader';
+import { VocabularyContextSchema } from '../src/types/vocabulary';
 import { Flashcard } from '../src/components/vocabulary/Flashcard';
 import { testRow, testAnalysis, testLookup } from './fixtures/vocabulary';
 import { vocabularyContextKey } from '../src/services/vocabulary/identity';
@@ -31,6 +33,7 @@ Object.defineProperty(globalThis, 'window', {
   configurable: true,
   value: Object.assign(new EventTarget(), { location: { hash: '' }, relireHistory: { read: () => 0 } }),
 });
+const { VocabularyBrowser } = await import('../src/components/vocabulary/VocabularyBrowser');
 const { VocabularyHome } = await import('../src/components/vocabulary/VocabularyHome');
 const { VocabularyReview } = await import('../src/components/vocabulary/VocabularyReview');
 const { WordsSection } = await import('../src/components/settings/WordsSection');
@@ -164,10 +167,13 @@ test('personal source, sentence and analysis markup render as escaped text, neve
         savedAt: 1,
         requestLanguage: 'en' as const,
         source: { kind: 'unit' as const, id: 'test', title: literal },
-        analysis: {
-          ...testAnalysis(),
-          translation: literal,
-          usageExamples: [{ fr: literal, zh: literal, en: literal }],
+        definition: {
+          kind: 'ai' as const,
+          analysis: {
+            ...testAnalysis(),
+            translation: literal,
+            usageExamples: [{ fr: literal, zh: literal, en: literal }],
+          },
         },
       },
     ],
@@ -178,3 +184,81 @@ test('personal source, sentence and analysis markup render as escaped text, neve
   expect(html).not.toMatch(/<(?:img|script)\b/);
   expect(html).not.toContain('dangerouslySetInnerHTML');
 });
+
+const readerLookup = testReaderLookup();
+const readerDefinition = testReaderDefinition();
+const readerContext = VocabularyContextSchema.parse({
+  sentence: readerLookup.sentence,
+  source: readerLookup.source,
+  requestLanguage: readerLookup.requestLanguage,
+  id: vocabularyContextKey(readerLookup),
+  savedAt: 1,
+  definition: readerDefinition,
+});
+const readerRow = { ...testRow(readerLookup.word), bookSource: undefined, contexts: [readerContext] };
+const aiLookup = testLookup('test-ai');
+const aiDefinition = {
+  kind: 'ai' as const,
+  analysis: { ...testAnalysis(aiLookup.word), translation: '\u6d4b\u8bd5 AI', translationEn: 'TEST AI gloss' },
+};
+const aiRow = {
+  ...testRow(aiLookup.word),
+  bookSource: undefined,
+  contexts: [
+    VocabularyContextSchema.parse({
+      sentence: aiLookup.sentence,
+      requestLanguage: aiLookup.requestLanguage,
+      id: vocabularyContextKey(aiLookup),
+      savedAt: 1,
+      definition: aiDefinition,
+    }),
+  ],
+};
+for (const language of ['en', 'zh'] as const) {
+  test(`${language}: authored answer uses the stored gloss, noun gender and sentence translation, never AI language/provenance or fabricated examples`, async () => {
+    await i18n.changeLanguage(language);
+    const html = render(<VocabularyAnswer word={{ ...readerRow, row: readerRow, builtIn: false }} snapshot />);
+    expect(html).toContain(readerDefinition.entry.gloss[language]);
+    expect(html).toContain(readerDefinition.sentenceTranslation[language]);
+    expect(html).toContain(readerLookup.sentence);
+    expect(html).toContain(readerLookup.source!.title);
+    expect(html).toContain(i18n.t('practice.genderMasculine'));
+    expect(html).not.toContain(i18n.t('vocab.savedLanguage', { language: i18n.t('vocab.language.en') }));
+    expect(html).not.toContain('TEST guide');
+    expect(html).not.toContain('/test/');
+    expect(html).not.toContain('Une phrase TEST.');
+    expect(html).not.toContain(i18n.t('vocab.builtIn'));
+    const ai = render(<VocabularyAnswer word={{ ...aiRow, row: aiRow, builtIn: false }} snapshot />);
+    expect(ai).toContain(language === 'en' ? aiDefinition.analysis.translationEn : aiDefinition.analysis.translation);
+    expect(ai).toContain(i18n.t('vocab.savedLanguage', { language: i18n.t('vocab.language.en') }));
+    expect(ai).toContain('Une phrase TEST.');
+  });
+  test(`${language}: real browser search finds either definition variant and authored sentence translations`, async () => {
+    await i18n.changeLanguage(language);
+    for (const [query, expected, absent] of [
+      [readerDefinition.entry.gloss[language], readerRow.word, aiRow.word],
+      [readerDefinition.sentenceTranslation[language], readerRow.word, aiRow.word],
+      [readerLookup.sentence, readerRow.word, aiRow.word],
+      [
+        language === 'en' ? aiDefinition.analysis.translationEn : aiDefinition.analysis.translation,
+        aiRow.word,
+        readerRow.word,
+      ],
+      ['No TEST match', null, readerRow.word],
+    ] as const) {
+      const useState = React.useState;
+      const state = spyOn(React, 'useState').mockImplementation(((initial: unknown) => {
+        const actual = useState(initial);
+        return initial === '' ? [query, () => {}] : actual;
+      }) as typeof React.useState);
+      try {
+        const html = render(<VocabularyBrowser rows={[readerRow, aiRow]} />);
+        if (expected) expect(html).toContain(`>${expected}</button>`);
+        else expect(html).toContain(i18n.t('vocab.noResults'));
+        expect(html).not.toContain(`>${absent}</button>`);
+      } finally {
+        state.mockRestore();
+      }
+    }
+  });
+}

@@ -1,6 +1,13 @@
 /** Vocabulary content, learner rows and owned metadata contracts; backup pairing lives in storage. */
 import { z } from 'zod';
-import { vocabularyContextKey, vocabularyId, vocabularyKey } from '../services/vocabulary/identity';
+import {
+  vocabularyContextKey,
+  vocabularyId,
+  vocabularyKey,
+  vocabularyReaderSourceId,
+} from '../services/vocabulary/identity';
+import { ReaderGlossaryEntrySchema, SentenceSchema } from './gradedReader';
+import { splitArticle } from '../utils/sentences';
 
 const personalText = z.string().refine((s) => s.trim().length > 0, 'Expected nonblank text');
 // Published content is normalized/no-HTML; personal snapshots retain literal source text for React to escape.
@@ -134,16 +141,50 @@ export const VocabularyAnalysisSchema = z.strictObject({
   cefrLevel: z.string().optional(),
   memoryTrick: z.string().optional(),
 });
+export const VocabularyDefinitionSchema = z.discriminatedUnion('kind', [
+  z.strictObject({ kind: z.literal('ai'), analysis: VocabularyAnalysisSchema }),
+  z.strictObject({
+    kind: z.literal('reader'),
+    readerId: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    version: VocabularyHashSchema,
+    entry: ReaderGlossaryEntrySchema,
+    sentenceTranslation: SentenceSchema.shape.translation,
+  }),
+]);
+const source = z
+  .strictObject({ kind: z.enum(['article', 'unit', 'reader']), id: personalText, title: personalText })
+  .refine((source) => {
+    if (source.kind !== 'reader') return true;
+    try {
+      const pair: unknown = JSON.parse(source.id);
+      const parsed = z.tuple([z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/), VocabularyHashSchema]).safeParse(pair);
+      return parsed.success && source.id === vocabularyReaderSourceId(...parsed.data);
+    } catch {
+      return false;
+    }
+  }, 'Invalid reader source identity');
 export const VocabularyContextSchema = z
   .strictObject({
     id: personalText,
     sentence: z.string(),
     savedAt: timestamp,
     requestLanguage: z.enum(['en', 'zh']),
-    source: z.strictObject({ kind: z.enum(['article', 'unit']), id: personalText, title: personalText }).optional(),
-    analysis: VocabularyAnalysisSchema,
+    source: source.optional(),
+    definition: VocabularyDefinitionSchema,
   })
-  .refine((c) => c.id === vocabularyContextKey({ ...c, word: c.analysis.word }), 'Invalid context identity');
+  .refine((c) => c.id === vocabularyContextKey(c), 'Invalid context identity')
+  .refine((c) => {
+    if (c.definition.kind !== 'reader') return true;
+    const sentences = splitArticle(c.sentence).flat();
+    return (
+      c.source?.kind === 'reader' &&
+      c.source.id === vocabularyReaderSourceId(c.definition.readerId, c.definition.version) &&
+      SentenceSchema.shape.fr.safeParse(c.sentence).success &&
+      /[.!?]$/u.test(c.sentence) &&
+      sentences.length === 1 &&
+      sentences[0].text === c.sentence
+    );
+  }, 'Reader definition needs its edition source and sentence');
 export const VocabularyBookSourceSchema = z.strictObject({
   bookId: z.literal('tcf-7000'),
   version: VocabularyHashSchema,
@@ -190,7 +231,8 @@ export const VocabularyRowSchema = z
     if ((row.schedule === null) !== (row.introducedAt === null)) invalid('Schedule and introduction must be paired');
     if (!row.schedule && (row.revision || row.history.length)) invalid('Unintroduced row cannot have reviews');
     if (new Set(row.contexts.map((c) => c.id)).size !== row.contexts.length) invalid('Duplicate context');
-    if (row.contexts.some((c) => vocabularyKey(c.analysis.word) !== row.key)) invalid('Analysis word mismatch');
+    if (row.contexts.some((c) => c.definition.kind === 'ai' && vocabularyKey(c.definition.analysis.word) !== row.key))
+      invalid('Analysis word mismatch');
     let revision = 0;
     const operations = new Set<string>();
     for (const record of row.history) {
@@ -223,6 +265,7 @@ export const VocabularyDaySchema = z
       day.introducedKeys.every((key) => vocabularyKey(key) === key),
     'Invalid daily keys',
   );
+export type VocabularyDefinition = z.infer<typeof VocabularyDefinitionSchema>;
 export type VocabularyEntry = z.infer<typeof VocabularyEntrySchema>;
 export type VocabularyManifest = z.infer<typeof VocabularyManifestSchema>;
 export type VocabularyBook = z.infer<typeof VocabularyBookSchema>;

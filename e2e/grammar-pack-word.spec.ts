@@ -303,7 +303,10 @@ test('a saved pack verb carries no conjugation table', async ({ page, ai }) => {
       page.evaluate(async () => {
         const { db } = (await import('/src/storage/db.ts' as string)) as typeof import('../src/storage/db');
         const rows = await (await db()).getAll('vocab');
-        return rows.map((row) => ({ word: row.word, keys: Object.keys(row.contexts[0]?.analysis ?? {}) }));
+        return rows.map((row) => {
+          const definition = row.contexts[0]?.definition;
+          return { word: row.word, keys: Object.keys(definition?.kind === 'ai' ? definition.analysis : {}) };
+        });
       }),
     )
     .toEqual([expect.objectContaining({ word: 'vais' })]);
