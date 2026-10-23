@@ -155,7 +155,8 @@ for (const language of ['en', 'zh']) {
     const htmlNoWordResults = render(
       <PracticeCard card={{ ...card, assessment: result }} movable={false} onOpenLog={noop} />,
     );
-    expect(htmlNoWordResults).toContain('Bonjour tout le monde.');
+    expect(htmlWithAzure).not.toContain('>Bonjour tout le monde.<');
+    expect(htmlNoWordResults).toContain('>Bonjour tout le monde.<');
     expect(htmlNoWordResults).not.toContain('decoration-wavy');
     expect(htmlNoWordResults).not.toContain('decoration-dashed');
 
