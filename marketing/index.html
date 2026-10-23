@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relire — French Reading & Pronunciation Trainer for TCF Canada</title>
-  <meta name="description" content="Practice French reading and pronunciation for TCF Canada with real texts, contextual explanations, IPA, shadowing, AI pronunciation feedback and spaced repetition. Free and open source." />
+  <title>Relire Plus — French Reading, Pronunciation & Exercise Practice for TCF Canada</title>
+  <meta name="description" content="Practice French reading, pronunciation and exercises for TCF Canada with real or imported texts, contextual explanations, shadowing, AI pronunciation feedback, a mistake notebook and spaced repetition. Free and open source." />
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
   <link rel="canonical" href="https://royisme.github.io/relire/" />
   <link rel="alternate" hreflang="en" href="https://royisme.github.io/relire/" />
   <link rel="alternate" hreflang="zh-CN" href="https://royisme.github.io/relire/zh/" />
   <link rel="alternate" hreflang="x-default" href="https://royisme.github.io/relire/" />
-  <meta property="og:title" content="Relire — Learn French from real text" />
-  <meta property="og:description" content="Read, understand, shadow and improve. An open-source French reading and pronunciation trainer for TCF Canada learners." />
+  <meta property="og:title" content="Relire Plus — Learn French from real text" />
+  <meta property="og:description" content="Read, understand, shadow, practise and improve. An open-source French reading, pronunciation and exercise practice app for TCF Canada learners." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://royisme.github.io/relire/" />
-  <meta property="og:site_name" content="Relire" />
+  <meta property="og:site_name" content="Relire Plus" />
   <meta property="og:image" content="https://royisme.github.io/relire/assets/reader.jpg" />
-  <meta property="og:image:alt" content="Relire French close-reading interface" />
+  <meta property="og:image:alt" content="Relire Plus French close-reading interface" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Relire — French Reading & Pronunciation Trainer" />
-  <meta name="twitter:description" content="Open-source close reading, shadowing and pronunciation practice for TCF Canada." />
+  <meta name="twitter:title" content="Relire Plus — French Reading, Pronunciation & Exercise Practice" />
+  <meta name="twitter:description" content="Open-source close reading, shadowing, pronunciation and exercise practice for TCF Canada." />
   <meta name="twitter:image" content="https://royisme.github.io/relire/assets/reader.jpg" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
@@ -32,23 +32,23 @@
     "@graph":[
       {
         "@type":"SoftwareApplication",
-        "name":"Relire",
+        "name":"Relire Plus",
         "applicationCategory":"EducationalApplication",
         "operatingSystem":"Web",
         "url":"https://royisme.github.io/relire/",
         "downloadUrl":"https://github.com/royisme/relire",
         "license":"https://opensource.org/license/mit/",
         "isAccessibleForFree":true,
-        "description":"Open-source French reading and pronunciation trainer for TCF Canada with contextual explanations, IPA, shadowing, AI pronunciation feedback and spaced repetition.",
+        "description":"Open-source French reading, pronunciation and exercise practice for TCF Canada with contextual explanations, IPA, shadowing, AI pronunciation feedback, generated exercises, a mistake notebook and spaced repetition.",
         "inLanguage":["en","zh-CN","fr"],
         "author":{"@type":"Person","name":"Roy Zhu","url":"https://github.com/royisme","sameAs":["https://github.com/royisme","https://x.com/royzhu655858"]}
       },
       {
         "@type":"FAQPage",
         "mainEntity":[
-          {"@type":"Question","name":"Is Relire free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Relire is open source under the MIT License. AI features use your own Gemini API key."}},
-          {"@type":"Question","name":"Does Relire store my learning data on a server?","acceptedAnswer":{"@type":"Answer","text":"No application server is required. Articles, vocabulary and progress are stored in your browser. AI requests go directly from your browser to the configured provider."}},
-          {"@type":"Question","name":"Is Relire an official TCF Canada preparation product?","acceptedAnswer":{"@type":"Answer","text":"No. Relire is an independent learning tool focused on French reading and pronunciation practice. It is not affiliated with France Éducation international or IRCC."}}
+          {"@type":"Question","name":"Is Relire Plus free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Relire Plus is open source under the MIT License. AI features use your own Gemini API key."}},
+          {"@type":"Question","name":"Does Relire Plus store my learning data on a server?","acceptedAnswer":{"@type":"Answer","text":"No application server is required. Articles, vocabulary and progress are stored in your browser. AI requests go directly from your browser to the configured provider."}},
+          {"@type":"Question","name":"Is Relire Plus an official TCF Canada preparation product?","acceptedAnswer":{"@type":"Answer","text":"No. Relire Plus is an independent learning tool for French reading, pronunciation and exercise practice. It is not affiliated with France Éducation international or IRCC."}}
         ]
       }
     ]
@@ -58,14 +58,14 @@
 <body>
   <header class="site-header">
     <div class="container nav">
-      <a class="brand" href="./">Relire</a>
+      <a class="brand" href="./">Relire Plus</a>
       <nav class="nav-links" aria-label="Main navigation">
         <a href="#how">How it works</a>
         <a href="#features">Features</a>
         <a href="#faq">FAQ</a>
         <a href="./zh/">中文</a>
         <a class="button small" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">GitHub</a>
-        <a class="button small primary" href="./app/">Open Relire</a>
+        <a class="button small primary" href="./app/">Open Relire Plus</a>
       </nav>
     </div>
   </header>
@@ -76,7 +76,7 @@
         <div>
           <div class="eyebrow">French learning · TCF Canada · Open source</div>
           <h1>Learn French from real text.</h1>
-          <p class="lede">Read an article, tap unfamiliar words, understand difficult sentences, shadow the audio and get pronunciation feedback — without breaking your reading flow.</p>
+          <p class="lede">Read an article, tap unfamiliar words, understand difficult sentences, shadow the audio, get pronunciation feedback and practise with generated exercises — without breaking your reading flow.</p>
           <div class="hero-actions">
             <a class="button primary" href="./app/">Start practicing</a>
             <a class="button" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">★ Star on GitHub</a>
@@ -84,7 +84,7 @@
           <p class="micro">Browser-only · No account · Local-first · Bring your own Gemini API key</p>
         </div>
         <div class="hero-shot">
-          <img src="./assets/reader.jpg" alt="Relire reader showing a French article for close reading practice" />
+          <img src="./assets/reader.jpg" alt="Relire Plus reader showing a French article for close reading practice" />
         </div>
       </div>
     </section>
@@ -102,7 +102,7 @@
       <div class="container">
         <div class="section-head">
           <h2>One continuous study loop.</h2>
-          <p>Relire is designed around close reading: stay inside one text while vocabulary, grammar, pronunciation and review connect to each other.</p>
+          <p>Relire Plus is designed around close reading: stay inside one text while vocabulary, grammar, pronunciation, exercises and review connect to each other.</p>
         </div>
         <div class="steps">
           <article class="card"><div class="step-no">01 · READ</div><h3>Read real French</h3><p>Paste your own article or start with a CEFR-tagged sample and read at your own pace.</p></article>
@@ -117,15 +117,15 @@
       <div class="container">
         <div class="section-head">
           <h2>Built for reading and pronunciation.</h2>
-          <p>Instead of trying to replace a complete French course, Relire goes deep on the two activities that happen together when you work through authentic text.</p>
+          <p>Instead of trying to replace a complete French course, Relire Plus goes deep on the activities that happen together when you work through authentic text.</p>
         </div>
         <div class="showcase">
           <figure class="shot-card">
-            <img src="./assets/word-analysis.jpg" alt="Contextual French word analysis with IPA and conjugation in Relire" />
+            <img src="./assets/word-analysis.jpg" alt="Contextual French word analysis with IPA and conjugation in Relire Plus" />
             <figcaption class="shot-copy"><h3>Vocabulary in context</h3><p>See the meaning used in this sentence, IPA, pronunciation guidance, tense and conjugation without leaving the article.</p></figcaption>
           </figure>
           <figure class="shot-card">
-            <img src="./assets/sentence-syntax.jpg" alt="French sentence syntax and grammar breakdown in Relire" />
+            <img src="./assets/sentence-syntax.jpg" alt="French sentence syntax and grammar breakdown in Relire Plus" />
             <figcaption class="shot-copy"><h3>Sentence-level understanding</h3><p>Break long sentences into grammatical roles, useful patterns and natural chunks for shadowing.</p></figcaption>
           </figure>
         </div>
@@ -134,7 +134,7 @@
           <article class="card feature"><div class="feature-kicker">Pronunciation</div><h3>Shadowing feedback</h3><p>Record a sentence and get feedback on sounds, liaisons, intonation and overall delivery.</p></article>
           <article class="card feature"><div class="feature-kicker">Vocabulary</div><h3>Spaced repetition</h3><p>Turn words you actually encounter into a personal review deck scheduled with SM-2.</p></article>
           <article class="card feature"><div class="feature-kicker">Reference</div><h3>French IPA chart</h3><p>Review French sounds with IPA and playable example words when a pronunciation pattern is unclear.</p></article>
-          <article class="card feature"><div class="feature-kicker">Practice</div><h3>Text-based drills</h3><p>Generate sentence-order, grammar cloze and oral shadowing practice from the article you are reading.</p></article>
+          <article class="card feature"><div class="feature-kicker">Practice</div><h3>Generated exercises</h3><p>Build exercise sets from the material you are studying, including dictation and AI-graded open answers.</p></article>
           <article class="card feature"><div class="feature-kicker">Privacy</div><h3>Browser-first storage</h3><p>Your articles, vocabulary and progress live locally. Back them up when you want to move devices.</p></article>
           <article class="card feature"><div class="feature-kicker">Control</div><h3>Editable AI prompts</h3><p>Inspect and change the instructions used for explanations instead of treating the AI layer as a black box.</p></article>
         </div>
@@ -146,14 +146,16 @@
         <div>
           <div class="eyebrow">TCF Canada workflow</div>
           <h2>Useful between lessons and mock tests.</h2>
-          <p class="lede">Relire is not a mock-exam platform. It is the daily practice layer for turning unfamiliar French into language you can understand and pronounce.</p>
+          <p class="lede">Relire Plus is not a mock-exam platform. It is the daily practice layer for turning unfamiliar French into language you can understand, pronounce and use.</p>
           <div class="checks">
-            <div class="check">Build reading fluency with authentic French texts.</div>
+            <div class="check">Build reading fluency with authentic or imported French texts.</div>
             <div class="check">Notice grammar and collocations inside real context.</div>
             <div class="check">Connect written French to spoken rhythm and liaison.</div>
+            <div class="check">Practise listening and writing with generated exercises.</div>
+            <div class="check">Keep mistakes in a notebook and drill the weak areas.</div>
             <div class="check">Keep useful vocabulary in a review loop.</div>
           </div>
-          <p class="note">Relire is independent and is not affiliated with or endorsed by France Éducation international or IRCC. AI pronunciation scores are estimates, not official TCF results.</p>
+          <p class="note">Relire Plus is independent and is not affiliated with or endorsed by France Éducation international or IRCC. AI pronunciation scores are estimates, not official TCF results.</p>
         </div>
         <div class="shot-card">
           <img src="./assets/sentence-shadowing.jpg" alt="French shadowing guide with translation, phrasing and playback controls" />
@@ -167,13 +169,13 @@
         <div>
           <div class="eyebrow">Questions</div>
           <h2>Before you start.</h2>
-          <p class="lede">Relire is intentionally lightweight: a browser, your own AI key for AI-powered features, and the French text you want to learn from.</p>
+          <p class="lede">Relire Plus is intentionally lightweight: a browser, your own AI key for AI-powered features, and the French material you want to learn from.</p>
         </div>
         <div class="faq">
-          <details><summary>Is Relire free?</summary><p>Yes. The project is open source under the MIT License. AI features use your own Gemini API key, so any provider usage is tied to your own account and quota.</p></details>
-          <details><summary>Do I need an account?</summary><p>No Relire account is required. Your articles, vocabulary and progress are stored in your browser.</p></details>
+          <details><summary>Is Relire Plus free?</summary><p>Yes. The project is open source under the MIT License. AI features use your own Gemini API key, so any provider usage is tied to your own account and quota.</p></details>
+          <details><summary>Do I need an account?</summary><p>No Relire Plus account is required. Your articles, vocabulary and progress are stored in your browser.</p></details>
           <details><summary>What works without an API key?</summary><p>You can open the app, read sample or imported texts and use locally stored study data. AI explanations, generated speech and pronunciation assessment require a configured provider key.</p></details>
-          <details><summary>Is this an official TCF Canada preparation tool?</summary><p>No. Relire is an independent learning tool focused on reading and pronunciation practice. Pair it with official exam information, mock tests and teaching when preparing for TCF Canada.</p></details>
+          <details><summary>Is this an official TCF Canada preparation tool?</summary><p>No. Relire Plus is an independent learning tool for reading, pronunciation and exercise practice. Pair it with official exam information, mock tests and teaching when preparing for TCF Canada.</p></details>
           <details><summary>Can I inspect the source or report a problem?</summary><p>Yes. The complete project is on GitHub, including its architecture and issue tracker.</p></details>
         </div>
       </div>
@@ -183,9 +185,9 @@
       <div class="container">
         <div class="eyebrow">Read · Understand · Shadow · Improve</div>
         <h2>Use the French you are already reading.</h2>
-        <p>Open Relire in your browser, try a sample article, and decide whether this close-reading workflow fits the way you learn.</p>
+        <p>Open Relire Plus in your browser, try a sample article, and decide whether this close-reading workflow fits the way you learn.</p>
         <div class="hero-actions">
-          <a class="button primary" href="./app/">Open Relire</a>
+          <a class="button primary" href="./app/">Open Relire Plus</a>
           <a class="button" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">View source on GitHub</a>
         </div>
       </div>
@@ -194,7 +196,7 @@
 
   <footer>
     <div class="container footer-row">
-      <span>Relire · Open-source French learning software</span>
+      <span>Relire Plus · Open-source French learning software</span>
       <div class="footer-links">
         <a href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">GitHub</a>
         <a href="https://github.com/royisme/relire/issues" target="_blank" rel="noreferrer">Issues</a>

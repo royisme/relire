@@ -1,53 +1,42 @@
-/** My study: the learner's own material, Words (the vocabulary) and Shadowing (recordings). */
+/** My study contains learner-owned Words, Mistakes and saved Shadowing only. */
 import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
+import { STUDY_TABS, type StudyTab } from '../../utils/routes';
 import { VocabularyView } from '../VocabularyView';
-import { Segmented } from '../ui/segmented';
+import { Link } from '../shell/Link';
+import { MistakeNotebook } from './MistakeNotebook';
 import { ShadowingLog } from './ShadowingLog';
-
-export type StudyTab = 'words' | 'shadowing';
-const KEY = 'relire_study_tab';
-
-export function readStudyTab(): StudyTab {
-  try {
-    return localStorage.getItem(KEY) === 'shadowing' ? 'shadowing' : 'words';
-  } catch {
-    return 'words';
-  }
-}
 
 interface Props {
   tab: StudyTab;
-  onTab: (tab: StudyTab) => void;
+  sectionsInSidebar: boolean;
   vocabulary: ComponentProps<typeof VocabularyView>;
   shadowing: ComponentProps<typeof ShadowingLog>;
+  mistakes: ComponentProps<typeof MistakeNotebook>;
 }
-
-export function StudyView({ tab, onTab, vocabulary, shadowing }: Props) {
+export function StudyView({ tab, sectionsInSidebar, vocabulary, shadowing, mistakes }: Props) {
   const { t } = useTranslation();
-  const choose = (next: StudyTab) => {
-    try {
-      localStorage.setItem(KEY, next);
-    } catch {
-      // The choice still applies in this tab.
-    }
-    onTab(next);
-  };
   return (
     <div>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
-        <Segmented
-          label={t('study.label')}
-          value={tab}
-          onChange={choose}
-          options={[{ value: 'words', label: t('study.words') }, { value: 'shadowing', label: t('study.shadowing') }]}
-        />
-      </div>
+      {!sectionsInSidebar && (
+        <nav aria-label={t('study.label')} className="mx-auto flex max-w-5xl flex-wrap gap-4 px-4 pt-6 sm:px-6">
+          {STUDY_TABS.map((section) => (
+            <Link
+              key={section}
+              to={{ name: 'study', tab: section }}
+              aria-current={section === tab ? 'page' : undefined}
+              className={`inline-flex min-h-10 items-center border-b-2 text-sm ${section === tab ? 'border-accent-700 text-accent-900' : 'border-transparent text-ink-600 hover:text-ink-900'}`}
+            >
+              {t(`study.${section}`)}
+            </Link>
+          ))}
+        </nav>
+      )}
       {tab === 'words' ? (
         <VocabularyView {...vocabulary} />
       ) : (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
-          <ShadowingLog {...shadowing} />
+        <div className="mx-auto min-w-0 max-w-5xl px-4 py-6 sm:px-6">
+          {tab === 'mistakes' ? <MistakeNotebook {...mistakes} /> : <ShadowingLog {...shadowing} />}
         </div>
       )}
     </div>

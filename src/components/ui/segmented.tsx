@@ -20,10 +20,14 @@ interface SegmentedProps<T extends string> {
 }
 
 export function Segmented<T extends string>({ options, value, onChange, label, className }: SegmentedProps<T>) {
+  const selected = Math.max(
+    0,
+    options.findIndex((option) => option.value === value),
+  );
   return (
     <div role="radiogroup" aria-label={label} className={cn('max-w-full overflow-x-auto', className)}>
       <div className="inline-flex items-center gap-0.5 rounded-lg bg-ink-100 p-1">
-        {options.map((o) => {
+        {options.map((o, index) => {
           const active = o.value === value;
           return (
             <button
@@ -31,10 +35,35 @@ export function Segmented<T extends string>({ options, value, onChange, label, c
               type="button"
               role="radio"
               aria-checked={active}
+              tabIndex={index === selected ? 0 : -1}
               onClick={() => onChange(o.value)}
+              onKeyDown={(event) => {
+                let next: number;
+                switch (event.key) {
+                  case 'ArrowRight':
+                  case 'ArrowDown':
+                    next = (index + 1) % options.length;
+                    break;
+                  case 'ArrowLeft':
+                  case 'ArrowUp':
+                    next = (index - 1 + options.length) % options.length;
+                    break;
+                  case 'Home':
+                    next = 0;
+                    break;
+                  case 'End':
+                    next = options.length - 1;
+                    break;
+                  default:
+                    return;
+                }
+                event.preventDefault();
+                event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus();
+                onChange(options[next].value);
+              }}
               className={cn(
-                'h-8 px-3 rounded-md text-sm whitespace-nowrap cursor-pointer transition-colors',
-                active ? 'bg-surface text-ink-950 font-medium shadow-xs' : 'text-ink-600 hover:text-ink-900'
+                'h-10 min-w-10 px-3 rounded-md text-sm whitespace-nowrap cursor-pointer transition-colors',
+                active ? 'bg-surface text-ink-950 font-medium shadow-xs' : 'text-ink-600 hover:text-ink-900',
               )}
             >
               {o.label}

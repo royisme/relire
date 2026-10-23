@@ -51,7 +51,11 @@ export function MenuButton<T extends string>({ icon, label, items, value, onSele
         {icon}
       </Button>
       {open && (
-        <ul role="menu" aria-label={label} className="absolute right-0 top-full mt-1 z-40 min-w-44 rounded-lg border border-ink-200 bg-surface py-1 shadow-lg anim-fade">
+        <ul
+          role="menu"
+          aria-label={label}
+          className="absolute right-0 top-full mt-1 z-40 min-w-44 rounded-lg border border-ink-200 bg-surface py-1 shadow-lg anim-fade"
+        >
           {items.map((item) => (
             <li key={item.value} role="none">
               <button

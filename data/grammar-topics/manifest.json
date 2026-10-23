@@ -1,0 +1,1175 @@
+{
+  "packVersion": "0.1.0",
+  "topics": [
+    {
+      "id": "noun-gender-feminine",
+      "level": "A1",
+      "chapter": "chapter-one",
+      "tags": [
+        "gender-number"
+      ],
+      "related": [],
+      "reference": "K001",
+      "include": true
+    },
+    {
+      "id": "noun-plurals",
+      "level": "A1",
+      "chapter": "chapter-one",
+      "tags": [
+        "gender-number"
+      ],
+      "related": [],
+      "reference": "K002",
+      "include": true
+    },
+    {
+      "id": "definite-article-forms",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles"
+      ],
+      "related": [
+        "definite-article-uses",
+        "articles-proper-names"
+      ],
+      "reference": "K003",
+      "include": true
+    },
+    {
+      "id": "article-contraction-a",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles",
+        "prepositions"
+      ],
+      "related": [
+        "article-contraction-de",
+        "country-prepositions",
+        "preposition-a"
+      ],
+      "reference": "K004",
+      "include": true
+    },
+    {
+      "id": "article-contraction-de",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles",
+        "prepositions"
+      ],
+      "related": [
+        "article-contraction-a"
+      ],
+      "reference": "K005",
+      "include": true
+    },
+    {
+      "id": "definite-article-uses",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles"
+      ],
+      "related": [
+        "definite-article-forms",
+        "articles-proper-names"
+      ],
+      "reference": "K006",
+      "include": true
+    },
+    {
+      "id": "articles-proper-names",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles"
+      ],
+      "related": [
+        "definite-article-forms",
+        "definite-article-uses"
+      ],
+      "reference": "K007",
+      "include": true
+    },
+    {
+      "id": "country-prepositions",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "prepositions",
+        "articles"
+      ],
+      "related": [
+        "article-contraction-a",
+        "preposition-a",
+        "preposition-en"
+      ],
+      "reference": "K008",
+      "include": true
+    },
+    {
+      "id": "indefinite-article-forms",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles"
+      ],
+      "related": [
+        "indefinite-article-reference",
+        "indefinite-article-description",
+        "des-before-adjectives",
+        "articles-in-negation"
+      ],
+      "reference": "K009",
+      "include": true
+    },
+    {
+      "id": "indefinite-article-reference",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles"
+      ],
+      "related": [
+        "indefinite-article-forms",
+        "indefinite-article-description",
+        "des-before-adjectives",
+        "articles-in-negation"
+      ],
+      "reference": "K010",
+      "include": true
+    },
+    {
+      "id": "indefinite-article-description",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles"
+      ],
+      "related": [
+        "indefinite-article-forms",
+        "indefinite-article-reference",
+        "des-before-adjectives",
+        "articles-in-negation"
+      ],
+      "reference": "K011",
+      "include": true
+    },
+    {
+      "id": "des-before-adjectives",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles",
+        "adjective-position"
+      ],
+      "related": [
+        "indefinite-article-forms",
+        "indefinite-article-reference",
+        "indefinite-article-description",
+        "articles-in-negation",
+        "adjective-position"
+      ],
+      "reference": "K012",
+      "include": true
+    },
+    {
+      "id": "partitive-article-forms",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "partitive-quantity"
+      ],
+      "related": [
+        "partitive-article-uses",
+        "uncountable-noun-articles",
+        "articles-in-negation"
+      ],
+      "reference": "K013",
+      "include": true
+    },
+    {
+      "id": "partitive-article-uses",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "partitive-quantity"
+      ],
+      "related": [
+        "partitive-article-forms",
+        "uncountable-noun-articles",
+        "articles-in-negation"
+      ],
+      "reference": "K014",
+      "include": true
+    },
+    {
+      "id": "uncountable-noun-articles",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "partitive-quantity"
+      ],
+      "related": [
+        "partitive-article-forms",
+        "partitive-article-uses",
+        "articles-in-negation"
+      ],
+      "reference": "K015",
+      "include": true
+    },
+    {
+      "id": "articles-in-negation",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "articles",
+        "negation"
+      ],
+      "related": [
+        "indefinite-article-forms",
+        "indefinite-article-reference",
+        "indefinite-article-description",
+        "des-before-adjectives",
+        "partitive-article-forms",
+        "partitive-article-uses",
+        "uncountable-noun-articles"
+      ],
+      "reference": "K016",
+      "include": true
+    },
+    {
+      "id": "possessive-determiners",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "possessive-demonstrative"
+      ],
+      "related": [],
+      "reference": "K017",
+      "include": true
+    },
+    {
+      "id": "demonstrative-determiners",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "possessive-demonstrative"
+      ],
+      "related": [],
+      "reference": "K018",
+      "include": true
+    },
+    {
+      "id": "interrogative-quel",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "questions"
+      ],
+      "related": [],
+      "reference": "K019",
+      "include": true
+    },
+    {
+      "id": "determiner-tout",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "possessive-demonstrative"
+      ],
+      "related": [],
+      "reference": "K020",
+      "include": true
+    },
+    {
+      "id": "cardinal-numbers",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "numbers-time"
+      ],
+      "related": [
+        "ordinal-numbers",
+        "fractions",
+        "percentages-decimals"
+      ],
+      "reference": "K021",
+      "include": true
+    },
+    {
+      "id": "ordinal-numbers",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "numbers-time"
+      ],
+      "related": [
+        "cardinal-numbers",
+        "fractions",
+        "percentages-decimals"
+      ],
+      "reference": "K022",
+      "include": true
+    },
+    {
+      "id": "fractions",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "numbers-time"
+      ],
+      "related": [
+        "cardinal-numbers",
+        "ordinal-numbers",
+        "percentages-decimals"
+      ],
+      "reference": "K023",
+      "include": true
+    },
+    {
+      "id": "percentages-decimals",
+      "level": "A1",
+      "chapter": "chapter-two",
+      "tags": [
+        "numbers-time"
+      ],
+      "related": [
+        "cardinal-numbers",
+        "ordinal-numbers",
+        "fractions"
+      ],
+      "reference": "K024",
+      "include": true
+    },
+    {
+      "id": "subject-pronouns",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "subject-object-pronouns"
+      ],
+      "related": [],
+      "reference": "K025",
+      "include": true
+    },
+    {
+      "id": "reflexive-pronouns",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "subject-object-pronouns",
+        "pronominal-verbs"
+      ],
+      "related": [],
+      "reference": "K026",
+      "include": true
+    },
+    {
+      "id": "stressed-pronouns",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "subject-object-pronouns"
+      ],
+      "related": [],
+      "reference": "K027",
+      "include": true
+    },
+    {
+      "id": "indirect-object-pronouns",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "subject-object-pronouns"
+      ],
+      "related": [],
+      "reference": "K028",
+      "include": true
+    },
+    {
+      "id": "direct-object-pronouns",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "subject-object-pronouns"
+      ],
+      "related": [],
+      "reference": "K029",
+      "include": true
+    },
+    {
+      "id": "pronoun-y",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "y-en"
+      ],
+      "related": [],
+      "reference": "K030",
+      "include": true
+    },
+    {
+      "id": "pronoun-en",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "y-en"
+      ],
+      "related": [],
+      "reference": "K031",
+      "include": true
+    },
+    {
+      "id": "pronoun-position",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "subject-object-pronouns",
+        "word-order"
+      ],
+      "related": [],
+      "reference": "K032",
+      "include": true
+    },
+    {
+      "id": "pronoun-on",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "other-pronouns"
+      ],
+      "related": [],
+      "reference": "K033",
+      "include": true
+    },
+    {
+      "id": "pronoun-tout",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "other-pronouns"
+      ],
+      "related": [],
+      "reference": "K034",
+      "include": true
+    },
+    {
+      "id": "pronoun-ca",
+      "level": "A1",
+      "chapter": "chapter-three",
+      "tags": [
+        "other-pronouns"
+      ],
+      "related": [],
+      "reference": "K035",
+      "include": true
+    },
+    {
+      "id": "adjective-agreement",
+      "level": "A1",
+      "chapter": "chapter-four",
+      "tags": [
+        "adjective-agreement"
+      ],
+      "related": [],
+      "reference": "K036",
+      "include": true
+    },
+    {
+      "id": "adjective-feminine",
+      "level": "A1",
+      "chapter": "chapter-four",
+      "tags": [
+        "adjective-agreement"
+      ],
+      "related": [],
+      "reference": "K037",
+      "include": true
+    },
+    {
+      "id": "adjective-plurals",
+      "level": "A1",
+      "chapter": "chapter-four",
+      "tags": [
+        "adjective-agreement"
+      ],
+      "related": [],
+      "reference": "K038",
+      "include": true
+    },
+    {
+      "id": "irregular-adjective-forms",
+      "level": "A1",
+      "chapter": "chapter-four",
+      "tags": [
+        "adjective-agreement"
+      ],
+      "related": [],
+      "reference": "K039",
+      "include": true
+    },
+    {
+      "id": "adjective-position",
+      "level": "A1",
+      "chapter": "chapter-four",
+      "tags": [
+        "adjective-position"
+      ],
+      "related": [
+        "des-before-adjectives"
+      ],
+      "reference": "K040",
+      "include": true
+    },
+    {
+      "id": "verb-conjugation-overview",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "present"
+      ],
+      "related": [],
+      "reference": "K041",
+      "include": true
+    },
+    {
+      "id": "present-tense-forms",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "present"
+      ],
+      "related": [
+        "present-tense-uses"
+      ],
+      "reference": "K042",
+      "include": true
+    },
+    {
+      "id": "present-tense-uses",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "present"
+      ],
+      "related": [
+        "present-tense-forms"
+      ],
+      "reference": "K043",
+      "include": true
+    },
+    {
+      "id": "compound-past-formation",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "passe-compose",
+        "past-participle-agreement"
+      ],
+      "related": [
+        "past-participles",
+        "compound-past-uses"
+      ],
+      "reference": "K044",
+      "include": true
+    },
+    {
+      "id": "past-participles",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "passe-compose"
+      ],
+      "related": [
+        "compound-past-formation",
+        "compound-past-uses"
+      ],
+      "reference": "K045",
+      "include": true
+    },
+    {
+      "id": "compound-past-uses",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "passe-compose"
+      ],
+      "related": [
+        "compound-past-formation",
+        "past-participles"
+      ],
+      "reference": "K046",
+      "include": true
+    },
+    {
+      "id": "imperfect-forms",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "imparfait"
+      ],
+      "related": [
+        "imperfect-uses"
+      ],
+      "reference": "K047",
+      "include": true
+    },
+    {
+      "id": "imperfect-uses",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "imparfait"
+      ],
+      "related": [
+        "imperfect-forms"
+      ],
+      "reference": "K048",
+      "include": true
+    },
+    {
+      "id": "past-tense-choice",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "tense-choice-past"
+      ],
+      "related": [],
+      "reference": "K049",
+      "include": true
+    },
+    {
+      "id": "recent-past",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "infinitive-gerund"
+      ],
+      "related": [],
+      "reference": "K050",
+      "include": true
+    },
+    {
+      "id": "simple-future",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "future"
+      ],
+      "related": [],
+      "reference": "K051",
+      "include": true
+    },
+    {
+      "id": "near-future",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "future"
+      ],
+      "related": [],
+      "reference": "K052",
+      "include": true
+    },
+    {
+      "id": "imperative-forms",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "imperative"
+      ],
+      "related": [],
+      "reference": "K053",
+      "include": true
+    },
+    {
+      "id": "pronominal-verb-uses",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "pronominal-verbs"
+      ],
+      "related": [
+        "pronominal-imperative-past"
+      ],
+      "reference": "K054",
+      "include": true
+    },
+    {
+      "id": "pronominal-imperative-past",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "pronominal-verbs",
+        "imperative"
+      ],
+      "related": [
+        "pronominal-verb-uses"
+      ],
+      "reference": "K055",
+      "include": true
+    },
+    {
+      "id": "jouer-prepositions",
+      "level": "A1",
+      "chapter": "chapter-five",
+      "tags": [
+        "prepositions"
+      ],
+      "related": [],
+      "reference": "K056",
+      "include": true
+    },
+    {
+      "id": "questions-comment",
+      "level": "A1",
+      "chapter": "chapter-six",
+      "tags": [
+        "questions"
+      ],
+      "related": [],
+      "reference": "K057",
+      "include": true
+    },
+    {
+      "id": "questions-combien",
+      "level": "A1",
+      "chapter": "chapter-six",
+      "tags": [
+        "questions"
+      ],
+      "related": [],
+      "reference": "K058",
+      "include": true
+    },
+    {
+      "id": "questions-ou",
+      "level": "A1",
+      "chapter": "chapter-six",
+      "tags": [
+        "questions"
+      ],
+      "related": [],
+      "reference": "K059",
+      "include": true
+    },
+    {
+      "id": "degree-adverbs",
+      "level": "A1",
+      "chapter": "chapter-six",
+      "tags": [
+        "adverbs"
+      ],
+      "related": [
+        "quantity-adverbs"
+      ],
+      "reference": "K060",
+      "include": true
+    },
+    {
+      "id": "quantity-adverbs",
+      "level": "A1",
+      "chapter": "chapter-six",
+      "tags": [
+        "adverbs",
+        "partitive-quantity"
+      ],
+      "related": [
+        "degree-adverbs"
+      ],
+      "reference": "K061",
+      "include": true
+    },
+    {
+      "id": "preposition-overview",
+      "level": "A1",
+      "chapter": "chapter-seven",
+      "tags": [
+        "prepositions"
+      ],
+      "related": [],
+      "reference": "K062",
+      "include": true
+    },
+    {
+      "id": "preposition-a",
+      "level": "A1",
+      "chapter": "chapter-seven",
+      "tags": [
+        "prepositions"
+      ],
+      "related": [
+        "article-contraction-a",
+        "country-prepositions"
+      ],
+      "reference": "K063",
+      "include": true
+    },
+    {
+      "id": "preposition-en",
+      "level": "A1",
+      "chapter": "chapter-seven",
+      "tags": [
+        "prepositions"
+      ],
+      "related": [
+        "country-prepositions"
+      ],
+      "reference": "K064",
+      "include": true
+    },
+    {
+      "id": "preposition-pour",
+      "level": "A1",
+      "chapter": "chapter-seven",
+      "tags": [
+        "prepositions"
+      ],
+      "related": [],
+      "reference": "K065",
+      "include": true
+    },
+    {
+      "id": "preposition-dans",
+      "level": "A1",
+      "chapter": "chapter-seven",
+      "tags": [
+        "prepositions"
+      ],
+      "related": [],
+      "reference": "K066",
+      "include": true
+    },
+    {
+      "id": "preposition-avec",
+      "level": "A1",
+      "chapter": "chapter-seven",
+      "tags": [
+        "prepositions"
+      ],
+      "related": [],
+      "reference": "K067",
+      "include": true
+    },
+    {
+      "id": "conjunction-si",
+      "level": "A1",
+      "chapter": "chapter-eight",
+      "tags": [
+        "connectors",
+        "hypothesis-si"
+      ],
+      "related": [],
+      "reference": "K068",
+      "include": true
+    },
+    {
+      "id": "conjunction-quand",
+      "level": "A1",
+      "chapter": "chapter-eight",
+      "tags": [
+        "connectors"
+      ],
+      "related": [],
+      "reference": "K069",
+      "include": true
+    },
+    {
+      "id": "yes-no-questions",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "questions"
+      ],
+      "related": [
+        "information-questions",
+        "questions-qui",
+        "questions-que-quoi",
+        "questions-est-ce-que"
+      ],
+      "reference": "K070",
+      "include": true
+    },
+    {
+      "id": "information-questions",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "questions"
+      ],
+      "related": [
+        "yes-no-questions",
+        "questions-qui",
+        "questions-que-quoi",
+        "questions-est-ce-que"
+      ],
+      "reference": "K071",
+      "include": true
+    },
+    {
+      "id": "questions-qui",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "questions"
+      ],
+      "related": [
+        "yes-no-questions",
+        "information-questions",
+        "questions-que-quoi",
+        "questions-est-ce-que"
+      ],
+      "reference": "K072",
+      "include": true
+    },
+    {
+      "id": "questions-que-quoi",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "questions"
+      ],
+      "related": [
+        "yes-no-questions",
+        "information-questions",
+        "questions-qui",
+        "questions-est-ce-que"
+      ],
+      "reference": "K073",
+      "include": true
+    },
+    {
+      "id": "questions-est-ce-que",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "questions"
+      ],
+      "related": [
+        "yes-no-questions",
+        "information-questions",
+        "questions-qui",
+        "questions-que-quoi"
+      ],
+      "reference": "K074",
+      "include": true
+    },
+    {
+      "id": "negation-ne-pas",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "negation"
+      ],
+      "related": [],
+      "reference": "K075",
+      "include": true
+    },
+    {
+      "id": "negation-ne-plus",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "negation"
+      ],
+      "related": [],
+      "reference": "K076",
+      "include": true
+    },
+    {
+      "id": "pattern-cest",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "word-order"
+      ],
+      "related": [],
+      "reference": "K077",
+      "include": true
+    },
+    {
+      "id": "pattern-il-y-a",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "word-order"
+      ],
+      "related": [],
+      "reference": "K078",
+      "include": true
+    },
+    {
+      "id": "pattern-il-faut",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "word-order"
+      ],
+      "related": [],
+      "reference": "K079",
+      "include": true
+    },
+    {
+      "id": "telling-time",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "numbers-time"
+      ],
+      "related": [],
+      "reference": "K080",
+      "include": true
+    },
+    {
+      "id": "time-prepositions",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "numbers-time",
+        "prepositions"
+      ],
+      "related": [],
+      "reference": "K081",
+      "include": true
+    },
+    {
+      "id": "expressing-cause",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "connectors"
+      ],
+      "related": [],
+      "reference": "K082",
+      "include": true
+    },
+    {
+      "id": "expressing-purpose",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "connectors"
+      ],
+      "related": [],
+      "reference": "K083",
+      "include": true
+    },
+    {
+      "id": "weather-expressions",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "vocabulary-usage"
+      ],
+      "related": [],
+      "reference": "K084",
+      "include": true
+    },
+    {
+      "id": "future-expressions",
+      "level": "A1",
+      "chapter": "chapter-nine",
+      "tags": [
+        "future"
+      ],
+      "related": [],
+      "reference": "K085",
+      "include": true
+    },
+    {
+      "id": "greetings",
+      "level": "A1",
+      "chapter": "chapter-ten",
+      "tags": [
+        "vocabulary-usage"
+      ],
+      "related": [],
+      "reference": "K086",
+      "include": true
+    },
+    {
+      "id": "introductions",
+      "level": "A1",
+      "chapter": "chapter-ten",
+      "tags": [
+        "vocabulary-usage"
+      ],
+      "related": [],
+      "reference": "K087",
+      "include": true
+    },
+    {
+      "id": "shopping",
+      "level": "A1",
+      "chapter": "chapter-ten",
+      "tags": [
+        "vocabulary-usage"
+      ],
+      "related": [],
+      "reference": "K088",
+      "include": true
+    },
+    {
+      "id": "asking-directions",
+      "level": "A1",
+      "chapter": "chapter-ten",
+      "tags": [
+        "vocabulary-usage",
+        "prepositions"
+      ],
+      "related": [],
+      "reference": "K089",
+      "include": true
+    },
+    {
+      "id": "dates",
+      "level": "A1",
+      "chapter": "chapter-ten",
+      "tags": [
+        "numbers-time",
+        "vocabulary-usage"
+      ],
+      "related": [],
+      "reference": "K090",
+      "include": true
+    },
+    {
+      "id": "hobbies",
+      "level": "A1",
+      "chapter": "chapter-ten",
+      "tags": [
+        "vocabulary-usage"
+      ],
+      "related": [],
+      "reference": "K091",
+      "include": true
+    },
+    {
+      "id": "holidays",
+      "level": "A1",
+      "chapter": "chapter-ten",
+      "tags": [
+        "vocabulary-usage"
+      ],
+      "related": [],
+      "reference": "K092",
+      "include": true
+    },
+    {
+      "id": "sports",
+      "level": "A1",
+      "chapter": "chapter-ten",
+      "tags": [
+        "vocabulary-usage"
+      ],
+      "related": [],
+      "reference": "K093",
+      "include": true
+    }
+  ]
+}

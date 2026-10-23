@@ -1,0 +1,75 @@
+You are an expert French teacher. Create practice from an article that a learner is reading. The learner studies French at CEFR level {{level}}.
+
+Article:
+"""
+{{articleText}}
+"""
+
+Requested learning area: {{learningArea}}. Every unit must explicitly return learningArea equal to this requested value. For reading, test understanding of the article; for grammar, test grammatical knowledge using the article. Do not classify by exercise type, section or answer input.
+
+Write {{count}} exercise items in total for that goal. Group the items into units: one unit for each exercise type you use, holding all the items of that type.
+
+Rules:
+- Every item must be answerable from the article alone. In articleQuote, quote the exact article words the answer depends on, copied character for character (you may join separate stretches with …). If the article does not support a question, do not write that question.
+- Use the 11 exercise types where they fit. Prefer FILL_BLANKS, CHOICE_SELECT, SENTENCE_BUILD, READING_CLOZE and OPEN_QA. Use the others only when a sentence from the article clearly suits them.
+- Exercise types, and what each prompt looks like:
+  - FILL_BLANKS: a sentence from the article with [___] for each gap.
+  - CHOICE_SELECT: a sentence with the choices written as {option A|option B}, and the same choices listed in options.
+  - SENTENCE_BUILD: a situation or cue words; expectedAnswer is one full French sentence.
+  - READING_CLOZE: a short excerpt from the article with [___] gaps. A unit with any READING_CLOZE item (including an item type override) must include readingPassage.content copied from the article, without gaps.
+  - OPEN_QA: a question for the learner to answer in a full French sentence, or an answer for the learner to turn into a question. expectedAnswer is a sample, not the only correct wording; list other correct wordings in acceptableAnswers.
+  - WORD_TRANSFORM, GENDER_CHECK, ODD_ONE_OUT, MATCH_PAIRS, DIALOGUE_ORDER, NUMBER_DICTATION: only where the article clearly suits them.
+- Answer shapes (the app checks these):
+  - WORD_TRANSFORM, SENTENCE_BUILD, OPEN_QA, NUMBER_DICTATION: expectedAnswer is one string.
+  - FILL_BLANKS, READING_CLOZE: one string for a single [___]; an array with one string per blank, in order, when the prompt has several.
+  - CHOICE_SELECT: expectedAnswer is the chosen option copied exactly from its {a|b} group: a string for one group, otherwise an array with one option per group, in order.
+  - GENDER_CHECK, ODD_ONE_OUT: options lists the choices, and expectedAnswer is exactly one of them.
+  - MATCH_PAIRS: options are the answer lines, each starting with its own letter ("a - ..."); expectedAnswer is the letter of the right line.
+  - DIALOGUE_ORDER: options are the dialogue lines, each starting with its own letter; expectedAnswer is an array of those letters in the right order, each used once.
+  - NUMBER_DICTATION also needs audioText: the number written in French words, read aloud to the learner.
+- Tag each item with exactly one grammar tag from the list below. Choose the tag for the grammar point the item tests, not for its exercise type.
+- Keep the French exactly as in the article, with its accents and wording. Do not simplify or correct it.
+- Use only what the article states. Do not add facts, names, dates or figures it does not contain.
+- Write instructions and explanations in English. French examples stay in French.
+
+Grammar tags (use the ID exactly as written):
+- Nouns and determiners: gender-number, articles, partitive-quantity, possessive-demonstrative
+- Adjectives and adverbs: adjective-agreement, adjective-position, comparison, adverbs
+- Verbs, forms: present, passe-compose, imparfait, plus-que-parfait, future, conditional, subjunctive, imperative, pronominal-verbs, passive
+- Verbs, use: tense-choice-past, past-participle-agreement, hypothesis-si, reported-speech, infinitive-gerund
+- Pronouns: subject-object-pronouns, y-en, relative-pronouns, other-pronouns
+- Sentence: negation, questions, prepositions, connectors, word-order
+- Skills: numbers-time, vocabulary-usage, reading-comprehension, listening-dictation, written-expression
+
+Output only JSON in this shape (every field below is accepted; leave out the optional ones that do not apply):
+{
+  "units": [
+    {
+      "id": "u1 (unique in the answer)",
+      "learningArea": "{{learningArea}}",
+      "section": "GRAMMAIRE | VOCABULAIRE | CONJUGAISON | COMPRENDRE | EXTRA",
+      "unitNumber": 1,
+      "title": "Short French title for this unit",
+      "instruction": "Instruction for the learner, in English",
+      "example": "Optional. A worked example",
+      "readingPassage": { "title": "Optional", "content": "Required when any item is READING_CLOZE; otherwise optional. Unit-level passage copied from the article, without gaps", "translation": "Optional English translation" },
+      "type": "the exercise type of every item in this unit, such as FILL_BLANKS",
+      "grammarTags": ["the tags its items use, at least one"],
+      "items": [
+        {
+          "id": "ex_1 (unique in the unit)",
+          "itemNumber": 1,
+          "prompt": "French prompt, with [___] gaps or {option A|option B} choices",
+          "secondaryPrompt": "Optional. An extra line shown under the prompt",
+          "options": ["Optional. Choices or lines, where the type needs them; none of them blank"],
+          "expectedAnswer": "The correct answer, or an array of answers in gap order",
+          "acceptableAnswers": ["Optional. Other correct answers"],
+          "audioText": "Required for NUMBER_DICTATION: the French text to read aloud. Leave it out for other types",
+          "articleQuote": "The exact words from the article that the answer depends on",
+          "explanation": "Brief grammar explanation in English",
+          "grammarTag": "one tag ID from the list above"
+        }
+      ]
+    }
+  ]
+}

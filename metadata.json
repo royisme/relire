@@ -1,7 +1,5 @@
 {
-  "name": "Relire - French close reading",
+  "name": "Relire Plus - French close reading",
   "description": "Close reading for French. Tap any word or sentence for an explanation in context, then read it aloud and get pronunciation feedback. Free, open source, runs in your browser.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "requestFramePermissions": ["microphone"]
 }

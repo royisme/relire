@@ -1,6 +1,7 @@
-import { getSpeechProvider } from '../../services/ai/providers';
+import { getAiAccess } from '../../services/ai/access';
+import { DeviceVoiceError } from '../../services/ai/errors';
 import { getAudio, putAudio } from '../../storage/audio';
-import { getApiKey, getAppSettings, hasSpeechKey, type AppSettings } from '../appSettings';
+import type { AppSettings } from '../appSettings';
 
 /**
  * Where a spoken clip comes from: stored audio first, the user's speech
@@ -11,10 +12,13 @@ import { getApiKey, getAppSettings, hasSpeechKey, type AppSettings } from '../ap
 const synthesizing = new Map<string, Promise<Blob>>();
 
 /** Returns the clip from storage when we have it, otherwise synthesizes and keeps it. */
-export async function loadSpeech(text: string, voice?: string, settings: AppSettings = getAppSettings()): Promise<Blob> {
-  const provider = settings.speechProvider;
-  const effectiveVoice = voice || settings.speechVoice;
-  const model = settings.speechModel;
+export async function loadSpeech(text: string, voice?: string, settings?: AppSettings): Promise<Blob> {
+  const access = getAiAccess(settings);
+  const selected = access.selection('speech');
+  // The device engine speaks directly: it has no clip to store, and playback uses the platform's voice.
+  if (selected.device) throw new DeviceVoiceError();
+  const { providerId: provider, model } = selected;
+  const effectiveVoice = voice || selected.voice;
   const trimmed = text.trim();
 
   const stored = await getAudio(provider, model, effectiveVoice, trimmed);
@@ -24,8 +28,8 @@ export async function loadSpeech(text: string, voice?: string, settings: AppSett
   const pending = synthesizing.get(flightKey);
   if (pending) return pending;
 
-  const request = getSpeechProvider(provider)
-    .synthesize({ text: trimmed }, { apiKey: getApiKey(settings, provider), model, voice: effectiveVoice })
+  const request = access
+    .synthesize({ text: trimmed, voice: effectiveVoice })
     .then(async (blob) => {
       await putAudio(provider, model, effectiveVoice, trimmed, blob);
       return blob;
@@ -42,7 +46,7 @@ export async function loadSpeech(text: string, voice?: string, settings: AppSett
  * (the listener paused or moved on), without cancelling a request already in flight.
  */
 export async function prefetchSpeech(texts: string[], shouldContinue: () => boolean = () => true): Promise<void> {
-  if (!hasSpeechKey()) return;
+  if (!getAiAccess().isConfigured('speech')) return;
   for (const text of texts) {
     if (!shouldContinue()) return;
     if (!text.trim()) continue;

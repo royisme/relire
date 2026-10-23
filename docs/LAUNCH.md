@@ -68,7 +68,7 @@ Suggested release summary:
 
 **Body**
 
-> Relire is an open-source, browser-only PWA for French close reading and pronunciation practice. It lets learners inspect words and sentences in context, generate grammar explanations, practise shadowing, receive pronunciation feedback, and review vocabulary with SM-2.
+> Relire is an open-source, browser-only PWA for French close reading and pronunciation practice. It lets learners inspect words and sentences in context, generate grammar explanations, practise shadowing, receive pronunciation feedback, and review vocabulary with FSRS-6.
 >
 > There is no application backend or account. Data is stored in IndexedDB/local storage, AI calls go directly from the browser to Gemini with the user’s own key, and generated explanations/audio are cached locally.
 >

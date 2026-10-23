@@ -23,9 +23,12 @@ async function vocabularyTexts(): Promise<Set<string>> {
   const d = await db();
   const texts = new Set<string>();
   for (const w of await d.getAll('vocab')) {
-    if (w.word) texts.add(normalizeText(w.word));
-    if (w.contextSentence) texts.add(normalizeText(w.contextSentence));
-    for (const ex of w.analysis?.usageExamples ?? []) if (ex.fr) texts.add(normalizeText(ex.fr));
+    if (!w.bookmarked && !w.schedule) continue;
+    texts.add(normalizeText(w.word));
+    for (const context of w.contexts) {
+      if (context.sentence) texts.add(normalizeText(context.sentence));
+      for (const ex of context.analysis.usageExamples ?? []) texts.add(normalizeText(ex.fr));
+    }
   }
   return texts;
 }
@@ -37,14 +40,20 @@ export async function protectedTexts(): Promise<Set<string>> {
   return texts;
 }
 
-export async function getAudio(provider: string, model: string, voice: string, text: string): Promise<Blob | undefined> {
+export async function getAudio(
+  provider: string,
+  model: string,
+  voice: string,
+  text: string,
+): Promise<Blob | undefined> {
   try {
     const d = await db();
     const entry = await d.get('audio', audioKey(provider, model, voice, text));
     if (!entry) return undefined;
     // Record use at most once a day so playing a clip is not a write every time.
     // A failed write must not turn a clip we did read into a miss.
-    if (Date.now() - entry.lastUsed > DAY) await d.put('audio', { ...entry, lastUsed: Date.now() }).catch(() => undefined);
+    if (Date.now() - entry.lastUsed > DAY)
+      await d.put('audio', { ...entry, lastUsed: Date.now() }).catch(() => undefined);
     return entry.blob;
   } catch {
     return undefined;
@@ -78,7 +87,13 @@ async function storeAudio(provider: string, model: string, voice: string, text: 
 }
 
 /** Best-effort for playback: if the clip cannot be kept (quota, private mode) it still plays. */
-export async function putAudio(provider: string, model: string, voice: string, text: string, blob: Blob): Promise<void> {
+export async function putAudio(
+  provider: string,
+  model: string,
+  voice: string,
+  text: string,
+  blob: Blob,
+): Promise<void> {
   try {
     await storeAudio(provider, model, voice, text, blob);
   } catch {
@@ -150,7 +165,9 @@ export interface AudioBackup {
   provider?: string;
   voice: string;
   model: string;
-  data: string; // base64 WAV
+  data: string; // base64 audio
+  /** WAV from Gemini, MP3 from Fish Audio; absent in older backups, which were all WAV. */
+  mimeType?: string;
 }
 
 /** Clips that belong to the vocabulary, for a backup. */
@@ -159,7 +176,15 @@ export async function exportProtectedAudio(): Promise<AudioBackup[]> {
   const keep = await vocabularyTexts();
   const out: AudioBackup[] = [];
   for (const e of await d.getAll('audio')) {
-    if (keep.has(e.text)) out.push({ text: e.text, provider: e.provider, voice: e.voice, model: e.model, data: await blobToBase64(e.blob) });
+    if (keep.has(e.text))
+      out.push({
+        text: e.text,
+        provider: e.provider,
+        voice: e.voice,
+        model: e.model,
+        data: await blobToBase64(e.blob),
+        ...(e.blob.type ? { mimeType: e.blob.type } : {}),
+      });
   }
   return out;
 }
@@ -171,7 +196,13 @@ export async function importAudio(items: AudioBackup[]): Promise<{ imported: num
   for (const item of items) {
     if (!item?.text || !item.data) continue;
     try {
-      await storeAudio(item.provider ?? 'gemini', item.model, item.voice, item.text, base64ToBlob(item.data));
+      await storeAudio(
+        item.provider ?? 'gemini',
+        item.model,
+        item.voice,
+        item.text,
+        base64ToBlob(item.data, item.mimeType || 'audio/wav'),
+      );
       imported++;
     } catch {
       failed++;

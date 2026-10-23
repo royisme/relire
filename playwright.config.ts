@@ -22,10 +22,15 @@ export default defineConfig({
       : { channel: 'chrome' }),
   },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } }, grepInvert: /@phone/ },
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } },
+      grepInvert: /@phone/,
+    },
     { name: 'phone', use: { viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true }, grep: /@phone/ },
   ],
   webServer: {
+    env: { VITE_CONTENT_SERVICE_URL: 'http://content.test' },
     command: `bun run dev --port ${port} --strictPort`,
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,

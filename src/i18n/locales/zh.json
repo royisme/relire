@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Relire",
+    "appName": "Relire Plus",
     "save": "保存",
     "cancel": "取消",
     "close": "关闭",
@@ -8,20 +8,50 @@
     "retry": "重试",
     "success": "成功",
     "error": "错误",
-    "documentTitle": "Relire - 法语精读",
+    "documentTitle": "Relire Plus - 法语精读",
     "done": "完成",
     "listSeparator": "；"
   },
+  "pageFailure": {
+    "message": "页面未能显示：{{msg}}",
+    "retry": "重试"
+  },
   "nav": {
-    "reader": "精读",
     "vocab": "我的学习",
-    "practice": "练习",
     "analytics": "进度",
     "installApp": "安装应用",
     "settings": "设置",
     "menu": "菜单",
     "language": "语言",
-    "main": "主导航"
+    "main": "主导航",
+    "collapse": "收起侧边栏",
+    "expand": "展开侧边栏",
+    "due": "{{count}} 个待复习",
+    "toReview": "{{count}} 道待复习",
+    "importArticle": "导入文章"
+  },
+  "learning": {
+    "areas": { "reading": "阅读", "grammar": "语法", "listening": "听力", "writing": "写作" },
+    "area": "学习领域",
+    "navigation": "学习导航",
+    "library": "文章库",
+    "exercises": "练习",
+    "exercisesTitle": "{{area}}练习",
+    "scopedCounts": "数量和进度仅统计当前领域。打开题组可查看完整批次，其中可能包含其他领域。",
+    "completeSet_one": "完整题组：跨所有学习领域的 {{count}} 份练习。删除题组会删除整个批次。",
+    "completeSet_other": "完整题组：跨所有学习领域的 {{count}} 份练习。删除题组会删除整个批次。",
+    "emptyTitle": "此领域还没有已保存的练习",
+    "emptyDesc": "通过“添加练习”导入练习单，或为此领域生成支持的练习。",
+    "listeningSupport": "听力支持数字听写和近音辨听，不支持通用音频理解训练。",
+    "listeningEmpty": "通过“添加练习”创建近音辨听练习，或导入含可练习数字听写的练习单。",
+    "unsupportedListening": "听力要求每道题均为数字听写或来自词对包的近音辨听，且有朗读文本。请选择其他领域或排除此单元；朗读题干不算听力练习。",
+    "speaking": "口语",
+    "readAloud": "朗读",
+    "speakingDesc": "听文章中的一句话，录下自己的朗读，也可请 AI 给出发音评估。",
+    "shadowingContext": "要保存跟读录音，请使用阅读页句子旁的麦克风。录音保存在“我的学习 → 跟读”。",
+    "chooseArticle": "选择文章",
+    "speakingEmpty": "请先在阅读中添加文章，再练习朗读。",
+    "sourceUnavailable": "所选文章或句子已不可用。请明确选择新的来源后继续。"
   },
   "theme": {
     "label": "主题",
@@ -31,6 +61,7 @@
     "dark": "深色"
   },
   "reader": {
+    "backToUnit": "返回练习",
     "stop": "停止",
     "tempo": "语速",
     "slowPace": "慢速",
@@ -44,7 +75,9 @@
     "wordCount": "{{count}} 词",
     "textSize": "字号",
     "listenAll": "通听",
-    "sentenceActions": "句子操作"
+    "sentenceActions": "句子操作",
+    "makeExercises": "出题",
+    "makeExercisesHint": "用文章出题"
   },
   "player": {
     "label": "全文朗读",
@@ -54,7 +87,11 @@
     "next": "下一句",
     "stop": "停止朗读",
     "progress": "第 {{current}} / {{total}} 句",
-    "failed": "这一句没能播放，按播放键重试。"
+    "failed": "这一句没能播放，按播放键重试。",
+    "failedReason": "这一句没能播放：{{msg}}"
+  },
+  "speech": {
+    "listenFailed": "播放失败：{{msg}}"
   },
   "wordModal": {
     "lemma": "原型",
@@ -63,16 +100,21 @@
     "contextTense": "在这句话里",
     "originalSentence": "原文：",
     "conjugation": "动词变位",
-    "clickToListen": "点任一形式可以听",
+    "conjugationLoading": "正在加载变位…",
+    "conjugateThis": "查这个动词的变位",
+    "showTenses": "显示全部时态",
+    "hideTenses": "收起全部时态",
+    "dictionaryNote": "来自 Morphalou 词典，未经人工审核。",
+    "compoundTenses": "复合时态在“动词变位”页面。",
+    "verbForm": "动词形式",
+    "verbFormLine": "{{verb}} : {{forms}}",
+    "verbFormTense": "{{tense}}, {{persons}}",
     "examples": "例句",
     "listenExample": "朗读例句",
     "memoryTrick": "帮你记住",
-    "addToVocab": "加入生词本",
-    "removeFromVocab": "已加入",
     "analyzing": "正在查这个词…",
     "failed": "没能查到这个词。",
-    "listen": "朗读",
-    "removeHint": "从生词本移除"
+    "listen": "朗读"
   },
   "sentenceDrawer": {
     "title": "句子",
@@ -88,7 +130,6 @@
     "original": "法语原句"
   },
   "shadowing": {
-    "title": "影子跟读",
     "pace": "语速建议",
     "phrasing": "意群与停顿",
     "liaisons": "联诵与省音",
@@ -104,11 +145,21 @@
     "stopOther": "停止那次录音",
     "assessError": "发音评测失败。",
     "overall": "综合评分",
+    "overallEstimate": "综合预估",
+    "estimate": "仅供练习参考的估计，不是分数。",
     "accuracy": "准确度",
     "fluency": "流畅度",
     "rhythm": "节奏",
+    "completeness": "完整度",
+    "wordAccuracy": "逐词准确度",
+    "wordError": {
+      "Mispronunciation": "发音不准",
+      "Omission": "漏读",
+      "Insertion": "多读"
+    },
     "sounds": "需要练习的发音",
     "words": "需要纠正的词",
+    "strengths": "做得好的地方",
     "notes": "点评",
     "status": {
       "excellent": "不错",
@@ -117,57 +168,191 @@
     }
   },
   "vocab": {
-    "title": "生词本",
-    "subtitle": "你保存的单词，会在快要忘记时提醒你复习。",
-    "startReview": "复习 {{count}} 个",
-    "allReviewed": "今天没有要复习的词",
-    "dueToday": "今日待复习",
-    "mastered": "已掌握",
-    "searchPlaceholder": "搜索单词、释义或例句",
-    "filterAll": "全部",
-    "filterDue": "今日待复习",
-    "filterLearning": "学习中",
-    "filterMastered": "已掌握",
-    "nextReview": "下次复习:",
-    "interval": "间隔: {{days}} 天",
-    "reps": "复习 {{count}} 次",
-    "deleteConfirm": "从生词本中移除这个词？",
-    "empty": "还没有生词。读文章时点一个词，再选“加入生词本”。",
-    "reviewTitle": "复习",
-    "showAnswer": "看释义",
-    "rateHard": "困难",
-    "rateGood": "记得",
-    "rateEasy": "很熟",
-    "finishReview": "这一轮复习完了",
-    "reviewedCount": "已复习 {{count}} 个",
-    "exportJson": "导出生词本（JSON）",
-    "backToList": "返回列表"
+    "title": "词汇",
+    "subtitle": "内置词汇与个人收藏共用一份复习计划。",
+    "pages": "词汇页面",
+    "today": "今天",
+    "allWords": "全部词汇",
+    "due": "现在待复习",
+    "learning": "学习与重学中",
+    "remaining": "今日剩余新词名额",
+    "continue": "开始或继续复习",
+    "book": "内置词书",
+    "bookCount_one": "{{count}} 个词可离线使用",
+    "bookCount_other": "{{count}} 个词可离线使用",
+    "bookUnavailable": "内置词书暂不可用。已保存的卡片仍可复习。",
+    "download": "下载词书",
+    "update": "检查更新",
+    "restart": "重新下载",
+    "downloading": "正在下载…",
+    "downloadProgress": "第 {{page}} 页，共 {{total}} 页",
+    "updatesUnavailable": "未配置内容服务，无法更新词书。",
+    "errorDetails": "查看错误详情",
+    "quotaReached": "今天的新词额度已用完，仍可复习到期词汇。",
+    "newLimit": "每日新词上限（0–100）",
+    "invalidLimit": "请输入 0 到 100 之间的整数。",
+    "retention": "目标保留率（80–95%）",
+    "invalidRetention": "请输入 80 到 95 之间的整数百分比。",
+    "retentionHelp": "这是安排复习的目标，不是实测成绩或记忆保证。目标越高，复习越多。修改只影响下一次成功保存的自评，不会重排当前到期时间。",
+    "outcomeHelp": "以翻面前的回忆为准：想不起核心含义选“不记得”；想起来但有犹豫或费力选“模糊”；顺利想起来选“记得”。只在翻面后认出含义，应选“不记得”。",
+    "clockError": "本次自评时间无效或早于上次复习。请校正设备时钟，再重新提交。",
+    "saved": "已保存",
+    "confirm": "确认",
+    "saving": "正在保存…",
+    "reviewDue": "复习到期词汇",
+    "search": "搜索单词、释义或句子",
+    "word": "单词",
+    "source": "来源",
+    "state": "学习状态",
+    "all": "全部",
+    "builtIn": "内置",
+    "bookmarked": "已收藏",
+    "unintroduced": "尚未学习",
+    "review": "复习中",
+    "savedContext": "个人语境",
+    "savedLanguage": "解释保存时的语言：{{language}}",
+    "language": { "en": "英语", "zh": "中文" },
+    "reset": "重置复习计划",
+    "resetHelp": "现在重新开始学习。首次学习时间、每日名额记录和自评历史都会保留。",
+    "delete": "删除卡片和历史",
+    "deleteHelp": "删除这张学习卡片、所有语境和自评历史。下载的词书和每日新词记录会保留。这与取消收藏不同。",
+    "noResults": "没有符合搜索或筛选条件的词。",
+    "previous": "上一页",
+    "next": "下一页",
+    "page": "第 {{page}} 页，共 {{total}} 页",
+    "back": "返回词汇",
+    "sessionCounts": "本轮：{{ratings}} 次自评 · {{introductions}} 个新词",
+    "reviewCounts": "现在待复习：{{due}} · 今日剩余新词名额：{{remaining}}",
+    "flip": "翻转卡片",
+    "flipFront": "翻回正面",
+    "skip": "暂时跳过",
+    "forgot": "不记得",
+    "fuzzy": "模糊",
+    "remembered": "记得",
+    "recall": "先回想含义，再翻转卡片。",
+    "waiting": "暂告一段落，等待复习",
+    "nextDue": "下次学习时间为 {{time}}（{{seconds}} 秒后）。你可以先离开，稍后回来。",
+    "noEligible": "现在没有可选卡片。可能还有未到期、已跳过或受名额限制的词，并不代表全部学会了。",
+    "analyticsCounts": "已开始学习 {{introduced}} 个 · 已提交 {{ratings}} 次自评",
+    "analysisMismatch": "模型回答的是“{{actual}}”，不是你点击的“{{requested}}”。请重试查询。",
+    "saveWord": "收藏单词",
+    "saveContext": "保存此语境",
+    "contextSaved": "语境已保存",
+    "removeBookmark": "取消收藏",
+    "removeHelp": "取消收藏会保留语境、复习计划和自评历史。"
   },
   "practice": {
-    "title": "练习",
-    "subtitle": "根据你正在读的文章出题",
-    "tabSyntax": "排语序",
-    "tabCloze": "填空",
-    "tabOral": "朗读",
-    "generateDrills": "出题",
-    "generating": "正在根据文章出题…",
-    "checkAnswer": "提交答案",
-    "nextQuestion": "下一题",
-    "showExplanation": "提示",
-    "questionProgress": "第 {{current}} 题 / 共 {{total}} 题",
-    "realTTS": "听发音",
-    "scramblePrompt": "按正确的顺序点下面的片段。",
-    "removeChunk": "点一下移除",
-    "chunksToOrder": "片段",
-    "noArticleTitle": "请先打开一篇文章",
-    "noArticleDesc": "练习是根据你正在读的文章生成的。",
+    "setCount_other": "{{count}} 个题组",
+    "exercises_other": "{{count}} 份练习",
+    "add": "添加练习",
+    "importWorksheet": "导入练习单",
+    "makeFromArticle": "由文章出题",
+    "makeConjugationDrills": "动词变位练习",
+    "importWorksheetDesc": "前往导入页，核对图片、PDF 或文本中的练习。",
+    "makeFromArticleDesc": "从文章库选一篇文章，由你的 AI 出题。",
+    "makeConjugationDrillsDesc": "选择已审核的动词和时态，无需 AI 密钥。",
+    "drillItems": "每个时态的题数",
+    "start": "开始练习",
+    "continue": "继续练习",
+    "practiseAgain": "再练一次",
+    "numberedTitle": "{{number}}. {{title}}",
+    "search": "搜索题组",
+    "colTitle": "标题",
+    "colExercises": "练习数",
+    "colProgress": "进度",
+    "colAdded": "添加日期",
+    "colNumber": "序号",
+    "colType": "题型",
+    "actions": "操作",
+    "checkedProgress": "已检查 {{checked}}/{{total}} 题 · 答对 {{correct}} 题",
+    "noMatch": "没有符合条件的题组。",
+    "back": "返回练习",
+    "backToSet": "返回「{{title}}」",
+    "deleteUnit": "删除练习",
+    "deleteUnitNamed": "删除练习「{{title}}」",
+    "deleteUnitTitle": "删除这份练习？",
+    "deleteUnitBody": "「{{title}}」及其作答将从本机删除。作答历史会留在错题本。",
+    "deleteLastUnit": "这是题组的最后一份练习，题组也会一并删除。",
+    "deleteUnitFailed": "无法删除练习：{{reason}}",
+    "noArticleTitle": "请先添加一篇文章",
+    "noArticleDesc": "练习是根据文章库里的文章生成的。",
     "openLibrary": "去文章库",
-    "newDrills": "换一组题"
+    "article": "文章",
+    "level": "难度",
+    "count": "题数",
+    "countRange": "请输入 1 到 {{max}} 之间的整数。",
+    "make": "用这篇文章出题",
+    "making": "正在根据文章出题…",
+    "made_other": "已生成 {{count}} 道题，见下方列表。",
+    "dropped_other": "有 {{count}} 道题无法与文章核对，已略去。",
+    "items_other": "{{count}} 题",
+    "notStarted": "未开始",
+    "progress": "已检查 {{checked}}/{{total}} 题，答对 {{correct}} 题",
+    "sentenceOf": "第 {{current}} 句，共 {{total}} 句",
+    "previousSentence": "上一句",
+    "nextSentence": "下一句",
+    "listenSlowly": "慢速播放",
+    "check": "检查",
+    "checked": "已检查",
+    "checkAll": "全部检查",
+    "hint": "提示",
+    "explain": "讲解",
+    "redo": "重做",
+    "redoTitle": "清空这道题的作答，再试一次。作答记录会留在错题本。",
+    "resetUnit": "重置本组",
+    "reset": "重置",
+    "resetTitle": "重置这一组？",
+    "resetBody": "「{{title}}」上的作答会清空，方便你重做。作答记录会保留。",
+    "deleteSet": "删除题组",
+    "deleteSetNamed": "删除题组「{{title}}」",
+    "deleteSetTitle": "删除这个题组？",
+    "deleteSetBody_other": "删除完整题组「{{title}}」：所有学习领域中的 {{count}} 份练习、作答和短文录音均会从本机删除。作答历史会留在错题本。",
+    "deleteSetFailed": "无法删除题组：{{reason}}",
+    "saveFailed": "最近的修改未能保存：{{msg}}",
+    "right": "答对",
+    "wrong": "答错",
+    "expected": "正确答案",
+    "yourAnswer": "你的答案",
+    "blankLabel": "第 {{number}} 题，第 {{blank}} 空",
+    "answerLabel": "第 {{number}} 题，你的答案",
+    "choiceLabel": "第 {{number}} 题，第 {{group}} 处选择",
+    "genderLabel": "第 {{number}} 题，阴阳性",
+    "genderMasculine": "阳性",
+    "genderFeminine": "阴性",
+    "wordsLabel": "第 {{number}} 题，词语",
+    "answersLabel": "第 {{number}} 题，选项",
+    "linesLabel": "第 {{number}} 题，对话句",
+    "moveLineUp": "把 {{line}} 上移",
+    "moveLineDown": "把 {{line}} 下移",
+    "openNote": "AI 会阅读你的回答并写出反馈。这是估计，不是分数。",
+    "sampleAnswer": "参考答案",
+    "example": "例",
+    "note": "说明",
+    "rule": "规则",
+    "clue": "线索",
+    "aiFeedback": "AI 反馈",
+    "betterVersion": "更好的写法",
+    "estimate": "仅供练习参考的估计，不是分数。",
+    "explanationTitle": "讲解",
+    "explaining": "正在讲解…",
+    "tip": "小提示",
+    "chars": {
+      "label": "法语字符",
+      "toggle": "法语字符",
+      "shift": "大写",
+      "hint": "点字符即可插入到光标处。",
+      "none": "请先点一下要填写的答案。"
+    },
+    "listen": "播放",
+    "openInReader": "在阅读页打开",
+    "sentenceLabel": "第 {{number}} 题，你拼的句子",
+    "tilesLabel": "第 {{number}} 题，词语卡片",
+    "sentenceEmpty": "用下面的词语卡片拼出句子。",
+    "removeWord": "移除 {{word}}"
   },
   "analytics": {
     "title": "进度",
     "subtitle": "你读过、存下和练过的内容。",
-    "wordsLearned": "已存生词",
     "oralSessions": "朗读次数",
     "avgScore": "平均发音分",
     "scoreHistory": "最近的分数",
@@ -180,7 +365,6 @@
     "voiceSection": "音色",
     "female": "女声",
     "male": "男声",
-    "offlineSection": "你的数据",
     "offlineSummary": "本机已保存：",
     "articlesCount": "{{count}} 篇文章",
     "vocabCount": "{{count}} 个生词",
@@ -190,41 +374,40 @@
     "importBackup": "导入备份",
     "exportSuccess": "备份已保存。",
     "importSuccess": "备份已恢复，正在重新加载…",
-    "testBtn": "测试连接和朗读",
     "testingBtn": "测试中…",
     "testSuccess": "连接和朗读都正常。",
     "testFailed": "测试失败：{{msg}}",
-    "savedNotice": "只保存在这个浏览器里。",
     "keySet": "Key 已保存在此浏览器",
     "keyMissing": "尚未设置 Key",
+    "keyNotNeeded": "无需密钥",
     "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 {{provider}}。没有应用服务器。",
     "getKey": "到 {{provider}} 获取 Key",
-    "needsKeyNotice": "请先填写 API Key，才能使用单词和句子解析、朗读和发音反馈。",
+    "providerDocs": "{{provider}} 文档",
+    "needsKeyNotice": {
+      "text": "请先填写 API Key，才能使用单词和句子解析、朗读和发音反馈。",
+      "ocr": "请先填写 API Key，才能读取图片和 PDF。",
+      "speech": "请先填写 API Key，才能把法语朗读出来。",
+      "assessment": "请填写 Azure Speech 密钥和资源区域，以便连接音频评测服务。"
+    },
     "storageProtected": "已受保护，浏览器不会自动清理",
     "storageNotProtected": "空间不足或长期不使用时，浏览器可能会清掉这些数据",
     "protectStorage": "保护我的数据",
     "exportFailed": "导出失败：{{msg}}",
     "restoreFailed": "恢复失败：{{msg}}",
-    "cacheSummary": "已保存的解析：{{words}} 个单词，{{sentences}} 个句子，{{drills}} 套练习，{{prosody}} 套发音标记",
+    "cacheSummary": "已保存的解析：{{words}} 个单词，{{conjugations}} 个动词变位，{{sentences}} 个句子，{{exercises}} 个练习答案，{{prosody}} 套发音标记",
+    "contentCacheSummary": "{{count}} 份已保存的内容响应（保留 365 天，不含在备份中）",
     "clearCache": "清除已保存的解析",
-    "cacheDesc": "解析、练习和发音标记会保存在这台设备上。单词一直保留到你清除，句子、练习和标记保留 30 天。它们不会包含在备份里。",
+    "cacheDesc": "解析、练习辅助和发音标记会保存在这台设备上。单词一直保留到你清除，句子、练习辅助和标记保留 30 天。它们不会包含在备份里。",
     "audioSummary": "发音音频：{{clips}} 段，{{mb}} MB；其中 {{kept}} 段因属于生词本而永久保留",
     "clearAudio": "清除其他音频",
     "audioDesc": "每段音频都会保存下来，离线也能播放，也不会重复生成。生词本里的单词、它们的语境句和例句的音频始终保留，其余音频超过 200 MB 后会按最近使用情况清理。",
     "backupAudio": "备份时包含生词本的发音音频（文件会更大）",
     "backupAudioSize": "约 {{mb}} MB",
     "importAudioPartial": "备份已恢复，但有 {{failed}} 段音频没能保存到这台设备（可能存储空间已满）。播放这些单词时会重新生成。",
-    "textSection": "讲解",
-    "textSectionDesc": "负责单词和句子解析、练习题和发音反馈。",
-    "speechSection": "朗读",
-    "speechSectionDesc": "负责朗读法语，可以和上面选不同的提供方。",
     "providerLabel": "提供方",
     "modelLabel": "模型",
     "keyLabel": "{{provider}} API Key",
-    "sameKeyNote": "与上面使用同一个 {{provider}} Key。",
-    "promptsSection": "提示词",
-    "show": "展开",
-    "hide": "收起",
+    "keyLabelOptional": "{{provider}} API 密钥（可选）",
     "promptsDesc": "发给 AI 的指令，是纯文本。修改它们就能改变回答的写法；任何一条都可以恢复默认。已经保存在这台设备上的解析不会变，改过的提示词会得到新的解析。",
     "promptTask": "提示词",
     "promptLanguage": "提示词语言",
@@ -239,7 +422,126 @@
     "clearShadowing": "删除全部录音",
     "clearShadowingConfirm": "删除本设备上的全部跟读录音？",
     "shadowingFailed": "录音：{{msg}}",
-    "backupShadowing": "包含我的跟读录音（文件更大）"
+    "backupShadowing": "包含我的跟读录音（文件更大）",
+    "saved": "已保存",
+    "unsaved": "有未保存的修改",
+    "saveFailed": "没能保存：{{msg}}",
+    "notStored": "浏览器没有保存这次修改，可能是存储被禁用或已满。",
+    "checking": "检查中…",
+    "keyCheckFailed": "Key 检查没有通过：{{msg}}",
+    "returnToWork": "回到刚才的位置",
+    "leaveTitle": "放弃未保存的 AI 设置？",
+    "leaveHelp": "这些改动还没保存，离开后会失去它们。",
+    "keepEditing": "继续编辑",
+    "discard": "放弃",
+    "sections": {
+      "ai": {
+        "title": "AI 服务",
+        "desc": "你自己的提供方密钥，以及每项 AI 任务的设置。"
+      },
+      "practice": {
+        "title": "练习",
+        "desc": "练习答案的判定方式，以及听写的播放。"
+      },
+      "words": {
+        "title": "生词",
+        "desc": "每日新词上限，以及本机的内置词书。"
+      },
+      "prompts": {
+        "title": "提示词",
+        "desc": "修改 AI 写回答的方式。"
+      },
+      "data": {
+        "title": "数据与备份",
+        "desc": "本机保存的内容，以及备份。"
+      }
+    },
+    "about": {
+      "title": "关于",
+      "desc": "Relire Plus 是什么，数据去了哪里。",
+      "what": "Relire Plus 是为准备 TCF Canada 的法语学习者做的精读助手：读真实的法语文章，点开任何单词或句子查看解析，并开口练习发音。",
+      "privacy": "没有账号，也没有应用服务器。文章、生词和录音都保存在这个浏览器里。使用 AI 功能时，文本或录音会用你自己的 Key 从这个浏览器直接发给你选择的提供方。",
+      "servicePrivacy": "此版本可从内容服务读取语法主题、法语词典和完整的分页词书。请求只包含主题编号、点击的词，或词书编号、页码和版本，以及网络请求的 IP 地址。文章、语境、答案、自评、复习计划、录音和密钥都不会发给它。客户端可以下载整本已发布词书；真实内容仍待所有者审核并批准分发。",
+      "scope": "Relire Plus 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
+      "source": "在 GitHub 查看源代码",
+      "lexicon": "对于不在已审核词表里的动词，单词页中的动词形式和时态来自 {{name}}，由 {{maintainer}} 维护，许可证为 {{licence}}。",
+      "lexiconSource": "{{name}} 数据来源",
+      "lexiconRebuild": "这些数据不在代码仓库里，可以用原始下载文件重新生成。",
+      "lexiconNotice": "重新生成的方法"
+    },
+    "strictAccents": "严格重音符号",
+    "strictAccentsNote": "开启后，重音符号写错即判错；关闭时，不带重音符号的答案也算对。",
+    "dictationSpeed": "听写播放速度",
+    "dictationSpeedNote": "点“播放”时，听写内容朗读的速度。",
+    "speakAfterCheck": "听写检查后再播放",
+    "speakAfterCheckNote": "听写题检查后，再播放一遍它的数字。",
+    "remoteAutoSpeak": "允许检查后用语音服务商朗读",
+    "remoteAutoSpeakNote": "关闭时，检查后的自动播放只用本机语音。开启后，检查可能用你选定的语音服务商合成音频，会产生费用。手动点按播放或试听始终使用它。",
+    "browserRecognition": "录制时允许浏览器转写我的语音",
+    "browserRecognitionNote": "默认关闭。开启后，浏览器可能把录音发给浏览器厂商的语音服务，生成一段转写文本，在你选的 AI 服务商无法听音频时帮助评分。关闭时不做语音识别，录音只在你点“评测发音”时发送给你选的 AI 服务商。"
+  },
+  "aiSettings": {
+    "purposesLabel": "AI 任务",
+    "purposes": {
+      "text": "文字 AI",
+      "ocr": "图像识别",
+      "speech": "语音合成",
+      "assessment": "发音评测"
+    },
+    "purposeDesc": {
+      "text": "查词、分析句子、生成练习，并批改开放题。",
+      "ocr": "识别图片和 PDF，并从导入的材料里整理出练习结构；粘贴的文字仍使用文字 AI。",
+      "speech": "用你选择的模型和音色朗读法语。",
+      "assessment": "Azure 音频评测设置。配置好此连接后，朗读评测会使用它；未配置时仍使用文字 AI。"
+    },
+    "purposeSettings": "{{purpose}}设置",
+    "sharedKey": "同一个 Key 也用于{{purposes}}。",
+    "modelHelp": "从建议里选一个模型，或直接填写模型 ID。",
+    "invalidModel": "请输入不超过 512 个字符的模型 ID，不能为空或包含控制字符。",
+    "modelNotValid": "有一个 AI 模型 ID 无效，请在那里修改后再保存。",
+    "baseUrlLabel": "Base URL",
+    "baseUrlHelp": "留空即使用 {{url}}。使用 DeepSeek、通义千问等兼容服务时填写它们的地址。",
+    "invalidBaseUrl": "请填写 http 或 https 地址，不要包含 Key、查询参数或片段，最多 2048 个字符。",
+    "baseUrlNotValid": "有一个 Base URL 不是可用的地址，请修改后再保存。",
+    "voiceLabel": "音色 ID",
+    "voiceHelp": "可选：粘贴 Fish Audio 的音色 ID；留空则使用模型默认音色。",
+    "invalidVoice": "请填写 Fish Audio 的音色 ID，或留空使用默认音色。",
+    "voiceNotValid": "该音色 ID 不被此服务商接受，请修改后再保存。",
+    "keylessHelp": "无需密钥：请求只发送到你在本机运行的服务器。Ollama 需要允许本页面的来源，请启动时把 OLLAMA_ORIGINS 设为本页面地址（OLLAMA_ORIGINS=* 表示全部允许）。",
+    "fetch": "获取模型列表",
+    "fetching": "获取中…",
+    "refresh": "刷新模型列表",
+    "fetchNeedsKey": "先在上面填写 Key，才能获取模型列表。",
+    "noDiscovery": "此提供方不提供模型列表。",
+    "fetched": "找到 {{count}} 个模型。获取列表不代表已经测试过它们。",
+    "empty": "提供方没有返回任何模型，当前选择保持不变。",
+    "absent": "当前选择的模型不在这个列表里，仍会保留。",
+    "capabilitySupported": "已知这个模型可以完成这项任务。",
+    "capabilityUnknown": "这个模型能否完成这项任务尚未确认，可以通过检查或实际请求来验证。",
+    "capabilityUnsupported": "已知这个模型不能完成这项任务。",
+    "check": "检查 Key",
+    "checkServer": "检查服务器",
+    "checkSuccess": "Key 可以使用。",
+    "preview": "试听音色",
+    "ocrNote": "图片和 PDF 使用这里的设置；粘贴的文字使用文字 AI。",
+    "unknownOcr": "这个模型能否读图尚未确认，导入可能会返回提供方自己的错误。",
+    "savedNote": "保存只会保留你的选择，不会测试它们。",
+    "deviceNote": "用设备自带的声音朗读：不需要密钥，不产生费用，也不会保存音频。听起来是否自然，取决于设备上安装的法语语音。"
+  },
+  "azureAssessment": {
+    "regionLabel": "Azure 资源区域（必填）",
+    "regionHelp": "填写 Azure Speech 资源显示的区域，只用字母、数字和连字符。区域只保存在本浏览器，不含在备份中。无需模型，连接检查使用法国法语（fr-FR）。",
+    "invalidRegion": "请填写 Azure 资源区域，只用字母、数字和连字符。应用不会自动选择区域。",
+    "check": "检查连接",
+    "checkHelp": "检查会用你的密钥和区域，直接向 Azure 发送 100 毫秒的静音音频，可能消耗配额。本标签页内的请求逐个执行，不限制其他标签页或设备。",
+    "checkSuccess": "Azure 已完成识别请求。这只验证连接，不代表发音质量。",
+    "checkTimeout": "Azure 未在 15 秒内完成连接检查。",
+    "emptyInput": "发音评测需要录音和参考文本。",
+    "emptyResult": "Azure 没有返回发音评测。",
+    "invalidResult": "Azure 返回的发音评测无法使用：{{reason}}",
+    "noMatch": "Azure 未识别到语音：{{reason}}",
+    "canceled": "Azure 取消了识别（{{code}}）：{{reason}}",
+    "unexpectedResult": "Azure 返回了非预期的识别结果：{{reason}}"
   },
   "importer": {
     "articleTitle": "标题",
@@ -252,7 +554,7 @@
   "pwa": {
     "title": "安装为应用",
     "chromeWay": "Chrome 或 Edge",
-    "chromeDesc": "点击地址栏里的安装图标，或打开浏览器菜单选择「安装 Relire」。",
+    "chromeDesc": "点击地址栏里的安装图标，或打开浏览器菜单选择「安装 Relire Plus」。",
     "safariWay": "Safari（macOS 14 及以上）",
     "safariDesc": "选择「文件 → 添加到程序坞」。iPhone 和 iPad 上用「分享 → 添加到主屏幕」。",
     "noServerWhy": "可以离线使用",
@@ -260,9 +562,8 @@
     "gotIt": "知道了"
   },
   "storage": {
+    "loadFailed": "无法读取你的数据：{{msg}}",
     "saveFailed": "最新的修改没能保存到这个浏览器里。",
-    "upgradeBlocked": "Relire 已更新。请关闭其他打开的 Relire 标签页以完成更新，本页随后会继续。",
-    "staleTab": "Relire 已在另一个标签页更新。请重新加载本页，以便继续保存。",
     "reload": "重新加载",
     "openBackup": "打开设置导出备份"
   },
@@ -294,7 +595,9 @@
     "noMatch": "没有符合搜索条件的文章。",
     "clearFilters": "清除筛选",
     "count_other": "共 {{count}} 篇",
-    "deleteRecordings": "其中 {{count}} 句的跟读录音也会一并删除。"
+    "deleteRecordings": "其中 {{count}} 句的跟读录音也会一并删除。",
+    "addManual": "撰写或粘贴文章",
+    "addImport": "从图片、PDF 或文字导入"
   },
   "onboarding": {
     "label": "新手引导",
@@ -332,6 +635,40 @@
     "consonants": "辅音",
     "play": "播放 {{word}}，音标 {{symbol}}"
   },
+  "minimalPairs": {
+    "progress": {
+      "title": "近音辨听作答",
+      "history": "统计仍保存的近音辨听练习的每次作答，包括重复作答。删除题组后，其作答不再计入这里的统计。",
+      "contrast": "/{{first}}/ ↔ /{{second}}/",
+      "counts": "共 {{total}} 次，答对 {{correct}} 次"
+    },
+    "readAloud": {
+      "title": "朗读练习",
+      "word": "选择要练习的词",
+      "guide": "两个词都读一读。切换词语会清除当前录音；也可以选择让 AI 给出反馈。"
+    },
+    "drill": {
+      "title": "近音辨听",
+      "description": "用已审核的词对创建辨听练习。创建和判题无需 AI 或密钥，保存后可在“听力”中找到题组。",
+      "instruction": "听单词，选出你听到的词。重音符号也算拼写的一部分。",
+      "contrasts": "对比音组",
+      "sound": "/{{symbol}}/ · {{word}}",
+      "contrast": "{{first}} ↔ {{second}}",
+      "pickContrast": "请选择一个或多个对比音组。",
+      "unknownContrast": "未知的对比音组：{{contrast}}。",
+      "countRange": "请根据所选音组的题量，输入 1 到 {{max}} 之间的整数。",
+      "make": "创建练习",
+      "making": "正在创建练习",
+      "open": "在听力中打开已保存题组",
+      "tips": {
+        "b-p": "法语 p 不送气。普通话 b 和 p 靠送气与否区分，法语 b 和 p 则靠声带是否振动区分。",
+        "y-u": "法语 u 的发音对应拼音 ü，法语 ou 的发音对应拼音 u，注意拼写区别。"
+      }
+    },
+    "notes": {
+      "tendency": "这是倾向而不是固定规则：许多讲标准法语的人会在开音节中合并这两个元音。"
+    }
+  },
   "levels": {
     "A1": "A1 · 入门",
     "A2": "A2 · 初级",
@@ -349,40 +686,113 @@
   "errors": {
     "badResponse": "AI 返回的内容无法解析，请重试。",
     "noAudio": "没能生成语音。",
-    "allModelsFailed": "所有模型都失败了，请重试。"
+    "noSpeechToScore": "没有可以评分的内容：这段录音没有你的 AI 服务商能听的音频，浏览器也没有给出转录文字。",
+    "noRecordingToScore": "没有可以评分的内容：请先录下自己朗读这句话，再按“评测发音”。",
+    "speechPlayback": "这段语音没能播放。",
+    "allModelsFailed": "所有模型都失败了，请重试。",
+    "invalidAnswer": "无法使用 AI 的回答：{{msg}}",
+    "modelListMalformed": "服务商返回的模型列表格式有误。",
+    "modelListPagination": "无法安全地获取完整的模型列表。",
+    "modelListUnavailable": "此服务商不提供模型列表。",
+    "invalidModelId": "请输入不超过 512 个字符的模型 ID，不能为空或包含控制字符。",
+    "invalidBaseUrl": "此提供方的 Base URL 不可用，请在设置中修改。",
+    "providerUnavailable": "服务商 {{provider}} 不可用。",
+    "purposeUnavailable": "此服务商不支持所选任务。",
+    "speechOutputUnsupported": "模型 {{model}} 无法合成语音，请选择语音模型。",
+    "invalidVoice": "这不是 Fish Audio 的音色 ID。留空即可使用模型默认音色。",
+    "invalidSpeechText": "仅支持不超过 {{max}} 个字符、不含标记或链接的纯文本。",
+    "invalidAudio": "语音服务未返回可播放的 MP3 音频。",
+    "speechAudioTooLarge": "合成的音频过大，已拒绝接收。",
+    "speechTimeout": "语音服务未及时响应，请重试。",
+    "deviceVoiceUnavailable": "这个浏览器无法用设备自带的声音朗读。",
+    "deviceVoiceNoFrench": "设备上没有安装法语语音，无法用本机声音朗读法语。",
+    "deviceVoiceFailed": "本机声音未能播放，请检查系统的语音设置。"
   },
   "models": {
     "gemini-2_5-flash": {
-      "name": "Gemini 2.5 Flash（推荐）",
-      "desc": "速度快，适合日常讲解和评分。"
+      "name": "Gemini 2.5 Flash（推荐）"
     },
     "gemini-2_5-pro": {
-      "name": "Gemini 2.5 Pro",
-      "desc": "较慢，长难句讲得更细。"
+      "name": "Gemini 2.5 Pro"
     },
     "gemini-3_8-flash": {
-      "name": "Gemini 3.8 Flash",
-      "desc": "较新，兼顾速度和深度。"
+      "name": "Gemini 3.8 Flash"
     },
     "gemini-3_1-flash-lite": {
-      "name": "Gemini 3.1 Flash-Lite",
-      "desc": "最轻最快，讲解较简短。"
+      "name": "Gemini 3.1 Flash-Lite"
     },
     "gemini-3_8-flash-lite-tts": {
-      "name": "Gemini 3.8 Flash-Lite TTS（推荐）",
-      "desc": "法语发音自然，包括联诵。"
+      "name": "Gemini 3.8 Flash-Lite TTS（推荐）"
+    },
+    "gpt-4o-mini": {
+      "name": "GPT-4o Mini（推荐）"
+    },
+    "gpt-4o": {
+      "name": "GPT-4o"
+    },
+    "gpt-4_1": {
+      "name": "GPT-4.1"
+    },
+    "gpt-4_1-mini": {
+      "name": "GPT-4.1 Mini"
+    },
+    "o4-mini": {
+      "name": "o4-mini"
+    },
+    "fish-audio/s2_1-pro-free": {
+      "name": "Fish Audio S2.1 Pro（免费）"
+    },
+    "fish-audio/s2_1-pro": {
+      "name": "Fish Audio S2.1 Pro"
+    },
+    "fish-audio/s2-pro": {
+      "name": "Fish Audio S2 Pro"
+    },
+    "fish-audio/s1": {
+      "name": "Fish Audio S1"
+    },
+    "fish-audio/transcribe-1": {
+      "name": "Fish Audio Transcribe 1（转写模型，非语音合成）"
+    },
+    "claude-3-7-sonnet-latest": {
+      "name": "Claude 3.7 Sonnet（推荐）"
+    },
+    "claude-3-5-haiku-latest": {
+      "name": "Claude 3.5 Haiku"
+    },
+    "llama3_1": {
+      "name": "Llama 3.1（推荐）"
+    },
+    "qwen2_5:14b": {
+      "name": "Qwen 2.5 14B"
+    },
+    "llama3_2-vision": {
+      "name": "Llama 3.2 Vision"
     }
   },
   "providers": {
-    "gemini": "Google Gemini"
+    "gemini": "Google Gemini",
+    "openai": "OpenAI 兼容",
+    "fish-audio": "Fish Audio",
+    "anthropic": "Anthropic Claude",
+    "ollama": "Ollama（本地）",
+    "device": "本机语音",
+    "azure": "Microsoft Azure Speech"
   },
   "prompts": {
     "word": "单词解析",
     "sentence": "句子解析",
-    "drills": "练习题",
     "pronunciationAudio": "发音评分（带录音）",
     "pronunciationText": "发音评分（仅文字转写）",
-    "prosody": "发音标记"
+    "prosody": "发音标记",
+    "extract": "导入：识读练习材料",
+    "hint": "练习提示",
+    "explain": "错题讲解",
+    "grade": "开放题批改",
+    "adaptive": "针对性练习",
+    "exercises": "由文章生成练习",
+    "transcribe": "导入：识别文章页面",
+    "conjugate": "动词变位"
   },
   "prosody": {
     "title": "发音标记",
@@ -442,7 +852,7 @@
     "saved": "已保存。",
     "tooShort": "太短了，没有保存。请再录一次。",
     "listeningEnded": "卡片播放了声音，全文朗读已停止。",
-    "busy": "句子分析或练习页正在录音。",
+    "busy": "句子分析或朗读页正在录音。",
     "error": "无法录音：{{msg}}",
     "saveFailed": "录音没能保存：{{msg}}",
     "retry": "重试",
@@ -452,34 +862,603 @@
     "minimise": "收起",
     "restore": "展开练习卡",
     "title": "跟读",
+    "check": "检查发音",
+    "checkHint": "评测会逐词分析你最近一次的录音。",
+    "details": "详细结果",
+    "detailsLabel": "发音评测详情",
+    "detailsTitle": "发音评测详情",
     "move": "移动卡片",
     "moveHint": "拖动可移动；双击或按 Home 键放回底部。"
   },
   "study": {
     "label": "我的学习",
     "words": "生词",
-    "shadowing": "跟读"
+    "shadowing": "跟读",
+    "mistakes": "错题本"
+  },
+  "nounGender": {
+    "title": "名词阴阳性",
+    "subtitle": "词尾只表示倾向，并非定律。可参考已审核的例词。",
+    "loading": "正在加载名词词尾…",
+    "groups": {
+      "f": "阴性倾向",
+      "m": "阳性倾向"
+    },
+    "examples": "已审核的例词：",
+    "exceptions": "A1 样本中的例外：",
+    "ruleLine": "{{rule}}，词典中 {{n}} 个名词有 {{percent}}% 符合。这是词尾倾向，不代表该词的实际阴阳性。",
+    "exception": "此名词是已审核的 A1 词表中不符合该词尾倾向的例外。",
+    "rules": {
+      "tion": "-tion 结尾通常为阴性",
+      "sion": "-sion 结尾通常为阴性",
+      "te": "-té 结尾通常为阴性",
+      "ure": "-ure 结尾通常为阴性",
+      "ette": "-ette 结尾通常为阴性",
+      "ance": "-ance 结尾通常为阴性",
+      "ence": "-ence 结尾通常为阴性",
+      "ie": "-ie 结尾通常为阴性",
+      "age": "-age 结尾通常为阳性",
+      "ment": "-ment 结尾通常为阳性",
+      "isme": "-isme 结尾通常为阳性",
+      "eau": "-eau 结尾通常为阳性",
+      "oir": "-oir 结尾通常为阳性",
+      "ier": "-ier 结尾通常为阳性",
+      "ee": "-ée 结尾通常为阴性",
+      "esse": "-esse 结尾通常为阴性",
+      "ude": "-ude 结尾通常为阴性"
+    },
+    "drill": {
+      "title": "名词阴阳性练习",
+      "description": "从已审核的 A1 名词中抽题，包含例外。无需密钥或内容服务。",
+      "instruction": "选择各名词的阴阳性：M 表示阳性，F 表示阴性。检查后会显示词尾倾向。",
+      "make": "生成练习",
+      "making": "正在保存…",
+      "open": "打开已保存的练习",
+      "countRange": "请输入 1 到 {{max}} 之间的整数。"
+    }
+  },
+  "grammarTopics": {
+    "sections": "语法分区",
+    "title": "语法专题",
+    "loading": "正在加载专题…",
+    "loadError": "无法加载专题：{{msg}}",
+    "empty": "尚未发布语法专题。",
+    "noMatch": "此标签下尚无已发布的专题。",
+    "clearTag": "清除标签筛选：{{tag}}",
+    "back": "返回语法专题",
+    "learning": {
+      "progress": {
+        "initial": "已检查 {{checked}}/{{total}} 题",
+        "summary": "已检查 {{checked}} 题，答对 {{right}} 题"
+      },
+      "index": {
+        "label": "题目索引",
+        "item": "{{checkpoint}}，第 {{number}} 题，共 {{total}} 题，{{state}}",
+        "number": "{{number}}",
+        "position": "第 {{number}} 题，共 {{total}} 题",
+        "unchecked": "未检查",
+        "right": "答对",
+        "wrong": "答错"
+      },
+      "actions": {
+        "previous": "上一题",
+        "redo": "重做",
+        "check": "检查",
+        "next": "下一题",
+        "reset": "重置作答"
+      },
+      "result": {
+        "right": "答对",
+        "wrong": "答错",
+        "expected": "正确答案",
+        "readFeedback": "查看反馈",
+        "readDetails": "查看详情",
+        "saveFailed": "作答未保存",
+        "feedbackTitle": "反馈"
+      },
+      "reference": {
+        "fullReference": "完整语法参考",
+        "openCurrent": "打开当前参考",
+        "savedPractice": "打开已保存的练习"
+      },
+      "practice": {
+        "savedOnlyNote": "此题组仅包含已保存的题目。",
+        "setLabel": "专题练习",
+        "revision": "版本 {{revision}}"
+      },
+      "errors": {
+        "prepareFailed": "无法准备题目：{{msg}}",
+        "saveFailed": "无法保存作答：{{msg}}",
+        "loadSavedFailed": "无法加载已保存的题目：{{msg}}"
+      }
+    },
+    "chapters": {
+      "chapter-one": "名词",
+      "chapter-two": "限定词",
+      "chapter-three": "代词",
+      "chapter-four": "品质形容词",
+      "chapter-five": "动词",
+      "chapter-six": "副词",
+      "chapter-seven": "介词",
+      "chapter-eight": "连词",
+      "chapter-nine": "句子",
+      "chapter-ten": "法语交际拓展"
+    }
   },
   "shadowingLog": {
     "title": "跟读本",
-    "subtitle": "你对文章句子的录音，保存在本设备上。每句保留最近三条。",
-    "article": "文章",
-    "allArticles": "全部文章",
+    "subtitle": "保存在本机的文章和练习短文录音，每句保留最近三次。",
+    "source": "来源",
+    "allSources": "全部来源",
     "referenceVoice": "范读使用设置中当前选择的声音，可能与你录音时不同。",
     "recorded": "已录 {{count}} 句",
-    "text": "原文",
     "reference": "范读",
-    "mine": "我的录音",
     "openInReader": "在阅读页打开",
-    "playReference": "播放范读",
+    "playLatest": "播放我的录音",
+    "lastRecorded": "最近录音：{{when}}",
     "playTake": "播放你在 {{when}} 的录音",
     "allTakes": "全部录音（{{count}}）",
     "delete": "删除",
     "deleteTake": "删除你在 {{when}} 的录音",
     "changed": "原文已改动（{{count}}）",
-    "removed": "文章已删除（{{count}}）",
+    "removed": "来源已不可用（{{count}}）",
     "empty": "还没有录音。在阅读页点击句子旁的麦克风即可练习。",
     "loadFailed": "无法读取你的录音：{{msg}}",
     "deleteFailed": "录音没能删除：{{msg}}"
+  },
+  "grammarAreas": {
+    "nouns": "名词与限定词",
+    "adjectives": "形容词与副词",
+    "verbForms": "动词形式",
+    "verbUse": "动词用法",
+    "pronouns": "代词",
+    "sentence": "句子结构",
+    "skills": "语言技能"
+  },
+  "grammarTags": {
+    "gender-number": "阴阳性与单复数",
+    "articles": "冠词",
+    "partitive-quantity": "部分冠词与数量",
+    "possessive-demonstrative": "物主形容词与指示形容词",
+    "adjective-agreement": "形容词的性数配合",
+    "adjective-position": "形容词的位置",
+    "comparison": "比较级与最高级",
+    "adverbs": "副词",
+    "present": "现在时",
+    "passe-compose": "复合过去时",
+    "imparfait": "未完成过去时",
+    "plus-que-parfait": "大过去时",
+    "future": "将来时",
+    "conditional": "条件式",
+    "subjunctive": "虚拟式",
+    "imperative": "命令式",
+    "pronominal-verbs": "代词式动词",
+    "passive": "被动语态",
+    "tense-choice-past": "过去时态的选择",
+    "past-participle-agreement": "过去分词的配合",
+    "hypothesis-si": "si 条件句",
+    "reported-speech": "间接引语",
+    "infinitive-gerund": "不定式与副动词",
+    "subject-object-pronouns": "主语与宾语人称代词",
+    "y-en": "代词 y 和 en",
+    "relative-pronouns": "关系代词",
+    "other-pronouns": "其他代词",
+    "negation": "否定句",
+    "questions": "疑问句",
+    "prepositions": "介词",
+    "connectors": "连接词",
+    "word-order": "语序",
+    "numbers-time": "数字与时间",
+    "vocabulary-usage": "词汇运用",
+    "reading-comprehension": "阅读理解",
+    "listening-dictation": "听写",
+    "written-expression": "书面表达"
+  },
+  "exerciseTypes": {
+    "WORD_TRANSFORM": {
+      "name": "词形变换",
+      "instruction": "把每个词改成要求的阴阳性或单复数。"
+    },
+    "FILL_BLANKS": {
+      "name": "填空",
+      "instruction": "在每个空格中填入缺少的词。"
+    },
+    "GENDER_CHECK": {
+      "name": "判断阴阳性",
+      "instruction": "为每个词选择阳性、阴性，或两者皆可。"
+    },
+    "ODD_ONE_OUT": {
+      "name": "找出不同项",
+      "instruction": "划掉不属于同一类的那个词。"
+    },
+    "MATCH_PAIRS": {
+      "name": "连线配对",
+      "instruction": "把每个问题与对应的回答配对。"
+    },
+    "DIALOGUE_ORDER": {
+      "name": "排列对话顺序",
+      "instruction": "把对话的各句排成正确的顺序。"
+    },
+    "CHOICE_SELECT": {
+      "name": "选择正确选项",
+      "instruction": "在每个句子中选出正确的选项。"
+    },
+    "SENTENCE_BUILD": {
+      "name": "根据信息写句子",
+      "instruction": "根据给出的信息写出完整的句子。"
+    },
+    "READING_CLOZE": {
+      "name": "阅读短文",
+      "instruction": "阅读短文，然后完成空格和问题。"
+    },
+    "NUMBER_DICTATION": {
+      "name": "数字听写",
+      "instruction": "写出你听到的数字，可用数字或文字。"
+    },
+    "OPEN_QA": {
+      "name": "开放式问答",
+      "instruction": "用你自己的话写出问题或答案。"
+    }
+  },
+  "notFound": {
+    "grammarTopic": "此语法专题尚未发布或不存在。",
+    "passage": "这篇短文已不可用。请返回文章库选择其他内容。",
+    "title": "找不到这个页面",
+    "page": "这个地址在 Relire Plus 里没有对应的页面。",
+    "article": "文章库里没有这篇文章。它可能已被删除，或者链接来自另一个浏览器。",
+    "toLibrary": "回到文章库",
+    "unit": "找不到这组练习。它可能已被删除，或者链接来自另一个浏览器。",
+    "set": "找不到这个题组。它可能已被删除，或链接来自另一个浏览器。",
+    "toPractice": "前往此领域的练习"
+  },
+  "importMaterial": {
+    "fileType": "请选择 PNG、JPEG、WebP 图片或 PDF 文件。",
+    "pdfSize": "PDF 不能为空，且不能超过 20 MiB。",
+    "imageSize": "图片不能为空，且不能超过 10 MiB。",
+    "imageRead": "无法读取图片，请重新选择文件。",
+    "imageDecode": "无法解码图片，请确认文件未损坏。",
+    "imagePixels": "图片超过 2000 万像素，请先缩小图片。",
+    "pdfPages": "PDF 必须包含 1–100 页，较大的文件请先拆分。",
+    "pageBounds": "请选择有效页码，每次最多解析 {{limit}} 页，跨页题目请一起选择。",
+    "imageLimit": "每次最多 {{limit}} 张图片。超出的图片未添加，其余已保留。",
+    "requestImageLimit": "每次最多读取 {{limit}} 张图片。",
+    "nothingToRead": "尚无可读取的内容，请先添加文字或图片。",
+    "removeFirst": "图片和 PDF 不能混用。请先移除已有材料，再选择其他类型或另一份 PDF。",
+    "pageFormat": "页码格式示例：1、1-3 或 1,3。",
+    "pdfProtected": "不支持受保护的 PDF，请先解除密码保护。",
+    "pdfOpen": "无法打开 PDF，请确认文件未损坏。",
+    "pdfRender": "无法渲染 PDF 页面，请检查文件或尝试其他页面。",
+    "disposed": "此材料已关闭，请重新选择文件。",
+    "pastedImage": "粘贴的图片"
+  },
+  "importFlow": {
+    "choose": "选择图片或 PDF",
+    "chooseImages": "选择图片",
+    "dropHere": "或把图片拖放、粘贴到此处，最多 {{limit}} 张",
+    "readingOrder": "图片按显示顺序阅读和发送；PDF 按所选页码顺序发送。",
+    "previews": "材料预览",
+    "previewPage": "第 {{page}} 页 · {{name}}",
+    "removeImage": "移除图片 {{name}}",
+    "remove": "移除",
+    "removeFile": "移除文件",
+    "clearText": "清空文字",
+    "localFile": "{{name}} · {{count}} 页，发送前仅在本地处理",
+    "pages": "发送页码（最多 {{limit}} 页，如 1,3-4）",
+    "recipient": "接收方：{{provider}} · {{model}}",
+    "sentImages_other": "{{count}} 张图片，第 1 至 {{count}} 页",
+    "sentPdf": "1 份 PDF，第 {{pages}} 页",
+    "none": "无",
+    "unsupported": "此模型无法读取图片。请先在设置中选择支持图片的模型。",
+    "working": "处理中…",
+    "pastedText": "粘贴文字",
+    "missingKey": "尚未设置 API 密钥。输入已保留；打开设置会放弃当前内容，请确认后再离开。",
+    "failed": "请求失败：{{msg}}",
+    "saving": "保存中…",
+    "restart": "重新开始",
+    "leaveTitle": "放弃本次导入？",
+    "leaveHelp": "未保存的输入和草稿将丢失，正在进行的请求会取消。",
+    "savingWait": "请等待保存结束后再离开。",
+    "keep": "继续编辑",
+    "discard": "放弃"
+  },
+  "importArticle": {
+    "heading": "导入文章",
+    "subtitle": "把照片、PDF 或粘贴的文字变成可以在这里阅读的文章。",
+    "text": "要导入的文字（最多 40000 字符）",
+    "consent": "发送内容",
+    "localOnly": "粘贴的文字不会发送到任何地方，只在这台设备上审阅和保存。",
+    "analyze": "发送并识别",
+    "continue": "继续",
+    "review": "审阅文章",
+    "reviewHelp": "保存前，文字只保留在本页。AI 转录可能有误：请对照原件检查，并在这里修改。",
+    "title": "标题",
+    "level": "等级",
+    "body": "文章正文",
+    "requiredText": "保存前请填写标题和正文。",
+    "save": "保存文章",
+    "saveFailed": "保存失败，文字已保留，可重试。{{msg}}"
+  },
+  "importExercises": {
+    "heading": "导入练习",
+    "subtitle": "把练习单、一页题目或粘贴的文字变成一个题组。",
+    "title": "题组标题",
+    "requiredTitle": "保存前请填写题组标题。",
+    "review": "审阅与修正",
+    "reviewHelp": "草稿仅保留在本页。AI 参考答案可能有误。展开题目即可修改；不需要的单元或题目可以排除。缺失信息须补全或排除后才能保存。",
+    "warning": "待核对：{{msg}}",
+    "includeUnit": "包含单元：{{title}}",
+    "unitTitle": "单元标题",
+    "instruction": "单元说明",
+    "passage": "阅读材料（阅读填空题必填）",
+    "noAnswer": "缺少参考答案",
+    "type": "题型",
+    "prompt": "题干（[___] 表示空格，{a|b} 表示选项）",
+    "options": "选项（每行一个；匹配和排序选项的首字母须各不相同）",
+    "answer": "参考答案",
+    "answers": "参考答案（每行对应一个空格或排序选项首字母）",
+    "alternatives": "其他可接受答案（每行一个）",
+    "grammar": "语法主题",
+    "secondaryPrompt": "补充题目信息",
+    "audioText": "听写内容（听写题必填）",
+    "resolved": "我已补全缺失信息",
+    "excludeItem": "排除此题",
+    "level": "这些练习的等级",
+    "chooseLevel": "选择等级",
+    "levelRequired": "保存前请选择题组难度。",
+    "confirm": "我已审阅每个所选单元的学习领域、练习和参考答案，确认将题组保存在本机。",
+    "save": "确认保存",
+    "selectUnits": "请至少包含一个可练习的单元。",
+    "saveFailed": "保存失败，草稿已保留，可重试。{{msg}}",
+    "mode": "提取模式",
+    "sentText": "文字：{{count}} 字符",
+    "exactText": "查看将发送的完整文字",
+    "text": "发送文字（最多 40000 字符；可作为图片的补充内容）",
+    "analyze": "发送并提取",
+    "consent": "发送前确认",
+    "modes": {
+      "complete": "补全缺失答案",
+      "extract": "仅提取原文答案",
+      "generate": "生成新练习"
+    },
+    "modeHelp": {
+      "complete": "保留原题和原文答案，由 AI 补全缺失的参考答案。",
+      "extract": "只保留原文中印出的答案，缺失答案须在审阅时补全。",
+      "generate": "请 AI 根据材料生成新练习，而非提取原有题目。"
+    },
+    "origin": {
+      "material": "原文答案，待核对",
+      "ai": "AI 参考答案",
+      "user": "用户修改"
+    },
+    "errors": {
+      "no-items": "{{title}}：未包含题目。请排除此单元，或添加有效题目。",
+      "blocked": "{{title}}：请补全缺失信息或排除相关题目。",
+      "missing-answer": "{{title}}：请填写缺失的参考答案或排除相关题目。",
+      "invalid": "{{title}}：{{msg}}"
+    }
+  },
+  "notebook": {
+    "description": "保留练习中的错误答案。点击单词即可查询并加入生词本。",
+    "empty": "还没有错题。练习中检查过的错误答案会显示在这里。",
+    "loadError": "无法加载错题：{{reason}}",
+    "resolved": "已解决",
+    "unresolved": "待复习",
+    "retryUnit": "回到单元重试",
+    "unitUnavailable": "单元已不可用",
+    "retryHelp": "打开已保存的练习，不更改答案。如果已经检查，请点击“重置本组”并确认；作答历史会保留。",
+    "emptyWordAnalysis": "单词分析为空。"
+  },
+  "exerciseProgress": {
+    "title": "语法正确率",
+    "history": "仅统计语法作答，包括来源已删除的语法历史记录。",
+    "accuracy": "{{percent}}% · 答对 {{correct}} / {{total}}",
+    "readFailed": "无法读取练习记录：{{reason}}",
+    "loading": "正在读取练习记录…",
+    "empty": "完成并检查练习后，这里会显示各语法领域的正确率。"
+  },
+  "adaptive": {
+    "title": "练习薄弱语法",
+    "targets": "最多选取三个有错题且正确率最低的主题：{{tags}}",
+    "noTargets": "暂无薄弱主题。只有实际答错过的主题才会被选中。",
+    "make": "生成一组练习",
+    "retry": "重试保存",
+    "discard": "丢弃",
+    "saving": "正在保存这组练习，请稍候。",
+    "generating": "正在生成新的练习…",
+    "unsaved": "尚未保存：{{title}}（{{items}}）。重试保存不会再次请求 AI，也可以丢弃。",
+    "leaveTitle": "丢弃这组练习？",
+    "leaveHelp": "生成的练习尚未保存。保留后可重试保存；离开或生成另一组之前需要先丢弃。",
+    "keep": "保留这组练习"
+  },
+  "conjugation": {
+    "page": {
+      "title": "变位",
+      "subtitle": "查看法语动词的各个时态，以及何时使用、如何构成。",
+      "inputLabel": "动词原形",
+      "button": "变位",
+      "working": "处理中…",
+      "practise": "练习全部时态",
+      "practising": "正在生成练习…",
+      "practiseTense": "练习此时态",
+      "practiseTitle": "练习",
+      "practisePrevious": "上一个时态",
+      "practiseNext": "下一个时态",
+      "packVerbs": "已审校动词：",
+      "practiseOpen": "打开新的练习集",
+      "patterns": {
+        "title": "句式",
+        "tense": "时态",
+        "person": "人称",
+        "impersonal": "无人称 il",
+        "on": "泛指 on",
+        "negation": "否定句",
+        "estCeQue": "est-ce que 疑问句",
+        "inversion": "倒装疑问句",
+        "unavailable": "— {{reason}}",
+        "noQuestions": "此时态不提供疑问句。",
+        "noJe": "此处不提供 je 的倒装疑问句，请用 est-ce que 提问。",
+        "notCovered": "所列规则未涵盖此情况。",
+        "aiOnly": "AI 生成，未核对",
+        "differs": "AI 生成；此变位与规则不符。"
+      },
+      "empty": "输入一个动词原形，例如 parler 或 se lever，即可查看它的各个时态。",
+      "auxiliary": {
+        "avoir": "助动词：avoir",
+        "etre": "助动词：être"
+      },
+      "status": {
+        "pack-reviewed": {
+          "label": "已审核",
+          "note": "这些变位来自应用自带的已审核动词表，没有使用 AI。"
+        },
+        "rule-checked": {
+          "label": "符合规则（未经人工审核）",
+          "note": "AI 给出的变位与它所说的规则一致。这只是核对，不是审核，一致的错误仍可能通过。"
+        },
+        "partly-differs": {
+          "label": "部分形式与规则不一致",
+          "note": "在标有“模型”和“规则”的格子里，AI 的形式与规则给出的形式不同，使用前请自行核对。"
+        },
+        "ai-only": {
+          "label": "AI 生成，未核对",
+          "note": "这些变位由 AI 写出，这里无法核对，使用时请多加留意。"
+        }
+      },
+      "model": "模型",
+      "rule": "规则",
+      "aiOnly": "AI 生成，未核对",
+      "differs": "有形式不一致",
+      "example": "AI 生成的例句",
+      "listen": "用本机语音朗读：{{text}}",
+      "stopListening": "停止朗读：{{text}}",
+      "endings": {
+        "title": "规则词尾",
+        "note": "变位中带下划线的词尾与此表来自同一规则。破折号表示该时态不使用此人称。",
+        "none": "无词尾",
+        "unavailable": "—"
+      },
+      "participles": "分词",
+      "participle": {
+        "present": "现在分词",
+        "ms": "过去分词，阳性单数",
+        "fs": "过去分词，阴性单数",
+        "mp": "过去分词，阳性复数",
+        "fp": "过去分词，阴性复数"
+      }
+    },
+    "tenses": {
+      "present": {
+        "name": "现在时",
+        "use": "用于表达当下发生的动作、客观事实或经常性习惯。",
+        "form": "在动词词干后加上人称词尾，如规则 -er 动词添加 -e、-es、-e、-ons、-ez、-ent。"
+      },
+      "passeCompose": {
+        "name": "复合过去时",
+        "use": "用于表达过去已经完成的具体动作或事件。",
+        "form": "由助动词 avoir 或 être 的直陈式现在时加上动词的过去分词构成。"
+      },
+      "imparfait": {
+        "name": "未完成过去时",
+        "use": "用于描述过去的背景、持续状态以及过去的习惯性动作。",
+        "form": "取直陈式现在时 nous 形式，去掉 -ons，再加上 -ais、-ais、-ait、-ions、-iez、-aient；être 使用词干 ét-。"
+      },
+      "plusQueParfait": {
+        "name": "愈过去时",
+        "use": "用于表达在过去另一动作或时刻之前已经完成的动作。",
+        "form": "由助动词 avoir 或 être 的未完成过去时加上动词的过去分词构成。"
+      },
+      "futur": {
+        "name": "简单将来时",
+        "use": "用于表达将来会发生或计划进行的动作与事件。",
+        "form": "规则动词以动词原形为基础（-re 动词去掉末尾的 e），加上词尾 -ai、-as、-a、-ons、-ez、-ont。"
+      },
+      "futurAnterieur": {
+        "name": "先将来时",
+        "use": "用于表达在将来某一时刻之前已经完成的动作。",
+        "form": "由助动词 avoir 或 être 的简单将来时加上动词的过去分词构成。"
+      },
+      "conditionnel": {
+        "name": "条件式",
+        "use": "用于委婉请求、表达愿望、提出建议或假设情况。",
+        "form": "在将来时词干后加上未完成过去时词尾 -ais、-ais、-ait、-ions、-iez、-aient。"
+      },
+      "conditionnelPasse": {
+        "name": "过去条件式",
+        "use": "用于表达对过去的假设、遗憾或对未能实现之事的责备。",
+        "form": "由助动词 avoir 或 être 的条件式加上动词的过去分词构成。"
+      },
+      "subjonctif": {
+        "name": "虚拟式",
+        "use": "某些表示必要、怀疑、愿望、情感或主观评价的表达后，从句使用虚拟式；是否使用虚拟式取决于具体表达和语境。",
+        "form": "通常由 que 引出。多数动词使用词尾 -e、-es、-e、-ions、-iez、-ent，词干可能随人称变化；部分动词形式不规则，如 que je sois、que j’aie。"
+      },
+      "subjonctifPasse": {
+        "name": "过去虚拟式",
+        "use": "用于需要虚拟式的从句，表示在参照时间之前已完成的动作；参照时间可以在过去、现在或将来。",
+        "form": "通常由 que 引出，由助动词 avoir 或 être 的虚拟式加上动词的过去分词构成。"
+      },
+      "imperatif": {
+        "name": "命令式",
+        "use": "用于直接给出指令、建议、要求或禁令。",
+        "form": "通常使用直陈式现在时的 tu、nous、vous 形式，不加主语代词。-er 动词、aller 及类似 ouvrir 的动词，其 tu 命令式不带词尾 -s，如 parle、va、ouvre；但直接连接代词 y 或 en 时要加 -s，如 vas-y、parles-en。être、avoir、savoir、vouloir 有特殊命令式形式。"
+      }
+    },
+    "rules": {
+      "er-regular": "规则 -er 动词在所有时态中保持词干不变并使用标准词尾，如 nous parlons。",
+      "er-cer": "以 -cer 结尾的动词在元音 a 和 o 前将 c 改为 ç 以保持发音，如 nous commençons。",
+      "er-ger": "以 -ger 结尾的动词在元音 a 和 o 前在 g 后加上不发音的 e 以保持发音，如 nous mangeons。",
+      "er-yer-i": "-oyer、-uyer 动词在不发音的 e 前把 y 改为 i，如 ils nettoient、ils essuient；-ayer 动词可保留 y，也可改为 i；-eyer 动词保留 y。envoyer、renvoyer 的将来时和条件式词干不规则。",
+      "er-e-grave": "按 lever 模式变位的动词，词干中的哑音 e 在含哑音 e 的音节前变为 è；将来时和条件式也如此，如 il lève、il lèvera。",
+      "er-eacute-egrave": "按 préférer 模式变位的动词，词干中的 é 在含哑音 e 的音节前变为 è，如 je préfère。将来时和条件式可用传统拼写 je préférerai、je préférerais，也可用修订拼写 je préfèrerai、je préfèrerais。",
+      "er-eler-double": "类似 appeler 和 jeter 的 -eler/-eter 动词在含不发音 e 的词尾前以及将来时和条件式中双写 l 或 t，如 j’appelle。",
+      "ir-issons": "第二组规则 -ir 动词在直陈式现在时复数、未完成过去时、现在虚拟式和现在分词中使用 -iss-，如 nous choisissons。",
+      "ir-sortir": "类似 sortir 和 partir 的动词在现在时单数人称中去掉词根末尾的辅音，如 je sors。",
+      "ir-ouvrir": "类似 ouvrir 和 offrir 的动词在现在时中使用规则 -er 动词的词尾，如 j’ouvre。",
+      "re-regular": "类似 vendre 的规则 -dre 动词在现在时单数中分别加 -s、-s，第三人称不加词尾，如 il vend。"
+    },
+    "persons": {
+      "1sg": "我",
+      "2sg": "你",
+      "3sg": "他/她/它",
+      "1pl": "我们",
+      "2pl": "你们/您",
+      "3pl": "他们/她们/它们"
+    },
+    "pronouns": {
+      "1sg": "je",
+      "2sg": "tu",
+      "3sg": "il/elle",
+      "1pl": "nous",
+      "2pl": "vous",
+      "3pl": "ils/elles"
+    },
+    "tenseFr": {
+      "present": "présent",
+      "passeCompose": "passé composé",
+      "imparfait": "imparfait",
+      "plusQueParfait": "plus-que-parfait",
+      "futur": "futur",
+      "futurAnterieur": "futur antérieur",
+      "conditionnel": "conditionnel",
+      "conditionnelPasse": "conditionnel passé",
+      "subjonctif": "subjonctif",
+      "subjonctifPasse": "subjonctif passé",
+      "imperatif": "impératif"
+    },
+    "drill": {
+      "title": "动词变位：{{tense}}",
+      "instruction": "按要求写出动词的正确形式。",
+      "setTitle": "动词变位：{{verbs}}",
+      "more": "等 {{count}} 个",
+      "made_one": "已生成 {{count}} 道题，就在下面的列表里。",
+      "made_other": "已生成 {{count}} 道题，就在下面的列表里。",
+      "making": "正在生成练习…",
+      "make": "生成练习",
+      "countRange": "请输入不小于 1 的整数。",
+      "loading": "正在加载动词…",
+      "noVerbs": "动词库里还没有动词。",
+      "verbs": "动词",
+      "tenses": "时态"
+    }
   }
 }

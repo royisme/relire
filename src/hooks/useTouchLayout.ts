@@ -9,4 +9,9 @@ function subscribe(listener: () => void) {
   return () => media.removeEventListener('change', listener);
 }
 
-export const useTouchLayout = () => useSyncExternalStore(subscribe, () => window.matchMedia(QUERY).matches, () => false);
+export const useTouchLayout = () =>
+  useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(QUERY).matches,
+    () => false,
+  );

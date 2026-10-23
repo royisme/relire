@@ -1,31 +1,33 @@
-# Relire — French Reading & Pronunciation Trainer
+# Relire Plus — French Reading, Pronunciation & Exercise Practice
 
-**Open-source French close-reading, shadowing and pronunciation practice for TCF Canada.**
+**Open-source French close reading, shadowing, pronunciation and exercise practice for TCF Canada.**
 
-[Try Relire online](https://royisme.github.io/relire/) · **English** · [简体中文](README.zh-CN.md)
+[Try Relire Plus online](https://royisme.github.io/relire/) · **English** · [简体中文](README.zh-CN.md)
 
-Read real French → tap a word or sentence → understand it in context → shadow the sentence → get AI pronunciation feedback.
+Read real French → tap a word or sentence → understand it in context → shadow the sentence → get AI pronunciation feedback → practise with exercises and review your mistakes.
 
-Relire runs entirely in your browser. There is no application server and no account. Bring your own Gemini API key, keep your learning data on your device, and install it as a PWA on desktop or mobile.
+Relire Plus runs entirely in your browser. There is no application server and no account. Bring your own Gemini API key, keep your learning data on your device, and install it as a PWA on desktop or mobile.
 
-**Why Relire**
+**Why Relire Plus**
 
-- Context-aware word explanations with IPA, verb tense and conjugation.
+- Context-aware word explanations with IPA and verb tense, plus a Conjugation page with reviewed tables and rule-checked forms.
 - Sentence translation, grammar breakdown, collocations and shadowing guidance.
 - Pronunciation feedback on sounds, liaisons and intonation.
-- Spaced-repetition vocabulary review with SM-2.
+- Exercises generated from your material, including dictation and AI-graded writing.
+- Material import from images, PDFs or text, with a mistake notebook and progress counted from real practice.
+- Spaced-repetition vocabulary review with FSRS-6.
 - Local-first storage and cached audio/AI results.
 - English and Simplified Chinese interfaces.
 
-> Relire focuses on reading and pronunciation practice. It is not a TCF mock-exam platform, its AI scores are estimates rather than official results, and it is not affiliated with France Éducation international or IRCC.
+> Relire Plus covers reading, pronunciation and exercise practice. It is not a TCF mock-exam platform, its AI scores are estimates rather than official results, and it is not affiliated with France Éducation international or IRCC.
 
 ## A look inside
 
 Read a French article with adjustable text size and playback speed.
 
-![French article in the Relire reader](docs/media/reader.jpg)
+![French article in the Relire Plus reader](docs/media/reader.jpg)
 
-Tap a word to see its meaning in context, IPA, pronunciation guidance and verb conjugations beside the article.
+Tap a word to see its meaning in context, IPA and pronunciation guidance beside the article. A verb from the reviewed list also shows its conjugation table; any other verb links to the Conjugation page.
 
 ![Contextual analysis of affronter, with IPA and verb conjugations](docs/media/word-analysis.jpg)
 
@@ -49,12 +51,12 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 ## What you can do
 
 - **Keep a library of articles.** Three B1 to C1 samples are included. Paste your own, then search, filter by level, sort, edit or delete them from a simple list. Choose text size and theme, and slow the audio down to 0.5×.
-- **Tap any word.** You get the lemma, meaning in context, IPA, the verb tense, a conjugation table and example sentences. Save it to your vocabulary in one click.
+- **Tap any word.** You get the lemma, meaning in context, IPA, the verb tense and example sentences. A verb from the reviewed list shows its conjugation table; any other verb links to the Conjugation page under My study, Grammar, which marks which forms the rules confirm. Save it to your vocabulary in one click.
 - **Break down a hard sentence.** Translation, syntax segments, grammar points, common collocations and a shadowing guide (rhythm groups, liaisons, intonation).
 - **Shadow and get feedback.** Record yourself reading a sentence and receive an overall score, plus feedback on individual sounds, liaisons and intonation.
 - **Look up any French sound.** A chart of the sounds of French in IPA, each with an example word you can tap to hear.
-- **Review vocabulary with spaced repetition.** An SM-2 schedule decides what is due today.
-- **Drill from the article you are reading.** Sentence scramble, oral shadowing and grammar cloze, generated from the current text.
+- **Review vocabulary with spaced repetition.** An FSRS-6 schedule decides what is due today.
+- **Exercises from your articles.** Make fill-in-the-blank, multiple-choice, word-form and open questions from any article, answer them on one sheet with hints, explanations and a French character bar, and read a sentence aloud for a pronunciation score.
 - **Choose your AI.** The AI that writes explanations and the AI that reads aloud are separate settings, each with its own provider, model and key, and the code is built so more providers can be added.
 - **Edit the prompts.** The instructions sent to the AI are plain-text templates you can view, change and reset in Settings.
 - **Use it in English or Chinese.** The interface and the explanations switch between the two.
@@ -100,10 +102,10 @@ src/services/ai/         providers, prompt templates and tasks; the UI calls src
 src/App.tsx              app state and screen navigation
 src/storage/             IndexedDB persistence, answer cache and audio storage
 src/components/          one file per screen or overlay
-src/utils/srs.ts         SM-2 scheduling
+src/utils/srs.ts         FSRS-6 scheduling
 ```
 
-`bun run lint` runs the TypeScript check. There are no automated tests yet.
+`bun run typecheck` runs the TypeScript check, `bun run lint` runs oxlint, `bun run format` formats with oxfmt, and `bun run e2e` runs the Playwright specs with every AI call mocked.
 
 ## Contributing
 

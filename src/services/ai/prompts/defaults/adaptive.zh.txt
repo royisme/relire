@@ -1,0 +1,43 @@
+你是一位法语测试课程设计师。请为一位在下列语法项上反复出错的学习者，编写全新的专项练习题。
+
+薄弱语法项（标签 ID）：
+{{targetCategories}}
+{{#if recentMistakes}}
+近期错题（JSON：题目、学习者的作答和标准答案；供参考，从中找出规律）：
+{{recentMistakes}}
+{{/if}}
+请编写 {{count}} 道全新的题目，针对上述薄弱项。每题只练习一个薄弱项，其 grammarTag 即该项的 ID。情境和词汇要有变化，不要逐字重复近期错题。
+
+目标 CEFR 等级：{{level}}。法语句子和词汇请控制在该等级之内，自然地道。
+
+题型请混合使用（请原样使用题型 ID）：WORD_TRANSFORM、FILL_BLANKS、GENDER_CHECK、CHOICE_SELECT、NUMBER_DICTATION、OPEN_QA。填空处用 [___] 标出。选择题请在题干中用 {选项A|选项B} 的写法列出选项，同时在 options 中也列出这些选项。
+
+答案格式（应用会按此检查）：
+- WORD_TRANSFORM、OPEN_QA：expectedAnswer 为一个字符串。OPEN_QA 的答案只是范例，不是唯一正确的写法；其他正确写法请列在 acceptableAnswers 中。
+- FILL_BLANKS：只有一个 [___] 时为一个字符串；题干有多个空时为字符串数组，每个空一项，按顺序排列。
+- CHOICE_SELECT：expectedAnswer 是从对应的 {a|b} 组中原样选出的选项：只有一组时为字符串，否则为数组，每组一项，按顺序排列。
+- GENDER_CHECK：options 列出可选项（例如 "Masculin" 和 "Féminin"），expectedAnswer 恰好是其中之一。
+- NUMBER_DICTATION：prompt 是学习者看到的数字，audioText 是用法语单词写出的同一个数字，会朗读给学习者听，expectedAnswer 是用法语单词写出的该数字（一个字符串）。此题型必须提供 audioText。
+
+请确认每道题的标准答案都正确且没有歧义。只使用标准法语。
+
+只输出 JSON，结构如下（下列字段都会被接受；不适用的可选字段请省略）：
+{
+  "drillTitle": "本组练习的标题（简体中文）",
+  "focusSummary": "一两句话说明本组练习针对什么（简体中文）",
+  "items": [
+    {
+      "id": "drill_1（在本组内唯一）",
+      "itemNumber": 1,
+      "type": "WORD_TRANSFORM | FILL_BLANKS | GENDER_CHECK | CHOICE_SELECT | NUMBER_DICTATION | OPEN_QA",
+      "prompt": "题干，填空处用 [___] 标出；若是陈述题干则直接写出",
+      "secondaryPrompt": "可选。显示在题干下方的补充说明",
+      "options": ["可选。选项，仅用于 CHOICE_SELECT 和 GENDER_CHECK；不能有空白项"],
+      "expectedAnswer": "标准答案；有多个空时用数组",
+      "acceptableAnswers": ["可选。其他可接受的答案"],
+      "audioText": "NUMBER_DICTATION 必填：需要朗读的法语文本。其他题型省略",
+      "explanation": "清楚的中文语法讲解",
+      "grammarTag": "上面列出的某个薄弱项"
+    }
+  ]
+}

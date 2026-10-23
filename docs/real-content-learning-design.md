@@ -167,7 +167,7 @@ The [IFrame API](https://developers.google.com/youtube/iframe_api_reference) exp
 ### 3.14 Notes, favorites, vocabulary, and learning progress
 
 - Goal: retain useful learning results and return to their original context.
-- Notes/favorites: local annotation records refer to article/segment ID and keep a text snapshot. Copying a sentence does not create a record. Saving a word reuses `vocab` and SM-2; favorite sentences are distinct from word review cards.
+- Notes/favorites: local annotation records refer to article/segment ID and keep a text snapshot. Copying a sentence does not create a record. Saving a word reuses `vocab` and FSRS-6; favorite sentences are distinct from word review cards.
 - Progress: save last segment, actual media position, completed state, and recorded practice events. Save after meaningful interactions and periodically during playback, not once per animation frame. Store no invented mastery percentage based on watch time.
 - Review: reuse the current word review deck. A new sentence SRS algorithm is not required by the screenshots; favorite sentences initially reopen the original learning location.
 - Acceptance: metadata survives reload/offline use; unrelated article deletion cannot erase saved word learning; reviewed/replaced segments remain identifiable.

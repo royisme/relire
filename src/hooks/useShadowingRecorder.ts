@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PronunciationAssessment } from '../types';
 import { assessPronunciation } from '../services/api';
 import { errorMessage } from '../services/ai/errors';
+import { getAppSettings } from '../utils/appSettings';
 import { FrenchAudioRecorder, stopSpeech } from '../utils/speech';
 import { CaptureBusyError } from '../utils/speech/recorder';
 
@@ -16,19 +17,32 @@ export type RecorderPhase = 'idle' | 'recording' | 'recorded';
 export type RecorderError = { kind: 'mic' } | { kind: 'busy' } | { kind: 'assess'; detail: string };
 
 interface Recording {
+  blob: Blob;
   base64: string;
   mimeType: string;
 }
 
+/** The part of the Web Speech API this hook uses; Chrome still ships it prefixed. */
+interface Recognizer {
+  lang: string;
+  interimResults: boolean;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+  start(): void;
+  stop(): void;
+}
+type RecognizerClass = new () => Recognizer;
+
 export function useShadowingRecorder(
   referenceText: string,
-  onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void
+  onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void,
 ) {
   const [phase, setPhase] = useState<RecorderPhase>('idle');
   const [seconds, setSeconds] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [assessment, setAssessment] = useState<PronunciationAssessment | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  /** True while the microphone for a new take is still starting, so the old take cannot be checked. */
+  const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<RecorderError | null>(null);
 
   const recorder = useRef<FrenchAudioRecorder | null>(null);
@@ -37,10 +51,14 @@ export function useShadowingRecorder(
   const transcript = useRef('');
   const recording = useRef<Recording | null>(null);
   const urlRef = useRef<string | null>(null);
+  /** Cancels the in-flight assessment when the session is invalidated. */
+  const assessAbort = useRef<AbortController | null>(null);
   /** Bumped on every reset, so work that finishes for an earlier sentence is dropped. */
   const session = useRef(0);
   const onAssessedRef = useRef(onAssessed);
-  onAssessedRef.current = onAssessed;
+  useLayoutEffect(() => {
+    onAssessedRef.current = onAssessed;
+  });
 
   const releaseResources = useCallback(() => {
     window.clearInterval(timer.current);
@@ -55,33 +73,42 @@ export function useShadowingRecorder(
     }
   }, []);
 
-  const reset = useCallback(() => {
+  // Ends whatever the previous sentence left running; work that finishes for it is dropped.
+  const invalidate = useCallback(() => {
     session.current++;
+    assessAbort.current?.abort();
+    assessAbort.current = null;
     releaseResources();
     recording.current = null;
     transcript.current = '';
+  }, [releaseResources]);
+
+  // A new sentence starts from nothing (adjusted during render, so no stale frame shows)...
+  const [shownFor, setShownFor] = useState(referenceText);
+  if (shownFor !== referenceText) {
+    setShownFor(referenceText);
     setPhase('idle');
     setSeconds(0);
     setAudioUrl(null);
     setAssessment(null);
     setIsEvaluating(false);
+    setIsStarting(false);
     setError(null);
-  }, [releaseResources]);
-
-  // A new sentence starts from nothing; leaving the screen closes the microphone.
-  useEffect(() => {
-    reset();
-    return () => {
-      session.current++;
-      releaseResources();
-    };
-  }, [referenceText, reset, releaseResources]);
+  }
+  // ...and leaving it, or the screen, closes the microphone.
+  useEffect(() => invalidate, [referenceText, invalidate]);
 
   const start = useCallback(async () => {
     stopSpeech();
     setAssessment(null);
     setError(null);
     const mine = ++session.current;
+    // A Check still running for the dropped take is cancelled, so the button serves the new take.
+    assessAbort.current?.abort();
+    assessAbort.current = null;
+    setIsEvaluating(false);
+    // The old take stays on screen until the microphone answers; it must not be checkable meanwhile.
+    setIsStarting(true);
 
     const rec = new FrenchAudioRecorder();
     let ok: boolean;
@@ -96,7 +123,10 @@ export function useShadowingRecorder(
         setPhase('idle');
       });
     } catch (err) {
-      if (mine === session.current) setError(err instanceof CaptureBusyError ? { kind: 'busy' } : { kind: 'mic' });
+      if (mine === session.current) {
+        setError(err instanceof CaptureBusyError ? { kind: 'busy' } : { kind: 'mic' });
+        setIsStarting(false);
+      }
       return;
     }
     if (mine !== session.current) {
@@ -105,6 +135,7 @@ export function useShadowingRecorder(
     }
     if (!ok) {
       setError({ kind: 'mic' });
+      setIsStarting(false);
       return;
     }
     recorder.current = rec;
@@ -115,18 +146,25 @@ export function useShadowingRecorder(
     recording.current = null;
     setAudioUrl(null);
     setPhase('recording');
+    setIsStarting(false);
     setSeconds(0);
     timer.current = window.setInterval(() => setSeconds((s) => s + 1), 1000);
 
-    // Where the browser can, a transcript helps the scorer; it is optional.
+    // Where the browser can, a transcript helps the scorer; it is optional and only runs on opt-in. Read
+    // now, not at import, so a setting saved in another tab applies to the next recording.
     transcript.current = '';
-    const Recognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!getAppSettings().practiceBrowserRecognition) return;
+    const speechWindow = window as unknown as {
+      SpeechRecognition?: RecognizerClass;
+      webkitSpeechRecognition?: RecognizerClass;
+    };
+    const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
     if (Recognition) {
       try {
         const r = new Recognition();
         r.lang = 'fr-FR';
         r.interimResults = false;
-        r.onresult = (evt: any) => {
+        r.onresult = (evt) => {
           if (mine === session.current) transcript.current = evt.results[0][0].transcript;
         };
         r.start();
@@ -154,21 +192,25 @@ export function useShadowingRecorder(
     }
     const url = URL.createObjectURL(result.blob);
     urlRef.current = url;
-    recording.current = { base64: result.base64, mimeType: result.mimeType };
+    recording.current = { blob: result.blob, base64: result.base64, mimeType: result.mimeType };
     setAudioUrl(url);
     setPhase('recorded');
   }, []);
 
   const assess = useCallback(async () => {
     const mine = session.current;
+    const controller = new AbortController();
+    assessAbort.current = controller;
     setIsEvaluating(true);
     setError(null);
     try {
       const res = await assessPronunciation({
         referenceText,
+        audio: recording.current?.blob,
         audioBase64: recording.current?.base64,
         mimeType: recording.current?.mimeType,
         userTranscript: transcript.current || undefined,
+        signal: controller.signal,
       });
       if (mine !== session.current) return;
       setAssessment(res);
@@ -178,9 +220,10 @@ export function useShadowingRecorder(
       console.error('Assessment failed:', err);
       setError({ kind: 'assess', detail: errorMessage(err) });
     } finally {
+      if (assessAbort.current === controller) assessAbort.current = null;
       if (mine === session.current) setIsEvaluating(false);
     }
   }, [referenceText]);
 
-  return { phase, seconds, audioUrl, assessment, isEvaluating, error, start, stop, assess };
+  return { phase, seconds, audioUrl, assessment, isEvaluating, isStarting, error, start, stop, assess };
 }

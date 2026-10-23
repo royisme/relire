@@ -8,7 +8,8 @@ interface PronunciationPreferences {
 const KEY = 'relire_pronunciation_preferences_v1';
 const layerNames: (keyof PronunciationLayers)[] = ['connections', 'stress', 'silent', 'syllables'];
 const defaults = (): PronunciationPreferences => ({
-  enabled: false, layers: { connections: true, stress: true, silent: true, syllables: true },
+  enabled: false,
+  layers: { connections: true, stress: true, silent: true, syllables: true },
 });
 // Keep controls usable in this tab if browser storage is unavailable or full.
 const unsaved = new Map<string, PronunciationPreferences>();
@@ -16,7 +17,7 @@ const unsaved = new Map<string, PronunciationPreferences>();
 function read(): Record<string, unknown> {
   try {
     const value: unknown = JSON.parse(localStorage.getItem(KEY) || '{}');
-    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+    return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
   } catch {
     return {};
   }
@@ -64,7 +65,9 @@ export function getSkippedSentences(articleId: string, identity: string): Record
     if (!entry || typeof entry !== 'object') return {};
     const { identity: saved, sentences } = entry as { identity?: unknown; sentences?: unknown };
     if (saved !== identity || !sentences || typeof sentences !== 'object') return {};
-    return Object.fromEntries(Object.entries(sentences).filter((pair): pair is [string, string] => typeof pair[1] === 'string'));
+    return Object.fromEntries(
+      Object.entries(sentences).filter((pair): pair is [string, string] => typeof pair[1] === 'string'),
+    );
   } catch {
     return {};
   }

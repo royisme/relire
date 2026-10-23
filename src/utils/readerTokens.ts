@@ -35,7 +35,14 @@ export function readerTokens(source: string): ReaderTextToken[] {
     const text = match[0];
     if (start > cursor) tokens.push({ text: source.slice(cursor, start), start: cursor, end: start });
     const prefix = text.match(/^(?:[ldcsnjmt]|qu)['’‘`]/i)?.[0] ?? '';
-    const word = { ordinal: ordinal++, text, start, end: start + text.length, prefix, lookup: text.slice(prefix.length) };
+    const word = {
+      ordinal: ordinal++,
+      text,
+      start,
+      end: start + text.length,
+      prefix,
+      lookup: text.slice(prefix.length),
+    };
     tokens.push({ text, start, end: word.end, word });
     cursor = word.end;
   }
@@ -44,7 +51,7 @@ export function readerTokens(source: string): ReaderTextToken[] {
 }
 
 export const readerWords = (source: string): ReaderWordToken[] =>
-  readerTokens(source).flatMap((token) => token.word ? [token.word] : []);
+  readerTokens(source).flatMap((token) => (token.word ? [token.word] : []));
 
 export function enumeratedReaderWords(source: string) {
   return readerWords(source).map(({ ordinal, text }) => ({ ordinal, source: text, graphemes: graphemes(text) }));

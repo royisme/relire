@@ -1,243 +1,386 @@
-import React, { useState } from 'react';
+/**
+ * Settings → AI services: one page for text, OCR, speech and recorded-audio assessment, sharing one provider key per
+ * provider and one page-wide Save. Test and discovery use the draft and never save it.
+ */
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, CheckCircle2, RefreshCw } from 'lucide-react';
-import { getProvider, speechProviders, textProviders } from '../../services/ai/providers';
+import { getAiAccess } from '../../services/ai/access';
+import { normalizeModelId } from '../../services/ai/catalogue';
+import { errorMessage } from '../../services/ai/errors';
+import {
+  assessmentProviders,
+  getProvider,
+  providerRequiresKey,
+  speechProviders,
+  textProviders,
+} from '../../services/ai/providers';
+import { normalizeAzureRegion } from '../../services/ai/providers/azure/region';
 import { getApiKey, type AppSettings } from '../../utils/appSettings';
+import { AI_PURPOSES, type AiPurposeRoute } from '../../utils/routes';
 import { testSpeech } from '../../utils/speech';
+import { useSaveStatus } from '../../hooks/useSaveStatus';
+import { Link } from '../shell/Link';
+import { Button } from '../ui/button';
+import { fieldLabel, BaseUrlField, KeyBadge, KeyField, RegionField, selectClass, useProviderNames } from './fields';
+import type { KeyRequest } from './keyRequest';
+import { ModelField } from './ModelField';
+import { saveSlice, sliceOf } from './slices';
+import type { useModelCatalogue } from './useModelCatalogue';
+
+type Catalogue = ReturnType<typeof useModelCatalogue>;
 
 interface AiSectionProps {
-  settings: AppSettings;
+  /** Which purpose's page is open; the draft keeps every purpose and key it holds. */
+  purpose: AiPurposeRoute;
+  /** Page-local discovery, kept by Settings so switching purpose does not fetch the same list again. */
+  catalogue: Catalogue;
+  /** The key input, so a key request can focus it without focusing again on a purpose switch. */
+  keyInput: RefObject<HTMLInputElement | null>;
+  /** What the fields show (unsaved edits included) and what is stored. */
+  draft: AppSettings;
+  saved: AppSettings;
   onChange: (settings: AppSettings) => void;
-  /** Shown when the dialog was opened because an AI feature needs a key. */
-  needsKey?: boolean;
+  onSaved: (next: AppSettings) => void;
+  /** Set when an AI feature needs a key: shows a notice, focuses the key field and can send the learner back. */
+  keyRequest: KeyRequest | null;
+  /** Leave Settings for where the learner was when the key was requested. */
+  onReturn: (hash: string) => void;
 }
 
-const select =
-  'w-full h-10 px-3 rounded-md bg-surface border border-ink-300 text-sm text-ink-900 focus:outline-none focus:border-accent-600 cursor-pointer';
-const card = 'space-y-3';
-const heading = 'font-serif text-base font-semibold text-ink-900';
-const fieldLabel = 'block text-sm font-medium text-ink-800 mb-1';
-
-/** Settings: which provider and model write the answers, which one speaks them, and a key for each. */
-export const AiSection: React.FC<AiSectionProps> = ({ settings, onChange, needsKey }) => {
+export function AiSection({
+  purpose,
+  catalogue,
+  keyInput,
+  draft,
+  saved,
+  onChange,
+  onSaved,
+  keyRequest,
+  onReturn,
+}: AiSectionProps) {
   const { t } = useTranslation();
-  const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ success: boolean; msg: string } | null>(null);
+  const { providerName } = useProviderNames();
+  const { status, run, clear } = useSaveStatus();
+  const [checking, setChecking] = useState(false);
+  const [checked, setChecked] = useState<{ ok: boolean; message: string } | null>(null);
+  const checkToken = useRef(0);
+  const checkRequest = useRef<AbortController | null>(null);
 
-  const name = (id: string) => t(`providers.${id}`, { defaultValue: id });
-  const modelName = (id: string) => t(`models.${id.replace(/\./g, '_')}.name`, { defaultValue: id });
-  const modelDesc = (id: string) => t(`models.${id.replace(/\./g, '_')}.desc`, { defaultValue: '' });
+  const providerId = draft[`${purpose}Provider`];
+  const provider = getProvider(providerId);
+  const model = draft[`${purpose}Model`];
+  const key = draft.apiKeys[providerId] ?? '';
+  const dirty = sliceOf(draft, 'ai') !== sliceOf(saved, 'ai');
+  // The device voice is a declared kind of engine: no key, no model, no voice, and nothing to preview remotely.
+  const device = purpose === 'speech' && provider.info.speech?.device === true;
+  // A local provider needs no key, so nothing here asks for one.
+  const needsKey = !device && providerRequiresKey(providerId);
+  const savedProviderId = saved[`${purpose}Provider`];
+  const missingKey = providerRequiresKey(savedProviderId) && !getApiKey(saved, savedProviderId);
+  const assessment = purpose === 'assessment';
+  const regionReady = !assessment || !!normalizeAzureRegion(draft.providerRegions[providerId]);
+  const modelReady = !!normalizeModelId(model) || device || assessment;
+  // A provider with its own voice check shows a free-text field; the value is refused before it can be saved.
+  const voiceAccepts = (voice: string) => provider.speech?.acceptsVoice?.(voice) ?? true;
+  const voiceValid = voiceAccepts(draft.speechVoice);
+  const others = AI_PURPOSES.filter((p) => p !== purpose && draft[`${p}Provider`] === providerId);
+  const sharedNote =
+    others.length > 0 &&
+    t('aiSettings.sharedKey', {
+      provider: providerName(providerId),
+      purposes: others.map((p) => t(`aiSettings.purposes.${p}`)).join(', '),
+    });
 
-  const text = getProvider(settings.textProvider).info;
-  const speech = getProvider(settings.speechProvider).info;
-  const sameKey = settings.textProvider === settings.speechProvider;
+  // A check that finishes after the page or purpose is left is ignored, cancelled with its request (so a
+  // preview sound stops with it) and cannot leave the button stuck in its checking state.
+  useEffect(
+    () => () => {
+      invalidateCheck();
+    },
+    [],
+  );
 
-  const setKey = (providerId: string, value: string) =>
-    onChange({ ...settings, apiKeys: { ...settings.apiKeys, [providerId]: value } });
+  /** Drops a check in flight: its result can no longer land, its request is cancelled, the button is free. */
+  function invalidateCheck() {
+    checkToken.current++;
+    checkRequest.current?.abort();
+    checkRequest.current = null;
+    setChecking(false);
+  }
 
-  // Changing a provider resets its model and voice to that provider's defaults.
-  const pickTextProvider = (id: string) => {
-    const info = getProvider(id).info.text!;
-    onChange({ ...settings, textProvider: id, textModel: info.defaultModel });
+  const edit = (next: AppSettings) => {
+    clear();
+    setChecked(null);
+    // A result about the previous provider, key, endpoint, model or voice must never answer for the new one.
+    invalidateCheck();
+    onChange(next);
   };
-  const pickSpeechProvider = (id: string) => {
-    const info = getProvider(id).info.speech!;
-    onChange({ ...settings, speechProvider: id, speechModel: info.defaultModel, speechVoice: info.defaultVoice });
+  // Changing the provider resets only this purpose's model (and the speech voice); other purposes stay.
+  // For speech, the engine being left is remembered and the one being entered comes back with what it had,
+  // or with its defaults until the learner chooses something for it.
+  const pickProvider = (id: string) => {
+    const chosen = getProvider(id).info;
+    if (purpose === 'assessment') {
+      if (!getProvider(id).assessment) return;
+      edit({ ...draft, assessmentProvider: id, assessmentModel: '' });
+    } else if (purpose === 'speech') {
+      if (!chosen.speech) return;
+      const remembered = normalizeModelId(draft.speechModel);
+      const entry = draft.speechChoices[id];
+      edit({
+        ...draft,
+        speechProvider: id,
+        speechModel: entry?.model ?? chosen.speech.defaultModel,
+        speechVoice: entry?.voice ?? chosen.speech.defaultVoice,
+        speechChoices: remembered
+          ? { ...draft.speechChoices, [providerId]: { model: remembered, voice: draft.speechVoice.trim() } }
+          : draft.speechChoices,
+      });
+    } else if (chosen.text) {
+      edit(
+        purpose === 'ocr'
+          ? { ...draft, ocrProvider: id, ocrModel: chosen.text.defaultModel }
+          : { ...draft, textProvider: id, textModel: chosen.text.defaultModel },
+      );
+    }
   };
-
-  const keyField = (providerId: string) => {
-    const info = getProvider(providerId).info;
-    return (
-      <div>
-        <label className={fieldLabel}>
-          {t('settings.keyLabel', { provider: name(providerId) })}
-        </label>
-        <input
-          type="password"
-          autoComplete="off"
-          placeholder={t('settings.customKeyPlaceholder')}
-          value={settings.apiKeys[providerId] ?? ''}
-          onChange={(e) => setKey(providerId, e.target.value)}
-          className="w-full h-10 px-3 rounded-md bg-surface border border-ink-300 text-sm font-mono focus:outline-none focus:border-accent-600"
-        />
-        <p className="text-xs text-ink-500 mt-1 leading-relaxed">
-          {t('settings.keyPrivacy', { provider: name(providerId) })}{' '}
-          <a href={info.keyUrl} target="_blank" rel="noreferrer" className="text-accent-900 underline underline-offset-2 hover:text-accent-900">
-            {t('settings.getKey', { provider: name(providerId) })}
-          </a>
-        </p>
-      </div>
+  const setModel = (next: string) =>
+    edit(
+      purpose === 'speech'
+        ? { ...draft, speechModel: next }
+        : purpose === 'ocr'
+          ? { ...draft, ocrModel: next }
+          : { ...draft, textModel: next },
     );
-  };
 
-  const keyBadge = (providerId: string) =>
-    getApiKey(settings, providerId) ? (
-      <span className="text-ok-800 flex items-center gap-1 text-xs">
-        <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
-        <span>{t('settings.keySet')}</span>
-      </span>
-    ) : (
-      <span className="text-ink-500 flex items-center gap-1 text-xs">
-        <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
-        <span>{t('settings.keyMissing')}</span>
-      </span>
-    );
-
-  // Plays a short phrase with the unsaved speech settings so a new provider, key or voice can be checked.
-  const runTest = async () => {
-    setTesting(true);
-    setTestResult(null);
+  // Checks the key (or previews the voice) with the settings on screen. Never saves.
+  const check = async () => {
+    if ((needsKey && !key.trim()) || checking || !modelReady || !regionReady) return;
+    const token = ++checkToken.current;
+    checkRequest.current?.abort();
+    const request = new AbortController();
+    checkRequest.current = request;
+    setChecking(true);
+    setChecked(null);
+    clear();
     try {
-      await testSpeech(settings);
-      setTestResult({ success: true, msg: t('settings.testSuccess') });
-    } catch (err: any) {
-      setTestResult({ success: false, msg: t('settings.testFailed', { msg: err.message || err }) });
+      if (purpose === 'speech') await testSpeech(draft, request.signal);
+      else await getAiAccess(draft).checkConnection(purpose, request.signal);
+      if (token === checkToken.current)
+        setChecked({
+          ok: true,
+          message: t(
+            purpose === 'speech'
+              ? 'settings.testSuccess'
+              : assessment
+                ? 'azureAssessment.checkSuccess'
+                : 'aiSettings.checkSuccess',
+          ),
+        });
+    } catch (err) {
+      if (token === checkToken.current)
+        setChecked({
+          ok: false,
+          message: t(purpose === 'speech' ? 'settings.testFailed' : 'settings.keyCheckFailed', {
+            msg: errorMessage(err, key),
+          }),
+        });
     } finally {
-      setTesting(false);
+      if (token === checkToken.current) setChecking(false);
     }
   };
 
+  // Saving keeps the choices; it is not a test of the key or the model.
+  const save = () => run(() => onSaved(saveSlice(draft, 'ai')));
+
+  const info = purpose === 'speech' ? provider.info.speech : provider.info.text;
+  const returnTo = keyRequest?.returnTo ?? null;
+  const canReturn = !dirty && !missingKey && getAiAccess(saved).isConfigured(purpose);
+
   return (
-    <>
-      {needsKey && (
+    <div className="space-y-6">
+      <nav aria-label={t('aiSettings.purposesLabel')} className="flex flex-wrap gap-x-5 border-b border-ink-200">
+        {AI_PURPOSES.map((entry) => (
+          <Link
+            key={entry}
+            to={{ name: 'settings', section: 'ai', purpose: entry }}
+            aria-current={entry === purpose ? 'page' : undefined}
+            className={`-mb-px inline-flex h-10 items-center border-b-2 text-sm cursor-pointer ${
+              entry === purpose
+                ? 'border-accent-700 font-medium text-ink-950'
+                : 'border-transparent text-ink-600 hover:text-ink-900'
+            }`}
+          >
+            {t(`aiSettings.purposes.${entry}`)}
+          </Link>
+        ))}
+      </nav>
+
+      <p className="text-sm text-ink-700 leading-relaxed">{t(`aiSettings.purposeDesc.${purpose}`)}</p>
+
+      {keyRequest && missingKey && (
         <p className="rounded-md border border-accent-200 bg-accent-50 px-3 py-2 text-sm text-accent-900">
-          {t('settings.needsKeyNotice')}
+          {t(`settings.needsKeyNotice.${purpose}`)}
         </p>
       )}
 
-      {/* Text provider: analysis, drills, pronunciation scoring */}
-      <section className="space-y-3.5">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <h4 className={heading}>
-            {t('settings.textSection')}
-          </h4>
-          {keyBadge(settings.textProvider)}
-        </div>
-        <div className={card}>
-          <p className="text-xs text-ink-500">{t('settings.textSectionDesc')}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label className="block">
-              <span className={fieldLabel}>{t('settings.providerLabel')}</span>
-              <select className={select} value={settings.textProvider} onChange={(e) => pickTextProvider(e.target.value)}>
-                {textProviders().map((p) => (
-                  <option key={p.info.id} value={p.info.id}>
-                    {name(p.info.id)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className={fieldLabel}>
-                {t('settings.modelLabel')}
-              </span>
-              <select className={select} value={settings.textModel} onChange={(e) => onChange({ ...settings, textModel: e.target.value })}>
-                {text.text!.models.map((m) => (
-                  <option key={m} value={m}>
-                    {modelName(m)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {modelDesc(settings.textModel) && (
-            <p className="text-xs text-ink-500 leading-relaxed">
-              {modelDesc(settings.textModel)}
-            </p>
-          )}
-          {keyField(settings.textProvider)}
-        </div>
-      </section>
-
-      {/* Speech provider: spoken French */}
-      <section className="space-y-3.5">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <h4 className={heading}>
-            {t('settings.speechSection')}
-          </h4>
-          {!sameKey && keyBadge(settings.speechProvider)}
-        </div>
-        <div className={card}>
-          <p className="text-xs text-ink-500">{t('settings.speechSectionDesc')}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label className="block">
-              <span className={fieldLabel}>{t('settings.providerLabel')}</span>
-              <select className={select} value={settings.speechProvider} onChange={(e) => pickSpeechProvider(e.target.value)}>
-                {speechProviders().map((p) => (
-                  <option key={p.info.id} value={p.info.id}>
-                    {name(p.info.id)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className={fieldLabel}>
-                {t('settings.modelLabel')}
-              </span>
-              <select className={select} value={settings.speechModel} onChange={(e) => onChange({ ...settings, speechModel: e.target.value })}>
-                {speech.speech!.models.map((m) => (
-                  <option key={m} value={m}>
-                    {modelName(m)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {modelDesc(settings.speechModel) && (
-            <p className="text-xs text-ink-500 leading-relaxed">
-              {modelDesc(settings.speechModel)}
-            </p>
-          )}
-
-          <div>
-            <span className={fieldLabel}>{t('settings.voiceSection')}</span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {speech.speech!.voices.map((v) => {
-                const selected = settings.speechVoice === v.id;
-                return (
-                  <button
-                    key={v.id}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => onChange({ ...settings, speechVoice: v.id })}
-                    className={`p-3 rounded-lg border text-left cursor-pointer ${
-                      selected ? 'border-accent-700 bg-accent-50/80 ring-2 ring-accent-700/20' : 'border-ink-200 bg-surface hover:border-ink-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-xs text-ink-900">{v.id}</span>
-                      <span className="text-xs px-1.5 rounded-md bg-ink-100 text-ink-600">
-                        {v.gender === 'female' ? t('settings.female') : t('settings.male')}
-                      </span>
-                    </div>
-                    <span className="text-xs text-ink-500 block truncate">{t(`voices.${v.id}`, { defaultValue: '' })}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {sameKey ? (
-            <p className="text-xs text-ink-500">{t('settings.sameKeyNote', { provider: name(settings.speechProvider) })}</p>
-          ) : (
-            keyField(settings.speechProvider)
-          )}
-
-          <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
-            <button
-              type="button"
-              onClick={runTest}
-              disabled={testing}
-              className="flex items-center gap-2 h-9 px-3 rounded-md border border-ink-300 bg-surface hover:bg-ink-100 text-ink-800 text-sm disabled:opacity-50 cursor-pointer"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${testing ? 'animate-spin' : ''}`} />
-              <span>{testing ? t('settings.testingBtn') : t('settings.testBtn')}</span>
-            </button>
-            {testResult && (
-              <span className={`text-xs font-medium ${testResult.success ? 'text-ok-800' : 'text-bad-800'}`}>{testResult.msg}</span>
+      <div className="space-y-4">
+        <label className="block">
+          <span className={fieldLabel}>{t('settings.providerLabel')}</span>
+          <select className={selectClass} value={providerId} onChange={(event) => pickProvider(event.target.value)}>
+            {(assessment ? assessmentProviders() : purpose === 'speech' ? speechProviders() : textProviders()).map(
+              (entry) => (
+                <option key={entry.info.id} value={entry.info.id}>
+                  {providerName(entry.info.id)}
+                </option>
+              ),
             )}
+          </select>
+        </label>
+
+        {device ? (
+          <p className="text-sm text-ink-700 leading-relaxed">{t('aiSettings.deviceNote')}</p>
+        ) : (
+          <div className="space-y-1">
+            <KeyBadge saved={saved} providerId={providerId} />
+            <KeyField
+              ref={keyInput}
+              providerId={providerId}
+              value={key}
+              onChange={(value) => edit({ ...draft, apiKeys: { ...draft.apiKeys, [providerId]: value } })}
+            />
+            {sharedNote && <p className="text-xs text-ink-500 leading-relaxed">{sharedNote}</p>}
           </div>
+        )}
+
+        {!device && provider.info.defaultBaseUrl && (
+          <BaseUrlField
+            providerId={providerId}
+            defaultUrl={provider.info.defaultBaseUrl}
+            value={draft.baseUrls[providerId] ?? ''}
+            onChange={(value) => edit({ ...draft, baseUrls: { ...draft.baseUrls, [providerId]: value } })}
+          />
+        )}
+
+        {assessment && (
+          <RegionField
+            value={draft.providerRegions[providerId] ?? ''}
+            onChange={(value) => edit({ ...draft, providerRegions: { ...draft.providerRegions, [providerId]: value } })}
+          />
+        )}
+
+        {!device && !assessment && (
+          <ModelField draft={draft} purpose={purpose} catalogue={catalogue} onChange={setModel} />
+        )}
+
+        {!device &&
+          purpose === 'speech' &&
+          info &&
+          'voices' in info &&
+          (info.voices.length > 0 ? (
+            <label className="block">
+              <span className={fieldLabel}>{t('settings.voiceSection')}</span>
+              <select
+                className={selectClass}
+                value={draft.speechVoice}
+                onChange={(event) => edit({ ...draft, speechVoice: event.target.value })}
+              >
+                {info.voices.map((voice) => (
+                  <option key={voice.id} value={voice.id}>
+                    {t(`voices.${voice.id}`, { defaultValue: voice.id })} ·{' '}
+                    {t(voice.gender === 'female' ? 'settings.female' : 'settings.male')}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <div>
+              <label htmlFor="speech-voice" className={fieldLabel}>
+                {t('aiSettings.voiceLabel')}
+              </label>
+              <input
+                id="speech-voice"
+                autoComplete="off"
+                spellCheck={false}
+                value={draft.speechVoice}
+                aria-invalid={!voiceValid}
+                aria-describedby="speech-voice-help"
+                onChange={(event) => edit({ ...draft, speechVoice: event.target.value })}
+                className={selectClass}
+              />
+              <p
+                id="speech-voice-help"
+                className={`text-xs mt-1 leading-relaxed ${voiceValid ? 'text-ink-500' : 'text-bad-700'}`}
+              >
+                {t(voiceValid ? 'aiSettings.voiceHelp' : 'aiSettings.invalidVoice')}
+              </p>
+            </div>
+          ))}
+
+        {purpose === 'ocr' && <p className="text-xs text-ink-500 leading-relaxed">{t('aiSettings.ocrNote')}</p>}
+      </div>
+
+      <div className="space-y-3 border-t border-ink-200 pt-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void check()}
+            className={assessment ? 'w-44' : undefined}
+            disabled={checking || (needsKey && !key.trim()) || !modelReady || !regionReady}
+          >
+            {t(
+              checking
+                ? purpose === 'speech'
+                  ? 'settings.testingBtn'
+                  : 'settings.checking'
+                : purpose === 'speech'
+                  ? 'aiSettings.preview'
+                  : assessment
+                    ? 'azureAssessment.check'
+                    : needsKey
+                      ? 'aiSettings.check'
+                      : 'aiSettings.checkServer',
+            )}
+          </Button>
+          <Button type="button" onClick={save} disabled={!dirty}>
+            {t('common.save')}
+          </Button>
         </div>
-      </section>
-    </>
+        {/* Fixed height, so the outcome appears without moving the page. */}
+        <div className="h-24 overflow-y-auto text-sm">
+          {checked && (
+            <p
+              role={checked.ok ? 'status' : 'alert'}
+              className={`break-words ${checked.ok ? 'text-ok-800' : 'text-bad-700'}`}
+            >
+              {checked.message}
+            </p>
+          )}
+          {status.phase === 'failed' ? (
+            <p role="alert" className="text-bad-700 break-words">
+              {status.message}
+            </p>
+          ) : dirty ? (
+            <p className="text-ink-500">{t('settings.unsaved')}</p>
+          ) : status.phase === 'saved' ? (
+            <p role="status" className="text-ok-800">
+              {t('settings.saved')}
+            </p>
+          ) : (
+            <p className="text-ink-500">{t('aiSettings.savedNote')}</p>
+          )}
+        </div>
+      </div>
+
+      {returnTo && (
+        // Always drawn while a request is pending, so it does not appear and move what is below.
+        <div className="border-t border-ink-200 pt-4">
+          <Button type="button" variant="outline" disabled={!canReturn} onClick={() => onReturn(returnTo)}>
+            {t('settings.returnToWork')}
+          </Button>
+        </div>
+      )}
+    </div>
   );
-};
+}

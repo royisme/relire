@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, OverlayHeader } from './ui/overlay';
 import { Button } from './ui/button';
-import { Article } from '../types';
+import { ARTICLE_LEVELS, Article } from '../types';
 import { formatLevel } from '../utils/i18nHelpers';
 
 interface ArticleEditorDialogProps {
   /** Present when editing; absent when adding. */
   article?: Article | null;
   onClose: () => void;
-  onSave: (article: Article) => void;
+  onSave: (article: Article) => Promise<void>;
 }
 
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const CATEGORIES = ['Littérature', 'Actualités', 'Culture', 'Science', 'Société'];
 
 const field =
@@ -27,39 +27,45 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
   const [source, setSource] = useState(article?.source ?? '');
   const [content, setContent] = useState(article?.content ?? '');
 
-  useEffect(() => {
-    setTitle(article?.title ?? '');
-    setLevel(article?.level ?? 'B1');
-    setCategory(article?.category ?? '');
-    setSource(article?.source ?? '');
-    setContent(article?.content ?? '');
-  }, [article]);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const close = () => {
+    if (!saving) onClose();
+  };
 
   const words = content.split(/\s+/).filter(Boolean).length;
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
-    onSave({
-      id: article?.id ?? 'custom-' + Date.now(),
-      createdAt: article?.createdAt ?? new Date().toISOString().split('T')[0],
-      title: title.trim() || content.trim().split(/\s+/).slice(0, 6).join(' ') + '…',
-      level,
-      category: category.trim(),
-      source: source.trim() || undefined,
-      content: content.trim(),
-    });
-    onClose();
+    if (saving || !content.trim()) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await onSave({
+        id: article?.id ?? 'custom-' + Date.now(),
+        createdAt: article?.createdAt ?? new Date().toISOString().split('T')[0],
+        title: title.trim() || content.trim().split(/\s+/).slice(0, 6).join(' ') + '…',
+        level,
+        category: category.trim(),
+        source: source.trim() || undefined,
+        content: content.trim(),
+      });
+      onClose();
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const heading = editing ? t('library.editTitle') : t('library.addTitle');
 
   return (
-    <Dialog onClose={onClose} label={heading}>
+    <Dialog onClose={close} label={heading}>
       <OverlayHeader
         title={heading}
         subtitle={editing ? undefined : t('library.addSubtitle')}
-        onClose={onClose}
+        onClose={close}
         closeLabel={t('common.close')}
       />
       <form onSubmit={submit} className="p-5 sm:p-6 space-y-4">
@@ -67,6 +73,7 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
           <label className="sm:col-span-2 block">
             <span className="block text-xs font-medium text-ink-700 mb-1">{t('importer.articleTitle')}</span>
             <input
+              disabled={saving}
               className={field}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -75,8 +82,13 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
           </label>
           <label className="block">
             <span className="block text-xs font-medium text-ink-700 mb-1">{t('importer.cefrLevel')}</span>
-            <select className={field + ' cursor-pointer'} value={level} onChange={(e) => setLevel(e.target.value)}>
-              {LEVELS.map((l) => (
+            <select
+              disabled={saving}
+              className={field + ' cursor-pointer'}
+              value={level}
+              onChange={(e) => setLevel(e.target.value)}
+            >
+              {ARTICLE_LEVELS.map((l) => (
                 <option key={l} value={l}>
                   {formatLevel(l, i18n.language)}
                 </option>
@@ -86,6 +98,7 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
           <label className="block sm:col-span-1">
             <span className="block text-xs font-medium text-ink-700 mb-1">{t('importer.category')}</span>
             <input
+              disabled={saving}
               className={field}
               list="relire-categories"
               value={category}
@@ -100,6 +113,7 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
           <label className="block sm:col-span-2">
             <span className="block text-xs font-medium text-ink-700 mb-1">{t('library.source')}</span>
             <input
+              disabled={saving}
               className={field}
               value={source}
               onChange={(e) => setSource(e.target.value)}
@@ -115,6 +129,7 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
           </span>
           <textarea
             required
+            disabled={saving}
             rows={editing ? 12 : 9}
             value={content}
             onChange={(e) => setContent(e.target.value)}
@@ -123,11 +138,17 @@ export const ArticleEditorDialog: React.FC<ArticleEditorDialogProps> = ({ articl
           />
         </label>
 
+        <div role={saveError ? 'alert' : undefined} className="h-10 overflow-y-auto text-sm text-bad-700 break-words">
+          {saveError && t('settings.saveFailed', { msg: saveError })}
+        </div>
         <div className="flex items-center justify-end gap-2 pt-1">
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" disabled={saving} onClick={close}>
             {t('common.cancel')}
           </Button>
-          <Button type="submit" disabled={!content.trim()}>
+          <Button type="submit" disabled={saving || !content.trim()} aria-busy={saving}>
+            <span className="w-4 h-4 shrink-0">
+              {saving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
+            </span>
             {editing ? t('library.saveChanges') : t('library.addSubmit')}
           </Button>
         </div>

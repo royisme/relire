@@ -8,14 +8,16 @@ interface OverlayProps {
   children: React.ReactNode;
 }
 
-function useEscape(onClose: () => void) {
+function useEscape(onClose: () => void, dialog?: React.RefObject<HTMLElement | null>) {
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key !== 'Escape') return;
+      if (dialog && Array.from(document.querySelectorAll('[role="dialog"]')).at(-1) !== dialog.current) return;
+      onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  }, [onClose, dialog]);
 }
 
 /**
@@ -23,10 +25,23 @@ function useEscape(onClose: () => void) {
  * The scrim is light so the article stays legible behind it.
  */
 export function Sheet({ onClose, label, className, children }: OverlayProps) {
-  useEscape(onClose);
+  const dialog = React.useRef<HTMLElement>(null);
+  useEscape(onClose, dialog);
+  React.useEffect(() => {
+    const opener = document.activeElement;
+    dialog.current?.focus({ preventScroll: true });
+    return () => {
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true });
+    };
+  }, []);
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end bg-scrim/25 anim-fade" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end bg-scrim/25 anim-fade"
+      onClick={onClose}
+    >
       <aside
+        ref={dialog}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={label}
@@ -34,7 +49,7 @@ export function Sheet({ onClose, label, className, children }: OverlayProps) {
         className={cn(
           'anim-sheet flex flex-col bg-surface border-ink-200 shadow-lg w-full max-h-[88vh] rounded-t-lg border-t',
           'md:max-h-none md:h-full md:max-w-lg md:rounded-none md:border-t-0 md:border-l',
-          className
+          className,
         )}
       >
         {children}
@@ -72,7 +87,10 @@ export function Dialog({ onClose, label, className, children }: OverlayProps) {
           aria-modal="true"
           aria-label={label}
           onClick={(e) => e.stopPropagation()}
-          className={cn('w-full max-w-2xl rounded-lg border border-ink-200 bg-surface shadow-lg overflow-hidden', className)}
+          className={cn(
+            'w-full max-w-2xl rounded-lg border border-ink-200 bg-surface shadow-lg overflow-hidden',
+            className,
+          )}
         >
           {children}
         </div>
@@ -108,7 +126,16 @@ export function OverlayHeader({
           aria-label={closeLabel}
           className="h-10 w-10 sm:h-8 sm:w-8 inline-flex items-center justify-center rounded-md text-ink-500 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
         >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          <svg
+            viewBox="0 0 24 24"
+            className="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
         </button>
       </div>
     </div>

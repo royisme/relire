@@ -1,8 +1,11 @@
 /** Owns cache-only recovery, generation, cancellation and reader snapshots, never DOM geometry. */
 import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
-  createPronunciationSession, fetchPronunciationMarkers, getPronunciationIdentity,
-  MissingApiKeyError, subscribePronunciationContext,
+  createPronunciationSession,
+  fetchPronunciationMarkers,
+  getPronunciationIdentity,
+  MissingApiKeyError,
+  subscribePronunciationContext,
 } from '../services/api';
 import { errorMessage } from '../services/ai/errors';
 import type { PronunciationLayers, PronunciationMarkers } from '../types/pronunciation';
@@ -11,7 +14,10 @@ import { hasUsablePronunciationMarkers, PronunciationValidationError } from '../
 import { hasGraphemeSupport, readerWords } from '../utils/readerTokens';
 import type { SentencePiece } from '../utils/sentences';
 import {
-  getPronunciationPreferences, getSkippedSentences, savePronunciationPreferences, saveSkippedSentences,
+  getPronunciationPreferences,
+  getSkippedSentences,
+  savePronunciationPreferences,
+  saveSkippedSentences,
 } from '../utils/pronunciationPreferences';
 
 export type PronunciationSnapshot = Readonly<Record<string, PronunciationMarkers>>;
@@ -29,17 +35,32 @@ interface State {
   error: string | null;
 }
 const empty = (identity: string, articleId: string): State => ({
-  identity, staged: {}, skipped: {}, displayed: {}, mode: false, layers: getPronunciationPreferences(articleId).layers,
-  restoring: true, running: false, stopped: false, error: null,
+  identity,
+  staged: {},
+  skipped: {},
+  displayed: {},
+  mode: false,
+  layers: getPronunciationPreferences(articleId).layers,
+  restoring: true,
+  running: false,
+  stopped: false,
+  error: null,
 });
 
-export function usePronunciationMarkers(articleId: string, content: string, sentences: SentencePiece[], onMissingKey: () => void) {
+export function usePronunciationMarkers(
+  articleId: string,
+  content: string,
+  sentences: SentencePiece[],
+  onMissingKey: () => void,
+) {
   const contextIdentity = useSyncExternalStore(subscribePronunciationContext, getPronunciationIdentity);
   const identity = JSON.stringify([articleId, content, contextIdentity]);
   const [stored, setStored] = useState(() => empty(identity, articleId));
+  // A new article, text or AI context starts from nothing; adjusted during render, so no stale frame shows.
+  if (stored.identity !== identity) setStored(empty(identity, articleId));
   const state = stored.identity === identity ? stored : empty(identity, articleId);
+  /** The latest written state, for async work and handlers; every write goes through it first. */
   const current = useRef(state);
-  current.current = state;
   const generation = useRef(0);
   const mounted = useRef(false);
   const tail = useRef<Promise<unknown> | null>(null);
@@ -51,12 +72,13 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
   useLayoutEffect(() => {
     mounted.current = true;
     const token = ++generation.current;
-    const initial = empty(identity, articleId);
-    current.current = initial;
-    setStored(initial);
+    current.current = empty(identity, articleId);
     const session = createPronunciationSession();
-    const live = () => mounted.current && generation.current === token &&
-      current.current.identity === identity && getPronunciationIdentity() === session.identity;
+    const live = () =>
+      mounted.current &&
+      generation.current === token &&
+      current.current.identity === identity &&
+      getPronunciationIdentity() === session.identity;
     const restore = async () => {
       const staged: Record<string, PronunciationMarkers> = {};
       const skipped: Record<string, string> = {};
@@ -70,27 +92,39 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
           }
           const saved = getSkippedSentences(articleId, session.identity);
           for (const sentence of supported) {
-            if (!staged[sentence.id] && Object.hasOwn(saved, sentence.text)) skipped[sentence.id] = saved[sentence.text];
+            if (!staged[sentence.id] && Object.hasOwn(saved, sentence.text))
+              skipped[sentence.id] = saved[sentence.text];
           }
         }
       } catch (cause) {
         error = errorMessage(cause);
       }
       if (!live()) return;
-      const complete = capable && supported.length > 0 &&
+      const complete =
+        capable &&
+        supported.length > 0 &&
         Object.keys(staged).length + Object.keys(skipped).length === supported.length &&
         Object.values(staged).some(hasUsablePronunciationMarkers);
       const mode = complete && getPronunciationPreferences(articleId).enabled;
       // Apply once on entry, never incrementally and never by issuing a provider request.
-      const next = { ...current.current, staged, skipped, displayed: mode ? staged : {}, mode, restoring: false, error };
+      const next = {
+        ...current.current,
+        staged,
+        skipped,
+        displayed: mode ? staged : {},
+        mode,
+        restoring: false,
+        error,
+      };
       current.current = next;
       setStored(next);
     };
     void restore();
-    return () => {
+    const end = () => {
       mounted.current = false;
       generation.current++;
     };
+    return end;
   }, [identity, articleId, supported, capable]);
   const ready = Object.keys(state.staged).length;
   const skippedCount = Object.keys(state.skipped).length;
@@ -100,7 +134,10 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
   const canDisplay = capable && !state.restoring && !state.running && remaining === 0 && ready > 0 && usable;
   const coverage = useMemo(() => {
     const words = sentences.reduce((count, s) => count + readerWords(s.text).length, 0);
-    const resolved = Object.values(state.staged).reduce((count, s) => count + s.words.filter((w) => w.status === 'resolved').length, 0);
+    const resolved = Object.values(state.staged).reduce(
+      (count, s) => count + s.words.filter((w) => w.status === 'resolved').length,
+      0,
+    );
     return { words, resolved };
   }, [sentences, state.staged]);
 
@@ -119,13 +156,22 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
     if (current.current.running || current.current.restoring || !capable) return;
     const token = ++generation.current;
     const session = createPronunciationSession();
-    const live = () => mounted.current && generation.current === token &&
-      current.current.identity === identity && getPronunciationIdentity() === session.identity;
+    const live = () =>
+      mounted.current &&
+      generation.current === token &&
+      current.current.identity === identity &&
+      getPronunciationIdentity() === session.identity;
     patch({ running: true, stopped: false, error: null });
     let staged = { ...current.current.staged };
     let skipped = { ...current.current.skipped };
-    const persistSkipped = () => saveSkippedSentences(articleId, session.identity, Object.fromEntries(
-      supported.filter((sentence) => skipped[sentence.id]).map((sentence) => [sentence.text, skipped[sentence.id]])));
+    const persistSkipped = () =>
+      saveSkippedSentences(
+        articleId,
+        session.identity,
+        Object.fromEntries(
+          supported.filter((sentence) => skipped[sentence.id]).map((sentence) => [sentence.text, skipped[sentence.id]]),
+        ),
+      );
     const stage = (id: string, value: PronunciationMarkers) => {
       staged = { ...staged, [id]: value };
       if (skipped[id]) {
@@ -204,8 +250,22 @@ export function usePronunciationMarkers(articleId: string, content: string, sent
   };
 
   return {
-    ...state, capable, oversized, ready, remaining, skippedCount, total: supported.length,
-    coverage, usable, changed, canDisplay, run, stop, display, setMode, toggleLayer,
+    ...state,
+    capable,
+    oversized,
+    ready,
+    remaining,
+    skippedCount,
+    total: supported.length,
+    coverage,
+    usable,
+    changed,
+    canDisplay,
+    run,
+    stop,
+    display,
+    setMode,
+    toggleLayer,
   };
 }
 

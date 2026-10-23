@@ -2,8 +2,8 @@ import { db, type CacheEntry } from './db';
 import { PRONUNCIATION_SCHEMA_VERSION, READER_TOKENIZER_VERSION } from '../types/pronunciation';
 
 /**
- * Persistent cache for AI answers, so the same word or sentence is never paid
- * for twice. Failures here are never fatal: a broken cache is just a miss.
+ * Persistent cache for AI answers and offline content.
+ * Failures here are never fatal: a broken cache is just a miss.
  */
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -11,11 +11,18 @@ const DAY = 24 * 60 * 60 * 1000;
 const POLICY = {
   // A word in a given sentence has one right answer, so it is kept until cleared.
   word: { ttl: Infinity, max: Infinity },
+  // The conjugation of a verb has one right answer, so it is kept like a word analysis.
+  conjugation: { ttl: Infinity, max: Infinity },
+  // Network-first content keeps its last good copy for offline reading.
+  content: { ttl: 365 * DAY, max: Infinity },
   // Sentence analyses are kept for 30 days.
   sentence: { ttl: 30 * DAY, max: 1000 },
   prosody: { ttl: 30 * DAY, max: 1000 },
-  // Practice drills for an article stay until the learner asks for new ones.
-  drills: { ttl: 30 * DAY, max: 300 },
+  // Exercise hints and explanations depend on the exact item and learner answer.
+  hint: { ttl: 30 * DAY, max: 2000 },
+  explanation: { ttl: 30 * DAY, max: 2000 },
+  // Units generated from an article; large, so fewer are kept.
+  exercises: { ttl: 30 * DAY, max: 200 },
 } as const;
 
 export type CacheKind = keyof typeof POLICY;
@@ -36,11 +43,43 @@ const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
 export const wordKey = (lang: string, fingerprint: string, word: string, sentence: string) =>
   `${fingerprint}|${lang}|${normalize(word)}|${normalize(sentence)}`;
 
-export const drillsKey = (lang: string, fingerprint: string, type: string, articleText: string) =>
-  `${fingerprint}|${lang}|${type}|${hashText(articleText.slice(0, 1500))}`;
+/** What a hint or explanation is about; every field is part of the key. */
+export interface ItemKeyInput {
+  exerciseType?: string;
+  prompt: string;
+  userAnswer: string;
+  expectedAnswer?: string;
+  grammarTag: string;
+  context?: string;
+}
+
+// A JSON array keeps fields apart even when a prompt contains the "|" of a {a|b} choice. Lesson context can be a
+// whole passage, so it is hashed.
+const itemKey = (lang: string, fingerprint: string, i: ItemKeyInput) =>
+  `${fingerprint}|${lang}|${JSON.stringify(
+    [i.exerciseType, i.prompt, i.userAnswer, i.expectedAnswer, i.grammarTag].map((v) => normalize(v ?? '')),
+  )}|${hashText(normalize(i.context ?? ''))}`;
+
+export const hintKey = itemKey;
+export const explanationKey = itemKey;
+
+/** Generated exercises are kept per article text, item count and level. */
+export const exercisesKey = (
+  lang: string,
+  fingerprint: string,
+  level: string,
+  count: number,
+  articleText: string,
+  learningArea: string,
+) =>
+  `${fingerprint}|${lang}|${learningArea}|${normalize(level)}|${count}|${hashText(articleText)}.${articleText.length}`;
 
 export const sentenceKey = (lang: string, fingerprint: string, sentence: string) =>
   `${fingerprint}|${lang}|${normalize(sentence)}`;
+
+/** A conjugation is kept per verb; the caller passes the engine form of the infinitive. */
+export const conjugationKey = (lang: string, fingerprint: string, infinitive: string) =>
+  `${fingerprint}|${lang}|${normalize(infinitive)}`;
 
 export const prosodyKey = (lang: string, fingerprint: string, sentence: string) =>
   `v${PRONUNCIATION_SCHEMA_VERSION}.t${READER_TOKENIZER_VERSION}|${fingerprint}|${lang}|${normalize(sentence)}`;
@@ -88,18 +127,31 @@ export async function putCached(kind: CacheKind, key: string, value: unknown): P
   }
 }
 
-export async function cacheCounts(): Promise<{ words: number; sentences: number; drills: number; prosody: number }> {
+/** Saved answers by kind. `exercises` adds up generated sets, hints and explanations. */
+export async function cacheCounts(): Promise<{
+  words: number;
+  conjugations: number;
+  content: number;
+  sentences: number;
+  exercises: number;
+  prosody: number;
+}> {
   try {
     const d = await db();
-    const [words, sentences, drills, prosody] = await Promise.all([
-      d.countFromIndex('cache', 'kind', 'word'),
-      d.countFromIndex('cache', 'kind', 'sentence'),
-      d.countFromIndex('cache', 'kind', 'drills'),
-      d.countFromIndex('cache', 'kind', 'prosody'),
+    const count = (kind: CacheKind) => d.countFromIndex('cache', 'kind', kind);
+    const [words, conjugations, content, sentences, prosody, sets, hints, explanations] = await Promise.all([
+      count('word'),
+      count('conjugation'),
+      count('content'),
+      count('sentence'),
+      count('prosody'),
+      count('exercises'),
+      count('hint'),
+      count('explanation'),
     ]);
-    return { words, sentences, drills, prosody };
+    return { words, conjugations, content, sentences, exercises: sets + hints + explanations, prosody };
   } catch {
-    return { words: 0, sentences: 0, drills: 0, prosody: 0 };
+    return { words: 0, conjugations: 0, content: 0, sentences: 0, exercises: 0, prosody: 0 };
   }
 }
 

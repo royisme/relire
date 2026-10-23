@@ -1,0 +1,175 @@
+{
+  "rules": {
+    "tion": {
+      "ending": "tion",
+      "gender": "f",
+      "n": 3794,
+      "agree": 3780,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "55401197991aa7a0a44acf143f0a6a3096cc0a0b854265e1fa3e0ec815595bec"
+    },
+    "sion": {
+      "ending": "sion",
+      "gender": "f",
+      "n": 349,
+      "agree": 347,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "6d2a1c35f9911b5ba9204bf4ac0d0717bbfc1e45f6baf03a434e641eafa2aaeb"
+    },
+    "te": {
+      "ending": "té",
+      "gender": "f",
+      "n": 2200,
+      "agree": 2032,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "ce0767fd45523a28d108d901dcc90187c67aec49147ddc86b592de6f131b4972"
+    },
+    "ure": {
+      "ending": "ure",
+      "gender": "f",
+      "n": 1216,
+      "agree": 902,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "36b2fd428998d73f7ed0c52a3243a3585a9754728183b5d8dc83f5464238ac47"
+    },
+    "ette": {
+      "ending": "ette",
+      "gender": "f",
+      "n": 940,
+      "agree": 927,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "784874c8408ef2bad8de05fbd235e3aaf1af3393b2cd81e8ea6179958300bc28"
+    },
+    "ance": {
+      "ending": "ance",
+      "gender": "f",
+      "n": 427,
+      "agree": 423,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "28404202fd8ecdaf58528113e8b3e5163f9ad069d4f23a4e44ebd80ae01e9499"
+    },
+    "ence": {
+      "ending": "ence",
+      "gender": "f",
+      "n": 354,
+      "agree": 351,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "3d928767f46fff74821f27582257feba319f69200a33b9028c85e3dea0bded56"
+    },
+    "ie": {
+      "ending": "ie",
+      "gender": "f",
+      "n": 8754,
+      "agree": 8660,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "03d66be4b8ab49caa1462c43457fd2bc9d2273baf26631f6ad7613c56e59d76f"
+    },
+    "age": {
+      "ending": "age",
+      "gender": "m",
+      "n": 3105,
+      "agree": 3091,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "3228fbe9a0a79f372e867c01462e5e7cc068c71409ab3fa9e925348b22882cb6"
+    },
+    "ment": {
+      "ending": "ment",
+      "gender": "m",
+      "n": 2201,
+      "agree": 2197,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "e6f8011cd15f7a3743cc84496471101919d4df38aa15bba553ac8b06f9a5b832"
+    },
+    "isme": {
+      "ending": "isme",
+      "gender": "m",
+      "n": 2228,
+      "agree": 2222,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "4578ef895acf2f484719a842c517bd12f804d6a465741bb7220ba24204b4c25b"
+    },
+    "eau": {
+      "ending": "eau",
+      "gender": "m",
+      "n": 371,
+      "agree": 368,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "bea19a1dc27689b8d198bc313aee66a08a25e0cf5a70a089b3b93e0e8763a1e7"
+    },
+    "oir": {
+      "ending": "oir",
+      "gender": "m",
+      "n": 403,
+      "agree": 403,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "8806394bf89fdb1982c0b3736ac932946518dabcb29e121becd7ddf272118df0"
+    },
+    "ier": {
+      "ending": "ier",
+      "gender": "m",
+      "n": 1362,
+      "agree": 1362,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "cd51a1631ea416631c385b2876f41eb04c0a40c36c89134ef217a635f5ec74d2"
+    },
+    "eur": {
+      "ending": "eur",
+      "gender": "m",
+      "n": 3882,
+      "agree": 3779,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "d8fe6ffc6eaea85d72e72ca77791544824ada52a04bf661906ddf81f411d19f4"
+    },
+    "e": {
+      "ending": "e",
+      "gender": "f",
+      "n": 50151,
+      "agree": 32324,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "ca2d891f39f6afb69d8370ef4b878ccb32ee5ee29c5ee895a1f25709511e05d7"
+    },
+    "ee": {
+      "ending": "ée",
+      "gender": "f",
+      "n": 1665,
+      "agree": 1614,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "2df341121789c171ef386503bee784bbe858feae587d928669e6fb0636aa0f86"
+    },
+    "esse": {
+      "ending": "esse",
+      "gender": "f",
+      "n": 185,
+      "agree": 183,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "fceffa49356920969fdc54134d8b015189b91fdd51383be4680f19da3d7c7135"
+    },
+    "ude": {
+      "ending": "ude",
+      "gender": "f",
+      "n": 120,
+      "agree": 115,
+      "morphalouVersion": "Version de 6/2016",
+      "ranAt": "2026-10-19T03:33:18.867Z",
+      "rowHash": "9cc79bd62f26053803a148e09bd903a4a854742db5c82311b6e5186e7fb8c28c"
+    }
+  }
+}

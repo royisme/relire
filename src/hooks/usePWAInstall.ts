@@ -7,21 +7,17 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isMac, setIsMac] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  // Standalone mode: already installed as a PWA, or launched from the Mac Dock.
+  const [isInstalled, setIsInstalled] = useState(
+    () =>
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true,
+  );
+  const [userAgent] = useState(() => window.navigator.userAgent.toLowerCase());
+  const isMac = /macintosh|mac os x/.test(userAgent);
+  const isIOS = /iphone|ipad|ipod/.test(userAgent);
 
   useEffect(() => {
-    // Detect standalone mode (already installed as PWA or launched from Mac Dock/App)
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-    setIsInstalled(isStandalone);
-
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    setIsMac(/macintosh|mac os x/.test(userAgent));
-    setIsIOS(/iphone|ipad|ipod/.test(userAgent));
-
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);

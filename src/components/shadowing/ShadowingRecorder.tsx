@@ -16,10 +16,12 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2,
 
 interface Props {
   referenceText: string;
+  /** A control drawn first in the transport row, such as Listen slowly. */
+  leading?: React.ReactNode;
   onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void;
 }
 
-export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }) => {
+export const ShadowingRecorder: React.FC<Props> = ({ referenceText, leading, onAssessed }) => {
   const { t } = useTranslation();
   const r = useShadowingRecorder(referenceText, onAssessed);
   const hasRecording = r.phase === 'recorded';
@@ -27,11 +29,14 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
+        {leading}
         {r.phase === 'recording' ? (
           <Button variant="destructive" onClick={r.stop}>
             <Square className="w-4 h-4 fill-current" aria-hidden="true" />
             <span>{t('shadowing.stop')}</span>
-            <span className="tnum" aria-hidden="true">{clock(r.seconds)}</span>
+            <span className="tnum" aria-hidden="true">
+              {clock(r.seconds)}
+            </span>
           </Button>
         ) : (
           <Button variant={hasRecording ? 'outline' : 'default'} onClick={r.start}>
@@ -41,7 +46,7 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }
         )}
 
         {hasRecording && (
-          <Button onClick={r.assess} disabled={r.isEvaluating}>
+          <Button variant="default" onClick={r.assess} disabled={r.isEvaluating || r.isStarting}>
             {r.isEvaluating ? (
               <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
             ) : (
@@ -59,12 +64,16 @@ export const ShadowingRecorder: React.FC<Props> = ({ referenceText, onAssessed }
       {r.error?.kind === 'busy' ? (
         <p role="alert" className="flex flex-wrap items-center gap-2 text-sm text-bad-700">
           <span className="break-words">{t('shadowing.busy')}</span>
-          <Button variant="outline" size="sm" onClick={cancelCapture}>{t('shadowing.stopOther')}</Button>
+          <Button variant="outline" size="sm" onClick={cancelCapture}>
+            {t('shadowing.stopOther')}
+          </Button>
         </p>
-      ) : r.error && (
-        <p role="alert" className="text-sm text-bad-700 break-words">
-          {r.error.kind === 'mic' ? t('shadowing.micError') : `${t('shadowing.assessError')} ${r.error.detail}`}
-        </p>
+      ) : (
+        r.error && (
+          <p role="alert" className="text-sm text-bad-700 break-words">
+            {r.error.kind === 'mic' ? t('shadowing.micError') : `${t('shadowing.assessError')} ${r.error.detail}`}
+          </p>
+        )
       )}
 
       {r.assessment && <AssessmentResult assessment={r.assessment} />}

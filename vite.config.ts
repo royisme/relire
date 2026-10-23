@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { pdfjsAssets } from './scripts/pdfjsAssets.ts';
 
 export default defineConfig(() => {
   return {
@@ -11,14 +12,16 @@ export default defineConfig(() => {
     plugins: [
       react(),
       tailwindcss(),
+      pdfjsAssets(),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
         manifest: {
           id: './',
-          name: 'Relire - French close reading',
-          short_name: 'Relire',
-          description: 'Close reading for French: tap any word or sentence for an explanation, then read it aloud and get pronunciation feedback.',
+          name: 'Relire Plus - French close reading',
+          short_name: 'Relire Plus',
+          description:
+            'Close reading for French: tap any word or sentence for an explanation, then read it aloud and get pronunciation feedback.',
           theme_color: '#F7F6F3',
           background_color: '#F7F6F3',
           display: 'standalone',
@@ -46,7 +49,9 @@ export default defineConfig(() => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}', 'pdfjs/**/*'],
+          // Include the PDF worker and binary resources (not covered by the app's extensions).
+          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -85,7 +90,7 @@ export default defineConfig(() => {
     ],
     resolve: {
       alias: {
-        '@': path.resolve(import.meta.dirname, '.'),
+        '@': path.resolve(import.meta.dirname, './src'),
       },
     },
   };

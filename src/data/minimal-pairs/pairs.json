@@ -1,0 +1,295 @@
+{
+  "schemaVersion": 1,
+  "packVersion": "0.1.0",
+  "pairs": [
+    {
+      "id": "rue-roue",
+      "contrast": "y-u",
+      "a": "rue",
+      "b": "roue",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "vu-vous",
+      "contrast": "y-u",
+      "a": "vu",
+      "b": "vous",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "tu-tout",
+      "contrast": "y-u",
+      "a": "tu",
+      "b": "tout",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "dessus-dessous",
+      "contrast": "y-u",
+      "a": "dessus",
+      "b": "dessous",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "vent-vont",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "vent",
+      "b": "vont",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "temps-thon",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "temps",
+      "b": "thon",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "sans-son",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "sans",
+      "b": "son",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "banc-bon",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "banc",
+      "b": "bon",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "dent-dont",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "dent",
+      "b": "dont",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "lent-long",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "lent",
+      "b": "long",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "fee-fait",
+      "contrast": "e-ɛ",
+      "a": "fée",
+      "b": "fait",
+      "note": "minimalPairs.notes.tendency",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "bon-beau",
+      "contrast": "ɔ̃-o",
+      "a": "bon",
+      "b": "beau",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "son-seau",
+      "contrast": "ɔ̃-o",
+      "a": "son",
+      "b": "seau",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "pont-pot",
+      "contrast": "ɔ̃-o",
+      "a": "pont",
+      "b": "pot",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "fond-faux",
+      "contrast": "ɔ̃-o",
+      "a": "fond",
+      "b": "faux",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "on-eau",
+      "contrast": "ɔ̃-o",
+      "a": "on",
+      "b": "eau",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "faim-fait",
+      "contrast": "ɛ̃-ɛ",
+      "a": "faim",
+      "b": "fait",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "vin-vais",
+      "contrast": "ɛ̃-ɛ",
+      "a": "vin",
+      "b": "vais",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "pain-paix",
+      "contrast": "ɛ̃-ɛ",
+      "a": "pain",
+      "b": "paix",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "main-mais",
+      "contrast": "ɛ̃-ɛ",
+      "a": "main",
+      "b": "mais",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "saint-sais",
+      "contrast": "ɛ̃-ɛ",
+      "a": "saint",
+      "b": "sais",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "bain-pain",
+      "contrast": "b-p",
+      "a": "bain",
+      "b": "pain",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "boire-poire",
+      "contrast": "b-p",
+      "a": "boire",
+      "b": "poire",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "bas-pas",
+      "contrast": "b-p",
+      "a": "bas",
+      "b": "pas",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "beau-peau",
+      "contrast": "b-p",
+      "a": "beau",
+      "b": "peau",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "bord-port",
+      "contrast": "b-p",
+      "a": "bord",
+      "b": "port",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "bulle-pull",
+      "contrast": "b-p",
+      "a": "bulle",
+      "b": "pull",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "rire-lire",
+      "contrast": "ʁ-l",
+      "a": "rire",
+      "b": "lire",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "roi-loi",
+      "contrast": "ʁ-l",
+      "a": "roi",
+      "b": "loi",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "riz-lit",
+      "contrast": "ʁ-l",
+      "a": "riz",
+      "b": "lit",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "reine-laine",
+      "contrast": "ʁ-l",
+      "a": "reine",
+      "b": "laine",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    },
+    {
+      "id": "rat-la",
+      "contrast": "ʁ-l",
+      "a": "rat",
+      "b": "là",
+      "status": "reviewed",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22"
+    }
+  ]
+}

@@ -2,54 +2,103 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <!-- Record same-document positions before deferred application code can be delayed. -->
+    <script>
+      (() => {
+        const key = 'relirePosition';
+        const nativeIndex = () => window.navigation?.currentEntry?.index;
+        let position = history.state?.[key] ?? 0;
+        const offset = (nativeIndex() ?? position) - position;
+        const replace = (href = location.href) => history.replaceState({ ...history.state, [key]: position }, '', href);
+        const record = () => {
+          const tagged = history.state?.[key];
+          position =
+            typeof tagged === 'number' ? tagged : nativeIndex() === undefined ? position + 1 : nativeIndex() - offset;
+          replace();
+        };
+        replace();
+        addEventListener('popstate', record);
+        addEventListener('hashchange', record);
+        window.relireHistory = {
+          read: () => position,
+          replace,
+          push: (href) => {
+            position++;
+            history.pushState({ ...history.state, [key]: position }, '', href);
+          },
+        };
+      })();
+    </script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#F7F6F3" />
     <!-- Theme before first paint (same rules as src/theme/theme.ts) -->
     <script>
       (function () {
         var p = 'system';
-        try { p = localStorage.getItem('relire_theme') || 'system'; } catch (e) {}
-        if (p !== 'light' && p !== 'sepia' && p !== 'dark') p = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        try {
+          p = localStorage.getItem('relire_theme') || 'system';
+        } catch (e) {}
+        if (p !== 'light' && p !== 'sepia' && p !== 'dark')
+          p = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         document.documentElement.dataset.theme = p;
       })();
     </script>
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Relire" />
+    <meta name="apple-mobile-web-app-title" content="Relire Plus" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
-    <title>Relire — French Reading & Pronunciation Trainer for TCF Canada</title>
-    <meta name="description" content="Open-source French reading and pronunciation trainer for TCF Canada. Learn from real articles with contextual word explanations, IPA, grammar breakdowns, shadowing, AI pronunciation feedback and spaced repetition." />
-    <meta name="keywords" content="French learning, TCF Canada, French pronunciation, French reading, shadowing, IPA, spaced repetition, CEFR, language learning, open source" />
+    <title>Relire Plus — French Reading, Pronunciation & Exercise Practice for TCF Canada</title>
+    <meta
+      name="description"
+      content="Open-source French reading, pronunciation and exercise practice for TCF Canada. Learn from real articles or your own imported material with contextual word explanations, IPA, grammar breakdowns, shadowing, AI pronunciation feedback, a mistake notebook and spaced repetition."
+    />
+    <meta
+      name="keywords"
+      content="French learning, TCF Canada, French pronunciation, French reading, shadowing, IPA, spaced repetition, CEFR, language learning, open source"
+    />
     <meta name="author" content="Roy Zhu" />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <link rel="canonical" href="https://royisme.github.io/relire/" />
 
-    <meta property="og:title" content="Relire — French Reading & Pronunciation Trainer for TCF Canada" />
-    <meta property="og:description" content="Read real French, inspect words and grammar in context, practise shadowing, and get AI pronunciation feedback. Open source and browser-only." />
+    <meta
+      property="og:title"
+      content="Relire Plus — French Reading, Pronunciation & Exercise Practice for TCF Canada"
+    />
+    <meta
+      property="og:description"
+      content="Read real French, inspect words and grammar in context, practise shadowing, work through generated exercises and review your mistakes. Open source and browser-only."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://royisme.github.io/relire/" />
-    <meta property="og:site_name" content="Relire" />
+    <meta property="og:site_name" content="Relire Plus" />
     <meta property="og:image" content="https://royisme.github.io/relire/pwa-512x512.png" />
-    <meta property="og:image:alt" content="Relire French reading and pronunciation trainer" />
+    <meta property="og:image:alt" content="Relire Plus French reading and pronunciation practice" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Relire — French Reading & Pronunciation Trainer for TCF Canada" />
-    <meta name="twitter:description" content="Open-source French close reading, shadowing and pronunciation practice for TCF Canada learners." />
+    <meta
+      name="twitter:title"
+      content="Relire Plus — French Reading, Pronunciation & Exercise Practice for TCF Canada"
+    />
+    <meta
+      name="twitter:description"
+      content="Open-source French reading, pronunciation and exercise practice for TCF Canada learners."
+    />
     <meta name="twitter:image" content="https://royisme.github.io/relire/pwa-512x512.png" />
 
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "Relire",
+        "name": "Relire Plus",
         "applicationCategory": "EducationalApplication",
         "operatingSystem": "Web",
         "url": "https://royisme.github.io/relire/",
         "downloadUrl": "https://github.com/royisme/relire",
         "license": "https://opensource.org/license/mit/",
-        "description": "Open-source French reading and pronunciation trainer for TCF Canada with contextual explanations, IPA, shadowing, AI pronunciation feedback and spaced repetition.",
+        "description": "Open-source French reading, pronunciation and exercise practice for TCF Canada with contextual explanations, IPA, shadowing, AI pronunciation feedback, generated exercises, a mistake notebook and spaced repetition.",
         "inLanguage": ["en", "zh-CN", "fr"],
         "isAccessibleForFree": true,
         "author": {
@@ -60,13 +109,15 @@
         }
       }
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Public+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Public+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body class="bg-ink-50 antialiased ">
+  <body class="bg-ink-50 antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

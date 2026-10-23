@@ -8,7 +8,7 @@ export function base64ToBlob(base64: string, type = 'audio/wav'): Blob {
 export function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');
+    reader.onload = () => resolve(typeof reader.result === 'string' ? (reader.result.split(',')[1] ?? '') : '');
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(blob);
   });

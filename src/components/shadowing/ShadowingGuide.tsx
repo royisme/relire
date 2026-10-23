@@ -28,7 +28,11 @@ export const ShadowingGuide: React.FC<{ guide: Guide }> = ({ guide }) => {
           <span className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5 font-serif text-base">
             {groups.map((g, i) => (
               <React.Fragment key={i}>
-                {i > 0 && <span className="text-ink-400" aria-hidden="true">/</span>}
+                {i > 0 && (
+                  <span className="text-ink-400" aria-hidden="true">
+                    /
+                  </span>
+                )}
                 <span className="rounded-md bg-ink-100 px-2 py-0.5 text-ink-900">{g}</span>
               </React.Fragment>
             ))}
@@ -41,7 +45,9 @@ export const ShadowingGuide: React.FC<{ guide: Guide }> = ({ guide }) => {
             liaisons[0]
           ) : (
             <ul className="list-disc pl-4 space-y-0.5">
-              {liaisons.map((l, i) => <li key={i}>{l}</li>)}
+              {liaisons.map((l, i) => (
+                <li key={i}>{l}</li>
+              ))}
             </ul>
           )}
         </Item>

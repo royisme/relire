@@ -30,7 +30,13 @@ test('a word the AI misspells is left unmarked instead of failing its sentence',
     prosody: (prompt: string) => {
       const tokens = prosodyTokens(prompt);
       return {
-        words: tokens.map(({ ordinal, source }) => ({ ordinal, source, status: 'resolved', syllables: [{ spelling: `zz${source}`, ipa: 'za' }], groupEnd: true })),
+        words: tokens.map(({ ordinal, source }) => ({
+          ordinal,
+          source,
+          status: 'resolved',
+          syllables: [{ spelling: `zz${source}`, ipa: 'za' }],
+          groupEnd: true,
+        })),
         // Out of range for one-word sentences, and a consonant the left word lacks.
         connections: [{ left: 0, type: 'liaison', sound: 'z', spelling: 'q' }],
       };
@@ -57,13 +63,22 @@ test('a provider failure pauses generation with the real error', async ({ page, 
   await expect(page.locator('[data-pronunciation-toggle]')).toHaveAttribute('aria-checked', 'false');
 });
 
-test('a sentence whose answer keeps failing validation is skipped, and the article reopens ready', async ({ page, ai }) => {
+test('a sentence whose answer keeps failing validation is skipped, and the article reopens ready', async ({
+  page,
+  ai,
+}) => {
   let broken = '';
   ai.answer({
     prosody: (prompt: string) => {
       const sentence = prosodySentence(prompt);
       broken ||= sentence;
-      const words = prosodyTokens(prompt).map(({ ordinal, source }) => ({ ordinal, source, status: 'unresolved', syllables: [], groupEnd: false }));
+      const words = prosodyTokens(prompt).map(({ ordinal, source }) => ({
+        ordinal,
+        source,
+        status: 'unresolved',
+        syllables: [],
+        groupEnd: false,
+      }));
       // A missing word is a sentence-level alignment error.
       return { words: sentence === broken ? words.slice(1) : words, connections: [] };
     },

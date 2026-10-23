@@ -1,0 +1,59 @@
+You are a careful French grammarian. Give the conjugation of the French verb "{{infinitive}}" as structured data for a learner. Accuracy matters more than anything else: write only forms you are sure of, in standard modern French.
+
+How the data is used: the app composes the subject pronouns, the reflexive pronoun, the imperative clitics and the passé composé itself, and compares your forms with its own rules. So give only the bare verb forms asked for below.
+
+Fields (all required unless marked optional):
+- "infinitive": the infinitive of the verb, as given above.
+- "pronominal": true when the infinitive starts with "se " or "s’", otherwise false.
+- "aux": the auxiliary of the passé composé, "avoir" or "etre". A pronominal verb always takes "etre".
+- "rule": the one conjugation family the verb follows. Use exactly one of these values:
+  - "er-regular": a regular -er verb with no spelling change.
+  - "er-cer": a -cer verb; c becomes ç before a or o.
+  - "er-ger": a -ger verb; an e is kept after g before a or o.
+  - "er-yer-i": a -yer verb; y becomes i before a silent ending (for -ayer verbs the y form is also accepted).
+  - "er-e-grave": an -er verb whose last stem e becomes è before a silent ending (a single consonant before -er, and -eter verbs that take a grave accent instead of doubling the t).
+  - "er-eacute-egrave": an -er verb whose last stem é becomes è before a silent ending in the present and the subjonctif; the futur and conditionnel keep é.
+  - "er-eler-double": an -eler or -eter verb that doubles the l or t before a silent ending.
+  - "ir-issons": a regular -ir verb with the -iss- stem in the plural, the imparfait, the subjonctif and the present participle.
+  - "ir-sortir": an -ir verb with a short stem (the last consonant of the stem dropped) in the singular of the present and the long stem elsewhere.
+  - "ir-ouvrir": an -ir verb conjugated with -er endings in the present (-e, -es, -e, -ons, -ez, -ent) and with an irregular past participle.
+  - "re-regular": a regular -re verb; present endings -s, -s, none, -ons, -ez, -ent.
+  - "irregular": every other verb, including all verbs in -oir and any verb that fits none of the families above. Never force a verb into a family it does not fit.
+- "defective" (optional): "impersonal" for a verb used only in the 3sg (an impersonal verb), "third-person" for a verb used only in the 3sg and 3pl. Leave it out for every ordinary verb.
+- "hAspire" (optional): true only when the infinitive starts with an aspirated h. Leave it out otherwise, including for a mute h.
+- "forms": the forms of the six simple tenses, as an object with the keys "present", "imparfait", "futur", "conditionnel", "subjonctif" and "imperatif". Each of the first five is an object keyed by person: "1sg", "2sg", "3sg", "1pl", "2pl", "3pl", every person present. Each person holds an array of strings, the main form first and any accepted variant after it. "imperatif" has only the keys "2sg", "1pl" and "2pl". For a "defective" verb give only the persons it has and leave "imperatif" out.
+  - Each string is the verb group only: the conjugated verb as it is written after the subject, with no subject pronoun, no "que", no reflexive pronoun and no hyphenated clitic, even for a pronominal verb and in the imperative. The imperative of a pronominal verb is the bare verb form, with nothing attached.
+  - Do not give the passé composé or any other compound tense in "forms".
+- "participles": "present" (optional: the present participle; leave it out when the verb has none) and "past", an object with the four forms "ms", "fs", "mp", "fp" (masculine singular, feminine singular, masculine plural, feminine plural). A participle that never agrees repeats the same form in all four.
+- "examples": one natural example sentence per tense, as an object with the keys "passeCompose", "present", "imparfait", "futur", "conditionnel", "subjonctif" and "imperatif". Each is an object with "fr" (one French sentence using the verb in that tense) and "gloss" (its translation into English). For a "defective" verb leave "imperatif" out.
+
+Rules for every French string you write:
+- Use the typographic apostrophe ’ (U+2019), never the straight apostrophe '.
+- Use precomposed accented letters (Unicode NFC) and no leading or trailing spaces.
+- Never repeat a form inside one array.
+
+Output only JSON in this shape. Every <angle-bracket> item stands for a value you write and is never a value itself; "pronominal" is true or false as described above. Leave out "defective", "hAspire" and, for a verb without a present participle, "participles.present" unless they apply; for a "defective" verb also leave out "imperatif" in "forms" and in "examples". Keep the same persons in every tense, as described above.
+{
+  "infinitive": "<infinitive>",
+  "pronominal": false,
+  "aux": "<auxiliary>",
+  "rule": "<rule>",
+  "forms": {
+    "present": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "imparfait": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "futur": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "conditionnel": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "subjonctif": { "1sg": ["<verb group>"], "2sg": ["<verb group>"], "3sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"], "3pl": ["<verb group>"] },
+    "imperatif": { "2sg": ["<verb group>"], "1pl": ["<verb group>"], "2pl": ["<verb group>"] }
+  },
+  "participles": { "present": "<present participle>", "past": { "ms": "<past participle ms>", "fs": "<past participle fs>", "mp": "<past participle mp>", "fp": "<past participle fp>" } },
+  "examples": {
+    "passeCompose": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "present": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "imparfait": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "futur": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "conditionnel": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "subjonctif": { "fr": "<French sentence>", "gloss": "<translation>" },
+    "imperatif": { "fr": "<French sentence>", "gloss": "<translation>" }
+  }
+}

@@ -1,7 +1,8 @@
 /**
  * The reader's one fixed bottom area: practice card above the article player.
  * Publishes its measured height as `--dock-height` so the reader can keep the
- * practised or read sentence clear of it. An overlay: never part of page flow.
+ * practised or read sentence clear of it. An overlay: never part of page flow. Centred on the content
+ * column, so it starts after the sidebar (`--sidebar-w`, set by the app shell).
  */
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 
@@ -23,7 +24,7 @@ export function BottomDock({ children }: { children: ReactNode }) {
   return (
     <div
       ref={dock}
-      className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none flex flex-col items-center gap-2 [&>*]:w-full [&>*]:max-w-md"
+      className="fixed inset-x-0 bottom-0 z-30 pr-4 pl-[calc(var(--sidebar-w,0px)+1rem)] pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none flex flex-col items-center gap-2 [&>*]:w-full [&>*]:max-w-md"
     >
       {children}
     </div>
@@ -31,4 +32,5 @@ export function BottomDock({ children }: { children: ReactNode }) {
 }
 
 /** Current dock height in px (0 when nothing is docked). */
-export const dockHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-height')) || 0;
+export const dockHeight = () =>
+  parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--dock-height')) || 0;

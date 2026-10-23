@@ -4,15 +4,30 @@
  * save and every late-result guard; the card component only draws this state.
  * See docs/shadowing-log-design.md (Recording flow).
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { readerIdentity, type ReaderSource } from '../types/readerSource';
 import type { ShadowingTake } from '../types/shadowing';
+import type { PronunciationAssessment } from '../types';
+import { assessPronunciation } from '../services/api';
+import { blobToBase64 } from '../utils/binary';
 import { addTake, ArticleGoneError, getShadowingSentence, subscribeShadowing } from '../storage/shadowing';
 import { errorMessage } from '../services/ai/errors';
 import {
-  acquireStream, CaptureBusyError, claimCapture, releaseCapture, releaseStream, Take, type TakeResult,
+  acquireStream,
+  CaptureBusyError,
+  claimCapture,
+  releaseCapture,
+  releaseStream,
+  Take,
+  type TakeResult,
 } from '../utils/speech/recorder';
 import {
-  getSequenceState, playRecording, setBeforePlay, speakFrench, stopSpeech, suspendSequence,
+  getSequenceState,
+  playRecording,
+  setBeforePlay,
+  speakFrench,
+  stopSpeech,
+  suspendSequence,
 } from '../utils/speech';
 import { getSpeechState, speechKey } from '../utils/speech/state';
 
@@ -20,7 +35,8 @@ export type CardPhase = 'closed' | 'acquiring' | 'recording' | 'saving' | 'ready
 export type CardNotice = 'saved' | 'tooShort' | 'listeningEnded' | 'busy' | null;
 
 export interface PracticeTarget {
-  articleId: string;
+  source: ReaderSource;
+  passageContent?: string;
   /** Sentence id in the reader, to return focus and highlight. */
   sentenceId: string;
   text: string;
@@ -30,7 +46,7 @@ const MIN_TAKE_MS = 500;
 const MAX_TAKE_MS = 60_000;
 export const takeKey = (take: ShadowingTake) => `take:${take.id}`;
 
-export function usePracticeCard() {
+export function usePracticeCard(onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void) {
   const [phase, setPhase] = useState<CardPhase>('closed');
   const [target, setTarget] = useState<PracticeTarget | null>(null);
   const [latest, setLatest] = useState<ShadowingTake | null>(null);
@@ -38,11 +54,30 @@ export function usePracticeCard() {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<CardNotice>(null);
+  const [assessment, setAssessment] = useState<PronunciationAssessment | null>(null);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [assessmentError, setAssessmentError] = useState<string | null>(null);
+  const assessAbort = useRef<AbortController | null>(null);
+  const latestRef = useRef(latest);
+  const onAssessedRef = useRef(onAssessed);
+  useLayoutEffect(() => {
+    onAssessedRef.current = onAssessed;
+    latestRef.current = latest;
+  });
+  const cancelAssessment = useCallback(() => {
+    assessAbort.current?.abort();
+    assessAbort.current = null;
+    setAssessment(null);
+    setAssessmentError(null);
+    setIsEvaluating(false);
+  }, []);
 
   // Bumped on close, switch, redo and cancel: async results from an older take are ignored.
   const session = useRef(0);
   const phaseRef = useRef<CardPhase>('closed');
   const targetRef = useRef<PracticeTarget | null>(null);
+  /** `stop`, for the take timer that is set up before `stop` exists. */
+  const stopRef = useRef<() => Promise<void>>(async () => {});
   const token = useRef<symbol | null>(null);
   const stream = useRef<MediaStream | null>(null);
   const take = useRef<Take | null>(null);
@@ -70,27 +105,36 @@ export function usePracticeCard() {
     token.current = null;
   }, []);
 
-  const loadLatest = useCallback(async (of: PracticeTarget) => {
-    try {
-      const record = await getShadowingSentence(of.articleId, of.text);
-      if (targetRef.current !== of) return;
-      setLatest(record?.takes.at(-1) ?? null);
-      setCount(record?.takes.length ?? 0);
-    } catch (err) {
-      if (targetRef.current === of) setError(errorMessage(err));
-    }
-  }, []);
+  const loadLatest = useCallback(
+    async (of: PracticeTarget) => {
+      try {
+        const record = await getShadowingSentence(of.source, of.text);
+        if (targetRef.current !== of) return;
+        const next = record?.takes.at(-1) ?? null;
+        if (next?.id !== latestRef.current?.id) cancelAssessment();
+        setLatest(next);
+        setCount(record?.takes.length ?? 0);
+      } catch (err) {
+        if (targetRef.current === of) setError(errorMessage(err));
+      }
+    },
+    [cancelAssessment],
+  );
 
   /** Ends any capture and returns to `ready` on the same sentence, with an optional notice. */
-  const toReady = useCallback((why: CardNotice = null) => {
-    session.current++;
-    releaseCaptureNow();
-    go('ready');
-    setNotice(why);
-  }, [releaseCaptureNow]);
+  const toReady = useCallback(
+    (why: CardNotice = null) => {
+      session.current++;
+      releaseCaptureNow();
+      go('ready');
+      setNotice(why);
+    },
+    [releaseCaptureNow],
+  );
 
-  const startTake = useCallback(async (of: PracticeTarget) => {
+  const startTake = useCallback(async () => {
     const mine = ++session.current;
+    cancelAssessment();
     setError(null);
     setNotice(null);
     setElapsedMs(0);
@@ -138,30 +182,33 @@ export function usePracticeCard() {
       go('ready');
       setError(errorMessage(err));
     }
-  }, [releaseCaptureNow, toReady]);
+  }, [cancelAssessment, releaseCaptureNow, toReady]);
 
-  const save = useCallback(async (of: PracticeTarget, result: TakeResult, mine: number) => {
-    go('saving');
-    try {
-      const record = await addTake(of.articleId, of.text, result);
-      unsaved.current = null;
-      if (mine !== session.current) return;
-      setLatest(record.takes.at(-1) ?? null);
-      setCount(record.takes.length);
-      go('ready');
-      setNotice('saved');
-    } catch (err) {
-      if (err instanceof ArticleGoneError) {
+  const save = useCallback(
+    async (of: PracticeTarget, result: TakeResult, mine: number) => {
+      go('saving');
+      try {
+        const record = await addTake(of.source, of.text, result, of.passageContent);
         unsaved.current = null;
-        if (mine === session.current) toReady();
-        return;
+        if (mine !== session.current) return;
+        setLatest(record.takes.at(-1) ?? null);
+        setCount(record.takes.length);
+        go('ready');
+        setNotice('saved');
+      } catch (err) {
+        if (err instanceof ArticleGoneError) {
+          unsaved.current = null;
+          if (mine === session.current) toReady();
+          return;
+        }
+        unsaved.current = { target: of, result };
+        if (mine !== session.current) return;
+        go('unsaved');
+        setError(errorMessage(err));
       }
-      unsaved.current = { target: of, result };
-      if (mine !== session.current) return;
-      go('unsaved');
-      setError(errorMessage(err));
-    }
-  }, [toReady]);
+    },
+    [toReady],
+  );
 
   /** Stop pressed (or 60 s reached): the target is fixed now, and the save completes even if the card closes. */
   const stop = useCallback(async () => {
@@ -188,32 +235,39 @@ export function usePracticeCard() {
     }
     await save(of, result, mine);
   }, [releaseCaptureNow, save, toReady]);
-  const stopRef = useRef(stop);
-  stopRef.current = stop;
+  useLayoutEffect(() => {
+    stopRef.current = stop;
+  }, [stop]);
 
   /** Opens the card on a sentence and records at once; refused while a take is in progress. */
-  const open = useCallback((next: PracticeTarget) => {
-    const busy = ['acquiring', 'recording', 'saving', 'unsaved'].includes(phaseRef.current);
-    if (busy) return false;
-    const same = targetRef.current?.articleId === next.articleId && targetRef.current.text === next.text;
-    const of = same ? targetRef.current! : next;
-    if (!same) {
-      targetRef.current = of;
-      setTarget(of);
-      setLatest(null);
-      setCount(0);
-      void loadLatest(of);
-    }
-    void startTake(of);
-    return true;
-  }, [loadLatest, startTake]);
+  const open = useCallback(
+    (next: PracticeTarget) => {
+      const busy = ['acquiring', 'recording', 'saving', 'unsaved'].includes(phaseRef.current);
+      if (busy) return false;
+      const same =
+        targetRef.current &&
+        readerIdentity(targetRef.current.source) === readerIdentity(next.source) &&
+        targetRef.current.text === next.text;
+      const of = same ? targetRef.current! : next;
+      if (!same) {
+        targetRef.current = of;
+        setTarget(of);
+        setLatest(null);
+        setCount(0);
+        void loadLatest(of);
+      }
+      void startTake();
+      return true;
+    },
+    [loadLatest, startTake],
+  );
 
   const redo = useCallback(() => {
     const of = targetRef.current;
     if (!of || phaseRef.current !== 'recording') return;
     session.current++;
     releaseCaptureNow();
-    void startTake(of);
+    void startTake();
   }, [releaseCaptureNow, startTake]);
 
   const retrySave = useCallback(() => {
@@ -232,6 +286,7 @@ export function usePracticeCard() {
   /** Closes the card; a running take is discarded, a save in flight still completes. */
   const close = useCallback(() => {
     session.current++;
+    cancelAssessment();
     releaseCaptureNow();
     unsaved.current = null;
     const { key } = getSpeechState();
@@ -245,7 +300,7 @@ export function usePracticeCard() {
     setError(null);
     setNotice(null);
     go('closed');
-  }, [releaseCaptureNow]);
+  }, [cancelAssessment, releaseCaptureNow]);
 
   /** A sheet or another sound takes over: discard a take in progress, keep the card. */
   const interrupt = useCallback(() => {
@@ -259,15 +314,23 @@ export function usePracticeCard() {
   }, [interrupt]);
 
   // Leaving the reader releases everything.
-  useEffect(() => () => {
-    session.current++;
-    releaseCaptureNow();
-  }, [releaseCaptureNow]);
+  useEffect(
+    () => () => {
+      session.current++;
+      assessAbort.current?.abort();
+      releaseCaptureNow();
+    },
+    [releaseCaptureNow],
+  );
 
   // Recordings deleted in the log update the card's latest take.
-  useEffect(() => subscribeShadowing(() => {
-    if (targetRef.current) void loadLatest(targetRef.current);
-  }), [loadLatest]);
+  useEffect(
+    () =>
+      subscribeShadowing(() => {
+        if (targetRef.current) void loadLatest(targetRef.current);
+      }),
+    [loadLatest],
+  );
 
   const endsListening = () => {
     if (getSequenceState().id) setNotice('listeningEnded');
@@ -295,9 +358,41 @@ export function usePracticeCard() {
     const card = session.current;
     void speakFrench(of.text, {
       onSettled: (outcome) => {
-        if (outcome === 'ended' && card === session.current && targetRef.current === of) void playRecording(mine.blob, takeKey(mine));
+        if (outcome === 'ended' && card === session.current && targetRef.current === of)
+          void playRecording(mine.blob, takeKey(mine));
       },
     });
+  };
+
+  /** One Check per request; a new capture or closed session makes even a non-aborting provider silent. */
+  const assess = async () => {
+    const of = targetRef.current;
+    if (!of || !latest || phaseRef.current !== 'ready' || assessAbort.current) return;
+    const mine = session.current;
+    const controller = new AbortController();
+    assessAbort.current = controller;
+    setIsEvaluating(true);
+    setAssessmentError(null);
+    try {
+      const audioBase64 = await blobToBase64(latest.blob);
+      if (controller.signal.aborted || mine !== session.current) return;
+      const result = await assessPronunciation({
+        referenceText: of.text,
+        audio: latest.blob,
+        audioBase64,
+        mimeType: latest.mimeType,
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted || mine !== session.current) return;
+      setAssessment(result);
+      onAssessedRef.current?.(result, of.text);
+    } catch (err) {
+      if (controller.signal.aborted || mine !== session.current) return;
+      setAssessmentError(errorMessage(err));
+    } finally {
+      if (assessAbort.current === controller) assessAbort.current = null;
+      if (mine === session.current) setIsEvaluating(false);
+    }
   };
 
   /** 0..1 input level for the meter, read on animation frames by the card. */
@@ -311,8 +406,28 @@ export function usePracticeCard() {
   };
 
   return {
-    phase, target, latest, count, elapsedMs, error, notice,
-    open, stop, redo, close, retrySave, discardUnsaved, interrupt, playReference, playLatest, compare, level,
+    phase,
+    target,
+    latest,
+    count,
+    elapsedMs,
+    error,
+    notice,
+    assessment,
+    assessmentError,
+    isEvaluating,
+    assess,
+    open,
+    stop,
+    redo,
+    close,
+    retrySave,
+    discardUnsaved,
+    interrupt,
+    playReference,
+    playLatest,
+    compare,
+    level,
   };
 }
 

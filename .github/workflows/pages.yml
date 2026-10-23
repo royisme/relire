@@ -20,8 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+        with:
+          # The same Bun as package.json "packageManager", so the deploy builds what developers build.
+          bun-version: 1.3.14
       - run: bun install --frozen-lockfile
       - name: Typecheck
+        run: bun run typecheck
+      - name: Lint
         run: bun run lint
       - name: Translations
         run: bun run i18n:check

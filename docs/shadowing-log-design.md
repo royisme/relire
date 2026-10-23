@@ -1,6 +1,6 @@
 # Shadowing log: design
 
-Status: proposal on `feat/shadowing-log`. Revised after a first GPT (Codex) review, redesigned with the user around a record button and a practice card, then revised after a second review. Nothing implemented yet.
+Status: implemented. This document records the original card/log design; current routes, passage sources and storage lifetimes are in `docs/architecture.md`.
 
 ## Problem
 
@@ -17,8 +17,8 @@ Goal: **practise any sentence where the reading happens — listen, record, list
 | --- | --- |
 | Shadowing style | Listen to the whole sentence, then repeat it (echo). Playback is always stopped while recording, so speakers are fine. |
 | Recordings kept | 3 per sentence, first in first out. No pinning in v1. |
-| Scoring | Not in v1. Later: a Settings switch to enable scoring and an option to score every take automatically. The new card and log make no assessment call and do not change stats; the existing drawer and Practice scoring are unchanged. |
-| Where the log lives | The Vocabulary tab is labelled **My study** and gets two sub-tabs, **Words** (today's vocabulary, unchanged) and **Shadowing**. The last sub-tab is remembered. The top bar keeps four tabs; the internal tab id stays `vocab` (the due-count badges depend on it). |
+| Scoring | Superseding the original no-scoring design (owner decision 2026-10-22), Read records and optionally checks its latest take only in the practice card, using a reserved scrollable result area and the existing Progress callback without storing assessments with takes; the sentence drawer no longer records, while Speaking and sound-pairs read-aloud are unchanged. |
+| Where the log lives | The Vocabulary tab is labelled **My study** and gets two sub-tabs, **Words** (today's vocabulary, unchanged) and **Shadowing**. The last sub-tab is remembered (superseded: the address `#/study/shadowing` now carries it, see `docs/architecture.md`). The top bar keeps four tabs (superseded by the sidebar); the internal tab id stays `vocab` (the due-count badges depend on it). |
 | Entry point | A record button (●) in the sentence action pill, beside play and analyse. Recording is always started by the learner, sentence by sentence, so a sentence can be repeated as often as wanted. |
 | Where recording happens | A closable **practice card** docked at the bottom of the screen (an overlay like the article player). It holds the sentence, reference playback, record/stop with a live input level, the sentence's takes with play/compare/delete, and a hint line; later the score and static waveforms. |
 | No automatic mode in v1 | The article player's automatic "record after each sentence" mode is deferred; it can reuse the same recorder and storage later. |
@@ -37,14 +37,19 @@ Not building in v1: scoring or any assessment call; the player's automatic shado
 
 **Cost note.** v1 never calls an assessment. The reference audio is the article's normal synthesized speech: if a sentence's clip is not stored yet (or was trimmed), playing the reference synthesizes it through the configured speech provider, which can cost a request, exactly like pressing play in the reader. The UI never says "free".
 
+## Passage-source extension
+
+The implemented independent unit-passage source is documented in `docs/architecture.md` (“Distinct passage sources and recording compatibility”). It reuses this card/log and the `shadowing` store, adds optional `passage: { unitId }` provenance with a disjoint encoded key, and keeps article keys/backups unchanged. Unit reset retains recordings; unit deletion leaves unavailable history that still roundtrips backups; changed text has no broken open link. Deleting the parent material removes prose and passage takes together. Reader return links include the source and sentence in the hash.
+
 ## Data
 
 New IndexedDB object store `shadowing`, added by an `oldVersion < 4` step in `db.ts` (3 → 4, additive; the five existing stores are untouched). One bounded record per sentence of an article:
 
 ```ts
 interface ShadowingSentence {
-  key: string;            // `${articleId}|${normalizeText(text)}`
+  key: string;            // `${articleId}|${normalizeText(text)}`, or the disjoint passage key
   articleId: string;
+  passage?: { unitId: string }; // provenance of a passage take; absent for a material take
   text: string;           // trimmed sentence as written when last recorded
   updatedAt: number;      // recordedAt of the newest remaining take
   takes: ShadowingTake[]; // oldest first, at most 3
@@ -63,7 +68,7 @@ interface ShadowingTake {
 - **One record per sentence** (takes inside) is kept for v1: at most three takes, so reading a record is bounded. Reading the list does read the blobs of every record it returns (IndexedDB returns whole values); the list stays lazy at the decoding level only, by creating object URLs on play. If lists get slow, split metadata and blobs later.
 - **FIFO in one readwrite transaction:** get, append, drop from the front while `takes.length > 3`, put, `await tx.done`. No other async work inside the transaction. The UI reports "saved" only after `tx.done`.
 - **Deleting the newest take** recomputes `updatedAt`; deleting the last take deletes the record.
-- **Identity and order.** `splitArticle` ids are positional and shift on edits, so identity is the normalized text (`normalizeText`: trim, lowercase, collapse spaces), the same normalization as speech clips. Order and "open in reader" are always derived from the current `splitArticle(article.content)`: a record matches the first sentence whose normalized text equals its key. Identical sentences in one article share one record and open at the first occurrence. A record with no match is "original text changed" (playable, deletable, no reader link); a record whose article is missing is grouped under "article removed" (same, no link). No stored position.
+- **Identity and order.** `splitArticle` ids are positional and shift on edits, so identity is the normalized text (`normalizeText`: trim, lowercase, collapse spaces), the same normalization as speech clips. Order and "open in reader" are always derived from the current `splitArticle(article.content)`: a record matches the first sentence whose normalized text equals its key. Identical sentences in one article share one record and open at the first occurrence. A record with no match is "original text changed" (playable, deletable, no reader link); a record whose article is missing is grouped under "Source unavailable" (designed here as "article removed"; unit passages group there too), same, no link. No stored position.
 - **Takes** under 0.5 s are discarded; a take stops at 60 s. Recorder bitrate is left to the browser; sizes are measured, not assumed. Example: opus at ~32 kbps is ~4 KB/s, so a 6 s take is ~24 KB and 3 takes × 500 sentences ≈ 36 MB. The real total is shown in Settings.
 - **Retention vs backup.** Reference clips of recorded sentences are kept from trimming: `protectedTexts()` (retention) also returns those texts. The vocabulary audio backup must not grow because of this, so `exportProtectedAudio()` gets its own vocabulary-only selection instead of reusing `protectedTexts()`.
 - **Storage persistence:** after the first committed take, call `navigator.storage.persist()` if not already persisted (best effort; browsers may still evict).
@@ -172,7 +177,7 @@ Desktop (≥ md): one table per article, rows in current article order.
 ## Settings, backup and deletion
 
 - **Data section:** "Shadowing: N sentences, M recordings, X MB" and **Delete all recordings** (confirm).
-- **Export:** checkbox "Include shadowing recordings" (off by default). Each take is written with `mimeType`, `durationMs`, `recordedAt`, `id` and base64 data under a `shadowing` key.
+- **Export:** checkbox "Include shadowing recordings" (off by default). Each take is written with `mimeType`, `durationMs`, `recordedAt`, `id` and base64 data under a `shadowing` key, plus its optional `passage: { unitId }` provenance.
 - **Import** (`importData` today writes stores one by one and only checks outer shapes; recordings get stricter handling):
   1. Validate and decode everything first: record keys recomputed from `articleId` + text, ≤ 3 takes, unique ids, positive durations, known MIME prefix (`audio/`), base64 decodes to the stated MIME (`base64ToBlob` defaults to WAV, so the MIME is passed explicitly), bytes recomputed.
   2. Then replace in **one** transaction over the stores being restored.
@@ -180,16 +185,12 @@ Desktop (≥ md): one table per article, rows in current article order.
   4. Recordings whose article is missing after import appear under "article removed".
 - **Deleting an article** deletes the article and its recordings in one `articles`+`shadowing` transaction, then updates React state. This does not go through the generic `saveArticles()` sync (which also runs on restore, where orphans must survive). A take whose save completes after its article was deleted is dropped (the save checks the article still exists inside its transaction).
 
-## IndexedDB upgrade
-
-`openDB` gets `blocked` and `blocking` handlers: an old tab holding version 3 is asked to close its connection (`blocking` → `db.close()` and a "Relire was updated, reload this tab" notice); the new tab shows "Close other Relire tabs to finish updating" instead of waiting silently. The app is not released yet, but the upgrade path is still tested (fresh install and v3 → v4 with existing data).
-
 ## Module responsibilities
 
 | Module | Owns |
 | --- | --- |
 | `storage/shadowing.ts` | Store, FIFO, queries, stats, backup (de)serialization and validation |
-| `storage/db.ts` | v4 upgrade, blocked/blocking handling, atomic article+recordings delete, transactional import |
+| `storage/db.ts` | Atomic article+recordings delete, transactional import |
 | `utils/speech/recorder.ts` | Stream session, per-take recording, owner-token capture lock |
 | `utils/speech/sequence.ts` | `suspendSequence()` keeping position for resume |
 | `utils/speech/playback.ts` | Take playback and comparison chain in the shared request-id/state machinery |

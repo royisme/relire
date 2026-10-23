@@ -1,13 +1,3 @@
-export interface ConjugationForm {
-  person: string;
-  form: string;
-}
-
-export interface ConjugationTense {
-  tense: string;
-  forms: ConjugationForm[];
-}
-
 export interface UsageExample {
   fr: string;
   zh: string;
@@ -25,7 +15,6 @@ export interface WordAnalysis {
   translationEn?: string;
   otherMeanings?: string[];
   contextTense?: string;
-  conjugationTable?: ConjugationTense[];
   usageExamples?: UsageExample[];
   cefrLevel?: string;
   memoryTrick?: string;
@@ -79,53 +68,32 @@ export interface PronunciationCorrection {
   advice: string;
 }
 
+/**
+ * What one read-aloud attempt was scored with. Only the three scores are certain: a provider that
+ * measures less (audio assessment without rhythm, prosody or coaching) leaves the rest absent, and
+ * nothing here is filled in for it.
+ */
 export interface PronunciationAssessment {
   overallScore: number;
   accuracyScore: number;
   fluencyScore: number;
-  rhythmScore: number;
+  completenessScore?: number;
+  /** Literal word-level service results, not IPA/phoneme coaching. */
+  wordResults?: { word: string; accuracyScore?: number; errorType?: string }[];
+  rhythmScore?: number;
   transcribedSpeech?: string;
-  phonemeFeedback: PhonemeFeedback[];
+  phonemeFeedback?: PhonemeFeedback[];
   liaisonFeedback?: string;
   intonationFeedback?: string;
-  corrections: PronunciationCorrection[];
+  corrections?: PronunciationCorrection[];
   strengths?: string[];
-  coachingNotes: string;
+  coachingNotes?: string;
   evaluatedAt?: string;
   referenceText?: string;
 }
 
-export interface ReviewRecord {
-  date: string;
-  rating: number; // 0-5 (0: Blackout, 3: Pass, 5: Perfect)
-  intervalDays: number;
-  easeFactor: number;
-}
-
-export interface VocabWord {
-  id: string;
-  word: string;
-  lemma: string;
-  ipa: string;
-  translation: string;
-  translationEn?: string;
-  partOfSpeech: string;
-  contextSentence: string;
-  contextTense?: string;
-  phoneticsGuide?: string;
-  phoneticsGuideEn?: string;
-  addedAt: string;
-  // SM-2 Spaced Repetition parameters
-  repetitions: number;
-  intervalDays: number;
-  easeFactor: number; // default 2.5
-  nextReviewDate: string; // ISO date string YYYY-MM-DD
-  lastReviewedAt?: string;
-  reviewHistory: ReviewRecord[];
-  tags?: string[];
-  /** The full explanation as it was when the word was saved, so the entry stands on its own. */
-  analysis?: WordAnalysis;
-}
+/** The levels an article can carry, as the article editor and the article import offer them. */
+export const ARTICLE_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
 export interface Article {
   id: string;
@@ -135,25 +103,6 @@ export interface Article {
   source?: string;
   content: string;
   createdAt: string;
-}
-
-export interface PracticeQuestion {
-  id: number;
-  type: 'scramble' | 'cloze' | 'oral_prompt' | 'translation';
-  targetSentence: string;
-  prompt: string;
-  scrambledChunks?: string[];
-  clozeText?: string;
-  options?: string[];
-  correctOptionIndex?: number;
-  grammarHint?: string;
-  shadowingAudioPrompt?: string;
-}
-
-export interface PracticeDeck {
-  title: string;
-  description: string;
-  questions: PracticeQuestion[];
 }
 
 export interface UserStats {

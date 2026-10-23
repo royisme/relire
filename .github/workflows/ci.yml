@@ -11,10 +11,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
+        with:
+          # The same Bun as package.json "packageManager", so CI runs what developers run.
+          bun-version: 1.3.14
       - run: bun install --frozen-lockfile
+      - name: Worker typecheck
+        run: bun install --cwd worker --frozen-lockfile && cd worker && bun run typecheck
       - name: Typecheck
+        run: bun run typecheck
+      - name: Lint
         run: bun run lint
+      - name: Format
+        run: bun run format:check
+      - name: Unit tests
+        run: bun run test
+      - name: Grammar pack
+        run: bun scripts/grammar-pack/build.ts --check
+      - name: Noun gender
+        run: bun scripts/noun-gender/build.ts --check
+      - name: Minimal pairs
+        run: bun scripts/minimal-pairs/build.ts --check
+      - name: Grammar topics
+        run: bun scripts/grammar-topics/publish.ts --check
       - name: Translations
         run: bun run i18n:check
+      - name: Code shape
+        run: bun run shape:check
       - name: Build
         run: bun run build

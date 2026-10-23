@@ -4,5 +4,9 @@ import { getThemePreference, resolveTheme, setThemePreference, subscribeTheme, t
 /** The theme preference and what it resolves to right now, for theme pickers. */
 export function useTheme() {
   const preference = useSyncExternalStore(subscribeTheme, getThemePreference);
-  return { preference, resolved: resolveTheme(preference), setPreference: setThemePreference as (p: ThemePreference) => void };
+  return {
+    preference,
+    resolved: resolveTheme(preference),
+    setPreference: setThemePreference as (p: ThemePreference) => void,
+  };
 }
