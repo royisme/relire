@@ -154,6 +154,24 @@ export function verbGate(
             des: 'plural',
             ces: 'plural',
             ses: 'plural',
+            // Possessives and demonstratives are determiners with an unambiguous number before a noun subject.
+            mon: 'singular',
+            ma: 'singular',
+            ton: 'singular',
+            ta: 'singular',
+            son: 'singular',
+            sa: 'singular',
+            notre: 'singular',
+            votre: 'singular',
+            leur: 'singular',
+            ce: 'singular',
+            cet: 'singular',
+            cette: 'singular',
+            mes: 'plural',
+            tes: 'plural',
+            nos: 'plural',
+            vos: 'plural',
+            leurs: 'plural',
           } as Record<string, string>
         )[key(beforeNoun.entry.lemma)];
       if (!number || !slots.has(number)) fail('Noun subject needs an unambiguous matching determiner');

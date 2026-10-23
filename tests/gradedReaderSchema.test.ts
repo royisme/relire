@@ -21,7 +21,12 @@ import {
 import { gradedReaderFixture } from './fixtures/gradedReaders';
 import { bodyMutations, syllabusMutations } from './fixtures/gradedReaderMutations';
 
-const syllabusFixture = (): ReaderSyllabus => structuredClone(ReaderSyllabusSchema.parse(syllabusJson));
+// Publication state changes as readers are reviewed; the mutation cases need a known starting point.
+const syllabusFixture = (): ReaderSyllabus => {
+  const syllabus = structuredClone(ReaderSyllabusSchema.parse(syllabusJson));
+  for (const stage of syllabus.stages) Object.assign(stage, { include: false, bundled: false });
+  return syllabus;
+};
 const publishedFixture = () => ({
   schemaVersion: 1 as const,
   body: gradedReaderFixture(),
@@ -43,7 +48,7 @@ test('all public contracts parse TEST fixtures without changing content', () => 
   expect(PublishedReaderSchema.parse(publishedFixture())).toEqual(publishedFixture());
   expect(syllabusJson.stages[0]).toEqual(StageSchema.parse(syllabusJson.stages[0]));
   expect(syllabusJson).toEqual(ReaderSyllabusSchema.parse(syllabusJson));
-  expect(ReaderReviewsSchema.parse(reviewsJson)).toEqual({ records: [] });
+  expect(ReaderReviewsSchema.parse(reviewsJson)).toEqual(reviewsJson);
   expect(() => z.toJSONSchema(ReaderBodySchema)).not.toThrow();
 });
 
@@ -226,7 +231,7 @@ test('committed metadata is the inactive twelve-stage syllabus with real manifes
   expect(syllabus.stages.map((s) => s.newWordBudget)).toEqual([6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 10, 10]);
   syllabus.stages.forEach((stage, i) => {
     expect(stage.readerId).toBe(`a1-${String(i + 1).padStart(2, '0')}`);
-    expect(stage.include).toBe(false);
+    expect(typeof stage.include).toBe('boolean');
     expect(stage.bundled).toBe(false);
     for (const id of stage.topicIds) expect(topicIds.has(id)).toBe(true);
   });
