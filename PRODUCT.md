@@ -26,6 +26,8 @@ Real French articles read sentence by sentence, where every sentence can be hear
 
 Intermediate learners (roughly A2–C1) preparing for TCF/DELF/DALF or reading French for pleasure. They are mostly Chinese speakers on a laptop or phone, in sessions of 15–45 minutes, often in the evening. They are already reading in a second language, so extra visual noise costs them real attention.
 
+Since 2026-10-23 the audience also includes **learners starting from zero**, Chinese speakers who cannot yet read a French sentence. They cannot spot an error in the content, need to get value before they own an AI key, and need a sequence rather than a toolbox. The first feature for them is graded readers (`docs/graded-readers-plan.md`); until it ships, the product is not yet built for them.
+
 ## Core jobs, in priority order
 
 1. **Read an article without losing the thread.** The text is the product. Chrome recedes.
