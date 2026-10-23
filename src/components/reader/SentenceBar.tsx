@@ -15,9 +15,11 @@ interface Props {
   onExplain: () => void;
   onPractise: () => void;
   onDismiss: () => void;
+  /** Speaks with the device's own voice instead of the selected engine (the graded reader's keyless Listen). */
+  playbackEngine?: 'device';
 }
 
-export function SentenceBar({ text, practiseBlocked, onExplain, onPractise, onDismiss }: Props) {
+export function SentenceBar({ text, practiseBlocked, onExplain, onPractise, onDismiss, playbackEngine }: Props) {
   const { t } = useTranslation();
   const practiseLabel = practiseBlocked ? t('practiceCard.finishFirst') : t('practiceCard.open');
   return (
@@ -31,6 +33,7 @@ export function SentenceBar({ text, practiseBlocked, onExplain, onPractise, onDi
         text={text}
         label={t('reader.playSentence')}
         stopLabel={t('reader.stop')}
+        engine={playbackEngine}
         variant="ghost"
         size="icon"
         className={panelGhost}

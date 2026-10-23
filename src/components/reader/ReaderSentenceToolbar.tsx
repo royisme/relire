@@ -14,6 +14,8 @@ interface ReaderSentenceToolbarProps {
   onPractise: () => void;
   cardBusy: boolean;
   practisedId: string | null;
+  /** Speaks with the device's own voice instead of the selected engine (the graded reader's keyless Listen). */
+  playbackEngine?: 'device';
 }
 
 export function ReaderSentenceToolbar({
@@ -26,6 +28,7 @@ export function ReaderSentenceToolbar({
   onPractise,
   cardBusy,
   practisedId,
+  playbackEngine,
 }: ReaderSentenceToolbarProps) {
   const toolbarButton = (active: boolean) =>
     active ? 'bg-accent-700 text-on-fill hover:bg-accent-800' : 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
@@ -44,6 +47,7 @@ export function ReaderSentenceToolbar({
           text={toolbar.text}
           label={t('reader.playSentence')}
           stopLabel={t('reader.stop')}
+          engine={playbackEngine}
           variant="ghost"
           size="icon"
           className={`h-7 w-7 transition-colors ${toolbarButton(speechActive)}`}
