@@ -1,5 +1,6 @@
 /** Owns read-only topic and lexicon HTTP delivery; content validation and loading belong to the owner's local pipeline. */
 import type { D1Database, RateLimit } from '@cloudflare/workers-types';
+import { readersResource } from './readers';
 import { vocabularyResource } from './vocabulary';
 
 export interface Env {
@@ -58,6 +59,17 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     headers.set('Cache-Control', 'no-store');
     return respond(JSON.stringify({ error: code }), status);
   };
+  // Every content route shares the same conditional-request handling; only the version and the cache policy differ.
+  const cached = (body: string, version: string, cacheControl: string) => {
+    const etag = `"${version}"`;
+    headers.set('ETag', etag);
+    headers.set('Cache-Control', cacheControl);
+    const matches = request.headers
+      .get('If-None-Match')
+      ?.split(',')
+      .some((value) => value.trim() === '*' || value.trim().replace(/^W\//, '') === etag);
+    return matches ? respond(null, 304) : respond(body, 200);
+  };
 
   if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
     headers.set('Allow', allow);
@@ -79,14 +91,12 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     if (path.startsWith('/v1/vocabulary/')) {
       const resource = await vocabularyResource(url, env.DB);
       if ('error' in resource) return error(resource.error, resource.status);
-      const etag = `"${resource.version}"`;
-      headers.set('ETag', etag);
-      headers.set('Cache-Control', resource.pinned ? 'public, max-age=300' : 'no-cache');
-      const matches = request.headers
-        .get('If-None-Match')
-        ?.split(',')
-        .some((value) => value.trim() === '*' || value.trim().replace(/^W\//, '') === etag);
-      return matches ? respond(null, 304) : respond(resource.body, 200);
+      return cached(resource.body, resource.version, resource.pinned ? 'public, max-age=300' : 'no-cache');
+    }
+    if (path === '/v1/readers' || path.startsWith('/v1/readers/')) {
+      const resource = await readersResource(url, env.DB);
+      if ('error' in resource) return error(resource.error, resource.status);
+      return cached(resource.body, resource.version, resource.pinned ? 'public, max-age=300' : 'no-cache');
     }
     const topicId = path.startsWith('/v1/topics/') ? path.slice('/v1/topics/'.length) : undefined;
     if (topicId !== undefined && !topicSlug.test(topicId)) return error('invalid-id', 400);
@@ -160,14 +170,7 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       .bind(versionKey)
       .first<{ value: string }>();
     if (!version) throw new Error(`Missing ${versionKey}`);
-    const etag = `"${version.value}"`;
-    headers.set('ETag', etag);
-    headers.set('Cache-Control', 'public, max-age=300');
-    const matches = request.headers
-      .get('If-None-Match')
-      ?.split(',')
-      .some((value) => value.trim() === '*' || value.trim().replace(/^W\//, '') === etag);
-    return matches ? respond(null, 304) : respond(body, 200);
+    return cached(body, version.value, 'public, max-age=300');
   } catch {
     // Fixed message only: D1 exceptions can contain SQL or private content.
     console.error('Content service unavailable');
