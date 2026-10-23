@@ -32,7 +32,12 @@
     "gradedReaders": "Graded readers"
   },
   "learning": {
-    "areas": { "reading": "Reading", "grammar": "Grammar", "listening": "Listening", "writing": "Writing" },
+    "areas": {
+      "reading": "Reading",
+      "grammar": "Grammar",
+      "listening": "Listening",
+      "writing": "Writing"
+    },
     "area": "Learning area",
     "navigation": "Learning destinations",
     "library": "Library",
@@ -132,7 +137,14 @@
       "proper": "Proper noun",
       "phrase": "Phrase"
     },
-    "gender": { "masculine": "masculine", "feminine": "feminine" }
+    "gender": {
+      "masculine": "masculine",
+      "feminine": "feminine"
+    },
+    "checkpoints": {
+      "title": "Checkpoints",
+      "quotedSentence": "From the sentence"
+    }
   },
   "sentenceDrawer": {
     "title": "Sentence",
@@ -229,7 +241,10 @@
     "review": "Review",
     "savedContext": "Personal context",
     "savedLanguage": "Saved explanation language: {{language}}",
-    "language": { "en": "English", "zh": "Chinese" },
+    "language": {
+      "en": "English",
+      "zh": "Chinese"
+    },
     "reset": "Reset schedule",
     "resetHelp": "Restart learning now. Introduction date, daily allowance history and ratings are kept.",
     "delete": "Delete card and history",
@@ -944,12 +959,6 @@
       "making": "Saving…",
       "open": "Open saved exercises",
       "countRange": "Choose a whole number from 1 to {{max}}."
-    }
-  },
-  "gradedReader": {
-    "checkpoints": {
-      "title": "Checkpoints",
-      "quotedSentence": "From the sentence"
     }
   },
   "grammarTopics": {

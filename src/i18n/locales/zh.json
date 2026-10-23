@@ -32,7 +32,12 @@
     "gradedReaders": "分级读物"
   },
   "learning": {
-    "areas": { "reading": "阅读", "grammar": "语法", "listening": "听力", "writing": "写作" },
+    "areas": {
+      "reading": "阅读",
+      "grammar": "语法",
+      "listening": "听力",
+      "writing": "写作"
+    },
     "area": "学习领域",
     "navigation": "学习导航",
     "library": "文章库",
@@ -132,7 +137,14 @@
       "proper": "专有名词",
       "phrase": "短语"
     },
-    "gender": { "masculine": "阳性", "feminine": "阴性" }
+    "gender": {
+      "masculine": "阳性",
+      "feminine": "阴性"
+    },
+    "checkpoints": {
+      "title": "检查点",
+      "quotedSentence": "出自句子"
+    }
   },
   "sentenceDrawer": {
     "title": "句子",
@@ -229,7 +241,10 @@
     "review": "复习中",
     "savedContext": "个人语境",
     "savedLanguage": "解释保存时的语言：{{language}}",
-    "language": { "en": "英语", "zh": "中文" },
+    "language": {
+      "en": "英语",
+      "zh": "中文"
+    },
     "reset": "重置复习计划",
     "resetHelp": "现在重新开始学习。首次学习时间、每日名额记录和自评历史都会保留。",
     "delete": "删除卡片和历史",
@@ -936,12 +951,6 @@
       "making": "正在保存…",
       "open": "打开已保存的练习",
       "countRange": "请输入 1 到 {{max}} 之间的整数。"
-    }
-  },
-  "gradedReader": {
-    "checkpoints": {
-      "title": "检查点",
-      "quotedSentence": "出自句子"
     }
   },
   "grammarTopics": {
