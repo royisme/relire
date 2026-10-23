@@ -35,6 +35,552 @@
       "contentHash": "5e20a4dbeaf4ee6529442ca7055517c3b788b089c681a8e43accac26851ca6fe",
       "reviewedBy": "Roy Zhu",
       "reviewedAt": "2026-10-22"
+    },
+    {
+      "topicId": "definite-article-forms",
+      "contentHash": "2c0f46970106729c9004c119be71ea5a50fa1040a78ba1704c082861f4de86b1",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "article-contraction-a",
+      "contentHash": "e83e4ea410fd9a5990bbb12c6e47594a59b25d593fa6d73f7cf6e3826c493b01",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "article-contraction-de",
+      "contentHash": "3c5aa9f69d930af1bb9c3090467fc02bccd0b1c818149697602726f3e9927e7e",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "definite-article-uses",
+      "contentHash": "258d024e83d8f7c7a615407f3d5b1798156cc99d600056976f2956c1f061344d",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "articles-proper-names",
+      "contentHash": "f57018f0829ac3890bac9503cf22c05b50283a7df0dd8ed2f87d923e76e4d9c8",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "country-prepositions",
+      "contentHash": "4676a42a4c159df8ba4ec1c969655557b628dd3ad81af9c654a65c2207ae93ab",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "indefinite-article-forms",
+      "contentHash": "6f6f7dc8b3db1349bd167d6cf113d7d76c40c325358e576be68548a4f0fb5930",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "indefinite-article-reference",
+      "contentHash": "67e3aae3babe80c676703ee59e421519e7305d38669a2d8a34d3f3ebd66291f4",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "indefinite-article-description",
+      "contentHash": "a760fb6eec57bcd31d896f1b0eab4862b6d419cd148de724d462855dddaa6f62",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "des-before-adjectives",
+      "contentHash": "024c111a5b468f87eaab26a365ba674437b9cfee490b9b8f2c2360734a573bce",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "partitive-article-forms",
+      "contentHash": "f12476b77f69232ca56da3191815f5ca8b353dffcce93cf472f8e9621fc56397",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "partitive-article-uses",
+      "contentHash": "cb6dadc89d27aeca0fff5604ffdf096d49cbbbc67ee99994601395f47e305f6d",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "uncountable-noun-articles",
+      "contentHash": "145ebd26b1559647e4b9ae9e572621f6ee0af74a9a32282e6a73d8b08cce356a",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "articles-in-negation",
+      "contentHash": "8103b36eba69facb2732863e90d5b68c6d5e5521b43603c219b01caf7a77f0ac",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "possessive-determiners",
+      "contentHash": "42ca44347e305df11629240b1dd8883f69cfc93ac5b09546e4786a73899e3afe",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "demonstrative-determiners",
+      "contentHash": "82c657c068a8f1b99040f81540b20d2a105fdd26a94aba2f372f990987dd8b26",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "interrogative-quel",
+      "contentHash": "7477489d13def0a9f70f73c71f000e02d30f4327051a18f0cf91398509306d6e",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "determiner-tout",
+      "contentHash": "b3d4fced2eee38243fc369c47653f8df6614f05f1cf2a1cd34c93ec5e631193a",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "cardinal-numbers",
+      "contentHash": "f681e7884e783a0b6852eca719ab36c00c13821eb1e9f6f5a59d7386db7ac7db",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "ordinal-numbers",
+      "contentHash": "58a37f4dbc8c3ccb931f58ee3cdaf4aa3a9b2bc122a94549f8307a7c6571ec8a",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "fractions",
+      "contentHash": "86659df52571c4b98dcecc29a78f97edab338bbf62566c8616cbeea691fcaf3b",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "percentages-decimals",
+      "contentHash": "5050d9a6a5301e0b809d9e8d02a790784f2ca6a819c623db01f1d6c4eb13d5d6",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "subject-pronouns",
+      "contentHash": "7a18bd253bc25527615130ec93b0690861dfe20db21997b242bdd0b817cb5e3b",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "reflexive-pronouns",
+      "contentHash": "2ba3fa84617447ed164f214b2dc5f671bd44e43d04b4e0a31e35e8e52ab26904",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "stressed-pronouns",
+      "contentHash": "d44c7d748757e01d1692e5dbed34287131c219a810c6ceef6ed19b5d6e383cfc",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "indirect-object-pronouns",
+      "contentHash": "2802636aabd0edfac78c207d63dbd2098a8035561e57b9e36134c4b7d62c5ecd",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "direct-object-pronouns",
+      "contentHash": "daee5184d0e9b443c821e724a1d02edb281fe8c942bf390332ad273f5f8a0e4a",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pronoun-y",
+      "contentHash": "6a0764ff0a8588d83a1cb7e5623b034a9e9f2bf993a080566e3b8ae5ded94d7e",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pronoun-en",
+      "contentHash": "486bb609cdc8e605324345549a88e9d7c964196360d14300a2b3db615e27747f",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pronoun-position",
+      "contentHash": "761edab9c467f26e1a22370e41ea96997eaa5fc374f1d87e5e64c85e6a598cb3",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pronoun-on",
+      "contentHash": "30d7ff0cd0bc59f0f2cb24a31ac3f4ce43b1e157b9a48f9b5c7b3273a2b2273b",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pronoun-tout",
+      "contentHash": "9207ff238567c8bb937fe792130581808707493fb2fae432fb92964ae0e14e03",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pronoun-ca",
+      "contentHash": "47dfb9ff56a623b2345ffe05cf642911b58c4942b2bb4c0caa7be29a03b8b75c",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "adjective-agreement",
+      "contentHash": "bf700954ced291724e83a0171da9550f4e300f679ee6482295f422f762292ad7",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "adjective-feminine",
+      "contentHash": "13c43b3f5d7ca2cf9b80c26b4b006f199a3d377000082135ec7aac88933cfb5d",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "adjective-plurals",
+      "contentHash": "eaa32906afd0375811e39ca90c3ae73ab68c8f369b0f5e1b1dd2193b1ae584ca",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "irregular-adjective-forms",
+      "contentHash": "f173d8f85fe9e271f064d886ee83eb77cc0a27732a495980fef76159eece055f",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "adjective-position",
+      "contentHash": "be74b411e82a75eb94f736801b06ed358df6b1a635c6321f4e13b4f4fe9dde63",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "verb-conjugation-overview",
+      "contentHash": "801cc524ac209c8e023f3385b0875101a210632bf87eef69759071020cff361f",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "present-tense-forms",
+      "contentHash": "ee823e278681d6a006cf1c84e2a3c5b462e3a6c9f8586dd0399c9b85a333ff52",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "present-tense-uses",
+      "contentHash": "fcc70ba9ad37b0df31641bdc449a2fe6be58ab795a091d7f0d3f6e18c077c599",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "compound-past-formation",
+      "contentHash": "737669df02649bce59bbfbbde224624e4e03f45126a77f332727f5cf82fe6457",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "past-participles",
+      "contentHash": "e20222f69720c036c64974824a115ead7935de9fc159dc2a22c2d960efca2649",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "compound-past-uses",
+      "contentHash": "496fea64a534e4b5298220267161e89df911606286a140ff20b10b03bb09de0e",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "imperfect-forms",
+      "contentHash": "aa09eafdd4accdbcc3b428430de84500b3aa2c0329654b98975a789479d7395d",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "imperfect-uses",
+      "contentHash": "63110fe62705ad9f3d170e582438c95344d57f2762b6c78415ac9d03763d30c2",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "past-tense-choice",
+      "contentHash": "12a86ac6ec6aaca4911baf9913a015f0fb2ac2a675a36748d9bf1e10a96c6770",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "recent-past",
+      "contentHash": "64ef5991f3db617939d09fd341403cf20b8df219e7ea3c167d04538fcabad1fe",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "simple-future",
+      "contentHash": "17d3245b848128922767a341a78b7e080c4be6a7417ad663d9845f7b939c0d12",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "near-future",
+      "contentHash": "4907e2ba09f187370d9707f53ac8d4b06db07431704cd877f5b850b65b4e8903",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "imperative-forms",
+      "contentHash": "d27d1f89846d4ce1747bd4df09b438532e1bfab70dfbba1594dcd695eca2de86",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pronominal-verb-uses",
+      "contentHash": "898c9b709df0ea569219c32748c9ae98083c5eda75b63b95cb73890f4be70cfd",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pronominal-imperative-past",
+      "contentHash": "1ef9a3d9bee3e55f868f7d4130f8f5921be07f8d9b364186dc9d8d616829fc46",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "jouer-prepositions",
+      "contentHash": "bcf22d9588e1ceab36daccfa3b02a80514b121179a81f3e7cc20bfe316254cc6",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "questions-comment",
+      "contentHash": "aef835187d49122585412bff758105f95c24194bb918744a89b9e462d4a49f66",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "questions-combien",
+      "contentHash": "c4d39b86900aa357b25f4b007de759bce8ea4334be9a553e6ee69bb3b7143da5",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "questions-ou",
+      "contentHash": "7d2a101b51477de301a36b3cfa6b4455d4d5551ce7e2d19f9ae9b0a5cc4abaa4",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "degree-adverbs",
+      "contentHash": "139dd487f29e7ebd263d056ad031e3e34094a5ee7649a3b3514e9e5f4180624e",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "quantity-adverbs",
+      "contentHash": "f381b8f11d8bac82f9fffea5006069f8f3f4e2e84a3e8e959617a6c5022af42c",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "preposition-overview",
+      "contentHash": "af6a21cdf2b9ba72afd7a281dcb27b20f0427ddeab75c787a957b5710e64d0bc",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "preposition-a",
+      "contentHash": "25d6280ce1dbb265e976d99be60b3a461efd232938885c5cc9466d60e070d366",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "preposition-en",
+      "contentHash": "517693cd722cc742ba81b9a9422a2e60d043e4725eaf8d91230f364b841edca7",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "preposition-pour",
+      "contentHash": "ffa8228159b21cece71b307bc3dc0aae3ade3086e9f48e312f377372990e8480",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "preposition-dans",
+      "contentHash": "295cad118eac11c488bda603fe40a3feb5ff839f35deb7be55136107fcd26fc7",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "preposition-avec",
+      "contentHash": "16350c8302d92a18f13eeee2ce09ffbfbf07b22d1839cd19e20a925e81233a29",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "conjunction-si",
+      "contentHash": "a7f34d397cab08ba6905af8cb98ceea28eb30542f25d2a70596ec723047e0fae",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "conjunction-quand",
+      "contentHash": "be6d73d1bf6c437c0c3b5bc71c433db46e55f13f10dcf3c41ef37e94c99c955e",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "yes-no-questions",
+      "contentHash": "2e178af4ed47765f782716d67253e0de1c5d220b9f6168d0e87e394c224c1cf1",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "information-questions",
+      "contentHash": "9d208c2c58fcaff5ce7097a0971b24a56f3305be9346c95f502ebf22e2a17b64",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "questions-qui",
+      "contentHash": "036d115cb0cf683817b207a386e4f437b5e753a5d5ee21e672eb0742763b3834",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "questions-que-quoi",
+      "contentHash": "2564b7e99ce9fdb99997527446103a07f6da4950e542cee0117befa8230c5a4a",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "questions-est-ce-que",
+      "contentHash": "40863cabd7b9850a9f1606eff7323ceb1452c5ac2d4447dc40dcee6a45977129",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "negation-ne-pas",
+      "contentHash": "3f20ef9efd9177ba9521c25dfdcf57f6898c415712b17899af5f7fcebc9d4c69",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "negation-ne-plus",
+      "contentHash": "5ad6fdf96f542af9ca9b9100ddb4f4c49bbbed40ae0d1d4988b4c04a031db4fb",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pattern-cest",
+      "contentHash": "cdf13f909377472729b8519b803594074f19c5f38456321791271fc9251bd23a",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pattern-il-y-a",
+      "contentHash": "b7aa20733ccceae5ac9766e9b2e223257080a31acceaa829973cf76966c58653",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "pattern-il-faut",
+      "contentHash": "9e1e287c87ad7b2e33e42e2f15c6121577c328edd073bb28552df6850b916772",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "telling-time",
+      "contentHash": "b5cfe473a86eb18be86076b6dbcec2d1454397342b27277e0f4d6bf21cee8646",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "time-prepositions",
+      "contentHash": "c086a774029c388ad49cca07ea405d300952f210d0fba25a6a61ec5e5c450cc2",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "expressing-cause",
+      "contentHash": "0d3f86cf76f128fb7fef362ef57e2b3b6829a95cf9cc021bdd788b23bba757bb",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "expressing-purpose",
+      "contentHash": "e2b257222c4a9987d4a86e00fbd803d9546d84fa29c8548b0db36444caa0400f",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "weather-expressions",
+      "contentHash": "34b2a350e599a198fa2c959bcd938719c306b0aa9ed398fedb0856e6220687bb",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "future-expressions",
+      "contentHash": "348e0b304fe11b03ef1bd203fc2b92cb31cea12d7796c9c57fcaa86ab6acf884",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "greetings",
+      "contentHash": "213ca502947716f6a364f34a9d662e11f79122f3e77a2f6956a3c76b1dccd0a0",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "introductions",
+      "contentHash": "54b51d473d1bb7d1b285369b9e1d9589c1945247cdb546d6d700d65bc1e75cd6",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "shopping",
+      "contentHash": "9d810ab140a304906c0198c63730dd1e073b4b360b8c3dc0e6e8fef008577c1b",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "asking-directions",
+      "contentHash": "8a63e4671abc0a162133b69a658fb3dbffacedfd4a3df302b2621261cc541576",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "dates",
+      "contentHash": "dac52d1bb4770dea4aa7a5a2e8ec9e213a806b24e815f860353b3370883ce9d7",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "hobbies",
+      "contentHash": "a0cc4b1cd58e9149c35e0923b8012e8559bb0048eeaa93faa7c2d012dcba85c4",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "holidays",
+      "contentHash": "95302bf11720a44ea695b258e0219fb5f76ec88bc0f0ca0139138e940b9bf5a5",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
+    },
+    {
+      "topicId": "sports",
+      "contentHash": "9646c69c37f66d9d56a514db89b77550c4ab3dd3a51abaafe6a48d5774c14857",
+      "reviewedBy": "AI review (GPT-6.1 and GLM-5.3, not human or teacher review); owner-approved local publication, language review deferred",
+      "reviewedAt": "2026-10-23"
     }
   ]
 }

@@ -35,7 +35,7 @@
         "articles-proper-names"
       ],
       "reference": "K003",
-      "include": false
+      "include": true
     },
     {
       "id": "article-contraction-a",
@@ -51,7 +51,7 @@
         "preposition-a"
       ],
       "reference": "K004",
-      "include": false
+      "include": true
     },
     {
       "id": "article-contraction-de",
@@ -65,7 +65,7 @@
         "article-contraction-a"
       ],
       "reference": "K005",
-      "include": false
+      "include": true
     },
     {
       "id": "definite-article-uses",
@@ -79,7 +79,7 @@
         "articles-proper-names"
       ],
       "reference": "K006",
-      "include": false
+      "include": true
     },
     {
       "id": "articles-proper-names",
@@ -93,7 +93,7 @@
         "definite-article-uses"
       ],
       "reference": "K007",
-      "include": false
+      "include": true
     },
     {
       "id": "country-prepositions",
@@ -109,7 +109,7 @@
         "preposition-en"
       ],
       "reference": "K008",
-      "include": false
+      "include": true
     },
     {
       "id": "indefinite-article-forms",
@@ -125,7 +125,7 @@
         "articles-in-negation"
       ],
       "reference": "K009",
-      "include": false
+      "include": true
     },
     {
       "id": "indefinite-article-reference",
@@ -141,7 +141,7 @@
         "articles-in-negation"
       ],
       "reference": "K010",
-      "include": false
+      "include": true
     },
     {
       "id": "indefinite-article-description",
@@ -157,7 +157,7 @@
         "articles-in-negation"
       ],
       "reference": "K011",
-      "include": false
+      "include": true
     },
     {
       "id": "des-before-adjectives",
@@ -175,7 +175,7 @@
         "adjective-position"
       ],
       "reference": "K012",
-      "include": false
+      "include": true
     },
     {
       "id": "partitive-article-forms",
@@ -190,7 +190,7 @@
         "articles-in-negation"
       ],
       "reference": "K013",
-      "include": false
+      "include": true
     },
     {
       "id": "partitive-article-uses",
@@ -205,7 +205,7 @@
         "articles-in-negation"
       ],
       "reference": "K014",
-      "include": false
+      "include": true
     },
     {
       "id": "uncountable-noun-articles",
@@ -220,7 +220,7 @@
         "articles-in-negation"
       ],
       "reference": "K015",
-      "include": false
+      "include": true
     },
     {
       "id": "articles-in-negation",
@@ -240,7 +240,7 @@
         "uncountable-noun-articles"
       ],
       "reference": "K016",
-      "include": false
+      "include": true
     },
     {
       "id": "possessive-determiners",
@@ -251,7 +251,7 @@
       ],
       "related": [],
       "reference": "K017",
-      "include": false
+      "include": true
     },
     {
       "id": "demonstrative-determiners",
@@ -262,7 +262,7 @@
       ],
       "related": [],
       "reference": "K018",
-      "include": false
+      "include": true
     },
     {
       "id": "interrogative-quel",
@@ -273,7 +273,7 @@
       ],
       "related": [],
       "reference": "K019",
-      "include": false
+      "include": true
     },
     {
       "id": "determiner-tout",
@@ -284,7 +284,7 @@
       ],
       "related": [],
       "reference": "K020",
-      "include": false
+      "include": true
     },
     {
       "id": "cardinal-numbers",
@@ -299,7 +299,7 @@
         "percentages-decimals"
       ],
       "reference": "K021",
-      "include": false
+      "include": true
     },
     {
       "id": "ordinal-numbers",
@@ -314,7 +314,7 @@
         "percentages-decimals"
       ],
       "reference": "K022",
-      "include": false
+      "include": true
     },
     {
       "id": "fractions",
@@ -329,7 +329,7 @@
         "percentages-decimals"
       ],
       "reference": "K023",
-      "include": false
+      "include": true
     },
     {
       "id": "percentages-decimals",
@@ -344,7 +344,7 @@
         "fractions"
       ],
       "reference": "K024",
-      "include": false
+      "include": true
     },
     {
       "id": "subject-pronouns",
@@ -355,7 +355,7 @@
       ],
       "related": [],
       "reference": "K025",
-      "include": false
+      "include": true
     },
     {
       "id": "reflexive-pronouns",
@@ -367,7 +367,7 @@
       ],
       "related": [],
       "reference": "K026",
-      "include": false
+      "include": true
     },
     {
       "id": "stressed-pronouns",
@@ -378,7 +378,7 @@
       ],
       "related": [],
       "reference": "K027",
-      "include": false
+      "include": true
     },
     {
       "id": "indirect-object-pronouns",
@@ -389,7 +389,7 @@
       ],
       "related": [],
       "reference": "K028",
-      "include": false
+      "include": true
     },
     {
       "id": "direct-object-pronouns",
@@ -400,7 +400,7 @@
       ],
       "related": [],
       "reference": "K029",
-      "include": false
+      "include": true
     },
     {
       "id": "pronoun-y",
@@ -411,7 +411,7 @@
       ],
       "related": [],
       "reference": "K030",
-      "include": false
+      "include": true
     },
     {
       "id": "pronoun-en",
@@ -422,7 +422,7 @@
       ],
       "related": [],
       "reference": "K031",
-      "include": false
+      "include": true
     },
     {
       "id": "pronoun-position",
@@ -434,7 +434,7 @@
       ],
       "related": [],
       "reference": "K032",
-      "include": false
+      "include": true
     },
     {
       "id": "pronoun-on",
@@ -445,7 +445,7 @@
       ],
       "related": [],
       "reference": "K033",
-      "include": false
+      "include": true
     },
     {
       "id": "pronoun-tout",
@@ -456,7 +456,7 @@
       ],
       "related": [],
       "reference": "K034",
-      "include": false
+      "include": true
     },
     {
       "id": "pronoun-ca",
@@ -467,7 +467,7 @@
       ],
       "related": [],
       "reference": "K035",
-      "include": false
+      "include": true
     },
     {
       "id": "adjective-agreement",
@@ -478,7 +478,7 @@
       ],
       "related": [],
       "reference": "K036",
-      "include": false
+      "include": true
     },
     {
       "id": "adjective-feminine",
@@ -489,7 +489,7 @@
       ],
       "related": [],
       "reference": "K037",
-      "include": false
+      "include": true
     },
     {
       "id": "adjective-plurals",
@@ -500,7 +500,7 @@
       ],
       "related": [],
       "reference": "K038",
-      "include": false
+      "include": true
     },
     {
       "id": "irregular-adjective-forms",
@@ -511,7 +511,7 @@
       ],
       "related": [],
       "reference": "K039",
-      "include": false
+      "include": true
     },
     {
       "id": "adjective-position",
@@ -524,7 +524,7 @@
         "des-before-adjectives"
       ],
       "reference": "K040",
-      "include": false
+      "include": true
     },
     {
       "id": "verb-conjugation-overview",
@@ -535,7 +535,7 @@
       ],
       "related": [],
       "reference": "K041",
-      "include": false
+      "include": true
     },
     {
       "id": "present-tense-forms",
@@ -548,7 +548,7 @@
         "present-tense-uses"
       ],
       "reference": "K042",
-      "include": false
+      "include": true
     },
     {
       "id": "present-tense-uses",
@@ -561,7 +561,7 @@
         "present-tense-forms"
       ],
       "reference": "K043",
-      "include": false
+      "include": true
     },
     {
       "id": "compound-past-formation",
@@ -576,7 +576,7 @@
         "compound-past-uses"
       ],
       "reference": "K044",
-      "include": false
+      "include": true
     },
     {
       "id": "past-participles",
@@ -590,7 +590,7 @@
         "compound-past-uses"
       ],
       "reference": "K045",
-      "include": false
+      "include": true
     },
     {
       "id": "compound-past-uses",
@@ -604,7 +604,7 @@
         "past-participles"
       ],
       "reference": "K046",
-      "include": false
+      "include": true
     },
     {
       "id": "imperfect-forms",
@@ -617,7 +617,7 @@
         "imperfect-uses"
       ],
       "reference": "K047",
-      "include": false
+      "include": true
     },
     {
       "id": "imperfect-uses",
@@ -630,7 +630,7 @@
         "imperfect-forms"
       ],
       "reference": "K048",
-      "include": false
+      "include": true
     },
     {
       "id": "past-tense-choice",
@@ -641,7 +641,7 @@
       ],
       "related": [],
       "reference": "K049",
-      "include": false
+      "include": true
     },
     {
       "id": "recent-past",
@@ -652,7 +652,7 @@
       ],
       "related": [],
       "reference": "K050",
-      "include": false
+      "include": true
     },
     {
       "id": "simple-future",
@@ -663,7 +663,7 @@
       ],
       "related": [],
       "reference": "K051",
-      "include": false
+      "include": true
     },
     {
       "id": "near-future",
@@ -674,7 +674,7 @@
       ],
       "related": [],
       "reference": "K052",
-      "include": false
+      "include": true
     },
     {
       "id": "imperative-forms",
@@ -685,7 +685,7 @@
       ],
       "related": [],
       "reference": "K053",
-      "include": false
+      "include": true
     },
     {
       "id": "pronominal-verb-uses",
@@ -698,7 +698,7 @@
         "pronominal-imperative-past"
       ],
       "reference": "K054",
-      "include": false
+      "include": true
     },
     {
       "id": "pronominal-imperative-past",
@@ -712,7 +712,7 @@
         "pronominal-verb-uses"
       ],
       "reference": "K055",
-      "include": false
+      "include": true
     },
     {
       "id": "jouer-prepositions",
@@ -723,7 +723,7 @@
       ],
       "related": [],
       "reference": "K056",
-      "include": false
+      "include": true
     },
     {
       "id": "questions-comment",
@@ -734,7 +734,7 @@
       ],
       "related": [],
       "reference": "K057",
-      "include": false
+      "include": true
     },
     {
       "id": "questions-combien",
@@ -745,7 +745,7 @@
       ],
       "related": [],
       "reference": "K058",
-      "include": false
+      "include": true
     },
     {
       "id": "questions-ou",
@@ -756,7 +756,7 @@
       ],
       "related": [],
       "reference": "K059",
-      "include": false
+      "include": true
     },
     {
       "id": "degree-adverbs",
@@ -769,7 +769,7 @@
         "quantity-adverbs"
       ],
       "reference": "K060",
-      "include": false
+      "include": true
     },
     {
       "id": "quantity-adverbs",
@@ -783,7 +783,7 @@
         "degree-adverbs"
       ],
       "reference": "K061",
-      "include": false
+      "include": true
     },
     {
       "id": "preposition-overview",
@@ -794,7 +794,7 @@
       ],
       "related": [],
       "reference": "K062",
-      "include": false
+      "include": true
     },
     {
       "id": "preposition-a",
@@ -808,7 +808,7 @@
         "country-prepositions"
       ],
       "reference": "K063",
-      "include": false
+      "include": true
     },
     {
       "id": "preposition-en",
@@ -821,7 +821,7 @@
         "country-prepositions"
       ],
       "reference": "K064",
-      "include": false
+      "include": true
     },
     {
       "id": "preposition-pour",
@@ -832,7 +832,7 @@
       ],
       "related": [],
       "reference": "K065",
-      "include": false
+      "include": true
     },
     {
       "id": "preposition-dans",
@@ -843,7 +843,7 @@
       ],
       "related": [],
       "reference": "K066",
-      "include": false
+      "include": true
     },
     {
       "id": "preposition-avec",
@@ -854,7 +854,7 @@
       ],
       "related": [],
       "reference": "K067",
-      "include": false
+      "include": true
     },
     {
       "id": "conjunction-si",
@@ -866,7 +866,7 @@
       ],
       "related": [],
       "reference": "K068",
-      "include": false
+      "include": true
     },
     {
       "id": "conjunction-quand",
@@ -877,7 +877,7 @@
       ],
       "related": [],
       "reference": "K069",
-      "include": false
+      "include": true
     },
     {
       "id": "yes-no-questions",
@@ -893,7 +893,7 @@
         "questions-est-ce-que"
       ],
       "reference": "K070",
-      "include": false
+      "include": true
     },
     {
       "id": "information-questions",
@@ -909,7 +909,7 @@
         "questions-est-ce-que"
       ],
       "reference": "K071",
-      "include": false
+      "include": true
     },
     {
       "id": "questions-qui",
@@ -925,7 +925,7 @@
         "questions-est-ce-que"
       ],
       "reference": "K072",
-      "include": false
+      "include": true
     },
     {
       "id": "questions-que-quoi",
@@ -941,7 +941,7 @@
         "questions-est-ce-que"
       ],
       "reference": "K073",
-      "include": false
+      "include": true
     },
     {
       "id": "questions-est-ce-que",
@@ -957,7 +957,7 @@
         "questions-que-quoi"
       ],
       "reference": "K074",
-      "include": false
+      "include": true
     },
     {
       "id": "negation-ne-pas",
@@ -968,7 +968,7 @@
       ],
       "related": [],
       "reference": "K075",
-      "include": false
+      "include": true
     },
     {
       "id": "negation-ne-plus",
@@ -979,7 +979,7 @@
       ],
       "related": [],
       "reference": "K076",
-      "include": false
+      "include": true
     },
     {
       "id": "pattern-cest",
@@ -990,7 +990,7 @@
       ],
       "related": [],
       "reference": "K077",
-      "include": false
+      "include": true
     },
     {
       "id": "pattern-il-y-a",
@@ -1001,7 +1001,7 @@
       ],
       "related": [],
       "reference": "K078",
-      "include": false
+      "include": true
     },
     {
       "id": "pattern-il-faut",
@@ -1012,7 +1012,7 @@
       ],
       "related": [],
       "reference": "K079",
-      "include": false
+      "include": true
     },
     {
       "id": "telling-time",
@@ -1023,7 +1023,7 @@
       ],
       "related": [],
       "reference": "K080",
-      "include": false
+      "include": true
     },
     {
       "id": "time-prepositions",
@@ -1035,7 +1035,7 @@
       ],
       "related": [],
       "reference": "K081",
-      "include": false
+      "include": true
     },
     {
       "id": "expressing-cause",
@@ -1046,7 +1046,7 @@
       ],
       "related": [],
       "reference": "K082",
-      "include": false
+      "include": true
     },
     {
       "id": "expressing-purpose",
@@ -1057,7 +1057,7 @@
       ],
       "related": [],
       "reference": "K083",
-      "include": false
+      "include": true
     },
     {
       "id": "weather-expressions",
@@ -1068,7 +1068,7 @@
       ],
       "related": [],
       "reference": "K084",
-      "include": false
+      "include": true
     },
     {
       "id": "future-expressions",
@@ -1079,7 +1079,7 @@
       ],
       "related": [],
       "reference": "K085",
-      "include": false
+      "include": true
     },
     {
       "id": "greetings",
@@ -1090,7 +1090,7 @@
       ],
       "related": [],
       "reference": "K086",
-      "include": false
+      "include": true
     },
     {
       "id": "introductions",
@@ -1101,7 +1101,7 @@
       ],
       "related": [],
       "reference": "K087",
-      "include": false
+      "include": true
     },
     {
       "id": "shopping",
@@ -1112,7 +1112,7 @@
       ],
       "related": [],
       "reference": "K088",
-      "include": false
+      "include": true
     },
     {
       "id": "asking-directions",
@@ -1124,7 +1124,7 @@
       ],
       "related": [],
       "reference": "K089",
-      "include": false
+      "include": true
     },
     {
       "id": "dates",
@@ -1136,7 +1136,7 @@
       ],
       "related": [],
       "reference": "K090",
-      "include": false
+      "include": true
     },
     {
       "id": "hobbies",
@@ -1147,7 +1147,7 @@
       ],
       "related": [],
       "reference": "K091",
-      "include": false
+      "include": true
     },
     {
       "id": "holidays",
@@ -1158,7 +1158,7 @@
       ],
       "related": [],
       "reference": "K092",
-      "include": false
+      "include": true
     },
     {
       "id": "sports",
@@ -1169,7 +1169,7 @@
       ],
       "related": [],
       "reference": "K093",
-      "include": false
+      "include": true
     }
   ]
 }
