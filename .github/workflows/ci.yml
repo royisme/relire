@@ -33,6 +33,8 @@ jobs:
         run: bun scripts/minimal-pairs/build.ts --check
       - name: Grammar topics
         run: bun scripts/grammar-topics/publish.ts --check
+      - name: Graded readers
+        run: bun scripts/graded-readers/assemble.ts --check
       - name: Translations
         run: bun run i18n:check
       - name: Code shape

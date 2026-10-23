@@ -38,6 +38,7 @@ Relire is a static, browser-only PWA for French close reading and pronunciation 
 | What is done, next, later and deferred | `docs/roadmap.md` |
 | Merging FrenchLab AI | `docs/merge-plan.md`, then `docs/merge-progress.md` |
 | Grammar pack: Part 1 verified conjugation data, Part 2 grammar topics, Part 3 framework-first conjugation (any verb, AI-filled and engine-checked), Part 4 noun-gender tendencies | `docs/grammar-pack.md` |
+| Graded readers: authoring pipeline, gates G0–G5, review flow | `docs/graded-readers.md`, then `docs/graded-readers-plan.md` |
 | Adding an AI provider | skill `add-ai-provider` |
 | Finishing a change | skill `ship-change` |
 | Delegating to pi, agy, subagents | `docs/agent-delegation.md` |
