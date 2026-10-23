@@ -46,7 +46,7 @@
       "maxSentenceWords": 8,
       "maxTextWords": 48,
       "maxSentences": 6,
-      "include": false,
+      "include": true,
       "bundled": false
     },
     {
