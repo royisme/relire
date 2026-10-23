@@ -180,11 +180,9 @@ export const ReaderBodySchema = z
       ['glossary'],
     );
     const entries = new Set(body.glossary.map((entry) => entry.id));
-    const used = new Set<string>();
     body.sentences.forEach((sentence, i) =>
       sentence.tokens.forEach((token, j) =>
         token.entryIds.forEach((id, k) => {
-          used.add(id);
           if (!entries.has(id))
             ctx.addIssue({
               code: 'custom',
@@ -194,10 +192,6 @@ export const ReaderBodySchema = z
         }),
       ),
     );
-    body.glossary.forEach((entry, i) => {
-      if (!used.has(entry.id))
-        ctx.addIssue({ code: 'custom', path: ['glossary', i], message: 'Unused glossary entry' });
-    });
     const roundTrip = splitArticle(body.sentences.map((sentence) => sentence.fr).join('\n')).flat();
     if (
       roundTrip.length !== body.sentences.length ||
