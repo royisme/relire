@@ -10,6 +10,7 @@ import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
 import { mapAzureResult } from '../src/services/ai/providers/azure/result';
 import { AssessmentResult } from '../src/components/shadowing/AssessmentResult';
+import { WordMarks } from '../src/components/shadowing/WordMarks';
 import type { PronunciationAssessment } from '../src/types';
 
 const i18n = createInstance();
@@ -86,13 +87,13 @@ test('mapped Azure words retain service order, scores and literal unknown errors
   const html = render(azure);
   const items = [...html.matchAll(/<li\b[^>]*>(.*?)<\/li>/g)].map((match) => match[1].replace(/<[^>]+>/g, ''));
   expect(items).toEqual([
-    'Bonjour91',
     `tout42${en.shadowing.wordError.Mispronunciation}`,
     `le0${en.shadowing.wordError.Omission}`,
     'monde85FutureServiceError',
     `encore${en.shadowing.wordError.Insertion}`,
-    'demain',
   ]);
+  expect(html).toContain('Bonjour');
+  expect(html).toContain('demain');
   expect(html).toContain(en.shadowing.wordAccuracy);
   expect(html).toContain(en.shadowing.completeness);
   expect(html).toContain('>63<');
@@ -101,10 +102,54 @@ test('mapped Azure words retain service order, scores and literal unknown errors
   expect(html).not.toContain(en.shadowing.sounds);
 });
 
+test('WordMarks marks a low score, an omission and an insertion with their sr-only labels and leaves a good word plain', () => {
+  const html = renderToStaticMarkup(
+    <I18nextProvider i18n={i18n}>
+      <WordMarks
+        words={[
+          { word: 'Bonjour', accuracyScore: 92, errorType: 'None' },
+          { word: 'tout', accuracyScore: 65 },
+          { word: 'le', errorType: 'Omission' },
+          { word: 'monde', accuracyScore: 90 },
+          { word: 'encore', errorType: 'Insertion' },
+        ]}
+      />
+    </I18nextProvider>,
+  );
+
+  // Good words are plain: no decorative underline or error labels
+  expect(html).toContain('Bonjour');
+  expect(html).toContain('monde');
+  expect(html).not.toContain('Bonjour (');
+  expect(html).not.toContain('title="Bonjour');
+
+  // Low score word has wavy underline, small score, sr-only label and title
+  expect(html).toContain('decoration-wavy');
+  expect(html).toContain('>tout<');
+  expect(html).toContain('>65<');
+  // The service named no error, so the label stays neutral instead of claiming a mispronunciation.
+  expect(html).toContain(`title="${en.shadowing.status.needs_work} 65"`);
+  expect(html).toContain(`(${en.shadowing.status.needs_work} 65)`);
+  expect(html).not.toContain(`${en.shadowing.wordError.Mispronunciation} 65`);
+
+  // Omission has dashed underline, dimmed opacity-50, sr-only label and title
+  expect(html).toContain('decoration-dashed');
+  expect(html).toContain('opacity-50');
+  expect(html).toContain('>le<');
+  expect(html).toContain(`title="${en.shadowing.wordError.Omission}"`);
+  expect(html).toContain(`(${en.shadowing.wordError.Omission})`);
+
+  // Insertion has + prefix, smaller font, dimmed opacity-60, sr-only label and title
+  expect(html).toContain('opacity-60');
+  expect(html).toContain('+encore');
+  expect(html).toContain(`title="${en.shadowing.wordError.Insertion}"`);
+  expect(html).toContain(`(${en.shadowing.wordError.Insertion})`);
+});
+
 test('word and completeness zero scores are real scores', () => {
   const html = render({ ...scoresOnly, completenessScore: 0, wordResults: [{ word: 'zéro', accuracyScore: 0 }] });
   expect(html).toContain(en.shadowing.completeness);
-  expect(html.match(/>0</g)).toHaveLength(2);
+  expect(html.match(/>0</g)).toHaveLength(3);
 });
 
 test('known word errors use the selected interface language', async () => {

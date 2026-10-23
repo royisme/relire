@@ -22,6 +22,7 @@ import { Button } from '../ui/button';
 import { SpeakIcon, useSpeechFailure, useSpeechPhase } from '../ui/speak-button';
 import { Waveform } from './Waveform';
 import { PracticeAssessment } from './PracticeAssessment';
+import { WordMarks } from '../shadowing/WordMarks';
 import { panelDanger, panelGhost, panelOutline, panelPrimary, panelSurface } from './panel';
 
 const clock = (ms: number) => {
@@ -67,10 +68,21 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
   // starts collapsed, the close confirmation only lives while a take is unsaved, and anything that needs
   // a decision opens the card again.
   const needsAttention = card.phase === 'unsaved' || !!card.error || !!card.assessmentError || card.notice === 'busy';
-  const [seen, setSeen] = useState({ text: card.target?.text, phase: card.phase, needsAttention });
-  if (seen.text !== card.target?.text || seen.phase !== card.phase || seen.needsAttention !== needsAttention) {
-    setSeen({ text: card.target?.text, phase: card.phase, needsAttention });
+  const [seen, setSeen] = useState({
+    text: card.target?.text,
+    phase: card.phase,
+    needsAttention,
+    assessment: card.assessment,
+  });
+  if (
+    seen.text !== card.target?.text ||
+    seen.phase !== card.phase ||
+    seen.needsAttention !== needsAttention ||
+    seen.assessment !== card.assessment
+  ) {
+    setSeen({ text: card.target?.text, phase: card.phase, needsAttention, assessment: card.assessment });
     if (seen.text !== card.target?.text) setExpanded(false);
+    if (card.assessment && card.assessment !== seen.assessment) setExpanded(true);
     if (seen.phase !== card.phase && card.phase !== 'unsaved') setConfirmClose(false);
     if (needsAttention && !seen.needsAttention) setMinimised(false);
   }
@@ -236,7 +248,11 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
           !expanded && 'line-clamp-2',
         )}
       >
-        {target.text}
+        {card.assessment?.wordResults && card.assessment.wordResults.length > 0 ? (
+          <WordMarks words={card.assessment.wordResults} />
+        ) : (
+          target.text
+        )}
       </button>
 
       {/* The strip: live input while recording, the latest take's real waveform afterwards. */}

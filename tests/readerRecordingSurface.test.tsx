@@ -69,7 +69,20 @@ function render(node: React.ReactNode, minimised = false) {
 const checkButton = (html: string) =>
   html
     .match(/<button\b[^>]*>[\s\S]*?<\/button>/g)!
-    .find((button) => button.includes(i18n.t('shadowing.check')) || button.includes(i18n.t('shadowing.checking')))!;
+    .find((button) => button.includes(i18n.t('practiceCard.check')) || button.includes(i18n.t('shadowing.checking')))!;
+
+const azureResult = {
+  overallScore: 78,
+  accuracyScore: 75,
+  fluencyScore: 80,
+  completenessScore: 85,
+  wordResults: [
+    { word: 'Bonjour', accuracyScore: 95 },
+    { word: 'tout', accuracyScore: 60, errorType: 'Mispronunciation' },
+    { word: 'le', errorType: 'Omission' },
+    { word: 'monde', accuracyScore: 90 },
+  ],
+};
 
 for (const language of ['en', 'zh']) {
   test(`${language}: Check is disabled without a take, during checking, and while a new take starts`, async () => {
@@ -84,7 +97,9 @@ for (const language of ['en', 'zh']) {
     ]) {
       const html = render(<PracticeAssessment card={{ ...card, ...changed }} />);
       expect(checkButton(html)).toContain('disabled=""');
-      expect(html).toContain('h-40 overflow-y-auto');
+      expect(html).toContain('min-h-[5.5rem]');
+      expect(html).not.toContain('h-40');
+      expect(html).not.toContain('overflow-y-auto');
     }
   });
 
@@ -96,23 +111,70 @@ for (const language of ['en', 'zh']) {
     const scored = draw({ assessment: result });
     const failed = draw({ assessmentError: 'TEST provider failed' });
     for (const html of [empty, scored, failed]) {
-      expect(html).toContain('h-40 overflow-y-auto');
+      expect(html).toContain('min-h-[5.5rem]');
+      expect(html).not.toContain('h-40');
       expect(checkButton(html)).not.toContain('disabled=""');
     }
-    expect(empty).not.toContain(i18n.t('shadowing.estimate'));
-    expect(scored).toContain(i18n.t('shadowing.estimate'));
+    expect(empty).toContain(i18n.t('practiceCard.checkHint'));
+    expect(empty).not.toContain(i18n.t('shadowing.overallEstimate'));
+    expect(empty).not.toContain(i18n.t('practiceCard.details'));
+
+    expect(scored).toContain(i18n.t('shadowing.overallEstimate'));
     expect(scored).toContain('>72<');
+    expect(scored).toContain(i18n.t('shadowing.accuracy'));
+    expect(scored).toContain('>70<');
+    expect(scored).toContain(i18n.t('shadowing.fluency'));
+    expect(scored).toContain('>74<');
+    expect(scored).toContain(i18n.t('practiceCard.details'));
+
     expect(failed).toContain('role="alert"');
     expect(failed).toContain('TEST provider failed');
     expect(failed).toContain(i18n.t('shadowing.assessError'));
   });
 
-  test(`${language}: the minimised card has neither Check nor assessment, but retains record/restore/close`, async () => {
+  test(`${language}: the card with an Azure-like result shows marks in place of sentence, score strip, and Details`, async () => {
+    await i18n.changeLanguage(language);
+    const htmlWithAzure = render(
+      <PracticeCard card={{ ...card, assessment: azureResult }} movable={false} onOpenLog={noop} />,
+    );
+    // WordMarks replace the plain sentence text
+    expect(htmlWithAzure).toContain('decoration-wavy');
+    expect(htmlWithAzure).toContain('decoration-dashed');
+    expect(htmlWithAzure).toContain('>tout<');
+    expect(htmlWithAzure).toContain('>le<');
+    // Score strip
+    expect(htmlWithAzure).toContain('>78<');
+    expect(htmlWithAzure).toContain(i18n.t('shadowing.overallEstimate'));
+    expect(htmlWithAzure).toContain(i18n.t('shadowing.accuracy'));
+    expect(htmlWithAzure).toContain(i18n.t('shadowing.completeness'));
+    expect(htmlWithAzure).toContain(i18n.t('practiceCard.details'));
+    // No nested scroller
+    expect(htmlWithAzure).not.toContain('h-40');
+
+    // With no wordResults, shows plain sentence and no word marks
+    const htmlNoWordResults = render(
+      <PracticeCard card={{ ...card, assessment: result }} movable={false} onOpenLog={noop} />,
+    );
+    expect(htmlNoWordResults).toContain('Bonjour tout le monde.');
+    expect(htmlNoWordResults).not.toContain('decoration-wavy');
+    expect(htmlNoWordResults).not.toContain('decoration-dashed');
+
+    // Without a result, shows the hint and Check button
+    const htmlEmpty = render(<PracticeCard card={{ ...card, assessment: null }} movable={false} onOpenLog={noop} />);
+    expect(htmlEmpty).toContain(i18n.t('practiceCard.checkHint'));
+    expect(checkButton(htmlEmpty)).not.toContain('disabled=""');
+    expect(htmlEmpty).not.toContain(i18n.t('practiceCard.details'));
+  });
+
+  test(`${language}: the minimised card has neither Check nor strip, but retains record/restore/close`, async () => {
     await i18n.changeLanguage(language);
     const html = render(<PracticeCard card={{ ...card, assessment: result }} movable={false} onOpenLog={noop} />, true);
+    expect(html).not.toContain(i18n.t('practiceCard.check'));
     expect(html).not.toContain(i18n.t('shadowing.check'));
-    expect(html).not.toContain(i18n.t('shadowing.estimate'));
-    expect(html).not.toContain('h-40 overflow-y-auto');
+    expect(html).not.toContain(i18n.t('shadowing.overallEstimate'));
+    expect(html).not.toContain(i18n.t('practiceCard.details'));
+    expect(html).not.toContain('min-h-[5.5rem]');
+    expect(html).not.toContain('h-40');
     expect(html).toContain(i18n.t('practiceCard.recordAgain'));
     expect(html).toContain(i18n.t('practiceCard.restore'));
     expect(html).toContain(i18n.t('common.close'));
