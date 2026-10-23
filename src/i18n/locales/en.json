@@ -28,7 +28,8 @@
     "expand": "Expand sidebar",
     "due": "{{count}} due",
     "toReview": "{{count}} to review",
-    "importArticle": "Import an article"
+    "importArticle": "Import an article",
+    "gradedReaders": "Graded readers"
   },
   "learning": {
     "areas": { "reading": "Reading", "grammar": "Grammar", "listening": "Listening", "writing": "Writing" },
@@ -1110,6 +1111,7 @@
   },
   "notFound": {
     "grammarTopic": "This grammar topic is not published or does not exist.",
+    "gradedReader": "This graded reader is not published or is no longer available. Return to the graded readers list to choose another.",
     "passage": "This passage is no longer available. Return to the library to choose another source.",
     "title": "This page is not here",
     "page": "This address does not match a page in Relire Plus.",
