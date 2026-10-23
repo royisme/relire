@@ -141,7 +141,10 @@ export function verbGate(
         report('G4', 'Ambiguous noun subject requires review or simplification', { ...head, severity: 'warning' });
       else if (headVerb.person !== (slots.has('plural') ? '3pl' : '3sg'))
         fail('Finite slot must agree with unambiguous noun number');
-      const beforeNoun = targetAtoms[previousIndex - 1];
+      // Pre-nominal adjectives may stand between the determiner and the noun (cette petite chambre).
+      let beforeIndex = previousIndex - 1;
+      while (targetAtoms[beforeIndex]?.entry.pos === 'adjective') beforeIndex -= 1;
+      const beforeNoun = targetAtoms[beforeIndex];
       const number =
         beforeNoun &&
         (

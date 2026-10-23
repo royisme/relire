@@ -39,6 +39,9 @@ const introduced: Record<string, number> = {
   vos: 2,
   leur: 2,
   leurs: 2,
+  // il y a is a stage 3 target pattern; the stressed pronoun is first met after a preposition (avec moi).
+  y: 3,
+  moi: 3,
   cet: 3,
   cette: 3,
   ces: 3,
