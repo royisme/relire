@@ -1,8 +1,21 @@
 /** Invented TEST content only: never published, reviewed or used as a production lesson. */
-import type { ReaderBody, TokenBinding } from '../../src/types/gradedReader';
+import { contentHash } from '../../scripts/graded-readers/gateInputs';
+import type { PublishedReader, ReaderBody, TokenBinding } from '../../src/types/gradedReader';
 
 const bindings = (...ids: string[][]): TokenBinding[] => ids.map((entryIds, ordinal) => ({ ordinal, entryIds }));
 const msg = (en: string, zh: string) => ({ summary: { en, zh } });
+
+/** A schema-valid published wrapper whose version really is the canonical body hash. */
+export function publishedReaderFixture(): PublishedReader {
+  const body = gradedReaderFixture();
+  const version = contentHash(body);
+  return {
+    schemaVersion: 1,
+    body,
+    version,
+    review: { contentHash: version, reviewedBy: 'TEST ONLY synthetic reviewer', reviewedAt: '2026-10-23' },
+  };
+}
 
 export function gradedReaderFixture(): ReaderBody {
   return {
