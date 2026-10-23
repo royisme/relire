@@ -8,6 +8,7 @@ import syllabusJson from '../data/graded-readers/syllabus.json';
 import { ReaderSyllabusSchema } from '../src/types/gradedReader';
 import { vocabularyHash } from '../src/services/vocabulary/book';
 import { ReaderDraftSchema, readDraft, storeDraft, storeCore, storeCandidates } from '../scripts/graded-readers/drafts';
+import { policyHash } from '../scripts/graded-readers/gateInputs';
 import { generateReader, model, type GenerateOptions } from '../scripts/graded-readers/generator';
 import { readerDraftFixture, readerCoreFixture, readerCandidatesFixture } from './fixtures/gradedReaderDrafts';
 
@@ -185,13 +186,7 @@ test('prompt binds caps, exact core, known senses and closed candidates, with no
       }),
     ),
   );
-  expect(generated.provenance.syllabusHash).toBe(
-    await vocabularyHash({
-      syllabusVersion: env.options.syllabus.syllabusVersion,
-      stages: env.options.syllabus.stages.slice(0, 3),
-      core: readerCoreFixture(),
-    }),
-  );
+  expect(generated.provenance.syllabusHash).toBe(policyHash(env.options.syllabus, readerCoreFixture(), 3));
   expect(await Bun.file(join(env.directory, 'drafts-1.json')).text()).toBe(firstBefore);
 });
 

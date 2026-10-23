@@ -8,6 +8,7 @@ import { ReaderSyllabusSchema, type ReaderSyllabus, type ReaderGlossaryEntry } f
 import { normalizeLookupToken } from '../../src/services/grammarPack/lookup';
 import { vocabularyHash } from '../../src/services/vocabulary/book';
 import { repositoryRoot } from '../grammar-topics/reference';
+import { policyHash } from './gateInputs';
 import {
   ReaderDraftSchema,
   ReaderDraftOutputSchema,
@@ -102,11 +103,7 @@ export async function generateReader(options: GenerateOptions, directory: string
     model: options.model ?? model,
     generatedAt: new Date().toISOString().slice(0, 10),
     promptHash: createHash('sha256').update(prompt).digest('hex'),
-    syllabusHash: await vocabularyHash({
-      syllabusVersion: syllabus.syllabusVersion,
-      stages: syllabus.stages.slice(0, stage.order),
-      core,
-    }),
+    syllabusHash: policyHash(syllabus, core, stage.order),
     dependencyHashes: await Promise.all(
       previous.map(async (draft) => ({ readerId: draft.body.id, contentHash: await vocabularyHash(draft.body) })),
     ),

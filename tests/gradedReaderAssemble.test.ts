@@ -89,6 +89,16 @@ test('TEST changed predecessor blocks assembly even when later review matches it
   expect(publish(fixture)).toHaveLength(2);
 });
 
+test('TEST publication flags are state, not policy: flipping include or bundled keeps the hash', () => {
+  const fixture = reviewFixture();
+  const before = policyHash(fixture.context.syllabus, fixture.context.core, 1);
+  fixture.context.syllabus.stages[0].include = !fixture.context.syllabus.stages[0].include;
+  fixture.context.syllabus.stages[0].bundled = !fixture.context.syllabus.stages[0].bundled;
+  expect(policyHash(fixture.context.syllabus, fixture.context.core, 1)).toBe(before);
+  fixture.context.syllabus.stages[0].maxSentences += 1;
+  expect(policyHash(fixture.context.syllabus, fixture.context.core, 1)).not.toBe(before);
+});
+
 test('TEST policy changes lapse review even with unchanged bodies', () => {
   const fixture = reviewFixture();
   approve(fixture);

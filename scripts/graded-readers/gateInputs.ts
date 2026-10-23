@@ -48,5 +48,10 @@ export interface GateContext {
 }
 export const contentHash = (value: unknown) =>
   createHash('sha256').update(canonicalVocabularyJson(value), 'utf8').digest('hex');
+/** Publication flags (`include`, `bundled`) are state, not policy: flipping them must not lapse drafts or reviews. */
 export const policyHash = (syllabus: ReaderSyllabus, core: Core, order: number) =>
-  contentHash({ syllabusVersion: syllabus.syllabusVersion, stages: syllabus.stages.slice(0, order), core });
+  contentHash({
+    syllabusVersion: syllabus.syllabusVersion,
+    stages: syllabus.stages.slice(0, order).map(({ include: _include, bundled: _bundled, ...policy }) => policy),
+    core,
+  });
