@@ -62,11 +62,13 @@ export function lexicalGates(
     }
     used.add(lexicalKey(entry));
     const readings = atom.readings.map(key);
+    // An elided word may be glossed by the surface the learner meets (c’) or by the expanded word (ce).
+    const formReadings = atom.role === 'elision' ? [...readings, key(atom.spelling)] : readings;
     const forms = entry.forms.map(key);
     const candidates = readings.flatMap((form) => context.lexicon.candidates(form));
     const detail = { ...location, selected: { lemma: entry.lemma, sense: entry.sense }, candidates };
     if (
-      !readings.some((reading) => forms.includes(reading)) ||
+      !formReadings.some((reading) => forms.includes(reading)) ||
       (atom.role === 'elision' && !readings.includes(key(entry.lemma)))
     )
       report('G2', 'Selected reading/form is not an allowed expansion of the source', detail);
@@ -85,7 +87,7 @@ export function lexicalGates(
         report('G3', 'Reused/closed entry must retain its reviewed definition and gender', detail);
       if (
         !['noun', 'verb', 'adjective'].includes(entry.pos) &&
-        !readings.some((reading) => approvedEntry.forms.map(key).includes(reading))
+        !formReadings.some((reading) => approvedEntry.forms.map(key).includes(reading))
       )
         report('G2', 'Function/supplement reading needs an explicitly reviewed form', detail);
     }
@@ -197,7 +199,9 @@ export function lexicalGates(
       }
   for (const entry of draft.body.glossary) {
     if (!used.has(lexicalKey(entry))) report('G3', `Unused gloss: ${entry.id}`);
-    const encountered = selected.filter((atom) => atom.entry.id === entry.id).flatMap((atom) => atom.readings.map(key));
+    const encountered = selected
+      .filter((atom) => atom.entry.id === entry.id)
+      .flatMap((atom) => [...atom.readings, ...(atom.role === 'elision' ? [atom.spelling] : [])].map(key));
     const phraseForms = [...tokenizations.values()].flatMap((result) =>
       result.words.flatMap((word) => (word.phrase ? [key(word.phrase)] : [])),
     );
