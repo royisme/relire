@@ -117,6 +117,23 @@
     "failed": "没能查到这个词。",
     "listen": "朗读"
   },
+  "gradedReader": {
+    "authored": "已编写",
+    "showTranslation": "显示译文",
+    "hideTranslation": "隐藏译文",
+    "pos": {
+      "noun": "名词",
+      "verb": "动词",
+      "adjective": "形容词",
+      "adverb": "副词",
+      "function": "虚词",
+      "interjection": "感叹词",
+      "number": "数词",
+      "proper": "专有名词",
+      "phrase": "短语"
+    },
+    "gender": { "masculine": "阳性", "feminine": "阴性" }
+  },
   "sentenceDrawer": {
     "title": "句子",
     "sub": "结构、语法和朗读",

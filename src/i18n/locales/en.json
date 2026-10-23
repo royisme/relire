@@ -117,6 +117,23 @@
     "failed": "Could not look up this word.",
     "listen": "Listen"
   },
+  "gradedReader": {
+    "authored": "Authored",
+    "showTranslation": "Show translation",
+    "hideTranslation": "Hide translation",
+    "pos": {
+      "noun": "Noun",
+      "verb": "Verb",
+      "adjective": "Adjective",
+      "adverb": "Adverb",
+      "function": "Function word",
+      "interjection": "Interjection",
+      "number": "Number",
+      "proper": "Proper noun",
+      "phrase": "Phrase"
+    },
+    "gender": { "masculine": "masculine", "feminine": "feminine" }
+  },
   "sentenceDrawer": {
     "title": "Sentence",
     "sub": "Structure, grammar and reading aloud",
