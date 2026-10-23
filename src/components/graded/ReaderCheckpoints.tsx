@@ -39,6 +39,7 @@ export interface ReaderCheckpointsProps {
   pending: string | null;
   /** The real check or save failure, shown in the reserved result slot. */
   error?: string | null;
+  onRetry?: () => void;
 }
 
 type Entry = { checkpoint: ReaderLearning['checkpoints'][number]; question: ReaderQuestion };
@@ -51,6 +52,7 @@ export function ReaderCheckpoints({
   onRedo,
   pending,
   error,
+  onRetry,
 }: ReaderCheckpointsProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
@@ -74,7 +76,7 @@ export function ReaderCheckpoints({
   const Control = type === 'CHOICE_SELECT' ? ChoiceSelectControl : FillBlanksControl;
   const view = answers[id] ?? { answer: emptyAnswer(item), checked: null };
   const checked = view.checked;
-  const busy = pending === id;
+  const busy = pending !== null;
   const submitted = recordedAnswerText(type, item, view.answer);
   const feedback = checked ? resolveTopicFeedback(entry.question.question.feedback, submitted, checked.correct) : null;
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -178,6 +180,11 @@ export function ReaderCheckpoints({
                   ? t(checked.correct ? 'grammarTopics.learning.result.right' : 'grammarTopics.learning.result.wrong')
                   : ''}
             </p>
+            {error && onRetry && (
+              <Button variant="ghost" onClick={onRetry} disabled={busy}>
+                {t('common.retry')}
+              </Button>
+            )}
             {(feedback || error) && (
               <Button variant="ghost" className="shrink-0" onClick={() => setFeedbackOpen(true)}>
                 {t(error ? 'grammarTopics.learning.result.readDetails' : 'grammarTopics.learning.result.readFeedback')}

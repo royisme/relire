@@ -36,8 +36,15 @@ interface ReaderViewProps {
   readingDocument: ReaderDocument;
   source: ReaderSource;
   onBack: () => void;
-  onWordClick: VocabularyWordLookup;
-  onSentenceClick: (sentence: string) => void;
+  onWordClick?: VocabularyWordLookup;
+  onSentenceClick?: (sentence: string) => void;
+  authored?: {
+    sentenceIds: string[];
+    onWord: (spelling: string, sentenceId: string, ordinal: number) => void;
+    onSentence: (sentenceId: string) => void;
+  };
+  playbackEngine?: 'device';
+  afterText?: React.ReactNode;
   onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void;
   onMissingKey: () => void;
   /** Opens My study → Shadowing at this source. */
@@ -54,6 +61,9 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   onBack,
   onWordClick,
   onSentenceClick,
+  authored,
+  playbackEngine,
+  afterText,
   onAssessed,
   onMissingKey,
   onOpenShadowingLog,
@@ -63,12 +73,17 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const sourceId = readerIdentity(source);
-  const target = (sentenceId: string, text: string) => ({
-    source,
-    sentenceId,
-    text,
-    ...(source.kind === 'passage' ? { passageContent: readingDocument.content } : {}),
-  });
+  const practise = (sentenceId: string, text: string) => {
+    // Reader recording ownership is deliberately deferred to R1-10.
+    if (source.kind !== 'graded')
+      card.open({
+        source,
+        sentenceId,
+        text,
+        ...(source.kind === 'passage' ? { passageContent: readingDocument.content } : {}),
+      });
+  };
+  const explain = (id: string, text: string) => (authored ? authored.onSentence(id) : onSentenceClick?.(text));
   // Reading preferences
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('lg');
   // Sentences are identified by position, not text, because the same sentence can repeat ("Oui.").
@@ -108,7 +123,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   const speech = useSpeechState();
   const playingKey = speech.phase !== 'idle' ? speech.key : null;
 
-  const { card, cardBusy, cardRef } = useReaderPracticeCard(setIsSpeedControlOpen, onAssessed);
+  const { card, cardBusy, cardRef } = useReaderPracticeCard(setIsSpeedControlOpen, onAssessed, playbackEngine);
 
   // The speed panel floats over the article; a tap outside it closes it.
   useEffect(() => {
@@ -127,9 +142,11 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
   // Helper to tokenize sentence into clickable words
   // Tapping a word also keeps that sentence's actions visible once the lookup sheet is closed (touch has no hover).
-  const clickWord = (word: string, sentenceText: string, id: string) => {
+  const clickWord = (word: string, sentenceText: string, id: string, ordinal: number, spelling: string) => {
     focusSentence(id);
-    onWordClick(word, sentenceText, readingDocument.content, {
+    if (authored) return authored.onWord(spelling, id, ordinal);
+    if (source.kind === 'graded') return;
+    onWordClick?.(word, sentenceText, readingDocument.content, {
       kind: source.kind === 'article' ? 'article' : 'unit',
       id: source.kind === 'article' ? source.articleId : source.unitId,
       title: readingDocument.title,
@@ -145,7 +162,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           annotation={markers.mode ? markers.displayed[id]?.words[token.word.ordinal] : undefined}
           layers={markers.layers}
           activeWord={activeWord}
-          onClick={(word) => clickWord(word, sentenceText, id)}
+          onClick={(word) => clickWord(word, sentenceText, id, token.word!.ordinal, token.word!.text)}
         />
       ) : (
         <React.Fragment key={token.start}>{token.text}</React.Fragment>
@@ -153,7 +170,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     );
 
   // Paragraphs and sentences, cut the same way for reading and for listening.
-  const paragraphs = useMemo(() => splitArticle(readingDocument.content), [readingDocument.content]);
+  const paragraphs = useMemo(() => {
+    let index = 0;
+    return splitArticle(readingDocument.content).map((paragraph) =>
+      paragraph.map((sentence) => ({
+        ...sentence,
+        id: authored?.sentenceIds[index++] ?? sentence.id,
+      })),
+    );
+  }, [readingDocument.content, authored?.sentenceIds]);
   const flatSentences = useMemo(() => paragraphs.flat(), [paragraphs]);
   const markers = usePronunciationMarkers(
     source.kind === 'article' ? source.articleId : sourceId,
@@ -230,7 +255,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   }, [focusText, sourceId]);
 
   // Listening to the whole article: one sentence after another, the current one highlighted.
-  const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
+  const sequence = useSyncExternalStore(subscribeSequence, getSequenceState, getSequenceState);
   const listening = sequence.id === sourceId;
   const listeningId = listening ? (flatSentences[sequence.index]?.id ?? null) : null;
   // Why the sentence being read could not be played, so the player can say it instead of a generic line.
@@ -242,6 +267,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       startSequence(
         sourceId,
         flatSentences.map((s) => s.text),
+        0,
+        playbackEngine,
       );
   };
 
@@ -308,7 +335,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     <>
       {/* Bottom padding leaves room for the dock (player, practice card), so the last lines can be read above it. */}
       <div
-        className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 space-y-4"
+        className="max-w-3xl min-w-0 mx-auto px-4 sm:px-6 pt-6 space-y-4"
         style={{ paddingBottom: 'max(7rem, calc(var(--dock-height, 0px) + 2rem))' }}
       >
         {/* Reading toolbar: one row, article on the left, preferences on the right */}
@@ -332,13 +359,14 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           />
         </div>
 
+        {source.kind === 'graded' && <p className="text-xs text-ink-600">{t('gradedReader.deviceVoice')}</p>}
         {/* Main Reading Surface */}
         <article
           ref={articleRef}
           onClick={(e) => {
             if (!(e.target as HTMLElement).closest('[data-sentence],[data-sentence-actions]')) setHoveredId(null);
           }}
-          className="relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border border-ink-200 bg-surface text-ink-900"
+          className={`relative min-w-0 ${source.kind === 'graded' ? 'px-4' : 'px-5'} py-8 sm:px-12 sm:py-12 rounded-lg border border-ink-200 bg-surface text-ink-900`}
         >
           <div className={`reading ${readerFontSizeClass(fontSize)} ${markers.mode ? 'reading-markers' : ''}`}>
             <header className="mb-8">
@@ -347,7 +375,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                 {readingDocument.category ? ` · ${readingDocument.category}` : ''}
                 {readingDocument.source ? ` · ${readingDocument.source}` : ''}
               </p>
-              <h1 className="reading-title font-serif font-semibold text-3xl sm:text-4xl leading-tight">
+              <h1 className="reading-title break-words font-serif font-semibold text-3xl sm:text-4xl leading-tight">
                 {cleanArticleTitle(readingDocument.title)}
               </h1>
             </header>
@@ -413,13 +441,16 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               cancelClear={cancelClear}
               scheduleClear={scheduleClear}
               speechActive={toolbarPhase !== 'idle'}
-              onExplain={() => onSentenceClick(toolbar.text)}
-              onPractise={() => card.open(target(toolbar.id, toolbar.text))}
+              onExplain={() => explain(toolbar.id, toolbar.text)}
+              onPractise={source.kind === 'graded' ? undefined : () => practise(toolbar.id, toolbar.text)}
+              playbackEngine={playbackEngine}
+              explainLabel={authored ? t('gradedReader.translation') : undefined}
               cardBusy={cardBusy}
               practisedId={practisedId}
             />
           )}
         </article>
+        {afterText}
       </div>
 
       {/* Outside the spaced column: as its last child it would add a margin to the article. */}
@@ -432,8 +463,10 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
             <SentenceBar
               text={barSentence.text}
               practiseBlocked={cardBusy}
-              onExplain={() => onSentenceClick(barSentence.text)}
-              onPractise={() => card.open(target(barSentence.id, barSentence.text))}
+              onExplain={() => explain(barSentence.id, barSentence.text)}
+              onPractise={source.kind === 'graded' ? undefined : () => practise(barSentence.id, barSentence.text)}
+              playbackEngine={playbackEngine}
+              explainLabel={authored ? t('gradedReader.translation') : undefined}
               onDismiss={() => setDismissedId(barSentence.id)}
             />
           )}

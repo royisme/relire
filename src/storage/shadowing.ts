@@ -7,7 +7,7 @@ import { base64ToBlob, blobToBase64 } from '../utils/binary';
 import { MAX_TAKES, type ShadowingSentence, type ShadowingTake } from '../types/shadowing';
 import { normalizeText } from './audio';
 import { db, requestPersistence } from './db';
-import type { ReaderSource } from '../types/readerSource';
+import type { RecordableReaderSource as ReaderSource } from '../types/readerSource';
 import { splitArticle } from '../utils/sentences';
 
 export const shadowingKey = (articleId: string, text: string) => `${articleId}|${normalizeText(text)}`;

@@ -7,9 +7,10 @@ import type { PronunciationAssessment } from '../types';
 export function useReaderPracticeCard(
   setIsSpeedControlOpen: (open: boolean) => void,
   onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void,
+  playbackEngine?: 'device',
 ) {
   // Practising one sentence: recording happens in the docked card, never on the pill.
-  const card = usePracticeCard(onAssessed);
+  const card = usePracticeCard(onAssessed, playbackEngine);
   const cardBusy =
     card.phase === 'acquiring' || card.phase === 'recording' || card.phase === 'saving' || card.phase === 'unsaved';
   const cardRef = useRef(card);

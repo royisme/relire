@@ -15,16 +15,16 @@ Plan and decisions: `docs/graded-readers-plan.md` (epic #65; phases #62, #63, #6
 | R1-1 | Bundled starter export, lazy loader, `useGradedReaders` hook | loader rejects hash/schema errors; `publish.ts --check` in CI; starter becomes a precached lazy chunk within budget | landed |
 | R1-2b | Local publish of readers 4+ into D1 (staged, read-back) | exact read-back before the catalogue pointer moves; no delete-first | next (Worker routes landed in R1-2a) |
 | R1-3 | Reader progress, opened-edition snapshot, backup/restore | snapshot survives service loss; restore rejects malformed input whole | landed |
-| R1-4b | `#/read/graded` list page | states of design §6.3; real progress; no fake rows | next (routes landed in R1-4a) |
-| R1-5 | Reader accepts a third source kind (`graded`) | no Article or unit is created; Back goes to the list | next |
-| R1-6 | Authored word and sentence sheets (no AI key) | meaning appears at once; no dummy analysis; translation reveal in a fixed slot | next |
-| R1-7 | Checkpoints and Mark read | strict-accent grading; verdict committed before shown; no automatic Next | component landed; wiring pending |
+| R1-4b | `#/read/graded` list page | starter-only states of design §6.3; real progress; no fake rows | done in worktree; lead acceptance pending |
+| R1-5 | Reader accepts a third source kind (`graded`) | no Article or unit is created; Back goes to the list | done in worktree; lead acceptance pending |
+| R1-6 | Authored word and sentence sheets (no AI key) | meaning appears at once; no dummy analysis; translation reveal in a fixed slot | R1-6c done in worktree; optional Ask AI deferred |
+| R1-7 | Checkpoints and Mark read | strict-accent grading; verdict committed before shown; no automatic Next | done in worktree; lead acceptance pending |
 | R1-10 | Recording ownership, shadowing log and backup for reader editions | takes keyed by reader id + body version | next |
-| R1-9b | Pass `playbackEngine: 'device'` from the graded route | nothing synthesized or fetched; real error without a French voice | next (plumbing landed in R1-9) |
+| R1-9b | Pass `playbackEngine: 'device'` from the graded route | nothing synthesized or fetched; real error without a French voice | done in worktree; owner device check pending |
 | R1-11 | Onboarding step 3 opens reader 1; key-banner wording; copy in both locales; docs | a learner with no key reaches a reader | landed |
 | R1-12 | Build evidence and the cross-feature test pass | chunk sizes and precache recorded | last |
 
-Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), R1-6a (authored word and sentence components), R1-7 (checkpoints component), R1-8 (authored saved-word definitions), R1-9 (device-voice plumbing), R1-11. Next: the integrated reader pages (list, Reader with a third source, authored sheets, checkpoints, completion, device voice), then recording ownership (R1-10).
+Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), R1-6a (authored word and sentence components), R1-7 (checkpoints component), R1-8 (authored saved-word definitions), R1-9 (device-voice plumbing), R1-11. Integrated pages are implemented in the worktree, pending lead checks/acceptance. Next: recording ownership (R1-10); recording is hidden on graded readers until then. No service catalogue is wired yet.
 
 ### Content (paused by the owner's priority)
 

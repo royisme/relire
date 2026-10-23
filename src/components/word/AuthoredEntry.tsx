@@ -125,7 +125,7 @@ export function AuthoredEntry({
           ) : error ? (
             <>
               <span className="min-w-0 break-words">{error}</span>
-              <Button variant="outline" size="sm" className="shrink-0" onClick={() => lastAction.current()}>
+              <Button variant="outline" size="sm" className="min-h-10 shrink-0" onClick={() => lastAction.current()}>
                 {t('common.retry')}
               </Button>
             </>

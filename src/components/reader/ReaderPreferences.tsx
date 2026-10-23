@@ -44,7 +44,7 @@ export function ReaderPreferences({
   preserveAnchor,
 }: ReaderPreferencesProps) {
   const rateButton = (active: boolean) =>
-    `h-8 px-2.5 rounded-md text-xs tnum cursor-pointer ${
+    `${sourceKind === 'graded' ? 'h-10' : 'h-8'} px-2.5 rounded-md text-xs tnum cursor-pointer ${
       active ? 'bg-accent-700 text-on-fill font-medium' : 'text-ink-700 hover:bg-ink-100'
     }`;
 
@@ -55,7 +55,15 @@ export function ReaderPreferences({
         className="mr-auto -ml-2 h-10 inline-flex items-center gap-1.5 px-2 rounded-md text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>{t(sourceKind === 'passage' ? 'reader.backToUnit' : 'library.back')}</span>
+        <span>
+          {t(
+            sourceKind === 'graded'
+              ? 'gradedReader.back'
+              : sourceKind === 'passage'
+                ? 'reader.backToUnit'
+                : 'library.back',
+          )}
+        </span>
       </button>
 
       <div
@@ -69,7 +77,7 @@ export function ReaderPreferences({
             onClick={() => setFontSize(sz)}
             aria-pressed={fontSize === sz}
             aria-label={sz}
-            className={`h-8 w-8 rounded-md font-serif cursor-pointer ${
+            className={`${sourceKind === 'graded' ? 'h-10 w-10' : 'h-8 w-8'} rounded-md font-serif cursor-pointer ${
               fontSize === sz ? 'bg-ink-100 text-ink-950' : 'text-ink-600 hover:bg-ink-100'
             }`}
             style={{ fontSize: 12 + i * 2.5 }}
@@ -114,13 +122,15 @@ export function ReaderPreferences({
         />
       </button>
 
-      <PronunciationControls
-        key={sourceId}
-        controller={markers}
-        onDisplay={() => preserveAnchor(markers.display)}
-        onMode={(marked) => preserveAnchor(() => markers.setMode(marked))}
-        onOpen={() => setIsSpeedControlOpen(false)}
-      />
+      {sourceKind !== 'graded' && (
+        <PronunciationControls
+          key={sourceId}
+          controller={markers}
+          onDisplay={() => preserveAnchor(markers.display)}
+          onMode={(marked) => preserveAnchor(() => markers.setMode(marked))}
+          onOpen={() => setIsSpeedControlOpen(false)}
+        />
+      )}
 
       {/* Floats over the article so opening it never moves the text */}
       {isSpeedControlOpen && (
