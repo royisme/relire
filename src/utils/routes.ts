@@ -199,6 +199,9 @@ export function parseRoute(
   return { route, canonical: href === hash ? null : href };
 }
 
+/** Graded readers work without a key: authored meanings, translations and the device voice. */
+export const worksWithoutKey = (route: Route) => route.name === 'gradedReaders' || route.name === 'gradedReader';
+
 export type Area =
   | 'read'
   | 'grammar'
