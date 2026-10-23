@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CircleAlert, CircleCheck, CircleDot } from 'lucide-react';
 import { PronunciationAssessment, PhonemeFeedback } from '../../types';
+import { isMarkedWord, WordMarks, wordMarkLabel } from './WordMarks';
 
 /**
  * The score and feedback for one read-aloud attempt. Only the scores a provider measured are drawn;
@@ -19,7 +20,9 @@ const Heading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <h5 className="text-xs font-medium text-ink-500">{children}</h5>
 );
 
-export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }> = ({ assessment }) => {
+export const AssessmentResult: React.FC<{
+  assessment: PronunciationAssessment;
+}> = ({ assessment }) => {
   const { t } = useTranslation();
   const metrics = [
     { label: t('shadowing.accuracy'), value: assessment.accuracyScore },
@@ -29,6 +32,7 @@ export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }>
   const sounds = assessment.phonemeFeedback ?? [];
   const words = assessment.corrections ?? [];
   const strengths = assessment.strengths ?? [];
+  const marked = (assessment.wordResults ?? []).filter(isMarkedWord);
 
   return (
     <div className="rounded-lg border border-ink-200 bg-ink-50 p-4 sm:p-5 space-y-5">
@@ -62,19 +66,20 @@ export const AssessmentResult: React.FC<{ assessment: PronunciationAssessment }>
       {!!assessment.wordResults?.length && (
         <section className="space-y-2">
           <Heading>{t('shadowing.wordAccuracy')}</Heading>
-          <ul className="flex flex-wrap gap-x-4 gap-y-2">
-            {assessment.wordResults.map((item, i) => (
-              <li key={i} className="min-w-0 max-w-full break-words text-sm text-ink-800">
-                <span className="font-serif text-ink-900">{item.word}</span>
-                {item.accuracyScore !== undefined && <span className="ml-2 tnum">{item.accuracyScore}</span>}
-                {item.errorType && item.errorType !== 'None' && (
-                  <span className="block text-xs text-ink-600">
-                    {t(`shadowing.wordError.${item.errorType}`, { defaultValue: item.errorType })}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
+          <p className="text-base leading-relaxed text-ink-900 break-words">
+            <WordMarks words={assessment.wordResults} />
+          </p>
+          {marked.length > 0 && (
+            <ul className="space-y-1 pt-1">
+              {marked.map((item, i) => (
+                <li key={i} className="min-w-0 max-w-full break-words text-sm text-ink-800">
+                  <span className="font-serif text-ink-900">{item.word}</span>
+                  {item.accuracyScore !== undefined && <span className="ml-2 tnum">{item.accuracyScore}</span>}
+                  <span className="ml-2 text-xs text-ink-600">{wordMarkLabel(item, t)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       )}
 
