@@ -28,7 +28,8 @@
     "expand": "展开侧边栏",
     "due": "{{count}} 个待复习",
     "toReview": "{{count}} 道待复习",
-    "importArticle": "导入文章"
+    "importArticle": "导入文章",
+    "gradedReaders": "分级读物"
   },
   "learning": {
     "areas": { "reading": "阅读", "grammar": "语法", "listening": "听力", "writing": "写作" },
@@ -1102,6 +1103,7 @@
   },
   "notFound": {
     "grammarTopic": "此语法专题尚未发布或不存在。",
+    "gradedReader": "这本分级读物未发布或已不可用。请返回分级读物列表选择其他读物。",
     "passage": "这篇短文已不可用。请返回文章库选择其他内容。",
     "title": "找不到这个页面",
     "page": "这个地址在 Relire Plus 里没有对应的页面。",

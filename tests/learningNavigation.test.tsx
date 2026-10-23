@@ -205,6 +205,33 @@ test('learning-first sidebar has no generic Practice or study Grammar; Writing r
   }
 });
 
+test('Graded readers is linked from the Reading destinations and stays current on the reader route', () => {
+  const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({ units: null, error: null });
+  const mistakes = spyOn(mistakesHook, 'useMistakes').mockReturnValue({
+    rows: [],
+    loading: false,
+    error: null,
+    retry: () => {},
+  });
+  try {
+    const nav = render(<LearningNavigation area="read" current={{ name: 'gradedReader', readerId: 'r' }} />);
+    expect(nav).toContain('href="#/read/graded" aria-current="page"');
+    // NavTree puts the classes between href and aria-current, so match the current graded link loosely.
+    const gradedCurrent = /href="#\/read\/graded"[^>]*aria-current/;
+    expect(gradedCurrent.test(render(<NavTree route={{ name: 'gradedReader', readerId: 'r' }} dueCount={0} />))).toBe(
+      true,
+    );
+    expect(gradedCurrent.test(render(<NavTree route={{ name: 'gradedReaders' }} dueCount={0} />))).toBe(true);
+    expect(gradedCurrent.test(render(<NavTree route={{ name: 'library' }} dueCount={0} />))).toBe(false);
+    expect(render(<LearningNavigation area="read" current={{ name: 'library' }} />)).not.toContain(
+      'href="#/read/graded" aria-current',
+    );
+  } finally {
+    units.mockRestore();
+    mistakes.mockRestore();
+  }
+});
+
 test('exercise import is not repeated in the sidebar while the reading article import stays', () => {
   const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({
     units: [{ ...unitOf('OPEN_QA'), learningArea: 'writing' }],
