@@ -2,10 +2,14 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { usePracticeCard } from './usePracticeCard';
 import { stopSpeech } from '../utils/speech';
+import type { PronunciationAssessment } from '../types';
 
-export function useReaderPracticeCard(setIsSpeedControlOpen: (open: boolean) => void) {
+export function useReaderPracticeCard(
+  setIsSpeedControlOpen: (open: boolean) => void,
+  onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void,
+) {
   // Practising one sentence: recording happens in the docked card, never on the pill.
-  const card = usePracticeCard();
+  const card = usePracticeCard(onAssessed);
   const cardBusy =
     card.phase === 'acquiring' || card.phase === 'recording' || card.phase === 'saving' || card.phase === 'unsaved';
   const cardRef = useRef(card);

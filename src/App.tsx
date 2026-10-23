@@ -304,6 +304,7 @@ export default function App() {
                   }
                   onWordClick={handleWordClick}
                   onSentenceClick={handleSentenceClick}
+                  onAssessed={handleRecordAssessmentComplete}
                   onMissingKey={requestKey}
                   onOpenShadowingLog={(sourceId) => {
                     setLogSourceId(sourceId);
@@ -430,8 +431,8 @@ export default function App() {
       {/* Word Detail Floating Modal */}
       <WordDetailModal {...wordSheet} bookmark={bookmark} />
 
-      {/* Sentence Breakdown & Shadowing Drawer */}
-      <SentenceDrawer {...sentenceSheet} onRecordAssessmentComplete={handleRecordAssessmentComplete} />
+      {/* Sentence breakdown drawer */}
+      <SentenceDrawer {...sentenceSheet} />
 
       {/* Article Importer / Pasting Modal */}
       {editor && (
