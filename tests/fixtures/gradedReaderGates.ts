@@ -1,4 +1,5 @@
 /** Invented TEST gate inputs only; synthetic review labels/hashes never authorize real content. */
+import { normalizeLookupToken as key } from '../../src/services/grammarPack/lookup';
 import syllabusJson from '../../data/graded-readers/syllabus.json';
 import { ReaderSyllabusSchema } from '../../src/types/gradedReader';
 import type { ReaderDraft } from '../../scripts/graded-readers/drafts';
@@ -89,7 +90,7 @@ export function annotate(
   draft.analyses = [];
   draft.verbGroups = [];
   const readingIds: Record<string, string> = Object.fromEntries(
-    draft.body.glossary.flatMap((entry) => entry.forms.map((form) => [form, entry.id])),
+    draft.body.glossary.flatMap((entry) => entry.forms.map((form) => [key(form), entry.id])),
   );
   for (const target of targetInventory(draft.body)) {
     for (const word of tokenize(target, { compounds: context.evidence.compounds }).words) {
@@ -99,7 +100,9 @@ export function annotate(
           draft.body.glossary.find((entry) => entry.pos === 'phrase' && entry.forms.includes(word.phrase!))!.id,
         );
       for (const atom of word.atoms) {
-        const entryId = readingIds[atom.readings[0]];
+        // An entry may list only the elision surface (c’), while the atom carries the expansion (ce).
+        const entryId =
+          readingIds[key(atom.readings[0])] ?? (atom.role === 'elision' ? readingIds[key(atom.spelling)] : undefined);
         if (!entryId) throw new Error(`TEST builder needs explicit reading for ${atom.spelling}`);
         const entry = draft.body.glossary.find((entry) => entry.id === entryId)!;
         const verb =
