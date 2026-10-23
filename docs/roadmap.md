@@ -1,6 +1,6 @@
 # Roadmap
 
-What is done, what is next, what comes later and what is deferred. Updated whenever a task lands or a decision changes (owner rule, 2026-10-18). Merge history lives in `docs/merge-progress.md`; the live session state is the local-only `docs/HANDOFF.md`.
+What is done, what is next, what comes later and what is deferred. Updated whenever a task lands or a decision changes (owner rule, 2026-10-18). The next small steps are `TASKS.md`, what has landed or broken is `PROGRESS.md`, merge history lives in `docs/merge-progress.md`, and the live session state is the local-only `docs/HANDOFF.md`. The document map is in `AGENTS.md`.
 
 Principles that shape every item: nothing has shipped, so no compatibility code; smallest design; static and unit checks are the normal gate, and the owner accepts appearance by hand; browser automation is exceptional, reserved for a necessary frontend/backend, persistence or backup/restore risk that unit tests cannot cover, never a default full suite or a theme/viewport/screenshot matrix (`docs/development.md`); implementation by workers (`docs/agent-delegation.md`).
 

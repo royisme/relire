@@ -25,6 +25,7 @@ Workers run no browsers/servers unless explicitly authorized. Any authorized bro
 - New strings in both locale files? Keys you stopped using removed?
 - Anything a user could notice gets a line in `CHANGELOG.md` under Unreleased (Added / Changed / Fixed / Removed), in the same commit, saying what the user gets, not which files moved.
 - If you moved responsibilities between modules, update `docs/architecture.md`; if you changed an area rule, update the matching `.claude/rules/*.md`.
+- Update `TASKS.md` (the step that landed leaves the queue, the next one is named) and `PROGRESS.md` (what is done, what broke, what is still unverified). `docs/HANDOFF.md` is local only; sync it with the handoff skill, never commit it.
 
 ## 3. Commit and push
 - Work on the designated feature branch. If its PR was already merged, restart the branch from the latest `main` and keep only unmerged commits.
