@@ -29,7 +29,8 @@ import { EMPTY_STATS, loadData, initializeData, saveStats } from './storage/db';
 import { usePersist } from './storage/usePersist';
 import { vocabularyDue, formatDate } from './utils/srs';
 import { hasTextKey } from './utils/appSettings';
-import { LIBRARY, parseRoute, routeHref, type AiPurposeRoute } from './utils/routes';
+import { firstBundledReaderId } from './services/gradedReaders/firstReader';
+import { LIBRARY, parseRoute, routeHref, worksWithoutKey, type AiPurposeRoute } from './utils/routes';
 import { navigate, useRoute } from './hooks/useRoute';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { useSidebar } from './hooks/useSidebar';
@@ -51,6 +52,8 @@ const PracticeSetPage = retryableLazy(async () => ({
 const GrammarSection = retryableLazy(() => import('./components/study/grammar/GrammarSection'));
 
 const ONBOARDING_KEY = 'relire_onboarded';
+/** The reader the guide opens: the first bundled one, or none while the app bundles no reader yet. */
+const FIRST_READER_ID = firstBundledReaderId();
 const storedFlag = (key: string) => {
   try {
     return localStorage.getItem(key) === '1';
@@ -243,7 +246,7 @@ export default function App() {
             </div>
           )}
 
-          {!hasKey && !onboardingOpen && route.name !== 'settings' && (
+          {!hasKey && !onboardingOpen && route.name !== 'settings' && !worksWithoutKey(route) && (
             <div className="bg-accent-50 border-b border-accent-200 text-accent-900 text-sm">
               <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span>{t('keyBanner.text')}</span>
@@ -448,7 +451,9 @@ export default function App() {
         <OnboardingDialog
           onClose={finishOnboarding}
           onKeySaved={() => setHasKey(true)}
-          onOpenSample={articles[0] ? () => openArticle(articles[0]) : undefined}
+          onOpenReader={
+            FIRST_READER_ID ? () => navigate({ name: 'gradedReader', readerId: FIRST_READER_ID }) : undefined
+          }
         />
       )}
     </div>
