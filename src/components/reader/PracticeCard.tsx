@@ -21,6 +21,7 @@ import { cn } from '../../lib/utils';
 import { Button } from '../ui/button';
 import { SpeakIcon, useSpeechFailure, useSpeechPhase } from '../ui/speak-button';
 import { Waveform } from './Waveform';
+import { PracticeAssessment } from './PracticeAssessment';
 import { panelDanger, panelGhost, panelOutline, panelPrimary, panelSurface } from './panel';
 
 const clock = (ms: number) => {
@@ -65,7 +66,7 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
   // Local view state follows the card, adjusted during render so no stale frame shows: a new sentence
   // starts collapsed, the close confirmation only lives while a take is unsaved, and anything that needs
   // a decision opens the card again.
-  const needsAttention = card.phase === 'unsaved' || !!card.error || card.notice === 'busy';
+  const needsAttention = card.phase === 'unsaved' || !!card.error || !!card.assessmentError || card.notice === 'busy';
   const [seen, setSeen] = useState({ text: card.target?.text, phase: card.phase, needsAttention });
   if (seen.text !== card.target?.text || seen.phase !== card.phase || seen.needsAttention !== needsAttention) {
     setSeen({ text: card.target?.text, phase: card.phase, needsAttention });
@@ -356,6 +357,8 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
           </button>
         )}
       </div>
+
+      <PracticeAssessment card={card} />
 
       {/* Hint, status or error: one bounded line region, announced on change. */}
       <div

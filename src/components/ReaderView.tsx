@@ -3,6 +3,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncEx
 import { useTranslation } from 'react-i18next';
 import { readerIdentity, type ReaderDocument, type ReaderSource } from '../types/readerSource';
 import type { VocabularyWordLookup } from '../services/vocabulary/identity';
+import type { PronunciationAssessment } from '../types';
 import { usePronunciationMarkers } from '../hooks/usePronunciationMarkers';
 import { readerTokens } from '../utils/readerTokens';
 import { ReaderWord } from './reader/ReaderWord';
@@ -37,6 +38,7 @@ interface ReaderViewProps {
   onBack: () => void;
   onWordClick: VocabularyWordLookup;
   onSentenceClick: (sentence: string) => void;
+  onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void;
   onMissingKey: () => void;
   /** Opens My study → Shadowing at this source. */
   onOpenShadowingLog: (sourceId: string) => void;
@@ -52,6 +54,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   onBack,
   onWordClick,
   onSentenceClick,
+  onAssessed,
   onMissingKey,
   onOpenShadowingLog,
   focusText = null,
@@ -105,7 +108,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   const speech = useSpeechState();
   const playingKey = speech.phase !== 'idle' ? speech.key : null;
 
-  const { card, cardBusy, cardRef } = useReaderPracticeCard(setIsSpeedControlOpen);
+  const { card, cardBusy, cardRef } = useReaderPracticeCard(setIsSpeedControlOpen, onAssessed);
 
   // The speed panel floats over the article; a tap outside it closes it.
   useEffect(() => {
