@@ -4,7 +4,7 @@ import type { Env } from '../../worker/src/index';
 
 export async function createWorkerDb() {
   const db = new Database(':memory:');
-  for (const migration of ['0001_init.sql', '0002_lexicon.sql', '0003_vocabulary.sql'])
+  for (const migration of ['0001_init.sql', '0002_lexicon.sql', '0003_vocabulary.sql', '0004_readers.sql'])
     db.exec(await Bun.file(new URL(`../../worker/migrations/${migration}`, import.meta.url)).text());
   const env: Env = {
     DB: {

@@ -9,9 +9,12 @@ Only `GET`, `HEAD` and `OPTIONS` are accepted; other methods return `405` with `
 - `/v1/topics`: summaries (`id`, `chapter`, `level`, `tags`, bilingual `title`), ordered by chapter then id; no body text.
 - `/v1/topics/:id`: full stored topic JSON; malformed slug `400`, missing topic `404`.
 - `/v1/tag-index`: covered tags mapped to ascending topic ids.
+- `/v1/readers`: the current graded-reader catalogue (`readersCurrent` → `readersCatalog:<catalogueHash>`), `no-cache`, ETag is the catalogue hash.
+- `/v1/readers/:id?version=<artifactHash>`: exactly that published immutable `PublishedReader` JSON; `version` is required, `public, max-age=300`, ETag is the artifact hash. Malformed slug `400 invalid-id`; missing/duplicate/extra/malformed `version` `400 invalid-query`; unknown id `404 not-found`; no current catalogue `404 readers-unavailable`; unpublished artifact of a known id `410 version-unavailable`; missing/corrupt marked data or D1 failure `500 unavailable`. Read-only: no learner data, no write route.
+- `/v1/vocabulary/tcf-7000?page=<n>[&version=<64 hex>]`: one page of the vocabulary book, plus its manifest and source; see below.
 - `/v1/lexicon/:lemma`: every entry (`pos` `verb`, `noun` or `adjective`, `gender` for nouns, `data`) of a lemma, plus `source`; `/v1/lexicon/form/:form`: the `{ lemma, pos }` pairs a form belongs to, plus `source`. The parameter is URL-decoded, NFC and lowercased; empty or over 64 characters `400 invalid-id`, unknown `404 not-found`. Shapes: `src/types/lexicon.ts`.
 
-Successful reads use JSON UTF-8, `Cache-Control: public, max-age=300`, and an `ETag` derived from `meta.packVersion` (`meta.lexiconVersion` for the lexicon routes). Matching `If-None-Match` returns `304`. `HEAD` returns the same status and headers without a body. Errors are JSON error codes; database failures return `500 unavailable` without exposing SQL or content.
+Successful reads use JSON UTF-8, `Cache-Control: public, max-age=300` (`no-cache` for the reader catalogue), and an `ETag` derived from `meta.packVersion` (`meta.lexiconVersion` for the lexicon routes, the catalogue/artifact hash for the reader routes). Matching `If-None-Match` returns `304`. `HEAD` returns the same status and headers without a body. Errors are JSON error codes; database failures return `500 unavailable` without exposing SQL or content.
 
 CORS echoes only exact origins in the comma-separated `ALLOWED_ORIGINS` variable. Its default empty string permits no cross-origin access. Preflights return `204`; allowed origins may send `If-None-Match` and read `ETag` and `Retry-After`.
 
@@ -45,7 +48,7 @@ The following account operations are for the owner, using their own Cloudflare a
    bunx wrangler d1 migrations apply DB --remote
    ```
 
-   The migrations create `topics`, `meta`, `lexicon_entries`, `lexicon_forms` and `vocabulary_pages` and set the empty versions (`packVersion`, `lexiconVersion`) to `0.0.0`. Local state lives in gitignored `worker/.wrangler/`.
+   The migrations create `topics`, `meta`, `lexicon_entries`, `lexicon_forms`, `vocabulary_pages` and `readers` and set the empty versions (`packVersion`, `lexiconVersion`) to `0.0.0`. Local state lives in gitignored `worker/.wrangler/`.
 4. Set `vars.ALLOWED_ORIGINS` in `wrangler.jsonc` to the deployment origins, separated by commas, for example `https://app.example.com,https://owner.example.com` (no paths or trailing slashes). The empty default is intentional. Keep the deployment configuration local if it contains owner-specific identifiers.
 5. Run locally:
 
