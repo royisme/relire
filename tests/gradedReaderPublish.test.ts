@@ -135,11 +135,13 @@ test('runPublish --check passes on the committed repository state', async () => 
   expect(await runPublish(['--check'])).toBe(0);
 });
 
-test('the committed starter file is the strict public shape with no bundled stages', async () => {
+test('the committed starter is exactly the bundled stages of the committed syllabus, in order', async () => {
   const root = process.cwd();
   const starter = (await Bun.file(starterFile(root)).json()) as StarterFile;
   const syllabus = (await Bun.file(join(root, 'data/graded-readers/syllabus.json')).json()) as ReaderSyllabus;
-  expect(starter.readers).toEqual([]);
   expect(starter.syllabusVersion).toBe(syllabus.syllabusVersion);
-  expect(syllabus.stages.filter((stage) => stage.bundled)).toEqual([]);
+  // Publication state changes as readers are reviewed; the starter must always mirror the bundled prefix.
+  expect(starter.readers.map((reader) => reader.body.id)).toEqual(
+    syllabus.stages.filter((stage) => stage.bundled).map((stage) => stage.readerId),
+  );
 });

@@ -13,7 +13,7 @@
       "maxTextWords": 24,
       "maxSentences": 4,
       "include": true,
-      "bundled": false
+      "bundled": true
     },
     {
       "order": 2,
@@ -27,7 +27,7 @@
       "maxTextWords": 35,
       "maxSentences": 5,
       "include": true,
-      "bundled": false
+      "bundled": true
     },
     {
       "order": 3,
@@ -47,7 +47,7 @@
       "maxTextWords": 48,
       "maxSentences": 6,
       "include": true,
-      "bundled": false
+      "bundled": true
     },
     {
       "order": 4,

@@ -35,9 +35,10 @@ test('an unloaded pack has no readers to find', () => {
   expect(findStarterReader('test-book')).toBeUndefined();
 });
 
-test('loads the committed empty starter through the real dynamic import', async () => {
-  expect(await loadStarterReaders()).toEqual([]);
-  expect(loadedStarterReaders()).toEqual([]);
+test('loads the committed starter through the real dynamic import and validates every hash', async () => {
+  const readers = await loadStarterReaders();
+  expect(loadedStarterReaders()).toEqual(readers);
+  for (const reader of readers) expect(findStarterReader(reader.body.id, reader.version)).toBe(reader);
 });
 
 test('memoises only a successful pack, without re-importing it', async () => {
