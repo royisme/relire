@@ -58,9 +58,11 @@ export function usePracticeCard(onAssessed?: (assessment: PronunciationAssessmen
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [assessmentError, setAssessmentError] = useState<string | null>(null);
   const assessAbort = useRef<AbortController | null>(null);
+  const latestRef = useRef(latest);
   const onAssessedRef = useRef(onAssessed);
   useLayoutEffect(() => {
     onAssessedRef.current = onAssessed;
+    latestRef.current = latest;
   });
   const cancelAssessment = useCallback(() => {
     assessAbort.current?.abort();
@@ -103,16 +105,21 @@ export function usePracticeCard(onAssessed?: (assessment: PronunciationAssessmen
     token.current = null;
   }, []);
 
-  const loadLatest = useCallback(async (of: PracticeTarget) => {
-    try {
-      const record = await getShadowingSentence(of.source, of.text);
-      if (targetRef.current !== of) return;
-      setLatest(record?.takes.at(-1) ?? null);
-      setCount(record?.takes.length ?? 0);
-    } catch (err) {
-      if (targetRef.current === of) setError(errorMessage(err));
-    }
-  }, []);
+  const loadLatest = useCallback(
+    async (of: PracticeTarget) => {
+      try {
+        const record = await getShadowingSentence(of.source, of.text);
+        if (targetRef.current !== of) return;
+        const next = record?.takes.at(-1) ?? null;
+        if (next?.id !== latestRef.current?.id) cancelAssessment();
+        setLatest(next);
+        setCount(record?.takes.length ?? 0);
+      } catch (err) {
+        if (targetRef.current === of) setError(errorMessage(err));
+      }
+    },
+    [cancelAssessment],
+  );
 
   /** Ends any capture and returns to `ready` on the same sentence, with an optional notice. */
   const toReady = useCallback(

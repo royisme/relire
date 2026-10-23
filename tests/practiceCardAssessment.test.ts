@@ -15,6 +15,8 @@ let cursor = 0;
 let mounting = true;
 let effects: React.EffectCallback[] = [];
 let cleanups: Array<() => void> = [];
+let reload: () => void;
+let storedTakes: ShadowingTake[];
 const spies: Array<{ mockRestore(): void }> = [];
 const onAssessed = mock((_result: PronunciationAssessment, _sentence: string) => undefined);
 const result: PronunciationAssessment = { overallScore: 72, accuracyScore: 70, fluencyScore: 74 };
@@ -67,6 +69,7 @@ beforeEach(() => {
   effects = [];
   cleanups = [];
   onAssessed.mockClear();
+  storedTakes = [latest];
   Object.defineProperty(globalThis, 'window', {
     configurable: true,
     value: { clearInterval: globalThis.clearInterval },
@@ -94,13 +97,16 @@ beforeEach(() => {
     spyOn(React, 'useEffect').mockImplementation((effect) => {
       if (mounting) effects.push(effect);
     }),
-    spyOn(storage, 'subscribeShadowing').mockReturnValue(() => undefined),
+    spyOn(storage, 'subscribeShadowing').mockImplementation((listener) => {
+      reload = listener;
+      return () => undefined;
+    }),
     spyOn(storage, 'getShadowingSentence').mockImplementation(async (_source, text) => ({
       key: `TEST|${text}`,
       articleId: 'TEST-article',
       text,
       updatedAt: 1,
-      takes: [latest],
+      takes: storedTakes,
     })),
     // A failed prompt leaves the saved take available, just as Record again does after a denial.
     spyOn(capture, 'acquireStream').mockRejectedValue(new DOMException('TEST denied', 'NotAllowedError')),
@@ -219,6 +225,58 @@ for (const action of ['new take', 'close', 'sentence change', 'unmount'] as cons
     });
   }
 }
+
+for (const replacement of ['older take', 'newer take', 'no take'] as const) {
+  for (const outcome of ['result', 'error'] as const) {
+    test(`reloading ${replacement} clears the result and aborts Check, ignoring a late ${outcome}`, async () => {
+      const completed = await startCheck(await ready());
+      completed.resolve();
+      await completed.done;
+      expect(useView().assessment).toBe(result);
+      onAssessed.mockClear();
+
+      const check = await startCheck(useView());
+      storedTakes = replacement === 'no take' ? [] : [{ ...latest, id: `TEST-${replacement}` }];
+      reload();
+      await flush();
+      const card = useView();
+      expect(card.latest).toBe(storedTakes.at(-1) ?? null);
+      expect(card.assessment).toBeNull();
+      expect(card.assessmentError).toBeNull();
+      expect(card.isEvaluating).toBe(false);
+      expect(check.signal.aborted).toBe(true);
+
+      if (outcome === 'result') check.resolve();
+      else check.reject();
+      await check.done;
+      expect(useView().assessment).toBeNull();
+      expect(useView().assessmentError).toBeNull();
+      expect(useView().isEvaluating).toBe(false);
+      expect(onAssessed).not.toHaveBeenCalled();
+    });
+  }
+}
+
+test('a reload with the same latest id preserves the result and running Check', async () => {
+  const completed = await startCheck(await ready());
+  completed.resolve();
+  await completed.done;
+  expect(useView().assessment).toBe(result);
+  onAssessed.mockClear();
+
+  const check = await startCheck(useView());
+  storedTakes = [{ ...latest }];
+  reload();
+  await flush();
+  expect(useView().latest).toBe(storedTakes[0]);
+  expect(useView().assessment).toBe(result);
+  expect(useView().isEvaluating).toBe(true);
+  expect(check.signal.aborted).toBe(false);
+  check.resolve();
+  await check.done;
+  expect(useView().assessment).toBe(result);
+  expect(onAssessed).toHaveBeenCalledTimes(1);
+});
 
 test('the old take is not checkable while its replacement microphone is starting', async () => {
   const card = await ready();

@@ -110,6 +110,8 @@ test('WordMarks marks a low score, an omission and an insertion with their sr-on
           { word: 'Bonjour', accuracyScore: 92, errorType: 'None' },
           { word: 'tout', accuracyScore: 65 },
           { word: 'le', errorType: 'Omission' },
+          { word: 'mot', accuracyScore: 0, errorType: 'Omission' },
+          { word: 'tout', accuracyScore: 58, errorType: 'Mispronunciation' },
           { word: 'monde', accuracyScore: 90 },
           { word: 'encore', errorType: 'Insertion' },
         ]}
@@ -138,6 +140,12 @@ test('WordMarks marks a low score, an omission and an insertion with their sr-on
   expect(html).toContain('>le<');
   expect(html).toContain(`title="${en.shadowing.wordError.Omission}"`);
   expect(html).toContain(`(${en.shadowing.wordError.Omission})`);
+
+  expect(html).toContain(`title="${en.shadowing.wordError.Omission} 0">mot`);
+  expect(html).toContain(`<span class="sr-only"> (${en.shadowing.wordError.Omission} 0)</span>`);
+  expect(html).toContain(`title="${en.shadowing.wordError.Mispronunciation} 58">tout`);
+  expect(html).toContain(`<span class="sr-only"> (${en.shadowing.wordError.Mispronunciation} 58)</span>`);
+  expect(html).not.toContain(`${en.shadowing.status.needs_work} 58`);
 
   // Insertion has + prefix, smaller font, dimmed opacity-60, sr-only label and title
   expect(html).toContain('opacity-60');
