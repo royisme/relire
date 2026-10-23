@@ -8,6 +8,7 @@ import { ReaderSyllabusSchema, type ReaderSyllabus, type ReaderGlossaryEntry } f
 import { normalizeLookupToken } from '../../src/services/grammarPack/lookup';
 import { vocabularyHash } from '../../src/services/vocabulary/book';
 import { repositoryRoot } from '../grammar-topics/reference';
+import { notYetIntroduced } from './gateCompleteness';
 import { policyHash } from './gateInputs';
 import {
   ReaderDraftSchema,
@@ -79,9 +80,11 @@ export async function generateReader(options: GenerateOptions, directory: string
       throw new Error(`Missing matching draft for earlier stage ${row.order} (${row.readerId})`);
     previous.push(draft);
   }
+  // The author only sees core words the stage inventory has introduced (G5 would reject the rest).
+  const availableCore = core.filter((entry) => !notYetIntroduced(entry.headword, stage.order));
   const known = new Map<string, Omit<ReaderGlossaryEntry, 'id'> & { id?: string }>();
   for (const entry of [
-    ...core.map(({ headword, ...entry }) => ({ ...entry, lemma: headword })),
+    ...availableCore.map(({ headword, ...entry }) => ({ ...entry, lemma: headword })),
     ...previous.flatMap((draft) => draft.body.glossary),
   ]) {
     const key = JSON.stringify([entry.pos, normalizeLookupToken(entry.lemma), entry.sense]);
@@ -90,7 +93,7 @@ export async function generateReader(options: GenerateOptions, directory: string
   }
   const inputs: Record<string, unknown> = {
     STAGE: stage,
-    CORE: core,
+    CORE: availableCore,
     KNOWN: [...known.values()],
     CANDIDATES: candidates,
   };

@@ -75,6 +75,9 @@ const introduced: Record<string, number> = {
   on: 12,
 };
 
+/** True when a listed core function word is introduced at a LATER stage; unlisted words are never filtered here (G5 still rejects them). */
+export const notYetIntroduced = (headword: string, order: number) => (introduced[key(headword)] ?? 0) > order;
+
 export function completenessGate(
   draft: ReaderDraft,
   context: GateContext,

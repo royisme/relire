@@ -188,7 +188,10 @@ export function verbGate(
         : undefined;
       const occurrences = completed?.filter((atom) => key(atom.spelling) === key(head.spelling)) ?? [];
       const index = occurrences.length === 1 ? completed!.indexOf(occurrences[0]) : -1;
-      const pronoun = index > 0 ? completed![index - 1].readings[0] : undefined;
+      // Step back over reflexive/object clitics, as the story path does (je me couche, il ne mange).
+      let pronounIndex = index - 1;
+      while (pronounIndex > 0 && clitics.includes(key(completed![pronounIndex].readings[0]))) pronounIndex--;
+      const pronoun = index > 0 ? completed![pronounIndex].readings[0] : undefined;
       if (!pronoun || persons[key(pronoun)] !== headVerb.person)
         fail('Missing supported subject-person frame; simplify or supply reviewed context');
     }

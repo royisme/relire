@@ -254,3 +254,27 @@ test('CLI help and invalid arguments do not dispatch or read private inputs', as
     expect(stdout + stderr).toContain('Usage:');
   }
 });
+
+test('the author sees only core words the stage inventory has introduced', async () => {
+  const env = await setup(['good'], 1);
+  const core = readerCoreFixture();
+  // du is introduced at stage 5, so a stage 1 author must not be offered it; unlisted TEST words pass through.
+  await storeCore(env.directory, [
+    ...core,
+    { headword: 'du', pos: 'function', sense: 'article', forms: ['du'], gloss: core[0].gloss },
+  ]);
+  const result = await env.run();
+  expect(result.failures).toEqual([]);
+  const [call] = await env.calls();
+  expect(call.task).not.toContain('"headword": "du"');
+  for (const entry of core) expect(call.task).toContain(`"headword": "${entry.headword}"`);
+  // The policy hash still covers the whole core, so the filter cannot hide a core change from review.
+  const draft = (await readDraft(env.directory, 1))!;
+  expect(draft.provenance.syllabusHash).toBe(
+    policyHash(
+      env.options.syllabus,
+      [...core, { headword: 'du', pos: 'function', sense: 'article', forms: ['du'], gloss: core[0].gloss }],
+      1,
+    ),
+  );
+});
