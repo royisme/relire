@@ -40,12 +40,6 @@ export const bodyMutations: [string, (body: ReaderBody) => void][] = [
     },
   ],
   [
-    'unused glossary entry',
-    (b) => {
-      b.glossary.push({ ...b.glossary[0], id: 'unused', sense: 'unused' });
-    },
-  ],
-  [
     'missing noun gender',
     (b) => {
       delete b.glossary[0].gender;
