@@ -68,6 +68,7 @@ export const BackupControls: React.FC<BackupControlsProps> = ({ audioBytes, shad
           articles: Array.isArray(data.articles) ? data.articles : undefined,
           vocab: data.vocab,
           vocabularyMeta: data.vocabularyMeta,
+          gradedReaders: data.gradedReaders,
           stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
           // Exercise rows are validated in full by importData; an absent key keeps the stored ones.
           units: data.units,
