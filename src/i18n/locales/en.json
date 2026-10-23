@@ -946,6 +946,12 @@
       "countRange": "Choose a whole number from 1 to {{max}}."
     }
   },
+  "gradedReader": {
+    "checkpoints": {
+      "title": "Checkpoints",
+      "quotedSentence": "From the sentence"
+    }
+  },
   "grammarTopics": {
     "sections": "Grammar sections",
     "title": "Topics",
