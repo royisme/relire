@@ -18,6 +18,7 @@ import { loadLexicon, parseAllowlist } from '../scripts/lexicon/lexicon';
 import { vocabularyMetadata } from '../src/services/vocabulary/book';
 import { handle, type Env } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
+import { workerRequest, WORKER_ACCESS_KEY } from './fixtures/workerDb';
 import { ALLOWLIST, writeMorphalouFixture } from './fixtures/morphalouCsv';
 import { testBook } from './fixtures/vocabulary';
 
@@ -294,7 +295,11 @@ test('topics and lexicon apply through real CLI and share the explicit proxy sta
     await db.prepare(buildPublishSql(input).sql.split('\n')[0]).run();
     await db.prepare([...lexiconStatements(lexicon, 'TEST')][0]).run();
     for (const path of ['/v1/topics', '/v1/lexicon/form/testmarche']) {
-      const response = await handle(new Request('https://content.test' + path), { DB: db, ALLOWED_ORIGINS: '' });
+      const response = await handle(workerRequest('https://content.test' + path), {
+        DB: db,
+        ALLOWED_ORIGINS: '',
+        ACCESS_KEYS: WORKER_ACCESS_KEY,
+      });
       expect(response.status).toBe(500);
       expect(await response.json()).toEqual({ error: 'unavailable' });
     }

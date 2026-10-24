@@ -15,7 +15,7 @@ import { buildPublishSql } from '../scripts/grammar-topics/publish';
 import { pathToFileURL } from 'node:url';
 import { GrammarTopicSchema } from '../src/types/grammarTopic';
 import { learningFixture, testBilingual } from './fixtures/grammarLearning';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 import { handle } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
 
@@ -323,7 +323,7 @@ test('complete TEST learning survives generation, sheet, hash review, assembly, 
   const { db, env: worker } = await createWorkerDb();
   try {
     db.exec(buildPublishSql(input).sql);
-    const response = await handle(new Request('https://content.test/v1/topics/test-a'), worker);
+    const response = await handle(workerRequest('https://content.test/v1/topics/test-a'), worker);
     expect(response.status).toBe(200);
     expect(GrammarTopicSchema.parse(await response.json())).toEqual(assembled);
   } finally {
