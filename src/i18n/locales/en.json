@@ -79,7 +79,7 @@
     "completeSet_other": "Complete set: {{count}} exercises across all its learning areas. Deleting the set removes the whole batch.",
     "emptyTitle": "No saved exercises in this area",
     "emptyDesc": "Use Add exercises to bring in a worksheet or make supported exercises for this area.",
-    "listeningSupport": "Listening supports number dictation, sound pairs and dictation of graded-reader sentences, not general audio comprehension.",
+    "listeningSupport": "Listening supports number dictation, sound pairs, spelling to sound and dictation of graded-reader sentences, not general audio comprehension.",
     "listeningEmpty": "Use Add exercises to practise sound pairs or import a worksheet with playable number dictation.",
     "unsupportedListening": "Listening requires number dictation or pack-backed sound pairs with audio text for every item. Choose another area or exclude this unit; prompt read-aloud is not listening practice.",
     "speaking": "Speaking",
