@@ -60,6 +60,11 @@
       "status_one": "{{count}} saved mistake",
       "status_other": "{{count}} saved mistakes",
       "action": "Redo"
+    },
+    "grammar": {
+      "title": "Grammar",
+      "status": "Next topic: {{title}}",
+      "action": "Open"
     }
   },
   "learning": {
@@ -1095,6 +1100,14 @@
     "noMatch": "No published topics match this tag.",
     "clearTag": "Clear tag filter: {{tag}}",
     "back": "Back to Topics",
+    "orderNote": "Topics are listed in the order of the course book.",
+    "studied": "Studied",
+    "markStudied": "Mark as studied",
+    "unmarkStudied": "Mark as not studied",
+    "next": "Next: {{title}}",
+    "nextTopic": "Next topic: {{title}}",
+    "allStudied": "You have marked every topic as studied.",
+    "markError": "Could not save this mark: {{msg}}",
     "learning": {
       "progress": {
         "initial": "{{checked}} of {{total}} checked",
