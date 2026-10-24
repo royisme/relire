@@ -59,8 +59,8 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
 | G1 | `position` from the manifest through publish, the D1 column, `/v1/topics` (sorted by it) and the summary schema | positions unique and positive; list sorted by position, not alphabetically | plan under review |
-| G2 | `storage/topicStudied.ts` (mark, unmark, list, subscribe) and its backup | idempotent mark; restore validates the whole file; absent keeps, `[]` clears | after G1 |
-| G3 | Topics page in book order, numbers, studied marks, Next links, mark button (copy by agy Gemini) | no invented progress; one filled button per view | after G2 |
+| G2 | `storage/topicStudied.ts` (mark, unmark, list, subscribe) and its backup | idempotent mark; restore validates the whole file; absent keeps, `[]` clears | landed (restore tested through the Settings handler) |
+| G3 | Topics page in book order, numbers, studied marks, Next links, mark button (copy by agy Gemini) | no invented progress; one filled button per view | next (after copy C5) |
 | G4 | Today `grammar` step (service configured only) | omitted, never faked, without a service; real error on the step | after G3 |
 
 ### Content (paused by the owner's priority)
