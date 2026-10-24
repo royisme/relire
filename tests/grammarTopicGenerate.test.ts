@@ -418,8 +418,13 @@ test('actual CLIs use the private path, report errors on stderr and exit 1 on a 
     join(repositoryRoot, 'src/services/exercises/normalizeFrench.ts'),
     join(repo, 'src/services/exercises/normalizeFrench.ts'),
   );
-  // Exercise metadata also validates reader provenance, so the copied contracts need its pure dependencies.
-  for (const file of ['services/grammarPack/lookup.ts', 'utils/readerTokens.ts', 'utils/sentences.ts']) {
+  // Exercise metadata also validates reader and spelling-sound provenance, so the copied contracts need their pure dependencies.
+  for (const file of [
+    'services/grammarPack/lookup.ts',
+    'utils/readerTokens.ts',
+    'utils/sentences.ts',
+    'data/frenchIpa.ts',
+  ]) {
     const destination = join(repo, 'src', file);
     await mkdir(join(destination, '..'), { recursive: true });
     await cp(join(repositoryRoot, 'src', file), destination);
