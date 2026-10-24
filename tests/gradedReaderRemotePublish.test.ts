@@ -299,6 +299,7 @@ test('zero non-bundled readers is a no-op, including CLI without private files o
   await publishReaders(await prepareReaderPublication([], '1.0.0'), db);
   expect(current().value).toBe('TEST old catalogue');
   const root = await mkdtemp(join(tmpdir(), 'relire-TEST-remote-publish-'));
+  const log = spyOn(console, 'log').mockImplementation(() => {});
   try {
     await Bun.write(
       join(root, 'data/graded-readers/syllabus.json'),
@@ -310,9 +311,14 @@ test('zero non-bundled readers is a no-op, including CLI without private files o
     await Bun.write(join(root, 'data/graded-readers/reviews.json'), '{"records":[]}');
     await runPublishRemote(['--apply-local'], root);
     await runPublishRemote(['--sql'], root);
+    expect(log.mock.calls).toEqual([
+      ['No non-bundled readers selected; nothing to publish.'],
+      ['No non-bundled readers selected; nothing to publish.'],
+    ]);
     for (const args of [[], ['--remote'], ['--apply-local', '--remote']])
       expect(await failure(runPublishRemote(args, root))).toMatchObject({ message: expect.stringContaining('Usage') });
   } finally {
+    log.mockRestore();
     await rm(root, { recursive: true, force: true });
   }
 });

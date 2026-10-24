@@ -4,6 +4,12 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: D-remote-2 review follow-up (`remote-books`, integration pending)
+
+- Reader no-op output now says nothing to publish without claiming database state; vocabulary completion messages use early branches. Both publishers share a pure terminal guard, with both asymmetric non-TTY cases tested without faking streams.
+- CLI refusal tests assert each publisher's own SQL path. Vocabulary has complete invented inputs and a staging-only control that actually writes SQL. Readers apply never writes SQL; its fallback checks no `.local/` output and an untriggered Wrangler import tripwire, avoiding the larger private-gate/offline-Morphalou fixture.
+- Verified here (all exit 0): focused publisher tests (40), typecheck, lint, format, shape, i18n, full suite (2,360), and workflow remote-flag grep. No remote service, network, install or real content exercised; owner remote acceptance remains unverified.
+
 ## 2026-10-24: D-remote-1 landed locally (publisher hygiene)
 
 - All four publishers now run a rooted, env-file-free local D1 target through `scripts/content-service/d1Target.ts`: no `.dev.vars`/`.env` read, explicit persist path, no telemetry or banner, failure logs under `<root>/.pi-runs/`, pure `parseArgs`, an `allowRemote` option that is a no-op until the remote steps. The topic and lexicon SQL deletes the version row first. Real local Wrangler and `getPlatformProxy` run in temp-root tests.

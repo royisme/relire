@@ -2,6 +2,10 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+export function requireInteractiveTerminal(stdinIsTTY: boolean, stdoutIsTTY: boolean): void {
+  if (!stdinIsTTY || !stdoutIsTTY) throw new Error('Remote publication requires TTY stdin and stdout');
+}
+
 export function d1ExecuteSpawn(root: string | URL, remote: boolean, ...args: string[]) {
   const worker = resolve(typeof root === 'string' ? root : fileURLToPath(root), 'worker');
   return {

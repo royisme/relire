@@ -1,5 +1,5 @@
 /** Metadata-only CI check or owner-authorized staged publication using installed Wrangler; no deployment. */
-import { platformProxyOptions } from '../content-service/d1Target';
+import { platformProxyOptions, requireInteractiveTerminal } from '../content-service/d1Target';
 import type { D1Database } from '../../worker/node_modules/@cloudflare/workers-types';
 import { checkVocabularyMetadata, vocabularyRepository } from './metadata';
 import {
@@ -33,8 +33,7 @@ export async function publish(
     const mode = parseArgs(args);
     const remote = mode === '--apply-remote-unreviewed';
     if (remote && !allowRemote) throw new Error('Remote publication requires owner CLI authorization');
-    if (remote && !(process.stdin.isTTY && process.stdout.isTTY))
-      throw new Error('Remote publication requires TTY stdin and stdout');
+    if (remote) requireInteractiveTerminal(Boolean(process.stdin.isTTY), Boolean(process.stdout.isTTY));
     const unreviewed = mode === '--apply-local-unreviewed' || remote;
     const { manifest, reviews } = checkVocabularyMetadata(
       await Bun.file(new URL('data/vocabulary/manifest.json', root)).json(),
@@ -99,13 +98,15 @@ export async function publish(
     } finally {
       await proxy?.dispose();
     }
-    console.log(
-      remote
-        ? 'Unreviewed vocabulary current pointer verified remotely; no linguistic review'
-        : unreviewed
-          ? 'Unreviewed vocabulary current pointer verified locally; linguistic review waived for local use'
-          : 'Vocabulary current pointer verified locally',
-    );
+    if (remote) {
+      console.log('Unreviewed vocabulary current pointer verified remotely; no linguistic review');
+      return;
+    }
+    if (unreviewed) {
+      console.log('Unreviewed vocabulary current pointer verified locally; linguistic review waived for local use');
+      return;
+    }
+    console.log('Vocabulary current pointer verified locally');
   } catch (error) {
     // D1 errors can include private content; keep raw failures out of the public console.
     await Bun.write(new URL('.pi-runs/vocabulary/failure.log', root), Bun.inspect(error) + '\n');

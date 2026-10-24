@@ -1,7 +1,7 @@
 /** Owns owner-authorized reader publication via installed Wrangler; no deployment or env files. */
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { platformProxyOptions } from '../content-service/d1Target';
+import { platformProxyOptions, requireInteractiveTerminal } from '../content-service/d1Target';
 import type { D1Database } from '../../worker/node_modules/@cloudflare/workers-types';
 import { repositoryRoot } from '../grammar-topics/reference';
 import { assemble } from './assemble';
@@ -23,14 +23,13 @@ export async function runPublishRemote(
     const mode = parseArgs(args);
     const remote = mode === '--apply-remote';
     if (remote && !allowRemote) throw new Error('Remote publication requires owner CLI authorization');
-    if (remote && !(process.stdin.isTTY && process.stdout.isTTY))
-      throw new Error('Remote publication requires TTY stdin and stdout');
+    if (remote) requireInteractiveTerminal(Boolean(process.stdin.isTTY), Boolean(process.stdout.isTTY));
     const { syllabus, reviews } = await readReviewMetadata(root);
     const remoteIds = new Set(
       syllabus.stages.filter((stage) => stage.include && !stage.bundled).map((stage) => stage.readerId),
     );
     if (!remoteIds.size) {
-      console.log(`No non-bundled readers selected; ${remote ? 'remote' : 'local'} catalogue unchanged.`);
+      console.log('No non-bundled readers selected; nothing to publish.');
       return;
     }
     // Keep the included prefix intact: gates need all earlier stages and their current reviews.

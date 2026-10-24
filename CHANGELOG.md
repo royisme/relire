@@ -131,6 +131,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Reader publication with no selected non-bundled readers now reports nothing to publish, without implying a database was checked.
 - The Grammar entry in the sidebar no longer shares its icon with the language switcher.
 - The pronunciation check prompts no longer show example scores the model could copy.
 - A pronunciation check with no audio and no transcript now says so instead of scoring the reference text.
