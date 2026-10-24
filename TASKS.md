@@ -39,7 +39,7 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| D1 | Meta schema, `supportsListening` extension, `gradeItem` flag `ignoreSentencePunctuation`, `prepareReaderDictation` | prepared unit passes `ExerciseUnitSchema`; a sentence typed without its final full stop grades right, a missing hyphen or apostrophe still wrong; fewer than 3 sentences rejected; retry through `saveUnits` keeps the batch | plan reviewed by Argon (6 findings applied); ready to dispatch |
+| D1 | Meta schema and marker-to-type refinement, `gradeItem` flag `ignoreSentencePunctuation`, `prepareReaderDictation` | prepared unit passes `ExerciseUnitSchema`; a sentence typed without its final full stop grades right, a missing hyphen or apostrophe still wrong; published readers require at least 3 sentences; retry through `saveUnits` keeps the batch | implemented on `pi/dictation-d1`; 2,224 tests pass; typecheck/lint blocked by missing Worker dependencies; awaiting lead checks/review |
 | D2 | Device engine in `NumberDictationControl` and `ItemRow`; "Practise by dictation" button in `GradedReaderWorkspace`; copy, caption, changelog, architecture | no synthesis or fetch; French text not shown before the check; one filled button per view stays | after D1 |
 
 ### Content (paused by the owner's priority)

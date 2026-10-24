@@ -418,6 +418,12 @@ test('actual CLIs use the private path, report errors on stderr and exit 1 on a 
     join(repositoryRoot, 'src/services/exercises/normalizeFrench.ts'),
     join(repo, 'src/services/exercises/normalizeFrench.ts'),
   );
+  // Exercise metadata also validates reader provenance, so the copied contracts need its pure dependencies.
+  for (const file of ['services/grammarPack/lookup.ts', 'utils/readerTokens.ts', 'utils/sentences.ts']) {
+    const destination = join(repo, 'src', file);
+    await mkdir(join(destination, '..'), { recursive: true });
+    await cp(join(repositoryRoot, 'src', file), destination);
+  }
   await symlink(join(repositoryRoot, 'node_modules'), join(repo, 'node_modules'));
   const cli = async (file: string, args: string[]) => {
     const child = Bun.spawn(['bun', file, ...args], {

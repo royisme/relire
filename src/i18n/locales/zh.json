@@ -747,6 +747,10 @@
     "consonants": "辅音",
     "play": "播放 {{word}}，音标 {{symbol}}"
   },
+  "readerDictation": {
+    "title": "听写",
+    "instruction": "听句子，写出你听到的内容。标点符号不计入判分。"
+  },
   "minimalPairs": {
     "progress": {
       "title": "近音辨听作答",
