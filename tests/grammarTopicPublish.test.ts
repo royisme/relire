@@ -1,7 +1,7 @@
 /** Owns private SQL publication, public metadata checks and publish-to-Worker round trips using TEST fixtures only. */
 import { expect, spyOn, test } from 'bun:test';
 import { createHash } from 'node:crypto';
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -329,39 +329,78 @@ test('publish output contains only counts, skipped ids and the path, never fixtu
   }
 });
 
-test('pure argument parsing accepts only local preparation/check modes', () => {
-  for (const args of [[], ['--check'], ['--apply-local']]) expect(parseArgs(args)).toBe(args[0]);
-  for (const args of [['--remote'], ['--apply-remote'], ['--check', '--apply-local'], ['--check', '--check']])
+test('pure argument parsing accepts preparation/check and explicit apply modes only', () => {
+  for (const args of [[], ['--check'], ['--apply-local'], ['--apply-remote']]) expect(parseArgs(args)).toBe(args[0]);
+  for (const args of [
+    ['--remote'],
+    ['--unknown'],
+    ['--apply-remote', '--remote'],
+    ['--apply-remote', '--apply-local'],
+    ['--apply-remote', '--check'],
+    ['--apply-remote', '--apply-remote'],
+    ['--check', '--apply-local'],
+    ['--check', '--check'],
+  ])
     expect(() => parseArgs(args)).toThrow('Usage');
 });
 
-test.each([undefined, false])(
-  'remote permission=%s still refuses remote flags and logs only beneath root',
-  async (allowRemote) => {
-    const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-topic-failure-'));
-    const log = spyOn(console, 'log').mockImplementation(() => {});
-    const error = spyOn(console, 'error').mockImplementation(() => {});
-    try {
-      expect(
-        await publish(['--apply-remote'], pathToFileURL(directory + '/'), { allowRemote }).then(
-          () => 'resolved',
-          (error: Error) => error.message,
-        ),
-      ).toContain('Usage');
-      expect(await Bun.file(join(directory, '.pi-runs/grammar-topics/failure.log')).text()).toContain(
-        'Usage: publish.ts [--apply-local | --check]',
-      );
-      expect(log.mock.calls).toEqual([]);
-      expect(error.mock.calls).toEqual([
-        ['Topic publication failed; private diagnostics in .pi-runs/grammar-topics/failure.log'],
-      ]);
-    } finally {
-      log.mockRestore();
-      error.mockRestore();
-      await rm(directory, { recursive: true, force: true });
+test.each([
+  { args: ['--bogus'], allowRemote: true, message: 'Usage: publish.ts [--apply-local | --apply-remote | --check]' },
+  ...[undefined, false].map((allowRemote) => ({
+    args: ['--apply-remote'],
+    allowRemote,
+    message: 'Remote publication requires owner CLI authorization',
+  })),
+  { args: ['--apply-remote'], allowRemote: true, message: 'Remote publication requires TTY stdin and stdout' },
+])('early refusal prints $message exactly once without creating files', async ({ args, allowRemote, message }) => {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-topic-failure-'));
+  const log = spyOn(console, 'log').mockImplementation(() => {});
+  const error = spyOn(console, 'error').mockImplementation(() => {});
+  const stdinIsTTY = process.stdin.isTTY;
+  process.stdin.isTTY = false;
+  try {
+    expect(
+      await publish([...args], pathToFileURL(directory + '/'), { allowRemote }).then(
+        () => 'resolved',
+        (error: Error) => error.message,
+      ),
+    ).toBe(message);
+    expect(await readdir(directory)).toEqual([]);
+    expect(log.mock.calls).toEqual([]);
+    expect(error.mock.calls).toEqual([[message]]);
+  } finally {
+    process.stdin.isTTY = stdinIsTTY;
+    log.mockRestore();
+    error.mockRestore();
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('remote CLI refuses non-TTY streams before inputs, output, logs or Wrangler access', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-topic-terminal-'));
+  try {
+    const script = 'scripts/grammar-topics/publish.ts';
+    await Bun.write(join(directory, script), Bun.file(new URL('../' + script, import.meta.url)));
+    for (const dependency of ['scripts/grammar-pack', 'scripts/content-service', 'src', 'node_modules']) {
+      await mkdir(join(directory, dependency, '..'), { recursive: true });
+      await symlink(new URL('../' + dependency, import.meta.url).pathname, join(directory, dependency));
     }
-  },
-);
+    const child = Bun.spawnSync({
+      cmd: [process.execPath, '--no-env-file', join(directory, script), '--apply-remote'],
+      cwd: directory,
+      stdin: 'ignore',
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    expect(child.exitCode).toBe(1);
+    expect(child.stdout.toString()).toBe('');
+    expect(child.stderr.toString()).toBe('Remote publication requires TTY stdin and stdout\n');
+    expect((await readdir(directory)).sort()).toEqual(['node_modules', 'scripts', 'src']);
+    expect(await Bun.file(join(directory, '.local/grammar-topics/publish.sql')).exists()).toBe(false);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 test('actual --check CLI validates committed metadata twice without static artifacts or private inputs', () => {
   for (let i = 0; i < 2; i++) {
