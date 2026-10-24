@@ -35,6 +35,7 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 ## Owner
 
 - Answer the open decisions in `docs/graded-readers-plan.md` (public bundle of stages 1 to 5, who reviews the language, word budgets).
+- Try the graded readers by hand with `docs/graded-readers-trial.md` (no AI key needed), then send back what is wrong.
 - Try by hand: the pronunciation features (practice-card marks, strip, Details), Sound pairs, the published local grammar topics; accept or change the open copy items (#16, #17, #24).
 - Human language review of the 91 locally published grammar topics (Chinese wording, kinship terms and a handful of Low items; their notes are in the local working notes).
 - Deploy the content service (#31) before any real learner depends on topics, the wordbook or later readers.
