@@ -11,6 +11,7 @@ import { errorMessage } from '../../services/ai/errors';
 import { navigate } from '../../hooks/useRoute';
 import { ReaderView } from '../ReaderView';
 import { ReaderCheckpoints } from './ReaderCheckpoints';
+import { ReaderDictationSection } from './ReaderDictationSection';
 import { ReaderAuthoredSheets, type AuthoredSelection } from './ReaderAuthoredSheets';
 import { Button } from '../ui/button';
 
@@ -79,6 +80,7 @@ export function GradedReaderWorkspace({
               error={progress.owner !== 'completion' ? progress.error : null}
               onRetry={progress.retry}
             />
+            <ReaderDictationSection reader={reader} />
             <section aria-label={t('gradedReader.completion')} className="space-y-2 border-t border-ink-200 pt-4">
               <Button
                 variant="outline"

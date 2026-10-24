@@ -79,7 +79,7 @@
     "completeSet_other": "完整题组：跨所有学习领域的 {{count}} 份练习。删除题组会删除整个批次。",
     "emptyTitle": "此领域还没有已保存的练习",
     "emptyDesc": "通过“添加练习”导入练习单，或为此领域生成支持的练习。",
-    "listeningSupport": "听力支持数字听写和近音辨听，不支持通用音频理解训练。",
+    "listeningSupport": "听力支持数字听写、近音辨听和分级读物句子听写，不支持通用音频理解训练。",
     "listeningEmpty": "通过“添加练习”创建近音辨听练习，或导入含可练习数字听写的练习单。",
     "unsupportedListening": "听力要求每道题均为数字听写或来自词对包的近音辨听，且有朗读文本。请选择其他领域或排除此单元；朗读题干不算听力练习。",
     "speaking": "口语",
@@ -184,6 +184,11 @@
     "sourceAi": "AI 撰写并经 AI 审核，非人工审核",
     "sourceHuman": "人工审核",
     "sourceUnknown": "未记录审核状态",
+    "dictation": {
+      "title": "听写",
+      "description": "用设备语音听这本读物中的句子，再把它们写下来。译文作为提示，标点不计入检查。",
+      "action": "练习听写"
+    },
     "completion": "阅读状态",
     "markRead": "标为已读",
     "markUnread": "标为未读",

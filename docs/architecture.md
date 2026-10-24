@@ -109,7 +109,7 @@ There is no router dependency. The address is the single source of truth for whe
 | `#/grammar/gender` | Local gender reference and drills, service-independent |
 | `#/grammar/topics/:topicId` | Published topic reader or shared topic-learning workbench |
 | `#/grammar/exercises` | Saved grammar-scoped sets, service-independent |
-| `#/listening`, `#/writing` | Explicit listening (number dictation only) and saved writing units; Writing menu appears only with saved writing units |
+| `#/listening`, `#/writing` | Explicit listening (number dictation, sound pairs and reader-sentence dictation) and saved writing units; Writing menu appears only with saved writing units |
 | `#/{read|grammar|listening|writing}/exercises/set/:setId` | Complete original mixed batch, real area labels and whole totals; at least one unit must match the entry area. Whole-set deletion names all areas and the real count |
 | `#/{read|grammar|listening|writing}/exercises/unit/:unitId` | Existing unit workspace; actual area must match or not-found |
 | `#/speaking` | Pronunciation hub: Read aloud, Sound pairs creation and saved-answer counts, French sounds reference and reader-shadowing context |
@@ -141,6 +141,10 @@ Two pages, one per area, each its own component so state and guard ownership nev
 The article import saves one article (`db.saveArticle`); the exercise import saves one batch of units (`exercises.saveUnits`, one transaction; every unit shares one `setId`, `level` and `createdAt`). Neither saves the other. Collisions always reject; an existing ID is not a retry receipt. It creates no states, attempts or schema metadata.
 
 `index.html` synchronously owns history-position recording before deferred modules; it merges history.state and records native hashes while the application loads. `utils/importNavigation` consumes that recorder: route publication stays at the import page until the Dialog decision, queued browser events coalesce before restoring the real origin entry, Keep retains draft/history, and Discard replays the saved traversal or link intent. Canonical replacements retain position. Successful save releases protection before navigation. Dirty reload/close uses beforeunload; pending saves cannot discard. Navigation API current-entry indices supplement genuinely older untagged entries, but routine operation does not require it. Same-document entries fabricated before the earliest synchronous document script cannot be direction-recovered without that API; the normal recording contract begins at that script, not at application mount.
+
+## Exercise dictation drills
+
+`NUMBER_DICTATION`, despite its name, is the one hear-and-type control for both numbers and sentences. `NumberDictationControl` keeps audio/answers hidden before checking. Reader-dictation clues are translations rendered without French lookup; items declaring `meta.playbackEngine === 'device'` use clip-less device playback for Listen and after-check speech, with `speechAfterCheck` still the replay master switch.
 
 ## Progress and adaptive drills
 
@@ -214,7 +218,9 @@ App lazy-loads `GradedReadersPage` and `GradedReaderPage`. `useGradedReaders` va
 
 `gradedDocument` adapts the committed snapshot's display fields only. ReaderView keeps its shared layout and dock, with authored sentence ids and token ordinals captured in word callbacks. `readerOccurrence` resolves local bindings into `ReaderAuthoredSheets` (AuthoredEntry/SentenceAuthored), bypassing App's AI lookup handlers. Vocabulary saves use the clicked displayed spelling, the reader definition and the exact edition source. Optional Ask AI is an extension slot, not implemented. All listening boundaries explicitly receive device voice; no global speech setting changes. Markers stay hidden on this source; recording actions are offered like any source, owned by the graded edition (snapshot-guarded save, see below), never a fake article or unit.
 
-After the text, `useReaderWorkspace` debounces drafts for 300 ms and `services/gradedReaders/session.ts` serializes draft/check/redo/completion writes with the captured epoch and advancing committed revision. Check flushes drafts and supplies `gradeReaderQuestion`; only the committed verdict is shown. Stale writes reload the edition instead of adopting new tokens or overwriting progress. Other failures retain durable state with Retry. Mark read/unread is explicit and independent, with the committed timestamp; opening, translation, playback and checks never complete reading. Checkpoints/completion stay in page flow above dock padding. No Article, Library entry, exercise unit, attempt or learner-data request is created.
+After the text, `useReaderWorkspace` debounces drafts for 300 ms and `services/gradedReaders/session.ts` serializes draft/check/redo/completion writes with the captured epoch and advancing committed revision. Check flushes drafts and supplies `gradeReaderQuestion`; only the committed verdict is shown. Stale writes reload the edition instead of adopting new tokens or overwriting progress. Other failures retain durable state with Retry. Mark read/unread is explicit and independent, with the committed timestamp; opening, translation, playback and checks never complete reading. Checkpoints/completion stay in page flow above dock padding. These reader-local actions create no Article, Library entry, exercise unit, attempt or learner-data request.
+
+Between checkpoints and completion, `ReaderDictationSection` → `prepareReaderDictation` → `saveUnits` (through `useUnitSaver`) → Practice set saves a standalone Listening unit before navigation. Failed writes retry the same prepared batch. The opened `PublishedReader` snapshot supplies up to six sentences, translated clues and edition provenance; saved sets, attempts, Mistakes and backups need no reader or service.
 
 ## Key flows
 

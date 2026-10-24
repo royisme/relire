@@ -18,6 +18,7 @@ import { ReaderWord } from '../src/components/reader/ReaderWord';
 import { SentenceBar } from '../src/components/reader/SentenceBar';
 import { ReaderSentenceToolbar } from '../src/components/reader/ReaderSentenceToolbar';
 import { SpeakButton } from '../src/components/ui/speak-button';
+import { ReaderCheckpoints } from '../src/components/graded/ReaderCheckpoints';
 import { AuthoredEntry } from '../src/components/word/AuthoredEntry';
 import { useReaderWorkspace } from '../src/hooks/useReaderWorkspace';
 import { readerOccurrence } from '../src/services/gradedReaders/occurrence';
@@ -33,6 +34,7 @@ import zh from '../src/i18n/locales/zh.json';
 
 const restoreWindow = readerTestWindow();
 const navigation = await import('../src/hooks/useRoute');
+const { ReaderDictationSection } = await import('../src/components/graded/ReaderDictationSection');
 const { GradedReaderPage, ReaderEditionGate } = await import('../src/components/graded/GradedReaderPage');
 const { GradedReaderWorkspace } = await import('../src/components/graded/GradedReaderWorkspace');
 const { ReaderAuthoredSheets } = await import('../src/components/graded/ReaderAuthoredSheets');
@@ -191,6 +193,20 @@ test('authored route actions never call AI or Settings; word and sentence select
   expect(navigate).not.toHaveBeenCalled();
   view().onBack();
   expect(navigate).toHaveBeenCalledWith({ name: 'gradedReaders' });
+});
+
+test('dictation uses the opened snapshot and sits between checkpoints and completion', async () => {
+  const opened = await storage.openReaderEdition(reader);
+  const tree = probe.render(() =>
+    GradedReaderWorkspace({ opened, vocabulary, reload: noop, onOpenShadowingLog: noop }),
+  );
+  const view = element<React.ComponentProps<typeof ReaderView>>(tree, ReaderView);
+  const afterText = view.props.afterText as React.ReactElement<{ children: React.ReactNode }>;
+  const sections = React.Children.toArray(afterText.props.children) as React.ReactElement[];
+  expect(sections.map((section) => section.type)).toEqual([ReaderCheckpoints, ReaderDictationSection, 'section']);
+  expect(
+    element<React.ComponentProps<typeof ReaderDictationSection>>(afterText, ReaderDictationSection).props.reader,
+  ).toBe(opened.row.snapshot);
 });
 
 test('the authored footer passes clicked spelling and the reader definition to durable bookmark storage', async () => {
