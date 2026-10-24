@@ -5,7 +5,7 @@ import { mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildPublishSql, checkTopicMetadata, publish } from '../scripts/grammar-topics/publish';
+import { buildPublishSql, checkTopicMetadata, parseArgs, publish } from '../scripts/grammar-topics/publish';
 import { buildTopics, type TopicBuildInputs } from '../scripts/grammar-pack/topics';
 import { topicContentHash } from '../scripts/grammar-pack/gate';
 import { GrammarTopicListSchema, GrammarTopicSchema, type GrammarTopic } from '../src/types/grammarTopic';
@@ -66,7 +66,7 @@ test('SQL quotes every value and round trips titles, examples, JSON tags and can
   const input = quotingInput();
   const { sql, version } = buildPublishSql(input);
   expect(sql).toContain("''single''");
-  expect(sql.startsWith('DELETE FROM topics;\n')).toBe(true);
+  expect(sql.startsWith("DELETE FROM meta WHERE key = 'packVersion';\nDELETE FROM topics;\n")).toBe(true);
   expect(sql.trimEnd().endsWith(`VALUES ('packVersion', '${version}');`)).toBe(true);
   const { db } = await createWorkerDb();
   try {
@@ -171,7 +171,7 @@ test('zero topics replaces prior content, emits only delete and version, and lis
     const empty = buildPublishSql(input);
     expect(empty.report).toEqual(['test-only: excluded; skipped']);
     expect(empty.sql).toBe(
-      "DELETE FROM topics;\nINSERT OR REPLACE INTO meta (key, value) VALUES ('packVersion', '0.1.0+e3b0c442');\n",
+      "DELETE FROM meta WHERE key = 'packVersion';\nDELETE FROM topics;\nINSERT OR REPLACE INTO meta (key, value) VALUES ('packVersion', '0.1.0+e3b0c442');\n",
     );
     expect(buildPublishSql(inputs([])).sql).toBe(empty.sql);
     db.exec(empty.sql);
@@ -328,6 +328,40 @@ test('publish output contains only counts, skipped ids and the path, never fixtu
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test('pure argument parsing accepts only local preparation/check modes', () => {
+  for (const args of [[], ['--check'], ['--apply-local']]) expect(parseArgs(args)).toBe(args[0]);
+  for (const args of [['--remote'], ['--apply-remote'], ['--check', '--apply-local'], ['--check', '--check']])
+    expect(() => parseArgs(args)).toThrow('Usage');
+});
+
+test.each([undefined, false])(
+  'remote permission=%s still refuses remote flags and logs only beneath root',
+  async (allowRemote) => {
+    const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-topic-failure-'));
+    const log = spyOn(console, 'log').mockImplementation(() => {});
+    const error = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(
+        await publish(['--apply-remote'], pathToFileURL(directory + '/'), { allowRemote }).then(
+          () => 'resolved',
+          (error: Error) => error.message,
+        ),
+      ).toContain('Usage');
+      expect(await Bun.file(join(directory, '.pi-runs/grammar-topics/failure.log')).text()).toContain(
+        'Usage: publish.ts [--apply-local | --check]',
+      );
+      expect(log.mock.calls).toEqual([]);
+      expect(error.mock.calls).toEqual([
+        ['Topic publication failed; private diagnostics in .pi-runs/grammar-topics/failure.log'],
+      ]);
+    } finally {
+      log.mockRestore();
+      error.mockRestore();
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
 
 test('actual --check CLI validates committed metadata twice without static artifacts or private inputs', () => {
   for (let i = 0; i < 2; i++) {

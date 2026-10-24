@@ -1,5 +1,5 @@
 /** Synthetic preparation, actual command entrypoints and ordered immutable publication failures on disposable SQLite. */
-import { expect, test } from 'bun:test';
+import { expect, spyOn, test } from 'bun:test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
@@ -13,7 +13,7 @@ import {
 } from '../scripts/vocabulary/prepareBook';
 import { prepare } from '../scripts/vocabulary/prepare';
 import { review } from '../scripts/vocabulary/review';
-import { publish } from '../scripts/vocabulary/publish';
+import { parseArgs, publish } from '../scripts/vocabulary/publish';
 import {
   assembleVocabularyBook,
   publishVocabularyBook,
@@ -23,6 +23,44 @@ import {
 import { vocabularyHash, vocabularyMetadata, canonicalVocabularyJson } from '../src/services/vocabulary/book';
 import { VocabularyEntrySchema } from '../src/types/vocabulary';
 import { handle } from '../worker/src/index';
+test('pure argument parsing accepts only preparation, metadata check and the two local modes', () => {
+  for (const args of [[], ['--check'], ['--apply-local'], ['--apply-local-unreviewed']])
+    expect(parseArgs(args)).toBe(args[0]);
+  for (const args of [
+    ['--remote'],
+    ['--apply-remote'],
+    ['--apply-remote-unreviewed'],
+    ['--check', '--apply-local'],
+    ['--apply-local', '--apply-local-unreviewed'],
+  ])
+    expect(() => parseArgs(args)).toThrow('Usage');
+});
+
+test.each([undefined, false])(
+  'remote permission=%s refuses remote flags with rooted private diagnostics',
+  async (allowRemote) => {
+    const directory = await mkdtemp(`${tmpdir()}/relire-TEST-vocabulary-failure-`);
+    const log = spyOn(console, 'log').mockImplementation(() => {});
+    const error = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(
+        await failure(
+          publish(['--apply-remote-unreviewed'], pathToFileURL(directory + '/'), undefined, { allowRemote }),
+        ),
+      ).toMatchObject({ message: expect.stringContaining('Usage') });
+      expect(await Bun.file(directory + '/.pi-runs/vocabulary/failure.log').text()).toContain('Usage: publish.ts');
+      expect(log.mock.calls).toEqual([]);
+      expect(error.mock.calls).toEqual([
+        ['Vocabulary publication failed; private diagnostics in .pi-runs/vocabulary/failure.log'],
+      ]);
+    } finally {
+      log.mockRestore();
+      error.mockRestore();
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
+
 const metadata = {
   bookId: 'tcf-7000',
   title: { en: 'TEST book', zh: '\u6d4b\u8bd5' },

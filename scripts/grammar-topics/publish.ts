@@ -1,6 +1,7 @@
 /** Owns private reviewed-topic SQL delivery to local D1; assembly and owner review stay in the existing gate. */
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { d1ExecuteSpawn } from '../content-service/d1Target';
 import { buildTopics, readTopicInputs, TopicManifestSchema, type TopicBuildInputs } from '../grammar-pack/topics';
 import { TopicReviewsSchema, topicContentHash } from '../grammar-pack/gate';
 import en from '../../src/i18n/locales/en.json';
@@ -20,8 +21,8 @@ export function buildPublishSql(input: TopicBuildInputs) {
     .digest('hex')
     .slice(0, 8);
   const version = `${pack.packVersion}+${digest}`;
-  // Wrangler strips explicit transactions; keep replacement rows first and the version last.
-  const statements = ['DELETE FROM topics;'];
+  // Wrangler strips explicit transactions; invalidate the old version before replacing rows.
+  const statements = ["DELETE FROM meta WHERE key = 'packVersion';", 'DELETE FROM topics;'];
   for (const [i, topic] of pack.topics.entries()) {
     const values = [
       topic.id,
@@ -61,42 +62,60 @@ export function checkTopicMetadata(
   }
 }
 
-export async function publish(args: string[], root = repository): Promise<void> {
+export function parseArgs(args: string[]) {
   if (args.length && (args.length !== 1 || !['--apply-local', '--check'].includes(args[0])))
     throw new Error('Usage: publish.ts [--apply-local | --check]');
-  if (args[0] === '--check') {
-    checkTopicMetadata(
-      await Bun.file(new URL('data/grammar-topics/manifest.json', root)).json(),
-      await Bun.file(new URL('data/grammar-topics/reviews.json', root)).json(),
-    );
-    console.log('Topic metadata checked (no private drafts read)');
-    return;
-  }
-  const { sql, pack, report } = buildPublishSql(await readTopicInputs(root));
-  const output = new URL('.local/grammar-topics/publish.sql', root);
-  await Bun.write(output, sql);
-  for (const line of report) console.log(`Skipped: ${line.split(':')[0]}`);
-  console.log(`${pack.topics.length} topics prepared: ${fileURLToPath(output)}`);
-  if (args[0] === '--apply-local') {
-    const child = Bun.spawn(['bunx', 'wrangler', 'd1', 'execute', 'DB', '--local', '--file', fileURLToPath(output)], {
-      cwd: fileURLToPath(new URL('worker/', repository)),
-      stdin: 'ignore',
-      stdout: 'inherit',
-      stderr: 'inherit',
-    });
-    if ((await child.exited) !== 0)
-      throw new Error(
-        'Local D1 publish failed. If the schema is missing: cd worker && bunx wrangler d1 migrations apply DB --local',
+  return args[0];
+}
+
+export async function publish(
+  args: string[],
+  root = repository,
+  { allowRemote = false }: { allowRemote?: boolean } = {},
+): Promise<void> {
+  // Reserved for the owner-only remote mode; no remote flags are accepted yet.
+  void allowRemote;
+  try {
+    const mode = parseArgs(args);
+    if (mode === '--check') {
+      checkTopicMetadata(
+        await Bun.file(new URL('data/grammar-topics/manifest.json', root)).json(),
+        await Bun.file(new URL('data/grammar-topics/reviews.json', root)).json(),
       );
-    console.log(`${pack.topics.length} topics published locally`);
+      console.log('Topic metadata checked (no private drafts read)');
+      return;
+    }
+    const { sql, pack, report } = buildPublishSql(await readTopicInputs(root));
+    const output = new URL('.local/grammar-topics/publish.sql', root);
+    await Bun.write(output, sql);
+    if (mode === '--apply-local') {
+      const child = Bun.spawn({
+        ...d1ExecuteSpawn(root, false, 'd1', 'execute', 'DB', '--file', fileURLToPath(output)),
+        stdin: 'ignore',
+        stdout: 'pipe',
+        stderr: 'pipe',
+      });
+      const [stdout, stderr, exitCode] = await Promise.all([
+        new Response(child.stdout).text(),
+        new Response(child.stderr).text(),
+        child.exited,
+      ]);
+      if (exitCode !== 0) throw new Error(`Local D1 publish failed (${exitCode})\n${stdout}${stderr}`);
+    }
+    for (const line of report) console.log(`Skipped: ${line.split(':')[0]}`);
+    console.log(`${pack.topics.length} topics prepared: ${fileURLToPath(output)}`);
+    if (mode === '--apply-local') console.log(`${pack.topics.length} topics published locally`);
+  } catch (error) {
+    await Bun.write(new URL('.pi-runs/grammar-topics/failure.log', root), Bun.inspect(error) + '\n');
+    console.error('Topic publication failed; private diagnostics in .pi-runs/grammar-topics/failure.log');
+    throw error;
   }
 }
 
 if (import.meta.main) {
   try {
-    await publish(Bun.argv.slice(2));
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : String(error));
+    await publish(Bun.argv.slice(2), repository, { allowRemote: true });
+  } catch {
     process.exitCode = 1;
   }
 }
