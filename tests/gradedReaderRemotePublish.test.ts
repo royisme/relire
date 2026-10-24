@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { d1ExecuteSpawn, platformProxyOptions } from '../scripts/content-service/d1Target';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 import { failure } from './fixtures/storage';
 import { publishedReaderFixture } from './fixtures/gradedReaders';
 import {
@@ -60,12 +60,12 @@ test('stage, exact readback, markers and immutable catalogue precede the sole po
   expect(pointer).toBe(events.length - 2);
   expect(current().value).toBe(prepared.catalogue.version);
   const response = await handle(
-    new Request(`https://content.test/v1/readers/${reader.body.id}?version=${prepared.artifacts[0].hash}`),
+    workerRequest(`https://content.test/v1/readers/${reader.body.id}?version=${prepared.artifacts[0].hash}`),
     env,
   );
   expect(response.status).toBe(200);
   expect(await response.text()).toBe(prepared.artifacts[0].body);
-  const list = await handle(new Request('https://content.test/v1/readers'), env);
+  const list = await handle(workerRequest('https://content.test/v1/readers'), env);
   expect(await list.json()).toEqual(prepared.catalogue);
 });
 

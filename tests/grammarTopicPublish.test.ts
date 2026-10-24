@@ -13,7 +13,7 @@ import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { handle } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
 import { learningFixture } from './fixtures/grammarLearning';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 
 function inputs(topics: GrammarTopic[] = [topicFixture()]): TopicBuildInputs {
   return {
@@ -175,8 +175,8 @@ test('zero topics replaces prior content, emits only delete and version, and lis
     );
     expect(buildPublishSql(inputs([])).sql).toBe(empty.sql);
     db.exec(empty.sql);
-    expect(await (await handle(new Request('https://content.test/v1/topics'), env)).json()).toEqual([]);
-    expect(await (await handle(new Request('https://content.test/v1/tag-index'), env)).json()).toEqual({});
+    expect(await (await handle(workerRequest('https://content.test/v1/topics'), env)).json()).toEqual([]);
+    expect(await (await handle(workerRequest('https://content.test/v1/tag-index'), env)).json()).toEqual({});
     expect(db.query("SELECT value FROM meta WHERE key = 'packVersion'").get()).toEqual({ value: empty.version });
   } finally {
     db.close();
@@ -227,7 +227,7 @@ test('private file publish through the real migration and Worker matches the app
     ]);
     db.exec(bytes);
     db.exec(bytes); // Reapplying replaces, never appends.
-    const request = (path: string) => handle(new Request(`https://content.test${path}`), env);
+    const request = (path: string) => handle(workerRequest(`https://content.test${path}`), env);
     const list = await request('/v1/topics');
     expect(list.status).toBe(200);
     expect(GrammarTopicListSchema.parse(await list.json())).toEqual(

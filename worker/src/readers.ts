@@ -13,7 +13,7 @@ async function metaValue(db: D1Database, key: string) {
 export async function readersResource(
   url: URL,
   db: D1Database,
-): Promise<{ body: string; version: string; pinned: boolean } | { error: string; status: number }> {
+): Promise<{ body: string; version: string } | { error: string; status: number }> {
   if (url.pathname === '/v1/readers') {
     const catalogueHash = await metaValue(db, 'readersCurrent');
     if (catalogueHash === undefined) return { error: 'readers-unavailable', status: 404 };
@@ -22,7 +22,7 @@ export async function readersResource(
     const catalogue = JSON.parse(stored) as { version?: unknown; readers?: unknown };
     if (catalogue.version !== catalogueHash || !Array.isArray(catalogue.readers))
       throw new Error('Corrupt reader catalogue');
-    return { body: stored, version: catalogueHash, pinned: false };
+    return { body: stored, version: catalogueHash };
   }
 
   const id = url.pathname.slice('/v1/readers/'.length);
@@ -54,5 +54,5 @@ export async function readersResource(
   // The artifact is PublishedReader JSON, so the id the route requested lives in its body; no app schema is imported.
   if ((JSON.parse(stored.body) as { body?: { id?: unknown } }).body?.id !== id)
     throw new Error('Corrupt published reader');
-  return { body: stored.body, version: requested, pinned: true };
+  return { body: stored.body, version: requested };
 }

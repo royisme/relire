@@ -2,12 +2,12 @@
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import type { Database } from 'bun:sqlite';
 import { handle, type Env } from '../worker/src/index';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 import { testBook } from './fixtures/vocabulary';
 import { publishVocabularyBook } from '../scripts/vocabulary/publication';
 let sqlite: Database, env: Env;
 const request = (query: string, init?: RequestInit) =>
-  handle(new Request(`https://content.test/v1/vocabulary/${query}`, init), env);
+  handle(workerRequest(`https://content.test/v1/vocabulary/${query}`, init), env);
 const seed = async () => {
   const book = await testBook(251);
   await publishVocabularyBook(book, {
@@ -62,7 +62,7 @@ test('unavailable current404, unmarked pinned410, bounds404, corrupt required ma
   sqlite.exec("DELETE FROM meta WHERE key LIKE 'vocabularyPublished:%'");
   expect((await request('tcf-7000?page=0')).status).toBe(500);
 });
-test('current no-cache, pinned public cache, ETag/HEAD/OPTIONS/methods/CORS/shared limiter preserved', async () => {
+test('current and pinned private revalidation, ETag/HEAD/OPTIONS/methods/CORS/shared limiter preserved', async () => {
   const book = await seed();
   env.ALLOWED_ORIGINS = 'https://app.test';
   for (const pinned of [false, true]) {
@@ -70,12 +70,16 @@ test('current no-cache, pinned public cache, ETag/HEAD/OPTIONS/methods/CORS/shar
     const get = await request(query, { headers: { Origin: 'https://app.test' } });
     expect(get.status).toBe(200);
     expect(get.headers.get('ETag')).toBe(`"${book.manifest.version}"`);
-    expect(get.headers.get('Cache-Control')).toBe(pinned ? 'public, max-age=300' : 'no-cache');
+    expect(get.headers.get('Cache-Control')).toBe('private, no-cache');
+    expect(get.headers.get('Vary')).toBe('Origin, Authorization');
     expect(get.headers.get('Access-Control-Allow-Origin')).toBe('https://app.test');
     const head = await request(query, { method: 'HEAD', headers: { Origin: 'https://app.test' } });
     expect([...head.headers]).toEqual([...get.headers]);
     expect(await head.text()).toBe('');
-    expect((await request(query, { headers: { 'If-None-Match': `W/"${book.manifest.version}"` } })).status).toBe(304);
+    const cached = await request(query, { headers: { 'If-None-Match': `W/"${book.manifest.version}"` } });
+    expect(cached.status).toBe(304);
+    expect(cached.headers.get('Cache-Control')).toBe('private, no-cache');
+    expect(cached.headers.get('Vary')).toBe('Origin, Authorization');
   }
   expect((await request('tcf-7000?page=0', { method: 'POST' })).status).toBe(405);
   expect((await request('tcf-7000?page=0', { method: 'OPTIONS' })).status).toBe(204);

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { testBook } from './fixtures/vocabulary';
 import { freshDb, failure } from './fixtures/storage';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 import { prepare } from '../scripts/vocabulary/prepare';
 import { review } from '../scripts/vocabulary/review';
 import { publish } from '../scripts/vocabulary/publish';
@@ -118,7 +118,7 @@ test('only explicit local mode publishes unreviewed content through Worker/clien
     process.env.VITE_CONTENT_SERVICE_URL = 'https://content.test';
     globalThis.fetch = (async (url: string, init: RequestInit) => {
       expect(init.credentials).toBe('omit');
-      const response = await handle(new Request(url, init), env);
+      const response = await handle(workerRequest(url, init), env);
       served.push(await response.clone().text());
       return response;
     }) as typeof fetch;

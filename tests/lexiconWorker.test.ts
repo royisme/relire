@@ -14,7 +14,7 @@ import {
   type LexiconLemmaResponse,
 } from '../src/types/lexicon';
 import { ALLOWLIST, writeMorphalouFixture } from './fixtures/morphalouCsv';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 
 const SOURCE = {
   name: 'Morphalou 3.1',
@@ -28,7 +28,7 @@ let root: string;
 let lexicon: Lexicon;
 let db: Database;
 let env: Env;
-const request = (path: string, init?: RequestInit) => handle(new Request(`https://content.test${path}`, init), env);
+const request = (path: string, init?: RequestInit) => handle(workerRequest(`https://content.test${path}`, init), env);
 
 beforeAll(async () => {
   root = await mkdtemp(join(tmpdir(), 'relire-lexicon-worker-'));
@@ -83,6 +83,20 @@ describe('/v1/lexicon/:lemma', () => {
     }
     const pronominal = await request('/v1/lexicon/se%20testlaver');
     expect(pronominal.status).toBe(200);
+  });
+
+  test('prefix remainders are decoded exactly once and retain extra path segments', async () => {
+    for (const lemma of ['test%2fword', 'test/word'])
+      db.query('INSERT INTO lexicon_entries VALUES (?, ?, NULL, ?)').run(lemma, 'noun', '{}');
+    for (const [path, lemma] of [
+      ['/v1/lexicon/test%252Fword', 'test%2fword'],
+      ['/v1/lexicon/test%2Fword', 'test/word'],
+      ['/v1/lexicon/test/word', 'test/word'],
+    ]) {
+      const response = await request(path);
+      expect(response.status).toBe(200);
+      expect((await response.json()).lemma).toBe(lemma);
+    }
   });
 
   test('unknown lemma is 404 not-found, without an ETag; a lemma named form is still a lemma', async () => {
@@ -172,11 +186,14 @@ describe('caching, HEAD, methods, CORS', () => {
     for (const path of ['/v1/lexicon/testmarcher', '/v1/lexicon/form/testmarche']) {
       const response = await request(path);
       expect(response.headers.get('ETag')).toBe(`"${VERSION}"`);
-      expect(response.headers.get('Cache-Control')).toBe('public, max-age=300');
+      expect(response.headers.get('Cache-Control')).toBe('private, no-cache');
+      expect(response.headers.get('Vary')).toBe('Origin, Authorization');
       expect(response.headers.get('Content-Type')).toBe('application/json; charset=utf-8');
       const cached = await request(path, { headers: { 'If-None-Match': `"${VERSION}"` } });
       expect(cached.status).toBe(304);
       expect(await cached.text()).toBe('');
+      expect(cached.headers.get('Cache-Control')).toBe('private, no-cache');
+      expect(cached.headers.get('Vary')).toBe('Origin, Authorization');
     }
     db.query("UPDATE meta SET value = '9.9.9' WHERE key = 'packVersion'").run();
     expect((await request('/v1/lexicon/testmarcher')).headers.get('ETag')).toBe(`"${VERSION}"`);

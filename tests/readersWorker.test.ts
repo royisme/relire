@@ -3,14 +3,14 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import type { Database } from 'bun:sqlite';
 import { PublishedReaderSchema, type PublishedReader } from '../src/types/gradedReader';
 import { handle, type Env } from '../worker/src/index';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 import { gradedReaderFixture } from './fixtures/gradedReaders';
 
 let sqlite: Database;
 let env: Env;
 
 const hash = (value: string) => new Bun.CryptoHasher('sha256').update(value).digest('hex');
-const request = (path: string, init?: RequestInit) => handle(new Request(`https://content.test${path}`, init), env);
+const request = (path: string, init?: RequestInit) => handle(workerRequest(`https://content.test${path}`, init), env);
 
 function readerFixture(): PublishedReader {
   const body = gradedReaderFixture();
@@ -77,19 +77,21 @@ describe('reader routes', () => {
     expect(await artifact.json()).toEqual({ error: 'not-found' });
   });
 
-  test('catalogue is the stored JSON with no-cache, and one artifact is the exact published JSON', async () => {
+  test('catalogue and artifact are the exact stored JSON with private revalidation', async () => {
     const reader = readerFixture();
     const { catalogue, catalogueHash } = publish([reader]);
     const list = await request('/v1/readers');
     expect(list.status).toBe(200);
-    expect(list.headers.get('Cache-Control')).toBe('no-cache');
+    expect(list.headers.get('Cache-Control')).toBe('private, no-cache');
+    expect(list.headers.get('Vary')).toBe('Origin, Authorization');
     expect(list.headers.get('ETag')).toBe(`"${catalogueHash}"`);
     expect(await list.json()).toEqual(catalogue);
 
     const artifactHash = catalogue.readers[0]!.artifactHash;
     const response = await request(`/v1/readers/${reader.body.id}?version=${artifactHash}`);
     expect(response.status).toBe(200);
-    expect(response.headers.get('Cache-Control')).toBe('public, max-age=300');
+    expect(response.headers.get('Cache-Control')).toBe('private, no-cache');
+    expect(response.headers.get('Vary')).toBe('Origin, Authorization');
     expect(response.headers.get('ETag')).toBe(`"${artifactHash}"`);
     expect(await response.json()).toEqual(reader);
     expect(
@@ -112,6 +114,8 @@ describe('reader routes', () => {
       expect(cached.status).toBe(304);
       expect(await cached.text()).toBe('');
       expect(cached.headers.get('ETag')).toBe(get.headers.get('ETag'));
+      expect(cached.headers.get('Cache-Control')).toBe('private, no-cache');
+      expect(cached.headers.get('Vary')).toBe('Origin, Authorization');
       const head = await request(path, { method: 'HEAD' });
       expect(head.status).toBe(200);
       expect([...head.headers]).toEqual([...get.headers]);

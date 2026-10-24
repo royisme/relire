@@ -5,7 +5,7 @@ import { canonicalVocabularyJson } from '../../src/services/vocabulary/book';
 export async function vocabularyResource(
   url: URL,
   db: D1Database,
-): Promise<{ body: string; version: string; pinned: boolean } | { error: string; status: number }> {
+): Promise<{ body: string; version: string } | { error: string; status: number }> {
   if (url.pathname !== '/v1/vocabulary/tcf-7000') return { error: 'not-found', status: 404 };
   const query = url.searchParams;
   if (
@@ -56,5 +56,5 @@ export async function vocabularyResource(
     new Set(parsed.entries.map((entry) => entry.key)).size !== parsed.entries.length
   )
     throw new Error('Corrupt published page');
-  return { body: stored.body, version, pinned: requested !== null };
+  return { body: stored.body, version };
 }

@@ -4,7 +4,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { testBook } from './fixtures/vocabulary';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 import { failure } from './fixtures/storage';
 import {
   prepareVocabulary,
@@ -179,7 +179,7 @@ test('real prepare/review/publish commands work on disposable invented metadata,
       value: string;
     };
     expect(current.value).toHaveLength(64);
-    const response = await handle(new Request('https://content.test/v1/vocabulary/tcf-7000?page=0'), env);
+    const response = await handle(workerRequest('https://content.test/v1/vocabulary/tcf-7000?page=0'), env);
     expect(response.status).toBe(200);
     const served = await response.text();
     expect(JSON.parse(served).entries).toHaveLength(1);
