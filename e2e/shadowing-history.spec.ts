@@ -19,7 +19,7 @@ async function finishAudio(page: Page) {
 }
 
 async function prepareHistory(page: Page) {
-  await page.goto('/');
+  await page.goto('/#/read');
   await expect(page.getByText('Le Petit Prince').first()).toBeVisible();
   await page.evaluate(
     async ({ longSentence, soleSentence }) => {

@@ -150,7 +150,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
             </ul>
             <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
               <Button variant="ghost" onClick={onClose}>
-                {t('onboarding.toLibrary')}
+                {t('onboarding.toToday')}
               </Button>
               {onOpenReader && (
                 <Button

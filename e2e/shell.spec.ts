@@ -16,7 +16,7 @@ const stored = (page: Page, key: string) => page.evaluate((k) => localStorage.ge
 
 test.describe('sidebar', () => {
   test('collapses to a rail and expands again, and remembers it across reloads', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/read');
     await expect(sidebar(page)).toHaveAttribute('data-sidebar', 'expanded');
     await expect(sidebar(page).getByRole('link', { name: 'My study' })).toContainText('My study');
     expect((await sidebar(page).boundingBox())!.width).toBe(240);
@@ -61,7 +61,7 @@ test.describe('sidebar', () => {
   });
 
   test('the reader starts with the sidebar collapsed, and opening it there is not remembered', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/read');
     await expect(sidebar(page)).toHaveAttribute('data-sidebar', 'expanded');
     await openArticle(page);
     await expect(sidebar(page)).toHaveAttribute('data-sidebar', 'rail');
@@ -87,7 +87,7 @@ test.describe('sidebar', () => {
 
 test.describe('routes', () => {
   test('Back and reload keep the place: library, article, Back', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/read');
     await expect(page).toHaveURL(/#\/read$/);
     await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
 
@@ -231,7 +231,7 @@ test.describe('settings sections save on their own', () => {
 test.describe('a key request', () => {
   test.beforeEach(async ({ page }) => {
     // No key: the first AI feature asks for one.
-    await page.goto('/');
+    await page.goto('/#/read');
     await page.evaluate(() => localStorage.setItem('relire_app_settings_v1', JSON.stringify({ apiKeys: {} })));
     await page.reload();
   });

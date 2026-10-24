@@ -83,18 +83,18 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 
 ## Data tables
 
-`App.tsx` lazy-loads `PracticePage` and `PracticeSetPage` at their routes, each behind the same fixed-height Suspense fallback as the grammar route. Their `SetTable` and `UnitTable` implementations load with those pages. Library stays eager because it is the default route (`#/read`): deferring it would add a startup request and a possible loading flash. TanStack Table therefore remains in the eager graph through `LibraryArticlesTable`; moving it to a separate preloaded chunk would not reduce eager bytes. Both interface locales also remain eager so language switching stays immediate. Measure the entry plus every `modulepreload` in built `dist/index.html`, not the entry alone, when assessing bundle changes; shared modules can move between chunks without reducing startup work. Workbox still precaches lazy chunks for offline navigation.
+`App.tsx` lazy-loads `PracticePage` and `PracticeSetPage` at their routes, each behind the same fixed-height Suspense fallback as the grammar route. Their `SetTable` and `UnitTable` implementations load with those pages. Today (`#/today`) is the landing page; the Library (`#/read`) stays eager. TanStack Table therefore remains in the eager graph through `LibraryArticlesTable`; moving it to a separate preloaded chunk would not reduce eager bytes. Both interface locales also remain eager so language switching stays immediate. Measure the entry plus every `modulepreload` in built `dist/index.html`, not the entry alone, when assessing bundle changes; shared modules can move between chunks without reducing startup work. Workbox still precaches lazy chunks for offline navigation.
 
 Library's `LibraryArticlesTable`, Practice's `SetTable` and `UnitTable` compose `ui/table` directly with TanStack Table v9 column definitions and row models (`useTable`, `rowSortingFeature`, `createSortedRowModel`, `getSortedRowModel`). No DataTable wrapper owns page behavior. `SortableHeader` shares only the header button, arrow and `aria-sort`; pages own filtering, empty/no-match states and confirmations. Unit sheets link back to their set page; Reader passage links still return to the exact exercise sheet.
 
 ## Navigation and routes
 
-There is no router dependency. The address is the single source of truth for where the learner is: `utils/routes.ts` parses `location.hash` into a `Route` and builds it back; `hooks/useRoute.ts` exposes the current route (a `useSyncExternalStore` over `popstate`, `hashchange` and its own event) and `navigate`. User navigation pushes history (`Link`, `navigate`); resolving a default (`#/` → `#/read`, `#/study` → `#/study/words`, `#/settings` on a wide screen → its first section) uses `replaceState`, so Back never lands on an address the learner did not choose. A push scrolls to the top; Back and forward keep the browser's scroll.
+There is no router dependency. The address is the single source of truth for where the learner is: `utils/routes.ts` parses `location.hash` into a `Route` and builds it back; `hooks/useRoute.ts` exposes the current route (a `useSyncExternalStore` over `popstate`, `hashchange` and its own event) and `navigate`. User navigation pushes history (`Link`, `navigate`); resolving a default (`#/` → `#/today`, `#/study` → `#/study/words`, `#/settings` on a wide screen → its first section) uses `replaceState`, so Back never lands on an address the learner did not choose. A push scrolls to the top; Back and forward keep the browser's scroll.
 
 | Address | Screen |
 | --- | --- |
-| `#/read` (also empty, `#/`) | Library |
-| `#/today` | Daily checklist derived from stored activity, with links to Words review, a graded reader, Speaking and Mistakes; no key required |
+| `#/read` | Library |
+| `#/today` (landing page; also empty, `#/`) | Daily checklist derived from stored activity, with links to Words review, a graded reader, Speaking and Mistakes; no key required |
 | `#/import/article` | In-memory article import (Read area); does not reserve any reader id |
 | `#/import/exercises?area=<learningArea>` | In-memory exercise import with required explicit entry area and editable per-unit classifications |
 | `#/read/graded` | Bundled starters plus optional validated service catalogue, with committed local reading status |

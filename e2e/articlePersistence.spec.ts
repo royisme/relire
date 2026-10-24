@@ -5,10 +5,10 @@ type Db = typeof import('../src/storage/db');
 
 test('a stale tab saving one article preserves unrelated creation, edit and deletion', async ({ page, ai }) => {
   void ai;
-  await page.goto('/');
+  await page.goto('/#/read');
   await expect(page.getByText('Le Petit Prince').first()).toBeVisible();
   const other = await page.context().newPage();
-  await other.goto('/');
+  await other.goto('/#/read');
   await expect(other.getByText('Le Petit Prince').first()).toBeVisible();
   const changed = await other.evaluate(async () => {
     const { db, deleteArticleData }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
@@ -55,7 +55,7 @@ for (const suffix of ['', ' @phone']) {
     ai,
   }) => {
     void ai;
-    await page.goto('/');
+    await page.goto('/#/read');
     await page.getByRole('button', { name: 'Add article', exact: true }).first().click();
     await page.getByRole('button', { name: 'Write or paste an article' }).click();
     const dialog = page.getByRole('dialog');
@@ -152,7 +152,7 @@ test('seed failure never publishes readiness; reload, empty library and sample r
       return put.apply(this, args);
     };
   });
-  await page.goto('/');
+  await page.goto('/#/read');
   await expect(page.getByRole('alert')).toBeVisible();
   await expect(page.getByText('Le Petit Prince')).toHaveCount(0);
   await expect(page.getByRole('alert')).toContainText('Seed write refused');

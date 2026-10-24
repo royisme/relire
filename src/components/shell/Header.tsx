@@ -43,7 +43,7 @@ export function Header({ route, dueCount, showMenu }: HeaderProps) {
         )}
 
         <Link
-          to={{ name: 'library' }}
+          to={{ name: 'today' }}
           className="shrink-0 font-serif text-xl font-semibold italic text-ink-900 cursor-pointer"
         >
           {t('common.appName')}

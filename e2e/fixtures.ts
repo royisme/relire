@@ -258,7 +258,7 @@ export { expect };
 
 /** Opens a sample article from the library by its title. */
 export async function openArticle(page: Page, title = 'Le Petit Prince') {
-  await page.goto('/');
+  await page.goto('/#/read');
   await page.getByText(title).first().click();
   await expect(page.locator('article [data-sentence]').first()).toBeVisible();
   await settled(page);
