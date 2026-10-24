@@ -90,7 +90,18 @@ First deployment: no accounts, public read-only, rate limited, CORS limited to t
 
 Plan `docs/d-remote-plan.md` (written by Opus; two Argon reviews, both fail, every finding the lead verified is applied) is ready to dispatch. Dispatch D-remote-1 first; D-remote-2b waits for the owner's limit check. Each diff then gets an independent Argon review.
 
-Not part of this: accounts (H4), an owner-only access token (an option for a private beta, not chosen).
+Not part of this: accounts (H4). The access key the owner chose on 2026-10-24 is the RS section below, not an account system.
+
+### Next: routed API, access key and remote service in Settings (owner decisions 2026-10-24; plan `docs/remote-settings-plan.md`, two reviews by gpt-6-astra applied)
+
+The Worker becomes a routed API (Hono, kept portable), requires an access key, and the app gets a Settings section (URL, key, Test, Enable; off by default; device-local, never in a backup). RS1 and RS2 merge back to back (one integration boundary). Drizzle for D1 is deliberately last and needs its own plan.
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| RS1 | Worker: Hono router with our own CORS/limiter/auth middleware in today's order, `ACCESS_KEYS` fail closed, `private, no-cache` on every success, tests and fixtures, runbook, ADR and `AGENTS.md` privacy wording | the four Worker tests keep bodies/ETags/statuses and pass with the new key fixtures; Worker typecheck, full suite and checks exit 0 in the main checkout | not started |
+| RS2 | App: `contentService` settings block (device-local, excluded from backups), `Authorization` header in `contentServiceFetch`, Settings section with Test and Enable, i18n en and zh, client tests | tests in the plan pass; the 23 call sites re-checked; detector `[]`; checks exit 0 | not started; merges right after RS1 |
+| RS3 | Spike then wire `@cloudflare/vite-plugin` so `vite dev` serves `/v1/*` from the publishers' local D1 | the production `dist` content hash is unchanged; a synthetic publisher write is read through the dev route | not started; may end in "do not ship" |
+| RS4 | Drizzle for D1: own plan first | plan states what it buys against a new dependency | not started |
 
 ### Content (paused by the owner's priority)
 
