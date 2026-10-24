@@ -9,7 +9,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 - Added strict saved dictation provenance tied to the effective `NUMBER_DICTATION` type and nonblank audio; reused the reader schemas for identifiers and body versions. Listening gates are unchanged.
 - Added pure reader-order-preserving sampling into one standalone Listening unit with translated clues, French audio/answers, edition metadata and save-only retry coverage. The existing published-reader schema owns the three-sentence minimum.
 - Scalar grading ignores only the flagged sentence punctuation, replacing it with spaces; hyphens, apostrophes and strict accents remain significant. Unflagged and nonscalar grading are unchanged.
-- Full suite: 2,224 tests pass; format, shape, i18n, build and UI detector exit 0. Typecheck and lint fail in this worktree because Worker dependencies are absent; the requested filtered typecheck emits no diagnostics for the changed areas. The grammar CLI fixture now copies the pure reader dependencies required by exercise metadata. Awaiting lead verification; D2 UI/device integration is not implemented or exercised.
+- Verified in the main checkout after the merge: typecheck, lint, format, shape, i18n, the full suite (2,224 tests), the UI detector and the build all exit 0. The grammar CLI test fixture now copies three pure reader modules because exercise metadata imports the reader schemas (`types/exercises.ts` now depends on `types/gradedReader.ts`; no import cycle). The plan was reviewed first by Argon (six findings, all applied). D2 (control, button, rule docs) is not built, so nothing is user-visible and no device voice was exercised.
 
 ## 2026-10-24: Today checklist (T1 to T4)
 
