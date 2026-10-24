@@ -6,7 +6,8 @@ CREATE TABLE topics (
   title_zh TEXT NOT NULL,
   tags TEXT NOT NULL,
   body TEXT NOT NULL,
-  content_hash TEXT NOT NULL
+  content_hash TEXT NOT NULL,
+  position INTEGER NOT NULL
 );
 
 CREATE TABLE meta (

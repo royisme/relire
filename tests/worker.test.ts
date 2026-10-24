@@ -10,11 +10,11 @@ import { createWorkerDb } from './fixtures/workerDb';
 let db: Database;
 let env: Env;
 
-function insert(input: GrammarTopic) {
+function insert(input: GrammarTopic, position = 1) {
   const topic = GrammarTopicSchema.parse(input);
   const body = JSON.stringify(topic);
   db.query(
-    'INSERT INTO topics (id, chapter, level, title_en, title_zh, tags, body, content_hash) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    'INSERT INTO topics (id, chapter, level, title_en, title_zh, tags, body, content_hash, position) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
   ).run(
     topic.id,
     topic.chapter,
@@ -24,6 +24,7 @@ function insert(input: GrammarTopic) {
     JSON.stringify(topic.tags),
     body,
     new Bun.CryptoHasher('sha256').update(body).digest('hex'),
+    position,
   );
   return topic;
 }
@@ -41,23 +42,26 @@ describe('topic routes', () => {
     expect(await (await request('/v1/tag-index')).json()).toEqual({});
   });
 
-  test('list contains summaries only, ordered by chapter then id', async () => {
+  test('list contains summaries only, ordered by position even when it disagrees with chapter and id order', async () => {
     const topics = [
-      insert({ ...topicFixture(), id: 'test-z', chapter: 'test-b' }),
-      insert({ ...topicFixture(), id: 'test-b', chapter: 'test-a' }),
-      insert({ ...topicFixture(), id: 'test-a', chapter: 'test-a' }),
+      insert({ ...topicFixture(), id: 'test-z', chapter: 'test-b' }, 2),
+      insert({ ...topicFixture(), id: 'test-b', chapter: 'test-a' }, 3),
+      insert({ ...topicFixture(), id: 'test-a', chapter: 'test-a' }, 1),
     ];
     const response = await request('/v1/topics');
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(
-      [topics[2], topics[1], topics[0]].map(({ id, chapter, level, tags, title }) => ({
-        id,
-        chapter,
-        level,
-        tags,
-        title,
+    const body = await response.json();
+    expect(body).toEqual(
+      [topics[2], topics[0], topics[1]].map((topic, i) => ({
+        id: topic.id,
+        chapter: topic.chapter,
+        level: topic.level,
+        tags: topic.tags,
+        title: topic.title,
+        position: i + 1,
       })),
     );
+    for (const row of body) expect(Number.isInteger(row.position) && row.position > 0).toBe(true);
   });
 
   test('one topic is the complete stored JSON, and every returned topic passes the real schema', async () => {

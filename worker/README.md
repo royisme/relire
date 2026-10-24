@@ -6,7 +6,7 @@ An optional, public read-only Cloudflare Worker backed by D1. It serves grammar 
 
 Only `GET`, `HEAD` and `OPTIONS` are accepted; other methods return `405` with `Allow`.
 
-- `/v1/topics`: summaries (`id`, `chapter`, `level`, `tags`, bilingual `title`), ordered by chapter then id; no body text.
+- `/v1/topics`: summaries (`id`, `chapter`, `level`, `tags`, bilingual `title`, `position`), ordered by `position` (the manifest's book order); no body text.
 - `/v1/topics/:id`: full stored topic JSON; malformed slug `400`, missing topic `404`.
 - `/v1/tag-index`: covered tags mapped to ascending topic ids.
 - `/v1/readers`: the current graded-reader catalogue (`readersCurrent` → `readersCatalog:<catalogueHash>`), `no-cache`, ETag is the catalogue hash.
@@ -73,7 +73,7 @@ bun scripts/grammar-topics/publish.ts                # Generate private SQL only
 bun scripts/grammar-topics/publish.ts --apply-local  # Generate and replace local D1 topics
 ```
 
-The existing `buildTopics` gate refuses an included draft without a matching owner review, naming the id. Excluded ids are listed; zero included topics publishes an empty set. SQL contains the exact published topic JSON, mirrored summary fields, JSON tags and canonical content hashes, ordered by id. The pack version is `<manifest.packVersion>+<first 8 SHA-256 hex of sorted id:contentHash lines joined with newlines (no final newline)>`. Wrangler strips explicit transaction wrappers, so SQL orders deletion first, rows next and the version last.
+The existing `buildTopics` gate refuses an included draft without a matching owner review, naming the id. Excluded ids are listed; zero included topics publishes an empty set. SQL contains the exact published topic JSON, mirrored summary fields, JSON tags, canonical content hashes and the 1-based manifest `position` (captured before the id sort), ordered by id. The pack version is `<manifest.packVersion>+<first 8 SHA-256 hex of sorted id:position:contentHash lines joined with newlines (no final newline)>`. Wrangler strips explicit transaction wrappers, so SQL orders deletion first, rows next and the version last.
 
 The only output file is gitignored `.local/grammar-topics/publish.sql`: it contains private topic text; never commit or print it. The command prints counts, skipped ids and the path, not text. Apply the migration first (`cd worker && bunx wrangler d1 migrations apply DB --local`); publishing never applies it silently. `--check` instead validates public manifest/review metadata and chapter labels without reading drafts or writing SQL, for CI.
 

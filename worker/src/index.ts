@@ -16,6 +16,7 @@ interface TopicSummaryRow {
   title_en: string;
   title_zh: string;
   tags: string;
+  position: number;
 }
 
 // Slug shared by src/types/grammarTopic.ts via src/types/grammarTagIndex.ts; no Zod in the Worker.
@@ -142,15 +143,16 @@ export async function handle(request: Request, env: Env): Promise<Response> {
       body = topic.body;
     } else if (path === '/v1/topics') {
       const { results } = await env.DB.prepare(
-        'SELECT id, chapter, level, title_en, title_zh, tags FROM topics ORDER BY chapter, id',
+        'SELECT id, chapter, level, title_en, title_zh, tags, position FROM topics ORDER BY position',
       ).all<TopicSummaryRow>();
       body = JSON.stringify(
-        results.map(({ id, chapter, level, title_en, title_zh, tags }) => ({
+        results.map(({ id, chapter, level, title_en, title_zh, tags, position }) => ({
           id,
           chapter,
           level,
           tags: JSON.parse(tags),
           title: { en: title_en, zh: title_zh },
+          position,
         })),
       );
     } else {

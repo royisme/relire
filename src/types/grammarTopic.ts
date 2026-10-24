@@ -81,6 +81,19 @@ export const GrammarTopicSummarySchema = z.object({
 });
 export type GrammarTopicSummary = z.infer<typeof GrammarTopicSummarySchema>;
 
+// Only the /v1/topics list carries the 1-based manifest position; topics, packs and drafts stay without it.
+export const GrammarTopicListEntrySchema = GrammarTopicSummarySchema.extend({
+  position: z.number().int().positive(),
+});
+export type GrammarTopicListEntry = z.infer<typeof GrammarTopicListEntrySchema>;
+
+export const GrammarTopicListSchema = z
+  .array(GrammarTopicListEntrySchema)
+  .refine((entries) => new Set(entries.map((entry) => entry.position)).size === entries.length, {
+    message: 'positions must be unique',
+  });
+export type GrammarTopicList = z.infer<typeof GrammarTopicListSchema>;
+
 export const GrammarTopicSchema = z
   .object({
     ...GrammarTopicSummarySchema.shape,

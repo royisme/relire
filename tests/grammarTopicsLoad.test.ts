@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { loadGrammarTopic, loadGrammarTopics } from '../src/services/grammarTopics/load';
 import { loadGrammarTagIndex } from '../src/services/grammarTopics/tagIndex';
 import { resetContentRequests } from '../src/services/grammarTopics/request';
-import { GrammarTopicSchema, GrammarTopicSummarySchema } from '../src/types/grammarTopic';
+import { GrammarTopicListEntrySchema, GrammarTopicListSchema, GrammarTopicSchema } from '../src/types/grammarTopic';
 import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { useGrammarTopics } from '../src/hooks/useGrammarTopics';
 import { useGrammarTagIndex } from '../src/hooks/useGrammarTagIndex';
@@ -34,8 +34,8 @@ const loaders = [
     name: 'summaries',
     path: '/v1/topics',
     load: loadGrammarTopics,
-    data: () => [GrammarTopicSummarySchema.parse(topicFixture())],
-    parse: (data: unknown) => GrammarTopicSummarySchema.array().parse(data),
+    data: () => [GrammarTopicListEntrySchema.parse({ ...topicFixture(), position: 1 })],
+    parse: (data: unknown) => GrammarTopicListSchema.parse(data),
   },
   {
     name: 'one topic',
@@ -136,7 +136,7 @@ test('offline cache is request-scoped, validated on read, and expires after 365 
 
 test('tag-index requests share in-flight work without parsing topics, then a later mount after reset fetches again', async () => {
   const topicParse = spyOn(GrammarTopicSchema, 'parse');
-  const summaryParse = spyOn(GrammarTopicSummarySchema, 'parse');
+  const listParse = spyOn(GrammarTopicListSchema, 'parse');
   fetchSpy.mockImplementation(Object.assign(async () => Response.json({}), { preconnect: () => {} }));
   try {
     const first = loadGrammarTagIndex();
@@ -147,10 +147,10 @@ test('tag-index requests share in-flight work without parsing topics, then a lat
     await loadGrammarTagIndex();
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     expect(topicParse).not.toHaveBeenCalled();
-    expect(summaryParse).not.toHaveBeenCalled();
+    expect(listParse).not.toHaveBeenCalled();
   } finally {
     topicParse.mockRestore();
-    summaryParse.mockRestore();
+    listParse.mockRestore();
   }
 });
 
