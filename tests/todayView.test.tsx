@@ -55,7 +55,7 @@ for (const language of ['en', 'zh']) {
     const html = render(mixed);
     const rows = items(html);
     expect(html).toContain(i18n.t('today.title'));
-    expect(html).toContain(new Intl.DateTimeFormat(language).format(now));
+    expect(html).toContain(new Intl.DateTimeFormat(language, { dateStyle: 'full' }).format(now));
     expect(html.match(/rounded-lg/g)).toHaveLength(1);
     expect(html).toContain(i18n.t('today.steps.title'));
     expect(html).toContain(i18n.t('today.steps.progress', { done: 2, total: 5 }));
@@ -163,11 +163,11 @@ for (const language of ['en', 'zh']) {
       expect(html).toContain(i18n.t(`today.read.${state}`, { order: 2 }));
       expect(links(html)[0]).toContain('href="#/read/graded/test-reader"');
       expect(html).not.toContain('?version=');
-      expect(html).not.toContain(i18n.t('today.read.noKey'));
+      expect(html).not.toContain(i18n.t('today.read.startNoKey', { order: 2 }));
     },
   );
 
-  test.each([true, false])(`${language}: Reader 1 no-key line is visible when next=%s`, async (next) => {
+  test.each([true, false])(`${language}: reader 1 first run shows one whole sentence when next=%s`, async (next) => {
     await i18n.changeLanguage(language);
     const html = render({
       steps: [
@@ -179,7 +179,8 @@ for (const language of ['en', 'zh']) {
       doneCount: next ? 1 : 0,
       counts: {},
     });
-    expect(items(html)[1]).toContain(`${i18n.t('today.read.start', { order: 1 })} ${i18n.t('today.read.noKey')}`);
+    expect(items(html)[1]).toContain(i18n.t('today.read.startNoKey', { order: 1 }));
+    expect(items(html)[1]).not.toContain(i18n.t('today.read.start', { order: 1 }));
   });
 
   test.each(['words', 'read', 'sound', 'mistakes', 'grammar'] as const)(
@@ -286,7 +287,7 @@ for (const language of ['en', 'zh']) {
     expect(html).toContain('role="status"');
     expect(html).toContain(i18n.t('today.title'));
     expect(html).toContain(i18n.t('today.loading'));
-    expect(html).not.toContain(new Intl.DateTimeFormat(language).format(now));
+    expect(html).not.toContain(new Intl.DateTimeFormat(language, { dateStyle: 'full' }).format(now));
     expect(html).not.toContain('animate-');
     expect(links(html)).toHaveLength(0);
   });

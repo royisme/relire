@@ -41,7 +41,7 @@
     "guidance": {
       "empty": "今天没有安排。可以选择一项技能自行练习。",
       "allDone": "今天的练习已完成。也可以再选一项技能自行练习。",
-      "unavailable": "部分练习未能加载。可以选择一项技能自行练习。",
+      "unavailable": "部分步骤未能加载。可以选择一项技能自行练习。",
       "plan": "今天可以{{steps}}。随时可以停下，下次从这里继续。",
       "words_one": "复习 {{count}} 个词",
       "words_other": "复习 {{count}} 个词",
@@ -64,20 +64,20 @@
       "exercises": "答题数",
       "readers": "练习读物数"
     },
-    "loading": "正在加载今天的练习…",
+    "loading": "正在加载今天的安排…",
     "stepError": "无法加载这一步：{{msg}}",
     "words": {
       "title": "复习生词",
       "status": "{{due}} 个待复习 · {{newAvailable}} 个新词",
       "action": "复习",
-      "why": "每个词会在到期前再次出现，简短复习可以巩固学过的内容。"
+      "why": "每个词都会在到期前再次出现。"
     },
     "read": {
       "title": "阅读",
       "start": "开始第 {{order}} 本分级读物",
       "continue": "继续第 {{order}} 本分级读物",
       "doneToday": "今天已读完第 {{order}} 本分级读物",
-      "noKey": "第 1 本读物无需密钥。",
+      "startNoKey": "从这里开始：第 {{order}} 本读物无需密钥。",
       "action": "打开",
       "why": "读一篇分级短文，点击任意词即可查看词义，无需密钥。"
     },
@@ -85,14 +85,14 @@
       "title": "近音辨听",
       "status": "分辨相近的法语发音",
       "action": "练习",
-      "why": "听一听、跟着读，熟悉下一篇短文中的发音。"
+      "why": "听一听相近的法语发音，跟着读一读。"
     },
     "mistakes": {
       "title": "重做错题",
       "status_one": "{{count}} 道已保存的错题",
       "status_other": "{{count}} 道已保存的错题",
       "action": "重做",
-      "why": "重做答错的题，答对后即可消除错题标记。"
+      "why": "重做答错的题，答对一道就少一道。"
     },
     "grammar": {
       "title": "语法",

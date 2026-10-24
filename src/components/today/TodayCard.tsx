@@ -48,10 +48,11 @@ export function TodayCard({ plan }: { plan: TodayPlan }) {
                       readerId: step.readerId,
                       ...(step.version ? { version: step.version } : {}),
                     }}
-                    status={[
-                      t(`today.read.${step.state}`, { order: step.order }),
-                      ...(step.order === 1 && step.state === 'start' ? [t('today.read.noKey')] : []),
-                    ].join(' ')}
+                    status={
+                      step.order === 1 && step.state === 'start'
+                        ? t('today.read.startNoKey', { order: step.order })
+                        : t(`today.read.${step.state}`, { order: step.order })
+                    }
                   />
                 );
               case 'sound':
