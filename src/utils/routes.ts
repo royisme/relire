@@ -16,6 +16,8 @@ export type Route =
   | { name: 'importExercises'; area: LearningArea }
   | { name: 'reader'; articleId: string; sentence?: string }
   | { name: 'passage'; unitId: string; sentence?: string }
+  | { name: 'gradedReaders' }
+  | { name: 'gradedReader'; readerId: string; version?: string; sentence?: string }
   | { name: 'study'; tab: StudyTab }
   | { name: 'wordsAll' }
   | { name: 'wordsReview' }
@@ -38,6 +40,8 @@ export type Route =
   | { name: 'notFound' };
 export const LIBRARY: Route = { name: 'library' };
 const sentenceQuery = (sentence?: string) => (sentence ? `?sentence=${encodeURIComponent(sentence)}` : '');
+/** Pinned graded-reader edition: a full SHA-256 body hash. */
+const READER_VERSION = /^[0-9a-f]{64}$/;
 
 export function routeHref(route: Route): string {
   switch (route.name) {
@@ -52,6 +56,15 @@ export function routeHref(route: Route): string {
       return `#/read/${encodeURIComponent(route.articleId)}${sentenceQuery(route.sentence)}`;
     case 'passage':
       return `#/passage/${encodeURIComponent(route.unitId)}${sentenceQuery(route.sentence)}`;
+    case 'gradedReaders':
+      return '#/read/graded';
+    case 'gradedReader': {
+      const query = [
+        ...(route.version ? [`version=${route.version}`] : []),
+        ...(route.sentence ? [`sentence=${encodeURIComponent(route.sentence)}`] : []),
+      ].join('&');
+      return `#/read/graded/${encodeURIComponent(route.readerId)}${query ? `?${query}` : ''}`;
+    }
     case 'study':
       return `#/study/${route.tab}`;
     case 'wordsAll':
@@ -121,7 +134,17 @@ export function parseRoute(
     else if ((root === 'listening' || root === 'writing') && parts.length === 1)
       route = { name: 'practice', area: root };
     else if (root === 'read' && parts.length === 1) route = LIBRARY;
-    else if (root === 'read' && parts.length === 2 && decodeURIComponent(sub) !== 'exercises')
+    else if (root === 'read' && sub === 'graded' && parts.length === 2) route = { name: 'gradedReaders' };
+    else if (root === 'read' && sub === 'graded' && parts.length === 3) {
+      const version = params.get('version');
+      if (version === null || READER_VERSION.test(version))
+        route = {
+          name: 'gradedReader',
+          readerId: decodeURIComponent(third),
+          ...(version ? { version } : {}),
+          ...focused,
+        };
+    } else if (root === 'read' && parts.length === 2 && !['exercises', 'graded'].includes(decodeURIComponent(sub)))
       route = { name: 'reader', articleId: decodeURIComponent(sub), ...focused };
     else if (root === 'passage' && parts.length === 2)
       route = { name: 'passage', unitId: decodeURIComponent(sub), ...focused };
@@ -176,6 +199,9 @@ export function parseRoute(
   return { route, canonical: href === hash ? null : href };
 }
 
+/** Graded readers work without a key: authored meanings, translations and the device voice. */
+export const worksWithoutKey = (route: Route) => route.name === 'gradedReaders' || route.name === 'gradedReader';
+
 export type Area =
   | 'read'
   | 'grammar'
@@ -192,6 +218,8 @@ export function areaOf(route: Route): Area | null {
     case 'importArticle':
     case 'reader':
     case 'passage':
+    case 'gradedReaders':
+    case 'gradedReader':
       return 'read';
     case 'wordsAll':
     case 'wordsReview':

@@ -7,6 +7,7 @@ import { exportData, importData } from '../../storage/db';
 import { getPromptOverrides, savePromptOverrides } from '../../services/ai/prompts';
 import { errorMessage } from '../../services/ai/errors';
 import { exportShadowing, parseShadowingBackup, shadowingRestored } from '../../storage/shadowing';
+import { gradeReaderQuestion } from '../../services/gradedReaders/checkpoints';
 
 interface BackupControlsProps {
   /** Sizes for the "include" options, in bytes. */
@@ -63,17 +64,22 @@ export const BackupControls: React.FC<BackupControlsProps> = ({ audioBytes, shad
         // [] clears them, anything malformed refuses the whole restore.
         const shadowing = data.shadowing === undefined ? undefined : parseShadowingBackup(data.shadowing);
 
-        await importData({
-          shadowing,
-          articles: Array.isArray(data.articles) ? data.articles : undefined,
-          vocab: data.vocab,
-          vocabularyMeta: data.vocabularyMeta,
-          stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
-          // Exercise rows are validated in full by importData; an absent key keeps the stored ones.
-          units: data.units,
-          itemStates: data.itemStates,
-          attempts: data.attempts,
-        });
+        // Checked reader answers are re-graded from their snapshots, so the restore needs the grader.
+        await importData(
+          {
+            shadowing,
+            articles: Array.isArray(data.articles) ? data.articles : undefined,
+            vocab: data.vocab,
+            vocabularyMeta: data.vocabularyMeta,
+            gradedReaders: data.gradedReaders,
+            stats: data.stats && typeof data.stats === 'object' ? data.stats : undefined,
+            // Exercise rows are validated in full by importData; an absent key keeps the stored ones.
+            units: data.units,
+            itemStates: data.itemStates,
+            attempts: data.attempts,
+          },
+          gradeReaderQuestion,
+        );
         if (shadowing) shadowingRestored();
         const audioResult = Array.isArray(data.audio) ? await importAudio(data.audio) : { imported: 0, failed: 0 };
         if (data.prompts && typeof data.prompts === 'object') savePromptOverrides(data.prompts);

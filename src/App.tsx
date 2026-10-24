@@ -29,7 +29,8 @@ import { EMPTY_STATS, loadData, initializeData, saveStats } from './storage/db';
 import { usePersist } from './storage/usePersist';
 import { vocabularyDue, formatDate } from './utils/srs';
 import { hasTextKey } from './utils/appSettings';
-import { LIBRARY, parseRoute, routeHref, type AiPurposeRoute } from './utils/routes';
+import { firstBundledReaderId } from './services/gradedReaders/firstReader';
+import { LIBRARY, parseRoute, routeHref, worksWithoutKey, type AiPurposeRoute } from './utils/routes';
 import { navigate, useRoute } from './hooks/useRoute';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { useSidebar } from './hooks/useSidebar';
@@ -49,8 +50,16 @@ const PracticeSetPage = retryableLazy(async () => ({
   default: (await import('./components/practice/PracticeSetPage')).PracticeSetPage,
 }));
 const GrammarSection = retryableLazy(() => import('./components/study/grammar/GrammarSection'));
+const GradedReadersPage = retryableLazy(async () => ({
+  default: (await import('./components/graded/GradedReadersPage')).GradedReadersPage,
+}));
+const GradedReaderPage = retryableLazy(async () => ({
+  default: (await import('./components/graded/GradedReaderPage')).GradedReaderPage,
+}));
 
 const ONBOARDING_KEY = 'relire_onboarded';
+/** The reader the guide opens: the first bundled one, or none while the app bundles no reader yet. */
+const FIRST_READER_ID = firstBundledReaderId();
 const storedFlag = (key: string) => {
   try {
     return localStorage.getItem(key) === '1';
@@ -64,7 +73,9 @@ export default function App() {
   // Where the learner is: the address decides the screen (see utils/routes.ts).
   const route = useRoute();
   const breakpoint = useBreakpoint();
-  const sidebar = useSidebar(route.name === 'reader' || route.name === 'passage' || route.name === 'unit');
+  const sidebar = useSidebar(
+    route.name === 'reader' || route.name === 'passage' || route.name === 'gradedReader' || route.name === 'unit',
+  );
   // The source the log opens at (set when the reader sends the learner to its recordings).
   const [logSourceId, setLogSourceId] = useState<string | null>(null);
 
@@ -155,7 +166,7 @@ export default function App() {
     sentenceSheet,
   } = useLookupSheets({ lookupOwner, content: readerDocument?.content, requestKey, setStats, t });
 
-  const bookmark = useVocabularyBookmark(vocabulary, lookup, wordData);
+  const bookmark = useVocabularyBookmark(vocabulary, lookup, wordData ? { kind: 'ai', analysis: wordData } : null);
 
   const finishOnboarding = () => {
     try {
@@ -243,7 +254,7 @@ export default function App() {
             </div>
           )}
 
-          {!hasKey && !onboardingOpen && route.name !== 'settings' && (
+          {!hasKey && !onboardingOpen && route.name !== 'settings' && !worksWithoutKey(route) && (
             <div className="bg-accent-50 border-b border-accent-200 text-accent-900 text-sm">
               <div className="max-w-5xl mx-auto px-3 sm:px-6 py-2 flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span>{t('keyBanner.text')}</span>
@@ -263,13 +274,16 @@ export default function App() {
             )}
             {route.name === 'importExercises' && <ImportExercisesPage key={route.area} area={route.area} />}
             {(route.name === 'library' ||
+              route.name === 'gradedReaders' ||
               route.name === 'grammar' ||
               route.name === 'grammarTopic' ||
               (route.name === 'practice' && (route.area === 'reading' || route.area === 'grammar'))) && (
               <div className="mx-auto max-w-5xl px-4 pt-6 sm:px-6">
                 <LearningNavigation
                   area={
-                    route.name === 'library' || (route.name === 'practice' && route.area === 'reading')
+                    route.name === 'library' ||
+                    route.name === 'gradedReaders' ||
+                    (route.name === 'practice' && route.area === 'reading')
                       ? 'read'
                       : 'grammar'
                   }
@@ -287,6 +301,26 @@ export default function App() {
                 onDelete={handleDeleteArticle}
                 onRestoreSamples={handleRestoreSamples}
               />
+            )}
+
+            {(route.name === 'gradedReaders' || route.name === 'gradedReader') && (
+              <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+                {route.name === 'gradedReaders' ? (
+                  <GradedReadersPage />
+                ) : (
+                  <GradedReaderPage
+                    key={`${route.readerId}:${route.version ?? ''}`}
+                    readerId={route.readerId}
+                    version={route.version}
+                    sentence={route.sentence}
+                    vocabulary={vocabulary}
+                    onOpenShadowingLog={(sourceId) => {
+                      setLogSourceId(sourceId);
+                      navigate({ name: 'study', tab: 'shadowing' });
+                    }}
+                  />
+                )}
+              </Suspense>
             )}
 
             {(route.name === 'reader' || route.name === 'passage') &&
@@ -351,7 +385,14 @@ export default function App() {
                     navigate(
                       source.kind === 'passage'
                         ? { name: 'passage', unitId: source.unitId, sentence: record.text }
-                        : { name: 'reader', articleId: source.articleId, sentence: record.text },
+                        : source.kind === 'graded'
+                          ? {
+                              name: 'gradedReader',
+                              readerId: source.readerId,
+                              version: source.version,
+                              sentence: record.text,
+                            }
+                          : { name: 'reader', articleId: source.articleId, sentence: record.text },
                     );
                   },
                 }}
@@ -402,6 +443,7 @@ export default function App() {
                 articleId={route.name === 'readAloud' ? route.articleId : undefined}
                 sentence={route.name === 'readAloud' ? route.sentence : undefined}
                 onAssessed={handleRecordAssessmentComplete}
+                onMissingKey={requestKey}
               />
             )}
 
@@ -448,7 +490,9 @@ export default function App() {
         <OnboardingDialog
           onClose={finishOnboarding}
           onKeySaved={() => setHasKey(true)}
-          onOpenSample={articles[0] ? () => openArticle(articles[0]) : undefined}
+          onOpenReader={
+            FIRST_READER_ID ? () => navigate({ name: 'gradedReader', readerId: FIRST_READER_ID }) : undefined
+          }
         />
       )}
     </div>

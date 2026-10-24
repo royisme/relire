@@ -3,7 +3,7 @@ import { beforeEach, expect, spyOn, test } from 'bun:test';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { freshDb } from './fixtures/storage';
-import { testAnalysis, testCandidate, testLookup } from './fixtures/vocabulary';
+import { testDefinition, testCandidate, testLookup } from './fixtures/vocabulary';
 import { useVocabularyReview } from '../src/hooks/useVocabularyReview';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import * as storage from '../src/storage/vocabulary';
@@ -12,7 +12,7 @@ const { introduceVocabularyCard, readVocabulary, saveVocabularyBookmark, saveVoc
 
 beforeEach(freshDb);
 async function reviewModel(words: string[], now: number): Promise<VocabularyModel> {
-  for (const word of words) await saveVocabularyBookmark(testLookup(word), testAnalysis(word), undefined, now);
+  for (const word of words) await saveVocabularyBookmark(testLookup(word), testDefinition(word), undefined, now);
   const model: VocabularyModel = {
     ...(await readVocabulary(now)),
     error: null,

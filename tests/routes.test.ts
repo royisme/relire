@@ -76,6 +76,36 @@ test('reader, distinct passage and speaking preserve source and sentence values'
   }
 });
 
+test('graded list and reader reserve the graded segment with pinned-version and sentence-focus rules', () => {
+  const version = 'a'.repeat(64);
+  const sentence = 'L’oiseau chante ? Oui, près du café & du jardin.';
+  roundTrip({ name: 'gradedReaders' });
+  for (const id of ['a b', 'é/ü?&=', 'x#y', '100%', 'graded', 'exercises']) {
+    roundTrip({ name: 'gradedReader', readerId: id });
+    roundTrip({ name: 'gradedReader', readerId: id, version });
+    roundTrip({ name: 'gradedReader', readerId: id, sentence });
+    roundTrip({ name: 'gradedReader', readerId: id, version, sentence });
+  }
+  expect(areaOf({ name: 'gradedReaders' })).toBe('read');
+  expect(areaOf({ name: 'gradedReader', readerId: 'r' })).toBe('read');
+  expect(routeHref({ name: 'gradedReader', readerId: 'r', version })).toBe(`#/read/graded/r?version=${version}`);
+  // The reserved segment never becomes an article id, raw or percent-encoded, and has no deeper alias.
+  expect(parse('#/read/graded').route).toEqual({ name: 'gradedReaders' });
+  expect(parse('#/read/%67raded').route.name).toBe('notFound');
+  expect(parse('#/read/graded/a/b').route.name).toBe('notFound');
+  expect(parse('#/read/graded/%E0%A4%A').route.name).toBe('notFound');
+  // Only a full lowercase 64-hex body version pins an edition.
+  for (const bad of ['xyz', 'a'.repeat(63), 'a'.repeat(65), 'A'.repeat(64), ''])
+    expect(parse(`#/read/graded/r?version=${encodeURIComponent(bad)}`).route.name).toBe('notFound');
+  // Unknown extras and unusable focus values are stripped to the canonical address.
+  expect(parse('#/read/graded?foo=1')).toEqual({ route: { name: 'gradedReaders' }, canonical: '#/read/graded' });
+  for (const result of [
+    parse('#/read/graded/r?foo=1'),
+    ...['', '   ', 'a'.repeat(4001)].map((value) => parse(`#/read/graded/r?sentence=${encodeURIComponent(value)}`)),
+  ])
+    expect(result).toEqual({ route: { name: 'gradedReader', readerId: 'r' }, canonical: '#/read/graded/r' });
+});
+
 test('Grammar is separate from My study and local references/exercises survive service absence', () => {
   expect(STUDY_TABS).toEqual(['words', 'shadowing', 'mistakes']);
   for (const tab of STUDY_TABS) roundTrip({ name: 'study', tab });

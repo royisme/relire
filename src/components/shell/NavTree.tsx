@@ -57,6 +57,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
     area === 'read'
       ? [
           { to: { name: 'library' }, label: t('learning.library') },
+          { to: { name: 'gradedReaders' }, label: t('nav.gradedReaders') },
           { to: { name: 'practice', area: 'reading' }, label: t('learning.exercises') },
           { to: { name: 'importArticle' }, label: t('nav.importArticle') },
         ]
@@ -95,7 +96,9 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
                         to.name === 'grammar'
                           ? (route.name === 'grammar' && route.section === to.section) ||
                             (!to.section && route.name === 'grammarTopic')
-                          : routeHref(route) === routeHref(to)
+                          : to.name === 'gradedReaders'
+                            ? route.name === 'gradedReaders' || route.name === 'gradedReader'
+                            : routeHref(route) === routeHref(to)
                       )
                         ? 'page'
                         : undefined

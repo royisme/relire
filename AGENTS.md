@@ -6,6 +6,8 @@ Relire is a static, browser-only PWA for French close reading and pronunciation 
 
 ## Hard rules
 
+The never-do list and working agreements are in `RULES.md`.
+
 - Every user-visible string goes through `t()` with keys in both `en.json` and `zh.json`.
 - Never commit API keys; backups never contain them.
 - Never invent data (fake stats, scores, AI answers); failures show the real error.
@@ -25,19 +27,33 @@ Relire is a static, browser-only PWA for French close reading and pronunciation 
 - Before dispatching a worker, or ruling a model out, run `magpie quota` (read-only, instant): availability changes, so never trust a reset time written in a note or an old error. Details in `docs/agent-delegation.md`.
 - Develop on the designated branch. No PRs, merges or force-push unless asked, except the lead's local merge in `docs/agent-delegation.md`. Finish with `ship-change`.
 
-## Where to look
+## The document set
+
+AGENTS.md is the glue: it is loaded every session and points to the rest. One file per role, each with one owner of its content. Where a role already had a file with a tool-bound or widely referenced name, that file stays (renaming `PRODUCT.md` or `DESIGN.md` breaks the design tooling; `docs/architecture.md` is linked from many docs).
+
+| Role | File | Read it when | Updated when |
+| --- | --- | --- | --- |
+| What we build and for whom (PRD) | `PRODUCT.md` | scope, audience, claims to avoid | scope or audience changes |
+| Stack, folders, data flow, storage | `docs/architecture.md` | touching module boundaries or data | responsibilities move |
+| Colors, type, components, tokens, overlays | `DESIGN.md`, skill `verify-ui` | any UI work | tokens or components change |
+| Rules: never-do list, working agreements | `RULES.md` (hard rules above; long form `docs/conventions.md`; area rules `.claude/rules/*.md`, auto-loaded) | before your first change | a rule is added or reversed |
+| Small steps, one at a time | `TASKS.md` | choosing what to do next | a step starts, lands or is replaced |
+| Done, broken, unverified | `PROGRESS.md` (history: `docs/merge-progress.md`, `CHANGELOG.md`) | catching up | a step lands or something breaks |
+| Direction: done, next, later, deferred | `docs/roadmap.md` | planning | priorities change |
+| Live session state | `docs/HANDOFF.md` (**local only**, never committed; history in `.handoffs/`) | start of a session after a reset | end of a session |
+
+Session protocol: read this file, `RULES.md`, then `TASKS.md` and `PROGRESS.md`; work one step; run the checks and read their exit codes; update `TASKS.md`, `PROGRESS.md`, the `CHANGELOG.md` line and any doc the change touches in the same commit; end with the skill `ship-change`.
+
+## Where to look (by task)
 
 | Your task | Read |
 | --- | --- |
 | Commands, checks, ports, e2e | `docs/development.md` |
 | What the hard rules mean in practice | `docs/conventions.md` |
-| Files in an area (UI, AI, storage, speech, i18n, marketing, TS) | `.claude/rules/*.md`, auto-loaded |
-| Product intent, audience, claims to avoid | `PRODUCT.md` |
-| UI work: tokens, type, spacing, overlays | `DESIGN.md`, skill `verify-ui` |
-| Module ownership, data flow, storage | `docs/architecture.md` |
-| What is done, next, later and deferred | `docs/roadmap.md` |
 | Merging FrenchLab AI | `docs/merge-plan.md`, then `docs/merge-progress.md` |
 | Grammar pack: Part 1 verified conjugation data, Part 2 grammar topics, Part 3 framework-first conjugation (any verb, AI-filled and engine-checked), Part 4 noun-gender tendencies | `docs/grammar-pack.md` |
+| Graded readers: plan, then authoring pipeline, gates G0 to G5, review flow | `docs/graded-readers-plan.md`, then `docs/graded-readers.md` |
+| Hosted content service | `docs/adr-hosted-content-service.md`, `worker/README.md` |
 | Adding an AI provider | skill `add-ai-provider` |
 | Finishing a change | skill `ship-change` |
 | Delegating to pi, agy, subagents | `docs/agent-delegation.md` |

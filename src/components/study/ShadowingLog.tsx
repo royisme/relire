@@ -107,7 +107,12 @@ export function ShadowingLog({ articles, units, unitsError, initialSourceId, onO
               </h3>
               <ul className="divide-y divide-ink-200 border-y border-ink-200">
                 {group.rows.map((row) => (
-                  <Row key={row.record.key} row={row} onOpen={() => onOpenSentence(row.record)} onDelete={remove} />
+                  <Row
+                    key={row.record.key}
+                    row={row}
+                    onOpen={group.unavailable ? undefined : () => onOpenSentence(row.record)}
+                    onDelete={remove}
+                  />
                 ))}
               </ul>
               {group.changed.length > 0 && (

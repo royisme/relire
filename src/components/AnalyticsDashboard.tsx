@@ -1,40 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExerciseProgress } from './progress/ExerciseProgress';
-import { SoundContrastProgress } from './progress/SoundContrastProgress';
 import { UserStats } from '../types';
 import type { VocabularyRow } from '../types/vocabulary';
-import { toggleSpeech } from '../utils/speech';
-import { SpeakIcon, useSpeechPhase } from './ui/speak-button';
 import { PageHeader } from './ui/page-header';
-import { FRENCH_IPA, IpaGroup } from '../data/frenchIpa';
 
 interface AnalyticsDashboardProps {
   stats: UserStats;
   vocabList: VocabularyRow[];
   onMissingKey: () => void;
 }
-
-const GROUPS: IpaGroup[] = ['vowels', 'nasals', 'semivowels', 'consonants'];
-
-/** One sound with an example word; pressing it speaks the word and its icon shows loading / playing in place. */
-const IpaTile: React.FC<{ symbol: string; word: string; label: string }> = ({ symbol, word, label }) => {
-  const phase = useSpeechPhase(word);
-  return (
-    <button
-      type="button"
-      onClick={() => toggleSpeech(word)}
-      aria-label={label}
-      className="group w-full h-16 rounded-md border border-ink-200 bg-surface hover:border-accent-300 hover:bg-accent-50 flex flex-col items-center justify-center cursor-pointer"
-    >
-      <span className="text-xl leading-none text-ink-900">[{symbol}]</span>
-      <span className="mt-1.5 inline-flex items-center gap-1 font-serif text-sm text-ink-600">
-        {word}
-        <SpeakIcon phase={phase} className="w-3 h-3 text-ink-400 group-hover:text-accent-900" />
-      </span>
-    </button>
-  );
-};
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, vocabList, onMissingKey }) => {
   const { t } = useTranslation();
@@ -97,32 +72,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ stats, v
           </ul>
         </section>
       )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 items-start gap-8 min-w-0">
-        <section className="space-y-4 min-w-0 lg:col-span-2">
-          <div>
-            <h3 className="font-serif font-semibold text-lg text-ink-900">{t('ipa.title')}</h3>
-            <p className="text-sm text-ink-500 mt-0.5">{t('ipa.subtitle')}</p>
-          </div>
-          {GROUPS.map((group) => (
-            <div key={group} className="space-y-2">
-              <h4 className="text-sm font-medium text-ink-700">{t(`ipa.${group}`)}</h4>
-              <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                {FRENCH_IPA[group].map((s) => (
-                  <li key={s.symbol}>
-                    <IpaTile
-                      symbol={s.symbol}
-                      word={s.word}
-                      label={t('ipa.play', { word: s.word, symbol: s.symbol })}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </section>
-        <SoundContrastProgress />
-      </div>
     </div>
   );
 };

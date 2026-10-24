@@ -10,6 +10,7 @@ export function LearningNavigation({ area, current }: { area: 'read' | 'grammar'
     area === 'read'
       ? [
           { to: { name: 'library' }, label: t('learning.library') },
+          { to: { name: 'gradedReaders' }, label: t('nav.gradedReaders') },
           { to: { name: 'practice', area: 'reading' }, label: t('learning.exercises') },
         ]
       : [
@@ -28,7 +29,9 @@ export function LearningNavigation({ area, current }: { area: 'read' | 'grammar'
           to.name === 'grammar'
             ? (current.name === 'grammar' && current.section === to.section) ||
               (!to.section && current.name === 'grammarTopic')
-            : routeHref(current) === routeHref(to);
+            : to.name === 'gradedReaders'
+              ? current.name === 'gradedReaders' || current.name === 'gradedReader'
+              : routeHref(current) === routeHref(to);
         return (
           <Link
             key={routeHref(to)}

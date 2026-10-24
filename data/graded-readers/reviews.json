@@ -1,0 +1,22 @@
+{
+  "records": [
+    {
+      "contentHash": "0f2eb53a8ae54eaf87d6b20f1da9f8015e79d8cf21228cdfc193a543970242f3",
+      "reviewedBy": "AI review: GPT-6.1 author; independent review by Gemini 3.8 Flash (two passes); not human or teacher review; owner-authorized local pilot",
+      "reviewedAt": "2026-10-23",
+      "readerId": "a1-01"
+    },
+    {
+      "contentHash": "ce0e94cacbfc30f3f0a9466ce2e67752b10e185a894815bede6c311dcfa7b959",
+      "reviewedBy": "AI review: GPT-6.1 author; independent review by Gemini 3.8 Flash (two passes); not human or teacher review; owner-authorized local pilot",
+      "reviewedAt": "2026-10-23",
+      "readerId": "a1-02"
+    },
+    {
+      "contentHash": "37480c24d810e2c18ab379d63a364bafaf0e798e035259bfa89182ec08a2a12f",
+      "reviewedBy": "AI review: GLM-5.3 author; independent review by Gemini 3.8 Flash (two passes); not human or teacher review; owner-authorized local pilot",
+      "reviewedAt": "2026-10-23",
+      "readerId": "a1-03"
+    }
+  ]
+}

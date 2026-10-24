@@ -3,7 +3,7 @@ import { PRONUNCIATION_SCHEMA_VERSION, READER_TOKENIZER_VERSION } from '../types
 
 /**
  * Persistent cache for AI answers and offline content.
- * Failures here are never fatal: a broken cache is just a miss.
+ * Disposable writes treat failures as misses; explicit reader offline saves await a committed write.
  */
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -124,6 +124,19 @@ export async function putCached(kind: CacheKind, key: string, value: unknown): P
     }
   } catch {
     // Quota or private mode: skip caching.
+  }
+}
+
+/** Explicit Keep offline only: unlike disposable AI/topic writes, commit and quota failures reach the caller. */
+export async function putReaderOffline(key: string, value: string): Promise<void> {
+  const d = await db();
+  const tx = d.transaction('cache', 'readwrite');
+  try {
+    await tx.store.put({ key: `content:${key}`, kind: 'content', value, createdAt: Date.now() });
+    await tx.done;
+  } catch (error) {
+    await tx.done.catch(() => undefined);
+    throw error;
   }
 }
 

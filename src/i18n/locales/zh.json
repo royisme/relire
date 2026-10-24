@@ -28,10 +28,16 @@
     "expand": "展开侧边栏",
     "due": "{{count}} 个待复习",
     "toReview": "{{count}} 道待复习",
-    "importArticle": "导入文章"
+    "importArticle": "导入文章",
+    "gradedReaders": "分级读物"
   },
   "learning": {
-    "areas": { "reading": "阅读", "grammar": "语法", "listening": "听力", "writing": "写作" },
+    "areas": {
+      "reading": "阅读",
+      "grammar": "语法",
+      "listening": "听力",
+      "writing": "写作"
+    },
     "area": "学习领域",
     "navigation": "学习导航",
     "library": "文章库",
@@ -115,6 +121,75 @@
     "analyzing": "正在查这个词…",
     "failed": "没能查到这个词。",
     "listen": "朗读"
+  },
+  "gradedReader": {
+    "listTitle": "分级读物",
+    "service": {
+      "loading": "正在加载更多读物…",
+      "ready": "更多读物来自内容服务。",
+      "empty": "暂无更多已发布读物。",
+      "savedCatalogue": "当前离线，显示上次保存的读物列表。",
+      "conflict": "{{ids}} 已发布不同的入门版本。请更新应用以使用新版；这里仍保留应用内的文本。",
+      "keepOffline": "离线保存",
+      "saving": "正在保存…",
+      "savedReader": "已保存，安装应用后可离线阅读。",
+      "saveError": "离线保存失败：{{msg}}"
+    },
+    "reviewNotice": "经 AI 审阅，未经人工审阅。无需密钥。",
+    "loading": "正在打开读物…",
+    "loadError": "读物加载失败：{{msg}}",
+    "openError": "此版本打开失败：{{msg}}",
+    "progressError": "阅读状态不可用：{{msg}}",
+    "saveError": "保存失败：{{msg}}",
+    "bindingError": "词义不可用：{{msg}}",
+    "empty": "暂无读物。",
+    "back": "返回分级读物",
+    "stage": "{{level}} · 第 {{number}} 阶段",
+    "stageNumber": "第 {{number}} 阶段",
+    "earlier": "已读过较早版本",
+    "word": "词语",
+    "translation": "译文",
+    "deviceVoice": "设备语音",
+    "sourceAi": "AI 撰写并经 AI 审核，非人工审核",
+    "sourceHuman": "人工审核",
+    "sourceUnknown": "未记录审核状态",
+    "completion": "阅读状态",
+    "markRead": "标为已读",
+    "markUnread": "标为未读",
+    "readAt": "已读 · {{date}}",
+    "status": {
+      "unavailable": "不可用",
+      "notOpened": "未打开",
+      "opened": "已打开",
+      "read": "已读"
+    },
+    "authored": "已编写",
+    "showTranslation": "显示译文",
+    "hideTranslation": "隐藏译文",
+    "pos": {
+      "noun": "名词",
+      "verb": "动词",
+      "adjective": "形容词",
+      "adverb": "副词",
+      "function": "虚词",
+      "interjection": "感叹词",
+      "number": "数词",
+      "proper": "专有名词",
+      "phrase": "短语"
+    },
+    "gender": {
+      "masculine": "阳性",
+      "feminine": "阴性"
+    },
+    "checkpoints": {
+      "title": "检查点",
+      "quotedSentence": "出自句子"
+    },
+    "ai": {
+      "askWord": "就这个词询问 AI",
+      "askSentence": "让 AI 分析这个句子",
+      "answer": "AI 回答，未经审校"
+    }
   },
   "sentenceDrawer": {
     "title": "句子",
@@ -211,7 +286,10 @@
     "review": "复习中",
     "savedContext": "个人语境",
     "savedLanguage": "解释保存时的语言：{{language}}",
-    "language": { "en": "英语", "zh": "中文" },
+    "language": {
+      "en": "英语",
+      "zh": "中文"
+    },
     "reset": "重置复习计划",
     "resetHelp": "现在重新开始学习。首次学习时间、每日名额记录和自评历史都会保留。",
     "delete": "删除卡片和历史",
@@ -461,7 +539,7 @@
       "desc": "Relire Plus 是什么，数据去了哪里。",
       "what": "Relire Plus 是为准备 TCF Canada 的法语学习者做的精读助手：读真实的法语文章，点开任何单词或句子查看解析，并开口练习发音。",
       "privacy": "没有账号，也没有应用服务器。文章、生词和录音都保存在这个浏览器里。使用 AI 功能时，文本或录音会用你自己的 Key 从这个浏览器直接发给你选择的提供方。",
-      "servicePrivacy": "此版本可从内容服务读取语法主题、法语词典和完整的分页词书。请求只包含主题编号、点击的词，或词书编号、页码和版本，以及网络请求的 IP 地址。文章、语境、答案、自评、复习计划、录音和密钥都不会发给它。客户端可以下载整本已发布词书；真实内容仍待所有者审核并批准分发。",
+      "servicePrivacy": "此版本可从内容服务读取语法主题、法语词典、完整的分页词书和更多分级读物。请求只包含主题编号、点击的词、词书编号、页码和版本，或已发布读物的编号和版本，以及网络请求的 IP 地址。文章、语境、答案、自评、复习计划、录音和密钥都不会发给它。客户端可以下载整本已发布词书；真实内容仍待所有者审核并批准分发。",
       "scope": "Relire Plus 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
       "source": "在 GitHub 查看源代码",
       "lexicon": "对于不在已审核词表里的动词，单词页中的动词形式和时态来自 {{name}}，由 {{maintainer}} 维护，许可证为 {{licence}}。",
@@ -606,24 +684,27 @@
     "next": "下一步",
     "welcomeTitle": "精读法语",
     "welcomeBody": "打开一篇文章，点任何一个单词或句子，就能看到它在上下文里的意思；再把它读出来，得到发音反馈。",
-    "welcomeNeed": "讲解由 AI 服务生成（默认是 {{provider}}）。你需要一个免费的 API Key，它只保存在这个浏览器里，只会发给该服务。",
-    "keyTitle": "连接 {{provider}}",
+    "welcomeNoKey": "不用 Key 也能开始：分级读物直接就能打开，单词意思、翻译和设备语音朗读都是免费的。",
+    "welcomeNeed": "AI 服务（默认是 {{provider}}）是可选的，它能提供更深入的分析、反馈和其他声音；需要一个免费的 API Key，它只保存在这个浏览器里。",
+    "keyTitle": "连接 {{provider}}（可选）",
     "keyStep1": "在 {{provider}} 免费创建一个 Key。",
     "openStudio": "打开 {{provider}}",
     "keyStep2": "把 Key 粘贴到这里。",
+    "keyOptional": "分级读物里的单词意思、翻译和朗读都是免费的，不需要 Key。Key 只是额外提供分析、反馈和其他声音。",
+    "continueWithoutKey": "不用 AI，继续",
     "checking": "正在检查…",
     "checkSave": "检查并保存",
     "keyInvalid": "这个 Key 不能用。",
     "keySaved": "Key 已保存在这个浏览器里。",
-    "tryTitle": "在示例文章上试一试",
-    "tipWord": "点一个单词，查看它在语境中的意思、发音和动词变位。",
-    "tipSentence": "点一个句子，再选“分析”，查看句子结构和语法，并练习朗读。",
+    "tryTitle": "打开第一本读物",
+    "tipWord": "点一个单词，查看它在语境中的意思和读音。",
+    "tipSentence": "点一个句子可以听它或练习朗读；添加 Key 后还能让 AI 分析句子。",
     "tipSpeak": "把想记住的词保存下来，它们会按计划回来复习。",
     "toLibrary": "去文章库",
-    "openSample": "打开示例文章"
+    "openReader": "打开第一本读物"
   },
   "keyBanner": {
-    "text": "添加你的 API Key，才能使用单词和句子解析、朗读和发音反馈。",
+    "text": "添加 API Key 后可以使用 AI 的单词和句子解析、AI 朗读和发音反馈。分级读物不用 Key 也能用。",
     "action": "添加 Key"
   },
   "ipa": {
@@ -638,6 +719,7 @@
   "minimalPairs": {
     "progress": {
       "title": "近音辨听作答",
+      "empty": "还没有作答记录。先在上方创建练习。",
       "history": "统计仍保存的近音辨听练习的每次作答，包括重复作答。删除题组后，其作答不再计入这里的统计。",
       "contrast": "/{{first}}/ ↔ /{{second}}/",
       "counts": "共 {{total}} 次，答对 {{correct}} 次"
@@ -987,7 +1069,7 @@
   },
   "shadowingLog": {
     "title": "跟读本",
-    "subtitle": "保存在本机的文章和练习短文录音，每句保留最近三次。",
+    "subtitle": "保存在本机的阅读跟读录音，每句保留最近三次。",
     "source": "来源",
     "allSources": "全部来源",
     "referenceVoice": "范读使用设置中当前选择的声音，可能与你录音时不同。",
@@ -1002,6 +1084,7 @@
     "deleteTake": "删除你在 {{when}} 的录音",
     "changed": "原文已改动（{{count}}）",
     "removed": "来源已不可用（{{count}}）",
+    "unavailableEdition": "读物版本不可用（{{id}}）",
     "empty": "还没有录音。在阅读页点击句子旁的麦克风即可练习。",
     "loadFailed": "无法读取你的录音：{{msg}}",
     "deleteFailed": "录音没能删除：{{msg}}"
@@ -1102,6 +1185,7 @@
   },
   "notFound": {
     "grammarTopic": "此语法专题尚未发布或不存在。",
+    "gradedReader": "这本分级读物未发布或已不可用。请返回分级读物列表选择其他读物。",
     "passage": "这篇短文已不可用。请返回文章库选择其他内容。",
     "title": "找不到这个页面",
     "page": "这个地址在 Relire Plus 里没有对应的页面。",

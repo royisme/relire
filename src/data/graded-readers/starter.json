@@ -1,0 +1,1423 @@
+{
+  "schemaVersion": 1,
+  "syllabusVersion": "0.1.0",
+  "readers": [
+    {
+      "schemaVersion": 1,
+      "body": {
+        "id": "a1-01",
+        "order": 1,
+        "level": "A1",
+        "title": {
+          "fr": "Un cahier",
+          "en": "A notebook",
+          "zh": "一本笔记本"
+        },
+        "topics": [
+          "subject-pronouns",
+          "indefinite-article-forms",
+          "pattern-cest",
+          "present-tense-forms"
+        ],
+        "sentences": [
+          {
+            "id": "s1",
+            "fr": "C’est une table.",
+            "translation": {
+              "en": "This is a table.",
+              "zh": "这是一张桌子。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-ce-neutral",
+                  "verb-etre-identity"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "function-une-article"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "noun-table-object"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "s2",
+            "fr": "J’ai un cahier.",
+            "translation": {
+              "en": "I have a notebook.",
+              "zh": "我有一本笔记本。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-je-subject",
+                  "verb-avoir-possession"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "function-un-article"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "noun-cahier-object"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "s3",
+            "fr": "J’ai un stylo.",
+            "translation": {
+              "en": "I have a pen.",
+              "zh": "我有一支笔。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-je-subject",
+                  "verb-avoir-possession"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "function-un-article"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "noun-stylo-object"
+                ]
+              }
+            ]
+          }
+        ],
+        "glossary": [
+          {
+            "id": "function-un-article",
+            "lemma": "un",
+            "pos": "function",
+            "sense": "article",
+            "forms": [
+              "un"
+            ],
+            "gloss": {
+              "en": "a, an (before a masculine singular noun)",
+              "zh": "一个（用于阳性单数名词）"
+            }
+          },
+          {
+            "id": "noun-cahier-object",
+            "lemma": "cahier",
+            "pos": "noun",
+            "sense": "object",
+            "forms": [
+              "cahier"
+            ],
+            "gloss": {
+              "en": "notebook",
+              "zh": "笔记本"
+            },
+            "gender": "masculine"
+          },
+          {
+            "id": "function-ce-neutral",
+            "lemma": "ce",
+            "pos": "function",
+            "sense": "neutral",
+            "forms": [
+              "c’"
+            ],
+            "gloss": {
+              "en": "it, this, that (in c’est = it is, this is; c’ before a vowel sound)",
+              "zh": "它，这，那（用于 c’est＝这是；元音前写作 c’）"
+            }
+          },
+          {
+            "id": "verb-etre-identity",
+            "lemma": "être",
+            "pos": "verb",
+            "sense": "identity",
+            "forms": [
+              "est"
+            ],
+            "gloss": {
+              "en": "am, is",
+              "zh": "是"
+            }
+          },
+          {
+            "id": "function-une-article",
+            "lemma": "une",
+            "pos": "function",
+            "sense": "article",
+            "forms": [
+              "une"
+            ],
+            "gloss": {
+              "en": "a, an (before a feminine singular noun)",
+              "zh": "一个（用于阴性单数名词）"
+            }
+          },
+          {
+            "id": "noun-table-object",
+            "lemma": "table",
+            "pos": "noun",
+            "sense": "object",
+            "forms": [
+              "table"
+            ],
+            "gloss": {
+              "en": "table",
+              "zh": "桌子"
+            },
+            "gender": "feminine"
+          },
+          {
+            "id": "function-je-subject",
+            "lemma": "je",
+            "pos": "function",
+            "sense": "subject",
+            "forms": [
+              "j’"
+            ],
+            "gloss": {
+              "en": "I (j’ before a vowel sound or mute h)",
+              "zh": "我（在元音或哑音 h 前写作 j’）"
+            }
+          },
+          {
+            "id": "verb-avoir-possession",
+            "lemma": "avoir",
+            "pos": "verb",
+            "sense": "possession",
+            "forms": [
+              "ai"
+            ],
+            "gloss": {
+              "en": "have, has",
+              "zh": "有"
+            }
+          },
+          {
+            "id": "noun-stylo-object",
+            "lemma": "stylo",
+            "pos": "noun",
+            "sense": "object",
+            "forms": [
+              "stylo"
+            ],
+            "gloss": {
+              "en": "pen",
+              "zh": "笔"
+            },
+            "gender": "masculine"
+          }
+        ],
+        "learning": {
+          "instruction": {
+            "en": "Read the text. Find each answer in the cited sentence, including its article.",
+            "zh": "阅读短文。在所引句子中找到每个答案，并保留冠词。"
+          },
+          "checkpoints": [
+            {
+              "id": "a1-01-objects",
+              "title": {
+                "en": "Find the objects",
+                "zh": "找到物品"
+              },
+              "questions": [
+                {
+                  "question": {
+                    "id": "a1-01-recognize",
+                    "instruction": {
+                      "en": "Choose the object phrase found in the cited sentence, including its article.",
+                      "zh": "选出所引句子中的物品短语，包括冠词。"
+                    },
+                    "type": "CHOICE_SELECT",
+                    "prompt": "C’est {une table|un cahier}.",
+                    "expectedAnswer": "une table",
+                    "feedback": {
+                      "correct": {
+                        "summary": {
+                          "en": "This matches the object named in the cited sentence.",
+                          "zh": "这与所引句子中提到的物品一致。"
+                        }
+                      },
+                      "incorrect": {
+                        "summary": {
+                          "en": "Look again at the object named in the cited sentence.",
+                          "zh": "再看看所引句子中提到的物品。"
+                        }
+                      },
+                      "byAnswer": [
+                        {
+                          "answer": "un cahier",
+                          "message": {
+                            "summary": {
+                              "en": "That object appears in a different sentence.",
+                              "zh": "那个物品出现在另一句中。"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "evidence": {
+                    "sentenceId": "s1",
+                    "quote": "C’est une table."
+                  }
+                },
+                {
+                  "question": {
+                    "id": "a1-01-copy",
+                    "instruction": {
+                      "en": "Copy the object phrase from the cited sentence, including its article. Do not include the final period.",
+                      "zh": "抄写所引句子中的物品短语，包括冠词，不要抄写句末的句号。"
+                    },
+                    "type": "FILL_BLANKS",
+                    "prompt": "J’ai [___].",
+                    "expectedAnswer": "un stylo",
+                    "feedback": {
+                      "correct": {
+                        "summary": {
+                          "en": "The object and its article match the text.",
+                          "zh": "物品名称及其冠词与原文一致。"
+                        }
+                      },
+                      "incorrect": {
+                        "summary": {
+                          "en": "Copy the object and its article exactly from the cited sentence.",
+                          "zh": "请准确抄写所引句子中的物品名称及其冠词。"
+                        }
+                      }
+                    }
+                  },
+                  "evidence": {
+                    "sentenceId": "s3",
+                    "quote": "J’ai un stylo."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "version": "0f2eb53a8ae54eaf87d6b20f1da9f8015e79d8cf21228cdfc193a543970242f3",
+      "review": {
+        "contentHash": "0f2eb53a8ae54eaf87d6b20f1da9f8015e79d8cf21228cdfc193a543970242f3",
+        "reviewedBy": "AI review: GPT-6.1 author; independent review by Gemini 3.8 Flash (two passes); not human or teacher review; owner-authorized local pilot",
+        "reviewedAt": "2026-10-23"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "body": {
+        "id": "a1-02",
+        "order": 2,
+        "level": "A1",
+        "title": {
+          "fr": "Ma famille",
+          "en": "My family",
+          "zh": "我的家人"
+        },
+        "topics": [
+          "noun-gender-feminine",
+          "noun-plurals",
+          "possessive-determiners",
+          "definite-article-forms"
+        ],
+        "sentences": [
+          {
+            "id": "s1",
+            "fr": "Ma mère aime les cahiers.",
+            "translation": {
+              "en": "My mother likes notebooks.",
+              "zh": "我的母亲喜欢笔记本。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-ma-possessive"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "noun-mere-person"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "verb-aimer-affection"
+                ]
+              },
+              {
+                "ordinal": 3,
+                "entryIds": [
+                  "function-les-article"
+                ]
+              },
+              {
+                "ordinal": 4,
+                "entryIds": [
+                  "noun-cahier-object"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "s2",
+            "fr": "Mes frères ont des stylos.",
+            "translation": {
+              "en": "My brothers have some pens.",
+              "zh": "我的兄弟们有一些笔。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-mes-possessive"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "noun-frere-person"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "verb-avoir-possession"
+                ]
+              },
+              {
+                "ordinal": 3,
+                "entryIds": [
+                  "function-des-article"
+                ]
+              },
+              {
+                "ordinal": 4,
+                "entryIds": [
+                  "noun-stylo-object"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "s3",
+            "fr": "J’ai un cahier.",
+            "translation": {
+              "en": "I have a notebook.",
+              "zh": "我有一本笔记本。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-je-subject",
+                  "verb-avoir-possession"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "function-un-article"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "noun-cahier-object"
+                ]
+              }
+            ]
+          }
+        ],
+        "glossary": [
+          {
+            "id": "function-ma-possessive",
+            "lemma": "ma",
+            "pos": "function",
+            "sense": "possessive",
+            "forms": [
+              "ma"
+            ],
+            "gloss": {
+              "en": "my (before a feminine singular noun)",
+              "zh": "我的（阴性单数）"
+            }
+          },
+          {
+            "id": "noun-famille-person",
+            "lemma": "famille",
+            "pos": "noun",
+            "sense": "person",
+            "forms": [
+              "famille"
+            ],
+            "gloss": {
+              "en": "family",
+              "zh": "家庭；家人"
+            },
+            "gender": "feminine"
+          },
+          {
+            "id": "noun-mere-person",
+            "lemma": "mère",
+            "pos": "noun",
+            "sense": "person",
+            "forms": [
+              "mère"
+            ],
+            "gloss": {
+              "en": "mother",
+              "zh": "母亲"
+            },
+            "gender": "feminine"
+          },
+          {
+            "id": "verb-aimer-affection",
+            "lemma": "aimer",
+            "pos": "verb",
+            "sense": "affection",
+            "forms": [
+              "aime"
+            ],
+            "gloss": {
+              "en": "love, like",
+              "zh": "爱；喜欢"
+            }
+          },
+          {
+            "id": "function-les-article",
+            "lemma": "les",
+            "pos": "function",
+            "sense": "article",
+            "forms": [
+              "les"
+            ],
+            "gloss": {
+              "en": "the (before a plural noun); also used for general statements: aime les cahiers = likes notebooks",
+              "zh": "定冠词，用于复数名词前；也用于泛指：aime les cahiers＝喜欢笔记本"
+            }
+          },
+          {
+            "id": "noun-cahier-object",
+            "lemma": "cahier",
+            "pos": "noun",
+            "sense": "object",
+            "forms": [
+              "cahiers",
+              "cahier"
+            ],
+            "gloss": {
+              "en": "notebook",
+              "zh": "笔记本"
+            },
+            "gender": "masculine"
+          },
+          {
+            "id": "function-mes-possessive",
+            "lemma": "mes",
+            "pos": "function",
+            "sense": "possessive",
+            "forms": [
+              "mes"
+            ],
+            "gloss": {
+              "en": "my (before a plural noun)",
+              "zh": "我的（复数）"
+            }
+          },
+          {
+            "id": "noun-frere-person",
+            "lemma": "frère",
+            "pos": "noun",
+            "sense": "person",
+            "forms": [
+              "frères"
+            ],
+            "gloss": {
+              "en": "brother",
+              "zh": "兄弟；哥哥；弟弟"
+            },
+            "gender": "masculine"
+          },
+          {
+            "id": "verb-avoir-possession",
+            "lemma": "avoir",
+            "pos": "verb",
+            "sense": "possession",
+            "forms": [
+              "ont",
+              "ai"
+            ],
+            "gloss": {
+              "en": "have, has",
+              "zh": "有"
+            }
+          },
+          {
+            "id": "function-des-article",
+            "lemma": "des",
+            "pos": "function",
+            "sense": "article",
+            "forms": [
+              "des"
+            ],
+            "gloss": {
+              "en": "some (before a plural noun: des stylos = some pens)",
+              "zh": "一些（用于复数名词前：des stylos＝一些笔）"
+            }
+          },
+          {
+            "id": "noun-stylo-object",
+            "lemma": "stylo",
+            "pos": "noun",
+            "sense": "object",
+            "forms": [
+              "stylos"
+            ],
+            "gloss": {
+              "en": "pen",
+              "zh": "笔"
+            },
+            "gender": "masculine"
+          },
+          {
+            "id": "function-je-subject",
+            "lemma": "je",
+            "pos": "function",
+            "sense": "subject",
+            "forms": [
+              "j’"
+            ],
+            "gloss": {
+              "en": "I (j’ before a vowel sound or mute h)",
+              "zh": "我（在元音或哑音 h 前写作 j’）"
+            }
+          },
+          {
+            "id": "function-un-article",
+            "lemma": "un",
+            "pos": "function",
+            "sense": "article",
+            "forms": [
+              "un"
+            ],
+            "gloss": {
+              "en": "a, an (before a masculine singular noun)",
+              "zh": "一个（用于阳性单数名词）"
+            }
+          }
+        ],
+        "learning": {
+          "instruction": {
+            "en": "Read the family snapshot. Use each quoted sentence to choose or copy the missing words, including the article.",
+            "zh": "读一读这个家庭的小片段。根据每题引用的句子，选择或抄写缺少的词，包含冠词。"
+          },
+          "checkpoints": [
+            {
+              "id": "family-belongings",
+              "title": {
+                "en": "Family belongings",
+                "zh": "家人的物品"
+              },
+              "questions": [
+                {
+                  "question": {
+                    "id": "brothers-belongings",
+                    "instruction": {
+                      "en": "Find what the brothers have in the quoted sentence. Choose the matching words, including the article.",
+                      "zh": "在引用的句子中找出兄弟们有什么。选择与原文一致的词，包含冠词。"
+                    },
+                    "type": "CHOICE_SELECT",
+                    "prompt": "Mes frères ont {des stylos|des cahiers}.",
+                    "expectedAnswer": "des stylos",
+                    "feedback": {
+                      "correct": {
+                        "summary": {
+                          "en": "That matches what the brothers have.",
+                          "zh": "这与原文中兄弟们拥有的物品一致。"
+                        }
+                      },
+                      "incorrect": {
+                        "summary": {
+                          "en": "Check the words after the verb in the quoted sentence.",
+                          "zh": "再看看引用句子中动词后面的词。"
+                        }
+                      },
+                      "byAnswer": [
+                        {
+                          "answer": "des cahiers",
+                          "message": {
+                            "summary": {
+                              "en": "Notebooks appear in the reading, but the brothers have a different item.",
+                              "zh": "短文提到了笔记本，但兄弟们拥有的是另一种物品。"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "evidence": {
+                    "sentenceId": "s2",
+                    "quote": "Mes frères ont des stylos."
+                  }
+                },
+                {
+                  "question": {
+                    "id": "mother-preference",
+                    "instruction": {
+                      "en": "Find what the mother likes in the quoted sentence. Copy the missing words exactly, including the article but not the period.",
+                      "zh": "在引用的句子中找出母亲喜欢什么。原样抄写缺少的词，包含冠词，不要句号。"
+                    },
+                    "type": "FILL_BLANKS",
+                    "prompt": "Ma mère aime [___].",
+                    "expectedAnswer": "les cahiers",
+                    "feedback": {
+                      "correct": {
+                        "summary": {
+                          "en": "You copied the words for what the mother likes.",
+                          "zh": "你抄写了母亲喜欢的物品名称。"
+                        }
+                      },
+                      "incorrect": {
+                        "summary": {
+                          "en": "Copy the two words after the verb, keeping the article and plural ending.",
+                          "zh": "抄写动词后面的两个词，保留冠词和复数词尾。"
+                        }
+                      }
+                    }
+                  },
+                  "evidence": {
+                    "sentenceId": "s1",
+                    "quote": "Ma mère aime les cahiers."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "version": "ce0e94cacbfc30f3f0a9466ce2e67752b10e185a894815bede6c311dcfa7b959",
+      "review": {
+        "contentHash": "ce0e94cacbfc30f3f0a9466ce2e67752b10e185a894815bede6c311dcfa7b959",
+        "reviewedBy": "AI review: GPT-6.1 author; independent review by Gemini 3.8 Flash (two passes); not human or teacher review; owner-authorized local pilot",
+        "reviewedAt": "2026-10-23"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "body": {
+        "id": "a1-03",
+        "order": 3,
+        "level": "A1",
+        "title": {
+          "fr": "Notre appartement",
+          "en": "Our Apartment",
+          "zh": "我们的公寓"
+        },
+        "topics": [
+          "pattern-il-y-a",
+          "demonstrative-determiners",
+          "adjective-agreement",
+          "preposition-dans",
+          "preposition-avec"
+        ],
+        "sentences": [
+          {
+            "id": "a1-03-s1",
+            "fr": "Il y a un salon dans cet appartement.",
+            "translation": {
+              "en": "There is a living room in this apartment.",
+              "zh": "这套公寓里有一个客厅。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-il-subject"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "function-y-existential"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "verb-avoir-possession"
+                ]
+              },
+              {
+                "ordinal": 3,
+                "entryIds": [
+                  "function-un-article"
+                ]
+              },
+              {
+                "ordinal": 4,
+                "entryIds": [
+                  "noun-salon-place"
+                ]
+              },
+              {
+                "ordinal": 5,
+                "entryIds": [
+                  "function-dans-preposition"
+                ]
+              },
+              {
+                "ordinal": 6,
+                "entryIds": [
+                  "function-cet-demonstrative"
+                ]
+              },
+              {
+                "ordinal": 7,
+                "entryIds": [
+                  "noun-appartement-place"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a1-03-s2",
+            "fr": "Ce salon est beau.",
+            "translation": {
+              "en": "This living room is beautiful.",
+              "zh": "这个客厅很漂亮。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-ce-demonstrative"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "noun-salon-place"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "verb-etre-identity"
+                ]
+              },
+              {
+                "ordinal": 3,
+                "entryIds": [
+                  "adjective-beau-appearance"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a1-03-s3",
+            "fr": "Il y a une chambre avec un lit.",
+            "translation": {
+              "en": "There is a bedroom with a bed.",
+              "zh": "有一间带一张床的卧室。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-il-subject"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "function-y-existential"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "verb-avoir-possession"
+                ]
+              },
+              {
+                "ordinal": 3,
+                "entryIds": [
+                  "function-une-article"
+                ]
+              },
+              {
+                "ordinal": 4,
+                "entryIds": [
+                  "noun-chambre-place"
+                ]
+              },
+              {
+                "ordinal": 5,
+                "entryIds": [
+                  "function-avec-preposition"
+                ]
+              },
+              {
+                "ordinal": 6,
+                "entryIds": [
+                  "function-un-article"
+                ]
+              },
+              {
+                "ordinal": 7,
+                "entryIds": [
+                  "noun-lit-object"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a1-03-s4",
+            "fr": "Cette petite chambre est belle.",
+            "translation": {
+              "en": "This little bedroom is lovely.",
+              "zh": "这间小卧室很美。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-cette-demonstrative"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "adjective-petit-size"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "noun-chambre-place"
+                ]
+              },
+              {
+                "ordinal": 3,
+                "entryIds": [
+                  "verb-etre-identity"
+                ]
+              },
+              {
+                "ordinal": 4,
+                "entryIds": [
+                  "adjective-beau-appearance"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a1-03-s5",
+            "fr": "Ma mère regarde le salon avec moi.",
+            "translation": {
+              "en": "My mother is looking at the living room with me.",
+              "zh": "我的母亲和我一起看客厅。"
+            },
+            "tokens": [
+              {
+                "ordinal": 0,
+                "entryIds": [
+                  "function-ma-possessive"
+                ]
+              },
+              {
+                "ordinal": 1,
+                "entryIds": [
+                  "noun-mere-person"
+                ]
+              },
+              {
+                "ordinal": 2,
+                "entryIds": [
+                  "verb-regarder-look"
+                ]
+              },
+              {
+                "ordinal": 3,
+                "entryIds": [
+                  "function-le-article"
+                ]
+              },
+              {
+                "ordinal": 4,
+                "entryIds": [
+                  "noun-salon-place"
+                ]
+              },
+              {
+                "ordinal": 5,
+                "entryIds": [
+                  "function-avec-preposition"
+                ]
+              },
+              {
+                "ordinal": 6,
+                "entryIds": [
+                  "function-moi-stressed"
+                ]
+              }
+            ]
+          }
+        ],
+        "glossary": [
+          {
+            "id": "function-notre-possessive",
+            "lemma": "notre",
+            "pos": "function",
+            "sense": "possessive",
+            "forms": [
+              "notre"
+            ],
+            "gloss": {
+              "en": "our (before a singular noun)",
+              "zh": "我们的（单数）"
+            }
+          },
+          {
+            "id": "function-il-subject",
+            "lemma": "il",
+            "pos": "function",
+            "sense": "subject",
+            "forms": [
+              "il"
+            ],
+            "gloss": {
+              "en": "he; it (for a masculine thing); impersonal it (in il y a; il est for telling the time)",
+              "zh": "他；它（指阳性事物）；无人称主语（il y a、il est 报时）"
+            }
+          },
+          {
+            "id": "function-y-existential",
+            "lemma": "y",
+            "pos": "function",
+            "sense": "existential",
+            "forms": [
+              "y"
+            ],
+            "gloss": {
+              "en": "part of il y a: there is, there are",
+              "zh": "il y a 的一部分：il y a＝有"
+            }
+          },
+          {
+            "id": "verb-avoir-possession",
+            "lemma": "avoir",
+            "pos": "verb",
+            "sense": "possession",
+            "forms": [
+              "a"
+            ],
+            "gloss": {
+              "en": "have, has",
+              "zh": "有"
+            }
+          },
+          {
+            "id": "function-un-article",
+            "lemma": "un",
+            "pos": "function",
+            "sense": "article",
+            "forms": [
+              "un"
+            ],
+            "gloss": {
+              "en": "a, an (before a masculine singular noun)",
+              "zh": "一个（用于阳性单数名词）"
+            }
+          },
+          {
+            "id": "noun-salon-place",
+            "lemma": "salon",
+            "pos": "noun",
+            "sense": "place",
+            "forms": [
+              "salon"
+            ],
+            "gloss": {
+              "en": "living room",
+              "zh": "客厅"
+            },
+            "gender": "masculine"
+          },
+          {
+            "id": "function-dans-preposition",
+            "lemma": "dans",
+            "pos": "function",
+            "sense": "preposition",
+            "forms": [
+              "dans"
+            ],
+            "gloss": {
+              "en": "in (inside a place)",
+              "zh": "在……里面"
+            }
+          },
+          {
+            "id": "function-cet-demonstrative",
+            "lemma": "cet",
+            "pos": "function",
+            "sense": "demonstrative",
+            "forms": [
+              "cet"
+            ],
+            "gloss": {
+              "en": "this, that (masculine singular before a vowel sound)",
+              "zh": "这，那（用于元音开头的阳性单数名词前）"
+            }
+          },
+          {
+            "id": "noun-appartement-place",
+            "lemma": "appartement",
+            "pos": "noun",
+            "sense": "place",
+            "forms": [
+              "appartement"
+            ],
+            "gloss": {
+              "en": "apartment",
+              "zh": "公寓"
+            },
+            "gender": "masculine"
+          },
+          {
+            "id": "function-ce-demonstrative",
+            "lemma": "ce",
+            "pos": "function",
+            "sense": "demonstrative",
+            "forms": [
+              "ce"
+            ],
+            "gloss": {
+              "en": "this, that (before a masculine singular noun)",
+              "zh": "这，那（用在阳性单数名词前）"
+            }
+          },
+          {
+            "id": "verb-etre-identity",
+            "lemma": "être",
+            "pos": "verb",
+            "sense": "identity",
+            "forms": [
+              "est"
+            ],
+            "gloss": {
+              "en": "am, is",
+              "zh": "是"
+            }
+          },
+          {
+            "id": "adjective-beau-appearance",
+            "lemma": "beau",
+            "pos": "adjective",
+            "sense": "appearance",
+            "forms": [
+              "beau",
+              "belle",
+              "belles"
+            ],
+            "gloss": {
+              "en": "beautiful, handsome",
+              "zh": "美的；英俊的"
+            }
+          },
+          {
+            "id": "function-une-article",
+            "lemma": "une",
+            "pos": "function",
+            "sense": "article",
+            "forms": [
+              "une"
+            ],
+            "gloss": {
+              "en": "a, an (before a feminine singular noun)",
+              "zh": "一个（用于阴性单数名词）"
+            }
+          },
+          {
+            "id": "noun-chambre-place",
+            "lemma": "chambre",
+            "pos": "noun",
+            "sense": "place",
+            "forms": [
+              "chambre"
+            ],
+            "gloss": {
+              "en": "bedroom",
+              "zh": "卧室"
+            },
+            "gender": "feminine"
+          },
+          {
+            "id": "function-avec-preposition",
+            "lemma": "avec",
+            "pos": "function",
+            "sense": "preposition",
+            "forms": [
+              "avec"
+            ],
+            "gloss": {
+              "en": "with (a person, a thing); having: une chambre avec un lit = a bedroom with a bed",
+              "zh": "和……一起；用；带有（une chambre avec un lit＝带一张床的卧室）"
+            }
+          },
+          {
+            "id": "noun-lit-object",
+            "lemma": "lit",
+            "pos": "noun",
+            "sense": "object",
+            "forms": [
+              "lit"
+            ],
+            "gloss": {
+              "en": "bed",
+              "zh": "床"
+            },
+            "gender": "masculine"
+          },
+          {
+            "id": "function-cette-demonstrative",
+            "lemma": "cette",
+            "pos": "function",
+            "sense": "demonstrative",
+            "forms": [
+              "cette"
+            ],
+            "gloss": {
+              "en": "this, that (feminine singular)",
+              "zh": "这，那（阴性单数）"
+            }
+          },
+          {
+            "id": "adjective-petit-size",
+            "lemma": "petit",
+            "pos": "adjective",
+            "sense": "size",
+            "forms": [
+              "petite"
+            ],
+            "gloss": {
+              "en": "small, little",
+              "zh": "小的"
+            }
+          },
+          {
+            "id": "function-ma-possessive",
+            "lemma": "ma",
+            "pos": "function",
+            "sense": "possessive",
+            "forms": [
+              "ma"
+            ],
+            "gloss": {
+              "en": "my (before a feminine singular noun)",
+              "zh": "我的（阴性单数）"
+            }
+          },
+          {
+            "id": "noun-mere-person",
+            "lemma": "mère",
+            "pos": "noun",
+            "sense": "person",
+            "forms": [
+              "mère"
+            ],
+            "gloss": {
+              "en": "mother",
+              "zh": "母亲"
+            },
+            "gender": "feminine"
+          },
+          {
+            "id": "verb-regarder-look",
+            "lemma": "regarder",
+            "pos": "verb",
+            "sense": "look",
+            "forms": [
+              "regarde"
+            ],
+            "gloss": {
+              "en": "look at, watch",
+              "zh": "看"
+            }
+          },
+          {
+            "id": "function-le-article",
+            "lemma": "le",
+            "pos": "function",
+            "sense": "article",
+            "forms": [
+              "le"
+            ],
+            "gloss": {
+              "en": "the (before a masculine singular noun); l’ before a vowel or mute h",
+              "zh": "定冠词，用于阳性单数名词前（元音或哑音 h 前用 l’）"
+            }
+          },
+          {
+            "id": "function-moi-stressed",
+            "lemma": "moi",
+            "pos": "function",
+            "sense": "stressed",
+            "forms": [
+              "moi"
+            ],
+            "gloss": {
+              "en": "me (after c’est or a preposition)",
+              "zh": "我（用于 c’est 之后或介词后）"
+            }
+          }
+        ],
+        "learning": {
+          "instruction": {
+            "en": "Read the short text about a home, then complete the two checkpoint questions.",
+            "zh": "先阅读这篇关于家的短文，然后完成两个检查点问题。"
+          },
+          "checkpoints": [
+            {
+              "id": "a1-03-cp1",
+              "title": {
+                "en": "Find it in the text",
+                "zh": "在课文中找一找"
+              },
+              "questions": [
+                {
+                  "question": {
+                    "id": "a1-03-q1",
+                    "instruction": {
+                      "en": "Question 1 uses sentence 4 of the text. Choose the option that completes the sentence exactly as it appears in the reading.",
+                      "zh": "第一题出自课文第四句。请选出与课文完全一致、能补全这个句子的选项。"
+                    },
+                    "type": "CHOICE_SELECT",
+                    "prompt": "Cette petite chambre est {beau|belle|belles}",
+                    "expectedAnswer": "belle",
+                    "feedback": {
+                      "correct": {
+                        "summary": {
+                          "en": "Correct. That is the form used in the reading.",
+                          "zh": "正确。这就是课文中使用的形式。"
+                        },
+                        "detail": {
+                          "en": "The noun in the sentence is feminine and singular. In French, adjectives often change their form to match the gender and number of the noun, and here the reading shows the feminine singular form.",
+                          "zh": "句中的名词是阴性单数。法语形容词常常根据名词的性和数改变形式，这里课文使用的是阴性单数形式。"
+                        }
+                      },
+                      "incorrect": {
+                        "summary": {
+                          "en": "Not quite. Read sentence 4 again and choose the form used there.",
+                          "zh": "不对。请再读一遍课文第四句，选出那里使用的形式。"
+                        },
+                        "detail": {
+                          "en": "Check the gender and number of the noun in the sentence, then pick the form that appears in the reading.",
+                          "zh": "先确认句中名词的性和数，再选出课文中出现的形式。"
+                        }
+                      },
+                      "byAnswer": [
+                        {
+                          "answer": "beau",
+                          "message": {
+                            "summary": {
+                              "en": "This is the masculine singular form, but the noun in this sentence is feminine.",
+                              "zh": "这是阳性单数形式，但这句话里的名词是阴性的。"
+                            }
+                          }
+                        },
+                        {
+                          "answer": "belles",
+                          "message": {
+                            "summary": {
+                              "en": "This is a plural form, but the noun in this sentence is singular.",
+                              "zh": "这是复数形式，但这句话里的名词是单数的。"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "evidence": {
+                    "sentenceId": "a1-03-s4",
+                    "quote": "Cette petite chambre est belle."
+                  }
+                },
+                {
+                  "question": {
+                    "id": "a1-03-q2",
+                    "instruction": {
+                      "en": "Question 2 uses sentence 3 of the text. Copy the two missing words into the blank exactly as they appear in the reading. Include the article.",
+                      "zh": "第二题出自课文第三句。请把缺失的两个词按课文原样抄进空格，要带上冠词。"
+                    },
+                    "type": "FILL_BLANKS",
+                    "prompt": "Il y a [___] avec un lit.",
+                    "expectedAnswer": "une chambre",
+                    "feedback": {
+                      "correct": {
+                        "summary": {
+                          "en": "Correct. You copied the article and the noun from the sentence.",
+                          "zh": "正确。你从句子里抄写了冠词和名词。"
+                        },
+                        "detail": {
+                          "en": "The article comes first and the noun follows, just as in the reading.",
+                          "zh": "冠词在前，名词在后，与课文完全一致。"
+                        }
+                      },
+                      "incorrect": {
+                        "summary": {
+                          "en": "Try again. Copy the two words that fill the blank in sentence 3, article included.",
+                          "zh": "再试一次。把课文第三句中填入空格的两个词抄写下来，别忘了冠词。"
+                        },
+                        "detail": {
+                          "en": "Find sentence 3 in the reading and copy the exact words that fill the blank.",
+                          "zh": "在课文中找到第三句，原样抄写填入空格的词。"
+                        }
+                      }
+                    }
+                  },
+                  "evidence": {
+                    "sentenceId": "a1-03-s3",
+                    "quote": "Il y a une chambre avec un lit."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "version": "37480c24d810e2c18ab379d63a364bafaf0e798e035259bfa89182ec08a2a12f",
+      "review": {
+        "contentHash": "37480c24d810e2c18ab379d63a364bafaf0e798e035259bfa89182ec08a2a12f",
+        "reviewedBy": "AI review: GLM-5.3 author; independent review by Gemini 3.8 Flash (two passes); not human or teacher review; owner-authorized local pilot",
+        "reviewedAt": "2026-10-23"
+      }
+    }
+  ]
+}

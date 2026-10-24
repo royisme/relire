@@ -28,10 +28,16 @@
     "expand": "Expand sidebar",
     "due": "{{count}} due",
     "toReview": "{{count}} to review",
-    "importArticle": "Import an article"
+    "importArticle": "Import an article",
+    "gradedReaders": "Graded readers"
   },
   "learning": {
-    "areas": { "reading": "Reading", "grammar": "Grammar", "listening": "Listening", "writing": "Writing" },
+    "areas": {
+      "reading": "Reading",
+      "grammar": "Grammar",
+      "listening": "Listening",
+      "writing": "Writing"
+    },
     "area": "Learning area",
     "navigation": "Learning destinations",
     "library": "Library",
@@ -115,6 +121,75 @@
     "analyzing": "Looking up the word…",
     "failed": "Could not look up this word.",
     "listen": "Listen"
+  },
+  "gradedReader": {
+    "listTitle": "Graded readers",
+    "service": {
+      "loading": "Loading more readers…",
+      "ready": "More readers from the content service.",
+      "empty": "No additional readers are published yet.",
+      "savedCatalogue": "Offline: showing the last saved reader list.",
+      "conflict": "A different starter edition is published for {{ids}}. Update the app to use a new starter; the bundled text is kept here.",
+      "keepOffline": "Keep offline",
+      "saving": "Saving…",
+      "savedReader": "Saved for offline reading after the app is installed.",
+      "saveError": "Not saved offline: {{msg}}"
+    },
+    "reviewNotice": "AI-reviewed readers, not human-reviewed. No key needed.",
+    "loading": "Opening readers…",
+    "loadError": "Could not load readers: {{msg}}",
+    "openError": "Could not open this edition: {{msg}}",
+    "progressError": "Reading status unavailable: {{msg}}",
+    "saveError": "Could not save: {{msg}}",
+    "bindingError": "Authored entry unavailable: {{msg}}",
+    "empty": "No readers are available yet.",
+    "back": "Back to graded readers",
+    "stage": "{{level}} · Stage {{number}}",
+    "stageNumber": "Stage {{number}}",
+    "earlier": "Earlier edition read",
+    "word": "Word",
+    "translation": "Translation",
+    "deviceVoice": "Device voice",
+    "sourceAi": "AI-written and AI-reviewed, not human-reviewed",
+    "sourceHuman": "Human-reviewed",
+    "sourceUnknown": "Review status not recorded",
+    "completion": "Reading status",
+    "markRead": "Mark read",
+    "markUnread": "Mark unread",
+    "readAt": "Read · {{date}}",
+    "status": {
+      "unavailable": "Unavailable",
+      "notOpened": "Not opened",
+      "opened": "Opened",
+      "read": "Read"
+    },
+    "authored": "Authored",
+    "showTranslation": "Show translation",
+    "hideTranslation": "Hide translation",
+    "pos": {
+      "noun": "Noun",
+      "verb": "Verb",
+      "adjective": "Adjective",
+      "adverb": "Adverb",
+      "function": "Function word",
+      "interjection": "Interjection",
+      "number": "Number",
+      "proper": "Proper noun",
+      "phrase": "Phrase"
+    },
+    "gender": {
+      "masculine": "masculine",
+      "feminine": "feminine"
+    },
+    "checkpoints": {
+      "title": "Checkpoints",
+      "quotedSentence": "From the sentence"
+    },
+    "ai": {
+      "askWord": "Ask AI about this word",
+      "askSentence": "Ask AI to analyse this sentence",
+      "answer": "AI answer, not reviewed"
+    }
   },
   "sentenceDrawer": {
     "title": "Sentence",
@@ -211,7 +286,10 @@
     "review": "Review",
     "savedContext": "Personal context",
     "savedLanguage": "Saved explanation language: {{language}}",
-    "language": { "en": "English", "zh": "Chinese" },
+    "language": {
+      "en": "English",
+      "zh": "Chinese"
+    },
     "reset": "Reset schedule",
     "resetHelp": "Restart learning now. Introduction date, daily allowance history and ratings are kept.",
     "delete": "Delete card and history",
@@ -468,7 +546,7 @@
       "desc": "What Relire Plus is and where your data goes.",
       "what": "Relire Plus is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
-      "servicePrivacy": "This version can read grammar topics, a French dictionary and a complete paged wordbook from a content service. Requests carry a topic id, tapped word, or book id/page/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules, recordings or keys. Wordbook download exposes the whole published book to clients; real content publication is pending owner review and distribution approval.",
+      "servicePrivacy": "This version can read grammar topics, a French dictionary, a complete paged wordbook and additional graded readers from a content service. Requests carry a topic id, tapped word, book id/page/version, or published reader id/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules, recordings or keys. Wordbook download exposes the whole published book to clients; real content publication is pending owner review and distribution approval.",
       "scope": "Relire Plus is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
       "source": "Source code on GitHub",
       "lexicon": "For verbs outside the reviewed list, the word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}.",
@@ -614,24 +692,27 @@
     "next": "Next",
     "welcomeTitle": "Read French closely",
     "welcomeBody": "Open an article, tap any word or sentence to see what it means in context, then read it aloud and get feedback on your pronunciation.",
-    "welcomeNeed": "The explanations come from an AI service ({{provider}} by default). You need a free API key; it stays in this browser and is only sent to that service.",
-    "keyTitle": "Connect {{provider}}",
+    "welcomeNoKey": "You can start without a key: the graded readers open right away, with word meanings, translations and listening through your device voice.",
+    "welcomeNeed": "An AI service ({{provider}} by default) is optional. It adds deeper analysis, feedback and other voices; it needs a free API key that stays in this browser.",
+    "keyTitle": "Connect {{provider}} (optional)",
     "keyStep1": "Create a free key at {{provider}}.",
     "openStudio": "Open {{provider}}",
     "keyStep2": "Paste the key here.",
+    "keyOptional": "Word meanings, translations and listening in the graded readers are free and need no key. A key only adds extra analysis, feedback and voices.",
+    "continueWithoutKey": "Continue without AI",
     "checking": "Checking…",
     "checkSave": "Check and save",
     "keyInvalid": "That key did not work.",
     "keySaved": "Key saved in this browser.",
-    "tryTitle": "Try it on a sample article",
-    "tipWord": "Tap a word to see its meaning in context, how to pronounce it, and how the verb is conjugated.",
-    "tipSentence": "Tap a sentence, then Analyze, to see its structure and grammar and to practise reading it aloud.",
+    "tryTitle": "Open your first reader",
+    "tipWord": "Tap a word to see its meaning in context and how to pronounce it.",
+    "tipSentence": "Tap a sentence to listen to it or practise reading it aloud; an AI analysis appears once you add a key.",
     "tipSpeak": "Save words you want to remember; they come back for review on a schedule.",
     "toLibrary": "Go to my library",
-    "openSample": "Open a sample article"
+    "openReader": "Open the first reader"
   },
   "keyBanner": {
-    "text": "Add your API key to turn on word and sentence analysis, audio and pronunciation feedback.",
+    "text": "Add your API key for AI word and sentence analysis, AI audio and pronunciation feedback. The graded readers work without it.",
     "action": "Add key"
   },
   "ipa": {
@@ -646,6 +727,7 @@
   "minimalPairs": {
     "progress": {
       "title": "Sound-pair answers",
+      "empty": "No sound-pair answers yet. Make exercises above to get started.",
       "history": "Counts every answer, including repeats, to sound-pair exercises that are still saved. Deleting a set removes its answers from these counts.",
       "contrast": "/{{first}}/ ↔ /{{second}}/",
       "counts": "{{correct}} of {{total}} correct"
@@ -995,7 +1077,7 @@
   },
   "shadowingLog": {
     "title": "Shadowing",
-    "subtitle": "Your recordings of article and exercise-passage sentences, kept on this device. The last three of each sentence are kept.",
+    "subtitle": "Your recordings of reader sentences, kept on this device. The last three of each sentence are kept.",
     "source": "Source",
     "allSources": "All sources",
     "referenceVoice": "The reference plays in the voice chosen in Settings now, which may differ from when you recorded.",
@@ -1010,6 +1092,7 @@
     "deleteTake": "Delete your recording from {{when}}",
     "changed": "Original text changed ({{count}})",
     "removed": "Source unavailable ({{count}})",
+    "unavailableEdition": "Unavailable edition ({{id}})",
     "empty": "No recordings yet. In the reader, press the microphone next to a sentence to practise it.",
     "loadFailed": "Could not load your recordings: {{msg}}",
     "deleteFailed": "Could not delete the recording: {{msg}}"
@@ -1110,6 +1193,7 @@
   },
   "notFound": {
     "grammarTopic": "This grammar topic is not published or does not exist.",
+    "gradedReader": "This graded reader is not published or is no longer available. Return to the graded readers list to choose another.",
     "passage": "This passage is no longer available. Return to the library to choose another source.",
     "title": "This page is not here",
     "page": "This address does not match a page in Relire Plus.",

@@ -3,7 +3,8 @@ import { loadSpeech, prefetchSpeech } from './clips';
 import { getSpeechState } from './state';
 
 /**
- * Listening to a whole text: plays its sentences one after another, one clip each, so playback starts after
+ * Listening to a whole text: plays its sentences one after another, one clip each (or, started with
+ * `playbackEngine: 'device'`, the device's own voice, clip-less), so playback starts after
  * the first sentence, clips are shared with the sentence buttons, and nothing past the next two sentences is
  * synthesized until the listener gets there. Pausing or stopping generates nothing more.
  *
@@ -24,6 +25,8 @@ const PREFETCH_AHEAD = 2;
 
 let state: SequenceState = IDLE;
 let items: string[] = [];
+/** The engine this sequence speaks with: the device's own voice, or the selected engine when unset. */
+let engine: 'device' | undefined;
 /** Bumped whenever the sequence is restarted, moved or stopped, so callbacks from an older clip are ignored. */
 let token = 0;
 const listeners = new Set<() => void>();
@@ -53,10 +56,14 @@ function playAt(index: number, t: number) {
   }
   set({ ...state, index, failed: false });
   // The current sentence first; the next ones are fetched once it is ready, so they never delay it.
-  void loadSpeech(items[index])
-    .catch(() => undefined)
-    .then(() => prefetchAhead(index, t));
+  // A device sequence speaks with the platform's own voice: no clip is loaded, fetched or stored.
+  if (engine !== 'device') {
+    void loadSpeech(items[index])
+      .catch(() => undefined)
+      .then(() => prefetchAhead(index, t));
+  }
   void speakFrench(items[index], {
+    engine,
     onSettled: (outcome) => {
       if (t !== token) return;
       if (outcome === 'ended') playAt(index + 1, t);
@@ -70,17 +77,22 @@ function playAt(index: number, t: number) {
   });
 }
 
-/** Starts reading `texts` from `from`, replacing whatever was playing. */
-export function startSequence(id: string, texts: string[], from = 0) {
+/** Starts reading `texts` from `from`, replacing whatever was playing. `playbackEngine: 'device'` reads
+ * the whole text with the device's own voice: no clip is loaded, synthesized or prefetched, and a missing
+ * French voice fails honestly instead of falling back to the selected engine. */
+export function startSequence(id: string, texts: string[], from = 0, playbackEngine?: 'device') {
   items = texts.map((s) => s.trim()).filter(Boolean);
   if (!items.length) return;
+  engine = playbackEngine;
   const t = ++token;
   set({ id, index: Math.min(Math.max(from, 0), items.length - 1), total: items.length, failed: false });
   playAt(state.index, t);
 }
 
-/** Fetches the next clips ahead — unless paused (resuming restarts it) or the sequence has moved on. */
+/** Fetches the next clips ahead — unless paused (resuming restarts it) or the sequence has moved on.
+ * A device sequence has no clips: nothing to fetch. */
 function prefetchAhead(index: number, t: number) {
+  if (engine === 'device') return;
   const current = () => t === token && getSpeechState().phase !== 'paused';
   if (!current()) return;
   void prefetchSpeech(items.slice(index + 1, index + 1 + PREFETCH_AHEAD), current);

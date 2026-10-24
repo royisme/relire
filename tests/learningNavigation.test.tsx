@@ -58,18 +58,22 @@ const article = {
 
 test('Read aloud has honest empty/missing selection, encoded article links, and durable sentence resolution', () => {
   const onAssessed = () => {};
-  expect(render(<SpeakingPage articles={[]} workspace onAssessed={onAssessed} />)).toContain(
+  expect(render(<SpeakingPage articles={[]} workspace onAssessed={onAssessed} onMissingKey={() => {}} />)).toContain(
     i18n.t('learning.speakingEmpty'),
   );
-  const entry = render(<SpeakingPage articles={[article]} workspace onAssessed={onAssessed} />);
+  const entry = render(<SpeakingPage articles={[article]} workspace onAssessed={onAssessed} onMissingKey={() => {}} />);
   expect(entry).toContain(`href="#/speaking/read-aloud/${encodeURIComponent(article.id)}"`);
-  const missing = render(<SpeakingPage articles={[article]} workspace articleId="gone" onAssessed={onAssessed} />);
+  const missing = render(
+    <SpeakingPage articles={[article]} workspace articleId="gone" onAssessed={onAssessed} onMissingKey={() => {}} />,
+  );
   expect(missing).toContain(i18n.t('learning.sourceUnavailable'));
   expect(missing).not.toContain('TEST premier');
   expect(resolveReadAloud([article], article.id, 'TEST deuxième.')?.index).toBe(1);
   expect(resolveReadAloud([article], article.id, 'removed sentence')).toBeUndefined();
   expect(resolveReadAloud([], article.id)).toBeUndefined();
-  const home = render(<SpeakingPage articles={[article]} workspace={false} onAssessed={onAssessed} />);
+  const home = render(
+    <SpeakingPage articles={[article]} workspace={false} onAssessed={onAssessed} onMissingKey={() => {}} />,
+  );
   expect(home).toContain('href="#/speaking/read-aloud"');
   expect(home).toContain(i18n.t('learning.shadowingContext'));
 });
@@ -100,12 +104,15 @@ test('Read aloud mounts exactly one existing recorder with the original assessme
         articleId={article.id}
         sentence="TEST deuxième."
         onAssessed={callback}
+        onMissingKey={() => {}}
       />,
     );
     expect(recorder).toHaveBeenCalledTimes(1);
     expect(html).toContain('TEST deuxième.');
     expect(html).not.toContain('TEST premier.');
     expect(html).toContain(i18n.t('shadowing.record'));
+    expect(html).not.toContain(i18n.t('minimalPairs.drill.title'));
+    expect(html).not.toContain(i18n.t('ipa.title'));
   } finally {
     recorder.mockRestore();
   }
@@ -198,6 +205,33 @@ test('learning-first sidebar has no generic Practice or study Grammar; Writing r
     units.mockReturnValue({ units: [{ ...unitOf('OPEN_QA'), learningArea: 'writing' }], error: null });
     expect(render(<NavTree route={{ name: 'practice', area: 'writing' }} dueCount={0} rail />)).toContain(
       'aria-label="Writing"',
+    );
+  } finally {
+    units.mockRestore();
+    mistakes.mockRestore();
+  }
+});
+
+test('Graded readers is linked from the Reading destinations and stays current on the reader route', () => {
+  const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({ units: null, error: null });
+  const mistakes = spyOn(mistakesHook, 'useMistakes').mockReturnValue({
+    rows: [],
+    loading: false,
+    error: null,
+    retry: () => {},
+  });
+  try {
+    const nav = render(<LearningNavigation area="read" current={{ name: 'gradedReader', readerId: 'r' }} />);
+    expect(nav).toContain('href="#/read/graded" aria-current="page"');
+    // NavTree puts the classes between href and aria-current, so match the current graded link loosely.
+    const gradedCurrent = /href="#\/read\/graded"[^>]*aria-current/;
+    expect(gradedCurrent.test(render(<NavTree route={{ name: 'gradedReader', readerId: 'r' }} dueCount={0} />))).toBe(
+      true,
+    );
+    expect(gradedCurrent.test(render(<NavTree route={{ name: 'gradedReaders' }} dueCount={0} />))).toBe(true);
+    expect(gradedCurrent.test(render(<NavTree route={{ name: 'library' }} dueCount={0} />))).toBe(false);
+    expect(render(<LearningNavigation area="read" current={{ name: 'library' }} />)).not.toContain(
+      'href="#/read/graded" aria-current',
     );
   } finally {
     units.mockRestore();

@@ -2,6 +2,7 @@
 import type { WordAnalysis } from '../../src/types';
 import type {
   VocabularyCandidate,
+  VocabularyDefinition,
   VocabularyEntry,
   VocabularyRow,
   VocabularySchedule,
@@ -17,6 +18,10 @@ export const testAnalysis = (word = 'test-mot'): WordAnalysis => ({
   phoneticsGuide: 'TEST guide',
   translation: 'TEST meaning',
   usageExamples: [{ fr: 'Une phrase TEST.', zh: '\u6d4b\u8bd5', en: 'A TEST sentence.' }],
+});
+export const testDefinition = (word = 'test-mot'): Extract<VocabularyDefinition, { kind: 'ai' }> => ({
+  kind: 'ai',
+  analysis: testAnalysis(word),
 });
 export const testLookup = (word = 'test-mot') => ({
   word,

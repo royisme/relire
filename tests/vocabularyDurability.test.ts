@@ -1,8 +1,17 @@
 /** Native aborts, raw backup rejection, exact acquired-audio eligibility and queue order on disposable learner data. */
 import { beforeEach, expect, test } from 'bun:test';
 import { freshDb, failure, seedUnit } from './fixtures/storage';
-import { testAnalysis, testBook, testCandidate, testLookup, testRow, testMatureSchedule } from './fixtures/vocabulary';
+import {
+  testDefinition,
+  testAnalysis,
+  testBook,
+  testCandidate,
+  testLookup,
+  testRow,
+  testMatureSchedule,
+} from './fixtures/vocabulary';
 import { db, exportData, importData } from '../src/storage/db';
+import { testReaderDefinition, testReaderLookup } from './fixtures/vocabularyReader';
 import {
   saveVocabularyBookmark,
   removeVocabularyBookmark,
@@ -205,25 +214,28 @@ test('current memory validation uses row revision and latest observation without
 test('only bookmarked or scheduled vocabulary protects/exports word, personal sentence and personal example clips; no synthesis', async () => {
   const saved = await saveVocabularyBookmark(
     testLookup('test-personal'),
-    testAnalysis('test-personal'),
+    testDefinition('test-personal'),
     undefined,
     now,
   );
   const retained = await saveVocabularyBookmark(
     testLookup('test-retained'),
-    testAnalysis('test-retained'),
+    testDefinition('test-retained'),
     undefined,
     now,
   );
   await removeVocabularyBookmark(retained.key);
+  const readerWord = await saveVocabularyBookmark(testReaderLookup(), testReaderDefinition(), undefined, now);
   const introduced = await introduceVocabularyCard(testCandidate('test-learning'), zero, now);
   const book = await testBook();
   const d = await db();
   const texts = [
     saved.word,
     saved.contexts[0].sentence,
-    saved.contexts[0].analysis.usageExamples![0].fr,
+    testAnalysis('test-personal').usageExamples![0].fr,
     retained.word,
+    readerWord.word,
+    readerWord.contexts[0].sentence,
     introduced.row.word,
     book.entries[0].word,
     'Built-in TEST example',
@@ -240,9 +252,14 @@ test('only bookmarked or scheduled vocabulary protects/exports word, personal se
       lastUsed: 1,
     });
   const expected = new Set(
-    [saved.word, saved.contexts[0].sentence, saved.contexts[0].analysis.usageExamples![0].fr, introduced.row.word].map(
-      normalizeText,
-    ),
+    [
+      saved.word,
+      saved.contexts[0].sentence,
+      testAnalysis('test-personal').usageExamples![0].fr,
+      readerWord.word,
+      readerWord.contexts[0].sentence,
+      introduced.row.word,
+    ].map(normalizeText),
   );
   expect(await protectedTexts()).toEqual(expected);
   const reader = globalThis.FileReader;

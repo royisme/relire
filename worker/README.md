@@ -9,9 +9,12 @@ Only `GET`, `HEAD` and `OPTIONS` are accepted; other methods return `405` with `
 - `/v1/topics`: summaries (`id`, `chapter`, `level`, `tags`, bilingual `title`), ordered by chapter then id; no body text.
 - `/v1/topics/:id`: full stored topic JSON; malformed slug `400`, missing topic `404`.
 - `/v1/tag-index`: covered tags mapped to ascending topic ids.
+- `/v1/readers`: the current graded-reader catalogue (`readersCurrent` → `readersCatalog:<catalogueHash>`), `no-cache`, ETag is the catalogue hash.
+- `/v1/readers/:id?version=<artifactHash>`: exactly that published immutable `PublishedReader` JSON; `version` is required, `public, max-age=300`, ETag is the artifact hash. Malformed slug `400 invalid-id`; missing/duplicate/extra/malformed `version` `400 invalid-query`; unknown id `404 not-found`; no current catalogue `404 readers-unavailable`; unpublished artifact of a known id `410 version-unavailable`; missing/corrupt marked data or D1 failure `500 unavailable`. Read-only: no learner data, no write route.
+- `/v1/vocabulary/tcf-7000?page=<n>[&version=<64 hex>]`: one page of the vocabulary book, plus its manifest and source; see below.
 - `/v1/lexicon/:lemma`: every entry (`pos` `verb`, `noun` or `adjective`, `gender` for nouns, `data`) of a lemma, plus `source`; `/v1/lexicon/form/:form`: the `{ lemma, pos }` pairs a form belongs to, plus `source`. The parameter is URL-decoded, NFC and lowercased; empty or over 64 characters `400 invalid-id`, unknown `404 not-found`. Shapes: `src/types/lexicon.ts`.
 
-Successful reads use JSON UTF-8, `Cache-Control: public, max-age=300`, and an `ETag` derived from `meta.packVersion` (`meta.lexiconVersion` for the lexicon routes). Matching `If-None-Match` returns `304`. `HEAD` returns the same status and headers without a body. Errors are JSON error codes; database failures return `500 unavailable` without exposing SQL or content.
+Successful reads use JSON UTF-8, `Cache-Control: public, max-age=300` (`no-cache` for the reader catalogue), and an `ETag` derived from `meta.packVersion` (`meta.lexiconVersion` for the lexicon routes, the catalogue/artifact hash for the reader routes). Matching `If-None-Match` returns `304`. `HEAD` returns the same status and headers without a body. Errors are JSON error codes; database failures return `500 unavailable` without exposing SQL or content.
 
 CORS echoes only exact origins in the comma-separated `ALLOWED_ORIGINS` variable. Its default empty string permits no cross-origin access. Preflights return `204`; allowed origins may send `If-None-Match` and read `ETag` and `Retry-After`.
 
@@ -45,7 +48,7 @@ The following account operations are for the owner, using their own Cloudflare a
    bunx wrangler d1 migrations apply DB --remote
    ```
 
-   The migrations create `topics`, `meta`, `lexicon_entries`, `lexicon_forms` and `vocabulary_pages` and set the empty versions (`packVersion`, `lexiconVersion`) to `0.0.0`. Local state lives in gitignored `worker/.wrangler/`.
+   The migrations create `topics`, `meta`, `lexicon_entries`, `lexicon_forms`, `vocabulary_pages` and `readers` and set the empty versions (`packVersion`, `lexiconVersion`) to `0.0.0`. Local state lives in gitignored `worker/.wrangler/`.
 4. Set `vars.ALLOWED_ORIGINS` in `wrangler.jsonc` to the deployment origins, separated by commas, for example `https://app.example.com,https://owner.example.com` (no paths or trailing slashes). The empty default is intentional. Keep the deployment configuration local if it contains owner-specific identifiers.
 5. Run locally:
 
@@ -93,6 +96,23 @@ Run metadata-only CI with `bun scripts/vocabulary/publish.ts --check`. Private p
 Default `publish.ts` writes ignored staging SQL only; it and `--apply-local` still require an actual matching review. The owner has separately waived linguistic review for original unfiltered **local use only**: `bun scripts/vocabulary/publish.ts --apply-local-unreviewed` publishes the current prepared artifact with strict `{ bookId: 'tcf-7000', contentHash, status: 'unreviewed' }` provenance, even when an actual matching review exists. It does not read partial correction/omission decisions, change the artifact or create/alter public `reviews.json`; preparing without partial AI decisions remains a separate step. This is not a linguistic review, an official C1 claim, Canadian-usage approval, new content or public delivery rights. Reviewed/CEFR/rights policies remain the default; actual AI corpus review is stopped for this local waiver.
 
 Both owner-authorized apply modes use the same already-installed local Wrangler, never install tools or apply migrations: compare existing version bodies, stage without overwrite/delete, read back each exact page plus aggregate hash/count/index/manifest, write/verify publication marker, then one final current-pointer upsert and readback. No BEGIN/COMMIT promise across invocations. A failed command/readback fails publication; reruns are idempotent. Old complete versions and incomplete staging remain. Cleanup and any public delivery require separate approval. The owner-authorized local import is complete: 7,362 entries from 7,391 source ids, 30 pages, explicitly unreviewed. No partial AI decisions were applied; actual review records remain empty. Protected topic/lexicon exports were byte-identical before/after; no remote application or public distribution occurred. The publisher uses installed Wrangler's local platform proxy with `remoteBindings: false` and explicit `worker/.wrangler/state/v3` persistence, binding large page bodies to avoid the SQL-statement limit. Literal staging SQL is not an apply path. See the joint kickoff for final hashes and real-browser verification.
+
+## Graded readers (local-only publication)
+
+After applying migrations locally, the owner can publish included non-bundled readers:
+
+```sh
+bun scripts/graded-readers/publishRemote.ts --sql          # Private staging SQL only, under .local/graded-readers/
+bun scripts/graded-readers/publishRemote.ts --apply-local  # Verified staged publication to local D1 only
+```
+
+Both modes reuse `assemble` over the included syllabus prefix, so current hash-bound reviews, gates G0–G5 and the strict privacy allowlist remain required; only `include: true` and `bundled: false` artifacts are selected afterward. Zero selected readers is a no-op, not a catalogue clear. No review is created or waived. The publisher never applies migrations or accesses remote D1, deploys, installs tools or reads env files.
+
+`readers(id,artifact_hash)` rows are immutable. Stage with INSERT OR IGNORE, reject existing-body/column collisions, read every exact stored JSON body and recompute its full SHA-256 before writing any `readerPublished:<id>:<artifactHash>` marker (`bodyVersion`, `artifactHash`). Write and verify the immutable `readersCatalog:<catalogueHash>` JSON next; summaries contain id/order/level/trilingual title/body version/artifact hash in stage order, and the envelope version hashes the canonical envelope without its version. Switch `readersCurrent` last with one atomic upsert and read it back. Failures before this switch preserve the previous catalogue. Retries are idempotent; old and incomplete staging rows stay. No cleanup or fictitious transaction spans commands.
+
+Apply uses the installed Wrangler local platform proxy, `remoteBindings: false`, `envFiles: []`, and `worker/.wrangler/state/v3`. SQL dry output is staging-only and is not a substitute for verified publication. Private raw errors stay in ignored `.pi-runs/graded-readers/publish-failure.log`; no prose is printed. Do not commit either output. No remote publishing procedure is authorized here.
+
+The app requests catalogue metadata and published reader id/artifact version only, never answers, reveals, progress, vocabulary, recordings or keys. Starter ids retain bundle authority; conflicting service editions ask for an app update. Network failure alone may use a validated saved catalogue/body. Explicit Keep offline reports success only after its cache commit; opened edition snapshots independently survive cache expiry/service loss.
 
 ## Lexicon
 
