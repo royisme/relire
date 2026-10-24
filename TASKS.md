@@ -42,6 +42,16 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | D1 | Meta schema and marker-to-type refinement, `gradeItem` flag `ignoreSentencePunctuation`, `prepareReaderDictation` | prepared unit passes `ExerciseUnitSchema`; a sentence typed without its final full stop grades right, a missing hyphen or apostrophe still wrong; published readers require at least 3 sentences; retry through `saveUnits` keeps the batch | landed (full suite 2224 pass, detector zero, build exit 0) |
 | D2 | Device engine in `NumberDictationControl` and `ItemRow`; "Practise by dictation" button in `GradedReaderWorkspace`; copy, caption, changelog, architecture | no synthesis or fetch; French text not shown before the check; one filled button per view stays | landed (full suite 2240 pass, detector zero, build exit 0); owner device check pending |
 
+### Next epic: letter sounds, spelling to sound before IPA (proposed; `docs/spelling-sounds-plan.md`)
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| S1 | Pack schema, authored seed file, build/check script, review tool, loader, CI line | unreviewed or changed rows refused; every example contains its spelling; `--check` byte-compares | plan under review |
+| C1 | Seed content: 18 patterns' words and en + zh notes (agy gemini-3.8-flash) | passes the S1 build checks and `i18n:check`; no IPA typed by hand | after S1 schema |
+| C2 | AI review of the seed rows (a different model family) | `AI review:` records for agreed rows; disagreements listed | after C1 |
+| S2 | Letter sounds section, sheet, IPA fold, review notice | device voice only; IPA closed by default; copy in both locales | after C2 |
+| S3 | Spelling drill, buttons, `supportsListening`, `ItemRow` device branch | distractors from the pack only; deterministic grading | after S2 |
+
 ### Content (paused by the owner's priority)
 
 Stages 1 to 3 have private drafts with AI review records (not human review). Stages 4 to 12 are not written; stage 4 has an unreviewed draft. Resume after the platform: R0-7 for stages 4 to 5, R2 for 6 to 12, a human language review before any real beginner uses the readers.
