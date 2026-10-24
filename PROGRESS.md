@@ -4,6 +4,13 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: D-remote-1 landed locally (publisher hygiene)
+
+- All four publishers now run a rooted, env-file-free local D1 target through `scripts/content-service/d1Target.ts`: no `.dev.vars`/`.env` read, explicit persist path, no telemetry or banner, failure logs under `<root>/.pi-runs/`, pure `parseArgs`, an `allowRemote` option that is a no-op until the remote steps. The topic and lexicon SQL deletes the version row first. Real local Wrangler and `getPlatformProxy` run in temp-root tests.
+- Found on the way: on Node 26 `.bin/wrangler --env-file x` is read by Node and exits 9 (Wrangler's launcher respawns `node` without `--`); the publishers and the owner's `W()` helper run `node --no-warnings -- .../wrangler-dist/cli.js`.
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,354), every CI pack `--check`, `vocabulary/publish.ts --check`, Worker typecheck, build. Argon reviewed the diff (fail on three test points; fixed). **Unverified:** any remote run; the typed `getPlatformProxy` import (root cannot resolve `wrangler` types, so it stays annotated by hand). Next: D-remote-2 and 3 (remote flags), D-origins.
+- Today v2: direction B chosen; the plan failed its first Argon review and was redesigned (one card, one ordered sequence); second review pending.
+
 ## 2026-10-24: owner decisions on deployment, accounts and content rights (docs only)
 
 - The owner confirmed the vocabulary book is their own work and publishable, and that Morphalou (open, LGPL-LR) needs no permission, only its notices (already built). Recorded as an amendment in `docs/adr-hosted-content-service.md`; the old "local use only / no public distribution / not authorized" lines in `worker/README.md` and `docs/vocabulary-flashcards-spec.md` were removed or reworded.
