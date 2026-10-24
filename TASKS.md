@@ -42,15 +42,17 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | D1 | Meta schema and marker-to-type refinement, `gradeItem` flag `ignoreSentencePunctuation`, `prepareReaderDictation` | prepared unit passes `ExerciseUnitSchema`; a sentence typed without its final full stop grades right, a missing hyphen or apostrophe still wrong; published readers require at least 3 sentences; retry through `saveUnits` keeps the batch | landed (full suite 2224 pass, detector zero, build exit 0) |
 | D2 | Device engine in `NumberDictationControl` and `ItemRow`; "Practise by dictation" button in `GradedReaderWorkspace`; copy, caption, changelog, architecture | no synthesis or fetch; French text not shown before the check; one filled button per view stays | landed (full suite 2240 pass, detector zero, build exit 0); owner device check pending |
 
-### Next epic: letter sounds, spelling to sound before IPA (proposed; `docs/spelling-sounds-plan.md`)
+### Next epic: letter sounds, spelling to sound before IPA (`docs/spelling-sounds-plan.md`; Argon review applied)
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| S1 | Pack schema, authored seed file, build/check script, review tool, loader, CI line | unreviewed or changed rows refused; every example contains its spelling; `--check` byte-compares | plan under review |
-| C1 | Seed content: 18 patterns' words and en + zh notes (agy gemini-3.8-flash) | passes the S1 build checks and `i18n:check`; no IPA typed by hand | after S1 schema |
-| C2 | AI review of the seed rows (a different model family) | `AI review:` records for agreed rows; disagreements listed | after C1 |
-| S2 | Letter sounds section, sheet, IPA fold, review notice | device voice only; IPA closed by default; copy in both locales | after C2 |
-| S3 | Spelling drill, buttons, `supportsListening`, `ItemRow` device branch | distractors from the pack only; deterministic grading | after S2 |
+| S1 | Pack types and schema, build script with the overlap/nasal/silent-h gate, review tool with `--kind`, loader, tests on fixtures only | unreviewed or changed rows (including a changed note) refused; an example with a different-sound spelling rejected; no seed file, no pack, no CI line | ready to dispatch |
+| C1 | Seed content: 16 patterns' words and en + zh notes (agy gemini-3.8-flash, own task) | passes the S1 gate and `i18n:check` | with S1 |
+| C2 | AI review of the seed rows (GPT, findings report only) | the lead records `AI review:` records for agreed rows | after C1 |
+| S1b | Generated pack, CI `--check` line (lead) | CI never sees an empty or unreviewed pack | after C2 |
+| S2 | Letter sounds section, sheet, IPA fold, review notice | device voice only; IPA closed by default; copy in both locales | after S1b |
+| S3a | `prepareSpellingDrill`, `supportsListening`, meta schema | distinct words, distractors of a different sound and not a substring of the heard word | after S1b |
+| S3b | `ItemRow` device branch, "Practise these sounds" button, error text, rule lines | deterministic grading; no synthesis | after S3a |
 
 ### Content (paused by the owner's priority)
 
