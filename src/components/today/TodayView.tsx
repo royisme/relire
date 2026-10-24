@@ -25,7 +25,10 @@ export function TodayView({ plan, now }: { plan: TodayPlan; now: number }) {
   return (
     <section className="mx-auto max-w-5xl min-w-0 min-h-[40rem] px-4 py-6 sm:px-6 space-y-6 break-words">
       <header className="space-y-3">
-        <PageHeader title={t('today.title')} subtitle={new Intl.DateTimeFormat(i18n.language).format(now)} />
+        <PageHeader
+          title={t('today.title')}
+          subtitle={new Intl.DateTimeFormat(i18n.language, { dateStyle: 'full' }).format(now)}
+        />
         <p className="max-w-prose text-sm text-ink-700">
           {plan.steps.length === 0 && t('today.guidance.empty')}
           {plan.allDone && t('today.guidance.allDone')}

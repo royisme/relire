@@ -42,13 +42,13 @@
       "empty": "No steps today. Choose a skill to practise on your own.",
       "allDone": "You are done for today. You can still practise a skill on its own.",
       "unavailable": "Some steps could not load. You can practise a skill on its own.",
-      "plan": "Today, {{steps}}. Stop whenever you like; you can pick up from here.",
+      "plan": "Today, {{steps}}. Stop whenever you like; you will pick up from here.",
       "words_one": "review {{count}} word",
       "words_other": "review {{count}} words",
       "read": "read a short text",
       "sound": "practise sound pairs",
-      "mistakes_one": "retry {{count}} mistake",
-      "mistakes_other": "retry {{count}} mistakes",
+      "mistakes_one": "redo {{count}} mistake",
+      "mistakes_other": "redo {{count}} mistakes",
       "grammar": "study the next grammar topic"
     },
     "practice": {
@@ -70,29 +70,29 @@
       "title": "Review words",
       "status": "{{due}} due · {{newAvailable}} new",
       "action": "Review",
-      "why": "Each word comes back just before it is due, so a short review keeps what you learned."
+      "why": "Each word comes back just before it is due."
     },
     "read": {
       "title": "Read",
       "start": "Start reader {{order}}",
       "continue": "Continue reader {{order}}",
       "doneToday": "Reader {{order}} done today",
-      "noKey": "Reader 1 needs no key.",
+      "startNoKey": "Start here: reader {{order}} needs no key.",
       "action": "Open",
-      "why": "A short graded text; tap any word for its meaning. No key needed."
+      "why": "A short graded text. Tap any word for its meaning; no key needed."
     },
     "sound": {
       "title": "Sound pairs",
       "status": "Tell similar French sounds apart",
       "action": "Practise",
-      "why": "Hear and repeat the sounds you will meet in the next text."
+      "why": "Hear similar French sounds and repeat them."
     },
     "mistakes": {
       "title": "Redo mistakes",
       "status_one": "{{count}} saved mistake",
       "status_other": "{{count}} saved mistakes",
       "action": "Redo",
-      "why": "Retry what you got wrong; a right answer clears it."
+      "why": "Redo what you got wrong; a correct answer clears it."
     },
     "grammar": {
       "title": "Grammar",
