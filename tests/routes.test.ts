@@ -1,9 +1,27 @@
 /** Canonical learning destinations and strict rejection of removed addresses; pure, no browser. */
 import { expect, test } from 'bun:test';
 import { LEARNING_AREAS, learningAreaPath } from '../src/types/learningArea';
-import { areaOf, parseRoute, routeHref, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../src/utils/routes';
+import {
+  areaOf,
+  parseRoute,
+  routeHref,
+  SETTINGS_SECTIONS,
+  STUDY_TABS,
+  worksWithoutKey,
+  type Route,
+} from '../src/utils/routes';
 const parse = (hash: string) => parseRoute(hash, true);
 const roundTrip = (route: Route) => expect(parse(routeHref(route))).toEqual({ route, canonical: null });
+
+test('Today roundtrips without a key and rejects extra path parts or queries', () => {
+  roundTrip({ name: 'today' });
+  expect(routeHref({ name: 'today' })).toBe('#/today');
+  expect(areaOf({ name: 'today' })).toBe('today');
+  expect(worksWithoutKey({ name: 'today' })).toBe(true);
+  expect(parse('#/today/x').route.name).toBe('notFound');
+  expect(parse('#/today?x=1').route.name).toBe('notFound');
+  expect(parse('#/today?').route.name).toBe('notFound');
+});
 
 test('each domain has scoped list, unit, complete-set and import roundtrips with encoded ids', () => {
   for (const area of LEARNING_AREAS) {

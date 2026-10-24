@@ -42,7 +42,7 @@ import { sourceOfRecording } from './storage/shadowing';
 import { setLabel } from './services/exercises/setLabel';
 import { LearningNavigation } from './components/shell/LearningNavigation';
 import { SpeakingPage } from './components/practice/SpeakingPage';
-
+import { TodayPage } from './components/today/TodayPage';
 const PracticePage = retryableLazy(async () => ({
   default: (await import('./components/practice/PracticePage')).PracticePage,
 }));
@@ -269,6 +269,7 @@ export default function App() {
           )}
 
           <PageContentBoundary routeKey={routeHref(route)}>
+            {route.name === 'today' && <TodayPage vocabulary={vocabulary} />}
             {route.name === 'importArticle' && (
               <ImportArticlePage onCreated={(article) => setArticles((prev) => [article, ...prev])} />
             )}
@@ -446,7 +447,6 @@ export default function App() {
                 onMissingKey={requestKey}
               />
             )}
-
             {route.name === 'progress' && (
               <AnalyticsDashboard stats={stats} vocabList={vocabList} onMissingKey={requestKey} />
             )}
