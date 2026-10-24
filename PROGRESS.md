@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: D-remote-3 and Today v2 V1/V2 landed locally
+
+- D-remote-3 (`922448d`): topics and the lexicon get `--apply-remote`, interactive (Wrangler's own confirmation), allowed only with `allowRemote` (from `import.meta.main`) and a TTY on stdin and stdout; success is decided only by a read-only check (topics: version and every id/position/hash/byte length; lexicon: version and both counts), never by Wrangler's exit code; refusals and Wrangler's stderr reach the owner's terminal. Argon: pass. **Unverified:** any remote run (no agent has touched a remote database); the `--json` shape against a remote database is checked only against Wrangler's code.
+- Today v2: V1 plan model (`nextIndex`, `doneCount`, `counts`, reader `title`) and V2 view (one card of ordered rows, expanded next step with the one filled button, aside of real counts, practise row, strings in en and zh) merged; `ui/card` written by hand because the shadcn output pulled in a wrong `cn` package and a ring. Verified: all checks, detector `[]`, build. Seen by the lead at 1280 px light and phone width dark, not by the owner. V3 (copy and two fixes) is in progress.
+
 ## 2026-10-24: D-remote-1 landed locally (publisher hygiene)
 
 - All four publishers now run a rooted, env-file-free local D1 target through `scripts/content-service/d1Target.ts`: no `.dev.vars`/`.env` read, explicit persist path, no telemetry or banner, failure logs under `<root>/.pi-runs/`, pure `parseArgs`, an `allowRemote` option that is a no-op until the remote steps. The topic and lexicon SQL deletes the version row first. Real local Wrangler and `getPlatformProxy` run in temp-root tests.
