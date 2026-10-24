@@ -75,6 +75,8 @@ GitHub Pages serves two things from one site (`.github/workflows/pages.yml`): th
 | `marketing/` | Static landing page, `robots.txt`, `sitemap.xml`. Not part of the app build. |
 | `vite.config.ts` | PWA manifest and service worker; `base: './'` so the build works from any path. |
 
+**Letter sounds pack.** Like the minimal-pairs pack, `types/spellingSounds.ts` defines strict source/review/pack contracts and `services/spellingSounds/load.ts` lazily validates, deeply freezes and memoises the generated pack, retrying failed loads. `scripts/spelling-sounds/build.ts` owns overlap, nasal-context, silent-prefix and bilingual-note gates; reviews bind each row and both notes to a canonical SHA-256 hash, and the pack version is content-addressed. The lead-only review tool preserves explicit `ai`/`human` kinds and matching reviewer prefixes (`--ref` is retained as record provenance). S1 is fixture-only: no source content, generated pack, locale notes or CI publication check exists yet; a missing pack builds cleanly and fails readably on load.
+
 ## Local PDF resources and verification
 
 `scripts/pdfjsAssets.ts` emits PDF.js's worker, cmaps, standard fonts, wasm/fallback decoders and ICC profiles to `pdfjs/`, and serves the same files in development. Runtime URLs resolve against Vite's relative base and the document base, not a root URL or CDN. Workbox precaches the entire resource directory (including `.mjs`, `.bcmap`, `.pfb`, `.ttf`, `.wasm` and `.icc`); its 3 MiB per-file cap includes the installed worker (about 1.3 MB). This adds about 5 MB of offline PDF resources even before the import screen ships.
