@@ -6,7 +6,7 @@ Status: T1 to T4 landed. Accepted by the owner (2026-10-24: Today is the landing
 
 The learning tools exist (graded readers, FSRS words, sound pairs, mistakes), but a zero-basis learner opens the app and sees the Library of imported articles. Nothing says what to do first today. Today answers one question: **what is worth doing now, and have I done it?**
 
-Not a "session runner": no wizard, no timer, no streaks, no scores, no AI. A page of at most four steps; each is a link into a page that already exists, with a status read from data the learner has already produced.
+Not a "session runner": no wizard, no timer, no streaks, no scores, no AI. A page of at most five steps; each is a link into a page that already exists, with a status read from data the learner has already produced.
 
 ## What it is
 
@@ -24,8 +24,9 @@ In this order. A step is omitted, never faked, when its inputs say it does not a
 | 2 | Read | a reader of the merged catalogue is not completed | "Continue reader N" if opened, else "Start reader N" (first by `order` not completed) | `gradedReader` | any checked answer or completion today; then the line names the reader just worked on ("Continue reader N" while unfinished, "Reader N done" when completed today) |
 | 3 | Sound pairs | always | "Practise a sound pair" | `speaking` | an attempt today on an item with `meta.source === 'minimal-pairs'` |
 | 4 | Redo mistakes | `listMistakes()` has at least one entry with `resolved === false` | "N saved mistakes" (unresolved only) | `study/mistakes` | an attempt today on an item that has a mistake entry |
+| 5 | Grammar topic | a content service is configured and an unstudied topic remains in the loaded list | "Next topic: {title}" (interface-language title of the first unstudied topic in book order) | `grammarTopic` | any topic was marked studied today (`at` in the local day) |
 
-All shown steps done: "You are done for today". Step 3 keeps the page non-empty.
+All shown steps done: "You are done for today". Step 3 keeps the page non-empty. The grammar step is service-gated: `useToday` makes no request at all without a configured service (the step is omitted, never faked), and while the list loads or fails the other four steps stand on their own; a load failure shows on the grammar step only, and when every topic is marked studied the step is omitted.
 
 Honest limits:
 
@@ -34,7 +35,6 @@ Honest limits:
 
 Left out of v1:
 
-- **Grammar topic of the day.** Topics exist only with the content service, and "which one next" needs the learning-order epic.
 - **Noun gender and conjugation drills.** Add as an extra step when a second reason appears.
 - **Streaks, totals, "XP".** Derived numbers nobody asked for (`RULES.md`).
 - **Return-to-Today after a step.** The learner uses the nav; Today refreshes through the existing subscriptions.

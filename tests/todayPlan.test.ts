@@ -305,6 +305,53 @@ test.each([
   });
 });
 
+test('an absent grammar input gives no grammar step', () => {
+  expect(buildTodayPlan(input()).steps.some((step) => step.id === 'grammar')).toBe(false);
+});
+
+test('a grammar value with a next topic is the last step and carries its topic and title', () => {
+  const plan = buildTodayPlan(
+    input({
+      words: { value: { due: 1, newAvailable: 0, reviewsToday: 0 } },
+      readers: { value: [reader(1, 'notOpened')] },
+      mistakes: { value: { unresolved: 2, attemptsToday: 0 } },
+      grammar: { value: { next: { topicId: 'test-one', title: 'TEST one' }, studiedToday: false } },
+    }),
+  );
+  expect(plan.steps.map((step) => step.id)).toEqual(['words', 'read', 'sound', 'mistakes', 'grammar']);
+  expect(plan.steps.at(-1)).toEqual({ id: 'grammar', done: false, topicId: 'test-one', title: 'TEST one' });
+});
+
+test('a grammar value with every topic marked omits the step even when one was marked today', () => {
+  expect(
+    buildTodayPlan(input({ grammar: { value: { studiedToday: true } } })).steps.some((step) => step.id === 'grammar'),
+  ).toBe(false);
+});
+
+test.each([
+  { studiedToday: false, done: false },
+  { studiedToday: true, done: true },
+])('the grammar step is done only when a topic was marked today: %j', ({ done, ...value }) => {
+  expect(
+    buildTodayPlan(
+      input({ grammar: { value: { next: { topicId: 'test-one', title: 'TEST one' }, ...value } } }),
+    ).steps.at(-1),
+  ).toEqual({ id: 'grammar', done, topicId: 'test-one', title: 'TEST one' });
+});
+
+test('a grammar error keeps its step in place with the real message and leaves the other steps unchanged', () => {
+  const source = input({
+    words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
+    readers: { value: [reader(1, 'read', true)] },
+    sound: { value: { attemptsToday: 1 } },
+    mistakes: { value: { unresolved: 0, attemptsToday: 1 } },
+  });
+  expect(buildTodayPlan({ ...source, grammar: { error: 'TEST topics load failed' } })).toEqual({
+    steps: [...buildTodayPlan(source).steps, { id: 'grammar', done: false, error: 'TEST topics load failed' }],
+    allDone: false,
+  });
+});
+
 test('allDone requires every shown step to be done', () => {
   const source = input({
     words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
@@ -317,6 +364,18 @@ test('allDone requires every shown step to be done', () => {
   expect(buildTodayPlan({ ...source, words: { value: { due: 1, newAvailable: 0, reviewsToday: 1 } } }).allDone).toBe(
     false,
   );
+});
+
+test('allDone counts the grammar step like any other step', () => {
+  const four = input({
+    words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
+    readers: { value: [reader(1, 'read', true)] },
+    sound: { value: { attemptsToday: 1 } },
+  });
+  expect(buildTodayPlan(four).allDone).toBe(true);
+  const next = { next: { topicId: 'test-one', title: 'TEST one' } };
+  expect(buildTodayPlan({ ...four, grammar: { value: { ...next, studiedToday: false } } }).allDone).toBe(false);
+  expect(buildTodayPlan({ ...four, grammar: { value: { ...next, studiedToday: true } } }).allDone).toBe(true);
 });
 
 test('failing sources stay in step order, preserve the actual error and are never done', () => {

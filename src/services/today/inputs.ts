@@ -1,12 +1,15 @@
-/** Owns the pure joins from stored vocabulary and reader data to Today's step input values, not selection, storage reads or hooks. */
-import { readerIdsActiveToday, reviewsToday } from './activity';
+/** Owns the pure joins from stored vocabulary, reader and studied-topic data to Today's step input values, not selection, storage reads or hooks. */
+import { readerIdsActiveToday, reviewsToday, startOfLocalDay } from './activity';
 import { readerListStatus } from '../gradedReaders/status';
+import { nextTopicEntry } from '../grammarTopics/order';
 import type { ReaderSummary } from '../gradedReaders/catalogue';
 import { vocabularyQueue } from '../vocabulary/queue';
 import type { PublishedReader } from '../../types/gradedReader';
+import type { GrammarTopicList } from '../../types/grammarTopic';
 import type { ReaderProgress } from '../../types/readerProgress';
+import type { TopicStudied } from '../../types/topicStudied';
 import type { VocabularyBook, VocabularyDay, VocabularyRow } from '../../types/vocabulary';
-import type { TodayReader, TodayWords } from './plan';
+import type { TodayGrammar, TodayReader, TodayWords } from './plan';
 
 /**
  * The words step's counts. Due candidates carry a schedule by construction.
@@ -64,4 +67,23 @@ export function readerEntries(
       activeToday: activeToday.has(reader.id),
     })),
   ].sort((a, b) => a.order - b.order);
+}
+
+/**
+ * The grammar step's input: the first unstudied topic in book order titled in the
+ * interface language (the same two-value rule as the Topics page), and whether
+ * any topic was marked studied in the local day. With every topic marked there
+ * is no next step to suggest.
+ */
+export function grammarInput(
+  list: GrammarTopicList,
+  studied: TopicStudied[],
+  now: number,
+  language: 'en' | 'zh',
+): TodayGrammar {
+  const next = nextTopicEntry(list, new Set(studied.map((row) => row.topicId)));
+  return {
+    ...(next ? { next: { topicId: next.id, title: next.title[language] } } : {}),
+    studiedToday: studied.some((row) => row.at >= startOfLocalDay(now)),
+  };
 }

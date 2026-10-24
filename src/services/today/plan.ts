@@ -1,6 +1,6 @@
 /** Owns pure ordered Today checklist selection, not activity counting, data loading or presentation. */
 export type Source<T> = { value: T } | { error: string };
-export type TodayStepId = 'words' | 'read' | 'sound' | 'mistakes';
+export type TodayStepId = 'words' | 'read' | 'sound' | 'mistakes' | 'grammar';
 /** The words step's queue counts. */
 export interface TodayWords {
   due: number;
@@ -15,12 +15,19 @@ export interface TodayReader {
   status: 'read' | 'opened' | 'notOpened';
   activeToday: boolean;
 }
+/** The grammar step's next book-order topic and today's studied mark; requires a content service. */
+export interface TodayGrammar {
+  next?: { topicId: string; title: string };
+  studiedToday: boolean;
+}
 export interface TodayInput {
   words: Source<TodayWords>;
   /** Merged catalogue joined with progress, ascending by order. */
   readers: Source<TodayReader[]>;
   sound: Source<{ attemptsToday: number }>;
   mistakes: Source<{ unresolved: number; attemptsToday: number }>;
+  /** Absent when no content service is configured: no grammar step at all. */
+  grammar?: Source<TodayGrammar>;
 }
 export type TodayStep =
   | { id: 'words'; done: boolean; due: number; newAvailable: number }
@@ -34,6 +41,7 @@ export type TodayStep =
     }
   | { id: 'sound'; done: boolean }
   | { id: 'mistakes'; done: boolean; unresolved: number }
+  | { id: 'grammar'; done: boolean; topicId: string; title: string }
   | { id: TodayStepId; done: false; error: string };
 export interface TodayPlan {
   steps: TodayStep[];
@@ -78,6 +86,16 @@ export function buildTodayPlan(input: TodayInput): TodayPlan {
   } else {
     const { unresolved, attemptsToday } = input.mistakes.value;
     if (unresolved > 0 || attemptsToday > 0) steps.push({ id: 'mistakes', done: attemptsToday > 0, unresolved });
+  }
+
+  if (input.grammar !== undefined) {
+    if ('error' in input.grammar) {
+      steps.push({ id: 'grammar', done: false, error: input.grammar.error });
+    } else {
+      const { next, studiedToday } = input.grammar.value;
+      if (next !== undefined)
+        steps.push({ id: 'grammar', done: studiedToday, topicId: next.topicId, title: next.title });
+    }
   }
 
   return { steps, allDone: steps.length > 0 && steps.every((step) => step.done) };

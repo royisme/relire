@@ -1,11 +1,17 @@
-/** useToday's source gathering: per-source errors, one shared now, and subscription refresh; DOM-less probe with fake IndexedDB. */
+/** useToday's source gathering: per-source errors, one shared now, subscription refresh and the service-gated grammar step; DOM-less probe with fake IndexedDB. */
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
+import { createInstance } from 'i18next';
+import * as translations from 'react-i18next';
 import * as starterReaders from '../src/services/gradedReaders/load';
+import * as catalogueService from '../src/services/gradedReaders/service';
+import * as grammarLoad from '../src/services/grammarTopics/load';
 import * as readerStorage from '../src/storage/gradedReaders';
 import * as vocabularyBook from '../src/storage/vocabularyBook';
+import { markTopicStudied } from '../src/storage/topicStudied';
 import { readerHookProbe } from './fixtures/readerHookProbe';
 import { freshDb } from './fixtures/storage';
 import { publishedReaderFixture } from './fixtures/gradedReaders';
+import { bookList } from './fixtures/grammarTopics';
 import { testMatureSchedule, testRow } from './fixtures/vocabulary';
 import { ITEMS, unitOf } from './fixtures/units';
 import { db } from '../src/storage/db';
@@ -15,6 +21,8 @@ import { startOfLocalDay } from '../src/services/today/activity';
 import { useToday } from '../src/hooks/useToday';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import type { ExerciseAttempt } from '../src/types/exercises';
+import type { GrammarTopicList } from '../src/types/grammarTopic';
+import en from '../src/i18n/locales/en.json';
 
 const now = new Date(2026, 9, 24, 12, 30).getTime();
 const start = startOfLocalDay(now);
@@ -33,10 +41,16 @@ const model = (changes: Partial<VocabularyModel> = {}) =>
     ...changes,
   }) as unknown as VocabularyModel;
 
+const i18n = createInstance();
+await i18n.init({ lng: 'en', resources: { en: { translation: en } }, initAsync: false });
+
 let probe: ReturnType<typeof readerHookProbe>;
 let load: ReturnType<typeof spyOn<typeof starterReaders, 'loadStarterReaders'>>;
 let listProgress: ReturnType<typeof spyOn<typeof readerStorage, 'listReaderProgress'>>;
 let subscribe: ReturnType<typeof spyOn<typeof readerStorage, 'subscribeReaders'>>;
+let translation: ReturnType<typeof spyOn<typeof translations, 'useTranslation'>>;
+let catalogueLoad: ReturnType<typeof spyOn<typeof catalogueService, 'loadReaderCatalogue'>>;
+let topicsLoad: ReturnType<typeof spyOn<typeof grammarLoad, 'loadGrammarTopics'>>;
 
 beforeEach(async () => {
   await freshDb();
@@ -45,11 +59,17 @@ beforeEach(async () => {
   load = spyOn(starterReaders, 'loadStarterReaders').mockImplementation(() => Promise.resolve([reader]));
   listProgress = spyOn(readerStorage, 'listReaderProgress').mockImplementation(() => Promise.resolve([]));
   subscribe = spyOn(readerStorage, 'subscribeReaders').mockImplementation(() => () => undefined);
+  translation = spyOn(translations, 'useTranslation').mockReturnValue({ i18n } as never);
+  // A configured service would otherwise send the catalogue to the network; Today tolerates its failure.
+  catalogueLoad = spyOn(catalogueService, 'loadReaderCatalogue').mockRejectedValue(
+    new Error('TEST catalogue unavailable'),
+  );
+  topicsLoad = spyOn(grammarLoad, 'loadGrammarTopics').mockImplementation(() => Promise.resolve(bookList));
 });
 
 afterEach(() => {
   probe.restore();
-  for (const spy of [load, listProgress, subscribe]) spy.mockRestore();
+  for (const spy of [load, listProgress, subscribe, translation, catalogueLoad, topicsLoad]) spy.mockRestore();
   if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
   else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
 });
@@ -70,6 +90,12 @@ async function drive(vocabulary: VocabularyModel, done: (state: State) => boolea
 
 const stepOf = (state: State, id: string) =>
   state.status === 'ready' ? state.plan.steps.find((step) => step.id === id) : undefined;
+
+/** The grammar step's topic id, once the service list has resolved onto the plan. */
+const grammarTopicOf = (state: State) => {
+  const step = stepOf(state, 'grammar');
+  return step !== undefined && 'topicId' in step ? step.topicId : undefined;
+};
 
 /** One CHOICE_SELECT unit whose first item is a sound-pairs item and whose second is a plain one. */
 async function seedPairsUnit() {
@@ -178,4 +204,53 @@ test('an exercises change refreshes sound and mistakes without a remount', async
   exercisesChanged();
   const refreshed = await drive(model(), (s) => s.status === 'ready' && stepOf(s, 'sound')?.done === true);
   expect(stepOf(refreshed, 'sound')).toEqual({ id: 'sound', done: true });
+});
+
+test('without a service configured the topic list is never requested and no grammar step exists', async () => {
+  const state = await drive(model(), (s) => s.status === 'ready');
+  expect(topicsLoad).not.toHaveBeenCalled();
+  expect(stepOf(state, 'grammar')).toBeUndefined();
+});
+
+test('a configured service adds the grammar step once the list resolves, without holding the four local steps', async () => {
+  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
+  let resolveTopics: (list: GrammarTopicList) => void = () => undefined;
+  topicsLoad.mockImplementation(
+    () =>
+      new Promise<GrammarTopicList>((resolve) => {
+        resolveTopics = resolve;
+      }),
+  );
+  const pending = await drive(model(), (s) => s.status === 'ready');
+  expect(stepOf(pending, 'grammar')).toBeUndefined();
+  expect(stepOf(pending, 'read')).toEqual({ id: 'read', done: false, readerId: 'test-book', order: 1, state: 'start' });
+  expect(stepOf(pending, 'sound')).toEqual({ id: 'sound', done: false });
+  resolveTopics(bookList);
+  const withGrammar = await drive(model(), (s) => stepOf(s, 'grammar') !== undefined);
+  expect(stepOf(withGrammar, 'grammar')).toEqual({
+    id: 'grammar',
+    done: false,
+    topicId: 'test-one',
+    title: 'TEST one',
+  });
+  if (withGrammar.status !== 'ready') throw new Error('expected the driven state to be ready');
+  expect(withGrammar.plan.steps.map((step) => step.id)).toEqual(['read', 'sound', 'grammar']);
+});
+
+test('a failing topic list shows its real error on the grammar step only', async () => {
+  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
+  topicsLoad.mockImplementation(() => Promise.reject(new Error('TEST topics unavailable')));
+  const state = await drive(model(), (s) => stepOf(s, 'grammar') !== undefined);
+  expect(stepOf(state, 'grammar')).toEqual({ id: 'grammar', done: false, error: 'TEST topics unavailable' });
+  expect(stepOf(state, 'read')).toEqual({ id: 'read', done: false, readerId: 'test-book', order: 1, state: 'start' });
+  expect(stepOf(state, 'sound')).toEqual({ id: 'sound', done: false });
+});
+
+test('marking a topic through real storage updates the grammar step via the subscription', async () => {
+  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
+  const state = await drive(model(), (s) => stepOf(s, 'grammar') !== undefined);
+  expect(stepOf(state, 'grammar')).toEqual({ id: 'grammar', done: false, topicId: 'test-one', title: 'TEST one' });
+  await markTopicStudied('test-one', now);
+  const marked = await drive(model(), (s) => grammarTopicOf(s) === 'test-two');
+  expect(stepOf(marked, 'grammar')).toEqual({ id: 'grammar', done: true, topicId: 'test-two', title: 'TEST two' });
 });

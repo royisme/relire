@@ -21,6 +21,7 @@ const mixed: TodayPlan = {
     { id: 'read', done: false, readerId: 'test-service-reader', order: 4, state: 'continue', version },
     { id: 'sound', done: false },
     { id: 'mistakes', done: true, unresolved: 2 },
+    { id: 'grammar', done: false, topicId: 'test-one', title: 'TEST one' },
   ],
   allDone: false,
 };
@@ -34,7 +35,7 @@ const items = (html: string) => html.match(/<li\b[^>]*>.*?<\/li>/g) ?? [];
 const links = (html: string) => html.match(/<a\b[^>]*>.*?<\/a>/g) ?? [];
 
 for (const language of ['en', 'zh']) {
-  test(`${language}: four ordered steps keep exact statuses, destinations and only the first pending link primary`, async () => {
+  test(`${language}: five ordered steps keep exact statuses, destinations and only the first pending link primary`, async () => {
     await i18n.changeLanguage(language);
     const html = render(mixed);
     const rows = items(html);
@@ -42,13 +43,14 @@ for (const language of ['en', 'zh']) {
     expect(html).toContain(`<h1 class="font-serif text-2xl font-semibold">${i18n.t('today.title')}</h1>`);
     expect(html).toContain(i18n.t('today.intro'));
     expect(html).toContain('<ol');
-    expect(rows).toHaveLength(4);
-    expect(actions).toHaveLength(4);
+    expect(rows).toHaveLength(5);
+    expect(actions).toHaveLength(5);
     const expected = [
       ['words', '#/study/words/review', i18n.t('today.words.status', { due: 0, newAvailable: 0 })],
       ['read', `#/read/graded/test-service-reader?version=${version}`, i18n.t('today.read.continue', { order: 4 })],
       ['sound', '#/speaking', i18n.t('today.sound.status')],
       ['mistakes', '#/study/mistakes', i18n.t('today.mistakes.status', { count: 2 })],
+      ['grammar', '#/grammar/topics/test-one', i18n.t('today.grammar.status', { title: 'TEST one' })],
     ];
     expected.forEach(([id, href, status], index) => {
       expect(rows[index]).toContain(`<h2 class="font-serif text-lg font-semibold">${i18n.t(`today.${id}.title`)}</h2>`);
@@ -91,7 +93,7 @@ for (const language of ['en', 'zh']) {
     },
   );
 
-  test.each(['words', 'read', 'sound', 'mistakes'] as const)(
+  test.each(['words', 'read', 'sound', 'mistakes', 'grammar'] as const)(
     `${language}: a failed %s step shows the real error without an action`,
     async (id) => {
       await i18n.changeLanguage(language);
@@ -140,6 +142,19 @@ for (const language of ['en', 'zh']) {
     expect(html).not.toContain('bg-accent-700');
     expect(html).toContain(i18n.t('today.allDone'));
     expect(html.indexOf(i18n.t('today.allDone'))).toBeGreaterThan(html.indexOf('</ol>'));
+  });
+
+  test(`${language}: a done grammar step keeps its done text and link`, async () => {
+    await i18n.changeLanguage(language);
+    const html = render({
+      steps: [{ id: 'grammar', done: true, topicId: 'test-two', title: 'TEST two' }],
+      allDone: true,
+    });
+    expect(html).toContain(i18n.t('today.grammar.status', { title: 'TEST two' }));
+    expect(links(html)[0]).toContain('href="#/grammar/topics/test-two"');
+    expect(html).toContain(i18n.t('today.done'));
+    expect(html).toContain(i18n.t('today.allDone'));
+    expect(links(html)[0]).not.toContain('bg-accent-700');
   });
 
   test(`${language}: saved mistake counts use the locale's singular and plural forms`, async () => {
