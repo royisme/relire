@@ -9,22 +9,22 @@ import { lexiconVerb, lexiconVerbLines } from '../src/services/lexicon/verbs';
 import { getCached } from '../src/storage/cache';
 import { LexiconFormResponseSchema, LexiconLemmaResponseSchema } from '../src/types/lexicon';
 import { failure, freshDb } from './fixtures/storage';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOff, serviceOn } from './fixtures/contentServiceSettings';
 import { chanterData, chanterLemma, formOf, testSource } from './fixtures/lexicon';
 
 const origin = 'http://content.test';
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 let fetchSpy: ReturnType<typeof spyOn<typeof globalThis, 'fetch'>>;
 beforeEach(async () => {
   resetContentRequests();
   await freshDb();
-  process.env.VITE_CONTENT_SERVICE_URL = origin;
+  freshSettingsStorage();
+  serviceOn(origin);
   fetchSpy = spyOn(globalThis, 'fetch');
 });
 afterEach(() => {
   resetContentRequests();
   fetchSpy.mockRestore();
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 
 const pathOf = (input: string | URL | Request) =>
@@ -56,6 +56,7 @@ test('a lemma and a form are validated, cached and asked by their encoded, folde
   expect(asked()).toEqual(['/v1/lexicon/chanter', "/v1/lexicon/form/s'appelle"]);
   expect(fetchSpy).toHaveBeenCalledWith(`${origin}/v1/lexicon/chanter`, {
     credentials: 'omit',
+    headers: { Authorization: 'Bearer TEST-access-key' },
     signal: expect.any(AbortSignal),
   });
   expect(await getCached('content', `${origin}/v1/lexicon/chanter`)).toEqual(chanterLemma());
@@ -98,7 +99,7 @@ test('a network failure uses the last good copy of that request, and without one
 });
 
 test('without a content service nothing is asked and nothing is found', async () => {
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  serviceOff();
   expect(await lexiconLemma('chanter')).toBeUndefined();
   expect(await lexiconForm('chantons')).toBeUndefined();
   expect(await lexiconVerb('chanter')).toBeUndefined();
@@ -170,9 +171,9 @@ test('a lexicon failure leaves no lines and carries its real text', async () => 
 
 test('the conjugation slot starts ready with no entry and asks nothing when no service is configured', () => {
   const status = () => createElement((): string => useLexiconVerb('chanter').status);
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  serviceOff();
   expect(renderToStaticMarkup(status())).toBe('ready');
-  process.env.VITE_CONTENT_SERVICE_URL = origin;
+  serviceOn(origin);
   expect(renderToStaticMarkup(status())).toBe('loading');
   expect(fetchSpy).not.toHaveBeenCalled();
 });

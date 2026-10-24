@@ -5,6 +5,7 @@ import { useGrammarTopics } from '../src/hooks/useGrammarTopics';
 import { useGrammarTagIndex } from '../src/hooks/useGrammarTagIndex';
 import { resetContentRequests } from '../src/services/grammarTopics/request';
 import { freshDb } from './fixtures/storage';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOff, serviceOn } from './fixtures/contentServiceSettings';
 import { topicFixture } from './fixtures/grammarTopics';
 
 async function until(done: () => boolean) {
@@ -12,7 +13,6 @@ async function until(done: () => boolean) {
   expect(done()).toBe(true);
 }
 
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 let effect: React.EffectCallback;
 let state: unknown;
 let changed: Promise<void>;
@@ -23,7 +23,8 @@ let effectSpy: ReturnType<typeof spyOn<typeof React, 'useEffect'>>;
 beforeEach(async () => {
   resetContentRequests();
   await freshDb();
-  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
+  freshSettingsStorage();
+  serviceOn('http://content.test');
   let resolve!: () => void;
   changed = new Promise<void>((done) => {
     resolve = done;
@@ -48,12 +49,11 @@ afterEach(() => {
   fetchSpy.mockRestore();
   stateSpy.mockRestore();
   effectSpy.mockRestore();
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 
 test('without a configured service a mounted tag hook stays plain and makes no request', () => {
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  serviceOff();
   expect(useGrammarTagIndex()).toEqual({ status: 'ready' });
   expect(effect()).toBeUndefined();
   expect(fetchSpy).not.toHaveBeenCalled();
@@ -68,6 +68,7 @@ test('the list hook becomes ready with summaries', async () => {
   expect(state).not.toHaveProperty('topic');
   expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics', {
     credentials: 'omit',
+    headers: { Authorization: 'Bearer TEST-access-key' },
     signal: expect.any(AbortSignal),
   });
 });
@@ -88,6 +89,7 @@ test('the reader hook receives a full topic and summaries, reusing the list requ
   expect(fetchSpy).toHaveBeenCalledTimes(2);
   expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics/test-only', {
     credentials: 'omit',
+    headers: { Authorization: 'Bearer TEST-access-key' },
     signal: expect.any(AbortSignal),
   });
 });

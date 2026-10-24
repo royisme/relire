@@ -1,4 +1,4 @@
-/** AI selections, shared provider credentials, regions and endpoints save together, independently of Practice. */
+/** AI selections, shared provider credentials, regions and endpoints save together, independently of Practice and the content service. */
 import i18n from '../../i18n';
 import { normalizeBaseUrl } from '../../services/ai/baseUrl';
 import { normalizeModelId } from '../../services/ai/catalogue';
@@ -6,7 +6,7 @@ import { getProvider } from '../../services/ai/providers';
 import { normalizeAzureRegion } from '../../services/ai/providers/azure/region';
 import { getAppSettings, saveAppSettings, type AppSettings, type SpeechChoice } from '../../utils/appSettings';
 
-export type SettingsSlice = 'ai' | 'practice';
+export type SettingsSlice = 'ai' | 'practice' | 'service';
 
 const AI_MODEL_FIELDS = ['textModel', 'ocrModel', 'speechModel'] as const;
 
@@ -61,6 +61,7 @@ const voiceRefused = (draft: AppSettings) => {
 };
 
 export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
+  if (slice === 'service') return JSON.stringify([settings.contentService]);
   if (slice === 'practice')
     return JSON.stringify([
       settings.practiceStrictAccents,
@@ -88,6 +89,15 @@ export function sliceOf(settings: AppSettings, slice: SettingsSlice): string {
 }
 
 export function withSlice(base: AppSettings, from: AppSettings, slice: SettingsSlice): AppSettings {
+  if (slice === 'service')
+    return {
+      ...base,
+      contentService: {
+        enabled: from.contentService.enabled,
+        url: canonicalBaseUrl(from.contentService.url),
+        key: from.contentService.key.trim(),
+      },
+    };
   if (slice === 'practice')
     return {
       ...base,
@@ -150,6 +160,9 @@ export function saveSlice(draft: AppSettings, slice: SettingsSlice): AppSettings
   // Same for an address storage would drop: the learner would silently go back to the provider's host.
   if (slice === 'ai' && usedProviders(draft).some((id) => baseUrlRefused(draft.baseUrls[id] ?? '')))
     throw new Error(i18n.t('aiSettings.baseUrlNotValid'));
+  // And for the service's own address, which storage would drop the same way.
+  if (slice === 'service' && baseUrlRefused(draft.contentService.url))
+    throw new Error(i18n.t('serviceSettings.urlNotValid'));
   // And for a voice the provider would refuse: storage would silently replace it with the default.
   if (slice === 'ai' && voiceRefused(draft)) throw new Error(i18n.t('aiSettings.voiceNotValid'));
   // A remembered choice for another engine follows the same rules.

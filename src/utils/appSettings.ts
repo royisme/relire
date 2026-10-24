@@ -7,14 +7,22 @@ import { normalizeAzureRegion } from '../services/ai/providers/azure/region';
 /**
  * User settings: which provider and model write the answers, which provider
  * reads page images, which provider speaks them or assesses recordings, shared keys/regions,
- * endpoint overrides, and the practice preferences (how answers are compared and
- * dictation is played). Display names live in the locale files (providers.*, models.*, voices.*).
+ * endpoint overrides, the optional content service, and the practice preferences (how answers are compared
+ * and dictation is played). Display names live in the locale files (providers.*, models.*, voices.*).
  */
 
 /** The model and voice last used with one speech engine, so switching back to it restores them. */
 export interface SpeechChoice {
   model: string;
   voice: string;
+}
+
+/** The optional content service: off until the learner tests it and turns it on; device-local like a key. */
+export interface ContentServiceSettings {
+  enabled: boolean;
+  url: string;
+  /** The access key the service's owner gave the learner, not an AI provider key. */
+  key: string;
 }
 
 export interface AppSettings {
@@ -35,6 +43,8 @@ export interface AppSettings {
   speechChoices: Record<string, SpeechChoice>;
   /** API keys by provider id. Never part of a backup. */
   apiKeys: Record<string, string>;
+  /** The optional content service. Never part of a backup; the URL env variable only prefills it for dev. */
+  contentService: ContentServiceSettings;
   /** Endpoint overrides by provider id; absent means the provider's default. Part of a backup. */
   baseUrls: Record<string, string>;
   /** Accents count as spelling mistakes when checking an answer. */
@@ -114,6 +124,12 @@ function defaults(): AppSettings {
     assessmentModel: '',
     providerRegions: {},
     apiKeys: {},
+    // The dev-time env variable prefills the address only; the service is never on without the learner's switch.
+    contentService: {
+      enabled: false,
+      url: normalizeBaseUrl(import.meta.env.VITE_CONTENT_SERVICE_URL) ?? '',
+      key: '',
+    },
     baseUrls: {},
     practiceStrictAccents: false,
     practiceDictationSpeed: DEFAULT_DICTATION_SPEED,
@@ -157,6 +173,18 @@ function normalize(value: unknown): AppSettings {
       .map(([id, value]) => [id, normalizeAzureRegion(value)] as const)
       .filter((entry): entry is readonly [string, string] => entry[1] !== undefined),
   );
+  // The service address is normalized like a provider endpoint: an unusable one is dropped, so the service
+  // reads as not configured instead of calling an address requests cannot use. An absent block keeps the
+  // default, so the dev-time env prefill survives until the learner saves a block of their own.
+  const contentService = (value: unknown): ContentServiceSettings => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return base.contentService;
+    const service = value as Partial<ContentServiceSettings>;
+    return {
+      enabled: service.enabled === true,
+      url: normalizeBaseUrl(service.url) ?? '',
+      key: typeof service.key === 'string' ? service.key.trim() : '',
+    };
+  };
   return {
     textProvider: textProvider.id,
     textModel: normalizeModelId(raw.textModel) ?? text.defaultModel,
@@ -170,6 +198,7 @@ function normalize(value: unknown): AppSettings {
     assessmentModel: '',
     providerRegions,
     apiKeys,
+    contentService: contentService(raw.contentService),
     baseUrls,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),
     practiceDictationSpeed: speedOr(raw.practiceDictationSpeed),

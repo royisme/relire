@@ -5,6 +5,7 @@ import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import en from '../src/i18n/locales/en.json';
 import { AboutSection } from '../src/components/settings/AboutSection';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOff, serviceOn } from './fixtures/contentServiceSettings';
 
 const i18n = createInstance();
 await i18n.init({
@@ -20,13 +21,12 @@ const render = () =>
     </I18nextProvider>,
   );
 
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 beforeEach(() => {
-  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
+  freshSettingsStorage();
+  serviceOn('http://content.test');
 });
 afterEach(() => {
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 
 test('with a content service the entry names the data, its maintainer, licence and source link', () => {
@@ -39,7 +39,7 @@ test('with a content service the entry names the data, its maintainer, licence a
 });
 
 test('without a content service no Morphalou entry is drawn', () => {
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  serviceOff();
   const html = render();
   expect(html).not.toContain('Morphalou');
   expect(html).not.toContain('NOTICE.md');
