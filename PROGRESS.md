@@ -4,6 +4,14 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: Letter sounds section and drill preparation (S2, S3a)
+
+- The Speaking page has a Letter sounds section above French sounds: spellings grouped as vowels, nasal vowels, consonants and silent letters; a sheet per spelling with its note, the example words (each with a device-voice Listen button) and a closed "Show IPA" fold. No IPA is visible in the section itself, and the AI-check notice shows while any row is AI-reviewed only.
+- `prepareSpellingDrill` and its schema are in (pure, no UI yet): distinct words, two distractor spellings whose sound differs and which are not inside the heard word, same group first, never the silent `h`; listening units accept the new marker. The 200-seed invariant tests run on the real pack.
+- Verified in the main checkout: typecheck, lint, format, shape, i18n, the full suite (2,283 tests), the UI detector and the build exit 0.
+- **My mistake, fixed:** in S1b I ran the pack `--check` and then `bun run format`, which reformatted the generated `src/data/spelling-sounds/patterns.json`, and I committed that file; the next `--check` failed and CI would have too. The generated pack is now in the formatter's ignore list like the other generated packs, and `--check` passes after `format`.
+- **Unverified:** hearing the example words on a real device voice, the section and sheet in three themes and at 360 px. Those are the owner's.
+
 ## 2026-10-24: letter sounds data layer, seed content and AI review (S1, C1, C2, S1b)
 
 - A reviewed-pack pipeline for spelling-to-sound content, modelled on the sound-pairs pack: schema (IPA symbols from any chart group, so `oi` is /w a/), a build gate that rejects an example containing a different-sound spelling, a nasal followed by a vowel or `n`/`m`, `oi` before `n`, and a silent `h` not at the word start; the row hash covers both locale notes; the review tool takes `--kind ai|human`; the loader and the CI `--check` line are in. No UI yet.

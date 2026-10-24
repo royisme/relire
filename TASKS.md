@@ -50,9 +50,9 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | C1 | Seed content: 16 patterns' words and en + zh notes (agy gemini-3.8-flash, own task) | passes the S1 gate and `i18n:check` | landed (0 gate problems) |
 | C2 | AI review of the seed rows (GPT, findings report only) | the lead records `AI review:` records for agreed rows | landed: every word and sound agreed; 12 notes and 2 examples replaced with the reviewer's own text; `ç` examples `déçu`/`façade` stay open |
 | S1b | Generated pack, CI `--check` line (lead) | CI never sees an empty or unreviewed pack | landed (16 AI records, `--check` exit 0; full suite 2265 pass) |
-| S2 | Letter sounds section, sheet, IPA fold, review notice | device voice only; IPA closed by default; copy in both locales | next |
-| S3a | `prepareSpellingDrill`, `supportsListening`, meta schema | distinct words, distractors of a different sound and not a substring of the heard word | next (parallel with S2) |
-| S3b | `ItemRow` device branch, "Practise these sounds" button, error text, rule lines | deterministic grading; no synthesis | after S3a |
+| S2 | Letter sounds section, sheet, IPA fold, review notice | device voice only; IPA closed by default; copy in both locales | landed (full suite 2283 pass, detector zero, build exit 0); owner device check pending |
+| S3a | `prepareSpellingDrill`, `supportsListening`, meta schema | distinct words, distractors of a different sound and not a substring of the heard word | landed (200-seed invariant tests on the real pack) |
+| S3b | `ItemRow` device branch, "Practise these sounds" button, error text, rule lines | deterministic grading; no synthesis | next |
 
 ### Content (paused by the owner's priority)
 

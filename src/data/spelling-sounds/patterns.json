@@ -6,8 +6,15 @@
       "id": "ou",
       "spelling": "ou",
       "group": "vowels",
-      "sound": ["u"],
-      "examples": ["vous", "jour", "rouge", "soupe"],
+      "sound": [
+        "u"
+      ],
+      "examples": [
+        "vous",
+        "jour",
+        "rouge",
+        "soupe"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -18,8 +25,16 @@
       "id": "oi",
       "spelling": "oi",
       "group": "vowels",
-      "sound": ["w", "a"],
-      "examples": ["moi", "toi", "soir", "boire"],
+      "sound": [
+        "w",
+        "a"
+      ],
+      "examples": [
+        "moi",
+        "toi",
+        "soir",
+        "boire"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -30,8 +45,15 @@
       "id": "au",
       "spelling": "au",
       "group": "vowels",
-      "sound": ["o"],
-      "examples": ["autre", "faute", "faux", "pause"],
+      "sound": [
+        "o"
+      ],
+      "examples": [
+        "autre",
+        "faute",
+        "faux",
+        "pause"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -42,8 +64,15 @@
       "id": "eau",
       "spelling": "eau",
       "group": "vowels",
-      "sound": ["o"],
-      "examples": ["eau", "beau", "peau", "bateau"],
+      "sound": [
+        "o"
+      ],
+      "examples": [
+        "eau",
+        "beau",
+        "peau",
+        "bateau"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -54,8 +83,15 @@
       "id": "eu",
       "spelling": "eu",
       "group": "vowels",
-      "sound": ["ø"],
-      "examples": ["peu", "bleu", "deux", "feu"],
+      "sound": [
+        "ø"
+      ],
+      "examples": [
+        "peu",
+        "bleu",
+        "deux",
+        "feu"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -66,8 +102,15 @@
       "id": "on",
       "spelling": "on",
       "group": "nasals",
-      "sound": ["ɔ̃"],
-      "examples": ["bon", "pont", "rond", "long"],
+      "sound": [
+        "ɔ̃"
+      ],
+      "examples": [
+        "bon",
+        "pont",
+        "rond",
+        "long"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -78,8 +121,15 @@
       "id": "an",
       "spelling": "an",
       "group": "nasals",
-      "sound": ["ɑ̃"],
-      "examples": ["dans", "plan", "banc", "grand"],
+      "sound": [
+        "ɑ̃"
+      ],
+      "examples": [
+        "dans",
+        "plan",
+        "banc",
+        "grand"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -90,8 +140,15 @@
       "id": "en",
       "spelling": "en",
       "group": "nasals",
-      "sound": ["ɑ̃"],
-      "examples": ["vent", "dent", "lent", "centre"],
+      "sound": [
+        "ɑ̃"
+      ],
+      "examples": [
+        "vent",
+        "dent",
+        "lent",
+        "centre"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -102,8 +159,15 @@
       "id": "in",
       "spelling": "in",
       "group": "nasals",
-      "sound": ["ɛ̃"],
-      "examples": ["vin", "matin", "lapin", "jardin"],
+      "sound": [
+        "ɛ̃"
+      ],
+      "examples": [
+        "vin",
+        "matin",
+        "lapin",
+        "jardin"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -114,8 +178,15 @@
       "id": "ain",
       "spelling": "ain",
       "group": "nasals",
-      "sound": ["ɛ̃"],
-      "examples": ["pain", "bain", "main", "train"],
+      "sound": [
+        "ɛ̃"
+      ],
+      "examples": [
+        "pain",
+        "bain",
+        "main",
+        "train"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -126,8 +197,15 @@
       "id": "ch",
       "spelling": "ch",
       "group": "consonants",
-      "sound": ["ʃ"],
-      "examples": ["chat", "cher", "chef", "riche"],
+      "sound": [
+        "ʃ"
+      ],
+      "examples": [
+        "chat",
+        "cher",
+        "chef",
+        "riche"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -138,8 +216,15 @@
       "id": "gn",
       "spelling": "gn",
       "group": "consonants",
-      "sound": ["ɲ"],
-      "examples": ["ligne", "signe", "espagnol", "gagner"],
+      "sound": [
+        "ɲ"
+      ],
+      "examples": [
+        "ligne",
+        "signe",
+        "espagnol",
+        "gagner"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -150,8 +235,15 @@
       "id": "qu",
       "spelling": "qu",
       "group": "consonants",
-      "sound": ["k"],
-      "examples": ["qui", "que", "quatre", "musique"],
+      "sound": [
+        "k"
+      ],
+      "examples": [
+        "qui",
+        "que",
+        "quatre",
+        "musique"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -162,8 +254,15 @@
       "id": "c-cedille",
       "spelling": "ç",
       "group": "consonants",
-      "sound": ["s"],
-      "examples": ["ça", "reçu", "déçu", "façade"],
+      "sound": [
+        "s"
+      ],
+      "examples": [
+        "ça",
+        "reçu",
+        "déçu",
+        "façade"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -174,8 +273,15 @@
       "id": "ph",
       "spelling": "ph",
       "group": "consonants",
-      "sound": ["f"],
-      "examples": ["phrase", "photo", "pharmacie", "alphabet"],
+      "sound": [
+        "f"
+      ],
+      "examples": [
+        "phrase",
+        "photo",
+        "pharmacie",
+        "alphabet"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
@@ -187,7 +293,12 @@
       "spelling": "h",
       "group": "silent",
       "sound": [],
-      "examples": ["homme", "hôtel", "hiver", "hôpital"],
+      "examples": [
+        "homme",
+        "hôtel",
+        "hiver",
+        "hôpital"
+      ],
       "review": {
         "kind": "ai",
         "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
