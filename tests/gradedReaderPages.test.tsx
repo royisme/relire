@@ -16,7 +16,8 @@ import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
 
 const restoreWindow = readerTestWindow();
-const { GradedReadersList, readerListStatus } = await import('../src/components/graded/GradedReadersPage');
+const { GradedReadersList } = await import('../src/components/graded/GradedReadersPage');
+const { readerListStatus } = await import('../src/services/gradedReaders/status');
 const { ReaderEditionGate } = await import('../src/components/graded/GradedReaderPage');
 const { GradedReaderWorkspace } = await import('../src/components/graded/GradedReaderWorkspace');
 afterAll(restoreWindow);

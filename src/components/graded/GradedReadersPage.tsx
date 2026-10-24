@@ -4,22 +4,10 @@ import { useGradedReaders } from '../../hooks/useGradedReaders';
 import { useReaderProgress } from '../../hooks/useReaderProgress';
 import { useReaderCatalogue } from '../../hooks/useReaderCatalogue';
 import { KeepReaderOffline } from './KeepReaderOffline';
-import type { ReaderSummary } from '../../services/gradedReaders/catalogue';
-import type { PublishedReader } from '../../types/gradedReader';
-import type { ReaderProgress } from '../../types/readerProgress';
+import { readerListStatus } from '../../services/gradedReaders/status';
 import { authoredText } from '../../utils/authoredText';
 import { Link } from '../shell/Link';
 import { Button } from '../ui/button';
-
-export function readerListStatus(reader: PublishedReader | ReaderSummary, rows?: ReaderProgress[]) {
-  const id = 'body' in reader ? reader.body.id : reader.id;
-  const current = rows?.find((row) => row.readerId === id && row.version === reader.version);
-  return {
-    status:
-      rows === undefined ? 'unavailable' : current?.completedAt != null ? 'read' : current ? 'opened' : 'notOpened',
-    earlier: rows?.find((row) => row.readerId === id && row.version !== reader.version && row.completedAt !== null),
-  };
-}
 
 export function GradedReadersList({
   content,
