@@ -4,6 +4,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: Speaking information architecture
+
+- Moved French sounds and Sound pairs creation/counts from Progress to Speaking landing with the shared dialog/save/open flow; Read aloud unchanged. Uncommitted; typecheck, lint, format, i18n, 2,077 tests, build and UI detector pass. `shape:check` fails on the unstaged removed file; its current-file logic passes. Visual/device acceptance remains owner-manual.
+
 ## 2026-10-23: graded readers, pronunciation result, grammar topics
 
 **Done**

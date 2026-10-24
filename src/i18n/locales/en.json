@@ -708,6 +708,7 @@
   "minimalPairs": {
     "progress": {
       "title": "Sound-pair answers",
+      "empty": "No sound-pair answers yet. Make exercises above to get started.",
       "history": "Counts every answer, including repeats, to sound-pair exercises that are still saved. Deleting a set removes its answers from these counts.",
       "contrast": "/{{first}}/ ↔ /{{second}}/",
       "counts": "{{correct}} of {{total}} correct"
