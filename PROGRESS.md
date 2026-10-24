@@ -4,6 +4,14 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: grammar topics in book order, studied marks and a Today step (G1 to G4, C5)
+
+- The Worker used to list topics `ORDER BY chapter, id` (alphabetical, so chapter eight came before chapter one). Topics now carry a `position`, the 1-based index in the committed manifest (the textbook's own order), published to D1 before the id sort and counted in the pack version; `/v1/topics` sorts by it. Position lives only in the list schema, not in full topics, the pack or drafts.
+- A learner can mark a topic studied (`meta.topicStudied:<id>`, backed up, restored through the Settings handler too). The Topics page lists chapters in order with numbers, studied marks and a Next link; the topic page has the mark button and a Next topic link, including the two checkpoint topics. Today gains a last Grammar step only when a content service is configured: no request and no step otherwise; a failing list shows the real error on that step and never blocks the other four.
+- Argon's review of the plan found six real problems before any code (a position leaking into full topics, the id sort overwriting the order, the reader never loading the list, the Settings restore omission, missing fixtures, a contradictory Today rule); all were fixed in the plan.
+- Verified in the main checkout: typecheck, lint, format, shape, i18n, the full suite (2,336 tests), the UI detector, the build, the Worker typecheck and every CI pack `--check` exit 0.
+- **Unverified:** a real service round trip after re-publishing local D1, the pages in three themes and at 360 px. **Not a teaching design:** the order is the textbook's; whether it suits zero-basis learners is the owner's or a teacher's call.
+
 ## 2026-10-24: Letter sounds practice button (S3b, C4)
 
 - "Practise these sounds" in the Letter sounds section saves a Listening set of spelling-to-sound choices and opens it in Practice; `ItemRow` plays Listen with the device voice for items that declare it. The Practice caption names the spelling drill. Rule files and the `speechAfterCheck` comment name both device-voice sources.

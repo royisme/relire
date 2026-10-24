@@ -54,14 +54,14 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | S3a | `prepareSpellingDrill`, `supportsListening`, meta schema | distinct words, distractors of a different sound and not a substring of the heard word | landed (200-seed invariant tests on the real pack) |
 | S3b | `ItemRow` device branch, "Practise these sounds" button, error text, rule lines | deterministic grading; no synthesis | landed (full suite 2288 pass, detector zero, build and pack check exit 0); owner device check pending |
 
-### Next epic: learning order of the 93 grammar topics and a Today step (proposed; `docs/grammar-order-plan.md`)
+### Landed: learning order of the 93 grammar topics and a Today step (`docs/grammar-order-plan.md`)
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| G1 | `position` from the manifest through publish, the D1 column, `/v1/topics` (sorted by it) and the summary schema | positions unique and positive; list sorted by position, not alphabetically | plan under review |
+| G1 | `position` from the manifest through publish, the D1 column, `/v1/topics` (sorted by it) and the list schema | positions unique and positive; list sorted by position, not alphabetically | plan under review |
 | G2 | `storage/topicStudied.ts` (mark, unmark, list, subscribe) and its backup | idempotent mark; restore validates the whole file; absent keeps, `[]` clears | landed (restore tested through the Settings handler) |
-| G3 | Topics page in book order, numbers, studied marks, Next links, mark button (copy by agy Gemini) | no invented progress; one filled button per view | next (after copy C5) |
-| G4 | Today `grammar` step (service configured only) | omitted, never faked, without a service; real error on the step | after G3 |
+| G3 | Topics page in book order, numbers, studied marks, Next links, mark button (copy by agy Gemini) | no invented progress; one filled button per view | landed (copy C5 by agy Gemini; full suite 2318 pass) |
+| G4 | Today `grammar` step (service configured only) | omitted, never faked, without a service; real error on the step | landed (full suite 2336 pass, detector zero, build exit 0, every CI pack check 0) |
 
 ### Content (paused by the owner's priority)
 
@@ -71,6 +71,7 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 
 ## Owner
 
+- Grammar topics in book order (needs the content service: re-publish local D1 first with `scripts/grammar-topics/publish.ts`, then start the Worker on 8787): chapters in order, studied marks, Next links, the Today grammar step; decide whether the textbook order is acceptable for beginners or a teacher should reorder (the order is the manifest's array order). With `.env.local` pointing at 8787 and no Worker running, Today's Grammar step shows the real error, by design.
 - Letter sounds by hand: Speaking page, hear the example words on a real device voice (iOS Safari especially), the IPA fold, "Practise these sounds" and a wrong answer in Mistakes, three themes and 360 px.
 - Human language review of the 16 letter-sounds rows (they carry `AI review:` records only; the `ç` examples `déçu` and `façade` are above A1 and need a teacher's pick), before any real beginner uses the section.
 - Try reader dictation by hand: "Practise by dictation" on a graded reader page with a real device voice (iOS Safari especially), type a full sentence on a phone, find a wrong answer in Mistakes, three themes and 360 px.
