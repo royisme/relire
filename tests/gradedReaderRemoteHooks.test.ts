@@ -24,6 +24,11 @@ function render<T>(hook: () => T): T {
   return hook();
 }
 const settle = () => Bun.sleep(0);
+// The hook compares editions with WebCrypto digests, which finish on their own schedule (slower on CI): poll.
+async function until(done: () => boolean) {
+  const end = Date.now() + 5000;
+  while (!done() && Date.now() < end) await Bun.sleep(1);
+}
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (error: Error) => void;
@@ -77,7 +82,7 @@ test('service readiness deduplicates starters, surfaces edition conflicts and la
   restores.push(() => load.mockRestore());
   expect(render(() => useReaderCatalogue(bundled)).status).toBe('loading');
   effect();
-  await settle();
+  await until(() => render(() => useReaderCatalogue(bundled)).status !== 'loading');
   expect(render(() => useReaderCatalogue(bundled))).toMatchObject({
     status: 'ready',
     saved: true,
@@ -100,7 +105,7 @@ test('catalogue retry/unmount guard rejects late success and failure without dis
   effect();
   await settle();
   old.reject(new Error('TEST stale catalogue'));
-  await settle();
+  await until(() => render(() => useReaderCatalogue(bundled)).status === 'ready');
   expect(render(() => useReaderCatalogue(bundled))).toMatchObject({ status: 'ready', readers: [], saved: false });
   const late = deferred<Awaited<ReturnType<typeof service.loadReaderCatalogue>>>();
   load.mockImplementationOnce(() => late.promise);
