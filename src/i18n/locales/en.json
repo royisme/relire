@@ -799,6 +799,26 @@
       "tendency": "A tendency, not a fixed rule: many standard speakers merge these two vowels in open syllables."
     }
   },
+  "spellingSounds": {
+    "notes": {
+      "ou": "Sounds like the 'oo' in English 'soup' with lips pushed forward and rounded.",
+      "oi": "Read like 'wa', smoothly gliding from a w sound into an open a.",
+      "au": "Sounds like a clear closed 'o' as in English 'boat', with rounded lips.",
+      "eau": "Shares the same sound as 'au', pronounced like the closed 'o' in English 'boat'.",
+      "eu": "Pronounced as the vowel in 'peu' with rounded lips, and this note only covers that reading.",
+      "on": "Nasal when not followed by a vowel or another n or m, resembling the vowel of English 'song' directed through the nose.",
+      "an": "Nasal when not followed by a vowel or another n or m, sounding like 'ah' in English 'father' directed through the nose.",
+      "en": "Shares the sound of 'an' and is nasal when not followed by a vowel or another n or m, echoing 'ah' through the nose.",
+      "in": "Nasal when not followed by a vowel or another n or m, resembling the vowel in English 'bad' resonated through the nose.",
+      "ain": "Shares the same sound as 'in' and is nasal when not followed by a vowel or another n or m, resonated through the nose.",
+      "ch": "Pronounced like the 'sh' in English 'shoe', produced with air flowing gently over the tongue.",
+      "gn": "Pronounced like the 'ny' in English 'canyon', pressing the middle of the tongue flat against the palate.",
+      "qu": "The letter u is silent and it sounds like k as in English 'key'.",
+      "c-cedille": "Pronounced like the 's' in English 'see', softening the c before the vowels a, o, or u.",
+      "ph": "Pronounced like the 'f' in English 'fish', with the upper teeth lightly resting on the lower lip.",
+      "h": "It is never pronounced, so words starting with it begin directly on the following vowel sound."
+    }
+  },
   "levels": {
     "A1": "A1 · Beginner",
     "A2": "A2 · Elementary",
