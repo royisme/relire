@@ -348,12 +348,13 @@ test.each([undefined, false])(
           (error: Error) => error.message,
         ),
       ).toContain('Usage');
-      await publish(['--check'], pathToFileURL(directory + '/')).catch(() => {});
-      expect(await Bun.file(join(directory, '.pi-runs/grammar-topics/failure.log')).text()).toContain('ENOENT');
-      expect(log.mock.calls).toEqual([]);
-      expect(error.mock.calls).toEqual(
-        Array(2).fill(['Topic publication failed; private diagnostics in .pi-runs/grammar-topics/failure.log']),
+      expect(await Bun.file(join(directory, '.pi-runs/grammar-topics/failure.log')).text()).toContain(
+        'Usage: publish.ts [--apply-local | --check]',
       );
+      expect(log.mock.calls).toEqual([]);
+      expect(error.mock.calls).toEqual([
+        ['Topic publication failed; private diagnostics in .pi-runs/grammar-topics/failure.log'],
+      ]);
     } finally {
       log.mockRestore();
       error.mockRestore();

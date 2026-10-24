@@ -15,11 +15,9 @@ import { topicFixture } from './fixtures/grammarTopics';
 import { ALLOWLIST, writeMorphalouFixture } from './fixtures/morphalouCsv';
 import { testBook } from './fixtures/vocabulary';
 
-let directory: string;
-let root: URL;
-beforeAll(async () => {
-  directory = await mkdtemp(join(tmpdir(), 'relire-TEST-local-d1-'));
-  root = pathToFileURL(directory + '/');
+async function createLocalD1Root() {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-local-d1-'));
+  const root = pathToFileURL(directory + '/');
   await mkdir(join(directory, 'worker/migrations'), { recursive: true });
   await copyFile(new URL('../worker/wrangler.jsonc', import.meta.url), new URL('worker/wrangler.jsonc', root));
   for (const migration of ['0001_init.sql', '0002_lexicon.sql', '0003_vocabulary.sql', '0004_readers.sql'])
@@ -34,6 +32,13 @@ beforeAll(async () => {
   const child = Bun.spawnSync({ ...d1ExecuteSpawn(root, false, 'd1', 'migrations', 'apply', 'DB'), stdin: 'ignore' });
   expect(child.stderr.toString()).toBe('');
   expect(child.exitCode).toBe(0);
+  return { directory, root };
+}
+
+let directory: string;
+let root: URL;
+beforeAll(async () => {
+  ({ directory, root } = await createLocalD1Root());
 }, 30_000);
 afterAll(async () => {
   await rm(directory, { recursive: true, force: true });
@@ -104,7 +109,8 @@ test('remote branch arguments/options are exact assertions only, without spawnin
   });
 });
 
-test('topics and lexicon apply through real CLI and share the explicit proxy state; deleting each version makes the Worker unavailable', async () => {
+async function writePublicationInputs(directory: string) {
+  const root = pathToFileURL(directory + '/');
   const topic = topicFixture();
   const input = {
     manifest: {
@@ -131,10 +137,15 @@ test('topics and lexicon apply through real CLI and share the explicit proxy sta
   await Bun.write(new URL('data/grammar-topics/manifest.json', root), JSON.stringify(input.manifest));
   await Bun.write(new URL('data/grammar-topics/reviews.json', root), JSON.stringify(input.reviews));
   await Bun.write(new URL(`.local/grammar-topics/drafts-${topic.chapter}.json`, root), JSON.stringify(input.drafts));
-  await publish(['--apply-local'], root);
   const csv = join(directory, 'csv');
   await writeMorphalouFixture(csv);
   await Bun.write(new URL('data/lexicon/lemmas.txt', root), ALLOWLIST);
+  return { input, csv };
+}
+
+test('topics and lexicon apply through real CLI and share the explicit proxy state; deleting each version makes the Worker unavailable', async () => {
+  const { input, csv } = await writePublicationInputs(directory);
+  await publish(['--apply-local'], root);
   await importLexicon(['--apply-local'], { MORPHALOU_DIR: csv }, root);
   const lexicon = await loadLexicon(csv, new Set(parseAllowlist(ALLOWLIST)));
   const { getPlatformProxy } = await import(new URL('worker/node_modules/wrangler/wrangler-dist/cli.js', root).href);
@@ -167,19 +178,21 @@ test('topics and lexicon apply through real CLI and share the explicit proxy sta
 }, 30_000);
 
 test('real CLI failures stay in rooted private logs, never inherited stdout/stderr', async () => {
-  const { getPlatformProxy } = await import(new URL('worker/node_modules/wrangler/wrangler-dist/cli.js', root).href);
-  const proxy: { env: Pick<Env, 'DB'>; dispose(): Promise<void> } = await getPlatformProxy(
-    platformProxyOptions(root, false),
-  );
-  try {
-    await proxy.env.DB.prepare('DROP TABLE topics').run();
-    await proxy.env.DB.prepare('DROP TABLE lexicon_entries').run();
-  } finally {
-    await proxy.dispose();
-  }
+  const { directory, root } = await createLocalD1Root();
   const log = spyOn(console, 'log').mockImplementation(() => {});
   const error = spyOn(console, 'error').mockImplementation(() => {});
   try {
+    await writePublicationInputs(directory);
+    const { getPlatformProxy } = await import(new URL('worker/node_modules/wrangler/wrangler-dist/cli.js', root).href);
+    const proxy: { env: Pick<Env, 'DB'>; dispose(): Promise<void> } = await getPlatformProxy(
+      platformProxyOptions(root, false),
+    );
+    try {
+      await proxy.env.DB.prepare('DROP TABLE topics').run();
+      await proxy.env.DB.prepare('DROP TABLE lexicon_entries').run();
+    } finally {
+      await proxy.dispose();
+    }
     expect(
       await publish(['--apply-local'], root).then(
         () => 'resolved',
@@ -206,6 +219,7 @@ test('real CLI failures stay in rooted private logs, never inherited stdout/stde
   } finally {
     log.mockRestore();
     error.mockRestore();
+    await rm(directory, { recursive: true, force: true });
   }
 }, 30_000);
 
