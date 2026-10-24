@@ -2,6 +2,8 @@
 
 Status: **Accepted** by the owner's instruction on 2026-10-19 ("no authorization issue, just do it", after answering the three design questions in section 1). It answers issue #27. The "no server" statements in `CLAUDE.md`, `PRODUCT.md`, `docs/architecture.md` and `docs/merge-plan.md` (decision 1) were amended in the same change (H0). Q1 to Q6 in section 8 stay open; the stated defaults apply until the owner says otherwise: Q2 yes, Q3 build-time URL only, Q4 existing packs stay static, Q6 yes. The legal read in Q5 is dropped by the owner's instruction (no licence concern), but the Morphalou notices and a rebuild recipe are still built in H3 because the licence requires them.
 
+**Amendment 2026-10-24 (owner):** (1) The vocabulary book `tcf-7000` is the owner's own work and the owner has the right to publish it: no distribution-rights gate remains, and it may be deployed with topics and the lexicon. It stays marked `unreviewed` until a language review is recorded. (2) Morphalou is open data (LGPL-LR) and needs no permission or approval; only its conditions apply (source named in every response, `worker/NOTICE.md`, `worker/licences/LGPL-LR.txt`, a documented rebuild from the original files), and all of them are already built. (3) The first deployment has no accounts: public read-only, rate limited, CORS limited to the deployment origins. Accounts stay H4 and are built only when something is charged, content that cannot be public appears, or cross-device sync is wanted. All routes are `GET` under `/v1` with no per-user rows, so auth can be added later as a Worker middleware and one header in `contentServiceFetch`, with no migration. (4) Not yet built: the publishers (`scripts/*/publish*.ts`) have only a local path, so a remote apply for topics, the lexicon, the vocabulary book and readers is a code step in `TASKS.md`; the owner then runs it with their own Cloudflare access.
+
 ## 1. Context
 
 - Owner direction (2026-10-19): the grammar topic text has no copyright risk, but it must be **private data** in case it becomes a paid service. It must never be committed to the public repository or shipped as static JSON inside the front-end bundle (anyone can download a bundle). Putting it into a backend database first is the problem to solve.
@@ -15,7 +17,7 @@ A Cloudflare **Worker with a D1 database** serves read-only content. Three kinds
 
 1. **Grammar topics** (Part 2): reviewed topic text (en, zh, French examples), the tag index, chapter metadata.
 2. **Lexicon** (issue #27): attested forms, gender and conjugation of a lemma, so an unknown verb is answered by the dictionary before the model.
-3. **Vocabulary book**: a complete paged built-in book, downloaded explicitly at Words entry/action. This code extension uses synthetic data only; actual corpus correction/C1 review, reviewer authority, local D1 application and distribution rights remain separate owner gates.
+3. **Vocabulary book**: a complete paged built-in book, downloaded explicitly at Words entry/action. The code was built and tested with synthetic data; the real corpus is the owner's own, publishable (amendment 2026-10-24), and carried as `unreviewed` until a language review (correction/C1 review, reviewer authority) is recorded.
 
 **Local first (owner, 2026-10-19):** the target is Cloudflare D1, but every phase is built and proven against a local Worker and a local D1 (`wrangler dev --local`, data under the gitignored `worker/.wrangler/`), so the whole product works end to end on the owner's machine. Deploying to Cloudflare is a later step the owner does, once the functionality is complete; no phase here includes a deploy, a login or a remote database.
 
@@ -54,7 +56,7 @@ Read-only JSON, versioned under `/v1`:
 - A service now exists: cost, abuse, uptime and privacy statements are the owner's to run. The server never receives a key, an answer, an article or a recording; a request carries only a topic id, a word (lemma or tapped form, revealing that lookup), a book id/page/version, or a published reader id/artifact version, and the caller's IP address. Reader answers, translation reveals, progress and recordings remain local. Vocabulary contexts, ratings, schedules, answers and keys never go to it. The About page says so when a service is configured.
 - The free build gets less (no topics) than the hosted one. That is the intended funnel, but the About page must say so.
 - Lexicon scope (owner, 2026-10-19: learners below C1 do not need 600,000 form rows): H3 serves a learner-sized selection, about 5,000 lemmas chosen offline by frequency plus the lemmas the app itself uses (`data/lexicon/lemmas.txt`, words only), measured at 49,238 rows, verbs with only the six simple tenses and the participles. The frequency table is used only to choose the words and is never stored or served.
-- Licence: Morphalou 3.1 is LGPL-LR; serving it needs its notices and replaceable data (a documented way to rebuild the D1 rows from the source). Other lexicons evaluated earlier carry share-alike or non-commercial terms and **must not be served** without a licence check. Serving data that may later be sold needs a licence review **before** any lexicon row is loaded (Q5).
+- Licence: Morphalou 3.1 is LGPL-LR; serving it needs its notices and replaceable data (a documented way to rebuild the D1 rows from the source). Other lexicons evaluated earlier carry share-alike or non-commercial terms and **must not be served** without a licence check. Q5 is closed by the owner (2026-10-24): Morphalou is open data and no review or permission is needed, only the notices above.
 - Reshaping TP1, TP3 and TP4 is cheap (nothing has shipped, no compatibility code), but it is real work; the topics UI cannot show real content until the service exists.
 
 ### Complete-book publication and caching
@@ -79,5 +81,5 @@ The app reuses unchanged `contentServiceFetch`/HTTP errors, accumulates pages in
 - **Q2 Bulk reading.** Is "public read-only, no bulk endpoint, rate limited" acceptable until accounts exist, knowing a determined reader can still collect every topic?
 - **Q3 Service URL.** Build-time only (one URL per deployment, simplest), or a Settings field so the free build can point at the owner's service?
 - **Q4 Existing static packs.** Do the conjugation pack and the noun-gender data stay in the bundle (default) or move to the service later?
-- **Q5 Licence.** Is a legal read of Morphalou 3.1's terms for a possibly paid service wanted before H3? (The author cannot give legal advice.)
+- **Q5 Licence.** Closed: no legal read wanted (owner, 2026-10-24); Morphalou 3.1 needs only its notices.
 - **Q6 Part 2 meanwhile.** Keep generating and reviewing topics locally (default), so the content is ready when H2 lands?

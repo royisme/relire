@@ -4,6 +4,12 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: owner decisions on deployment, accounts and content rights (docs only)
+
+- The owner confirmed the vocabulary book is their own work and publishable, and that Morphalou (open, LGPL-LR) needs no permission, only its notices (already built). Recorded as an amendment in `docs/adr-hosted-content-service.md`; the old "local use only / no public distribution / not authorized" lines in `worker/README.md` and `docs/vocabulary-flashcards-spec.md` were removed or reworded.
+- Accounts are not part of the first deployment (public read-only, rate limited, CORS-limited). They stay H4 and come with charging, non-public content or sync.
+- Found while writing this: the publishers have only a local apply path, so nothing can reach a deployed D1 yet (step D-remote in `TASKS.md`). The vocabulary manifest `attribution` still names the AnkiWeb deck with "licence not stated": the owner must say what it should read.
+
 ## 2026-10-24: grammar topics in book order, studied marks and a Today step (G1 to G4, C5)
 
 - The Worker used to list topics `ORDER BY chapter, id` (alphabetical, so chapter eight came before chapter one). Topics now carry a `position`, the 1-based index in the committed manifest (the textbook's own order), published to D1 before the id sort and counted in the pack version; `/v1/topics` sorts by it. Position lives only in the list schema, not in full topics, the pack or drafts.

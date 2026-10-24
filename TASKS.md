@@ -58,10 +58,21 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| G1 | `position` from the manifest through publish, the D1 column, `/v1/topics` (sorted by it) and the list schema | positions unique and positive; list sorted by position, not alphabetically | plan under review |
+| G1 | `position` from the manifest through publish, the D1 column, `/v1/topics` (sorted by it) and the list schema | positions unique and positive; list sorted by position, not alphabetically | landed |
 | G2 | `storage/topicStudied.ts` (mark, unmark, list, subscribe) and its backup | idempotent mark; restore validates the whole file; absent keeps, `[]` clears | landed (restore tested through the Settings handler) |
 | G3 | Topics page in book order, numbers, studied marks, Next links, mark button (copy by agy Gemini) | no invented progress; one filled button per view | landed (copy C5 by agy Gemini; full suite 2318 pass) |
 | G4 | Today `grammar` step (service configured only) | omitted, never faked, without a service; real error on the step | landed (full suite 2336 pass, detector zero, build exit 0, every CI pack check 0) |
+
+### Next: remote publication of the content service (owner decision 2026-10-24; no plan doc yet)
+
+First deployment: no accounts, public read-only, rate limited, CORS limited to the deployment origins; topics, lexicon and the vocabulary book (the owner's own, `unreviewed`) go up together (ADR amendment). Needs a short plan doc and an Argon review before dispatch.
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| D-remote | A remote apply for the topic, lexicon, vocabulary and reader publishers (today each has only a local path), keeping staged writes, exact readback and the last-step pointer switch; the owner runs it with their own Cloudflare access | a dry run against a second local D1 passes the same readbacks; nothing logs in or deploys by itself | not started |
+| D-origins | Deployment config (`ALLOWED_ORIGINS`, D1 id) kept local; a short checklist in `worker/README.md` | the placeholder stays in the committed file | not started |
+
+Not part of this: accounts (H4), an owner-only access token (an option for a private beta, not chosen).
 
 ### Content (paused by the owner's priority)
 
@@ -80,7 +91,8 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 - Try the graded readers by hand with `docs/graded-readers-trial.md` (no AI key needed), then send back what is wrong.
 - Try by hand: the pronunciation features (practice-card marks, strip, Details), Sound pairs, the published local grammar topics; accept or change the open copy items (#16, #17, #24).
 - Human language review of the 91 locally published grammar topics (Chinese wording, kinship terms and a handful of Low items; their notes are in the local working notes).
-- Deploy the content service (#31) before any real learner depends on topics, the wordbook or later readers.
+- Say what `attribution` in `data/vocabulary/manifest.json` should read: it still names the AnkiWeb deck with "licence not stated", but the book is your own work (served to learners in every response).
+- Deploy the content service (#31) before any real learner depends on topics, the wordbook or later readers: create the D1 database, set `ALLOWED_ORIGINS`, run D-remote once it lands, then `wrangler deploy`. No rights gate remains for the wordbook or the lexicon.
 
 ## Not started
 
