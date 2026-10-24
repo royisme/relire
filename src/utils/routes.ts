@@ -3,7 +3,7 @@ import { contentServiceUrl } from '../services/grammarTopics/service';
 import { GRAMMAR_TAGS, type GrammarTag } from '../types/grammar';
 import { LearningAreaSchema, learningAreaPath, type LearningArea } from '../types/learningArea';
 
-export const SETTINGS_SECTIONS = ['ai', 'practice', 'words', 'prompts', 'data'] as const;
+export const SETTINGS_SECTIONS = ['ai', 'practice', 'words', 'prompts', 'data', 'service'] as const;
 export const AI_PURPOSES = ['text', 'ocr', 'speech', 'assessment'] as const;
 export type AiPurposeRoute = (typeof AI_PURPOSES)[number];
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];

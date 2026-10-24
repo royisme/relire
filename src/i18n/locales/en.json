@@ -614,6 +614,10 @@
       "data": {
         "title": "Data and backup",
         "desc": "What is stored on this device, and backups."
+      },
+      "service": {
+        "title": "Content service",
+        "desc": "The optional service behind grammar topics, the lexicon, the wordbook and extra readers."
       }
     },
     "about": {
@@ -621,7 +625,7 @@
       "desc": "What Relire Plus is and where your data goes.",
       "what": "Relire Plus is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
-      "servicePrivacy": "This version can read grammar topics, a French dictionary, a complete paged wordbook and additional graded readers from a content service. Requests carry a topic id, tapped word, book id/page/version, or published reader id/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules, recordings or keys. Wordbook download exposes the whole published book to clients; real content publication is pending owner review and distribution approval.",
+      "servicePrivacy": "This version can read grammar topics, a French dictionary, a complete paged wordbook and additional graded readers from a content service. Requests carry a topic id, tapped word, book id/page/version, or published reader id/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules or recordings, and never an AI provider key: the only key it receives is the access key you set for it. Wordbook download exposes the whole published book to clients; real content publication is pending owner review and distribution approval.",
       "scope": "Relire Plus is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
       "source": "Source code on GitHub",
       "lexicon": "For verbs outside the reviewed list, the word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}.",
@@ -639,6 +643,25 @@
     "remoteAutoSpeakNote": "Off, automatic playback uses this device’s voice. On, a check may synthesize a clip with your Speech synthesis provider, which can cost money. Pressing Listen or Preview always uses it.",
     "browserRecognition": "Let my browser transcribe while I record",
     "browserRecognitionNote": "Off by default. On, your browser may send the recording to the browser maker's speech service to produce a transcript, which helps scoring when your AI provider cannot listen. Off, no recognition runs and the recording only goes to your AI provider when you press Check pronunciation."
+  },
+  "serviceSettings": {
+    "urlLabel": "Service address",
+    "urlPlaceholder": "https://content.example.com",
+    "urlHelp": "Where the content service you were given is served from. Leave empty if you do not use one.",
+    "urlInvalid": "This address cannot be used: it must be an http(s) address without credentials, a query or a fragment.",
+    "urlNotValid": "The service address cannot be stored; correct it before saving.",
+    "keyLabel": "Access key",
+    "keyHelp": "The access key the service's owner gave you. It stays in this browser, is sent only to this service, and is never part of a backup.",
+    "testBtn": "Test",
+    "testingBtn": "Testing…",
+    "testSuccess": "Connected. The service answered with its topic list.",
+    "testRejected": "The service rejected the key.",
+    "testLimited": "The service is limiting requests; try again in a moment.",
+    "testStatus": "The service answered: {{msg}}",
+    "testNetwork": "The service could not be reached: it is not running, the address is wrong, or the service does not allow this site (CORS).",
+    "testInvalidBody": "The service answered, but not with its topic list: {{msg}}",
+    "enableLabel": "Use this content service",
+    "enableNote": "The switch turns on only after a successful Test of the address and key above; editing either turns it off again. Saving is separate from testing."
   },
   "aiSettings": {
     "purposesLabel": "AI tasks",

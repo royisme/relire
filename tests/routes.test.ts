@@ -155,7 +155,7 @@ test('Grammar is separate from My study and local references/exercises survive s
 });
 
 test('Settings preferences, About, AI purpose and return addresses remain intact', () => {
-  expect(SETTINGS_SECTIONS).toEqual(['ai', 'practice', 'words', 'prompts', 'data']);
+  expect(SETTINGS_SECTIONS).toEqual(['ai', 'practice', 'words', 'prompts', 'data', 'service']);
   for (const section of SETTINGS_SECTIONS)
     roundTrip({ name: 'settings', section, ...(section === 'ai' ? { purpose: 'text' as const } : {}) });
   for (const purpose of ['text', 'ocr', 'speech', 'assessment'] as const)

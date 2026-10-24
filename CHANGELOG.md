@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Settings has a Content service section: enter the service address and your access key, press Test to see the real result, then switch it on. It is off by default, kept on this device only and never included in a backup; the service now requires the key.
 - Today now reads as one guided page: a dated heading with a sentence about what is ahead, one card with the day's steps in order and the next step expanded with a single button, a small "Today so far" tally of real counts, and links to practise one skill on its own.
 - With a content service configured, Today adds a fifth step: the next grammar topic in book order, done for the day once you mark any topic studied; without a service, Today is unchanged and makes no request.
 - Grammar topics follow book order with numbered entries, personal Studied marks and Next links; mark or unmark a topic after reading it.

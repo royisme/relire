@@ -5,7 +5,8 @@ import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { testBook } from './fixtures/vocabulary';
 import { freshDb, failure } from './fixtures/storage';
-import { createWorkerDb, workerRequest } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest, WORKER_ACCESS_KEY } from './fixtures/workerDb';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOn } from './fixtures/contentServiceSettings';
 import { prepare } from '../scripts/vocabulary/prepare';
 import { review } from '../scripts/vocabulary/review';
 import { publish } from '../scripts/vocabulary/publish';
@@ -49,7 +50,7 @@ test('only explicit local mode publishes unreviewed content through Worker/clien
   const root = pathToFileURL(directory + '/');
   const { db, env } = await createWorkerDb();
   const originalFetch = globalThis.fetch;
-  const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
+  freshSettingsStorage();
   const messages: string[] = [],
     commands: string[] = [],
     served: string[] = [];
@@ -115,7 +116,7 @@ test('only explicit local mode publishes unreviewed content through Worker/clien
     expect(messages).toContain(
       'Unreviewed vocabulary current pointer verified locally; linguistic review waived for local use',
     );
-    process.env.VITE_CONTENT_SERVICE_URL = 'https://content.test';
+    serviceOn('https://content.test', WORKER_ACCESS_KEY);
     globalThis.fetch = (async (url: string, init: RequestInit) => {
       expect(init.credentials).toBe('omit');
       const response = await handle(workerRequest(url, init), env);
@@ -173,8 +174,7 @@ test('only explicit local mode publishes unreviewed content through Worker/clien
   } finally {
     log.mockRestore();
     globalThis.fetch = originalFetch;
-    if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-    else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+    restoreSettingsStorage();
     db.close();
     await rm(directory, { recursive: true, force: true });
   }

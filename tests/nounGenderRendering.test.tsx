@@ -12,6 +12,7 @@ import { prepareGenderDrills } from '../src/services/exercises/fromGender';
 import { GenderCheckControl } from '../src/components/practice/controls/GenderCheckControl';
 import { NounGenderHint } from '../src/components/word/NounGenderHint';
 import { emptyAnswer } from '../src/services/exercises/answer';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOff, serviceOn } from './fixtures/contentServiceSettings';
 import type { ExerciseItem } from '../src/types/exercises';
 
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
@@ -124,11 +125,11 @@ test('reference loading and real errors occupy one bounded reserved region', () 
 });
 
 test('Grammar offers Gender and Conjugation without a service and Topics only with one', () => {
-  const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
   try {
+    freshSettingsStorage();
     for (const hasService of [false, true]) {
-      if (hasService) process.env.VITE_CONTENT_SERVICE_URL = 'https://TEST.invalid';
-      else delete process.env.VITE_CONTENT_SERVICE_URL;
+      if (hasService) serviceOn('https://TEST.invalid');
+      else serviceOff();
       const html = render(<LearningNavigation area="grammar" current={{ name: 'grammar', section: 'gender' }} />);
       expect(html).toContain(i18n.t('nounGender.title'));
       expect(html).toContain(i18n.t('conjugation.page.title'));
@@ -138,7 +139,6 @@ test('Grammar offers Gender and Conjugation without a service and Topics only wi
       expect(html).not.toContain('role="radio"');
     }
   } finally {
-    if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-    else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+    restoreSettingsStorage();
   }
 });

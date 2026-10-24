@@ -10,9 +10,9 @@ import { loadStarterReaders, resetStarterReadersForTests } from '../src/services
 import { db } from '../src/storage/db';
 import { openReaderEdition } from '../src/storage/gradedReaders';
 import { ContentServiceHttpError, ContentServiceNetworkError } from '../src/services/grammarTopics/service';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOff, serviceOn } from './fixtures/contentServiceSettings';
 
 const originalFetch = globalThis.fetch;
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 const reader = publishedReaderFixture();
 let entry = await readerSummary(reader);
 async function catalogueFor(readers = [entry]) {
@@ -23,14 +23,14 @@ const artifactResponse = () => new Response(canonicalVocabularyJson(reader));
 beforeEach(async () => {
   await freshDb();
   resetStarterReadersForTests();
-  process.env.VITE_CONTENT_SERVICE_URL = 'https://content.test';
+  freshSettingsStorage();
+  serviceOn('https://content.test');
   entry = await readerSummary(reader);
 });
 afterEach(() => {
   globalThis.fetch = originalFetch;
   resetStarterReadersForTests();
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 
 test('catalogue and exact pinned artifact use credential-free timed GETs, URL/hash cache keys and no learner data', async () => {
@@ -66,7 +66,7 @@ test('network failure alone can use a validated saved catalogue and exact artifa
   }) as typeof fetch;
   expect(await loadReaderCatalogue()).toEqual({ catalogue, saved: true });
   expect(await loadRemoteReader(entry)).toEqual(reader);
-  process.env.VITE_CONTENT_SERVICE_URL = 'https://other.test';
+  serviceOn('https://other.test');
   expect(await failure(loadReaderCatalogue())).toMatchObject({ message: 'TEST network offline' });
   expect(await failure(loadRemoteReader(entry))).toBeInstanceOf(ContentServiceNetworkError);
 });
@@ -187,7 +187,7 @@ test('bundle precedence deduplicates exact editions and surfaces conflicts witho
 
 test('no service fetches nothing; exact opened snapshot survives service loss with no TTL', async () => {
   await loadStarterReaders({ schemaVersion: 1, syllabusVersion: '1.0.0', readers: [] });
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  serviceOff();
   globalThis.fetch = (async (_url: string): Promise<Response> => {
     throw new Error('TEST unexpected network');
   }) as typeof fetch;

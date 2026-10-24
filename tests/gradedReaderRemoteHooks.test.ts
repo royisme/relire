@@ -6,6 +6,7 @@ import * as edition from '../src/services/gradedReaders/edition';
 import { useReaderCatalogue } from '../src/hooks/useReaderCatalogue';
 import { useReaderEdition } from '../src/hooks/useReaderEdition';
 import { publishedReaderFixture } from './fixtures/gradedReaders';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOff, serviceOn } from './fixtures/contentServiceSettings';
 import { readerSummary } from '../src/services/gradedReaders/catalogue';
 import { vocabularyHash } from '../src/services/vocabulary/book';
 
@@ -14,7 +15,6 @@ const bundled = [reader];
 const entry = await readerSummary(reader);
 const body = { schemaVersion: 1 as const, syllabusVersion: '1.0.0', readers: [entry] };
 const catalogue = { ...body, version: await vocabularyHash(body) };
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 let restores: (() => void)[];
 let slots: unknown[];
 let cursor: number;
@@ -39,7 +39,8 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 beforeEach(() => {
-  process.env.VITE_CONTENT_SERVICE_URL = 'https://content.test';
+  freshSettingsStorage();
+  serviceOn('https://content.test');
   slots = [];
   effect = () => undefined;
   const state = spyOn(React, 'useState').mockImplementation(((initial: unknown) => {
@@ -60,12 +61,11 @@ beforeEach(() => {
 });
 afterEach(() => {
   for (const restore of restores) restore();
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 
 test('catalogue is disabled without a URL and never fetches', () => {
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  serviceOff();
   const load = spyOn(service, 'loadReaderCatalogue');
   restores.push(() => load.mockRestore());
   expect(render(() => useReaderCatalogue(bundled)).status).toBe('disabled');

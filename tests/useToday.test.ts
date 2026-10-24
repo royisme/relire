@@ -10,6 +10,7 @@ import * as vocabularyBook from '../src/storage/vocabularyBook';
 import { markTopicStudied } from '../src/storage/topicStudied';
 import { readerHookProbe } from './fixtures/readerHookProbe';
 import { freshDb } from './fixtures/storage';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOn } from './fixtures/contentServiceSettings';
 import { publishedReaderFixture } from './fixtures/gradedReaders';
 import { readerAnswer } from './fixtures/readerProgress';
 import { bookList } from './fixtures/grammarTopics';
@@ -30,7 +31,6 @@ import en from '../src/i18n/locales/en.json';
 const now = new Date(2026, 9, 24, 12, 30).getTime();
 const start = startOfLocalDay(now);
 const reader = publishedReaderFixture();
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 
 // The fields useToday reads; the writers the model also carries are irrelevant here.
 const model = (changes: Partial<VocabularyModel> = {}) =>
@@ -57,7 +57,7 @@ let topicsLoad: ReturnType<typeof spyOn<typeof grammarLoad, 'loadGrammarTopics'>
 
 beforeEach(async () => {
   await freshDb();
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  freshSettingsStorage();
   probe = readerHookProbe();
   load = spyOn(starterReaders, 'loadStarterReaders').mockImplementation(() => Promise.resolve([reader]));
   listProgress = spyOn(readerStorage, 'listReaderProgress').mockImplementation(() => Promise.resolve([]));
@@ -73,8 +73,7 @@ beforeEach(async () => {
 afterEach(() => {
   probe.restore();
   for (const spy of [load, listProgress, subscribe, translation, catalogueLoad, topicsLoad]) spy.mockRestore();
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 
 type State = ReturnType<typeof useToday>;
@@ -288,7 +287,7 @@ test('without a service configured the topic list is never requested and no gram
 });
 
 test('a configured service adds the grammar step once the list resolves, without holding the four local steps', async () => {
-  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
+  serviceOn('http://content.test');
   let resolveTopics: (list: GrammarTopicList) => void = () => undefined;
   topicsLoad.mockImplementation(
     () =>
@@ -320,7 +319,7 @@ test('a configured service adds the grammar step once the list resolves, without
 });
 
 test('a failing topic list shows its real error on the grammar step only', async () => {
-  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
+  serviceOn('http://content.test');
   topicsLoad.mockImplementation(() => Promise.reject(new Error('TEST topics unavailable')));
   const state = await drive(model(), (s) => stepOf(s, 'grammar') !== undefined);
   expect(stepOf(state, 'grammar')).toEqual({ id: 'grammar', done: false, error: 'TEST topics unavailable' });
@@ -336,7 +335,7 @@ test('a failing topic list shows its real error on the grammar step only', async
 });
 
 test('marking a topic through real storage updates the grammar step via the subscription', async () => {
-  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test';
+  serviceOn('http://content.test');
   const state = await drive(model(), (s) => stepOf(s, 'grammar') !== undefined);
   expect(stepOf(state, 'grammar')).toEqual({ id: 'grammar', done: false, topicId: 'test-one', title: 'TEST one' });
   await markTopicStudied('test-one', now);
