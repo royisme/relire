@@ -1,6 +1,6 @@
 # Sentence dictation from graded readers
 
-Status: proposed (2026-10-24), not built. Queue item 1 of the standing goal. Platform only: no new reader text, no new model call.
+Status: D1 and D2 landed (2026-10-24). Platform only: no new reader text, no new model call. Owner visual and device acceptance pending.
 
 ## Why
 

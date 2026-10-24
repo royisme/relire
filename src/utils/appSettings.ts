@@ -223,7 +223,9 @@ export const practiceGrading = (): GradingOptions => ({ strictAccents: getAppSet
  * Whether something may speak by itself (a dictation item after its check), and with which engine: the
  * Practice preference is the master switch; on, the selected engine speaks once the learner has opted
  * into remote synthesis (or when that engine is the device voice itself), and with the device voice
- * otherwise, because it costs nothing and synthesizes nothing. Explicit Listen always uses the selection.
+ * otherwise, because it costs nothing and synthesizes nothing. Explicit Listen uses the selection except
+ * for items declaring meta.playbackEngine === 'device' (reader dictation), whose Listen and after-check
+ * replay use the device voice, still subject to this master switch.
  */
 export const speechAfterCheck = (settings: AppSettings = getAppSettings()): 'selected' | 'device' | null =>
   !settings.practiceSpeakAfterCheck
