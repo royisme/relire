@@ -1,4 +1,4 @@
-/** Owns owner-authorized local-only reader publication via installed Wrangler; no remote mode, deployment or env files. */
+/** Owns owner-authorized reader publication via installed Wrangler; no deployment or env files. */
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { platformProxyOptions } from '../content-service/d1Target';
@@ -9,8 +9,8 @@ import { loadReviewInputs, readReviewMetadata } from './reviewInputs';
 import { prepareReaderPublication, publishReaders, sqlQuote } from './publication';
 
 export function parseArgs(args: string[]) {
-  if (args.length !== 1 || !['--sql', '--apply-local'].includes(args[0]))
-    throw new Error('Usage: publishRemote.ts --sql | --apply-local');
+  if (args.length !== 1 || !['--sql', '--apply-local', '--apply-remote'].includes(args[0]))
+    throw new Error('Usage: publishRemote.ts --sql | --apply-local | --apply-remote');
   return args[0];
 }
 
@@ -19,16 +19,18 @@ export async function runPublishRemote(
   root = repositoryRoot,
   { allowRemote = false }: { allowRemote?: boolean } = {},
 ): Promise<void> {
-  // Reserved for the owner-only remote mode; no remote flags are accepted yet.
-  void allowRemote;
   try {
     const mode = parseArgs(args);
+    const remote = mode === '--apply-remote';
+    if (remote && !allowRemote) throw new Error('Remote publication requires owner CLI authorization');
+    if (remote && !(process.stdin.isTTY && process.stdout.isTTY))
+      throw new Error('Remote publication requires TTY stdin and stdout');
     const { syllabus, reviews } = await readReviewMetadata(root);
     const remoteIds = new Set(
       syllabus.stages.filter((stage) => stage.include && !stage.bundled).map((stage) => stage.readerId),
     );
     if (!remoteIds.size) {
-      console.log('No non-bundled readers selected; local catalogue unchanged.');
+      console.log(`No non-bundled readers selected; ${remote ? 'remote' : 'local'} catalogue unchanged.`);
       return;
     }
     // Keep the included prefix intact: gates need all earlier stages and their current reviews.
@@ -49,7 +51,9 @@ export async function runPublishRemote(
         ];
         return `INSERT OR IGNORE INTO readers (id, artifact_hash, body_version, stage_order, body) VALUES (${values.join(', ')});`;
       });
-      statements.push('-- Staging only. Use --apply-local for verified readback, markers, catalogue and pointer.');
+      statements.push(
+        '-- Staging only. Use --apply-local or --apply-remote for verified readback, markers, catalogue and pointer.',
+      );
       await Bun.write(join(root, '.local/graded-readers/publish.sql'), statements.join('\n') + '\n');
       console.log(`${readers.length} reader(s) prepared as private staging SQL only.`);
       return;
@@ -58,7 +62,7 @@ export async function runPublishRemote(
       pathToFileURL(join(root, 'worker/node_modules/wrangler/wrangler-dist/cli.js')).href
     );
     const proxy: { env: { DB: D1Database }; dispose(): Promise<void> } = await getPlatformProxy(
-      platformProxyOptions(root, false),
+      platformProxyOptions(root, remote),
     );
     try {
       await publishReaders(prepared, {
@@ -66,18 +70,20 @@ export async function runPublishRemote(
           const result = await proxy.env.DB.prepare(sql)
             .bind(...parameters)
             .run();
-          if (!result.success) throw new Error('Local reader D1 write failed');
+          if (!result.success) throw new Error('Reader D1 write failed');
         },
         read: async (sql) => {
           const result = await proxy.env.DB.prepare(sql).all<Record<string, unknown>>();
-          if (!result.success) throw new Error('Local reader D1 read failed');
+          if (!result.success) throw new Error('Reader D1 read failed');
           return result.results;
         },
       });
     } finally {
       await proxy.dispose();
     }
-    console.log(`${readers.length} reader(s) published and current pointer verified locally.`);
+    console.log(
+      `${readers.length} reader(s) published and current pointer verified ${remote ? 'remotely' : 'locally'}.`,
+    );
   } catch (error) {
     // Raw D1/schema errors can contain private prose, so diagnostics stay ignored.
     await Bun.write(join(root, '.pi-runs/graded-readers/publish-failure.log'), Bun.inspect(error) + '\n');

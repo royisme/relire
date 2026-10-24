@@ -23,17 +23,15 @@ import {
 import { vocabularyHash, vocabularyMetadata, canonicalVocabularyJson } from '../src/services/vocabulary/book';
 import { VocabularyEntrySchema } from '../src/types/vocabulary';
 import { handle } from '../worker/src/index';
-test('pure argument parsing accepts only preparation, metadata check and the two local modes', () => {
-  for (const args of [[], ['--check'], ['--apply-local'], ['--apply-local-unreviewed']])
-    expect(parseArgs(args)).toBe(args[0]);
-  for (const args of [
-    ['--remote'],
-    ['--apply-remote'],
-    ['--apply-remote-unreviewed'],
-    ['--check', '--apply-local'],
-    ['--apply-local', '--apply-local-unreviewed'],
-  ])
-    expect(() => parseArgs(args)).toThrow('Usage');
+test('pure argument parsing accepts preparation, check, local modes and remote unreviewed only', () => {
+  const flags = ['--check', '--apply-local', '--apply-local-unreviewed', '--apply-remote-unreviewed'];
+  expect(parseArgs([])).toBeUndefined();
+  for (const flag of flags) expect(parseArgs([flag])).toBe(flag);
+  const usage = 'Usage: publish.ts [--check | --apply-local | --apply-local-unreviewed | --apply-remote-unreviewed]';
+  for (const flag of ['--remote', '--apply-remote', '--unknown']) expect(() => parseArgs([flag])).toThrow(usage);
+  for (const first of [...flags, '--remote', '--apply-remote'])
+    for (const second of [...flags, '--remote', '--apply-remote'])
+      expect(() => parseArgs([first, second])).toThrow(usage);
 });
 
 test.each([undefined, false])(
@@ -47,8 +45,10 @@ test.each([undefined, false])(
         await failure(
           publish(['--apply-remote-unreviewed'], pathToFileURL(directory + '/'), undefined, { allowRemote }),
         ),
-      ).toMatchObject({ message: expect.stringContaining('Usage') });
-      expect(await Bun.file(directory + '/.pi-runs/vocabulary/failure.log').text()).toContain('Usage: publish.ts');
+      ).toMatchObject({ message: 'Remote publication requires owner CLI authorization' });
+      expect(await Bun.file(directory + '/.pi-runs/vocabulary/failure.log').text()).toContain(
+        'Remote publication requires owner CLI authorization',
+      );
       expect(log.mock.calls).toEqual([]);
       expect(error.mock.calls).toEqual([
         ['Vocabulary publication failed; private diagnostics in .pi-runs/vocabulary/failure.log'],

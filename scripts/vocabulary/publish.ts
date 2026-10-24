@@ -1,4 +1,4 @@
-/** Metadata-only CI check or owner-authorized local-only staged publication using installed Wrangler. */
+/** Metadata-only CI check or owner-authorized staged publication using installed Wrangler; no deployment. */
 import { platformProxyOptions } from '../content-service/d1Target';
 import type { D1Database } from '../../worker/node_modules/@cloudflare/workers-types';
 import { checkVocabularyMetadata, vocabularyRepository } from './metadata';
@@ -12,8 +12,14 @@ import {
 } from './publication';
 import { canonicalVocabularyJson } from '../../src/services/vocabulary/book';
 export function parseArgs(args: string[]) {
-  if (args.length && (args.length !== 1 || !['--check', '--apply-local', '--apply-local-unreviewed'].includes(args[0])))
-    throw new Error('Usage: publish.ts [--check | --apply-local | --apply-local-unreviewed]');
+  if (
+    args.length &&
+    (args.length !== 1 ||
+      !['--check', '--apply-local', '--apply-local-unreviewed', '--apply-remote-unreviewed'].includes(args[0]))
+  )
+    throw new Error(
+      'Usage: publish.ts [--check | --apply-local | --apply-local-unreviewed | --apply-remote-unreviewed]',
+    );
   return args[0];
 }
 
@@ -23,11 +29,13 @@ export async function publish(
   testAdapter?: VocabularyPublishAdapter,
   { allowRemote = false }: { allowRemote?: boolean } = {},
 ) {
-  // Reserved for the owner-only remote mode; no remote flags are accepted yet.
-  void allowRemote;
   try {
     const mode = parseArgs(args);
-    const unreviewed = mode === '--apply-local-unreviewed';
+    const remote = mode === '--apply-remote-unreviewed';
+    if (remote && !allowRemote) throw new Error('Remote publication requires owner CLI authorization');
+    if (remote && !(process.stdin.isTTY && process.stdout.isTTY))
+      throw new Error('Remote publication requires TTY stdin and stdout');
+    const unreviewed = mode === '--apply-local-unreviewed' || remote;
     const { manifest, reviews } = checkVocabularyMetadata(
       await Bun.file(new URL('data/vocabulary/manifest.json', root)).json(),
       await Bun.file(new URL('data/vocabulary/reviews.json', root)).json(),
@@ -53,7 +61,7 @@ export async function publish(
         `INSERT OR IGNORE INTO vocabulary_pages (book_id, version, page, body) VALUES ('tcf-7000', ${sqlQuote(book.manifest.version)}, ${page.page}, ${sqlQuote(canonicalVocabularyJson(page))});`,
     );
     statements.push(
-      '-- Staging only. Publication marker/current pointer require verified local publication after body readback.',
+      '-- Staging only. Publication marker/current pointer require verified publication after body readback.',
     );
     await Bun.write(new URL('.local/vocabulary/publish.sql', root), statements.join('\n') + '\n');
     if (mode !== '--apply-local' && !unreviewed) {
@@ -64,7 +72,7 @@ export async function publish(
       ? { getPlatformProxy: undefined }
       : await import(new URL('worker/node_modules/wrangler/wrangler-dist/cli.js', root).href);
     const proxy: { env: { DB: D1Database }; dispose(): Promise<void> } | undefined = await getPlatformProxy?.(
-      platformProxyOptions(root, false),
+      platformProxyOptions(root, remote),
     );
     try {
       let command = 0;
@@ -74,7 +82,7 @@ export async function publish(
           const statement = proxy!.env.DB.prepare(sql).bind(...parameters);
           const output = read ? await statement.all<Record<string, unknown>>() : await statement.run();
           await Bun.write(log, JSON.stringify(output) + '\n');
-          if (!output.success || !Array.isArray(output.results)) throw new Error('Invalid local D1 readback');
+          if (!output.success || !Array.isArray(output.results)) throw new Error('Invalid D1 readback');
           return output.results;
         } catch (error) {
           await Bun.write(log, Bun.inspect(error) + '\n');
@@ -92,9 +100,11 @@ export async function publish(
       await proxy?.dispose();
     }
     console.log(
-      unreviewed
-        ? 'Unreviewed vocabulary current pointer verified locally; linguistic review waived for local use'
-        : 'Vocabulary current pointer verified locally',
+      remote
+        ? 'Unreviewed vocabulary current pointer verified remotely; no linguistic review'
+        : unreviewed
+          ? 'Unreviewed vocabulary current pointer verified locally; linguistic review waived for local use'
+          : 'Vocabulary current pointer verified locally',
     );
   } catch (error) {
     // D1 errors can include private content; keep raw failures out of the public console.

@@ -109,6 +109,60 @@ test('remote branch arguments/options are exact assertions only, without spawnin
   });
 });
 
+test.each([
+  {
+    script: 'scripts/vocabulary/publish.ts',
+    rootModule: 'scripts/vocabulary/metadata.ts',
+    dependencies: ['scripts/vocabulary/publication.ts', 'scripts/content-service', 'src'],
+    flag: '--apply-remote-unreviewed',
+    log: '.pi-runs/vocabulary/failure.log',
+    message: 'Vocabulary publication failed; private diagnostics in .pi-runs/vocabulary/failure.log',
+  },
+  {
+    script: 'scripts/graded-readers/publishRemote.ts',
+    rootModule: 'scripts/grammar-topics/reference.ts',
+    dependencies: [
+      'scripts/graded-readers/assemble.ts',
+      'scripts/graded-readers/reviewInputs.ts',
+      'scripts/graded-readers/publication.ts',
+      'scripts/content-service',
+    ],
+    flag: '--apply-remote',
+    log: '.pi-runs/graded-readers/publish-failure.log',
+    message: 'Reader publication failed; private diagnostics in .pi-runs/graded-readers/publish-failure.log',
+  },
+])('$script CLI refuses non-TTY stdin and stdout before metadata or Wrangler', async (publisher) => {
+  expect(process.stdin.isTTY).toBeFalsy();
+  expect(process.stdout.isTTY).toBeFalsy();
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-cli-refusal-'));
+  try {
+    // Copy the entrypoint and its root constant; other imports stay on the real implementation.
+    for (const file of [publisher.script, publisher.rootModule]) {
+      await Bun.write(join(directory, file), Bun.file(new URL('../' + file, import.meta.url)));
+    }
+    for (const file of publisher.dependencies) {
+      await mkdir(resolve(directory, file, '..'), { recursive: true });
+      await symlink(new URL('../' + file, import.meta.url).pathname, join(directory, file));
+    }
+    const child = Bun.spawnSync({
+      cmd: [process.execPath, '--no-env-file', join(directory, publisher.script), publisher.flag],
+      cwd: directory,
+      stdin: 'ignore',
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    expect(child.exitCode).toBe(1);
+    expect(child.stdout.toString()).toBe('');
+    expect(child.stderr.toString()).toBe(publisher.message + '\n');
+    expect(await Bun.file(join(directory, publisher.log)).text()).toContain(
+      'Remote publication requires TTY stdin and stdout',
+    );
+    expect(await Bun.file(join(directory, '.local/vocabulary/publish.sql')).exists()).toBe(false);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
 async function writePublicationInputs(directory: string) {
   const root = pathToFileURL(directory + '/');
   const topic = topicFixture();

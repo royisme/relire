@@ -209,10 +209,14 @@ test('CLI SQL uses assembly gates/current reviews/privacy and selects only inclu
   }
 });
 
-test('pure argument parsing accepts SQL or local apply, never remote or mixed modes', () => {
-  for (const args of [['--sql'], ['--apply-local']]) expect(parseArgs(args)).toBe(args[0]);
-  for (const args of [[], ['--remote'], ['--apply-remote'], ['--sql', '--apply-local'], ['--sql', '--sql']])
-    expect(() => parseArgs(args)).toThrow('Usage');
+test('pure argument parsing accepts SQL, local apply or explicit remote apply, never --remote or mixed modes', () => {
+  const flags = ['--sql', '--apply-local', '--apply-remote'];
+  for (const flag of flags) expect(parseArgs([flag])).toBe(flag);
+  const usage = 'Usage: publishRemote.ts --sql | --apply-local | --apply-remote';
+  for (const args of [[], ['--remote'], ['--apply-remote-unreviewed'], ['--unknown']])
+    expect(() => parseArgs(args)).toThrow(usage);
+  for (const first of [...flags, '--remote'])
+    for (const second of [...flags, '--remote']) expect(() => parseArgs([first, second])).toThrow(usage);
 });
 
 test.each([undefined, false])(
@@ -223,10 +227,10 @@ test.each([undefined, false])(
     const error = spyOn(console, 'error').mockImplementation(() => {});
     try {
       expect(await failure(runPublishRemote(['--apply-remote'], root, { allowRemote }))).toMatchObject({
-        message: expect.stringContaining('Usage'),
+        message: 'Remote publication requires owner CLI authorization',
       });
       expect(await Bun.file(join(root, '.pi-runs/graded-readers/publish-failure.log')).text()).toContain(
-        'Usage: publishRemote.ts',
+        'Remote publication requires owner CLI authorization',
       );
       expect(log.mock.calls).toEqual([]);
       expect(error.mock.calls).toEqual([
