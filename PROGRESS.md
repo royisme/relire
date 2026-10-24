@@ -4,6 +4,12 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: RS1 landed (routed Worker API with access keys)
+
+- Plan `docs/remote-settings-plan.md` (two reviews by gpt-6-astra because Argon had no quota; every finding applied). The Worker is a Hono app (`worker/src/index.ts`) with its own CORS, method, limiter, `OPTIONS` and access-key middleware in that order, prefix routes over the raw path, resources split into `topics.ts` and `lexicon.ts`. `ACCESS_KEYS` fails closed; SHA-256 digests compared without an early exit (Bun has no `timingSafeEqual`); 401 carries the CORS headers and `WWW-Authenticate`; every success is `private, no-cache` with `Vary: Origin, Authorization`; auth runs before the `ETag` match.
+- Worker written by gpt-6.1-sol (`43a320f`); review of the diff by gpt-6-astra failed on two points (the Bearer scheme was case- and space-sensitive; the `pinned` field was dead), both fixed in the merge `ff3826c`. Docs: `worker/README.md` (Access key section, runbook order: deploy, then `secret put`, then smoke checks with and without a key), ADR amendment, `AGENTS.md`, `docs/architecture.md`.
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,400), every CI pack `--check`, `vocabulary/publish.ts --check`, Worker typecheck and `bun install --cwd worker --frozen-lockfile`, build (no Hono in `dist`), detector `[]`. **Unverified:** a real `wrangler secret put`, a deployed Worker, a browser call with a key. **Open:** the app cannot send a key until RS2, so a configured local app gets `401` from this Worker until then (the plan treats RS1 and RS2 as one integration boundary).
+
 ## 2026-10-24: D-origins landed; D-remote code is complete
 
 - `.gitignore` ignores `worker/wrangler.deploy.jsonc`; `worker/README.md` no longer tells the owner to edit the committed config and carries the owner-only deployment runbook (day 1: migrations, topics, vocabulary, readers; day 2: the lexicon alone; smoke checks; CORS origin). `docs/development.md`'s "No remote mode" sentence is corrected. Nothing in the runbook has been run: the owner's own Cloudflare login, the D1 limits check (decides D-remote-2b) and the deploy are the next steps (TASKS Owner).
