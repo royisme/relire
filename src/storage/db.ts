@@ -18,6 +18,8 @@ import { deleteUnitRows } from './exerciseRows';
 import { ReaderProgressSchema, type ReaderProgress, type ReaderQuestionGrader } from '../types/readerProgress';
 import { parseGradedReaderBackup, restoreGradedReaderRows } from './gradedReaderBackup';
 import { readersChanged } from './gradedReaders';
+import { TopicStudiedArraySchema, type TopicStudied } from '../types/topicStudied';
+import { exportTopicStudied, restoreTopicStudied, topicStudiedChanged } from './topicStudied';
 
 /**
  * User data lives in IndexedDB: no 5 MB cap, async, and one record per article
@@ -75,6 +77,7 @@ export interface AppData {
 export interface BackupData extends AppData {
   vocabularyMeta: VocabularyMetaBackup;
   gradedReaders: ReaderProgress[];
+  topicStudied: TopicStudied[];
   units: ExerciseUnit[];
   itemStates: ExerciseItemState[];
   attempts: ExerciseAttempt[];
@@ -274,6 +277,7 @@ export async function exportData(): Promise<BackupData> {
     units,
     itemStates,
     attempts,
+    topicStudied: exportTopicStudied(meta),
     gradedReaders: keys
       .filter((key) => key.startsWith('readerProgress:'))
       .map((key) => ReaderProgressSchema.parse(meta.get(key))),
@@ -292,6 +296,7 @@ export interface RestoreInput extends Partial<Omit<AppData, 'vocab'>> {
   vocab?: unknown;
   vocabularyMeta?: unknown;
   gradedReaders?: unknown;
+  topicStudied?: unknown;
   /** Validated by the caller (`parseShadowingBackup`). */
   shadowing?: ShadowingSentence[];
   units?: unknown;
@@ -308,6 +313,7 @@ export interface RestoreInput extends Partial<Omit<AppData, 'vocab'>> {
  * `ExerciseBackupError` and nothing is written; an absent key keeps the stored rows.
  */
 export async function importData(data: RestoreInput, gradeReaderQuestion?: ReaderQuestionGrader) {
+  const topicStudied = data.topicStudied === undefined ? undefined : TopicStudiedArraySchema.parse(data.topicStudied);
   const readers = await parseGradedReaderBackup(data, gradeReaderQuestion);
   const vocabulary = parseVocabularyBackup(data);
   const exercises = parseExerciseBackup(data);
@@ -328,6 +334,7 @@ export async function importData(data: RestoreInput, gradeReaderQuestion?: Reade
       for (const sentence of data.shadowing) await store.put(sentence);
     }
     if (readers) await restoreGradedReaderRows(tx.objectStore('meta'), readers);
+    if (topicStudied) await restoreTopicStudied(tx.objectStore('meta'), topicStudied);
     if (data.stats) await tx.objectStore('meta').put({ ...EMPTY_STATS, ...data.stats }, 'stats');
     await tx.objectStore('meta').put(true, 'started');
     if (touchesExercises) {
@@ -352,6 +359,7 @@ export async function importData(data: RestoreInput, gradeReaderQuestion?: Reade
   }
   await tx.done;
   if (readers) await readersChanged();
+  if (topicStudied) await topicStudiedChanged();
   if (vocabulary) await vocabularyChanged();
   if (touchesExercises) exercisesChanged();
 }

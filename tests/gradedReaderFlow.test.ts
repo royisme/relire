@@ -22,6 +22,7 @@ import {
   shadowingRestored,
 } from '../src/storage/shadowing';
 import { saveVocabularyBookmark } from '../src/storage/vocabulary';
+import { markTopicStudied, listTopicStudied } from '../src/storage/topicStudied';
 import { loadStarterReaders, resetStarterReadersForTests } from '../src/services/gradedReaders/load';
 import { gradeReaderQuestion, readerQuestionItem } from '../src/services/gradedReaders/checkpoints';
 import { readerOccurrence } from '../src/services/gradedReaders/occurrence';
@@ -251,8 +252,11 @@ test('real-data restore rejects malformed readers whole; absent preserves progre
 });
 
 test('Settings BackupControls restores checked real-reader backups without losing learner data', async () => {
+  await markTopicStudied('test-studied-topic', 100);
   const backup = await learnerJourney();
+  expect(backup.topicStudied).toEqual([{ topicId: 'test-studied-topic', at: 100 }]);
   await freshDb();
+  expect(await listTopicStudied()).toEqual([]);
   const i18n = createInstance();
   await i18n.init({ lng: 'en', resources: { en: { translation: en } }, initAsync: false });
   const translation = spyOn(translations, 'useTranslation').mockReturnValue({
@@ -296,6 +300,9 @@ test('Settings BackupControls restores checked real-reader backups without losin
     } as unknown as React.ChangeEvent<HTMLInputElement>);
     expect(imported).toBeDefined();
     await imported;
+    expect(await listTopicStudied(), 'BackupControls must pass studied marks to importData').toEqual(
+      backup.topicStudied,
+    );
     expect((await listReaderProgress()).length, 'BackupControls must supply the checked-reader grader').toBe(
       backup.gradedReaders.length,
     );
