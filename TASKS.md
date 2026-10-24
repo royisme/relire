@@ -35,6 +35,13 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | T3 | `TodayPage`, `#/today`, nav item, copy in both locales, `worksWithoutKey`, architecture and changelog lines | steps match the plan; no invented counts | landed (full suite 2213 pass, detector zero, build exit 0); owner visual check pending |
 | T4 | Landing change and onboarding exit | `#/` and `''` open Today; Library stays at `#/read`; `notFound`, `'#/read'` fallbacks and onboarding step 3 exit agree | landed (full suite 2213 pass, detector zero, build exit 0); no e2e run; owner visual check pending |
 
+### Next epic: sentence dictation from graded readers (proposed; `docs/reader-dictation-plan.md`)
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| D1 | Meta schema, `supportsListening` extension, `gradeItem` flag `ignoreSentencePunctuation`, `prepareReaderDictation` | prepared unit passes `ExerciseUnitSchema`; a sentence typed without its final full stop grades right, a missing hyphen or apostrophe still wrong; fewer than 3 sentences rejected; retry through `saveUnits` keeps the batch | plan under review |
+| D2 | Device engine in `NumberDictationControl` and `ItemRow`; "Practise by dictation" button in `GradedReaderWorkspace`; copy, caption, changelog, architecture | no synthesis or fetch; French text not shown before the check; one filled button per view stays | after D1 |
+
 ### Content (paused by the owner's priority)
 
 Stages 1 to 3 have private drafts with AI review records (not human review). Stages 4 to 12 are not written; stage 4 has an unreviewed draft. Resume after the platform: R0-7 for stages 4 to 5, R2 for 6 to 12, a human language review before any real beginner uses the readers.
