@@ -18,12 +18,23 @@ const version = 'b'.repeat(64);
 const mixed: TodayPlan = {
   steps: [
     { id: 'words', done: true, due: 0, newAvailable: 0 },
-    { id: 'read', done: false, readerId: 'test-service-reader', order: 4, state: 'continue', version },
+    {
+      id: 'read',
+      done: false,
+      readerId: 'test-service-reader',
+      order: 4,
+      title: 'Une histoire',
+      state: 'continue',
+      version,
+    },
     { id: 'sound', done: false },
     { id: 'mistakes', done: true, unresolved: 2 },
     { id: 'grammar', done: false, topicId: 'test-one', title: 'TEST one' },
   ],
   allDone: false,
+  nextIndex: 1,
+  doneCount: 2,
+  counts: {},
 };
 const render = (plan: TodayPlan) =>
   renderToStaticMarkup(
@@ -73,7 +84,13 @@ for (const language of ['en', 'zh']) {
 
   test(`${language}: due and new counts come from the plan, and the words link can be primary`, async () => {
     await i18n.changeLanguage(language);
-    const html = render({ steps: [{ id: 'words', done: false, due: 7, newAvailable: 3 }], allDone: false });
+    const html = render({
+      steps: [{ id: 'words', done: false, due: 7, newAvailable: 3 }],
+      allDone: false,
+      nextIndex: 0,
+      doneCount: 0,
+      counts: {},
+    });
     expect(html).toContain(i18n.t('today.words.status', { due: 7, newAvailable: 3 }));
     expect(links(html)[0]).toContain('bg-accent-700');
     expect(html).not.toContain(i18n.t('today.done'));
@@ -84,8 +101,20 @@ for (const language of ['en', 'zh']) {
     async (state) => {
       await i18n.changeLanguage(language);
       const html = render({
-        steps: [{ id: 'read', done: state === 'doneToday', readerId: 'test-bundled-reader', order: 2, state }],
+        steps: [
+          {
+            id: 'read',
+            done: state === 'doneToday',
+            readerId: 'test-bundled-reader',
+            order: 2,
+            title: 'Une histoire',
+            state,
+          },
+        ],
         allDone: state === 'doneToday',
+        nextIndex: state === 'doneToday' ? undefined : 0,
+        doneCount: state === 'doneToday' ? 1 : 0,
+        counts: {},
       });
       expect(html).toContain(i18n.t(`today.read.${state}`, { order: 2 }));
       expect(links(html)[0]).toContain('href="#/read/graded/test-bundled-reader"');
@@ -98,7 +127,13 @@ for (const language of ['en', 'zh']) {
     async (id) => {
       await i18n.changeLanguage(language);
       const message = `TEST ${id} read failed`;
-      const html = render({ steps: [{ id, done: false, error: message }], allDone: false });
+      const html = render({
+        steps: [{ id, done: false, error: message }],
+        allDone: false,
+        nextIndex: undefined,
+        doneCount: 0,
+        counts: {},
+      });
       expect(items(html)).toHaveLength(1);
       expect(html).toContain(i18n.t(`today.${id}.title`));
       expect(html).toContain(i18n.t('today.stepError', { msg: message }));
@@ -117,6 +152,9 @@ for (const language of ['en', 'zh']) {
         { id: 'sound', done: false },
       ],
       allDone: false,
+      nextIndex: 1,
+      doneCount: 0,
+      counts: {},
     });
     expect(items(html)).toHaveLength(2);
     expect(links(items(html)[0]!)).toHaveLength(0);
@@ -131,11 +169,14 @@ for (const language of ['en', 'zh']) {
     const html = render({
       steps: [
         { id: 'words', done: true, due: 0, newAvailable: 0 },
-        { id: 'read', done: true, readerId: 'test-reader', order: 4, state: 'doneToday' },
+        { id: 'read', done: true, readerId: 'test-reader', order: 4, title: 'Une histoire', state: 'doneToday' },
         { id: 'sound', done: true },
         { id: 'mistakes', done: true, unresolved: 0 },
       ],
       allDone: true,
+      nextIndex: undefined,
+      doneCount: 4,
+      counts: {},
     });
     expect(links(html)).toHaveLength(4);
     expect(items(html).every((row) => row.includes(i18n.t('today.done')))).toBe(true);
@@ -149,6 +190,9 @@ for (const language of ['en', 'zh']) {
     const html = render({
       steps: [{ id: 'grammar', done: true, topicId: 'test-two', title: 'TEST two' }],
       allDone: true,
+      nextIndex: undefined,
+      doneCount: 1,
+      counts: {},
     });
     expect(html).toContain(i18n.t('today.grammar.status', { title: 'TEST two' }));
     expect(links(html)[0]).toContain('href="#/grammar/topics/test-two"');
@@ -160,7 +204,13 @@ for (const language of ['en', 'zh']) {
   test(`${language}: saved mistake counts use the locale's singular and plural forms`, async () => {
     await i18n.changeLanguage(language);
     for (const count of [1, 2]) {
-      const html = render({ steps: [{ id: 'mistakes', done: false, unresolved: count }], allDone: false });
+      const html = render({
+        steps: [{ id: 'mistakes', done: false, unresolved: count }],
+        allDone: false,
+        nextIndex: 0,
+        doneCount: 0,
+        counts: {},
+      });
       expect(html).toContain(i18n.t('today.mistakes.status', { count }));
       expect(html).not.toContain('today.mistakes.status');
       if (language === 'en') expect(html).toContain(count === 1 ? '1 saved mistake</p>' : '2 saved mistakes</p>');
@@ -169,7 +219,7 @@ for (const language of ['en', 'zh']) {
 
   test(`${language}: an empty plan renders the title without invented steps or completion`, async () => {
     await i18n.changeLanguage(language);
-    const html = render({ steps: [], allDone: false });
+    const html = render({ steps: [], allDone: false, nextIndex: undefined, doneCount: 0, counts: {} });
     expect(html).toContain(i18n.t('today.title'));
     expect(items(html)).toHaveLength(0);
     expect(links(html)).toHaveLength(0);

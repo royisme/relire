@@ -11,6 +11,7 @@ import { markTopicStudied } from '../src/storage/topicStudied';
 import { readerHookProbe } from './fixtures/readerHookProbe';
 import { freshDb } from './fixtures/storage';
 import { publishedReaderFixture } from './fixtures/gradedReaders';
+import { readerAnswer } from './fixtures/readerProgress';
 import { bookList } from './fixtures/grammarTopics';
 import { testMatureSchedule, testRow } from './fixtures/vocabulary';
 import { ITEMS, unitOf } from './fixtures/units';
@@ -19,6 +20,8 @@ import { saveUnits } from '../src/storage/exercises';
 import { exercisesChanged } from '../src/storage/exerciseEvents';
 import { startOfLocalDay } from '../src/services/today/activity';
 import { useToday } from '../src/hooks/useToday';
+import { contentHash } from '../scripts/graded-readers/gateInputs';
+import type { ReaderProgress } from '../src/types/readerProgress';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import type { ExerciseAttempt } from '../src/types/exercises';
 import type { GrammarTopicList } from '../src/types/grammarTopic';
@@ -129,10 +132,13 @@ test('empty data is ready: the first reader to start, sound always shown, words 
     now,
     plan: {
       steps: [
-        { id: 'read', done: false, readerId: 'test-book', order: 1, state: 'start' },
+        { id: 'read', done: false, readerId: 'test-book', order: 1, title: 'Un livre', state: 'start' },
         { id: 'sound', done: false },
       ],
       allDone: false,
+      nextIndex: 0,
+      doneCount: 0,
+      counts: { reviews: 0, exercises: 0, readers: 0 },
     },
   });
 });
@@ -148,7 +154,14 @@ test('an unread vocabulary model keeps the hook loading', async () => {
 test('a vocabulary model error is the words step error while the other steps stay intact', async () => {
   const state = await drive(model({ error: 'TEST vocab read failed' }), (s) => s.status === 'ready');
   expect(stepOf(state, 'words')).toEqual({ id: 'words', done: false, error: 'TEST vocab read failed' });
-  expect(stepOf(state, 'read')).toEqual({ id: 'read', done: false, readerId: 'test-book', order: 1, state: 'start' });
+  expect(stepOf(state, 'read')).toEqual({
+    id: 'read',
+    done: false,
+    readerId: 'test-book',
+    order: 1,
+    title: 'Un livre',
+    state: 'start',
+  });
 });
 
 test('a book read failure is the words step error', async () => {
@@ -180,6 +193,54 @@ test('a progress read failure is the readers step error', async () => {
   listProgress.mockImplementation(() => Promise.reject(new Error('TEST progress read failed')));
   const state = await drive(model(), (s) => s.status === 'ready');
   expect(stepOf(state, 'read')).toEqual({ id: 'read', done: false, error: 'TEST progress read failed' });
+  if (state.status !== 'ready') throw new Error('expected the driven state to be ready');
+  expect(state.plan.counts).toEqual({ reviews: 0, exercises: 0 });
+});
+
+test('a progress read error omits the readers count even while the starters also failed', async () => {
+  load.mockImplementation(() => Promise.reject(new Error('TEST starter chunk corrupt')));
+  listProgress.mockImplementation(() => Promise.reject(new Error('TEST progress read failed')));
+  const state = await drive(model(), (s) => s.status === 'ready');
+  expect(stepOf(state, 'read')).toEqual({ id: 'read', done: false, error: 'TEST starter chunk corrupt' });
+  if (state.status !== 'ready') throw new Error('expected the driven state to be ready');
+  expect(state.plan.counts).toEqual({ reviews: 0, exercises: 0 });
+});
+
+test('the readers count includes a reader saved offline that is not in the catalogue', async () => {
+  // A reader whose edition left the catalogue but whose progress row stays: a checked answer today
+  // must still count, while the read step keeps pointing at the catalogue's first unread reader.
+  const offline = structuredClone(reader);
+  offline.body.id = 'test-offline-reader';
+  offline.version = contentHash(offline.body);
+  offline.review.contentHash = offline.version;
+  const row: ReaderProgress = {
+    readerId: offline.body.id,
+    version: offline.version,
+    snapshot: offline,
+    openedAt: start - 1,
+    lastOpenedAt: now,
+    lastSentenceId: null,
+    answers: {
+      'recognize-book': {
+        answer: readerAnswer(0, 'un livre'),
+        checked: { checkedAt: now, correct: true, strictAccents: true },
+      },
+    },
+    completedAt: null,
+    revision: 0,
+  };
+  listProgress.mockImplementation(() => Promise.resolve([row]));
+  const state = await drive(model(), (s) => s.status === 'ready');
+  expect(stepOf(state, 'read')).toEqual({
+    id: 'read',
+    done: false,
+    readerId: 'test-book',
+    order: 1,
+    title: 'Un livre',
+    state: 'start',
+  });
+  if (state.status !== 'ready') throw new Error('expected the driven state to be ready');
+  expect(state.plan.counts).toEqual({ reviews: 0, exercises: 0, readers: 1 });
 });
 
 test("today's sound-pair practice and a wrong-before retry complete their steps", async () => {
@@ -193,6 +254,20 @@ test("today's sound-pair practice and a wrong-before retry complete their steps"
   expect(stepOf(state, 'mistakes')).toEqual({ id: 'mistakes', done: true, unresolved: 1 });
   if (state.status !== 'ready') throw new Error('expected the driven state to be ready');
   expect(state.plan.allDone).toBe(false);
+});
+
+test('the exercises count is the single attempts list length, not the sound and mistake counters', async () => {
+  await seedPairsUnit();
+  const d = await db();
+  await d.put('attempts', attempt('pair', start - 86400_000)); // wrong before today: a retryable mistake
+  await d.put('attempts', attempt('pair', now - 1, true)); // today: the sound-pairs retry
+  await d.put('attempts', attempt('plain', now - 2)); // today: plain exercises both step counters miss
+  await d.put('attempts', attempt('plain', now - 3));
+  const state = await drive(model(), (s) => s.status === 'ready');
+  expect(stepOf(state, 'sound')).toEqual({ id: 'sound', done: true });
+  expect(stepOf(state, 'mistakes')).toEqual({ id: 'mistakes', done: true, unresolved: 1 });
+  if (state.status !== 'ready') throw new Error('expected the driven state to be ready');
+  expect(state.plan.counts).toEqual({ reviews: 0, exercises: 3, readers: 0 });
 });
 
 test('an exercises change refreshes sound and mistakes without a remount', async () => {
@@ -223,7 +298,14 @@ test('a configured service adds the grammar step once the list resolves, without
   );
   const pending = await drive(model(), (s) => s.status === 'ready');
   expect(stepOf(pending, 'grammar')).toBeUndefined();
-  expect(stepOf(pending, 'read')).toEqual({ id: 'read', done: false, readerId: 'test-book', order: 1, state: 'start' });
+  expect(stepOf(pending, 'read')).toEqual({
+    id: 'read',
+    done: false,
+    readerId: 'test-book',
+    order: 1,
+    title: 'Un livre',
+    state: 'start',
+  });
   expect(stepOf(pending, 'sound')).toEqual({ id: 'sound', done: false });
   resolveTopics(bookList);
   const withGrammar = await drive(model(), (s) => stepOf(s, 'grammar') !== undefined);
@@ -242,7 +324,14 @@ test('a failing topic list shows its real error on the grammar step only', async
   topicsLoad.mockImplementation(() => Promise.reject(new Error('TEST topics unavailable')));
   const state = await drive(model(), (s) => stepOf(s, 'grammar') !== undefined);
   expect(stepOf(state, 'grammar')).toEqual({ id: 'grammar', done: false, error: 'TEST topics unavailable' });
-  expect(stepOf(state, 'read')).toEqual({ id: 'read', done: false, readerId: 'test-book', order: 1, state: 'start' });
+  expect(stepOf(state, 'read')).toEqual({
+    id: 'read',
+    done: false,
+    readerId: 'test-book',
+    order: 1,
+    title: 'Un livre',
+    state: 'start',
+  });
   expect(stepOf(state, 'sound')).toEqual({ id: 'sound', done: false });
 });
 

@@ -56,12 +56,14 @@ export function readerEntries(
     ...bundled.map((reader) => ({
       readerId: reader.body.id,
       order: reader.body.order,
+      title: reader.body.title.fr,
       status: readerListStatus(reader, progress).status,
       activeToday: activeToday.has(reader.body.id),
     })),
     ...service.map((reader) => ({
       readerId: reader.id,
       order: reader.order,
+      title: reader.title.fr,
       version: reader.version,
       status: readerListStatus(reader, progress).status,
       activeToday: activeToday.has(reader.id),

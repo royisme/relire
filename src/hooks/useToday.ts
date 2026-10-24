@@ -4,7 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { errorMessage } from '../services/ai/errors';
 import { loadGrammarTopics } from '../services/grammarTopics/load';
 import { contentServiceUrl } from '../services/grammarTopics/service';
-import { mistakeAttemptsToday, soundAttemptsToday, startOfLocalDay } from '../services/today/activity';
+import {
+  mistakeAttemptsToday,
+  readerIdsActiveToday,
+  soundAttemptsToday,
+  startOfLocalDay,
+} from '../services/today/activity';
 import { grammarInput, readerEntries, wordsInput } from '../services/today/inputs';
 import { buildTodayPlan, type TodayGrammar, type TodayInput, type TodayPlan } from '../services/today/plan';
 import { getVocabularyBook } from '../storage/vocabularyBook';
@@ -79,6 +84,14 @@ export function useToday(
     now,
   ]);
 
+  // The readers-worked-today count reads progress rows only: checked after the step join above, so a
+  // starter or catalogue failure must not mask the progress read's own error or turn the count into 0.
+  const readerCount = useMemo<TodayInput['counts']['readers'] | null>(() => {
+    if (progress.error !== undefined) return { error: progress.error };
+    if (progress.rows === undefined) return null;
+    return { value: readerIdsActiveToday(progress.rows, now).size };
+  }, [progress.error, progress.rows, now]);
+
   const [practice, setPractice] = useState<PracticeData | { error: string } | null>(null);
   useEffect(() => {
     let live = true;
@@ -151,7 +164,7 @@ export function useToday(
           : 'error' in words
             ? { error: words.error }
             : { value: words.value };
-    if (wordsSource === null || readers === null || practice === null) return null;
+    if (wordsSource === null || readers === null || practice === null || readerCount === null) return null;
     const input: TodayInput = {
       words: wordsSource,
       readers,
@@ -168,11 +181,17 @@ export function useToday(
                 attemptsToday: mistakeAttemptsToday(practice.today, practice.wrongBefore, now),
               },
             },
+      // One count over the single attempts list the hook already holds; the sound and mistake step
+      // counters overlap and miss other exercises, so they are never summed.
+      counts: {
+        exercises: 'error' in practice ? { error: practice.error } : { value: practice.today.length },
+        readers: readerCount,
+      },
       // `null` is a pending or unconfigured list: the plan omits the step rather than blocking the rest.
       ...(grammar !== null ? { grammar } : {}),
     };
     return buildTodayPlan(input);
-  }, [vocabulary.error, words, readers, practice, grammar, now]);
+  }, [vocabulary.error, words, readers, readerCount, practice, grammar, now]);
 
   return plan ? { status: 'ready', plan, now } : { status: 'loading' };
 }

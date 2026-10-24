@@ -79,6 +79,7 @@ function input(changes: Partial<TodayInput> = {}): TodayInput {
     readers: { value: [] },
     sound: { value: { attemptsToday: 0 } },
     mistakes: { value: { unresolved: 0, attemptsToday: 0 } },
+    counts: { exercises: { value: 0 }, readers: { value: 0 } },
     ...changes,
   };
 }
@@ -86,6 +87,7 @@ function input(changes: Partial<TodayInput> = {}): TodayInput {
 const reader = (order: number, status: 'read' | 'opened' | 'notOpened', activeToday = false, version?: string) => ({
   readerId: `test-reader-${order}`,
   order,
+  title: `TEST Lecture ${order}`,
   ...(version !== undefined ? { version } : {}),
   status,
   activeToday,
@@ -197,21 +199,33 @@ test('plan order is words, read, sound, mistakes, with real counts and determini
   expect(plan).toEqual({
     steps: [
       { id: 'words', done: false, due: 2, newAvailable: 3 },
-      { id: 'read', done: false, readerId: 'test-reader-1', order: 1, state: 'start' },
+      { id: 'read', done: false, readerId: 'test-reader-1', order: 1, title: 'TEST Lecture 1', state: 'start' },
       { id: 'sound', done: false },
       { id: 'mistakes', done: false, unresolved: 4 },
     ],
     allDone: false,
+    nextIndex: 0,
+    doneCount: 0,
+    counts: { reviews: 1, exercises: 0, readers: 0 },
   });
   expect(buildTodayPlan(source)).toEqual(plan);
   expect(source).toEqual(before);
 });
 
 test('empty words, readers and mistakes are omitted; sound is always shown', () => {
-  expect(buildTodayPlan(input())).toEqual({ steps: [{ id: 'sound', done: false }], allDone: false });
+  expect(buildTodayPlan(input())).toEqual({
+    steps: [{ id: 'sound', done: false }],
+    allDone: false,
+    nextIndex: 0,
+    doneCount: 0,
+    counts: { reviews: 0, exercises: 0, readers: 0 },
+  });
   expect(buildTodayPlan(input({ sound: { value: { attemptsToday: 1 } } }))).toEqual({
     steps: [{ id: 'sound', done: true }],
     allDone: true,
+    nextIndex: undefined,
+    doneCount: 1,
+    counts: { reviews: 0, exercises: 0, readers: 0 },
   });
 });
 
@@ -236,6 +250,7 @@ test('read selects the first unread reader in catalogue order', () => {
     done: false,
     readerId: 'test-reader-2',
     order: 2,
+    title: 'TEST Lecture 2',
     state: 'start',
   });
 });
@@ -246,6 +261,7 @@ test('a reader completed today keeps focus instead of the next unopened reader',
     done: true,
     readerId: 'test-reader-1',
     order: 1,
+    title: 'TEST Lecture 1',
     state: 'doneToday',
   });
 });
@@ -256,6 +272,7 @@ test('read focus is the highest-order active reader, even with earlier unread re
     done: true,
     readerId: 'test-reader-3',
     order: 3,
+    title: 'TEST Lecture 3',
     state: 'continue',
   });
 });
@@ -267,6 +284,7 @@ test('all readers completed with none active today omits read; an active complet
     done: true,
     readerId: 'test-reader-1',
     order: 1,
+    title: 'TEST Lecture 1',
     state: 'doneToday',
   });
 });
@@ -277,6 +295,7 @@ test('an opened reader gives continue but is not done without activity today', (
     done: false,
     readerId: 'test-reader-1',
     order: 1,
+    title: 'TEST Lecture 1',
     state: 'continue',
   });
 });
@@ -288,6 +307,7 @@ test('a service reader keeps its edition on the read step; a bundled reader has 
     done: false,
     readerId: 'test-reader-2',
     order: 2,
+    title: 'TEST Lecture 2',
     version: 'b'.repeat(64),
     state: 'start',
   });
@@ -349,6 +369,9 @@ test('a grammar error keeps its step in place with the real message and leaves t
   expect(buildTodayPlan({ ...source, grammar: { error: 'TEST topics load failed' } })).toEqual({
     steps: [...buildTodayPlan(source).steps, { id: 'grammar', done: false, error: 'TEST topics load failed' }],
     allDone: false,
+    nextIndex: undefined,
+    doneCount: 4,
+    counts: { reviews: 1, exercises: 0, readers: 0 },
   });
 });
 
@@ -384,6 +407,7 @@ test('failing sources stay in step order, preserve the actual error and are neve
     readers: { error: 'TEST readers read failed' },
     sound: { error: 'TEST attempts read failed' },
     mistakes: { error: 'TEST mistakes read failed' },
+    counts: { exercises: { value: 3 }, readers: { value: 2 } },
   });
   expect(plan).toEqual({
     steps: [
@@ -393,6 +417,9 @@ test('failing sources stay in step order, preserve the actual error and are neve
       { id: 'mistakes', done: false, error: 'TEST mistakes read failed' },
     ],
     allDone: false,
+    nextIndex: undefined,
+    doneCount: 0,
+    counts: { exercises: 3, readers: 2 },
   });
 });
 
@@ -411,6 +438,63 @@ test.each(['words', 'readers', 'sound', 'mistakes'] as const)(
     expect(buildTodayPlan({ ...source, [key]: { error: 'TEST source failed' } })).toEqual({
       steps: expected,
       allDone: false,
+      nextIndex: undefined,
+      doneCount: 3,
+      counts: key === 'words' ? { exercises: 0, readers: 0 } : { reviews: 1, exercises: 0, readers: 0 },
     });
   },
 );
+
+test('nextIndex is the first not-done step, skipping failed steps', () => {
+  const plan = buildTodayPlan(
+    input({
+      words: { error: 'TEST words read failed' },
+      readers: { value: [reader(1, 'notOpened')] },
+      sound: { value: { attemptsToday: 1 } },
+      mistakes: { value: { unresolved: 2, attemptsToday: 0 } },
+    }),
+  );
+  expect(plan.steps.map((step) => step.done)).toEqual([false, false, true, false]);
+  expect(plan.nextIndex).toBe(1);
+});
+
+test('nextIndex is undefined when every step is done or failed', () => {
+  const allDoneOrFailed = input({
+    words: { error: 'TEST words read failed' },
+    readers: { value: [reader(1, 'read', true)] },
+    sound: { value: { attemptsToday: 1 } },
+  });
+  expect(buildTodayPlan(allDoneOrFailed).nextIndex).toBeUndefined();
+  expect(buildTodayPlan(input({ sound: { value: { attemptsToday: 1 } } })).nextIndex).toBeUndefined();
+});
+
+test('doneCount counts done steps only; a failed step is never done', () => {
+  const source = input({
+    words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
+    readers: { value: [reader(1, 'read', true)] },
+    sound: { value: { attemptsToday: 1 } },
+    mistakes: { value: { unresolved: 1, attemptsToday: 0 } },
+  });
+  expect(buildTodayPlan(source).doneCount).toBe(3);
+  expect(buildTodayPlan({ ...source, sound: { error: 'TEST attempts read failed' } }).doneCount).toBe(2);
+});
+
+test('counts carry each source value and omit a key when that source failed, never 0', () => {
+  const source = input({
+    words: { value: { due: 1, newAvailable: 0, reviewsToday: 5 } },
+    counts: { exercises: { value: 7 }, readers: { value: 2 } },
+  });
+  expect(buildTodayPlan(source).counts).toEqual({ reviews: 5, exercises: 7, readers: 2 });
+  expect(buildTodayPlan({ ...source, words: { error: 'TEST words read failed' } }).counts).toEqual({
+    exercises: 7,
+    readers: 2,
+  });
+  expect(
+    buildTodayPlan({ ...source, counts: { exercises: { error: 'TEST attempts read failed' }, readers: { value: 2 } } })
+      .counts,
+  ).toEqual({ reviews: 5, readers: 2 });
+  expect(
+    buildTodayPlan({ ...source, counts: { exercises: { value: 7 }, readers: { error: 'TEST progress read failed' } } })
+      .counts,
+  ).toEqual({ reviews: 5, exercises: 7 });
+});
