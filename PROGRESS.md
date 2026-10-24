@@ -4,6 +4,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: D-origins landed; D-remote code is complete
+
+- `.gitignore` ignores `worker/wrangler.deploy.jsonc`; `worker/README.md` no longer tells the owner to edit the committed config and carries the owner-only deployment runbook (day 1: migrations, topics, vocabulary, readers; day 2: the lexicon alone; smoke checks; CORS origin). `docs/development.md`'s "No remote mode" sentence is corrected. Nothing in the runbook has been run: the owner's own Cloudflare login, the D1 limits check (decides D-remote-2b) and the deploy are the next steps (TASKS Owner).
+
 ## 2026-10-24: D-remote-3 and Today v2 V1/V2 landed locally
 
 - D-remote-3 (`922448d`): topics and the lexicon get `--apply-remote`, interactive (Wrangler's own confirmation), allowed only with `allowRemote` (from `import.meta.main`) and a TTY on stdin and stdout; success is decided only by a read-only check (topics: version and every id/position/hash/byte length; lexicon: version and both counts), never by Wrangler's exit code; refusals and Wrangler's stderr reach the owner's terminal. Argon: pass. **Unverified:** any remote run (no agent has touched a remote database); the `--json` shape against a remote database is checked only against Wrangler's code.
