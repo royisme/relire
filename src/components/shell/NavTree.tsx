@@ -4,6 +4,7 @@ import {
   BarChart3,
   BookmarkCheck,
   BookOpen,
+  CalendarCheck,
   Download,
   Headphones,
   Info,
@@ -33,6 +34,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
   const writing = useReaderUnits().units?.some((unit) => unit.learningArea === 'writing');
   const item = { rail, onNavigate };
   const links = [
+    { to: { name: 'today' } as Route, area: 'today', icon: CalendarCheck, label: t('today.title') },
     { to: { name: 'library' } as Route, area: 'read', icon: BookOpen, label: t('learning.areas.reading') },
     { to: { name: 'grammar' } as Route, area: 'grammar', icon: SpellCheck, label: t('learning.areas.grammar') },
     {

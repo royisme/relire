@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Today: a short daily checklist of words to review, the next reader, sound pairs and saved mistakes.
 - With a content service configured, graded readers includes additional published editions and Keep offline, with saved-list fallback only on network failure. Bundled starters stay available and conflicting starter editions ask for an app update; without a service, the starter-only experience is unchanged.
 - On a graded reader's word and sentence sheets, an optional "Ask AI" button appears only when a text AI is configured and never runs on its own: it reuses the same word/sentence analysis as the ordinary Reader (same prompts and cache) and shows the answer in a separate, clearly labelled "AI answer, not reviewed" block below the authored meaning or translation, which stays authoritative. Errors, including a key removed mid-session, show inline with an explicit Settings link; nothing is saved and no analysis statistic counts.
 - Record yourself reading a graded reader and find the takes in My study → Shadowing: each edition's sentences keep their own last three takes (keyed by reader and version, so the same sentence in two editions never merges), the log groups them under the reader's title with a deep link back to the pinned sentence, and a take whose edition snapshot is gone stays playable under an honest "Unavailable edition" label. Recording checks only the local snapshot, so it works offline with no key.

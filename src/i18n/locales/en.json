@@ -31,6 +31,37 @@
     "importArticle": "Import an article",
     "gradedReaders": "Graded readers"
   },
+  "today": {
+    "title": "Today",
+    "intro": "A short list of what is worth doing now. Each step opens the page where you do it.",
+    "done": "Done today",
+    "allDone": "You are done for today.",
+    "loading": "Loading today's steps…",
+    "stepError": "Could not load this step: {{msg}}",
+    "words": {
+      "title": "Review words",
+      "status": "{{due}} due · {{newAvailable}} new",
+      "action": "Review"
+    },
+    "read": {
+      "title": "Read",
+      "start": "Start reader {{order}}",
+      "continue": "Continue reader {{order}}",
+      "doneToday": "Reader {{order}} done today",
+      "action": "Open"
+    },
+    "sound": {
+      "title": "Sound pairs",
+      "status": "Tell similar French sounds apart",
+      "action": "Practise"
+    },
+    "mistakes": {
+      "title": "Redo mistakes",
+      "status_one": "{{count}} saved mistake",
+      "status_other": "{{count}} saved mistakes",
+      "action": "Redo"
+    }
+  },
   "learning": {
     "areas": {
       "reading": "Reading",

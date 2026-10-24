@@ -11,6 +11,7 @@ export const STUDY_TABS = ['words', 'shadowing', 'mistakes'] as const;
 export type StudyTab = (typeof STUDY_TABS)[number];
 export type GrammarSectionRoute = 'conjugation' | 'gender';
 export type Route =
+  | { name: 'today' }
   | { name: 'library' }
   | { name: 'importArticle' }
   | { name: 'importExercises'; area: LearningArea }
@@ -45,6 +46,8 @@ const READER_VERSION = /^[0-9a-f]{64}$/;
 
 export function routeHref(route: Route): string {
   switch (route.name) {
+    case 'today':
+      return '#/today';
     case 'library':
     case 'notFound':
       return '#/read';
@@ -126,6 +129,7 @@ export function parseRoute(
   try {
     if (parts.some((part) => !part)) return { route, canonical: null };
     if (!parts.length) route = LIBRARY;
+    else if (root === 'today' && parts.length === 1 && !hash.includes('?')) route = { name: 'today' };
     else if (area && sub === 'exercises' && parts.length === 4 && ['unit', 'set'].includes(third) && !query) {
       const id = decodeURIComponent(fourth);
       route = third === 'unit' ? { name: 'unit', area, unitId: id } : { name: 'practiceSet', area, setId: id };
@@ -199,10 +203,12 @@ export function parseRoute(
   return { route, canonical: href === hash ? null : href };
 }
 
-/** Graded readers work without a key: authored meanings, translations and the device voice. */
-export const worksWithoutKey = (route: Route) => route.name === 'gradedReaders' || route.name === 'gradedReader';
+/** Today needs no AI; graded readers use authored text and the device voice. */
+export const worksWithoutKey = (route: Route) =>
+  route.name === 'today' || route.name === 'gradedReaders' || route.name === 'gradedReader';
 
 export type Area =
+  | 'today'
   | 'read'
   | 'grammar'
   | 'listening'
@@ -236,6 +242,7 @@ export function areaOf(route: Route): Area | null {
     case 'readAloud':
     case 'speaking':
       return 'speaking';
+    case 'today':
     case 'progress':
     case 'settings':
     case 'about':

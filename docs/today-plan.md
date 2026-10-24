@@ -1,6 +1,6 @@
 # Today: a short daily checklist for beginners
 
-Status: accepted by the owner (2026-10-24: Today is the landing page; step 3 always shown), not built. Advisor-reviewed once. Steps are in `TASKS.md`.
+Status: T1 to T3 landed; T4 (landing) is next. Accepted by the owner (2026-10-24: Today is the landing page; step 3 always shown). Advisor-reviewed once. Steps are in `TASKS.md`.
 
 ## Why
 

@@ -31,6 +31,37 @@
     "importArticle": "导入文章",
     "gradedReaders": "分级读物"
   },
+  "today": {
+    "title": "今天",
+    "intro": "列出现在值得做的几件事，点开即可前往对应页面。",
+    "done": "今天已完成",
+    "allDone": "今天的练习已完成。",
+    "loading": "正在加载今天的练习…",
+    "stepError": "无法加载这一步：{{msg}}",
+    "words": {
+      "title": "复习生词",
+      "status": "{{due}} 个待复习 · {{newAvailable}} 个新词",
+      "action": "复习"
+    },
+    "read": {
+      "title": "阅读",
+      "start": "开始第 {{order}} 本分级读物",
+      "continue": "继续第 {{order}} 本分级读物",
+      "doneToday": "今天已读完第 {{order}} 本分级读物",
+      "action": "打开"
+    },
+    "sound": {
+      "title": "近音辨听",
+      "status": "分辨相近的法语发音",
+      "action": "练习"
+    },
+    "mistakes": {
+      "title": "重做错题",
+      "status_one": "{{count}} 道已保存的错题",
+      "status_other": "{{count}} 道已保存的错题",
+      "action": "重做"
+    }
+  },
   "learning": {
     "areas": {
       "reading": "阅读",
