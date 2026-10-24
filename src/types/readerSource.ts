@@ -1,4 +1,5 @@
 /** Reader ownership, independent of the material's prose; never creates a Library article. */
+import type { TFunction } from 'i18next';
 import type { Article } from './index';
 import type { ExerciseUnit } from './exercises';
 import type { PublishedReader } from './gradedReader';
@@ -20,14 +21,27 @@ export const readerIdentity = (source: ReaderSource) =>
       ? passageIdentity(source.unitId)
       : `graded:${encodeURIComponent(source.readerId)}:${source.version}`;
 
+/**
+ * The header's short label for a review record. The full record (`scripts/graded-readers/review.ts` writes
+ * `AI review: …` or `Human review: …`) stays out of the header: it is a provenance log, not a display string.
+ */
+export const reviewSourceKey = (
+  reviewedBy: string,
+): 'gradedReader.sourceAi' | 'gradedReader.sourceHuman' | 'gradedReader.sourceUnknown' =>
+  reviewedBy.startsWith('AI review:')
+    ? 'gradedReader.sourceAi'
+    : reviewedBy.startsWith('Human review:')
+      ? 'gradedReader.sourceHuman'
+      : 'gradedReader.sourceUnknown';
+
 /** Display only: an authored edition never becomes an Article or a Library row. */
-export function gradedDocument(reader: PublishedReader): ReaderDocument {
+export function gradedDocument(reader: PublishedReader, t: TFunction): ReaderDocument {
   return {
     title: reader.body.title.fr,
     content: reader.body.sentences.map((sentence) => sentence.fr).join('\n'),
     level: reader.body.level,
     category: '',
-    source: reader.review.reviewedBy,
+    source: t(reviewSourceKey(reader.review.reviewedBy)),
   };
 }
 

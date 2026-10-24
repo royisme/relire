@@ -240,7 +240,7 @@ test('ReaderView captures sentence id and ordinal and forwards device voice to s
     () => sequence.mockRestore(),
   );
   const props: React.ComponentProps<typeof ReaderView> = {
-    readingDocument: gradedDocument(reader),
+    readingDocument: gradedDocument(reader, i18n.t.bind(i18n)),
     source: { kind: 'graded', readerId: reader.body.id, version: reader.version },
     onBack: noop,
     onMissingKey: noop,
