@@ -69,9 +69,9 @@ Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlo
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| V0 | Owner chooses A or B (B needs a `DESIGN.md` exception for Today) | the choice is recorded in the plan | waiting for the owner |
+| V0 | Owner chooses A or B | the choice is recorded in the plan | done: B (2026-10-24); next, Argon reviews the plan |
 | V1 | Plan model: reader `title`, `reviewsToday`, `doneCount`, `nextIndex`; first-run and no-step cases | `bun test tests/today*.test.ts` and the full suite exit 0 | not started |
-| V2 | View: `TodayFocus`, `TodayPath`, `TodayAside`, practise-on-your-own links | typecheck, lint, format, shape exit 0; detector `[]`; component tests per state | after V0 |
+| V2 | View: `TodayFocus`, `TodayPath`, `TodayAside`, practise-on-your-own links | typecheck, lint, format, shape exit 0; detector `[]`; component tests per state | after the Argon review |
 | V3 | Copy by agy gemini-3.8-flash: `today.*` keys, guidance sentence, why lines | `bun run i18n:check` exits 0; the lead reads the zh | after V2 |
 | V4 | Docs: `DESIGN.md` Today section, architecture, changelog | `format:check` exits 0 | after V3 |
 

@@ -32,13 +32,15 @@ The first mockup put a coloured bar on the left edge of a rounded card (the owne
 
 The owner said the page is too flat, and `DESIGN.md` is the rulebook that produced the flat page. So the choice is the owner's, shown on a static page (`.pi-runs/today-v2/mockup.html`, real tokens, app width and 360 px, light and dark) before any view code. Both directions obey the anti-slop rules: **A, type-led and open**: no card around the next step, hairline rules, a 32px serif headline, one button, the path as an open ruled list; **B, app structure**: one flat card with a plain 1px border, the same headline and button, and the day's steps on a connected line inside it. Neither needs a `DESIGN.md` exception. V1 below works with either and is not blocked.
 
+**Chosen by the owner, 2026-10-24: B (app structure).** The next step sits in one flat card with a plain 1px border and no bar, tint or ring; the day's steps run on a connected line inside it; the aside and the practise-on-your-own row stay as designed below.
+
 ## Design
 
 Layout from `md`: a main column and a 17rem aside (parlons: 255px); below `md` one column with the aside after the path. Content stays inside `max-w-5xl`.
 
 1. **Heading block.** A quiet date line (`Intl.DateTimeFormat` with the interface language, 12px `ink-500`), the serif headline "Today", and one guidance sentence built from the plan: "Review 12 words, then read Reader 2 and practise a sound. Stop whenever you like; you will pick up here." The sentence lists only the steps that exist, in order; with no steps left it says the day is done.
 2. **Focus block** (the first step not done; no left accent bar, no tint: see "Anti-slop rules" below). Inside: the step icon and "Up next" in `ink-500`, the step's concrete item as a serif 24px headline (words: "12 words to review"; read: the reader's own title; grammar: the topic title; sound: "Sounds of French"; mistakes: "3 mistakes to retry"), one line of why, and the one filled button "Start" with the step's action label, `lg` size. When every step is done the card says so, shows what was done today (real counts), and offers the practise-on-your-own links as outline buttons; no button is filled then.
-3. **Path** (section title "Today's path" with "n of m done" at the right). One bordered list; each row is a whole-row link, 56px or taller: a 32px round marker (the number; a check in `ok-800` on `ok-50` when done; a small error icon in `bad-700` when the step failed to load), the icon, the title, the status line (counts or the real error), and a chevron. The next row has the accent bar; done rows are `ink-500` with the check and stay links (a learner may do more). The focus card repeats the next row on purpose: the card is the action, the list is the map.
+3. **Path** (section title "Today's path" with "n of m done" at the right). One bordered list; each row is a whole-row link, 56px or taller: a 32px round marker (the number; a check in `ok-800` on `ok-50` when done; a small error icon in `bad-700` when the step failed to load), the icon, the title, the status line (counts or the real error), and a chevron. The next row has a filled accent marker and a semibold title (no bar); done rows are `ink-500` with the check and stay links (a learner may do more). The focus card repeats the next row on purpose: the card is the action, the list is the map.
 4. **Aside, "Today so far".** A real progress track (steps done of steps listed, `<progress>` semantics or the shadcn Progress), under it the counts from stored data: words reviewed today, sentences practised today (sound and mistakes attempts), and the readers opened today. A count of 0 is shown as 0. No goal, no streak, no percent beyond the track.
 5. **Practise on your own** (option A's row, below the path): links to Words, Read, Speaking and Grammar (always: without a service Grammar still holds conjugation and gender), each with its icon. This is the agency for a learner who does not want the plan.
 6. **Guidance copy** (the part that was missing): per step one "why" line, e.g. words: "Each word comes back just before it is due, so a short review keeps what you learned." read: "A short graded text at your level; tap any word for its meaning. No key needed." sound: "Hear and repeat the sounds you will meet in the next text." mistakes: "Retry what you got wrong; a right answer clears it." grammar: "The next topic in the book's order." The lines describe what the step does; they make no claim about results.
@@ -50,7 +52,7 @@ Layout from `md`: a main column and a 17rem aside (parlons: 255px); below `md` o
 - Visual quality is judged by the owner. The lead looks at screenshots (light, sepia, dark; 360 and 1280 px) as an aid and fixes what is plainly broken, but that is not acceptance.
 - No time estimates until a real basis exists (measured review durations would need new stored data).
 - The `why` lines are static copy, not personalised.
-- `DESIGN.md` gets a short "Today" section that records the focus card, the path rows and the aside as the one place a left accent bar marks "next"; nothing else in it changes.
+- `DESIGN.md` gets a short "Today" section that records the focus card (flat, 1px border), the connected step line and the aside; no accent bar, tint or ring; nothing else in it changes.
 
 ## Steps (each lands separately)
 
@@ -62,4 +64,4 @@ Layout from `md`: a main column and a 17rem aside (parlons: 255px); below `md` o
 
 ## Owner checks (never done by an agent)
 
-Look at Today in light, sepia and dark at 360 and 1280 px, first run and a day with everything done; say whether it now reads as an app and whether the guidance lines help; decide whether the left accent bar and the aside belong in the design language or Today should stay flatter.
+Look at Today in light, sepia and dark at 360 and 1280 px, first run and a day with everything done; say whether it now reads as an app and whether the guidance lines help; decide whether the card, the step line and the aside belong in the design language or Today should stay flatter.

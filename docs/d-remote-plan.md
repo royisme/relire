@@ -89,7 +89,9 @@ All commands from the repository root, in an interactive terminal, with `C=worke
 6. `W deploy --config $C`. `GET` smoke checks on the deployed URL: `/v1/topics` 200 with ETag equal to local `packVersion`; `/v1/lexicon/être` 200 with ETag equal to local `lexiconVersion` and the Morphalou source; `/v1/vocabulary/tcf-7000?page=0` 200, `manifest.version` equal to local `vocabularyCurrent:tcf-7000`, `pageCount` 30, review `unreviewed`; `/v1/readers` `404 readers-unavailable`; an allowed `Origin` gets `Access-Control-Allow-Origin`, another gets none; `POST` gets 405.
 7. Build your own HTTPS app with `VITE_CONTENT_SERVICE_URL=<deployed URL>`; `ALLOWED_ORIGINS` holds each such build's exact origin (no path; the Pages site would be `https://royisme.github.io`). Then the iOS Safari real-device checks that needed HTTPS: topics, wordbook download, lexicon word sheet, device voice.
 
-## Questions for the owner
+## Owner decisions (2026-10-24)
+
+Both defaults accepted by the owner.
 
 - **Public Pages build.** Should `pages.yml` set `VITE_CONTENT_SERVICE_URL`, so the free public build shows topics, the wordbook and the lexicon, and `https://royisme.github.io` goes into `ALLOWED_ORIGINS`? Default in these steps: `pages.yml` unchanged; only the owner's own build points at the service. The ADR (section 1) says the free build hides topics without a service.
 - **localhost in production CORS.** Should `http://localhost:5173` be allowed so a local dev build can test against the deployed service? Default: not allowed.
