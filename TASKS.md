@@ -70,8 +70,8 @@ Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlo
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
 | V0 | Owner chooses A or B | the choice is recorded in the plan | done: B (2026-10-24); three Argon reviews failed with narrowing findings, all applied; V1 may start |
-| V1 | Plan model: reader `title`, `nextIndex`, `doneCount`, `counts`; error and no-step cases; fix the shapes in `tests/todayView.test.tsx` and `tests/useToday.test.ts` | the three Today tests, typecheck and the full suite exit 0 | ready |
-| V2 | View: one card with ordered rows, aside, practise row; keys in en and zh (the lead adds shadcn `card` first) | typecheck, lint, format, shape, i18n exit 0; detector `[]`; component tests per state | after V1 |
+| V1 | Plan model: reader `title`, `nextIndex`, `doneCount`, `counts`; error and no-step cases; fix the shapes in `tests/todayView.test.tsx` and `tests/useToday.test.ts` | the three Today tests, typecheck and the full suite exit 0 | landed (merge of `today-model`); all checks exit 0 in the main checkout; no Argon review (small pure model, broad tests) |
+| V2 | View: one card with ordered rows, aside, practise row; keys in en and zh (the lead adds shadcn `card` first) | typecheck, lint, format, shape, i18n exit 0; detector `[]`; component tests per state | `ui/card` added by the lead (hand-written to `DESIGN.md`: the shadcn output pulled a wrong `cn` package and a ring); ready to dispatch |
 | V3 | Copy by agy gemini-3.8-flash: `today.*` keys, guidance sentence, why lines | `bun run i18n:check` exits 0; the lead reads the zh | after V2 |
 | V4 | Docs: `DESIGN.md` Today section, architecture, changelog | `format:check` exits 0 | after V3 |
 
