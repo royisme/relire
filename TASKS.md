@@ -13,7 +13,7 @@ Plan and decisions: `docs/graded-readers-plan.md` (epic #65; phases #62, #63, #6
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
 | R1-1 | Bundled starter export, lazy loader, `useGradedReaders` hook | loader rejects hash/schema errors; `publish.ts --check` in CI; starter becomes a precached lazy chunk within budget | landed |
-| R1-2b | Local publish of non-bundled readers into D1 and app service catalogue | exact read-back before markers/catalogue/pointer; bundle precedence, network-only cache fallback and committed Keep offline | done; checks pass, uncommitted, lead review pending |
+| R1-2b | Local publish of non-bundled readers into D1 and app service catalogue | exact read-back before markers/catalogue/pointer; bundle precedence, network-only cache fallback and committed Keep offline | landed |
 | R1-3 | Reader progress, opened-edition snapshot, backup/restore | snapshot survives service loss; restore rejects malformed input whole | landed |
 | R1-4b | `#/read/graded` list page | starter-only states of design §6.3; real progress; no fake rows | landed |
 | R1-5 | Reader accepts a third source kind (`graded`) | no Article or unit is created; Back goes to the list | landed |
@@ -24,7 +24,16 @@ Plan and decisions: `docs/graded-readers-plan.md` (epic #65; phases #62, #63, #6
 | R1-11 | Onboarding step 3 opens reader 1; key-banner wording; copy in both locales; docs | a learner with no key reaches a reader | landed |
 | R1-12 | Build evidence and the cross-feature test pass | chunk sizes and precache recorded | landed (the flow test found and fixed a Settings restore bug) |
 
-Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), R1-6a (authored word and sentence components), R1-7 (checkpoints component), R1-8 (authored saved-word definitions), R1-9 (device-voice plumbing), R1-10 (recording ownership), R1-11. Integrated pages have landed (visual and device checks are the owner's). R1-2b wires the optional service catalogue and local-only staged publisher; uncommitted, awaiting lead review. No service configured still means bundle only.
+Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), R1-6a (authored word and sentence components), R1-7 (checkpoints component), R1-8 (authored saved-word definitions), R1-9 (device-voice plumbing), R1-10 (recording ownership), R1-11. Integrated pages have landed (visual and device checks are the owner's). R1-2b wires the optional service catalogue and local-only staged publisher. No service configured still means bundle only.
+
+### Next epic: Today checklist (proposed; `docs/today-plan.md`)
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| T1 | `services/today/plan.ts` and `activity.ts`, pure | ordering, omission, local-midnight and done-today rules, empty-queue and all-complete cases tested | not started |
+| T2 | `useToday` hook; extract the reader status function from `GradedReadersPage` | one `now`; the shared vocabulary model is passed in; each source reports its own error | not started |
+| T3 | `TodayPage`, `#/today`, nav item, copy in both locales, `worksWithoutKey`, architecture and changelog lines | steps match the plan; no invented counts | not started |
+| T4 | Landing change and onboarding exit | only after the owner answers the landing question | blocked on owner |
 
 ### Content (paused by the owner's priority)
 
