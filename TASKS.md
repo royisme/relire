@@ -65,7 +65,7 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 
 ### Next: Today v2, an app-like Today with guidance (`docs/today-v2-plan.md`, draft)
 
-Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlons. A static comparison of two directions is at `.pi-runs/today-v2/mockup.html` (local file: A strict, B Parlons-like). The owner picks one, then the plan goes to Argon, then V1 to V4 below. V1 is the same for both and is not blocked.
+Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlons. The owner chose direction B; V0 to V4 below have landed locally. What is left is the owner's look at it (Owner section).
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
