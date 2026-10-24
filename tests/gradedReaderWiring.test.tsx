@@ -196,7 +196,14 @@ test('authored route actions never call AI or Settings; word and sentence select
 test('the authored footer passes clicked spelling and the reader definition to durable bookmark storage', async () => {
   const occurrence = readerOccurrence(reader, 's1', 0, 'C’est', 'en');
   const draw = () =>
-    probe.render(() => ReaderAuthoredSheets({ selection: { kind: 'word', occurrence }, vocabulary, onClose: noop }));
+    probe.render(() =>
+      ReaderAuthoredSheets({
+        selection: { kind: 'word', occurrence },
+        text: gradedDocument(reader).content,
+        vocabulary,
+        onClose: noop,
+      }),
+    );
   const entry = element<React.ComponentProps<typeof AuthoredEntry>>(draw(), AuthoredEntry);
   probe.effects();
   entry.props.onSave();
