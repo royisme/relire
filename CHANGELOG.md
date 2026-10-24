@@ -8,6 +8,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Added
 - Letter sounds on Speaking: tap a spelling for example words spoken by your device, a plain note and optional IPA; the pack is labelled AI-checked, not teacher-reviewed.
+- Practise letter sounds as a listening drill: the Speaking section's "Practise these sounds" button saves a no-key set (hear a word, choose the spelling) and opens it in Practice.
 - Practise graded-reader sentences by dictation with your device's voice and translated clues, without a key; punctuation is not checked, saved sets open in Practice and wrong answers appear in Mistakes.
 - Today: a short daily checklist of words to review, the next reader, sound pairs and saved mistakes.
 - With a content service configured, graded readers includes additional published editions and Keep offline, with saved-list fallback only on network failure. Bundled starters stay available and conflicting starter editions ask for an app update; without a service, the starter-only experience is unchanged.

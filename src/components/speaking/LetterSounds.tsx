@@ -5,6 +5,7 @@ import { useSpellingSounds } from '../../hooks/useSpellingSounds';
 import type { SpellingSoundsPack } from '../../types/spellingSounds';
 import { Button } from '../ui/button';
 import { LetterSoundSheet } from './LetterSoundSheet';
+import { PractiseLetterSounds } from './PractiseLetterSounds';
 
 const GROUPS = ['vowels', 'nasals', 'consonants', 'silent'] as const;
 
@@ -40,6 +41,7 @@ export function LetterSounds() {
           {pack.patterns.some((pattern) => pattern.review.kind === 'ai') && (
             <p className="text-xs text-ink-500">{t('spellingSounds.reviewNotice')}</p>
           )}
+          <PractiseLetterSounds pack={pack} />
           {GROUPS.map((group) => (
             <div key={group} className="space-y-2">
               <h3 className="text-sm font-medium text-ink-700">{t(`spellingSounds.groups.${group}`)}</h3>
