@@ -71,6 +71,9 @@ First deployment: no accounts, public read-only, rate limited, CORS limited to t
 | --- | --- | --- | --- |
 | D-remote | A remote apply for the topic, lexicon, vocabulary and reader publishers (today each has only a local path), keeping staged writes, exact readback and the last-step pointer switch; the owner runs it with their own Cloudflare access | a dry run against a second local D1 passes the same readbacks; nothing logs in or deploys by itself | not started |
 | D-origins | Deployment config (`ALLOWED_ORIGINS`, D1 id) kept local; a short checklist in `worker/README.md` | the placeholder stays in the committed file | not started |
+| D-limit | After the first deployment: tap a verb form repeatedly on the deployed URL, read the 429 behaviour and the dashboard row metrics, then set the per-IP limit (issue #31; the duplicate-request half landed in `ee34d4a`) | a measured limit is recorded in `worker/README.md`; the limiter note is updated | not started; owner-run, after D-remote |
+
+Plan doc `docs/d-remote-plan.md` (written by Opus, then an Argon review) comes before any D-remote dispatch.
 
 Not part of this: accounts (H4), an owner-only access token (an option for a private beta, not chosen).
 
@@ -90,10 +93,24 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 - Answer the open decisions in `docs/graded-readers-plan.md` (public bundle of stages 1 to 5, who reviews the language, word budgets).
 - Try the graded readers by hand with `docs/graded-readers-trial.md` (no AI key needed), then send back what is wrong.
 - Try by hand: the pronunciation features (practice-card marks, strip, Details), Sound pairs, the published local grammar topics; accept or change the open copy items (#16, #17, #24).
-- Human language review of the 91 locally published grammar topics (Chinese wording, kinship terms and a handful of Low items; their notes are in the local working notes).
+- Human language review of the 91 locally published grammar topics (Chinese wording, kinship terms and a handful of Low items; their notes are in the local working notes). Tracked with the letter-sound rows and the readers in #67.
 - Re-publish the vocabulary book to local D1 (`bun scripts/vocabulary/publish.ts --apply-local-unreviewed`) so it serves the manifest without the removed `attribution` field.
-- Deploy the content service (#31) before any real learner depends on topics, the wordbook or later readers: create the D1 database, set `ALLOWED_ORIGINS`, run D-remote once it lands, then `wrangler deploy`. No rights gate remains for the wordbook or the lexicon.
+- Deploy the content service before any real learner depends on topics, the wordbook or later readers: create the D1 database, set `ALLOWED_ORIGINS`, run D-remote once it lands, then `wrangler deploy`. No rights gate remains for the wordbook or the lexicon.
 
 ## Not started
 
-#14 (blocked by language-reviewer items), #21 (needs a real key), #29 (on hold), accounts and a paid tier (deferred in `docs/roadmap.md`).
+Open GitHub issues (2026-10-24) and what each waits for; nothing here is ready for a worker except D-remote above:
+
+| Issue | Waits for |
+| --- | --- |
+| #31 rate limit vs word-sheet taps | the first deployment (D-limit) |
+| #14 irregular verbs | the language-reviewer items (#16) and the owner's row review (#43, branch `pi/ds-flash-40`) |
+| #16 conjugation copy and sentence-pattern rules | the owner |
+| #17 visual acceptance of the new screens | the owner, on a real browser and phone |
+| #21 real-provider check of the conjugation prompt | the owner's real key |
+| #24 README screenshot of the pack table | a real provider key (the text is done) |
+| #29 split the `-eur` rule | on hold (owner, 2026-10-22) until a meaning-based design exists |
+| #62, #63, #64, #65 graded readers | content is paused by the owner's priority; runtime R1 is landed; R0-7 and R2 need content and a human review |
+| #67 human language review (topics, letter sounds, readers) | the owner picks the reviewer |
+
+Accounts and a paid tier are deferred in `docs/roadmap.md`. #13 (grammar topics pack, TP1 to TP5) was closed on 2026-10-24.
