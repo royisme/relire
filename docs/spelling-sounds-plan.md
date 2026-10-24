@@ -1,6 +1,6 @@
 # Letter sounds: spelling to sound before IPA
 
-Status: S1, C1, C2, S1b, C3 (UI copy) and S2 have landed. S3 drills are separate and not built here. Revised after Argon's review (seven findings, all checked against the code and applied). Queue item 2 of the standing goal. Framework first, content later (`RULES.md`): the platform, the review gate and a small seed pack; the full inventory of French spellings is later content work. Visual, device-voice and human language acceptance remain owner checks.
+Status: all steps (S1, C1, C2, S1b, C3 UI copy, S2, S3a, S3b) have landed. Revised after Argon's review (seven findings, all checked against the code and applied). Queue item 2 of the standing goal. Framework first, content later (`RULES.md`): the platform, the review gate and a small seed pack; the full inventory of French spellings is later content work. Visual, device-voice and human language acceptance remain owner checks.
 
 ## Why
 

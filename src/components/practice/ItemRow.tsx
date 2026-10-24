@@ -105,6 +105,7 @@ export function ItemRow({
           {audio && type !== 'NUMBER_DICTATION' && (
             <SpeakButton
               text={audio}
+              engine={item.meta?.playbackEngine === 'device' ? 'device' : undefined}
               label={t('practice.listen')}
               stopLabel={t('reader.stop')}
               variant="ghost"

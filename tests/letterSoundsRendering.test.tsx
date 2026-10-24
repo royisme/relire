@@ -5,15 +5,24 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import * as translations from 'react-i18next';
-import * as packHook from '../src/hooks/useSpellingSounds';
 import type { SpellingSoundsPack } from '../src/types/spellingSounds';
-import { LetterSounds } from '../src/components/speaking/LetterSounds';
-import { LetterSoundSheet } from '../src/components/speaking/LetterSoundSheet';
 import { SpeakButton } from '../src/components/ui/speak-button';
 import { Collapsible } from '../src/components/ui/collapsible';
 import { OverlayHeader, Sheet } from '../src/components/ui/overlay';
 import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
+
+// The section's practice button imports the router, which reads window at module load.
+const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+Object.defineProperty(globalThis, 'window', {
+  configurable: true,
+  value: Object.assign(new EventTarget(), { location: { hash: '' }, relireHistory: { read: () => 0 } }),
+});
+const { LetterSounds } = await import('../src/components/speaking/LetterSounds');
+const { LetterSoundSheet } = await import('../src/components/speaking/LetterSoundSheet');
+const packHook = await import('../src/hooks/useSpellingSounds');
+if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
+else Reflect.deleteProperty(globalThis, 'window');
 
 const i18n = createInstance();
 await i18n.init({
@@ -90,7 +99,8 @@ for (const language of ['en', 'zh']) {
         if (/[^a-z]/.test(symbol)) expect(html).not.toContain(symbol);
       }
       expect(html).not.toContain(i18n.t('spellingSounds.showIpa'));
-      expect(html).not.toContain(i18n.t('spellingSounds.practise'));
+      // The practice button appears only with a ready pack; it is a separate outline control below the notice.
+      expect(html).toContain(i18n.t('spellingSounds.practise'));
       expect(html).not.toContain(i18n.t('spellingSounds.reviewNotice'));
       hook.mockReturnValue({
         status: 'ready',
@@ -188,12 +198,14 @@ test('loading reserves space; failure shows the real reason and Retry invokes th
     expect(loading).toContain('role="status"');
     expect(loading).toContain('min-h-[34rem]');
     expect(loading).toContain(i18n.t('common.loading'));
+    expect(loading).not.toContain(i18n.t('spellingSounds.practise'));
     hook.mockReturnValue({ status: 'error', error: 'TEST chunk refused', retry });
     const failed = render(<LetterSounds />);
     expect(failed).toContain('role="alert"');
     expect(failed).toContain('TEST chunk refused');
     expect(failed).toContain(i18n.t('common.retry'));
     expect(failed).toContain('min-h-[34rem]');
+    expect(failed).not.toContain(i18n.t('spellingSounds.practise'));
     const state = spyOn(React, 'useState').mockReturnValue([null, noop]);
     const translation = spyOn(translations, 'useTranslation').mockReturnValue({ t: (key: string) => key } as never);
     try {
