@@ -10,6 +10,7 @@ import { LearningAreaSchema, supportsListening, type LearningArea } from './lear
 import { GrammarTagSchema, type GrammarTag } from './grammar';
 import { NounGenderDrillMetaSchema } from './nounGenderDrill';
 import { ReaderDictationMetaSchema } from './readerDictation';
+import { SpellingDrillMetaSchema } from './spellingDrill';
 import {
   CheckpointQuestionSchema,
   TopicOriginSchema,
@@ -83,6 +84,13 @@ export function refineExerciseItem(
       for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
     if (type !== 'NUMBER_DICTATION' || !item.audioText?.trim())
       issue('meta', 'Reader-dictation metadata requires number dictation with nonblank audio text');
+  }
+  if (item.meta?.source === 'spelling-sounds') {
+    const parsed = SpellingDrillMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'CHOICE_SELECT' || !item.audioText?.trim())
+      issue('meta', 'Spelling-sounds metadata requires choice select with nonblank audio text');
   }
   if (
     ['DIALOGUE_ORDER', 'MATCH_PAIRS', 'ODD_ONE_OUT', 'GENDER_CHECK'].includes(type) &&
@@ -183,7 +191,8 @@ export const ExtractedUnitSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['learningArea'],
-        message: 'Listening requires number dictation or pack-backed sound pairs with audio text for every item',
+        message:
+          'Listening requires number dictation, pack-backed sound pairs or spelling-sound choices with audio text for every item',
       });
     if (unit.id.startsWith('topic:') !== Boolean(unit.topicOrigin))
       ctx.addIssue({ code: 'custom', message: 'Topic unit identity and origin must be paired' });
