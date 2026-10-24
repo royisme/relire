@@ -1,10 +1,11 @@
-/** Owns private lexicon SQL delivery to local D1 from the local Morphalou copy and the committed allowlist; not parsing, selection or the Worker. */
+/** Owns private lexicon SQL delivery and read-only D1 verification; not parsing, selection or the Worker. */
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { d1ExecuteSpawn } from '../content-service/d1Target';
+import { z } from 'zod';
+import { d1ExecuteSpawn, requireInteractiveTerminal } from '../content-service/d1Target';
 import { entryRow, loadLexicon, morphalouDir, parseAllowlist, SOURCES, type Lexicon, type Pos } from './lexicon';
 
 const repository = new URL('../../', import.meta.url);
@@ -69,9 +70,57 @@ export function* lexiconStatements(lexicon: Lexicon, version: string, cap = STAT
   yield `INSERT OR REPLACE INTO meta (key, value) VALUES ('lexiconVersion', ${quote(version)});`;
 }
 
+export async function checkLexiconPublication(
+  root: URL,
+  remote: boolean,
+  expected: { version: string; entries: number; forms: number },
+): Promise<void> {
+  const child = Bun.spawn({
+    ...d1ExecuteSpawn(
+      root,
+      remote,
+      'd1',
+      'execute',
+      'DB',
+      '--command',
+      "SELECT (SELECT value FROM meta WHERE key = 'lexiconVersion') AS version, (SELECT count(*) FROM lexicon_entries) AS entries, (SELECT count(*) FROM lexicon_forms) AS forms;",
+      '--json',
+    ),
+    stdin: 'ignore',
+    stdout: 'pipe',
+    stderr: 'pipe',
+  });
+  const [output, , exitCode] = await Promise.all([
+    new Response(child.stdout).json().catch(() => null),
+    new Response(child.stderr).text(),
+    child.exited,
+  ]);
+  const parsed = z
+    .tuple([
+      z.object({
+        success: z.literal(true),
+        results: z.tuple([z.object({ version: z.string().nullable(), entries: z.number(), forms: z.number() })]),
+      }),
+    ])
+    .safeParse(output);
+  const row = parsed.success ? parsed.data[0].results[0] : null;
+  const versionMatches = row?.version === expected.version;
+  if (exitCode === 0 && versionMatches && row?.entries === expected.entries && row.forms === expected.forms) return;
+  await Bun.write(
+    new URL('.pi-runs/lexicon/check-failure.log', root),
+    JSON.stringify({
+      exitCode,
+      versionMatches,
+      expected: { entries: expected.entries, forms: expected.forms },
+      actual: row ? { entries: row.entries, forms: row.forms } : null,
+    }) + '\n',
+  );
+  throw new Error('Lexicon import read-only check failed');
+}
+
 export function parseArgs(args: string[]) {
-  if (args.length && (args.length !== 1 || args[0] !== '--apply-local'))
-    throw new Error('Usage: import.ts [--apply-local]');
+  if (args.length && (args.length !== 1 || !['--apply-local', '--apply-remote'].includes(args[0])))
+    throw new Error('Usage: import.ts [--apply-local | --apply-remote]');
   return args[0];
 }
 
@@ -81,10 +130,11 @@ export async function importLexicon(
   root = repository,
   { allowRemote = false }: { allowRemote?: boolean } = {},
 ): Promise<void> {
-  // Reserved for the owner-only remote mode; no remote flags are accepted yet.
-  void allowRemote;
+  const mode = parseArgs(args);
+  const remote = mode === '--apply-remote';
+  if (remote && allowRemote !== true) throw new Error('Remote publication requires owner CLI authorization');
+  if (remote) requireInteractiveTerminal(Boolean(process.stdin.isTTY), Boolean(process.stdout.isTTY));
   try {
-    const mode = parseArgs(args);
     const started = performance.now();
     const dir = morphalouDir(fileURLToPath(root), env);
     const allowed = parseAllowlist(await Bun.file(new URL('data/lexicon/lemmas.txt', root)).text());
@@ -95,21 +145,23 @@ export async function importLexicon(
         `Allowlisted but not in Morphalou: ${missing.map((id) => id.split('\0').reverse().join(':')).join(', ')}`,
       );
 
+    const version = await sourceVersion(dir);
+    const rows = formRows(lexicon);
     const output = new URL('.local/lexicon/import.sql', root);
     await mkdir(fileURLToPath(new URL('.local/lexicon/', root)), { recursive: true });
     const writer = Bun.file(output).writer();
     let bytes = 0;
-    for (const statement of lexiconStatements(lexicon, await sourceVersion(dir))) {
+    for (const statement of lexiconStatements(lexicon, version)) {
       await writer.write(statement + '\n');
       bytes += Buffer.byteLength(statement) + 1;
     }
     await writer.end();
 
-    if (mode === '--apply-local') {
+    if (mode === '--apply-local' || remote) {
       const child = Bun.spawn({
-        ...d1ExecuteSpawn(root, false, 'd1', 'execute', 'DB', '--file', fileURLToPath(output)),
-        stdin: 'ignore',
-        stdout: 'pipe',
+        ...d1ExecuteSpawn(root, remote, 'd1', 'execute', 'DB', '--file', fileURLToPath(output)),
+        stdin: remote ? 'inherit' : 'ignore',
+        stdout: remote ? 'inherit' : 'pipe',
         stderr: 'pipe',
       });
       const [stdout, stderr, exitCode] = await Promise.all([
@@ -117,16 +169,17 @@ export async function importLexicon(
         new Response(child.stderr).text(),
         child.exited,
       ]);
-      if (exitCode !== 0) throw new Error(`Local D1 import failed (${exitCode})\n${stdout}${stderr}`);
+      // The import exit code cannot distinguish a remote confirmation from a declined prompt.
+      if (!remote && exitCode !== 0) throw new Error(`Local D1 import failed (${exitCode})\n${stdout}${stderr}`);
+      await checkLexiconPublication(root, remote, { version, entries: lexicon.size, forms: rows.length });
     }
-    const rows = formRows(lexicon);
     for (const pos of ['verb', 'noun', 'adjective'] as Pos[]) {
       const lemmas = allowed.filter((id) => id.endsWith(`\0${pos}`)).length;
       console.log(`${pos}: ${lemmas} lemmas, ${rows.filter((row) => row[2] === pos).length} form rows`);
     }
     console.log(`${allowed.length} lemmas, ${rows.length} form rows, ${bytes} SQL bytes: ${fileURLToPath(output)}`);
     console.log(`${((performance.now() - started) / 1000).toFixed(1)} seconds`);
-    if (mode === '--apply-local') console.log('Lexicon imported locally');
+    if (mode === '--apply-local' || remote) console.log(`Lexicon imported ${remote ? 'remotely' : 'locally'}`);
   } catch (error) {
     await Bun.write(new URL('.pi-runs/lexicon/failure.log', root), Bun.inspect(error) + '\n');
     console.error('Lexicon import failed; private diagnostics in .pi-runs/lexicon/failure.log');

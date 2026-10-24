@@ -5,9 +5,15 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { d1ExecuteSpawn, platformProxyOptions, requireInteractiveTerminal } from '../scripts/content-service/d1Target';
-import { buildPublishSql, publish } from '../scripts/grammar-topics/publish';
+import { buildPublishSql, checkTopicPublication, publish } from '../scripts/grammar-topics/publish';
 import { topicContentHash } from '../scripts/grammar-pack/gate';
-import { formRows, importLexicon, lexiconStatements, sourceVersion } from '../scripts/lexicon/import';
+import {
+  checkLexiconPublication,
+  formRows,
+  importLexicon,
+  lexiconStatements,
+  sourceVersion,
+} from '../scripts/lexicon/import';
 import { loadLexicon, parseAllowlist } from '../scripts/lexicon/lexicon';
 import { vocabularyMetadata } from '../src/services/vocabulary/book';
 import { handle, type Env } from '../worker/src/index';
@@ -101,6 +107,18 @@ test('remote branch arguments/options are exact assertions only, without spawnin
   expect(spawn.cwd).toBe(join(directory, 'worker'));
   expect(spawn.env.WRANGLER_SEND_METRICS).toBe('false');
   expect(spawn.env.WRANGLER_HIDE_BANNER).toBe('true');
+  expect(spawn.cmd).not.toContain('--persist-to');
+  expect(spawn.cmd).not.toContain('--yes');
+  const read = d1ExecuteSpawn(root, true, 'd1', 'execute', 'DB', '--command', 'SELECT count(*) FROM topics', '--json');
+  expect(read.cmd).toEqual([
+    ...spawn.cmd.slice(0, 7),
+    '--command',
+    'SELECT count(*) FROM topics',
+    '--json',
+    ...spawn.cmd.slice(9),
+  ]);
+  expect(read.cwd).toBe(spawn.cwd);
+  expect(read.env).toEqual(spawn.env);
   expect(platformProxyOptions(root, true)).toEqual({
     configPath: join(directory, 'worker/wrangler.deploy.jsonc'),
     remoteBindings: true,
@@ -284,6 +302,76 @@ test('topics and lexicon apply through real CLI and share the explicit proxy sta
     await proxy.dispose();
   }
 }, 30_000);
+
+test('read-only checks pass real local applies and reject tampered metadata without printing database output', async () => {
+  const { input, csv } = await writePublicationInputs(directory);
+  const expectedTopics = buildPublishSql(input);
+  const lexicon = await loadLexicon(csv, new Set(parseAllowlist(ALLOWLIST)));
+  const expectedLexicon = { version: await sourceVersion(csv), entries: lexicon.size, forms: formRows(lexicon).length };
+  await publish(['--apply-local'], root);
+  await importLexicon(['--apply-local'], { MORPHALOU_DIR: csv }, root);
+  const log = spyOn(console, 'log').mockImplementation(() => {});
+  const error = spyOn(console, 'error').mockImplementation(() => {});
+  try {
+    await checkTopicPublication(root, false, expectedTopics);
+    await checkLexiconPublication(root, false, expectedLexicon);
+    for (const tamper of [
+      { sql: "UPDATE topics SET content_hash = 'TEST-changed-hash'", kind: 'topics' },
+      { sql: 'DELETE FROM topics', kind: 'topics' },
+      { sql: 'UPDATE topics SET position = position + 1', kind: 'topics' },
+      { sql: "UPDATE topics SET body = body || ' '", kind: 'topics' },
+      { sql: "UPDATE meta SET value = 'TEST-private-version' WHERE key = 'packVersion'", kind: 'topics' },
+      { sql: "UPDATE meta SET value = 'TEST-private-version' WHERE key = 'lexiconVersion'", kind: 'lexicon' },
+      { sql: 'DELETE FROM lexicon_forms WHERE rowid IN (SELECT rowid FROM lexicon_forms LIMIT 1)', kind: 'lexicon' },
+      {
+        sql: 'DELETE FROM lexicon_entries WHERE rowid IN (SELECT rowid FROM lexicon_entries LIMIT 1)',
+        kind: 'lexicon',
+      },
+    ]) {
+      const child = Bun.spawnSync({
+        ...d1ExecuteSpawn(root, false, 'd1', 'execute', 'DB', '--command', tamper.sql),
+        stdin: 'ignore',
+        stdout: 'pipe',
+        stderr: 'pipe',
+      });
+      expect(child.exitCode).toBe(0);
+      expect(child.stderr.toString()).toBe('');
+      const check =
+        tamper.kind === 'topics'
+          ? checkTopicPublication(root, false, expectedTopics)
+          : checkLexiconPublication(root, false, expectedLexicon);
+      expect(
+        await check.then(
+          () => 'resolved',
+          (failure: Error) => failure.message,
+        ),
+      ).toBe(
+        tamper.kind === 'topics' ? 'Topic publication read-only check failed' : 'Lexicon import read-only check failed',
+      );
+      const diagnostics = await Bun.file(
+        new URL(
+          tamper.kind === 'topics' ? '.pi-runs/grammar-topics/check-failure.log' : '.pi-runs/lexicon/check-failure.log',
+          root,
+        ),
+      ).text();
+      expect(diagnostics).toContain('"actual":');
+      expect(diagnostics).not.toContain(input.drafts[0].title.en);
+      expect(diagnostics).not.toContain('TEST-private-version');
+      expect(diagnostics).not.toContain('"body"');
+      expect(diagnostics).not.toContain('"data"');
+      expect(log.mock.calls).toEqual([]);
+      expect(error.mock.calls).toEqual([]);
+      // Restore each target independently so every corruption is the sole cause of refusal.
+      if (tamper.kind === 'topics') await publish(['--apply-local'], root);
+      if (tamper.kind === 'lexicon') await importLexicon(['--apply-local'], { MORPHALOU_DIR: csv }, root);
+      log.mockClear();
+      error.mockClear();
+    }
+  } finally {
+    log.mockRestore();
+    error.mockRestore();
+  }
+}, 60_000);
 
 test('real CLI failures stay in rooted private logs, never inherited stdout/stderr', async () => {
   const { directory, root } = await createLocalD1Root();

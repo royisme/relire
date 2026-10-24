@@ -1,6 +1,6 @@
 /** Owns the lexicon importer checks on an invented CSV: selection, mapping, SQL shape, determinism and the allowlist. */
 import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test';
-import { mkdtemp, readFile, rm, writeFile, mkdir } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile, mkdir, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -228,35 +228,64 @@ describe('determinism and version', () => {
   });
 });
 
-test('pure argument parsing accepts only SQL preparation and local application', () => {
-  expect(parseArgs([])).toBeUndefined();
-  expect(parseArgs(['--apply-local'])).toBe('--apply-local');
-  for (const args of [['--remote'], ['--apply-remote'], ['--check'], ['--apply-local', '--apply-local']])
+test('pure argument parsing accepts SQL preparation and explicit apply modes only', () => {
+  for (const args of [[], ['--apply-local'], ['--apply-remote']]) expect(parseArgs(args)).toBe(args[0]);
+  for (const args of [
+    ['--remote'],
+    ['--unknown'],
+    ['--check'],
+    ['--apply-remote', '--remote'],
+    ['--apply-remote', '--apply-local'],
+    ['--apply-remote', '--check'],
+    ['--apply-remote', '--apply-remote'],
+    ['--apply-local', '--apply-local'],
+  ])
     expect(() => parseArgs(args)).toThrow('Usage');
 });
 
-test.each([undefined, false])(
-  'remote permission=%s refuses remote flags with rooted private diagnostics',
-  async (allowRemote) => {
-    const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-lexicon-failure-'));
-    const log = spyOn(console, 'log').mockImplementation(() => {});
-    const error = spyOn(console, 'error').mockImplementation(() => {});
-    try {
-      expect(
-        await rejection(importLexicon(['--apply-remote'], {}, pathToFileURL(directory + '/'), { allowRemote })),
-      ).toContain('Usage');
-      expect(await Bun.file(join(directory, '.pi-runs/lexicon/failure.log')).text()).toContain('Usage: import.ts');
-      expect(log.mock.calls).toEqual([]);
-      expect(error.mock.calls).toEqual([
-        ['Lexicon import failed; private diagnostics in .pi-runs/lexicon/failure.log'],
-      ]);
-    } finally {
-      log.mockRestore();
-      error.mockRestore();
-      await rm(directory, { recursive: true, force: true });
+test.each([undefined, false])('remote permission=%s refuses before any file access or logging', async (allowRemote) => {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-lexicon-failure-'));
+  const log = spyOn(console, 'log').mockImplementation(() => {});
+  const error = spyOn(console, 'error').mockImplementation(() => {});
+  try {
+    expect(
+      await rejection(importLexicon(['--apply-remote'], {}, pathToFileURL(directory + '/'), { allowRemote })),
+    ).toBe('Remote publication requires owner CLI authorization');
+    expect(await readdir(directory)).toEqual([]);
+    expect(log.mock.calls).toEqual([]);
+    expect(error.mock.calls).toEqual([]);
+  } finally {
+    log.mockRestore();
+    error.mockRestore();
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('remote CLI refuses non-TTY streams before inputs, output, logs or Wrangler access', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-lexicon-terminal-'));
+  try {
+    const script = 'scripts/lexicon/import.ts';
+    await Bun.write(join(directory, script), Bun.file(new URL('../' + script, import.meta.url)));
+    for (const dependency of ['scripts/lexicon/lexicon.ts', 'scripts/content-service', 'node_modules']) {
+      await mkdir(join(directory, dependency, '..'), { recursive: true });
+      await symlink(new URL('../' + dependency, import.meta.url).pathname, join(directory, dependency));
     }
-  },
-);
+    const child = Bun.spawnSync({
+      cmd: [process.execPath, '--no-env-file', join(directory, script), '--apply-remote'],
+      cwd: directory,
+      stdin: 'ignore',
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    expect(child.exitCode).toBe(1);
+    expect(child.stdout.toString()).toBe('');
+    expect(child.stderr.toString()).toBe('');
+    expect((await readdir(directory)).sort()).toEqual(['node_modules', 'scripts']);
+    expect(await Bun.file(join(directory, '.local/lexicon/import.sql')).exists()).toBe(false);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 describe('allowlist', () => {
   // The importer reports counts on stdout; keep the test output clean.
@@ -298,7 +327,7 @@ describe('allowlist', () => {
   test('a malformed line is refused; unknown arguments are refused', async () => {
     expect(await rejection(importWith('verb:testmarcher\nadverb:test\n'))).toBe('Bad allowlist line: adverb:test');
     expect(await rejection(importLexicon(['--remote'], {}, pathToFileURL(`${root}/`)))).toBe(
-      'Usage: import.ts [--apply-local]',
+      'Usage: import.ts [--apply-local | --apply-remote]',
     );
   });
 });
