@@ -5,7 +5,7 @@
  * See docs/shadowing-log-design.md (Recording flow).
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { readerIdentity, type RecordableReaderSource as ReaderSource } from '../types/readerSource';
+import { readerIdentity, type ReaderSource } from '../types/readerSource';
 import type { ShadowingTake } from '../types/shadowing';
 import type { PronunciationAssessment } from '../types';
 import { assessPronunciation } from '../services/api';

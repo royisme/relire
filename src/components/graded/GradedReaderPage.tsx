@@ -16,10 +16,12 @@ export function ReaderEditionGate({
   reader,
   vocabulary,
   focusText,
+  onOpenShadowingLog,
 }: {
   reader: PublishedReader;
   vocabulary: VocabularyModel;
   focusText?: string;
+  onOpenShadowingLog: (sourceId: string) => void;
 }) {
   const [state, setState] = useState<{ opened?: OpenedReader; error?: string }>({});
   const [attempt, setAttempt] = useState(0);
@@ -49,6 +51,7 @@ export function ReaderEditionGate({
         vocabulary={vocabulary}
         reload={reload}
         focusText={focusText}
+        onOpenShadowingLog={onOpenShadowingLog}
       />
     );
   return <ReaderRouteStatus error={state.error} retry={reload} />;
@@ -92,11 +95,13 @@ export function GradedReaderPage({
   version,
   sentence,
   vocabulary,
+  onOpenShadowingLog,
 }: {
   readerId: string;
   version?: string;
   sentence?: string;
   vocabulary: VocabularyModel;
+  onOpenShadowingLog: (sourceId: string) => void;
 }) {
   const content = useGradedReaders();
   const reader = content.status === 'ready' ? findStarterReader(readerId, version) : undefined;
@@ -108,6 +113,7 @@ export function GradedReaderPage({
       reader={reader}
       vocabulary={vocabulary}
       focusText={sentence}
+      onOpenShadowingLog={onOpenShadowingLog}
     />
   );
 }

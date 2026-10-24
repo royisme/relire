@@ -74,14 +74,13 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   const { t, i18n } = useTranslation();
   const sourceId = readerIdentity(source);
   const practise = (sentenceId: string, text: string) => {
-    // Reader recording ownership is deliberately deferred to R1-10.
-    if (source.kind !== 'graded')
-      card.open({
-        source,
-        sentenceId,
-        text,
-        ...(source.kind === 'passage' ? { passageContent: readingDocument.content } : {}),
-      });
+    // A graded edition's content is pinned by its version; the snapshot guard in addTake checks it.
+    card.open({
+      source,
+      sentenceId,
+      text,
+      ...(source.kind === 'passage' ? { passageContent: readingDocument.content } : {}),
+    });
   };
   const explain = (id: string, text: string) => (authored ? authored.onSentence(id) : onSentenceClick?.(text));
   // Reading preferences
@@ -442,7 +441,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               scheduleClear={scheduleClear}
               speechActive={toolbarPhase !== 'idle'}
               onExplain={() => explain(toolbar.id, toolbar.text)}
-              onPractise={source.kind === 'graded' ? undefined : () => practise(toolbar.id, toolbar.text)}
+              onPractise={() => practise(toolbar.id, toolbar.text)}
               playbackEngine={playbackEngine}
               explainLabel={authored ? t('gradedReader.translation') : undefined}
               cardBusy={cardBusy}
@@ -464,7 +463,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               text={barSentence.text}
               practiseBlocked={cardBusy}
               onExplain={() => explain(barSentence.id, barSentence.text)}
-              onPractise={source.kind === 'graded' ? undefined : () => practise(barSentence.id, barSentence.text)}
+              onPractise={() => practise(barSentence.id, barSentence.text)}
               playbackEngine={playbackEngine}
               explainLabel={authored ? t('gradedReader.translation') : undefined}
               onDismiss={() => setDismissedId(barSentence.id)}

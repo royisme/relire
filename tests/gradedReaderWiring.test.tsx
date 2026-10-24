@@ -92,7 +92,7 @@ test('the workspace is absent until the snapshot commit resolves; failure keeps 
     return original(...args);
   });
   undo.push(() => open.mockRestore());
-  const draw = () => probe.render(() => ReaderEditionGate({ reader, vocabulary }));
+  const draw = () => probe.render(() => ReaderEditionGate({ reader, vocabulary, onOpenShadowingLog: noop }));
   expect(draw().type).not.toBe(GradedReaderWorkspace);
   probe.effects();
   expect(open).toHaveBeenCalledTimes(1);
@@ -107,7 +107,7 @@ test('failed open offers storage-only Retry and never mounts a writable workspac
   const original = storage.openReaderEdition;
   const open = spyOn(storage, 'openReaderEdition').mockRejectedValueOnce(new Error('TEST snapshot denied'));
   undo.push(() => open.mockRestore());
-  const draw = () => probe.render(() => ReaderEditionGate({ reader, vocabulary }));
+  const draw = () => probe.render(() => ReaderEditionGate({ reader, vocabulary, onOpenShadowingLog: noop }));
   draw();
   probe.effects();
   await until(() => draw().props.error === 'TEST snapshot denied');
@@ -125,7 +125,7 @@ test('detail route resolves known/unknown/unavailable pin, never writes a substi
   const pack = spyOn(packs, 'useGradedReaders').mockReturnValue({ status: 'ready', readers: [reader], retry: noop });
   undo.push(() => pack.mockRestore());
   const draw = (readerId: string, version?: string) =>
-    probe.render(() => GradedReaderPage({ readerId, version, vocabulary }));
+    probe.render(() => GradedReaderPage({ readerId, version, vocabulary, onOpenShadowingLog: noop }));
   expect(draw(reader.body.id).type).toBe(ReaderEditionGate);
   expect(draw(reader.body.id, reader.version).type).toBe(ReaderEditionGate);
   expect(draw(reader.body.id, 'a'.repeat(64)).props.missing).toBe(true);
@@ -166,7 +166,8 @@ test('authored route actions never call AI or Settings; word and sentence select
     () => navigate.mockRestore(),
   );
   const opened = await storage.openReaderEdition(reader);
-  const draw = () => probe.render(() => GradedReaderWorkspace({ opened, vocabulary, reload: noop }));
+  const draw = () =>
+    probe.render(() => GradedReaderWorkspace({ opened, vocabulary, reload: noop, onOpenShadowingLog: noop }));
   const view = () => element<React.ComponentProps<typeof ReaderView>>(draw(), ReaderView).props;
   view().authored!.onWord('livre', 's2', 1);
   const sheets = element<React.ComponentProps<typeof ReaderAuthoredSheets>>(draw(), ReaderAuthoredSheets).props;
@@ -198,7 +199,7 @@ test('the authored footer passes clicked spelling and the reader definition to d
   expect(element<React.ComponentProps<typeof SpeakButton>>(extra, SpeakButton).props.engine).toBe('device');
 });
 
-test('floating and touch sentence controls forward the device engine to SpeakButton with Translation and no practice action', () => {
+test('floating and touch sentence controls forward the device engine to SpeakButton with Translation', () => {
   const toolbar = probe.render(() =>
     ReaderSentenceToolbar({
       t: i18n.t.bind(i18n),
@@ -264,7 +265,8 @@ test('ReaderView captures sentence id and ordinal and forwards device voice to s
   );
   const bar = element<React.ComponentProps<typeof SentenceBar>>(draw(), SentenceBar);
   expect(bar.props.playbackEngine).toBe('device');
-  expect(bar.props.onPractise).toBeUndefined();
+  // R1-10: graded editions are recordable; the bar and pill offer practise like articles and passages.
+  expect(bar.props.onPractise).toBeInstanceOf(Function);
   expect(bar.props.explainLabel).toBe(i18n.t('gradedReader.translation'));
   expect(card.mock.calls[0][2]).toBe('device');
 });

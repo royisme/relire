@@ -15,7 +15,7 @@ import {
   ShadowingBackupError,
   type ShadowingBackup,
 } from '../src/storage/shadowing';
-import type { RecordableReaderSource as ReaderSource } from '../src/types/readerSource';
+import type { ReaderSource } from '../src/types/readerSource';
 
 beforeEach(freshDb);
 const content = 'Nous visitons le jardin. Les oiseaux chantent.';

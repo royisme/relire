@@ -21,11 +21,13 @@ export function GradedReaderWorkspace({
   vocabulary,
   reload,
   focusText,
+  onOpenShadowingLog,
 }: {
   opened: OpenedReader;
   vocabulary: VocabularyModel;
   reload: () => void;
   focusText?: string;
+  onOpenShadowingLog: (sourceId: string) => void;
 }) {
   const { t, i18n } = useTranslation();
   const progress = useReaderWorkspace(opened, reload);
@@ -42,7 +44,7 @@ export function GradedReaderWorkspace({
         source={{ kind: 'graded', readerId: reader.body.id, version: reader.version }}
         onBack={() => navigate({ name: 'gradedReaders' })}
         onMissingKey={noAi}
-        onOpenShadowingLog={noAi}
+        onOpenShadowingLog={onOpenShadowingLog}
         focusText={focusText}
         activeWord={selection?.kind === 'word' ? selection.occurrence.lookup.word : null}
         activeSentence={selection?.kind === 'sentence' ? selection.sentence.fr : null}
