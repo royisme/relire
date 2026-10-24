@@ -1,11 +1,12 @@
 import tailwindcss from '@tailwindcss/vite';
+import { cloudflare } from '@cloudflare/vite-plugin';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { pdfjsAssets } from './scripts/pdfjsAssets.ts';
 
-export default defineConfig(() => {
+export default defineConfig(({ command }) => {
   return {
     // Relative base so the static build works from any path (GitHub Pages, a folder, file hosting).
     base: './',
@@ -13,6 +14,25 @@ export default defineConfig(() => {
       react(),
       tailwindcss(),
       pdfjsAssets(),
+      // Serve the content Worker next to the SPA in `vite dev` only; the production build is untouched.
+      ...(command === 'serve'
+        ? [
+            cloudflare({
+              configPath: path.resolve(import.meta.dirname, 'worker/wrangler.jsonc'),
+              // Share the publishers' local D1 state (the plugin appends `v3`).
+              persistState: { path: path.resolve(import.meta.dirname, 'worker/.wrangler/state') },
+              // The plugin defaults remote bindings to true; this service is local-only in dev.
+              remoteBindings: false,
+              config: (wranglerConfig) => {
+                // In-memory overrides, never written to worker/wrangler.jsonc: only /v1/* reaches the
+                // Worker (everything else stays with Vite), and the dev date matches the workerd
+                // version bundled with this plugin (the worker's own 2026-10-19 needs a newer one).
+                wranglerConfig.assets = { directory: './dist', run_worker_first: ['/v1/*'] };
+                wranglerConfig.compatibility_date = '2026-10-13';
+              },
+            }),
+          ]
+        : []),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
