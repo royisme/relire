@@ -59,12 +59,15 @@ test('reviews count every history entry of the local day, boundary included', ()
 });
 
 const base = publishedReaderFixture();
-const bundledOf = (id: string, order: number): PublishedReader => ({ ...base, body: { ...base.body, id, order } });
-const summaryOf = (id: string, order: number, version = 'b'.repeat(64)): ReaderSummary => ({
+const bundledOf = (id: string, order: number, fr = 'Un livre'): PublishedReader => ({
+  ...base,
+  body: { ...base.body, id, order, title: { ...base.body.title, fr } },
+});
+const summaryOf = (id: string, order: number, version = 'b'.repeat(64), fr = 'Un livre'): ReaderSummary => ({
   id,
   order,
   level: 'A1',
-  title: base.body.title,
+  title: { ...base.body.title, fr },
   version,
   artifactHash: 'c'.repeat(64),
 });
@@ -81,31 +84,45 @@ const progressOf = (readerId: string, version: string, changes: Partial<ReaderPr
   ...changes,
 });
 
-test('only bundled readers, sorted by order with their progress status', () => {
+test('only bundled readers, sorted by order with their French titles and progress status', () => {
   expect(
     readerEntries(
-      [bundledOf('test-book-2', 2), bundledOf('test-book-1', 1)],
+      [bundledOf('test-book-2', 2, 'Le marché'), bundledOf('test-book-1', 1)],
       [],
       [progressOf('test-book-1', base.version)],
       now,
     ),
   ).toEqual([
-    { readerId: 'test-book-1', order: 1, status: 'opened', activeToday: false },
-    { readerId: 'test-book-2', order: 2, status: 'notOpened', activeToday: false },
+    { readerId: 'test-book-1', order: 1, title: 'Un livre', status: 'opened', activeToday: false },
+    { readerId: 'test-book-2', order: 2, title: 'Le marché', status: 'notOpened', activeToday: false },
   ]);
 });
 
 test('service readers follow the bundled ones by order and carry their edition; a completed edition reads as done', () => {
   const entries = readerEntries(
     [bundledOf('test-book', 3)],
-    [summaryOf('test-service', 1), summaryOf('test-service-2', 2, 'd'.repeat(64))],
+    [summaryOf('test-service', 1, 'b'.repeat(64), 'Une histoire'), summaryOf('test-service-2', 2, 'd'.repeat(64))],
     [progressOf('test-service', 'b'.repeat(64), { completedAt: now })],
     now,
   );
   expect(entries).toEqual([
-    { readerId: 'test-service', order: 1, version: 'b'.repeat(64), status: 'read', activeToday: true },
-    { readerId: 'test-service-2', order: 2, version: 'd'.repeat(64), status: 'notOpened', activeToday: false },
-    { readerId: 'test-book', order: 3, status: 'notOpened', activeToday: false },
+    {
+      readerId: 'test-service',
+      order: 1,
+      title: 'Une histoire',
+      version: 'b'.repeat(64),
+      status: 'read',
+      activeToday: true,
+    },
+    {
+      readerId: 'test-service-2',
+      order: 2,
+      title: 'Un livre',
+      version: 'd'.repeat(64),
+      status: 'notOpened',
+      activeToday: false,
+    },
+    { readerId: 'test-book', order: 3, title: 'Un livre', status: 'notOpened', activeToday: false },
   ]);
   expect('version' in entries[2]).toBe(false);
 });
@@ -119,7 +136,7 @@ test('a checked answer today marks the reader active even without completion', (
   };
   expect(
     readerEntries([bundledOf('test-book', 1)], [], [progressOf('test-book', base.version, { answers })], now)[0],
-  ).toEqual({ readerId: 'test-book', order: 1, status: 'opened', activeToday: true });
+  ).toEqual({ readerId: 'test-book', order: 1, title: 'Un livre', status: 'opened', activeToday: true });
 });
 
 test('an empty catalogue and no progress yields no entries', () => {

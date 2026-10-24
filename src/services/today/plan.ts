@@ -11,6 +11,8 @@ export interface TodayWords {
 export interface TodayReader {
   readerId: string;
   order: number;
+  /** The reader's French title, as the Read list shows it (never localized). */
+  title: string;
   version?: string;
   status: 'read' | 'opened' | 'notOpened';
   activeToday: boolean;
@@ -26,6 +28,8 @@ export interface TodayInput {
   readers: Source<TodayReader[]>;
   sound: Source<{ attemptsToday: number }>;
   mistakes: Source<{ unresolved: number; attemptsToday: number }>;
+  /** The aside's day counts; each source fails on its own, and a failure omits the count, never 0. */
+  counts: { exercises: Source<number>; readers: Source<number> };
   /** Absent when no content service is configured: no grammar step at all. */
   grammar?: Source<TodayGrammar>;
 }
@@ -36,6 +40,7 @@ export type TodayStep =
       done: boolean;
       readerId: string;
       order: number;
+      title: string;
       version?: string;
       state: 'start' | 'continue' | 'doneToday';
     }
@@ -46,6 +51,11 @@ export type TodayStep =
 export interface TodayPlan {
   steps: TodayStep[];
   allDone: boolean;
+  /** First step to act on; undefined when every step is done or failed (a failed step is never next). */
+  nextIndex: number | undefined;
+  doneCount: number;
+  /** Real day counts; a key is absent when its source failed, never 0. */
+  counts: { reviews?: number; exercises?: number; readers?: number };
 }
 
 export function buildTodayPlan(input: TodayInput): TodayPlan {
@@ -70,6 +80,7 @@ export function buildTodayPlan(input: TodayInput): TodayPlan {
         done: readers.some((reader) => reader.activeToday),
         readerId: focus.readerId,
         order: focus.order,
+        title: focus.title,
         ...(focus.version !== undefined ? { version: focus.version } : {}),
         state: focus.status === 'read' ? 'doneToday' : focus.status === 'opened' ? 'continue' : 'start',
       });
@@ -98,5 +109,17 @@ export function buildTodayPlan(input: TodayInput): TodayPlan {
     }
   }
 
-  return { steps, allDone: steps.length > 0 && steps.every((step) => step.done) };
+  const nextAt = steps.findIndex((step) => !step.done && !('error' in step));
+  const counts: TodayPlan['counts'] = {};
+  if (!('error' in input.words)) counts.reviews = input.words.value.reviewsToday;
+  if (!('error' in input.counts.exercises)) counts.exercises = input.counts.exercises.value;
+  if (!('error' in input.counts.readers)) counts.readers = input.counts.readers.value;
+
+  return {
+    steps,
+    allDone: steps.length > 0 && steps.every((step) => step.done),
+    nextIndex: nextAt === -1 ? undefined : nextAt,
+    doneCount: steps.filter((step) => step.done).length,
+    counts,
+  };
 }
