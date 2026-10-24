@@ -69,9 +69,9 @@ Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlo
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| V0 | Owner chooses A or B | the choice is recorded in the plan | done: B (2026-10-24); next, Argon reviews the plan |
-| V1 | Plan model: reader `title`, `reviewsToday`, `doneCount`, `nextIndex`; first-run and no-step cases | `bun test tests/today*.test.ts` and the full suite exit 0 | not started |
-| V2 | View: `TodayFocus`, `TodayPath`, `TodayAside`, practise-on-your-own links | typecheck, lint, format, shape exit 0; detector `[]`; component tests per state | after the Argon review |
+| V0 | Owner chooses A or B | the choice is recorded in the plan | done: B (2026-10-24); first Argon review failed, plan revised; second Argon review next |
+| V1 | Plan model: reader `title`, `nextIndex`, `doneCount`, `counts`; error and no-step cases; fix the shapes in `tests/todayView.test.tsx` and `tests/useToday.test.ts` | the three Today tests, typecheck and the full suite exit 0 | after the second Argon review |
+| V2 | View: one card with ordered rows, aside, practise row; keys in en and zh (the lead adds shadcn `card` first) | typecheck, lint, format, shape, i18n exit 0; detector `[]`; component tests per state | after V1 |
 | V3 | Copy by agy gemini-3.8-flash: `today.*` keys, guidance sentence, why lines | `bun run i18n:check` exits 0; the lead reads the zh | after V2 |
 | V4 | Docs: `DESIGN.md` Today section, architecture, changelog | `format:check` exits 0 | after V3 |
 
