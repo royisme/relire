@@ -11,10 +11,12 @@ const quote = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
 export function buildPublishSql(input: TopicBuildInputs) {
   const { pack, report } = buildTopics(input);
+  // Positions are the 1-based manifest order of included topics; capture them before the id sort below.
+  const positions = new Map(pack.topics.map((topic, index) => [topic.id, index + 1]));
   pack.topics.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   const hashes = pack.topics.map((topic) => topicContentHash(topic));
   const digest = createHash('sha256')
-    .update(pack.topics.map((topic, i) => `${topic.id}:${hashes[i]}`).join('\n'))
+    .update(pack.topics.map((topic, i) => `${topic.id}:${positions.get(topic.id)}:${hashes[i]}`).join('\n'))
     .digest('hex')
     .slice(0, 8);
   const version = `${pack.packVersion}+${digest}`;
@@ -32,7 +34,9 @@ export function buildPublishSql(input: TopicBuildInputs) {
       hashes[i],
     ];
     statements.push(
-      `INSERT INTO topics (id, chapter, level, title_en, title_zh, tags, body, content_hash) VALUES (${values.map(quote).join(', ')});`,
+      `INSERT INTO topics (id, chapter, level, title_en, title_zh, tags, body, content_hash, position) VALUES (${values
+        .map(quote)
+        .join(', ')}, ${positions.get(topic.id)});`,
     );
   }
   statements.push(`INSERT OR REPLACE INTO meta (key, value) VALUES ('packVersion', ${quote(version)});`);

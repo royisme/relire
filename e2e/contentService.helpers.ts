@@ -17,7 +17,14 @@ export async function mockTopics(page: Page, pack = emptyTopics()) {
     const path = new URL(route.request().url()).pathname;
     if (path === '/v1/topics') {
       return route.fulfill({
-        json: pack.topics.map(({ id, chapter, level, tags, title }) => ({ id, chapter, level, tags, title })),
+        json: pack.topics.map(({ id, chapter, level, tags, title }, i) => ({
+          id,
+          chapter,
+          level,
+          tags,
+          title,
+          position: i + 1,
+        })),
       });
     }
     const topic = pack.topics.find((entry) => path === `/v1/topics/${entry.id}`);

@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { errorMessage } from '../services/ai/errors';
 import { loadGrammarTopic, loadGrammarTopics } from '../services/grammarTopics/load';
 import { ContentServiceHttpError } from '../services/grammarTopics/service';
-import type { GrammarTopic, GrammarTopicSummary } from '../types/grammarTopic';
+import type { GrammarTopic, GrammarTopicListEntry } from '../types/grammarTopic';
 
 interface GrammarTopicsState {
   status: 'loading' | 'ready' | 'error' | 'notFound';
-  topics?: GrammarTopicSummary[];
+  topics?: GrammarTopicListEntry[];
   topic?: GrammarTopic;
   error?: string;
 }

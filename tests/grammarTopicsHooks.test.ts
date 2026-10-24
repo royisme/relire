@@ -55,7 +55,7 @@ test('without a configured service a mounted tag hook stays plain and makes no r
 });
 
 test('the list hook becomes ready with summaries', async () => {
-  fetchSpy.mockResolvedValue(Response.json([topicFixture()]));
+  fetchSpy.mockResolvedValue(Response.json([{ ...topicFixture(), position: 1 }]));
   expect(useGrammarTopics()).toEqual({ status: 'loading' });
   effect();
   await changed;
