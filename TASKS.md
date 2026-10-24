@@ -31,7 +31,7 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
 | T1 | `services/today/plan.ts` and `activity.ts`, pure | ordering, omission, local-midnight and done-today rules, empty-queue and all-complete cases tested | landed (26 tests; full suite 2165 pass) |
-| T2 | `useToday` hook; extract the reader status function from `GradedReadersPage` | one `now`; the shared vocabulary model is passed in; each source reports its own error | not started |
+| T2 | `useToday` hook; extract the reader status function from `GradedReadersPage` | one `now`; the shared vocabulary model is passed in; each source reports its own error | landed (full suite 2186 pass; new-card count is capped by the remaining daily allowance) |
 | T3 | `TodayPage`, `#/today`, nav item, copy in both locales, `worksWithoutKey`, architecture and changelog lines | steps match the plan; no invented counts | not started |
 | T4 | Landing change and onboarding exit | only after the owner answers the landing question | blocked on owner |
 
