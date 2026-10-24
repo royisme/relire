@@ -97,6 +97,23 @@ Default `publish.ts` writes ignored staging SQL only; it and `--apply-local` sti
 
 Both owner-authorized apply modes use the same already-installed local Wrangler, never install tools or apply migrations: compare existing version bodies, stage without overwrite/delete, read back each exact page plus aggregate hash/count/index/manifest, write/verify publication marker, then one final current-pointer upsert and readback. No BEGIN/COMMIT promise across invocations. A failed command/readback fails publication; reruns are idempotent. Old complete versions and incomplete staging remain. Cleanup and any public delivery require separate approval. The owner-authorized local import is complete: 7,362 entries from 7,391 source ids, 30 pages, explicitly unreviewed. No partial AI decisions were applied; actual review records remain empty. Protected topic/lexicon exports were byte-identical before/after; no remote application or public distribution occurred. The publisher uses installed Wrangler's local platform proxy with `remoteBindings: false` and explicit `worker/.wrangler/state/v3` persistence, binding large page bodies to avoid the SQL-statement limit. Literal staging SQL is not an apply path. See the joint kickoff for final hashes and real-browser verification.
 
+## Graded readers (local-only publication)
+
+After applying migrations locally, the owner can publish included non-bundled readers:
+
+```sh
+bun scripts/graded-readers/publishRemote.ts --sql          # Private staging SQL only, under .local/graded-readers/
+bun scripts/graded-readers/publishRemote.ts --apply-local  # Verified staged publication to local D1 only
+```
+
+Both modes reuse `assemble` over the included syllabus prefix, so current hash-bound reviews, gates G0–G5 and the strict privacy allowlist remain required; only `include: true` and `bundled: false` artifacts are selected afterward. Zero selected readers is a no-op, not a catalogue clear. No review is created or waived. The publisher never applies migrations or accesses remote D1, deploys, installs tools or reads env files.
+
+`readers(id,artifact_hash)` rows are immutable. Stage with INSERT OR IGNORE, reject existing-body/column collisions, read every exact stored JSON body and recompute its full SHA-256 before writing any `readerPublished:<id>:<artifactHash>` marker (`bodyVersion`, `artifactHash`). Write and verify the immutable `readersCatalog:<catalogueHash>` JSON next; summaries contain id/order/level/trilingual title/body version/artifact hash in stage order, and the envelope version hashes the canonical envelope without its version. Switch `readersCurrent` last with one atomic upsert and read it back. Failures before this switch preserve the previous catalogue. Retries are idempotent; old and incomplete staging rows stay. No cleanup or fictitious transaction spans commands.
+
+Apply uses the installed Wrangler local platform proxy, `remoteBindings: false`, `envFiles: []`, and `worker/.wrangler/state/v3`. SQL dry output is staging-only and is not a substitute for verified publication. Private raw errors stay in ignored `.pi-runs/graded-readers/publish-failure.log`; no prose is printed. Do not commit either output. No remote publishing procedure is authorized here.
+
+The app requests catalogue metadata and published reader id/artifact version only, never answers, reveals, progress, vocabulary, recordings or keys. Starter ids retain bundle authority; conflicting service editions ask for an app update. Network failure alone may use a validated saved catalogue/body. Explicit Keep offline reports success only after its cache commit; opened edition snapshots independently survive cache expiry/service loss.
+
 ## Lexicon
 
 Data comes from Morphalou 3.1 (LGPL-LR); the notice, the licence text and the rebuild steps are in `NOTICE.md` and `licences/`. No lexicon data is in the repository.

@@ -1,30 +1,34 @@
-/** Starter-only ordered reading list; content and committed progress load independently, without a service catalogue. */
+/** Ordered starter and optional service reading list; independent failures never hide the local starters. */
 import { useTranslation } from 'react-i18next';
 import { useGradedReaders } from '../../hooks/useGradedReaders';
 import { useReaderProgress } from '../../hooks/useReaderProgress';
+import { useReaderCatalogue } from '../../hooks/useReaderCatalogue';
+import { KeepReaderOffline } from './KeepReaderOffline';
+import type { ReaderSummary } from '../../services/gradedReaders/catalogue';
 import type { PublishedReader } from '../../types/gradedReader';
 import type { ReaderProgress } from '../../types/readerProgress';
 import { authoredText } from '../../utils/authoredText';
 import { Link } from '../shell/Link';
 import { Button } from '../ui/button';
 
-export function readerListStatus(reader: PublishedReader, rows?: ReaderProgress[]) {
-  const current = rows?.find((row) => row.readerId === reader.body.id && row.version === reader.version);
+export function readerListStatus(reader: PublishedReader | ReaderSummary, rows?: ReaderProgress[]) {
+  const id = 'body' in reader ? reader.body.id : reader.id;
+  const current = rows?.find((row) => row.readerId === id && row.version === reader.version);
   return {
     status:
       rows === undefined ? 'unavailable' : current?.completedAt != null ? 'read' : current ? 'opened' : 'notOpened',
-    earlier: rows?.find(
-      (row) => row.readerId === reader.body.id && row.version !== reader.version && row.completedAt !== null,
-    ),
+    earlier: rows?.find((row) => row.readerId === id && row.version !== reader.version && row.completedAt !== null),
   };
 }
 
 export function GradedReadersList({
   content,
   progress,
+  service,
 }: {
   content: ReturnType<typeof useGradedReaders>;
   progress: ReturnType<typeof useReaderProgress>;
+  service?: ReturnType<typeof useReaderCatalogue>;
 }) {
   const { t, i18n } = useTranslation();
   return (
@@ -53,7 +57,47 @@ export function GradedReadersList({
                 </>
               )}
             </div>
-            {!content.readers?.length && <p>{t('gradedReader.empty')}</p>}
+            {service && service.status !== 'disabled' && (
+              <div
+                role="status"
+                aria-busy={service.status === 'loading'}
+                className="h-28 overflow-auto text-sm text-ink-700"
+              >
+                {service.status === 'loading' && <p>{t('gradedReader.service.loading')}</p>}
+                {service.status === 'error' && (
+                  <>
+                    <p className="break-words text-bad-700">{t('gradedReader.loadError', { msg: service.error })}</p>
+                    <Button variant="outline" onClick={service.retry}>
+                      {t('common.retry')}
+                    </Button>
+                  </>
+                )}
+                {service.status === 'ready' && (
+                  <>
+                    <p>
+                      {t(
+                        service.saved
+                          ? 'gradedReader.service.savedCatalogue'
+                          : service.readers?.length
+                            ? 'gradedReader.service.ready'
+                            : 'gradedReader.service.empty',
+                      )}
+                    </p>
+                    {!!service.conflicts?.length && (
+                      <p>
+                        {t('gradedReader.service.conflict', {
+                          ids: service.conflicts.map((entry) => entry.id).join(', '),
+                        })}
+                      </p>
+                    )}
+                    <Button variant="ghost" onClick={service.retry}>
+                      {t('common.retry')}
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+            {!content.readers?.length && !service?.readers?.length && <p>{t('gradedReader.empty')}</p>}
             <ol className="divide-y divide-ink-200">
               {content.readers?.map((reader) => {
                 const { status, earlier } = readerListStatus(reader, progress.rows);
@@ -74,6 +118,27 @@ export function GradedReadersList({
                   </li>
                 );
               })}
+              {service?.status === 'ready' &&
+                service.readers?.map((entry) => {
+                  const { status, earlier } = readerListStatus(entry, progress.rows);
+                  return (
+                    <li key={`${entry.id}:${entry.artifactHash}`} className="min-w-0 py-4 space-y-1 break-words">
+                      <Link
+                        to={{ name: 'gradedReader', readerId: entry.id, version: entry.version }}
+                        className="inline-flex min-h-10 items-center font-serif text-xl text-accent-900 underline underline-offset-4"
+                      >
+                        {entry.title.fr}
+                      </Link>
+                      <p className="text-sm text-ink-700">{authoredText(entry.title, i18n.language)}</p>
+                      <p className="text-xs text-ink-600">
+                        {t('gradedReader.stage', { number: entry.order, level: t('levels.A1') })} ·{' '}
+                        {t(`gradedReader.status.${status}`)}
+                      </p>
+                      {earlier && <p className="text-xs text-ink-600">{t('gradedReader.earlier')}</p>}
+                      <KeepReaderOffline entry={entry} />
+                    </li>
+                  );
+                })}
             </ol>
           </>
         )}
@@ -85,5 +150,6 @@ export function GradedReadersList({
 export function GradedReadersPage() {
   const content = useGradedReaders();
   const progress = useReaderProgress();
-  return <GradedReadersList content={content} progress={progress} />;
+  const service = useReaderCatalogue(content.readers);
+  return <GradedReadersList content={content} progress={progress} service={service} />;
 }

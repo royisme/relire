@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- With a content service configured, graded readers includes additional published editions and Keep offline, with saved-list fallback only on network failure. Bundled starters stay available and conflicting starter editions ask for an app update; without a service, the starter-only experience is unchanged.
 - Record yourself reading a graded reader and find the takes in My study → Shadowing: each edition's sentences keep their own last three takes (keyed by reader and version, so the same sentence in two editions never merges), the log groups them under the reader's title with a deep link back to the pinned sentence, and a take whose edition snapshot is gone stays playable under an honest "Unavailable edition" label. Recording checks only the local snapshot, so it works offline with no key.
 - Read the bundled graded readers without a key: authored word meanings and sentence translations, saved words, device-voice listening, checkpoints and explicit reading status; the readers are AI-reviewed, not human-reviewed.
 - Saved graded-reader words retain their authored bilingual meaning, noun gender and sentence translation in Words and backups, even when the reader is unavailable; AI and reader contexts share the clicked spelling’s review card.

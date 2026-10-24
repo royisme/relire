@@ -124,6 +124,17 @@
   },
   "gradedReader": {
     "listTitle": "Graded readers",
+    "service": {
+      "loading": "Loading more readers…",
+      "ready": "More readers from the content service.",
+      "empty": "No additional readers are published yet.",
+      "savedCatalogue": "Offline: showing the last saved reader list.",
+      "conflict": "A different starter edition is published for {{ids}}. Update the app to use a new starter; the bundled text is kept here.",
+      "keepOffline": "Keep offline",
+      "saving": "Saving…",
+      "savedReader": "Saved for offline reading after the app is installed.",
+      "saveError": "Not saved offline: {{msg}}"
+    },
     "reviewNotice": "AI-reviewed readers, not human-reviewed. No key needed.",
     "loading": "Opening readers…",
     "loadError": "Could not load readers: {{msg}}",
@@ -527,7 +538,7 @@
       "desc": "What Relire Plus is and where your data goes.",
       "what": "Relire Plus is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
-      "servicePrivacy": "This version can read grammar topics, a French dictionary and a complete paged wordbook from a content service. Requests carry a topic id, tapped word, or book id/page/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules, recordings or keys. Wordbook download exposes the whole published book to clients; real content publication is pending owner review and distribution approval.",
+      "servicePrivacy": "This version can read grammar topics, a French dictionary, a complete paged wordbook and additional graded readers from a content service. Requests carry a topic id, tapped word, book id/page/version, or published reader id/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules, recordings or keys. Wordbook download exposes the whole published book to clients; real content publication is pending owner review and distribution approval.",
       "scope": "Relire Plus is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
       "source": "Source code on GitHub",
       "lexicon": "For verbs outside the reviewed list, the word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}.",
