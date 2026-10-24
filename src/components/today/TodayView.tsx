@@ -23,6 +23,11 @@ function stepContent(step: Exclude<TodayStep, { error: string }>, t: TFunction):
       return { to: { name: 'speaking' }, status: t('today.sound.status') };
     case 'mistakes':
       return { to: { name: 'study', tab: 'mistakes' }, status: t('today.mistakes.status', { count: step.unresolved }) };
+    case 'grammar':
+      return {
+        to: { name: 'grammarTopic', topicId: step.topicId },
+        status: t('today.grammar.status', { title: step.title }),
+      };
   }
 }
 

@@ -1,6 +1,6 @@
 # Learning order for the 93 grammar topics, and a grammar step in Today
 
-Status: G1 to G3 landed (2026-10-24); G4 (Today) remains separate. Revised after Argon's review (six findings, checked against the code and applied). Queue item 3 of the standing goal. Platform only: no topic text is written or changed.
+Status: G1 to G4 landed (2026-10-24). Revised after Argon's review (six findings, checked against the code and applied). Queue item 3 of the standing goal. Platform only: no topic text is written or changed.
 
 ## Why
 

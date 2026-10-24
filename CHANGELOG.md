@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- With a content service configured, Today adds a fifth step: the next grammar topic in book order, done for the day once you mark any topic studied; without a service, Today is unchanged and makes no request.
 - Grammar topics follow book order with numbered entries, personal Studied marks and Next links; mark or unmark a topic after reading it.
 - Letter sounds on Speaking: tap a spelling for example words spoken by your device, a plain note and optional IPA; the pack is labelled AI-checked, not teacher-reviewed.
 - Practise letter sounds as a listening drill: the Speaking section's "Practise these sounds" button saves a no-key set (hear a word, choose the spelling) and opens it in Practice.

@@ -1,11 +1,15 @@
-/** Owns gathering Today's step inputs (the shared vocabulary model, the reader hooks, exercise storage), not selection or presentation. */
+/** Owns gathering Today's step inputs (the shared vocabulary model, the reader hooks, exercise storage, the optional topic list), not selection or presentation. */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { errorMessage } from '../services/ai/errors';
+import { loadGrammarTopics } from '../services/grammarTopics/load';
+import { contentServiceUrl } from '../services/grammarTopics/service';
 import { mistakeAttemptsToday, soundAttemptsToday, startOfLocalDay } from '../services/today/activity';
-import { readerEntries, wordsInput } from '../services/today/inputs';
-import { buildTodayPlan, type TodayInput, type TodayPlan } from '../services/today/plan';
+import { grammarInput, readerEntries, wordsInput } from '../services/today/inputs';
+import { buildTodayPlan, type TodayGrammar, type TodayInput, type TodayPlan } from '../services/today/plan';
 import { getVocabularyBook } from '../storage/vocabularyBook';
 import { getUnit, listAttemptsSince, listMistakes, subscribeExercises } from '../storage/exercises';
+import { listTopicStudied, subscribeTopicStudied } from '../storage/topicStudied';
 import type { ExerciseAttempt, ExerciseUnit } from '../types/exercises';
 import { useGradedReaders } from './useGradedReaders';
 import { useReaderCatalogue } from './useReaderCatalogue';
@@ -108,6 +112,35 @@ export function useToday(
     };
   }, [now]);
 
+  // Without a content service there are no topics at all: no request, no grammar step. While the list loads
+  // the four local steps stand on their own; the step joins once the list resolves.
+  const { i18n } = useTranslation();
+  const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
+  const grammarConfigured = contentServiceUrl() !== undefined;
+  const [grammar, setGrammar] = useState<{ value: TodayGrammar } | { error: string } | null>(null);
+  useEffect(() => {
+    if (!grammarConfigured) return;
+    let live = true;
+    let sequence = 0;
+    const load = async () => {
+      const request = ++sequence;
+      try {
+        const [list, studied] = await Promise.all([loadGrammarTopics(), listTopicStudied()]);
+        if (!live || request !== sequence) return;
+        setGrammar({ value: grammarInput(list, studied, now, language) });
+      } catch (err) {
+        if (live && request === sequence) setGrammar({ error: errorMessage(err) });
+      }
+    };
+    const unsubscribe = subscribeTopicStudied(() => void load());
+    void load();
+    return () => {
+      live = false;
+      sequence++;
+      unsubscribe();
+    };
+  }, [grammarConfigured, now, language]);
+
   const plan = useMemo(() => {
     // A model read error is the words step's own error even though no book was ever loaded.
     const wordsSource =
@@ -135,9 +168,11 @@ export function useToday(
                 attemptsToday: mistakeAttemptsToday(practice.today, practice.wrongBefore, now),
               },
             },
+      // `null` is a pending or unconfigured list: the plan omits the step rather than blocking the rest.
+      ...(grammar !== null ? { grammar } : {}),
     };
     return buildTodayPlan(input);
-  }, [vocabulary.error, words, readers, practice, now]);
+  }, [vocabulary.error, words, readers, practice, grammar, now]);
 
   return plan ? { status: 'ready', plan, now } : { status: 'loading' };
 }

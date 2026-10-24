@@ -1,13 +1,15 @@
-/** Pure Today input joins: queue counts and the merged reader catalogue; no storage, no hooks. */
+/** Pure Today input joins: queue counts, the merged reader catalogue and the grammar step; no storage, no hooks. */
 import { expect, test } from 'bun:test';
-import { readerEntries, wordsInput } from '../src/services/today/inputs';
+import { grammarInput, readerEntries, wordsInput } from '../src/services/today/inputs';
 import { publishedReaderFixture } from './fixtures/gradedReaders';
+import { bookList } from './fixtures/grammarTopics';
 import { readerAnswer } from './fixtures/readerProgress';
 import { initialVocabularySchedule } from '../src/utils/srs';
 import { testMatureSchedule, testRow, testBook } from './fixtures/vocabulary';
 import type { ReaderSummary } from '../src/services/gradedReaders/catalogue';
 import type { PublishedReader } from '../src/types/gradedReader';
 import type { ReaderProgress } from '../src/types/readerProgress';
+import type { TopicStudied } from '../src/types/topicStudied';
 
 const now = new Date(2026, 9, 24, 12, 30).getTime();
 const start = new Date(2026, 9, 24).getTime();
@@ -122,4 +124,32 @@ test('a checked answer today marks the reader active even without completion', (
 
 test('an empty catalogue and no progress yields no entries', () => {
   expect(readerEntries([], [], [], now)).toEqual([]);
+});
+
+const mark = (topicId: string, at: number): TopicStudied => ({ topicId, at });
+
+test('grammar takes the first unstudied topic in book order, skipping studied ids', () => {
+  expect(grammarInput(bookList, [mark('test-one', start - 1)], now, 'en')).toEqual({
+    next: { topicId: 'test-two', title: 'TEST two' },
+    studiedToday: false,
+  });
+});
+
+test('grammar counts a studied mark from the local midnight boundary onward', () => {
+  expect(grammarInput(bookList, [mark('test-one', start)], now, 'en').studiedToday).toBe(true);
+  expect(grammarInput(bookList, [mark('test-one', start - 1)], now, 'en').studiedToday).toBe(false);
+});
+
+test('grammar titles follow the interface language; an all-studied book leaves no next topic', () => {
+  expect(grammarInput(bookList, [], now, 'zh').next).toEqual({ topicId: 'test-one', title: 'TEST zh one' });
+  expect(
+    grammarInput(
+      bookList,
+      bookList.map((entry) => mark(entry.id, start)),
+      now,
+      'zh',
+    ),
+  ).toEqual({
+    studiedToday: true,
+  });
 });
