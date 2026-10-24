@@ -50,3 +50,17 @@ Whether a sentence is correct, idiomatic French; whether the English and Chinese
 - `scripts/graded-readers/` — `prompt.txt`, `generate.ts`/`generator.ts`, `tokenize.ts`, the `gate*.ts` set, `check.ts`, `sheet.ts`, `review.ts`, `assemble.ts`, `publish.ts` (bundle), `publishRemote.ts` / `publication.ts` (local D1).
 - `tests/gradedReader*.test.ts` — synthetic fixtures with a fake dispatch; no real model or private file.
 - `docs/graded-readers-plan.md` — the plan this pipeline implements.
+
+## Build evidence — 2026-10-23 (R1-12)
+
+Ran `bun run build` once (exit 0) against the committed three-reader starter. Sizes below are emitted minified bytes and Vite's reported gzip kB (decimal); all three exact asset URLs occur in the generated `dist/sw.js` precache list.
+
+| Chunk (`dist/assets/`) | Minified bytes | Gzip kB | Precached |
+| --- | ---: | ---: | --- |
+| `starter-C7ZkPwxw.js` | 20,075 | 5.38 | yes |
+| `GradedReadersPage-BOUiGdHx.js` | 6,422 | 1.94 | yes |
+| `GradedReaderPage-BVHVc-rI.js` | 21,891 | 6.85 | yes |
+
+`src/data/graded-readers/starter.json` is 44,248 UTF-8 bytes, below the 100 KiB (102,400-byte) file budget. Its emitted starter chunk is 20,075 bytes, below the 120 KiB (122,880-byte) minified budget (also below the detailed design's 30 KiB gzip budget). No budget is exceeded; no move to D1 is needed. Byte counts came from `Bun.file(path).bytes().byteLength`; precache membership was checked against each `assets/<name>` URL in `dist/sw.js`. The build reports 289 precache entries (7,434.02 KiB) and an unrelated >500 kB chunk warning; it does not prove device or offline browser behaviour.
+
+`tests/gradedReaderFlow.test.ts` guards the committed starter's 100 KiB size and exercises every real bundled edition through checkpoints, completion, authored vocabulary, TEST recording export/restore and unavailable-edition history. The explicit-grader storage roundtrip passes, but the DOM-free regression invoking the actual Settings file-import handler fails: `BackupControls` omits the grader required for checked-reader backups. R1-12 is blocked pending that caller correction; the test is neither skipped nor marked expected-failing.
