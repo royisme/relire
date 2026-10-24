@@ -34,11 +34,14 @@ export const reviewSourceKey = (
       ? 'gradedReader.sourceHuman'
       : 'gradedReader.sourceUnknown';
 
+/** The edition's text as the Reader cuts it: one sentence per line, exactly as authored. */
+export const gradedText = (reader: PublishedReader) => reader.body.sentences.map((sentence) => sentence.fr).join('\n');
+
 /** Display only: an authored edition never becomes an Article or a Library row. */
 export function gradedDocument(reader: PublishedReader, t: TFunction): ReaderDocument {
   return {
     title: reader.body.title.fr,
-    content: reader.body.sentences.map((sentence) => sentence.fr).join('\n'),
+    content: gradedText(reader),
     level: reader.body.level,
     category: '',
     source: t(reviewSourceKey(reader.review.reviewedBy)),

@@ -6,7 +6,7 @@ import type { VocabularyModel } from '../../hooks/useVocabulary';
 import { useReaderWorkspace } from '../../hooks/useReaderWorkspace';
 import type { OpenedReader } from '../../services/gradedReaders/session';
 import { readerOccurrence } from '../../services/gradedReaders/occurrence';
-import { gradedDocument } from '../../types/readerSource';
+import { gradedDocument, gradedText } from '../../types/readerSource';
 import { errorMessage } from '../../services/ai/errors';
 import { navigate } from '../../hooks/useRoute';
 import { ReaderView } from '../ReaderView';
@@ -115,7 +115,7 @@ export function GradedReaderWorkspace({
         <ReaderAuthoredSheets
           key={JSON.stringify(selection)}
           selection={selection}
-          text={gradedDocument(reader).content}
+          text={gradedText(reader)}
           vocabulary={vocabulary}
           onClose={() => setSelection(null)}
         />

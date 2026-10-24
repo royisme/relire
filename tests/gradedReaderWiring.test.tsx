@@ -21,7 +21,7 @@ import { SpeakButton } from '../src/components/ui/speak-button';
 import { AuthoredEntry } from '../src/components/word/AuthoredEntry';
 import { useReaderWorkspace } from '../src/hooks/useReaderWorkspace';
 import { readerOccurrence } from '../src/services/gradedReaders/occurrence';
-import { gradedDocument } from '../src/types/readerSource';
+import { gradedDocument, gradedText } from '../src/types/readerSource';
 import { emptyAnswer } from '../src/services/exercises/answer';
 import { readerQuestionItem } from '../src/services/gradedReaders/checkpoints';
 import { getVocabularySnapshot } from '../src/storage/vocabulary';
@@ -199,7 +199,7 @@ test('the authored footer passes clicked spelling and the reader definition to d
     probe.render(() =>
       ReaderAuthoredSheets({
         selection: { kind: 'word', occurrence },
-        text: gradedDocument(reader).content,
+        text: gradedText(reader),
         vocabulary,
         onClose: noop,
       }),
