@@ -4,6 +4,12 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: Letter sounds practice button (S3b, C4)
+
+- "Practise these sounds" in the Letter sounds section saves a Listening set of spelling-to-sound choices and opens it in Practice; `ItemRow` plays Listen with the device voice for items that declare it. The Practice caption names the spelling drill. Rule files and the `speechAfterCheck` comment name both device-voice sources.
+- Verified in the main checkout: typecheck, lint, format, shape, i18n, the full suite (2,288 tests), the UI detector, the build and the pack `--check` exit 0. **Unverified:** hearing it on a real device voice, three themes, 360 px (the owner's).
+- Known duplication left alone: the practice button and the reader dictation button share about 25 lines; extract only if a third caller appears.
+
 ## 2026-10-24: Letter sounds section and drill preparation (S2, S3a)
 
 - The Speaking page has a Letter sounds section above French sounds: spellings grouped as vowels, nasal vowels, consonants and silent letters; a sheet per spelling with its note, the example words (each with a device-voice Listen button) and a closed "Show IPA" fold. No IPA is visible in the section itself, and the AI-check notice shows while any row is AI-reviewed only.

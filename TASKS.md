@@ -42,7 +42,7 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | D1 | Meta schema and marker-to-type refinement, `gradeItem` flag `ignoreSentencePunctuation`, `prepareReaderDictation` | prepared unit passes `ExerciseUnitSchema`; a sentence typed without its final full stop grades right, a missing hyphen or apostrophe still wrong; published readers require at least 3 sentences; retry through `saveUnits` keeps the batch | landed (full suite 2224 pass, detector zero, build exit 0) |
 | D2 | Device engine in `NumberDictationControl` and `ItemRow`; "Practise by dictation" button in `GradedReaderWorkspace`; copy, caption, changelog, architecture | no synthesis or fetch; French text not shown before the check; one filled button per view stays | landed (full suite 2240 pass, detector zero, build exit 0); owner device check pending |
 
-### Next epic: letter sounds, spelling to sound before IPA (`docs/spelling-sounds-plan.md`; Argon review applied)
+### Landed: letter sounds, spelling to sound before IPA (`docs/spelling-sounds-plan.md`)
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
@@ -52,7 +52,16 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | S1b | Generated pack, CI `--check` line (lead) | CI never sees an empty or unreviewed pack | landed (16 AI records, `--check` exit 0; full suite 2265 pass) |
 | S2 | Letter sounds section, sheet, IPA fold, review notice | device voice only; IPA closed by default; copy in both locales | landed (full suite 2283 pass, detector zero, build exit 0); owner device check pending |
 | S3a | `prepareSpellingDrill`, `supportsListening`, meta schema | distinct words, distractors of a different sound and not a substring of the heard word | landed (200-seed invariant tests on the real pack) |
-| S3b | `ItemRow` device branch, "Practise these sounds" button, error text, rule lines | deterministic grading; no synthesis | next |
+| S3b | `ItemRow` device branch, "Practise these sounds" button, error text, rule lines | deterministic grading; no synthesis | landed (full suite 2288 pass, detector zero, build and pack check exit 0); owner device check pending |
+
+### Next epic: learning order of the 93 grammar topics and a Today step (proposed; `docs/grammar-order-plan.md`)
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| G1 | `position` from the manifest through publish, the D1 column, `/v1/topics` (sorted by it) and the summary schema | positions unique and positive; list sorted by position, not alphabetically | plan under review |
+| G2 | `storage/topicStudied.ts` (mark, unmark, list, subscribe) and its backup | idempotent mark; restore validates the whole file; absent keeps, `[]` clears | after G1 |
+| G3 | Topics page in book order, numbers, studied marks, Next links, mark button (copy by agy Gemini) | no invented progress; one filled button per view | after G2 |
+| G4 | Today `grammar` step (service configured only) | omitted, never faked, without a service; real error on the step | after G3 |
 
 ### Content (paused by the owner's priority)
 
@@ -62,6 +71,7 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 
 ## Owner
 
+- Letter sounds by hand: Speaking page, hear the example words on a real device voice (iOS Safari especially), the IPA fold, "Practise these sounds" and a wrong answer in Mistakes, three themes and 360 px.
 - Human language review of the 16 letter-sounds rows (they carry `AI review:` records only; the `ç` examples `déçu` and `façade` are above A1 and need a teacher's pick), before any real beginner uses the section.
 - Try reader dictation by hand: "Practise by dictation" on a graded reader page with a real device voice (iOS Safari especially), type a full sentence on a phone, find a wrong answer in Mistakes, three themes and 360 px.
 - Try Today by hand (`#/today`, now the landing page): light, sepia, dark and 360 px, a first run through onboarding, and Sound pairs with a device voice. Then run the e2e specs you care about (13 `goto` entries were repointed to `/#/read`; none was run).
