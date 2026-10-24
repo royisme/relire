@@ -13,6 +13,7 @@ import {
 import { useSaveStatus } from '../../hooks/useSaveStatus';
 import type { AppSettings } from '../../utils/appSettings';
 import { Button } from '../ui/button';
+import { Switch } from '../ui/switch';
 import { fieldLabel } from './fields';
 import { SaveBar } from './SaveBar';
 import { saveSlice, sliceOf } from './slices';
@@ -25,18 +26,19 @@ interface ServiceSectionProps {
   onSaved: (next: AppSettings) => void;
 }
 
-/** The outcome a Test shows: the real result, never a guess or a count. */
-const testMessage = (error: unknown, t: (key: string, options?: Record<string, string>) => string) =>
-  error instanceof ContentServiceHttpError && error.status === 401
-    ? t('serviceSettings.testRejected')
-    : error instanceof ContentServiceHttpError && error.status === 429
-      ? t('serviceSettings.testLimited')
-      : error instanceof ContentServiceHttpError
-        ? t('serviceSettings.testStatus', { msg: error.message })
-        : error instanceof ContentServiceNetworkError
-          ? t('serviceSettings.testNetwork')
-          : // A 200 that is not the topic list: the schema's or the parser's real reason.
-            t('serviceSettings.testInvalidBody', { msg: error instanceof Error ? error.message : String(error) });
+/**
+ * The outcome a Test shows: the real result, never a guess or a count. A hint names the case and the real error
+ * follows it, so a 401's code, a limiter's answer or a network failure's reason stay on screen.
+ */
+const testMessage = (error: unknown, t: (key: string, options?: Record<string, string>) => string) => {
+  if (error instanceof ContentServiceHttpError) {
+    const hint = { 401: 'serviceSettings.testRejected', 429: 'serviceSettings.testLimited' }[error.status];
+    return t(hint ?? 'serviceSettings.testStatus', { msg: error.message });
+  }
+  if (error instanceof ContentServiceNetworkError) return t('serviceSettings.testNetwork', { msg: error.message });
+  // A 200 that is not the topic list: the schema's or the parser's real reason.
+  return t('serviceSettings.testInvalidBody', { msg: error instanceof Error ? error.message : String(error) });
+};
 
 export function ServiceSection({ draft, saved, onChange, onSaved }: ServiceSectionProps) {
   const { t } = useTranslation();
@@ -118,9 +120,10 @@ export function ServiceSection({ draft, saved, onChange, onSaved }: ServiceSecti
             onChange={(event) => setUrl(event.target.value)}
             className="w-full h-10 px-3 rounded-md bg-surface border border-ink-300 text-sm font-mono focus:outline-none focus:border-accent-600"
           />
+          {/* Both texts hold the same box at the narrowest width, so editing the address moves nothing below. */}
           <p
             id="service-url-help"
-            className={`text-xs mt-1 leading-relaxed ${urlUsable || !url.trim() ? 'text-ink-500' : 'text-bad-700'}`}
+            className={`text-xs mt-1 min-h-16 leading-relaxed ${urlUsable || !url.trim() ? 'text-ink-500' : 'text-bad-700'}`}
           >
             {t(urlUsable || !url.trim() ? 'serviceSettings.urlHelp' : 'serviceSettings.urlInvalid')}
           </p>
@@ -141,9 +144,11 @@ export function ServiceSection({ draft, saved, onChange, onSaved }: ServiceSecti
       </div>
 
       <div>
+        {/* Wide enough for both labels, so starting a Test does not resize the control. */}
         <Button
           type="button"
           variant="outline"
+          className="min-w-28"
           onClick={() => void test()}
           disabled={testing || !urlUsable || !current.key}
         >
@@ -164,25 +169,13 @@ export function ServiceSection({ draft, saved, onChange, onSaved }: ServiceSecti
 
       <div>
         <div className="flex min-h-10 items-center gap-3">
-          <button
-            type="button"
-            role="switch"
+          <Switch
             data-service-enable
-            aria-checked={enabled}
-            aria-label={t('serviceSettings.enableLabel')}
+            checked={enabled}
+            onCheckedChange={toggle}
             disabled={!enabled && !canEnable}
-            onClick={toggle}
-            className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-md disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <span
-              aria-hidden="true"
-              className={`relative h-4 w-7 shrink-0 rounded-full ${enabled ? 'bg-accent-700' : 'bg-ink-500'}`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-surface ${enabled ? 'translate-x-3' : ''}`}
-              />
-            </span>
-          </button>
+            aria-label={t('serviceSettings.enableLabel')}
+          />
           <span className="min-w-0 text-sm text-ink-900">{t('serviceSettings.enableLabel')}</span>
         </div>
         <p className="text-xs leading-relaxed text-ink-500 break-words">{t('serviceSettings.enableNote')}</p>

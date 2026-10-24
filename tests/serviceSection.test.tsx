@@ -1,7 +1,6 @@
 /** The Content service section: fields, a live Test of the draft values, the Test-gated switch, and its own save. */
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
-import * as React from 'react';
-import * as translations from 'react-i18next';
+import { Children, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { createInstance } from 'i18next';
 import { getAppSettings } from '../src/utils/appSettings';
 import { withSlice } from '../src/components/settings/slices';
@@ -9,10 +8,14 @@ import { ServiceSection } from '../src/components/settings/ServiceSection';
 import { SaveBar } from '../src/components/settings/SaveBar';
 import { freshSettingsStorage, restoreSettingsStorage } from './fixtures/contentServiceSettings';
 import { bookList } from './fixtures/grammarTopics';
-import * as statusHook from '../src/hooks/useSaveStatus';
 import { Button } from '../src/components/ui/button';
+import { Switch } from '../src/components/ui/switch';
 import { readerHookProbe } from './fixtures/readerHookProbe';
 import en from '../src/i18n/locales/en.json';
+
+// Dynamic namespaces because the spies replace the hooks in place: testable, unlike a module mock that would leak.
+const translations = await import('react-i18next');
+const statusHook = await import('../src/hooks/useSaveStatus');
 
 const i18n = createInstance();
 await i18n.init({
@@ -53,7 +56,7 @@ afterEach(() => {
   restoreSettingsStorage();
 });
 
-type Node = React.ReactElement<Record<string, unknown>>;
+type Node = ReactElement<Record<string, unknown>>;
 
 /** The section's elements in document order; the probe keeps the section's state between renders. */
 function render(): Node[] {
@@ -70,12 +73,12 @@ function render(): Node[] {
       },
     });
     const found: Node[] = [];
-    const visit = (node: React.ReactNode) => {
-      if (!React.isValidElement<Record<string, unknown>>(node)) return;
+    const visit = (node: ReactNode) => {
+      if (!isValidElement<Record<string, unknown>>(node)) return;
       found.push(node);
       // The Save bar is a component of its own; the walk looks inside it because the test presses its Save.
       if (node.type === SaveBar) visit(SaveBar(node.props as unknown as Parameters<typeof SaveBar>[0]));
-      React.Children.forEach(node.props.children as React.ReactNode, visit);
+      Children.forEach(node.props.children as ReactNode, visit);
     };
     visit(tree);
     return found;
@@ -90,7 +93,8 @@ const elementOf = (elements: Node[], match: (element: Node) => boolean) => {
 const field = (elements: Node[], id: string) => elementOf(elements, (element) => element.props.id === id);
 const buttonOf = (elements: Node[], label: string) =>
   elementOf(elements, (element) => element.type === Button && element.props.children === label);
-const enableSwitch = (elements: Node[]) => elementOf(elements, (element) => element.props.role === 'switch');
+const enableSwitch = (elements: Node[]) =>
+  elementOf(elements, (element) => element.props['data-service-enable'] === true);
 const resultText = (elements: Node[]) => {
   const slot = elementOf(elements, (element) => element.props['data-service-test-result'] === true);
   const paragraph = slot.props.children as Node | undefined;
@@ -108,8 +112,10 @@ const fillDraft = (url: string, key: string) => {
 test('an empty section offers no Test, keeps the switch off and disabled, and promises nothing', () => {
   const elements = render();
   expect(buttonOf(elements, 'Test').props.disabled).toBe(true);
+  // The shared Base UI switch, not a hand-drawn one.
+  expect(enableSwitch(elements).type).toBe(Switch);
   expect(enableSwitch(elements).props.disabled).toBe(true);
-  expect(enableSwitch(elements).props['aria-checked']).toBe(false);
+  expect(enableSwitch(elements).props.checked).toBe(false);
   expect(resultText(elements)).toBeUndefined();
 });
 
@@ -131,22 +137,32 @@ test('Test probes the draft values with no store and the draft key, and a pass u
   expect(enableSwitch(settled).props.disabled).toBe(false);
 });
 
-for (const [name, respond, key, expected] of [
-  ['a rejected key', () => Response.json({ error: 'unauthorized' }, { status: 401 }), 'testRejected', ''],
-  ['a rate-limited probe', () => Response.json({ error: 'limited' }, { status: 429 }), 'testLimited', ''],
+for (const [name, respond, hint, detail] of [
+  [
+    'a rejected key',
+    () => Response.json({ error: 'unauthorized' }, { status: 401 }),
+    'testRejected',
+    'HTTP 401: unauthorized',
+  ],
+  [
+    'a rate-limited probe',
+    () => Response.json({ error: 'limited' }, { status: 429 }),
+    'testLimited',
+    'HTTP 429: limited',
+  ],
   [
     'another HTTP status',
     () => Response.json({ error: 'unavailable' }, { status: 500 }),
     'testStatus',
     'HTTP 500: unavailable',
   ],
-  ['a network failure', () => Promise.reject(new TypeError('Failed to fetch')), 'testNetwork', ''],
-  ['an HTML 200', () => new Response('<html>TEST ONLY</html>'), 'testInvalidBody', ''],
+  ['a network failure', () => Promise.reject(new TypeError('Failed to fetch')), 'testNetwork', 'Failed to fetch'],
+  ['an HTML 200', () => new Response('<html>TEST ONLY</html>'), 'testInvalidBody', 'Failed to parse JSON'],
   [
     'a JSON 200 that is not the topic list',
     () => Response.json({ unexpected: true }),
     'testInvalidBody',
-    'Invalid input',
+    'Invalid input: expected array, received object',
   ],
 ] as const) {
   test(`Test shows the real result for ${name} and keeps the switch locked`, async () => {
@@ -156,9 +172,10 @@ for (const [name, respond, key, expected] of [
     await Bun.sleep(0);
     const settled = render();
     const message = resultText(settled) ?? '';
-    // Every result names its own case; where the case carries a real detail, that detail is on screen.
-    expect(message).toContain(i18n.t(`serviceSettings.${key}`).split('{{msg}}')[0]);
-    if (expected) expect(message).toContain(expected);
+    const hintText = i18n.t(`serviceSettings.${hint}`, { msg: '' });
+    // The hint names the case and the real error follows it, never a hint alone.
+    expect(message.startsWith(hintText)).toBe(true);
+    expect(message.slice(hintText.length)).toContain(detail);
     expect(enableSwitch(settled).props.disabled).toBe(true);
   });
 }
@@ -188,14 +205,14 @@ test('the switch turns on after a pass, off needs no Test, and an edit resets bo
   (buttonOf(render(), 'Test').props.onClick as () => void)();
   await Bun.sleep(0);
   let elements = render();
-  (enableSwitch(elements).props.onClick as () => void)();
+  (enableSwitch(elements).props.onCheckedChange as () => void)();
   expect(draft.contentService.enabled).toBe(true);
   elements = render();
-  expect(enableSwitch(elements).props['aria-checked']).toBe(true);
+  expect(enableSwitch(elements).props.checked).toBe(true);
   // Off needs no pass; the pass is kept, so the switch can be turned back on.
-  (enableSwitch(elements).props.onClick as () => void)();
+  (enableSwitch(elements).props.onCheckedChange as () => void)();
   expect(draft.contentService.enabled).toBe(false);
-  (enableSwitch(render()).props.onClick as () => void)();
+  (enableSwitch(render()).props.onCheckedChange as () => void)();
   expect(draft.contentService.enabled).toBe(true);
   // Editing either field turns the service off and clears the pass.
   change(render(), 'service-url', 'http://other.test');
@@ -210,12 +227,12 @@ test('Save stores the section alone once the switch is on, and the page draft fo
   fillDraft('http://content.test/', ' TEST-key ');
   (buttonOf(render(), 'Test').props.onClick as () => void)();
   await Bun.sleep(0);
-  (enableSwitch(render()).props.onClick as () => void)();
+  (enableSwitch(render()).props.onCheckedChange as () => void)();
   const elements = render();
   (buttonOf(elements, 'Save').props.onClick as () => void)();
   expect(getAppSettings().contentService).toEqual({ enabled: true, url: 'http://content.test', key: 'TEST-key' });
   // The page draft takes the stored block while its other slices keep their unsaved values.
   expect(draft.contentService).toEqual(getAppSettings().contentService);
   expect(draft.practiceStrictAccents).toBe(saved.practiceStrictAccents);
-  expect(enableSwitch(render()).props['aria-checked']).toBe(true);
+  expect(enableSwitch(render()).props.checked).toBe(true);
 });

@@ -4,6 +4,12 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: RS2 landed (Settings > Content service)
+
+- A device-local `contentService` settings block (`enabled`, `url`, `key`), off by default, dropped from backups on export and kept on restore. `contentServiceUrl()` is `undefined` unless enabled with URL and key, so the 23 call sites are unchanged; `contentServiceFetch` sends `Authorization: Bearer`. New section `service` in Settings: URL, key, Test (draft values, `cache: 'no-store'`, topic-list schema, stale results ignored, the real error after each hint), and a Test-gated Enable switch (new `ui/switch`, Base UI; `shadcn add switch` again generated a wrong `cn` import and was hand-fixed). The 23 call sites were re-checked: nothing stays mounted beside Settings, so no reload and no subscription.
+- Worker: glm-5.3 (`49846bc`). gpt-6-astra reviewed the diff (fail, 5 points: replaced real errors, unstable slots, a hand-drawn switch, missing page-level test, star imports; plus a stale About sentence); deepseek-flash fixed them (`d8a25f6`, about 0.3 CNY), I simplified one nested ternary. The reader's labelled toggle `Button` keeps its own markup (a switch cannot nest in a button).
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,422), Worker typecheck, build, detector `[]`. **Unverified:** the section's look at 360 px and in the three themes, a real Test against a running Worker, Enable end to end in a browser.
+
 ## 2026-10-24: RS1 landed (routed Worker API with access keys)
 
 - Plan `docs/remote-settings-plan.md` (two reviews by gpt-6-astra because Argon had no quota; every finding applied). The Worker is a Hono app (`worker/src/index.ts`) with its own CORS, method, limiter, `OPTIONS` and access-key middleware in that order, prefix routes over the raw path, resources split into `topics.ts` and `lexicon.ts`. `ACCESS_KEYS` fails closed; SHA-256 digests compared without an early exit (Bun has no `timingSafeEqual`); 401 carries the CORS headers and `WWW-Authenticate`; every success is `private, no-cache` with `Vary: Origin, Authorization`; auth runs before the `ETag` match.
