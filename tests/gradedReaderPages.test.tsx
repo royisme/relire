@@ -137,12 +137,12 @@ test('status distinguishes unavailable, not opened, opened, read and only comple
 });
 
 test('gradedDocument is a view adapter with no article identity or learner fields', () => {
-  expect(gradedDocument(reader)).toEqual({
+  expect(gradedDocument(reader, i18n.t.bind(i18n))).toEqual({
     title: reader.body.title.fr,
     content: reader.body.sentences.map((sentence) => sentence.fr).join('\n'),
     level: 'A1',
     category: '',
-    source: reader.review.reviewedBy,
+    source: i18n.t('gradedReader.sourceUnknown'),
   });
   expect(readerIdentity({ kind: 'graded', readerId: reader.body.id, version: reader.version })).toContain(
     reader.version,

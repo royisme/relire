@@ -105,7 +105,7 @@ export function useShadowingLog(articles: Article[], units: ExerciseUnit[] | nul
     for (const row of progress ?? [])
       sources.push({
         id: readerIdentity({ kind: 'graded', readerId: row.readerId, version: row.version }),
-        document: gradedDocument(row.snapshot),
+        document: gradedDocument(row.snapshot, t),
       });
     for (const source of sources) {
       const list = bySource.get(source.id);

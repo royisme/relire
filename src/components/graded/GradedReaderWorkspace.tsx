@@ -38,7 +38,7 @@ export function GradedReaderWorkspace({
     <>
       <ReaderView
         readingDocument={{
-          ...gradedDocument(reader),
+          ...gradedDocument(reader, t),
           category: t('gradedReader.stageNumber', { number: reader.body.order }),
         }}
         source={{ kind: 'graded', readerId: reader.body.id, version: reader.version }}
