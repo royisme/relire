@@ -792,6 +792,25 @@
     }
   },
   "spellingSounds": {
+    "title": "字母发音",
+    "intro": "点击拼写，听包含它的法语单词。",
+    "groups": {
+      "vowels": "元音",
+      "nasals": "鼻化元音",
+      "consonants": "辅音",
+      "silent": "不发音字母"
+    },
+    "examples": "示例单词",
+    "showIpa": "显示音标",
+    "hideIpa": "隐藏音标",
+    "reviewNotice": "由 AI 检查，未经老师核对。",
+    "practise": "练习这些发音",
+    "drill": {
+      "title": "拼写辨音",
+      "instruction": "听单词，选出对应其主要发音的拼写。"
+    },
+    "listenWord": "听 {{word}}",
+    "sheetClose": "关闭面板",
     "notes": {
       "ou": "发音近似英语 soup 中的 ou：双唇收圆，元音音色保持不变。",
       "oi": "读作类似 wa 的音，由开头的 w 平滑过渡到元音 a。",

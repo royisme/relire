@@ -800,6 +800,25 @@
     }
   },
   "spellingSounds": {
+    "title": "Letter sounds",
+    "intro": "Tap a spelling to hear French words that use it.",
+    "groups": {
+      "vowels": "Vowels",
+      "nasals": "Nasal vowels",
+      "consonants": "Consonants",
+      "silent": "Silent letters"
+    },
+    "examples": "Example words",
+    "showIpa": "Show IPA",
+    "hideIpa": "Hide IPA",
+    "reviewNotice": "Checked by an AI, not by a teacher.",
+    "practise": "Practise these sounds",
+    "drill": {
+      "title": "Spelling to sound",
+      "instruction": "Listen to each word and choose the spelling that makes its main sound."
+    },
+    "listenWord": "Hear {{word}}",
+    "sheetClose": "Close sheet",
     "notes": {
       "ou": "Sounds approximately like the ‘ou’ in English ‘soup’: round your lips and keep the vowel steady.",
       "oi": "Read like 'wa', smoothly gliding from a w sound into an open a.",
