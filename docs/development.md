@@ -34,16 +34,23 @@ Development handoff: [Built-in vocabulary and flashcards specification](vocabula
 
 ## Run the content service locally
 
-From the repository root, install the Worker dependencies, apply the migration to local D1, and start the service on its default port 8787. The origin flag allows the app's local Vite origin (the Worker otherwise denies cross-origin access):
+**The easy way: one process.** `bun run dev` also serves the content Worker next to the app (the Cloudflare Vite plugin, dev only: `vite build` and the GitHub Pages bundle are unchanged). Only `/v1/*` reaches the Worker; everything else is the app. It uses the same local D1 the publishers write (`worker/.wrangler/state/v3`), so apply the migrations once and publish as usual:
 
 ```sh
 bun install --cwd worker
+cd worker && bunx wrangler d1 migrations apply DB --local && cd ..
+```
+
+Put a throwaway key in the gitignored `worker/.dev.vars` (`ACCESS_KEYS=<any long random string>`; without it every request is `401`), run `bun run dev`, open `http://localhost:5173`, then Settings > Content service: enter `http://localhost:5173` and the same key, press Test, switch the service on. Dev caveat: the plugin bundles its own workerd, so the dev Worker runs with `compatibility_date` 2026-10-13 (an in-memory override in `vite.config.ts`; `worker/wrangler.jsonc` keeps 2026-10-19). Remote bindings are forced off in dev.
+
+**A separate Worker process (optional).** From the repository root, in `worker/`, start it on its default port 8787; the origin flag allows the app's local Vite origin (the Worker otherwise denies cross-origin access):
+
+```sh
 cd worker
-bunx wrangler d1 migrations apply DB --local
 bun run dev --var ALLOWED_ORIGINS:http://localhost:5173
 ```
 
-Put a throwaway key in the gitignored `worker/.dev.vars` (`ACCESS_KEYS=<any long random string>`) and run `bun run dev` in `worker/`. In the app root, optionally create the gitignored `.env.local` with `VITE_CONTENT_SERVICE_URL=http://127.0.0.1:8787` (it only prefills the URL field), run `bun run dev` in another terminal, open `http://localhost:5173`, then Settings > Content service: enter that URL and the same key, press Test, switch the service on. The service is off by default, so without it Grammar shows Conjugation and Gender; noun reference and local drills need neither a service nor an AI key. Local D1 starts with no published topics.
+Optionally put `VITE_CONTENT_SERVICE_URL=http://127.0.0.1:8787` in the gitignored `.env.local` (it only prefills the URL field), then enter that URL and the key in Settings as above. The service is off by default, so without it Grammar shows Conjugation and Gender; noun reference and local drills need neither a service nor an AI key. Local D1 starts with no published topics.
 
 From the repository root, `bun scripts/grammar-topics/publish.ts` runs the existing reviewed-only gate over the manifest, hash-bound reviews and private `.local/grammar-topics/drafts-<chapter>.json` arrays, then writes private `.local/grammar-topics/publish.sql`; `--apply-local` also replaces the local D1 topics (apply the migration above first). Excluded ids are listed; zero included topics clears the published set. Static topic/tag-index artifacts and the `build.ts topics` target are gone. CI uses `bun scripts/grammar-topics/publish.ts --check` to validate public metadata and chapter labels only, without reading `.local/`. See `worker/README.md` for owner publishing instructions.
 
