@@ -30,7 +30,7 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 
 Stages 1 to 3 have private drafts with AI review records (not human review). Stages 4 to 12 are not written; stage 4 has an unreviewed draft. Resume after the platform: R0-7 for stages 4 to 5, R2 for 6 to 12, a human language review before any real beginner uses the readers.
 
-Speaking IA: implemented uncommitted on `pi/gr-ia-speaking`; static/unit/build checks pass except `shape:check` cannot read the unstaged removed file (current-file shape check passes); owner-manual visual acceptance pending.
+Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has landed; owner-manual visual acceptance is pending.
 
 ## Owner
 
