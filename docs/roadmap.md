@@ -28,6 +28,7 @@ Principles that shape every item: nothing has shipped, so no compatibility code;
 | Import source step | Thumbnails, up to five images per request (reading order), remove one image or the PDF, clear pasted text, discard in place without the leave dialog; the extraction mode select keeps a fixed height | `docs/merge-progress.md` (import), `CHANGELOG.md` |
 | Practice as exercise sets | Practice lists sets in a table (search, level filter, sortable columns, delete with a named confirmation); a set page lists its exercises with per-exercise delete; "Add exercises" dialog holds import and "from an article"; Library and Practice tables share shadcn Table with TanStack Table | `DESIGN.md` "Data tables", `docs/architecture.md` |
 | UI component library | shadcn/ui on Base UI is set up (`components.json`, `@/` alias, tokens mapped); Table, Select, Input, Checkbox and Collapsible are in place; the hand-written primitives (overlay Dialog/Sheet/Drawer, Segmented, MenuButton, Button, SpeakButton) are not migrated | `docs/conventions.md` "UI components", `docs/architecture.md` |
+| Today checklist | The landing page `#/today`: up to four steps (words due and new, the next graded reader, sound pairs, saved mistakes), each a link with a status and a "done today" mark derived from stored timestamps; no new store, no key, no streaks. Static and unit checks passed; the owner's visual and first-run check is pending | `docs/today-plan.md`, `CHANGELOG.md` |
 
 ## Next
 

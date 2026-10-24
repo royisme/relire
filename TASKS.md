@@ -26,14 +26,14 @@ Plan and decisions: `docs/graded-readers-plan.md` (epic #65; phases #62, #63, #6
 
 Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), R1-6a (authored word and sentence components), R1-7 (checkpoints component), R1-8 (authored saved-word definitions), R1-9 (device-voice plumbing), R1-10 (recording ownership), R1-11. Integrated pages have landed (visual and device checks are the owner's). R1-2b wires the optional service catalogue and local-only staged publisher. No service configured still means bundle only.
 
-### Next epic: Today checklist (proposed; `docs/today-plan.md`)
+### Landed: Today checklist (`docs/today-plan.md`)
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
 | T1 | `services/today/plan.ts` and `activity.ts`, pure | ordering, omission, local-midnight and done-today rules, empty-queue and all-complete cases tested | landed (26 tests; full suite 2165 pass) |
 | T2 | `useToday` hook; extract the reader status function from `GradedReadersPage` | one `now`; the shared vocabulary model is passed in; each source reports its own error | landed (full suite 2186 pass; new-card count is capped by the remaining daily allowance) |
 | T3 | `TodayPage`, `#/today`, nav item, copy in both locales, `worksWithoutKey`, architecture and changelog lines | steps match the plan; no invented counts | landed (full suite 2213 pass, detector zero, build exit 0); owner visual check pending |
-| T4 | Landing change and onboarding exit | `#/` and `''` open Today; Library stays at `#/read`; `notFound`, `'#/read'` fallbacks and onboarding step 3 exit agree | next (owner agreed Today is the landing page) |
+| T4 | Landing change and onboarding exit | `#/` and `''` open Today; Library stays at `#/read`; `notFound`, `'#/read'` fallbacks and onboarding step 3 exit agree | landed (full suite 2213 pass, detector zero, build exit 0); no e2e run; owner visual check pending |
 
 ### Content (paused by the owner's priority)
 
@@ -43,6 +43,7 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 
 ## Owner
 
+- Try Today by hand (`#/today`, now the landing page): light, sepia, dark and 360 px, a first run through onboarding, and Sound pairs with a device voice. Then run the e2e specs you care about (13 `goto` entries were repointed to `/#/read`; none was run).
 - Answer the open decisions in `docs/graded-readers-plan.md` (public bundle of stages 1 to 5, who reviews the language, word budgets).
 - Try the graded readers by hand with `docs/graded-readers-trial.md` (no AI key needed), then send back what is wrong.
 - Try by hand: the pronunciation features (practice-card marks, strip, Details), Sound pairs, the published local grammar topics; accept or change the open copy items (#16, #17, #24).

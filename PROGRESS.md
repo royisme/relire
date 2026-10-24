@@ -4,6 +4,14 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: Today checklist (T1 to T4)
+
+- Today is the page the app opens on (`#/today`; the Library stays at `#/read`). Up to four steps, each a link into an existing page with a status read from stored data: review words (real due and new counts), the next graded reader, sound pairs (always shown), and saved mistakes. "Done today" is derived from review, checkpoint and attempt timestamps in the local day; nothing new is stored. Plan: `docs/today-plan.md`.
+- Static checks, the full suite (2,213 tests), the production build and the UI detector all exit 0 in the main checkout after each merge.
+- Found while building: `vocabularyQueue` does not cap new cards at the daily limit, so Today caps them by the remaining allowance itself; a first wrong answer today is not a mistake "retry", so retries count only items wrong before today. Both have tests.
+- The shared e2e fixture and 12 other specs entered the app with `goto('/')` and would have landed on Today; they now use `/#/read`, the same page as before. **No e2e was run.**
+- **Unverified:** the Today page in light, sepia and dark and at 360 px, the first-run flow with onboarding, and Sound pairs audio on a real device voice. Those are the owner's.
+
 ## 2026-10-23: graded-reader flow and build evidence (R1-12)
 
 - A real-bundle flow test covers all three bundled readers: strict right and wrong checkpoint answers, redo, read/unread/read, clicked-spelling authored vocabulary, TEST recordings, JSON backup and restore through the Settings import handler, malformed/absent/empty progress imports, and unavailable-edition history. **It found a real bug: Settings restore did not pass the reader grader, so restoring any backup with checked reader answers was refused and restored nothing. Fixed** (`BackupControls` now passes `gradeReaderQuestion`); the unit tests of the storage layer had passed because they injected the grader themselves.
