@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-23: graded-reader flow and build evidence (R1-12)
+
+- A real-bundle flow test covers all three bundled readers: strict right and wrong checkpoint answers, redo, read/unread/read, clicked-spelling authored vocabulary, TEST recordings, JSON backup and restore through the Settings import handler, malformed/absent/empty progress imports, and unavailable-edition history. **It found a real bug: Settings restore did not pass the reader grader, so restoring any backup with checked reader answers was refused and restored nothing. Fixed** (`BackupControls` now passes `gradeReaderQuestion`); the unit tests of the storage layer had passed because they injected the grader themselves.
+- Build figures are in `docs/graded-readers.md` "Build evidence".
+
 ## 2026-10-24: graded-reader local publication and optional catalogue (R1-2b)
 
 - Implemented immutable local D1 staging, exact readback before publication markers/catalogue and a final atomic current-pointer switch. The app retains bundle authority, adds validated remote editions, network-only saved-content fallback, committed Keep offline and guarded detail loading through the existing durable edition open.
