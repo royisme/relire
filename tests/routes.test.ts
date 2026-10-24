@@ -179,5 +179,8 @@ test('Settings preferences, About, AI purpose and return addresses remain intact
       purpose: 'speech',
       focusKey: true,
     });
-  expect(parse('').canonical).toBe('#/read');
+  expect(parse('').canonical).toBe('#/today');
+  expect(parse('').route).toEqual({ name: 'today' });
+  expect(parse('#/')).toEqual({ route: { name: 'today' }, canonical: '#/today' });
+  expect(parse('#/read')).toEqual({ route: { name: 'library' }, canonical: null });
 });

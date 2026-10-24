@@ -128,7 +128,7 @@ export function parseRoute(
         : undefined;
   try {
     if (parts.some((part) => !part)) return { route, canonical: null };
-    if (!parts.length) route = LIBRARY;
+    if (!parts.length) route = { name: 'today' };
     else if (root === 'today' && parts.length === 1 && !hash.includes('?')) route = { name: 'today' };
     else if (area && sub === 'exercises' && parts.length === 4 && ['unit', 'set'].includes(third) && !query) {
       const id = decodeURIComponent(fourth);

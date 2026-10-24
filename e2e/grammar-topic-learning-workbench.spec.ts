@@ -26,7 +26,7 @@ for (const phone of [false, true]) {
     await page.route('**/*', (route) =>
       new URL(route.request().url()).origin === 'http://localhost:5174' ? route.fallback() : route.abort(),
     );
-    await page.goto('/');
+    await page.goto('/#/read');
     await page.evaluate(async () => {
       const { mountCharacterWorkbench }: typeof import('./grammar-topic-learning-characters.fixture') = await import(
         /* @vite-ignore */ '/e2e/grammar-topic-learning-characters.fixture.tsx' as string

@@ -111,7 +111,7 @@ test('without a bundled reader step 3 offers no reader action instead of an inve
   try {
     step.value = 2;
     expect(html()).not.toContain(en.onboarding.openReader);
-    expect(html()).toContain(en.onboarding.toLibrary);
+    expect(html()).toContain(en.onboarding.toToday);
   } finally {
     restore();
   }

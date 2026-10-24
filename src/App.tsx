@@ -149,7 +149,7 @@ export default function App() {
   // Settings → AI services, on the purpose that needs the key, with the key field ready; its way back is
   // wherever the learner is now. Lookups, generation and grading use the text purpose.
   const requestKey = (purpose: AiPurposeRoute = 'text') => {
-    const here = window.location.hash || '#/read';
+    const here = window.location.hash || '#/today';
     const inSettings = parseRoute(window.location.hash).route.name === 'settings';
     setKeyRequest({ id: Date.now(), returnTo: inSettings ? null : here });
     navigate({ name: 'settings', section: 'ai', purpose, focusKey: true });
