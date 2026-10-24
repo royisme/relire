@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { countsBySoundContrast, subscribeExercises, type ContrastCount } from '../../storage/exercises';
 import { aiErrorText } from '../../utils/aiErrorText';
 
-export function SoundContrastProgress() {
+export function SoundContrastCounts() {
   const { t } = useTranslation();
   const [state, setState] = useState<{ counts: ContrastCount[]; loading: boolean; error: string }>({
     counts: [],
@@ -41,7 +41,7 @@ export function SoundContrastProgress() {
         </h3>
         <p className="text-sm text-ink-600 mt-0.5 break-words">{t('minimalPairs.progress.history')}</p>
       </div>
-      <dl className="divide-y divide-ink-200">
+      <dl className="h-72 overflow-y-auto divide-y divide-ink-200" aria-busy={state.loading}>
         {state.counts.map(({ contrast, correct, total }) => {
           const [first, second] = contrast.split('-');
           return (
@@ -60,7 +60,9 @@ export function SoundContrastProgress() {
           ? t('exerciseProgress.readFailed', { reason: state.error })
           : state.loading
             ? t('exerciseProgress.loading')
-            : ''}
+            : !state.counts.length
+              ? t('minimalPairs.progress.empty')
+              : ''}
       </p>
     </section>
   );

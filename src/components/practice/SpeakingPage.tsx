@@ -1,12 +1,20 @@
 /** Speaking entry and durable Read aloud workspace; OralPractice owns presentation, existing recorder owns capture/assessment. */
+import { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { retryableLazy } from '../../utils/retryableLazy';
 import type { Article, PronunciationAssessment } from '../../types';
 import { resolveReadAloud } from '../../services/readAloud';
 import { cleanArticleTitle } from '../../utils/i18nHelpers';
 import { Link } from '../shell/Link';
-import { buttonVariants } from '../ui/button';
+import { Button, buttonVariants } from '../ui/button';
 import { PageHeader } from '../ui/page-header';
 import { OralPractice } from './OralPractice';
+import { FrenchSounds } from '../speaking/FrenchSounds';
+import { SoundContrastCounts } from '../speaking/SoundContrastCounts';
+
+const AddExercisesDialog = retryableLazy(async () => ({
+  default: (await import('./AddExercisesDialog')).AddExercisesDialog,
+}));
 
 interface Props {
   articles: Article[];
@@ -14,9 +22,11 @@ interface Props {
   articleId?: string;
   sentence?: string;
   onAssessed: (assessment: PronunciationAssessment, sentence: string) => void;
+  onMissingKey: () => void;
 }
-export function SpeakingPage({ articles, workspace, articleId, sentence, onAssessed }: Props) {
+export function SpeakingPage({ articles, workspace, articleId, sentence, onAssessed, onMissingKey }: Props) {
   const { t } = useTranslation();
+  const [addingPairs, setAddingPairs] = useState(false);
   const selection = articleId ? resolveReadAloud(articles, articleId, sentence) : undefined;
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6">
@@ -35,6 +45,30 @@ export function SpeakingPage({ articles, workspace, articleId, sentence, onAsses
             {t('learning.readAloud')}
           </Link>
           <p className="text-sm text-ink-600">{t('learning.shadowingContext')}</p>
+          <section className="min-w-0 space-y-4 border-t border-ink-200 pt-6" aria-labelledby="sound-pairs-title">
+            <div>
+              <h2 id="sound-pairs-title" className="font-serif text-lg font-semibold text-ink-900">
+                {t('minimalPairs.drill.title')}
+              </h2>
+              <p className="mt-1 text-sm text-ink-600">{t('minimalPairs.drill.description')}</p>
+            </div>
+            <Button variant="outline" onClick={() => setAddingPairs(true)}>
+              {t('minimalPairs.drill.make')}
+            </Button>
+            <SoundContrastCounts />
+          </section>
+          <FrenchSounds />
+          {addingPairs && (
+            <Suspense fallback={null}>
+              <AddExercisesDialog
+                area="listening"
+                articles={articles}
+                initialChoice="pairs"
+                onMissingKey={onMissingKey}
+                onClose={() => setAddingPairs(false)}
+              />
+            </Suspense>
+          )}
         </>
       ) : articleId ? (
         selection ? (

@@ -79,6 +79,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- French sounds and Sound pairs moved from Progress to Speaking.
 - Read aloud puts Listen slowly beside Record on one row, and Record is the page's one filled button again, so the main action no longer looks the same as hearing the sentence.
 - **Practising a conjugation no longer leaves the page.** Each tense on the Conjugation page has its own small drill, and the header's "Practise all tenses" makes one exercise per tense the page shows; either one saves real Grammar exercises and draws the set's own sheet in place under the result, one tense at a time with previous and next, so answers and attempts are recorded as usual. The link to the saved set in Practice is still there. The reviewed verbs are also a row of buttons above the input, so a common verb needs no typing, and the input stays for any other verb.
 - A grammar topic question no longer shows a greyed "Read feedback" before you check it; the button appears only once there is feedback or a save error to read.

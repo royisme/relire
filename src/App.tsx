@@ -443,6 +443,7 @@ export default function App() {
                 articleId={route.name === 'readAloud' ? route.articleId : undefined}
                 sentence={route.name === 'readAloud' ? route.sentence : undefined}
                 onAssessed={handleRecordAssessmentComplete}
+                onMissingKey={requestKey}
               />
             )}
 

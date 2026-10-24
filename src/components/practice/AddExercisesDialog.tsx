@@ -32,7 +32,7 @@ export function AddExercisesDialog({
 }: {
   articles: Article[];
   area: LearningArea;
-  initialChoice: 'article' | 'conjugation' | null;
+  initialChoice: 'article' | 'conjugation' | 'pairs' | null;
   onMissingKey: () => void;
   onClose: () => void;
 }) {

@@ -58,18 +58,22 @@ const article = {
 
 test('Read aloud has honest empty/missing selection, encoded article links, and durable sentence resolution', () => {
   const onAssessed = () => {};
-  expect(render(<SpeakingPage articles={[]} workspace onAssessed={onAssessed} />)).toContain(
+  expect(render(<SpeakingPage articles={[]} workspace onAssessed={onAssessed} onMissingKey={() => {}} />)).toContain(
     i18n.t('learning.speakingEmpty'),
   );
-  const entry = render(<SpeakingPage articles={[article]} workspace onAssessed={onAssessed} />);
+  const entry = render(<SpeakingPage articles={[article]} workspace onAssessed={onAssessed} onMissingKey={() => {}} />);
   expect(entry).toContain(`href="#/speaking/read-aloud/${encodeURIComponent(article.id)}"`);
-  const missing = render(<SpeakingPage articles={[article]} workspace articleId="gone" onAssessed={onAssessed} />);
+  const missing = render(
+    <SpeakingPage articles={[article]} workspace articleId="gone" onAssessed={onAssessed} onMissingKey={() => {}} />,
+  );
   expect(missing).toContain(i18n.t('learning.sourceUnavailable'));
   expect(missing).not.toContain('TEST premier');
   expect(resolveReadAloud([article], article.id, 'TEST deuxième.')?.index).toBe(1);
   expect(resolveReadAloud([article], article.id, 'removed sentence')).toBeUndefined();
   expect(resolveReadAloud([], article.id)).toBeUndefined();
-  const home = render(<SpeakingPage articles={[article]} workspace={false} onAssessed={onAssessed} />);
+  const home = render(
+    <SpeakingPage articles={[article]} workspace={false} onAssessed={onAssessed} onMissingKey={() => {}} />,
+  );
   expect(home).toContain('href="#/speaking/read-aloud"');
   expect(home).toContain(i18n.t('learning.shadowingContext'));
 });
@@ -100,12 +104,15 @@ test('Read aloud mounts exactly one existing recorder with the original assessme
         articleId={article.id}
         sentence="TEST deuxième."
         onAssessed={callback}
+        onMissingKey={() => {}}
       />,
     );
     expect(recorder).toHaveBeenCalledTimes(1);
     expect(html).toContain('TEST deuxième.');
     expect(html).not.toContain('TEST premier.');
     expect(html).toContain(i18n.t('shadowing.record'));
+    expect(html).not.toContain(i18n.t('minimalPairs.drill.title'));
+    expect(html).not.toContain(i18n.t('ipa.title'));
   } finally {
     recorder.mockRestore();
   }

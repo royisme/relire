@@ -700,6 +700,7 @@
   "minimalPairs": {
     "progress": {
       "title": "近音辨听作答",
+      "empty": "还没有作答记录。先在上方创建练习。",
       "history": "统计仍保存的近音辨听练习的每次作答，包括重复作答。删除题组后，其作答不再计入这里的统计。",
       "contrast": "/{{first}}/ ↔ /{{second}}/",
       "counts": "共 {{total}} 次，答对 {{correct}} 次"
