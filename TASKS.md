@@ -72,8 +72,8 @@ Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlo
 | V0 | Owner chooses A or B | the choice is recorded in the plan | done: B (2026-10-24); three Argon reviews failed with narrowing findings, all applied; V1 may start |
 | V1 | Plan model: reader `title`, `nextIndex`, `doneCount`, `counts`; error and no-step cases; fix the shapes in `tests/todayView.test.tsx` and `tests/useToday.test.ts` | the three Today tests, typecheck and the full suite exit 0 | landed (merge of `today-model`); all checks exit 0 in the main checkout; no Argon review (small pure model, broad tests) |
 | V2 | View: one card with ordered rows, aside, practise row; keys in en and zh (the lead adds shadcn `card` first) | typecheck, lint, format, shape, i18n exit 0; detector `[]`; component tests per state | landed (`e1f1180`); all checks exit 0, detector `[]`; lead looked at 1280 px light and phone width dark (not acceptance); the owner judges the look |
-| V3 | Copy by agy gemini-3.8-flash: `today.*` keys, guidance sentence, why lines | `bun run i18n:check` exits 0; the lead reads the zh | after V2 |
-| V4 | Docs: `DESIGN.md` Today section, architecture, changelog | `format:check` exits 0 | after V3 |
+| V3 | Copy by agy gemini-3.8-flash: `today.*` keys, guidance sentence, why lines | `bun run i18n:check` exits 0; the lead reads the zh | landed (merge of `today-copy`); also fixed the first-run line and the date format; all checks exit 0 |
+| V4 | Docs: `DESIGN.md` Today section, architecture, changelog | `format:check` exits 0 | landed: `DESIGN.md` Today section, `docs/architecture.md`, `CHANGELOG.md` |
 
 ### Next: remote publication of the content service (owner decision 2026-10-24; plan `docs/d-remote-plan.md` under Argon review)
 
