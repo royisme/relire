@@ -1,129 +1,189 @@
-/** Server-rendered Today checklist contracts with hand-built plans; no storage, browser or real learner activity. */
+/** Server-rendered Today view contracts in both locales; no browser, storage reads or real learner activity. */
 import { afterAll, expect, test } from 'bun:test';
-import * as React from 'react';
+import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createInstance } from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import { readerTestWindow } from './fixtures/readerTestWindow';
-import type { TodayPlan } from '../src/services/today/plan';
+import type { TodayPlan, TodayStep } from '../src/services/today/plan';
+import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
 
 const restoreWindow = readerTestWindow();
 const { TodayView } = await import('../src/components/today/TodayView');
+const { TodayPage } = await import('../src/components/today/TodayPage');
 afterAll(restoreWindow);
 const i18n = createInstance();
 await i18n.init({ lng: 'en', resources: { en: { translation: en }, zh: { translation: zh } }, initAsync: false });
+const now = Date.UTC(2026, 9, 24, 12, 30);
 const version = 'b'.repeat(64);
+const frenchTitle = 'Une très longue histoire française pour apprendre à lire tranquillement';
+const pending = [
+  { id: 'words', done: false, due: 2, newAvailable: 1 },
+  { id: 'read', done: false, readerId: 'test-reader', order: 4, title: frenchTitle, state: 'continue', version },
+  { id: 'sound', done: false },
+  { id: 'mistakes', done: false, unresolved: 2 },
+  { id: 'grammar', done: false, topicId: 'test-one', title: 'TEST one' },
+] satisfies TodayStep[];
 const mixed: TodayPlan = {
-  steps: [
-    { id: 'words', done: true, due: 0, newAvailable: 0 },
-    {
-      id: 'read',
-      done: false,
-      readerId: 'test-service-reader',
-      order: 4,
-      title: 'Une histoire',
-      state: 'continue',
-      version,
-    },
-    { id: 'sound', done: false },
-    { id: 'mistakes', done: true, unresolved: 2 },
-    { id: 'grammar', done: false, topicId: 'test-one', title: 'TEST one' },
-  ],
+  steps: pending.map((step) => ({ ...step, done: step.id === 'words' || step.id === 'mistakes' })),
   allDone: false,
   nextIndex: 1,
   doneCount: 2,
-  counts: {},
+  counts: { reviews: 5, exercises: 0, readers: 1 },
 };
-const render = (plan: TodayPlan) =>
-  renderToStaticMarkup(
-    <I18nextProvider i18n={i18n}>
-      <TodayView plan={plan} />
-    </I18nextProvider>,
-  );
 const items = (html: string) => html.match(/<li\b[^>]*>.*?<\/li>/g) ?? [];
 const links = (html: string) => html.match(/<a\b[^>]*>.*?<\/a>/g) ?? [];
+const render = (plan: TodayPlan) => {
+  const html = renderToStaticMarkup(
+    <I18nextProvider i18n={i18n}>
+      <TodayView plan={plan} now={now} />
+    </I18nextProvider>,
+  ).replaceAll('&#x27;', "'");
+  links(html).forEach((link) => expect(link).not.toMatch(/<a\b[^>]*>.*<(?:a|button|input|select|textarea)\b/));
+  expect(links(html).filter((link) => link.includes('bg-accent-700'))).toHaveLength(
+    plan.nextIndex === undefined ? 0 : 1,
+  );
+  expect(html).not.toMatch(/today\.[a-z]/);
+  return html;
+};
 
 for (const language of ['en', 'zh']) {
-  test(`${language}: five ordered steps keep exact statuses, destinations and only the first pending link primary`, async () => {
+  test(`${language}: one Card, ordered whole-row links, one expanded next step and real date`, async () => {
     await i18n.changeLanguage(language);
     const html = render(mixed);
     const rows = items(html);
-    const actions = links(html);
-    expect(html).toContain(`<h1 class="font-serif text-2xl font-semibold">${i18n.t('today.title')}</h1>`);
-    expect(html).toContain(i18n.t('today.intro'));
-    expect(html).toContain('<ol');
+    expect(html).toContain(i18n.t('today.title'));
+    expect(html).toContain(new Intl.DateTimeFormat(language).format(now));
+    expect(html.match(/rounded-lg/g)).toHaveLength(1);
+    expect(html).toContain(i18n.t('today.steps.title'));
+    expect(html).toContain(i18n.t('today.steps.progress', { done: 2, total: 5 }));
     expect(rows).toHaveLength(5);
-    expect(actions).toHaveLength(5);
     const expected = [
-      ['words', '#/study/words/review', i18n.t('today.words.status', { due: 0, newAvailable: 0 })],
-      ['read', `#/read/graded/test-service-reader?version=${version}`, i18n.t('today.read.continue', { order: 4 })],
-      ['sound', '#/speaking', i18n.t('today.sound.status')],
-      ['mistakes', '#/study/mistakes', i18n.t('today.mistakes.status', { count: 2 })],
-      ['grammar', '#/grammar/topics/test-one', i18n.t('today.grammar.status', { title: 'TEST one' })],
+      ['#/study/words/review', i18n.t('today.words.status', { due: 2, newAvailable: 1 })],
+      [`#/read/graded/test-reader?version=${version}`, i18n.t('today.read.continue', { order: 4 })],
+      ['#/speaking', i18n.t('today.sound.status')],
+      ['#/study/mistakes', i18n.t('today.mistakes.status', { count: 2 })],
+      ['#/grammar/topics/test-one', i18n.t('today.grammar.status', { title: 'TEST one' })],
     ];
-    expected.forEach(([id, href, status], index) => {
-      expect(rows[index]).toContain(`<h2 class="font-serif text-lg font-semibold">${i18n.t(`today.${id}.title`)}</h2>`);
+    expected.forEach(([href, status], index) => {
       expect(rows[index]).toContain(status);
-      expect(actions[index]).toContain(`href="${href}"`);
-      expect(actions[index]).toContain(`>${i18n.t(`today.${id}.action`)}</a>`);
+      expect(links(rows[index]!)).toHaveLength(1);
+      expect(links(rows[index]!)[0]).toContain(`href="${href}"`);
       if (index === 1) {
-        expect(actions[index]).toContain('bg-accent-700');
-        expect(actions[index]).toContain('text-on-fill');
-      } else {
-        expect(actions[index]).toContain('border-ink-300');
-        expect(actions[index]).not.toContain('bg-accent-700');
+        expect(rows[index]).toContain('text-2xl leading-tight');
+        expect(rows[index]).toContain('text-accent-900');
+        expect(rows[index]).toContain(i18n.t('today.read.why'));
+        expect(links(rows[index]!)[0]).toContain('h-11');
+        expect(links(rows[index]!)[0]).toContain(`>${i18n.t('today.read.action')}</a>`);
+        expect(links(rows[index]!)[0]).not.toContain('<h4');
+        return;
       }
+      expect(links(rows[index]!)[0]).toContain('<h4');
+      expect(rows[index]).not.toContain('text-2xl');
       expect(rows[index].includes('text-ok-800')).toBe(index === 0 || index === 3);
-      expect(rows[index].includes(i18n.t('today.done'))).toBe(index === 0 || index === 3);
+      if (index === 0 || index === 3) expect(rows[index]).toContain('text-ink-500');
     });
-    expect(html).not.toContain(i18n.t('today.allDone'));
-    expect(html).not.toContain('<svg');
+    expect(rows[1]).toContain(frenchTitle);
+    expect(html.match(/border-l border-ink-200/g)).toHaveLength(4);
+    expect(html).not.toContain('bg-accent-100');
+    expect(html).not.toContain('ring-');
+    expect(rows.filter((row) => row.includes('<svg'))).toHaveLength(2);
   });
 
-  test(`${language}: due and new counts come from the plan, and the words link can be primary`, async () => {
+  test.each(pending)(`${language}: $id as next keeps its why and Start action label`, async (step) => {
     await i18n.changeLanguage(language);
-    const html = render({
-      steps: [{ id: 'words', done: false, due: 7, newAvailable: 3 }],
-      allDone: false,
-      nextIndex: 0,
-      doneCount: 0,
-      counts: {},
+    const html = render({ steps: [step], allDone: false, nextIndex: 0, doneCount: 0, counts: {} });
+    const action = links(items(html)[0]!)[0];
+    expect(action).toContain(`>${i18n.t(`today.${step.id}.action`)}</a>`);
+    expect(html).toContain(i18n.t(`today.${step.id}.why`));
+  });
+
+  test(`${language}: guidance lists only actionable steps in order, without the French title`, async () => {
+    await i18n.changeLanguage(language);
+    const html = render({ steps: pending, allDone: false, nextIndex: 0, doneCount: 0, counts: {} });
+    const clauses = [
+      i18n.t('today.guidance.words', { count: 3 }),
+      i18n.t('today.guidance.read'),
+      i18n.t('today.guidance.sound'),
+      i18n.t('today.guidance.mistakes', { count: 2 }),
+      i18n.t('today.guidance.grammar'),
+    ];
+    expect(html).toContain(
+      i18n.t('today.guidance.plan', { steps: new Intl.ListFormat(language, { type: 'conjunction' }).format(clauses) }),
+    );
+    const mixedHtml = render({
+      ...mixed,
+      steps: mixed.steps.map((step) =>
+        step.id === 'grammar' ? { id: 'grammar', done: false, error: 'TEST unavailable' } : step,
+      ),
     });
-    expect(html).toContain(i18n.t('today.words.status', { due: 7, newAvailable: 3 }));
-    expect(links(html)[0]).toContain('bg-accent-700');
-    expect(html).not.toContain(i18n.t('today.done'));
+    // A failed source never contributes a clause, even while other steps remain actionable.
+    expect(mixedHtml).toContain(
+      i18n.t('today.guidance.plan', {
+        steps: new Intl.ListFormat(language, { type: 'conjunction' }).format([
+          i18n.t('today.guidance.read'),
+          i18n.t('today.guidance.sound'),
+        ]),
+      }),
+    );
+    expect(html.slice(0, html.indexOf('</header>'))).not.toContain(frenchTitle);
+  });
+
+  test.each([1, 3])(`${language}: one-step word and mistake guidance with count %s`, async (count) => {
+    await i18n.changeLanguage(language);
+    for (const step of [
+      { id: 'words', done: false, due: count - 1, newAvailable: 1 },
+      { id: 'mistakes', done: false, unresolved: count },
+    ] satisfies TodayStep[]) {
+      const html = render({ steps: [step], allDone: false, nextIndex: 0, doneCount: 0, counts: {} });
+      expect(html).toContain(i18n.t('today.guidance.plan', { steps: i18n.t(`today.guidance.${step.id}`, { count }) }));
+      if (step.id === 'mistakes') expect(html).toContain(i18n.t('today.mistakes.status', { count }));
+      if (language === 'en') {
+        const noun = step.id === 'words' ? 'word' : 'mistake';
+        expect(html).toContain(count === 1 ? `1 ${noun}.` : `3 ${noun}s.`);
+      }
+    }
   });
 
   test.each(['start', 'continue', 'doneToday'] as const)(
-    `${language}: reader state %s keeps its status and unpinned link`,
+    `${language}: reader state %s keeps the French title and unpinned route`,
     async (state) => {
       await i18n.changeLanguage(language);
+      const done = state === 'doneToday';
       const html = render({
-        steps: [
-          {
-            id: 'read',
-            done: state === 'doneToday',
-            readerId: 'test-bundled-reader',
-            order: 2,
-            title: 'Une histoire',
-            state,
-          },
-        ],
-        allDone: state === 'doneToday',
-        nextIndex: state === 'doneToday' ? undefined : 0,
-        doneCount: state === 'doneToday' ? 1 : 0,
+        steps: [{ id: 'read', done, readerId: 'test-reader', order: 2, title: frenchTitle, state }],
+        allDone: done,
+        nextIndex: done ? undefined : 0,
+        doneCount: done ? 1 : 0,
         counts: {},
       });
+      expect(html).toContain(frenchTitle);
       expect(html).toContain(i18n.t(`today.read.${state}`, { order: 2 }));
-      expect(links(html)[0]).toContain('href="#/read/graded/test-bundled-reader"');
+      expect(links(html)[0]).toContain('href="#/read/graded/test-reader"');
       expect(html).not.toContain('?version=');
+      expect(html).not.toContain(i18n.t('today.read.noKey'));
     },
   );
 
+  test.each([true, false])(`${language}: Reader 1 no-key line is visible when next=%s`, async (next) => {
+    await i18n.changeLanguage(language);
+    const html = render({
+      steps: [
+        { id: 'words', done: next, due: 1, newAvailable: 0 },
+        { id: 'read', done: false, readerId: 'test-reader', order: 1, title: frenchTitle, state: 'start' },
+      ],
+      allDone: false,
+      nextIndex: next ? 1 : 0,
+      doneCount: next ? 1 : 0,
+      counts: {},
+    });
+    expect(items(html)[1]).toContain(`${i18n.t('today.read.start', { order: 1 })} ${i18n.t('today.read.noKey')}`);
+  });
+
   test.each(['words', 'read', 'sound', 'mistakes', 'grammar'] as const)(
-    `${language}: a failed %s step shows the real error without an action`,
+    `${language}: failed $id is plain text and its error appears once`,
     async (id) => {
       await i18n.changeLanguage(language);
       const message = `TEST ${id} read failed`;
@@ -135,16 +195,15 @@ for (const language of ['en', 'zh']) {
         counts: {},
       });
       expect(items(html)).toHaveLength(1);
+      expect(links(items(html)[0]!)).toHaveLength(0);
       expect(html).toContain(i18n.t(`today.${id}.title`));
       expect(html).toContain(i18n.t('today.stepError', { msg: message }));
-      expect(links(html)).toHaveLength(0);
-      expect(html).not.toContain('<button');
-      expect(html).not.toContain(i18n.t('today.done'));
-      expect(html).not.toContain(i18n.t('today.allDone'));
+      expect(html.split(message)).toHaveLength(2);
+      expect(html).toContain(i18n.t('today.guidance.unavailable'));
     },
   );
 
-  test(`${language}: a failed source leaves other step statuses and links intact`, async () => {
+  test(`${language}: nextIndex skips an error and expands sound, not the failed row`, async () => {
     await i18n.changeLanguage(language);
     const html = render({
       steps: [
@@ -156,73 +215,79 @@ for (const language of ['en', 'zh']) {
       doneCount: 0,
       counts: {},
     });
-    expect(items(html)).toHaveLength(2);
     expect(links(items(html)[0]!)).toHaveLength(0);
-    expect(links(items(html)[1]!)).toHaveLength(1);
-    expect(links(html)[0]).toContain('href="#/speaking"');
-    expect(html).toContain(i18n.t('today.sound.status'));
-    expect(html).not.toContain('bg-accent-700');
+    expect(links(items(html)[1]!)[0]).toContain('bg-accent-700');
+    expect(html).toContain(i18n.t('today.guidance.plan', { steps: i18n.t('today.guidance.sound') }));
+    expect(html).not.toContain(i18n.t('today.guidance.unavailable'));
   });
 
-  test(`${language}: all done closes below the list with no primary link`, async () => {
+  test(`${language}: all done keeps done rows linked and leaves only outline practice actions`, async () => {
     await i18n.changeLanguage(language);
     const html = render({
-      steps: [
-        { id: 'words', done: true, due: 0, newAvailable: 0 },
-        { id: 'read', done: true, readerId: 'test-reader', order: 4, title: 'Une histoire', state: 'doneToday' },
-        { id: 'sound', done: true },
-        { id: 'mistakes', done: true, unresolved: 0 },
-      ],
+      steps: pending.map((step) => ({ ...step, done: true })),
       allDone: true,
       nextIndex: undefined,
-      doneCount: 4,
+      doneCount: 5,
       counts: {},
     });
-    expect(links(html)).toHaveLength(4);
-    expect(items(html).every((row) => row.includes(i18n.t('today.done')))).toBe(true);
-    expect(html).not.toContain('bg-accent-700');
-    expect(html).toContain(i18n.t('today.allDone'));
-    expect(html.indexOf(i18n.t('today.allDone'))).toBeGreaterThan(html.indexOf('</ol>'));
+    expect(html).toContain(i18n.t('today.guidance.allDone'));
+    expect(items(html).every((row) => links(row)[0]?.includes('<h4') && row.includes('text-ok-800'))).toBe(true);
+    expect(links(html)).toHaveLength(9);
+    expect(html).not.toContain(i18n.t('today.read.why'));
   });
 
-  test(`${language}: a done grammar step keeps its done text and link`, async () => {
-    await i18n.changeLanguage(language);
-    const html = render({
-      steps: [{ id: 'grammar', done: true, topicId: 'test-two', title: 'TEST two' }],
-      allDone: true,
-      nextIndex: undefined,
-      doneCount: 1,
-      counts: {},
-    });
-    expect(html).toContain(i18n.t('today.grammar.status', { title: 'TEST two' }));
-    expect(links(html)[0]).toContain('href="#/grammar/topics/test-two"');
-    expect(html).toContain(i18n.t('today.done'));
-    expect(html).toContain(i18n.t('today.allDone'));
-    expect(links(html)[0]).not.toContain('bg-accent-700');
-  });
-
-  test(`${language}: saved mistake counts use the locale's singular and plural forms`, async () => {
-    await i18n.changeLanguage(language);
-    for (const count of [1, 2]) {
-      const html = render({
-        steps: [{ id: 'mistakes', done: false, unresolved: count }],
-        allDone: false,
-        nextIndex: 0,
-        doneCount: 0,
-        counts: {},
-      });
-      expect(html).toContain(i18n.t('today.mistakes.status', { count }));
-      expect(html).not.toContain('today.mistakes.status');
-      if (language === 'en') expect(html).toContain(count === 1 ? '1 saved mistake</p>' : '2 saved mistakes</p>');
-    }
-  });
-
-  test(`${language}: an empty plan renders the title without invented steps or completion`, async () => {
+  test(`${language}: no steps has empty guidance, no progress and always four independent destinations`, async () => {
     await i18n.changeLanguage(language);
     const html = render({ steps: [], allDone: false, nextIndex: undefined, doneCount: 0, counts: {} });
-    expect(html).toContain(i18n.t('today.title'));
+    expect(html).toContain(i18n.t('today.guidance.empty'));
     expect(items(html)).toHaveLength(0);
+    expect(html).not.toContain(i18n.t('today.steps.progress', { done: 0, total: 0 }));
+    const actions = links(html);
+    expect(actions).toHaveLength(4);
+    ['#/study/words', '#/read', '#/speaking', '#/grammar'].forEach((href, index) => {
+      expect(actions[index]).toContain(`href="${href}"`);
+      expect(actions[index]).toContain('border-ink-300');
+      expect(actions[index]).not.toContain('<svg');
+    });
+  });
+
+  test(`${language}: aside shows real counts including zero and omits a missing source`, async () => {
+    await i18n.changeLanguage(language);
+    const html = render({ ...mixed, counts: { reviews: 0, readers: 7 } });
+    const aside = html.match(/<aside\b.*?<\/aside>/)?.[0] ?? '';
+    expect(aside).toContain(i18n.t('today.counts.title'));
+    expect(aside).toContain(i18n.t('today.counts.reviews'));
+    expect(aside).toContain(i18n.t('today.counts.readers'));
+    expect(aside).not.toContain(i18n.t('today.counts.exercises'));
+    expect(aside).toContain('<dd class="tnum text-ink-900">0</dd>');
+    expect(aside).toContain('<dd class="tnum text-ink-900">7</dd>');
+    expect(aside).not.toContain('rounded-');
+    expect(render(mixed)).toContain(i18n.t('today.counts.exercises'));
+  });
+
+  test(`${language}: TodayPage loading has its heading and static line, without ready date`, async () => {
+    await i18n.changeLanguage(language);
+    const vocabulary: VocabularyModel = {
+      rows: [],
+      preferences: { newPerDay: 20, retentionPercent: 90 },
+      day: { date: '', introducedKeys: [] },
+      epoch: 0,
+      now,
+      ready: false,
+      error: null,
+      refresh: async () => undefined,
+      savePreferences: async () => undefined,
+    };
+    const html = renderToStaticMarkup(
+      <I18nextProvider i18n={i18n}>
+        <TodayPage vocabulary={vocabulary} />
+      </I18nextProvider>,
+    ).replaceAll('&#x27;', "'");
+    expect(html).toContain('role="status"');
+    expect(html).toContain(i18n.t('today.title'));
+    expect(html).toContain(i18n.t('today.loading'));
+    expect(html).not.toContain(new Intl.DateTimeFormat(language).format(now));
+    expect(html).not.toContain('animate-');
     expect(links(html)).toHaveLength(0);
-    expect(html).not.toContain(i18n.t('today.allDone'));
   });
 }
