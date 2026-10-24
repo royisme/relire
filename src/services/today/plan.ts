@@ -1,16 +1,37 @@
 /** Owns pure ordered Today checklist selection, not activity counting, data loading or presentation. */
 export type Source<T> = { value: T } | { error: string };
 export type TodayStepId = 'words' | 'read' | 'sound' | 'mistakes';
+/** The words step's queue counts. */
+export interface TodayWords {
+  due: number;
+  newAvailable: number;
+  reviewsToday: number;
+}
+/** One merged-catalogue reader joined with progress; a service edition carries its version. */
+export interface TodayReader {
+  readerId: string;
+  order: number;
+  version?: string;
+  status: 'read' | 'opened' | 'notOpened';
+  activeToday: boolean;
+}
 export interface TodayInput {
-  words: Source<{ due: number; newAvailable: number; reviewsToday: number }>;
+  words: Source<TodayWords>;
   /** Merged catalogue joined with progress, ascending by order. */
-  readers: Source<{ readerId: string; order: number; status: 'read' | 'opened' | 'notOpened'; activeToday: boolean }[]>;
+  readers: Source<TodayReader[]>;
   sound: Source<{ attemptsToday: number }>;
   mistakes: Source<{ unresolved: number; attemptsToday: number }>;
 }
 export type TodayStep =
   | { id: 'words'; done: boolean; due: number; newAvailable: number }
-  | { id: 'read'; done: boolean; readerId: string; order: number; state: 'start' | 'continue' | 'doneToday' }
+  | {
+      id: 'read';
+      done: boolean;
+      readerId: string;
+      order: number;
+      version?: string;
+      state: 'start' | 'continue' | 'doneToday';
+    }
   | { id: 'sound'; done: boolean }
   | { id: 'mistakes'; done: boolean; unresolved: number }
   | { id: TodayStepId; done: false; error: string };
@@ -41,6 +62,7 @@ export function buildTodayPlan(input: TodayInput): TodayPlan {
         done: readers.some((reader) => reader.activeToday),
         readerId: focus.readerId,
         order: focus.order,
+        ...(focus.version !== undefined ? { version: focus.version } : {}),
         state: focus.status === 'read' ? 'doneToday' : focus.status === 'opened' ? 'continue' : 'start',
       });
   }

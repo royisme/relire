@@ -38,6 +38,7 @@ export {
   accuracyByGrammarTag,
   countsBySoundContrast,
   listAttempts,
+  listAttemptsSince,
   listMistakes,
   type AttemptQuery,
   type ContrastCount,

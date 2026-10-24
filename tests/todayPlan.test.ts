@@ -83,9 +83,10 @@ function input(changes: Partial<TodayInput> = {}): TodayInput {
   };
 }
 
-const reader = (order: number, status: 'read' | 'opened' | 'notOpened', activeToday = false) => ({
+const reader = (order: number, status: 'read' | 'opened' | 'notOpened', activeToday = false, version?: string) => ({
   readerId: `test-reader-${order}`,
   order,
+  ...(version !== undefined ? { version } : {}),
   status,
   activeToday,
 });
@@ -277,6 +278,18 @@ test('an opened reader gives continue but is not done without activity today', (
     readerId: 'test-reader-1',
     order: 1,
     state: 'continue',
+  });
+});
+
+test('a service reader keeps its edition on the read step; a bundled reader has none', () => {
+  expect(readStep({ value: [reader(1, 'notOpened')] })).not.toHaveProperty('version');
+  expect(readStep({ value: [reader(1, 'read'), reader(2, 'notOpened', false, 'b'.repeat(64))] })).toEqual({
+    id: 'read',
+    done: false,
+    readerId: 'test-reader-2',
+    order: 2,
+    version: 'b'.repeat(64),
+    state: 'start',
   });
 });
 
