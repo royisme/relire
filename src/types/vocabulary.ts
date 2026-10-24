@@ -60,7 +60,6 @@ export const VocabularyReviewSchema = z.strictObject({
 export const VocabularyBookMetadataSchema = z.strictObject({
   bookId: z.literal('tcf-7000'),
   title: z.strictObject({ en: english, zh: chinese }),
-  attribution: text,
 });
 export const VocabularyManifestSchema = VocabularyBookMetadataSchema.extend({
   version: VocabularyHashSchema,

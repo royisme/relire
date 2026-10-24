@@ -26,7 +26,6 @@ import { handle } from '../worker/src/index';
 const metadata = {
   bookId: 'tcf-7000',
   title: { en: 'TEST book', zh: '\u6d4b\u8bd5' },
-  attribution: 'Invented TEST only',
 };
 const sources = [
   {

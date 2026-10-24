@@ -2,7 +2,6 @@
 import { z } from 'zod';
 import { VocabularyBookMetadataSchema, VocabularyHashSchema, VocabularyReviewSchema } from '../../src/types/vocabulary';
 export const PublicVocabularyManifestSchema = VocabularyBookMetadataSchema.extend({
-  attribution: z.string().min(1).nullable(),
   contentHash: VocabularyHashSchema.nullable(),
 });
 export const PublicVocabularyReviewsSchema = z.strictObject({ records: z.array(VocabularyReviewSchema) });

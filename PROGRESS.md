@@ -8,7 +8,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 - The owner confirmed the vocabulary book is their own work and publishable, and that Morphalou (open, LGPL-LR) needs no permission, only its notices (already built). Recorded as an amendment in `docs/adr-hosted-content-service.md`; the old "local use only / no public distribution / not authorized" lines in `worker/README.md` and `docs/vocabulary-flashcards-spec.md` were removed or reworded.
 - Accounts are not part of the first deployment (public read-only, rate limited, CORS-limited). They stay H4 and come with charging, non-public content or sync.
-- Found while writing this: the publishers have only a local apply path, so nothing can reach a deployed D1 yet (step D-remote in `TASKS.md`). The vocabulary manifest `attribution` still names the AnkiWeb deck with "licence not stated": the owner must say what it should read.
+- Found while writing this: the publishers have only a local apply path, so nothing can reach a deployed D1 yet (step D-remote in `TASKS.md`). The vocabulary manifest `attribution` field named a third-party AnkiWeb deck; the owner said the book is their own, so the field was removed everywhere (schema, manifest, scripts, tests). Re-publishing the local D1 is needed to serve the new manifest.
 
 ## 2026-10-24: grammar topics in book order, studied marks and a Today step (G1 to G4, C5)
 

@@ -39,7 +39,6 @@ export async function testBook(count = 1, label = 'TEST') {
   const metadata = {
     bookId: 'tcf-7000' as const,
     title: { en: label, zh: '\u6d4b\u8bd5' },
-    attribution: 'Invented TEST only',
   };
   const entries = Array.from({ length: count }, (_, index) => testEntry(`test-${index}`, index));
   const contentHash = await vocabularyHash({ metadata, entries });

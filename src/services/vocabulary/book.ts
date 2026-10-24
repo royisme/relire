@@ -23,7 +23,7 @@ export async function vocabularyHash(value: unknown): Promise<string> {
   return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
 }
 export function vocabularyMetadata(manifest: Omit<VocabularyManifest, 'version'>) {
-  return { bookId: manifest.bookId, title: manifest.title, attribution: manifest.attribution };
+  return { bookId: manifest.bookId, title: manifest.title };
 }
 export async function validateVocabularyBook(raw: unknown): Promise<VocabularyBook> {
   const book = VocabularyBookSchema.parse(raw);

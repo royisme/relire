@@ -40,11 +40,7 @@ export async function prepare(args: string[], root = vocabularyRepository) {
     JSON.stringify(
       {
         contentHash: artifact.contentHash,
-        objectives: [
-          'Check meanings, examples and POS',
-          'Apply owner-selected C1/Canadian usage policy',
-          'Confirm attribution and distribution rights',
-        ],
+        objectives: ['Check meanings, examples and POS', 'Apply owner-selected C1/Canadian usage policy'],
         entries: artifact.entries,
         issues: artifact.report.issues,
       },

@@ -63,7 +63,7 @@ Read-only JSON, versioned under `/v1`:
 
 Migration `0003_vocabulary.sql` adds only immutable `vocabulary_pages`. Publication stages without deleting or overwriting any version, reads back every exact body/index/manifest/count and aggregate hash, writes its publication marker, then switches the current pointer with one upsert and verifies it. No transaction spans Wrangler commands. Old versions and incomplete staging rows remain; cleanup requires separate authorization. Missing pinned markers return 410; corrupt published data and D1 failures return fixed 500 errors.
 
-The app reuses unchanged `contentServiceFetch`/HTTP errors, accumulates pages in memory and commits exactly one complete `content` cache after full validation. A storage commit failure propagates and preserves the prior complete book. The existing 365-day TTL applies; saved study snapshots are independent. No startup/per-flip downloads, page caches, learner-write endpoints or new service setting exist. Public metadata has no source text, actual attribution or approval while unprepared/unreviewed.
+The app reuses unchanged `contentServiceFetch`/HTTP errors, accumulates pages in memory and commits exactly one complete `content` cache after full validation. A storage commit failure propagates and preserves the prior complete book. The existing 365-day TTL applies; saved study snapshots are independent. No startup/per-flip downloads, page caches, learner-write endpoints or new service setting exist. Public metadata holds the book id, title and content hash only: no source text, attribution line or approval.
 
 ## 7. Phases
 

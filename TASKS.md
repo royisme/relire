@@ -91,7 +91,7 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 - Try the graded readers by hand with `docs/graded-readers-trial.md` (no AI key needed), then send back what is wrong.
 - Try by hand: the pronunciation features (practice-card marks, strip, Details), Sound pairs, the published local grammar topics; accept or change the open copy items (#16, #17, #24).
 - Human language review of the 91 locally published grammar topics (Chinese wording, kinship terms and a handful of Low items; their notes are in the local working notes).
-- Say what `attribution` in `data/vocabulary/manifest.json` should read: it still names the AnkiWeb deck with "licence not stated", but the book is your own work (served to learners in every response).
+- Re-publish the vocabulary book to local D1 (`bun scripts/vocabulary/publish.ts --apply-local-unreviewed`) so it serves the manifest without the removed `attribution` field.
 - Deploy the content service (#31) before any real learner depends on topics, the wordbook or later readers: create the D1 database, set `ALLOWED_ORIGINS`, run D-remote once it lands, then `wrangler deploy`. No rights gate remains for the wordbook or the lexicon.
 
 ## Not started
