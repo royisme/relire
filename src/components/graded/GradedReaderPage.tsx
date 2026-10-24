@@ -1,11 +1,10 @@
-/** Resolves the exact bundled route edition, then gates the writable workspace on its durable snapshot commit. */
+/** Resolves an exact route edition, then gates the writable workspace on its durable snapshot commit. */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGradedReaders } from '../../hooks/useGradedReaders';
+import { useReaderEdition } from '../../hooks/useReaderEdition';
 import type { VocabularyModel } from '../../hooks/useVocabulary';
 import type { PublishedReader } from '../../types/gradedReader';
 import type { OpenedReader } from '../../services/gradedReaders/session';
-import { findStarterReader } from '../../services/gradedReaders/load';
 import { openReaderEdition } from '../../storage/gradedReaders';
 import { errorMessage } from '../../services/ai/errors';
 import { GradedReaderWorkspace } from './GradedReaderWorkspace';
@@ -103,10 +102,9 @@ export function GradedReaderPage({
   vocabulary: VocabularyModel;
   onOpenShadowingLog: (sourceId: string) => void;
 }) {
-  const content = useGradedReaders();
-  const reader = content.status === 'ready' ? findStarterReader(readerId, version) : undefined;
-  if (!reader)
-    return <ReaderRouteStatus error={content.error} missing={content.status === 'ready'} retry={content.retry} />;
+  const content = useReaderEdition(readerId, version);
+  const reader = content.reader;
+  if (!reader) return <ReaderRouteStatus error={content.error} missing={content.missing} retry={content.retry} />;
   return (
     <ReaderEditionGate
       key={`${readerId}:${reader.version}`}

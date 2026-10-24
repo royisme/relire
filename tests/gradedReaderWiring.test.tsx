@@ -25,7 +25,7 @@ import { gradedDocument } from '../src/types/readerSource';
 import { emptyAnswer } from '../src/services/exercises/answer';
 import { readerQuestionItem } from '../src/services/gradedReaders/checkpoints';
 import { getVocabularySnapshot } from '../src/storage/vocabulary';
-import * as packs from '../src/hooks/useGradedReaders';
+import * as contentService from '../src/services/grammarTopics/service';
 import { loadStarterReaders, resetStarterReadersForTests } from '../src/services/gradedReaders/load';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import en from '../src/i18n/locales/en.json';
@@ -122,14 +122,23 @@ test('failed open offers storage-only Retry and never mounts a writable workspac
 test('detail route resolves known/unknown/unavailable pin, never writes a substitute edition', async () => {
   resetStarterReadersForTests();
   await loadStarterReaders({ schemaVersion: 1, syllabusVersion: '1.0.0', readers: [reader] });
-  const pack = spyOn(packs, 'useGradedReaders').mockReturnValue({ status: 'ready', readers: [reader], retry: noop });
-  undo.push(() => pack.mockRestore());
+  const url = spyOn(contentService, 'contentServiceUrl').mockReturnValue(undefined);
+  undo.push(() => url.mockRestore());
   const draw = (readerId: string, version?: string) =>
     probe.render(() => GradedReaderPage({ readerId, version, vocabulary, onOpenShadowingLog: noop }));
-  expect(draw(reader.body.id).type).toBe(ReaderEditionGate);
-  expect(draw(reader.body.id, reader.version).type).toBe(ReaderEditionGate);
-  expect(draw(reader.body.id, 'a'.repeat(64)).props.missing).toBe(true);
-  expect(draw('test-unknown').props.missing).toBe(true);
+  for (const version of [undefined, reader.version]) {
+    expect(draw(reader.body.id, version).type).not.toBe(ReaderEditionGate);
+    probe.effects();
+    await until(() => draw(reader.body.id, version).type === ReaderEditionGate);
+  }
+  for (const [id, version] of [
+    [reader.body.id, 'a'.repeat(64)],
+    ['test-unknown', undefined],
+  ]) {
+    expect(draw(id!, version).props.missing).not.toBe(true);
+    probe.effects();
+    await until(() => draw(id!, version).props.missing === true);
+  }
   expect(await storage.listReaderProgress()).toEqual([]);
 });
 

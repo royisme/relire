@@ -18,7 +18,9 @@ export class ContentServiceNetworkError extends Error {}
 // must not hold a core screen: an overdue request counts as a network failure (cached copy, else the real error).
 const REQUEST_TIMEOUT_MS = 5000;
 
-export async function contentServiceFetch(path: string): Promise<unknown> {
+export function contentServiceFetch(path: string, format: 'text'): Promise<string>;
+export function contentServiceFetch(path: string): Promise<unknown>;
+export async function contentServiceFetch(path: string, format?: 'text'): Promise<unknown> {
   const url = contentServiceUrl();
   if (!url) throw new Error('Content service is not configured');
   let response: Response;
@@ -32,5 +34,5 @@ export async function contentServiceFetch(path: string): Promise<unknown> {
     const body = (await response.json().catch(() => undefined)) as { error?: string } | undefined;
     throw new ContentServiceHttpError(response.status, body?.error ?? 'unexpected response');
   }
-  return response.json();
+  return format === 'text' ? response.text() : response.json();
 }
