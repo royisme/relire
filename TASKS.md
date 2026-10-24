@@ -81,11 +81,14 @@ First deployment: no accounts, public read-only, rate limited, CORS limited to t
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| D-remote | A remote apply for the topic, lexicon, vocabulary and reader publishers (today each has only a local path), keeping staged writes, exact readback and the last-step pointer switch; the owner runs it with their own Cloudflare access | a dry run against a second local D1 passes the same readbacks; nothing logs in or deploys by itself | not started |
-| D-origins | Deployment config (`ALLOWED_ORIGINS`, D1 id) kept local; a short checklist in `worker/README.md` | the placeholder stays in the committed file | not started |
+| D-remote-1 | Local hygiene in all four publishers (no `.dev.vars`/`.env` read, explicit persist, paths from `root`, no telemetry), version row deleted first in the topic and lexicon SQL, pure `parseArgs` | `bun test` on the four publisher tests and `d1Target.test.ts` exits 0; a temp-root run writes nothing under the repository | not started |
+| D-remote-2 | Vocabulary `--apply-remote-unreviewed` and readers `--apply-remote` through the same protocol, TTY gate, `allowRemote` only from `import.meta.main` | refusal tests pass; no workflow mentions `--remote` | not started |
+| D-remote-2b | Halve the vocabulary page size (and pace the download), only if the owner's check of Cloudflare's D1 limits rejects a 108 KB page | the lead's full re-run exits 0 | conditional |
+| D-remote-3 | Topics and lexicon `--apply-remote`, interactive, with a read-only check as the only success criterion | tests pass; check mismatch fails the run | not started |
+| D-origins | `.gitignore` for `worker/wrangler.deploy.jsonc`; `worker/README.md` rewritten wherever stale, with a rooted runbook | the placeholder stays in the committed file; the README no longer tells the owner to edit it | not started |
 | D-limit | After the first deployment: tap a verb form repeatedly on the deployed URL, read the 429 behaviour and the dashboard row metrics, then set the per-IP limit (issue #31; the duplicate-request half landed in `ee34d4a`) | a measured limit is recorded in `worker/README.md`; the limiter note is updated | not started; owner-run, after D-remote |
 
-Plan doc `docs/d-remote-plan.md` (written by Opus, then an Argon review) comes before any D-remote dispatch.
+Plan `docs/d-remote-plan.md` (written by Opus; two Argon reviews, both fail, every finding the lead verified is applied) is ready to dispatch. Dispatch D-remote-1 first; D-remote-2b waits for the owner's limit check. Each diff then gets an independent Argon review.
 
 Not part of this: accounts (H4), an owner-only access token (an option for a private beta, not chosen).
 
