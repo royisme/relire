@@ -170,6 +170,11 @@
     "checkpoints": {
       "title": "Checkpoints",
       "quotedSentence": "From the sentence"
+    },
+    "ai": {
+      "askWord": "Ask AI about this word",
+      "askSentence": "Ask AI to analyse this sentence",
+      "answer": "AI answer, not reviewed"
     }
   },
   "sentenceDrawer": {

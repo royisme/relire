@@ -115,6 +115,7 @@ export function GradedReaderWorkspace({
         <ReaderAuthoredSheets
           key={JSON.stringify(selection)}
           selection={selection}
+          text={gradedDocument(reader).content}
           vocabulary={vocabulary}
           onClose={() => setSelection(null)}
         />

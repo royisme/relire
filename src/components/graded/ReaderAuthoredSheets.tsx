@@ -1,4 +1,5 @@
-/** Authored-only word/sentence sheets for a captured occurrence; no lookup hook, AI request or Settings redirect. */
+/** Authored word/sentence sheets for a captured occurrence; no lookup hook, no automatic AI request and no
+ * Settings redirect — the optional Ask AI is explicit, configured-only and self-contained. */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Sentence } from '../../types/gradedReader';
@@ -8,6 +9,7 @@ import { useVocabularyBookmark } from '../../hooks/useVocabularyBookmark';
 import { authoredText } from '../../utils/authoredText';
 import { AuthoredEntry } from '../word/AuthoredEntry';
 import { SentenceAuthored } from '../SentenceAuthored';
+import { AuthoredAskAi } from './AuthoredAskAi';
 import { Sheet, OverlayHeader } from '../ui/overlay';
 import { SpeakButton } from '../ui/speak-button';
 
@@ -18,10 +20,13 @@ export type AuthoredSelection =
 
 export function ReaderAuthoredSheets({
   selection,
+  text,
   vocabulary,
   onClose,
 }: {
   selection: AuthoredSelection;
+  /** The reader's full text: the context an optional explicit Ask AI request is made with. */
+  text: string;
   vocabulary: VocabularyModel;
   onClose: () => void;
 }) {
@@ -62,7 +67,14 @@ export function ReaderAuthoredSheets({
                 label={t('gradedReader.deviceVoice')}
                 variant="outline"
               />
-              {/* Extension slot: optional explicit Ask AI stays separate from the authored definition. */}
+              <AuthoredAskAi
+                subject={{
+                  kind: 'word',
+                  word: occurrence.lookup.word,
+                  sentence: occurrence.sentence.fr,
+                  text,
+                }}
+              />
             </div>
           }
         />
@@ -73,13 +85,16 @@ export function ReaderAuthoredSheets({
             revealed={revealed}
             onToggle={() => setRevealed((value) => !value)}
             extra={
-              <SpeakButton
-                text={selection.sentence.fr}
-                engine="device"
-                stopLabel={t('reader.stop')}
-                label={t('gradedReader.deviceVoice')}
-                variant="outline"
-              />
+              <>
+                <SpeakButton
+                  text={selection.sentence.fr}
+                  engine="device"
+                  stopLabel={t('reader.stop')}
+                  label={t('gradedReader.deviceVoice')}
+                  variant="outline"
+                />
+                <AuthoredAskAi subject={{ kind: 'sentence', sentence: selection.sentence.fr, text }} />
+              </>
             }
           />
         </div>

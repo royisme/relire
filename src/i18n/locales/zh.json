@@ -170,6 +170,11 @@
     "checkpoints": {
       "title": "检查点",
       "quotedSentence": "出自句子"
+    },
+    "ai": {
+      "askWord": "就这个词询问 AI",
+      "askSentence": "让 AI 分析这个句子",
+      "answer": "AI 回答，未经审校"
     }
   },
   "sentenceDrawer": {
