@@ -1,9 +1,11 @@
 /** Local reader publication protocol on real in-memory D1 migrations, with labelled invented TEST artifacts only. */
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import type { Database } from 'bun:sqlite';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { copyFile, mkdir, mkdtemp, realpath, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { d1ExecuteSpawn, platformProxyOptions } from '../scripts/content-service/d1Target';
 import { createWorkerDb } from './fixtures/workerDb';
 import { failure } from './fixtures/storage';
 import { publishedReaderFixture } from './fixtures/gradedReaders';
@@ -12,7 +14,7 @@ import {
   publishReaders,
   type ReaderPublishAdapter,
 } from '../scripts/graded-readers/publication';
-import { runPublishRemote } from '../scripts/graded-readers/publishRemote';
+import { parseArgs, runPublishRemote } from '../scripts/graded-readers/publishRemote';
 import { handle } from '../worker/src/index';
 import type { Env } from '../worker/src/index';
 import syllabus from '../data/graded-readers/syllabus.json';
@@ -206,6 +208,88 @@ test('CLI SQL uses assembly gates/current reviews/privacy and selects only inclu
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test('pure argument parsing accepts SQL or local apply, never remote or mixed modes', () => {
+  for (const args of [['--sql'], ['--apply-local']]) expect(parseArgs(args)).toBe(args[0]);
+  for (const args of [[], ['--remote'], ['--apply-remote'], ['--sql', '--apply-local'], ['--sql', '--sql']])
+    expect(() => parseArgs(args)).toThrow('Usage');
+});
+
+test.each([undefined, false])(
+  'remote permission=%s refuses remote flags with rooted private diagnostics',
+  async (allowRemote) => {
+    const root = await mkdtemp(join(tmpdir(), 'relire-TEST-reader-failure-'));
+    const log = spyOn(console, 'log').mockImplementation(() => {});
+    const error = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(await failure(runPublishRemote(['--apply-remote'], root, { allowRemote }))).toMatchObject({
+        message: expect.stringContaining('Usage'),
+      });
+      expect(await Bun.file(join(root, '.pi-runs/graded-readers/publish-failure.log')).text()).toContain(
+        'Usage: publishRemote.ts',
+      );
+      expect(log.mock.calls).toEqual([]);
+      expect(error.mock.calls).toEqual([
+        ['Reader publication failed; private diagnostics in .pi-runs/graded-readers/publish-failure.log'],
+      ]);
+    } finally {
+      log.mockRestore();
+      error.mockRestore();
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+);
+
+test('real local proxy publishes invented readers into a migrated disposable root', async () => {
+  const fixture = reviewFixture();
+  fixture.context.reviews.records.push(testReview(fixture.draft));
+  const root = await reviewTestRoot(fixture);
+  const load = spyOn(reviewInputs, 'loadReviewInputs').mockResolvedValue({
+    drafts: fixture.drafts,
+    context: fixture.inputs,
+  });
+  try {
+    await mkdir(join(root, 'worker/migrations'), { recursive: true });
+    await copyFile(new URL('../worker/wrangler.jsonc', import.meta.url), join(root, 'worker/wrangler.jsonc'));
+    for (const migration of ['0001_init.sql', '0002_lexicon.sql', '0003_vocabulary.sql', '0004_readers.sql'])
+      await copyFile(
+        new URL(`../worker/migrations/${migration}`, import.meta.url),
+        join(root, 'worker/migrations', migration),
+      );
+    await symlink(
+      resolve(await realpath(new URL('../node_modules', import.meta.url)), '../worker/node_modules'),
+      join(root, 'worker/node_modules'),
+    );
+    const migration = Bun.spawnSync({
+      ...d1ExecuteSpawn(root, false, 'd1', 'migrations', 'apply', 'DB'),
+      stdin: 'ignore',
+    });
+    expect(migration.stderr.toString()).toBe('');
+    expect(migration.exitCode).toBe(0);
+    await runPublishRemote(['--apply-local'], root);
+    await runPublishRemote(['--apply-local'], root);
+    const { getPlatformProxy } = await import(
+      pathToFileURL(join(root, 'worker/node_modules/wrangler/wrangler-dist/cli.js')).href
+    );
+    const proxy: { env: Pick<Env, 'DB'>; dispose(): Promise<void> } = await getPlatformProxy(
+      platformProxyOptions(root, false),
+    );
+    try {
+      expect(
+        await proxy.env.DB.prepare("SELECT value FROM meta WHERE key = 'readersCurrent'").first('value'),
+      ).toHaveLength(64);
+      const body = await proxy.env.DB.prepare('SELECT body FROM readers').first<string>('body');
+      expect(JSON.parse(body!).body).toEqual(fixture.draft.body);
+    } finally {
+      await proxy.dispose();
+    }
+    expect(await Bun.file(join(root, '.local/graded-readers/publish.sql')).exists()).toBe(false);
+    expect(await Bun.file(join(root, '.pi-runs/graded-readers/publish-failure.log')).exists()).toBe(false);
+  } finally {
+    load.mockRestore();
+    await rm(root, { recursive: true, force: true });
+  }
+}, 30_000);
 
 test('zero non-bundled readers is a no-op, including CLI without private files or Wrangler', async () => {
   await publishReaders(await prepareReaderPublication([], '1.0.0'), db);

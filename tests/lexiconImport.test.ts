@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { importLexicon, lexiconStatements, sourceVersion, STATEMENT_CAP } from '../scripts/lexicon/import';
+import { importLexicon, lexiconStatements, parseArgs, sourceVersion, STATEMENT_CAP } from '../scripts/lexicon/import';
 import { entryRow, loadLexicon, parseAllowlist, type Lexicon } from '../scripts/lexicon/lexicon';
 import { LexiconEntrySchema } from '../src/types/lexicon';
 import { ALLOWLIST, writeMorphalouFixture } from './fixtures/morphalouCsv';
@@ -148,8 +148,9 @@ async function load(data: Lexicon, cap?: number) {
 describe('SQL', () => {
   test('rows equal the model, forms are deduplicated lowercase keys, the version is last', async () => {
     const { db, statements } = await load(lexicon);
-    expect(statements[0]).toBe('DELETE FROM lexicon_forms;');
-    expect(statements[1]).toBe('DELETE FROM lexicon_entries;');
+    expect(statements[0]).toBe("DELETE FROM meta WHERE key = 'lexiconVersion';");
+    expect(statements[1]).toBe('DELETE FROM lexicon_forms;');
+    expect(statements[2]).toBe('DELETE FROM lexicon_entries;');
     expect(statements.at(-1)).toContain("'lexiconVersion', 'morphalou-3.1+test0000'");
     expect(db.query("SELECT value FROM meta WHERE key = 'lexiconVersion'").get()).toEqual({
       value: 'morphalou-3.1+test0000',
@@ -227,6 +228,36 @@ describe('determinism and version', () => {
   });
 });
 
+test('pure argument parsing accepts only SQL preparation and local application', () => {
+  expect(parseArgs([])).toBeUndefined();
+  expect(parseArgs(['--apply-local'])).toBe('--apply-local');
+  for (const args of [['--remote'], ['--apply-remote'], ['--check'], ['--apply-local', '--apply-local']])
+    expect(() => parseArgs(args)).toThrow('Usage');
+});
+
+test.each([undefined, false])(
+  'remote permission=%s refuses remote flags with rooted private diagnostics',
+  async (allowRemote) => {
+    const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-lexicon-failure-'));
+    const log = spyOn(console, 'log').mockImplementation(() => {});
+    const error = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(
+        await rejection(importLexicon(['--apply-remote'], {}, pathToFileURL(directory + '/'), { allowRemote })),
+      ).toContain('Usage');
+      expect(await Bun.file(join(directory, '.pi-runs/lexicon/failure.log')).text()).toContain('Usage: import.ts');
+      expect(log.mock.calls).toEqual([]);
+      expect(error.mock.calls).toEqual([
+        ['Lexicon import failed; private diagnostics in .pi-runs/lexicon/failure.log'],
+      ]);
+    } finally {
+      log.mockRestore();
+      error.mockRestore();
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
+
 describe('allowlist', () => {
   // The importer reports counts on stdout; keep the test output clean.
   const log = spyOn(console, 'log');
@@ -266,6 +297,8 @@ describe('allowlist', () => {
 
   test('a malformed line is refused; unknown arguments are refused', async () => {
     expect(await rejection(importWith('verb:testmarcher\nadverb:test\n'))).toBe('Bad allowlist line: adverb:test');
-    expect(await rejection(importLexicon(['--remote']))).toBe('Usage: import.ts [--apply-local]');
+    expect(await rejection(importLexicon(['--remote'], {}, pathToFileURL(`${root}/`)))).toBe(
+      'Usage: import.ts [--apply-local]',
+    );
   });
 });
