@@ -83,7 +83,7 @@
       "spelling": "gn",
       "group": "consonants",
       "sound": ["ɲ"],
-      "examples": ["ligne", "signe", "vigne", "gagner"]
+      "examples": ["ligne", "signe", "espagnol", "gagner"]
     },
     {
       "id": "qu",
@@ -104,7 +104,7 @@
       "spelling": "ph",
       "group": "consonants",
       "sound": ["f"],
-      "examples": ["phrase", "phare", "pharmacie", "alphabet"]
+      "examples": ["phrase", "photo", "pharmacie", "alphabet"]
     },
     {
       "id": "h",

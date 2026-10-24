@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "packVersion": "a87adbc043ea60d80d6fbfb0c84d895b000823957cd73e1e3a0148048effa3b1",
+  "patterns": [
+    {
+      "id": "ou",
+      "spelling": "ou",
+      "group": "vowels",
+      "sound": ["u"],
+      "examples": ["vous", "jour", "rouge", "soupe"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "oi",
+      "spelling": "oi",
+      "group": "vowels",
+      "sound": ["w", "a"],
+      "examples": ["moi", "toi", "soir", "boire"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "au",
+      "spelling": "au",
+      "group": "vowels",
+      "sound": ["o"],
+      "examples": ["autre", "faute", "faux", "pause"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "eau",
+      "spelling": "eau",
+      "group": "vowels",
+      "sound": ["o"],
+      "examples": ["eau", "beau", "peau", "bateau"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "eu",
+      "spelling": "eu",
+      "group": "vowels",
+      "sound": ["ø"],
+      "examples": ["peu", "bleu", "deux", "feu"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "on",
+      "spelling": "on",
+      "group": "nasals",
+      "sound": ["ɔ̃"],
+      "examples": ["bon", "pont", "rond", "long"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "an",
+      "spelling": "an",
+      "group": "nasals",
+      "sound": ["ɑ̃"],
+      "examples": ["dans", "plan", "banc", "grand"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "en",
+      "spelling": "en",
+      "group": "nasals",
+      "sound": ["ɑ̃"],
+      "examples": ["vent", "dent", "lent", "centre"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "in",
+      "spelling": "in",
+      "group": "nasals",
+      "sound": ["ɛ̃"],
+      "examples": ["vin", "matin", "lapin", "jardin"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "ain",
+      "spelling": "ain",
+      "group": "nasals",
+      "sound": ["ɛ̃"],
+      "examples": ["pain", "bain", "main", "train"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "ch",
+      "spelling": "ch",
+      "group": "consonants",
+      "sound": ["ʃ"],
+      "examples": ["chat", "cher", "chef", "riche"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "gn",
+      "spelling": "gn",
+      "group": "consonants",
+      "sound": ["ɲ"],
+      "examples": ["ligne", "signe", "espagnol", "gagner"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "qu",
+      "spelling": "qu",
+      "group": "consonants",
+      "sound": ["k"],
+      "examples": ["qui", "que", "quatre", "musique"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "c-cedille",
+      "spelling": "ç",
+      "group": "consonants",
+      "sound": ["s"],
+      "examples": ["ça", "reçu", "déçu", "façade"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "ph",
+      "spelling": "ph",
+      "group": "consonants",
+      "sound": ["f"],
+      "examples": ["phrase", "photo", "pharmacie", "alphabet"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    },
+    {
+      "id": "h",
+      "spelling": "h",
+      "group": "silent",
+      "sound": [],
+      "examples": ["homme", "hôtel", "hiver", "hôpital"],
+      "review": {
+        "kind": "ai",
+        "by": "AI review: GPT 6.1 sol, independent of the Gemini author",
+        "at": "2026-10-24"
+      }
+    }
+  ]
+}

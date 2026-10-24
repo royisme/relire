@@ -4,6 +4,13 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: letter sounds data layer, seed content and AI review (S1, C1, C2, S1b)
+
+- A reviewed-pack pipeline for spelling-to-sound content, modelled on the sound-pairs pack: schema (IPA symbols from any chart group, so `oi` is /w a/), a build gate that rejects an example containing a different-sound spelling, a nasal followed by a vowel or `n`/`m`, `oi` before `n`, and a silent `h` not at the word start; the row hash covers both locale notes; the review tool takes `--kind ai|human`; the loader and the CI `--check` line are in. No UI yet.
+- Seed content for 16 patterns was written by Gemini (author) and passed the gate with 0 problems. An independent GPT review agreed every example word and IPA target and rejected 12 notes (English comparisons that mislead, nasal conditions too absolute, a circular `eu` note, unclear Chinese) and two example words (`vigne`, `phare`); its own replacement text was applied verbatim. The lead recorded 16 `AI review:` records. **Open:** the `ç` examples `déçu` and `façade` are above A1 and no gate-clean replacement exists.
+- The plan was reviewed by Argon first (seven findings, all applied). Verified in the main checkout: typecheck, lint, format, shape, i18n, the full suite (2,265 tests), `--check` and the build exit 0.
+- **Unverified:** everything about hearing the words; the labels say AI review, not teacher review, and a human language review is still the release gate for beginners.
+
 ## 2026-10-24: reader dictation page and device voice (D2)
 
 - A graded reader page has a "Practise by dictation" section between the checkpoints and Mark read. It saves one Listening set of up to six of the reader's sentences (translation as the clue, French only as audio and as the reference answer) and opens it in Practice. Device voice only, no key, deterministic grading that ignores sentence punctuation; wrong answers go to Mistakes. `NumberDictationControl` takes the device engine from the item and no longer attaches French word lookup to a translated clue. Speech and UI rule files name the exception.

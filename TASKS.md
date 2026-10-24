@@ -46,12 +46,12 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| S1 | Pack types and schema, build script with the overlap/nasal/silent-h gate, review tool with `--kind`, loader, tests on fixtures only | unreviewed or changed rows (including a changed note) refused; an example with a different-sound spelling rejected; no seed file, no pack, no CI line | ready to dispatch |
-| C1 | Seed content: 16 patterns' words and en + zh notes (agy gemini-3.8-flash, own task) | passes the S1 gate and `i18n:check` | with S1 |
-| C2 | AI review of the seed rows (GPT, findings report only) | the lead records `AI review:` records for agreed rows | after C1 |
-| S1b | Generated pack, CI `--check` line (lead) | CI never sees an empty or unreviewed pack | after C2 |
-| S2 | Letter sounds section, sheet, IPA fold, review notice | device voice only; IPA closed by default; copy in both locales | after S1b |
-| S3a | `prepareSpellingDrill`, `supportsListening`, meta schema | distinct words, distractors of a different sound and not a substring of the heard word | after S1b |
+| S1 | Pack types and schema, build script with the overlap/nasal/silent-h gate, review tool with `--kind`, loader, tests on fixtures only | unreviewed or changed rows (including a changed note) refused; an example with a different-sound spelling rejected | landed |
+| C1 | Seed content: 16 patterns' words and en + zh notes (agy gemini-3.8-flash, own task) | passes the S1 gate and `i18n:check` | landed (0 gate problems) |
+| C2 | AI review of the seed rows (GPT, findings report only) | the lead records `AI review:` records for agreed rows | landed: every word and sound agreed; 12 notes and 2 examples replaced with the reviewer's own text; `ç` examples `déçu`/`façade` stay open |
+| S1b | Generated pack, CI `--check` line (lead) | CI never sees an empty or unreviewed pack | landed (16 AI records, `--check` exit 0; full suite 2265 pass) |
+| S2 | Letter sounds section, sheet, IPA fold, review notice | device voice only; IPA closed by default; copy in both locales | next |
+| S3a | `prepareSpellingDrill`, `supportsListening`, meta schema | distinct words, distractors of a different sound and not a substring of the heard word | next (parallel with S2) |
 | S3b | `ItemRow` device branch, "Practise these sounds" button, error text, rule lines | deterministic grading; no synthesis | after S3a |
 
 ### Content (paused by the owner's priority)
@@ -62,6 +62,7 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 
 ## Owner
 
+- Human language review of the 16 letter-sounds rows (they carry `AI review:` records only; the `ç` examples `déçu` and `façade` are above A1 and need a teacher's pick), before any real beginner uses the section.
 - Try reader dictation by hand: "Practise by dictation" on a graded reader page with a real device voice (iOS Safari especially), type a full sentence on a phone, find a wrong answer in Mistakes, three themes and 360 px.
 - Try Today by hand (`#/today`, now the landing page): light, sepia, dark and 360 px, a first run through onboarding, and Sound pairs with a device voice. Then run the e2e specs you care about (13 `goto` entries were repointed to `/#/read`; none was run).
 - Answer the open decisions in `docs/graded-readers-plan.md` (public bundle of stages 1 to 5, who reviews the language, word budgets).
