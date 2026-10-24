@@ -7,10 +7,11 @@ export function readerListStatus(
   reader: PublishedReader | ReaderSummary,
   rows: ReaderProgress[],
 ): { status: 'read' | 'opened' | 'notOpened'; earlier: ReaderProgress | undefined };
-export function readerListStatus(reader: PublishedReader | ReaderSummary): {
-  status: 'unavailable';
-  earlier: undefined;
-};
+// The permissive shape the starter list calls: unavailable progress (rows undefined) reads as `unavailable`, never as notOpened.
+export function readerListStatus(
+  reader: PublishedReader | ReaderSummary,
+  rows?: ReaderProgress[],
+): { status: 'unavailable' | 'read' | 'opened' | 'notOpened'; earlier: ReaderProgress | undefined };
 export function readerListStatus(reader: PublishedReader | ReaderSummary, rows?: ReaderProgress[]) {
   const id = 'body' in reader ? reader.body.id : reader.id;
   const current = rows?.find((row) => row.readerId === id && row.version === reader.version);
