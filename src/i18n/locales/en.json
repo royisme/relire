@@ -1057,7 +1057,7 @@
   },
   "shadowingLog": {
     "title": "Shadowing",
-    "subtitle": "Your recordings of article and exercise-passage sentences, kept on this device. The last three of each sentence are kept.",
+    "subtitle": "Your recordings of reader sentences, kept on this device. The last three of each sentence are kept.",
     "source": "Source",
     "allSources": "All sources",
     "referenceVoice": "The reference plays in the voice chosen in Settings now, which may differ from when you recorded.",
@@ -1072,6 +1072,7 @@
     "deleteTake": "Delete your recording from {{when}}",
     "changed": "Original text changed ({{count}})",
     "removed": "Source unavailable ({{count}})",
+    "unavailableEdition": "Unavailable edition ({{id}})",
     "empty": "No recordings yet. In the reader, press the microphone next to a sentence to practise it.",
     "loadFailed": "Could not load your recordings: {{msg}}",
     "deleteFailed": "Could not delete the recording: {{msg}}"

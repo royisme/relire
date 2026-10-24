@@ -4,8 +4,10 @@ import type { ExerciseUnit } from './exercises';
 import type { PublishedReader } from './gradedReader';
 import { unitTitle } from '../services/exercises/setLabel';
 
-export type RecordableReaderSource = { kind: 'article'; articleId: string } | { kind: 'passage'; unitId: string };
-export type ReaderSource = RecordableReaderSource | { kind: 'graded'; readerId: string; version: string };
+export type ReaderSource =
+  | { kind: 'article'; articleId: string }
+  | { kind: 'passage'; unitId: string }
+  | { kind: 'graded'; readerId: string; version: string };
 
 export type ReaderDocument = Pick<Article, 'title' | 'content' | 'level' | 'category' | 'source'>;
 

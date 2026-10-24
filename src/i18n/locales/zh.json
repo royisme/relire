@@ -1049,7 +1049,7 @@
   },
   "shadowingLog": {
     "title": "跟读本",
-    "subtitle": "保存在本机的文章和练习短文录音，每句保留最近三次。",
+    "subtitle": "保存在本机的阅读跟读录音，每句保留最近三次。",
     "source": "来源",
     "allSources": "全部来源",
     "referenceVoice": "范读使用设置中当前选择的声音，可能与你录音时不同。",
@@ -1064,6 +1064,7 @@
     "deleteTake": "删除你在 {{when}} 的录音",
     "changed": "原文已改动（{{count}}）",
     "removed": "来源已不可用（{{count}}）",
+    "unavailableEdition": "读物版本不可用（{{id}}）",
     "empty": "还没有录音。在阅读页点击句子旁的麦克风即可练习。",
     "loadFailed": "无法读取你的录音：{{msg}}",
     "deleteFailed": "录音没能删除：{{msg}}"

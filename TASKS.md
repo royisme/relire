@@ -19,12 +19,12 @@ Plan and decisions: `docs/graded-readers-plan.md` (epic #65; phases #62, #63, #6
 | R1-5 | Reader accepts a third source kind (`graded`) | no Article or unit is created; Back goes to the list | landed |
 | R1-6 | Authored word and sentence sheets (no AI key) | meaning appears at once; no dummy analysis; translation reveal in a fixed slot | landed; optional Ask AI deferred |
 | R1-7 | Checkpoints and Mark read | strict-accent grading; verdict committed before shown; no automatic Next | landed |
-| R1-10 | Recording ownership, shadowing log and backup for reader editions | takes keyed by reader id + body version | next |
+| R1-10 | Recording ownership, shadowing log and backup for reader editions | takes keyed by reader id + body version | landed |
 | R1-9b | Pass `playbackEngine: 'device'` from the graded route | nothing synthesized or fetched; real error without a French voice | landed; owner device check pending |
 | R1-11 | Onboarding step 3 opens reader 1; key-banner wording; copy in both locales; docs | a learner with no key reaches a reader | landed |
 | R1-12 | Build evidence and the cross-feature test pass | chunk sizes and precache recorded | last |
 
-Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), R1-6a (authored word and sentence components), R1-7 (checkpoints component), R1-8 (authored saved-word definitions), R1-9 (device-voice plumbing), R1-11. Integrated pages have landed (visual and device checks are the owner's). Next: recording ownership (R1-10); recording is hidden on graded readers until then. No service catalogue is wired yet.
+Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), R1-6a (authored word and sentence components), R1-7 (checkpoints component), R1-8 (authored saved-word definitions), R1-9 (device-voice plumbing), R1-10 (recording ownership), R1-11. Integrated pages have landed (visual and device checks are the owner's). No service catalogue is wired yet.
 
 ### Content (paused by the owner's priority)
 

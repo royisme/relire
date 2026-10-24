@@ -98,6 +98,7 @@ test('committed workspace server-renders authored text, checkpoints and explicit
           }}
           vocabulary={vocabulary}
           reload={noop}
+          onOpenShadowingLog={noop}
         />
       </I18nextProvider>,
     );
@@ -148,7 +149,7 @@ test('gradedDocument is a view adapter with no article identity or learner field
   );
   const html = renderToStaticMarkup(
     <I18nextProvider i18n={i18n}>
-      <ReaderEditionGate reader={reader} vocabulary={vocabulary} />
+      <ReaderEditionGate reader={reader} vocabulary={vocabulary} onOpenShadowingLog={noop} />
     </I18nextProvider>,
   );
   expect(html).toContain('aria-busy="true"');

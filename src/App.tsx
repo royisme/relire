@@ -314,6 +314,10 @@ export default function App() {
                     version={route.version}
                     sentence={route.sentence}
                     vocabulary={vocabulary}
+                    onOpenShadowingLog={(sourceId) => {
+                      setLogSourceId(sourceId);
+                      navigate({ name: 'study', tab: 'shadowing' });
+                    }}
                   />
                 )}
               </Suspense>
@@ -381,7 +385,14 @@ export default function App() {
                     navigate(
                       source.kind === 'passage'
                         ? { name: 'passage', unitId: source.unitId, sentence: record.text }
-                        : { name: 'reader', articleId: source.articleId, sentence: record.text },
+                        : source.kind === 'graded'
+                          ? {
+                              name: 'gradedReader',
+                              readerId: source.readerId,
+                              version: source.version,
+                              sentence: record.text,
+                            }
+                          : { name: 'reader', articleId: source.articleId, sentence: record.text },
                     );
                   },
                 }}
