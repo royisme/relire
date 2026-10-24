@@ -4,6 +4,12 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: reader dictation page and device voice (D2)
+
+- A graded reader page has a "Practise by dictation" section between the checkpoints and Mark read. It saves one Listening set of up to six of the reader's sentences (translation as the clue, French only as audio and as the reference answer) and opens it in Practice. Device voice only, no key, deterministic grading that ignores sentence punctuation; wrong answers go to Mistakes. `NumberDictationControl` takes the device engine from the item and no longer attaches French word lookup to a translated clue. Speech and UI rule files name the exception.
+- Verified in the main checkout: typecheck, lint, format, shape, i18n, the full suite (2,240 tests), the UI detector and the build exit 0. The worker also probed that the new tests fail on the old control and on wrong navigation or retry behaviour. The plan was reviewed by Argon first (six findings, all applied).
+- **Unverified:** a real device French voice (and iOS Safari), typing a full sentence on a phone, the section in three themes and at 360 px. Those are the owner's.
+
 ## 2026-10-24: reader dictation data and grading (D1)
 
 - Added strict saved dictation provenance tied to the effective `NUMBER_DICTATION` type and nonblank audio; reused the reader schemas for identifiers and body versions. Listening gates are unchanged.

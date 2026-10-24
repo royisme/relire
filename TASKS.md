@@ -35,12 +35,12 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | T3 | `TodayPage`, `#/today`, nav item, copy in both locales, `worksWithoutKey`, architecture and changelog lines | steps match the plan; no invented counts | landed (full suite 2213 pass, detector zero, build exit 0); owner visual check pending |
 | T4 | Landing change and onboarding exit | `#/` and `''` open Today; Library stays at `#/read`; `notFound`, `'#/read'` fallbacks and onboarding step 3 exit agree | landed (full suite 2213 pass, detector zero, build exit 0); no e2e run; owner visual check pending |
 
-### Next epic: sentence dictation from graded readers (proposed; `docs/reader-dictation-plan.md`)
+### Landed: sentence dictation from graded readers (`docs/reader-dictation-plan.md`)
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
 | D1 | Meta schema and marker-to-type refinement, `gradeItem` flag `ignoreSentencePunctuation`, `prepareReaderDictation` | prepared unit passes `ExerciseUnitSchema`; a sentence typed without its final full stop grades right, a missing hyphen or apostrophe still wrong; published readers require at least 3 sentences; retry through `saveUnits` keeps the batch | landed (full suite 2224 pass, detector zero, build exit 0) |
-| D2 | Device engine in `NumberDictationControl` and `ItemRow`; "Practise by dictation" button in `GradedReaderWorkspace`; copy, caption, changelog, architecture | no synthesis or fetch; French text not shown before the check; one filled button per view stays | next |
+| D2 | Device engine in `NumberDictationControl` and `ItemRow`; "Practise by dictation" button in `GradedReaderWorkspace`; copy, caption, changelog, architecture | no synthesis or fetch; French text not shown before the check; one filled button per view stays | landed (full suite 2240 pass, detector zero, build exit 0); owner device check pending |
 
 ### Content (paused by the owner's priority)
 
@@ -50,6 +50,7 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 
 ## Owner
 
+- Try reader dictation by hand: "Practise by dictation" on a graded reader page with a real device voice (iOS Safari especially), type a full sentence on a phone, find a wrong answer in Mistakes, three themes and 360 px.
 - Try Today by hand (`#/today`, now the landing page): light, sepia, dark and 360 px, a first run through onboarding, and Sound pairs with a device voice. Then run the e2e specs you care about (13 `goto` entries were repointed to `/#/read`; none was run).
 - Answer the open decisions in `docs/graded-readers-plan.md` (public bundle of stages 1 to 5, who reviews the language, word budgets).
 - Try the graded readers by hand with `docs/graded-readers-trial.md` (no AI key needed), then send back what is wrong.
