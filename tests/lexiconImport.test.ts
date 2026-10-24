@@ -243,18 +243,29 @@ test('pure argument parsing accepts SQL preparation and explicit apply modes onl
     expect(() => parseArgs(args)).toThrow('Usage');
 });
 
-test.each([undefined, false])('remote permission=%s refuses before any file access or logging', async (allowRemote) => {
+test.each([
+  { args: ['--bogus'], allowRemote: true, message: 'Usage: import.ts [--apply-local | --apply-remote]' },
+  ...[undefined, false].map((allowRemote) => ({
+    args: ['--apply-remote'],
+    allowRemote,
+    message: 'Remote publication requires owner CLI authorization',
+  })),
+  { args: ['--apply-remote'], allowRemote: true, message: 'Remote publication requires TTY stdin and stdout' },
+])('early refusal prints $message exactly once without creating files', async ({ args, allowRemote, message }) => {
   const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-lexicon-failure-'));
   const log = spyOn(console, 'log').mockImplementation(() => {});
   const error = spyOn(console, 'error').mockImplementation(() => {});
+  const stdinIsTTY = process.stdin.isTTY;
+  process.stdin.isTTY = false;
   try {
-    expect(
-      await rejection(importLexicon(['--apply-remote'], {}, pathToFileURL(directory + '/'), { allowRemote })),
-    ).toBe('Remote publication requires owner CLI authorization');
+    expect(await rejection(importLexicon([...args], {}, pathToFileURL(directory + '/'), { allowRemote }))).toBe(
+      message,
+    );
     expect(await readdir(directory)).toEqual([]);
     expect(log.mock.calls).toEqual([]);
-    expect(error.mock.calls).toEqual([]);
+    expect(error.mock.calls).toEqual([[message]]);
   } finally {
+    process.stdin.isTTY = stdinIsTTY;
     log.mockRestore();
     error.mockRestore();
     await rm(directory, { recursive: true, force: true });
@@ -279,7 +290,7 @@ test('remote CLI refuses non-TTY streams before inputs, output, logs or Wrangler
     });
     expect(child.exitCode).toBe(1);
     expect(child.stdout.toString()).toBe('');
-    expect(child.stderr.toString()).toBe('');
+    expect(child.stderr.toString()).toBe('Remote publication requires TTY stdin and stdout\n');
     expect((await readdir(directory)).sort()).toEqual(['node_modules', 'scripts']);
     expect(await Bun.file(join(directory, '.local/lexicon/import.sql')).exists()).toBe(false);
   } finally {

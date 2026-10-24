@@ -127,10 +127,18 @@ export async function publish(
   root = repository,
   { allowRemote = false }: { allowRemote?: boolean } = {},
 ): Promise<void> {
-  const mode = parseArgs(args);
+  let mode: string | undefined;
+  try {
+    mode = parseArgs(args);
+    if (mode === '--apply-remote') {
+      if (allowRemote !== true) throw new Error('Remote publication requires owner CLI authorization');
+      requireInteractiveTerminal(Boolean(process.stdin.isTTY), Boolean(process.stdout.isTTY));
+    }
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    throw error;
+  }
   const remote = mode === '--apply-remote';
-  if (remote && allowRemote !== true) throw new Error('Remote publication requires owner CLI authorization');
-  if (remote) requireInteractiveTerminal(Boolean(process.stdin.isTTY), Boolean(process.stdout.isTTY));
   try {
     if (mode === '--check') {
       checkTopicMetadata(
@@ -149,7 +157,7 @@ export async function publish(
         ...d1ExecuteSpawn(root, remote, 'd1', 'execute', 'DB', '--file', fileURLToPath(output)),
         stdin: remote ? 'inherit' : 'ignore',
         stdout: remote ? 'inherit' : 'pipe',
-        stderr: 'pipe',
+        stderr: remote ? 'inherit' : 'pipe',
       });
       const [stdout, stderr, exitCode] = await Promise.all([
         new Response(child.stdout).text(),

@@ -344,21 +344,32 @@ test('pure argument parsing accepts preparation/check and explicit apply modes o
     expect(() => parseArgs(args)).toThrow('Usage');
 });
 
-test.each([undefined, false])('remote permission=%s refuses before any file access or logging', async (allowRemote) => {
+test.each([
+  { args: ['--bogus'], allowRemote: true, message: 'Usage: publish.ts [--apply-local | --apply-remote | --check]' },
+  ...[undefined, false].map((allowRemote) => ({
+    args: ['--apply-remote'],
+    allowRemote,
+    message: 'Remote publication requires owner CLI authorization',
+  })),
+  { args: ['--apply-remote'], allowRemote: true, message: 'Remote publication requires TTY stdin and stdout' },
+])('early refusal prints $message exactly once without creating files', async ({ args, allowRemote, message }) => {
   const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-topic-failure-'));
   const log = spyOn(console, 'log').mockImplementation(() => {});
   const error = spyOn(console, 'error').mockImplementation(() => {});
+  const stdinIsTTY = process.stdin.isTTY;
+  process.stdin.isTTY = false;
   try {
     expect(
-      await publish(['--apply-remote'], pathToFileURL(directory + '/'), { allowRemote }).then(
+      await publish([...args], pathToFileURL(directory + '/'), { allowRemote }).then(
         () => 'resolved',
         (error: Error) => error.message,
       ),
-    ).toBe('Remote publication requires owner CLI authorization');
+    ).toBe(message);
     expect(await readdir(directory)).toEqual([]);
     expect(log.mock.calls).toEqual([]);
-    expect(error.mock.calls).toEqual([]);
+    expect(error.mock.calls).toEqual([[message]]);
   } finally {
+    process.stdin.isTTY = stdinIsTTY;
     log.mockRestore();
     error.mockRestore();
     await rm(directory, { recursive: true, force: true });
@@ -383,7 +394,7 @@ test('remote CLI refuses non-TTY streams before inputs, output, logs or Wrangler
     });
     expect(child.exitCode).toBe(1);
     expect(child.stdout.toString()).toBe('');
-    expect(child.stderr.toString()).toBe('');
+    expect(child.stderr.toString()).toBe('Remote publication requires TTY stdin and stdout\n');
     expect((await readdir(directory)).sort()).toEqual(['node_modules', 'scripts', 'src']);
     expect(await Bun.file(join(directory, '.local/grammar-topics/publish.sql')).exists()).toBe(false);
   } finally {
