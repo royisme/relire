@@ -67,12 +67,15 @@ function elements(tree: React.ReactNode) {
 }
 
 for (const language of ['en', 'zh']) {
-  test(`${language}: Speaking landing orders Read aloud, Sound pairs with count states, then the full French sounds chart`, async () => {
+  test(`${language}: Speaking landing orders Read aloud, Sound pairs, Letter sounds, then the full French sounds chart`, async () => {
     await i18n.changeLanguage(language);
     const landing = <SpeakingPage articles={[]} workspace={false} onAssessed={noop} onMissingKey={noop} />;
     const loading = render(landing);
     expect(loading.indexOf('href="#/speaking/read-aloud"')).toBeLessThan(loading.indexOf('id="sound-pairs-title"'));
-    expect(loading.indexOf('id="sound-pairs-title"')).toBeLessThan(loading.indexOf('id="french-sounds-title"'));
+    expect(loading.indexOf('id="letter-sounds-title"')).toBeGreaterThan(loading.indexOf('id="sound-pairs-title"'));
+    expect(loading.indexOf('id="french-sounds-title"')).toBeGreaterThan(loading.indexOf('id="letter-sounds-title"'));
+    expect(loading).toContain(i18n.t('spellingSounds.title'));
+    expect(loading).toContain(i18n.t('spellingSounds.intro'));
     expect(loading).toContain(i18n.t('minimalPairs.drill.description'));
     expect(loading).toContain(i18n.t('minimalPairs.drill.make'));
     expect(loading).toContain(i18n.t('exerciseProgress.loading'));
@@ -103,6 +106,7 @@ for (const language of ['en', 'zh']) {
     const chooser = render(<SpeakingPage articles={[]} workspace onAssessed={noop} onMissingKey={noop} />);
     expect(chooser).not.toContain('id="sound-pairs-title"');
     expect(chooser).not.toContain('id="french-sounds-title"');
+    expect(chooser).not.toContain('id="letter-sounds-title"');
   });
 
   test(`${language}: Progress keeps real stats, grammar accuracy/adaptive drills and recent scores, not sound study content`, async () => {

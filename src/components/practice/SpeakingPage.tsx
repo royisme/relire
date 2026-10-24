@@ -10,6 +10,7 @@ import { Button, buttonVariants } from '../ui/button';
 import { PageHeader } from '../ui/page-header';
 import { OralPractice } from './OralPractice';
 import { FrenchSounds } from '../speaking/FrenchSounds';
+import { LetterSounds } from '../speaking/LetterSounds';
 import { SoundContrastCounts } from '../speaking/SoundContrastCounts';
 
 const AddExercisesDialog = retryableLazy(async () => ({
@@ -57,6 +58,7 @@ export function SpeakingPage({ articles, workspace, articleId, sentence, onAsses
             </Button>
             <SoundContrastCounts />
           </section>
+          <LetterSounds />
           <FrenchSounds />
           {addingPairs && (
             <Suspense fallback={null}>
