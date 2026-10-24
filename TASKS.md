@@ -17,7 +17,7 @@ Plan and decisions: `docs/graded-readers-plan.md` (epic #65; phases #62, #63, #6
 | R1-3 | Reader progress, opened-edition snapshot, backup/restore | snapshot survives service loss; restore rejects malformed input whole | landed |
 | R1-4b | `#/read/graded` list page | starter-only states of design §6.3; real progress; no fake rows | landed |
 | R1-5 | Reader accepts a third source kind (`graded`) | no Article or unit is created; Back goes to the list | landed |
-| R1-6 | Authored word and sentence sheets (no AI key) | meaning appears at once; no dummy analysis; translation reveal in a fixed slot | landed; optional Ask AI deferred |
+| R1-6 | Authored word and sentence sheets (no AI key) | meaning appears at once; no dummy analysis; translation reveal in a fixed slot | landed (optional Ask AI landed too) |
 | R1-7 | Checkpoints and Mark read | strict-accent grading; verdict committed before shown; no automatic Next | landed |
 | R1-10 | Recording ownership, shadowing log and backup for reader editions | takes keyed by reader id + body version | landed |
 | R1-9b | Pass `playbackEngine: 'device'` from the graded route | nothing synthesized or fetched; real error without a French voice | landed; owner device check pending |
