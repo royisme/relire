@@ -29,7 +29,8 @@ Workers run no browsers/servers unless explicitly authorized. Any authorized bro
 
 ## 3. Commit and push
 - Work on the designated feature branch. If its PR was already merged, restart the branch from the latest `main` and keep only unmerged commits.
-- One commit per coherent change, with a message that explains why. End it with the attribution lines the session asks for.
+- One commit per coherent change, with a message that explains why. The title is `type(scope): summary` (feat, fix, docs, chore, refactor, test; `docs/conventions.md`, "Git names"). End it with the attribution lines the session asks for.
+- A new branch has at most three hyphenated words and no slash or type prefix; PR titles use the same `type(scope): summary` form.
 - `git push -u origin <branch>`; retry network failures with backoff.
 - Do not open a PR, merge, or force-push someone else's branch unless the user asks.
 

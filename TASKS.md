@@ -63,7 +63,19 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 | G3 | Topics page in book order, numbers, studied marks, Next links, mark button (copy by agy Gemini) | no invented progress; one filled button per view | landed (copy C5 by agy Gemini; full suite 2318 pass) |
 | G4 | Today `grammar` step (service configured only) | omitted, never faked, without a service; real error on the step | landed (full suite 2336 pass, detector zero, build exit 0, every CI pack check 0) |
 
-### Next: remote publication of the content service (owner decision 2026-10-24; no plan doc yet)
+### Next: Today v2, an app-like Today with guidance (`docs/today-v2-plan.md`, draft)
+
+Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlons. A static comparison of two directions is at `.pi-runs/today-v2/mockup.html` (local file: A strict, B Parlons-like). The owner picks one, then the plan goes to Argon, then V1 to V4 below. V1 is the same for both and is not blocked.
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| V0 | Owner chooses A or B (B needs a `DESIGN.md` exception for Today) | the choice is recorded in the plan | waiting for the owner |
+| V1 | Plan model: reader `title`, `reviewsToday`, `doneCount`, `nextIndex`; first-run and no-step cases | `bun test tests/today*.test.ts` and the full suite exit 0 | not started |
+| V2 | View: `TodayFocus`, `TodayPath`, `TodayAside`, practise-on-your-own links | typecheck, lint, format, shape exit 0; detector `[]`; component tests per state | after V0 |
+| V3 | Copy by agy gemini-3.8-flash: `today.*` keys, guidance sentence, why lines | `bun run i18n:check` exits 0; the lead reads the zh | after V2 |
+| V4 | Docs: `DESIGN.md` Today section, architecture, changelog | `format:check` exits 0 | after V3 |
+
+### Next: remote publication of the content service (owner decision 2026-10-24; plan `docs/d-remote-plan.md` under Argon review)
 
 First deployment: no accounts, public read-only, rate limited, CORS limited to the deployment origins; topics, lexicon and the vocabulary book (the owner's own, `unreviewed`) go up together (ADR amendment). Needs a short plan doc and an Argon review before dispatch.
 

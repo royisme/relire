@@ -108,7 +108,7 @@ Run from the checkout to be reviewed. `--tools read,grep,find,ls` restricts pi's
 ```bash
 task=<short-name>
 mkdir -p .pi-runs/$task
-git worktree add -b pi/$task ../relire-wt/$task HEAD
+git worktree add -b $task ../relire-wt/$task HEAD   # branch = the task name: at most three hyphenated words, no slash or prefix
 git -C ../relire-wt/$task log -1   # must be the commit you expect
 ln -s "$PWD/node_modules" ../relire-wt/$task/node_modules
 # write the prompt to .pi-runs/$task/prompt.md (template in section 6)
@@ -119,7 +119,7 @@ nohup scripts/pi-dispatch.sh ../relire-wt/$task openai-codex/gpt-6.1-sol \
 
 What the script does: runs `pi -p -ne --no-session --model <id> --thinking ${PI_THINKING:-high}` inside the worktree under `timeout` (default 5400 s). If no process in pi's tree holds an established TCP connection within 48 s it kills and retries, at most 5 times (exit 124 when it gives up). It refuses an empty prompt file and a model without `<provider>/`. For `antigravity/*` it adds `-e ~/.pi/agent/extensions/agy-lean.ts`. `PI_EXT=1` allows extensions; only use it on a task you can afford to see hijacked.
 
-Clean up after merging or discarding: `git worktree remove ../relire-wt/$task && git branch -D pi/$task`.
+Clean up after merging or discarding: `git worktree remove ../relire-wt/$task && git branch -D $task` (older worker branches are still named `pi/<task>`).
 
 ## 5. How results come back, and the merge gate
 
@@ -144,10 +144,10 @@ Browser automation is exceptional for necessary critical frontend/backend, brows
 pi loads relire's `AGENTS.md` (context-file discovery covers `AGENTS.md` and `CLAUDE.md`; `CLAUDE.md` only imports `AGENTS.md`), but **not** `.claude/rules/*.md`, which only Claude Code auto-loads. agy-lean is told to read repo rules, but does not inherit them. Name the rule files in the prompt. In the template, `<worktree>` is the absolute path of the task's worktree and `<lead-checkout>` the absolute path of the lead's own checkout; fill both in before dispatching.
 
 ```markdown
-You are the implementer for one task in Relire, working in the git worktree <worktree> on branch pi/<task>.
+You are the implementer for one task in Relire, working in the git worktree <worktree> on branch <task>.
 
 ## Read first
-- CLAUDE.md, then: <docs/merge-plan.md §N, docs/architecture.md section, ...>
+- CLAUDE.md, then docs/conventions.md ("Code style" and "Git names"), then: <docs/merge-plan.md §N, docs/architecture.md section, ...>
 - Area rules for the files you touch: .claude/rules/<ui|ai-layer|storage|speech|i18n|typescript>.md
 - The plan: <path>. Do exactly these steps: <steps>. Scope: only <files/dirs>.
 
@@ -157,7 +157,7 @@ You are the implementer for one task in Relire, working in the git worktree <wor
 - Never invent data: no sample stats, fake scores or fallback AI answers. Empty means empty; failures show the real error.
 - Nothing has shipped: write no backward-compatibility, legacy-fallback or migration code for unreleased states, and no defensive code for cases that cannot happen. Add an abstraction only when a second real caller exists. When unsure, take the smaller change and report the question instead of building options.
 - AI calls go through src/services/ai; prompt wording lives in template files, never in TypeScript.
-- Comments and commit messages in English. Chinese only in zh.json and *.zh.txt prompts.
+- Comments and commit messages in English; commit messages are `type(scope): summary` (feat, fix, docs, chore, refactor, test). Chinese only in zh.json and *.zh.txt prompts.
 - A change a user could notice gets one line in CHANGELOG.md (Unreleased) in the same commit.
 - Bun only. Do not run bun install / bun add; node_modules is a symlink to the main checkout. A new dependency needs the user: stop and report.
 - Commit on this branch only, staging files by name (never git add -A or git add .). Do not push, open a PR or merge. This overrides the ship-change skill's push step.

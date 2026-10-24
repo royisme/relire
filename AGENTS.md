@@ -17,6 +17,8 @@ The never-do list and working agreements are in `RULES.md`.
 - Use a shadcn/ui (Base UI) component first via `bunx shadcn@latest add <name>`; write a custom component only when none exists, and compose data tables from `ui/table` and `@tanstack/react-table`.
 - Controls never move the page: transient states show on the control itself or in an overlay.
 - Docs, comments, commit messages and PR text are in English; Chinese only where `docs/conventions.md` allows.
+- Names: a new branch is at most three words joined by hyphens, with no slash and no type prefix (`today-v2`, `fix-scroll-state`); commits and PR titles are `type(scope): summary` with type one of feat, fix, docs, chore, refactor, test.
+- Code style (`docs/conventions.md`, "Code style"): validate once at the boundary that owns the value, inline single-use helpers, no `any`, no aliased or star imports in new code, `const` and early returns instead of `else`, no speculative race or security handling without the owner's buy-in.
 - A user-noticeable change gets a `CHANGELOG.md` (Unreleased) line in the same commit.
 
 ## How to work here

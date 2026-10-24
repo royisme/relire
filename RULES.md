@@ -25,6 +25,7 @@ What an agent (or a person) must never do in this repository, and the working ag
 - Never run `rm -rf` on a `node_modules` that may be a symlink; never run `bun install` or touch the network from a worker.
 - Never push, open a PR, merge to `main` or force-push unless the owner asks (the lead's local merges into the working branch excepted: `docs/agent-delegation.md`). Never bypass the pre-commit hook.
 - Never stop, rebind or reset the owner's servers on 5173 and 8787, or start a second browser/e2e run (`docs/development.md`).
+- Never name a new branch with a slash, a type prefix (`feat/`, `fix/`, `pi/`) or more than three hyphenated words, and never write a commit or PR title that is not `type(scope): summary` (types feat, fix, docs, chore, refactor, test). Worker branches are named after the task (`docs/agent-delegation.md`). Existing branches keep their names until merged or deleted.
 
 **Delegation**
 - Never dispatch a worker, or rule a model out, without running `magpie quota` first.
@@ -35,6 +36,7 @@ What an agent (or a person) must never do in this repository, and the working ag
 
 - **One small step at a time** (`TASKS.md`). A step has an acceptance line; it is done when the checks pass and the lead has read the diff.
 - **Read before you change**: the files you will touch and the document for the area (`AGENTS.md` map).
+- **Code style**: `docs/conventions.md` ("Code style") applies to every TypeScript change, workers included (pi does not load `.claude/rules`, so the rule text must be reachable from `AGENTS.md`). Match the surrounding code where it differs; do not reformat old code to the new style.
 - **Verification report**: say what ran, what did not, and what the owner must check by hand (visual acceptance, real devices, real keys).
 - **Platform before content** (owner, 2026-10-23): framework and features first; copy, glosses and learning content are versioned data that can be revised later. Do not spend review rounds on wording while a platform task is open.
 - **Content honesty**: content shown to learners is labelled with what checked it. A beginner cannot catch an error, so a human language review is the release gate for beginner content.
