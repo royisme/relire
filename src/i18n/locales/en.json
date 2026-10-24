@@ -33,38 +33,72 @@
   },
   "today": {
     "title": "Today",
-    "intro": "A short list of what is worth doing now. Each step opens the page where you do it.",
     "done": "Done today",
-    "allDone": "You are done for today.",
+    "steps": {
+      "title": "Today's steps",
+      "progress": "{{done}} of {{total}} done"
+    },
+    "guidance": {
+      "empty": "No steps today. Choose a skill to practise on your own.",
+      "allDone": "You are done for today. You can still practise a skill on its own.",
+      "unavailable": "Some steps could not load. You can practise a skill on its own.",
+      "plan": "Today, {{steps}}. Stop whenever you like; you can pick up from here.",
+      "words_one": "review {{count}} word",
+      "words_other": "review {{count}} words",
+      "read": "read a short text",
+      "sound": "practise sound pairs",
+      "mistakes_one": "retry {{count}} mistake",
+      "mistakes_other": "retry {{count}} mistakes",
+      "grammar": "study the next grammar topic"
+    },
+    "practice": {
+      "title": "Or practise one skill on its own",
+      "words": "Words",
+      "read": "Read",
+      "speaking": "Speaking",
+      "grammar": "Grammar"
+    },
+    "counts": {
+      "title": "Today so far",
+      "reviews": "Words reviewed",
+      "exercises": "Exercises answered",
+      "readers": "Readers worked on"
+    },
     "loading": "Loading today's steps…",
     "stepError": "Could not load this step: {{msg}}",
     "words": {
       "title": "Review words",
       "status": "{{due}} due · {{newAvailable}} new",
-      "action": "Review"
+      "action": "Review",
+      "why": "Each word comes back just before it is due, so a short review keeps what you learned."
     },
     "read": {
       "title": "Read",
       "start": "Start reader {{order}}",
       "continue": "Continue reader {{order}}",
       "doneToday": "Reader {{order}} done today",
-      "action": "Open"
+      "noKey": "Reader 1 needs no key.",
+      "action": "Open",
+      "why": "A short graded text; tap any word for its meaning. No key needed."
     },
     "sound": {
       "title": "Sound pairs",
       "status": "Tell similar French sounds apart",
-      "action": "Practise"
+      "action": "Practise",
+      "why": "Hear and repeat the sounds you will meet in the next text."
     },
     "mistakes": {
       "title": "Redo mistakes",
       "status_one": "{{count}} saved mistake",
       "status_other": "{{count}} saved mistakes",
-      "action": "Redo"
+      "action": "Redo",
+      "why": "Retry what you got wrong; a right answer clears it."
     },
     "grammar": {
       "title": "Grammar",
       "status": "Next topic: {{title}}",
-      "action": "Open"
+      "action": "Open",
+      "why": "The next topic in the book's order."
     }
   },
   "learning": {

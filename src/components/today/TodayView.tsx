@@ -1,70 +1,59 @@
-/** Owns the Today checklist's headings, statuses and destination links, not loading or stored activity. */
+/** Owns Today's date, plan guidance and independent practice links, not loading or activity selection. */
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
-import type { TodayPlan, TodayStep } from '../../services/today/plan';
+import type { TodayPlan } from '../../services/today/plan';
 import type { Route } from '../../utils/routes';
-import { cn } from '../../lib/utils';
 import { Link } from '../shell/Link';
 import { buttonVariants } from '../ui/button';
+import { PageHeader } from '../ui/page-header';
+import { TodayAside } from './TodayAside';
+import { TodayCard } from './TodayCard';
 
-function stepContent(step: Exclude<TodayStep, { error: string }>, t: TFunction): { to: Route; status: string } {
-  switch (step.id) {
-    case 'words':
-      return {
-        to: { name: 'wordsReview' },
-        status: t('today.words.status', { due: step.due, newAvailable: step.newAvailable }),
-      };
-    case 'read':
-      return {
-        to: { name: 'gradedReader', readerId: step.readerId, ...(step.version ? { version: step.version } : {}) },
-        status: t(`today.read.${step.state}`, { order: step.order }),
-      };
-    case 'sound':
-      return { to: { name: 'speaking' }, status: t('today.sound.status') };
-    case 'mistakes':
-      return { to: { name: 'study', tab: 'mistakes' }, status: t('today.mistakes.status', { count: step.unresolved }) };
-    case 'grammar':
-      return {
-        to: { name: 'grammarTopic', topicId: step.topicId },
-        status: t('today.grammar.status', { title: step.title }),
-      };
-  }
-}
-
-export function TodayView({ plan }: { plan: TodayPlan }) {
-  const { t } = useTranslation();
-  const firstPending = plan.steps.find((step) => !step.done);
+export function TodayView({ plan, now }: { plan: TodayPlan; now: number }) {
+  const { t, i18n } = useTranslation();
+  const clauses = plan.steps.flatMap((step) => {
+    if (step.done || 'error' in step) return [];
+    if (step.id === 'words') return [t('today.guidance.words', { count: step.due + step.newAvailable })];
+    if (step.id === 'mistakes') return [t('today.guidance.mistakes', { count: step.unresolved })];
+    return [t(`today.guidance.${step.id}`)];
+  });
+  const practice: { id: string; to: Route }[] = [
+    { id: 'words', to: { name: 'study', tab: 'words' } },
+    { id: 'read', to: { name: 'library' } },
+    { id: 'speaking', to: { name: 'speaking' } },
+    { id: 'grammar', to: { name: 'grammar' } },
+  ];
   return (
-    <section className="mx-auto max-w-3xl min-w-0 min-h-[40rem] px-4 py-6 sm:px-6 space-y-4 break-words">
-      <h1 className="font-serif text-2xl font-semibold">{t('today.title')}</h1>
-      <p className="text-sm text-ink-600">{t('today.intro')}</p>
-      <ol className="divide-y divide-ink-200 border-y border-ink-200">
-        {plan.steps.map((step) => {
-          const content =
-            'error' in step ? { status: t('today.stepError', { msg: step.error }), to: null } : stepContent(step, t);
-          return (
-            <li key={step.id} className="min-w-0 py-4 space-y-2">
-              <h2 className="font-serif text-lg font-semibold">{t(`today.${step.id}.title`)}</h2>
-              <p className={cn('text-sm', 'error' in step ? 'text-bad-700' : 'text-ink-700')}>
-                {content.status}
-                {step.done && <span className="block text-ok-800">{t('today.done')}</span>}
-              </p>
-              {content.to && (
-                <Link
-                  to={content.to}
-                  className={cn(
-                    buttonVariants({ variant: step === firstPending ? 'default' : 'outline' }),
-                    'h-auto min-h-10 max-w-full whitespace-normal break-words py-2',
-                  )}
-                >
-                  {t(`today.${step.id}.action`)}
+    <section className="mx-auto max-w-5xl min-w-0 min-h-[40rem] px-4 py-6 sm:px-6 space-y-6 break-words">
+      <header className="space-y-3">
+        <PageHeader title={t('today.title')} subtitle={new Intl.DateTimeFormat(i18n.language).format(now)} />
+        <p className="max-w-prose text-sm text-ink-700">
+          {plan.steps.length === 0 && t('today.guidance.empty')}
+          {plan.allDone && t('today.guidance.allDone')}
+          {plan.steps.length > 0 &&
+            !plan.allDone &&
+            (plan.nextIndex === undefined
+              ? t('today.guidance.unavailable')
+              : t('today.guidance.plan', {
+                  steps: new Intl.ListFormat(i18n.language, { type: 'conjunction' }).format(clauses),
+                }))}
+        </p>
+      </header>
+      <div className="grid min-w-0 gap-8 md:grid-cols-[minmax(0,1fr)_17rem]">
+        <div className="min-w-0 space-y-5">
+          <TodayCard plan={plan} />
+          <nav aria-label={t('today.practice.title')} className="space-y-2">
+            <p className="text-sm text-ink-600">{t('today.practice.title')}</p>
+            <div className="flex flex-wrap gap-2">
+              {practice.map((link) => (
+                <Link key={link.id} to={link.to} className={buttonVariants({ variant: 'outline' })}>
+                  {t(`today.practice.${link.id}`)}
                 </Link>
-              )}
-            </li>
-          );
-        })}
-      </ol>
-      {plan.allDone && <p className="text-sm text-ink-700">{t('today.allDone')}</p>}
+              ))}
+            </div>
+          </nav>
+        </div>
+        <TodayAside counts={plan.counts} />
+      </div>
     </section>
   );
 }
