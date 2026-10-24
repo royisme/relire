@@ -36,6 +36,8 @@ Thumbs.db
 
 # Local tooling state
 worker/.wrangler/
+# Owner-local deployment config (real database/account ids, origins); the committed file keeps placeholders
+worker/wrangler.deploy.jsonc
 .claude/settings.local.json
 # Agent definitions are never committed (rules/ and skills/ stay tracked)
 .claude/agents/
