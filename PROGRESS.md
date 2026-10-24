@@ -4,6 +4,13 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: reader dictation data and grading (D1)
+
+- Added strict saved dictation provenance tied to the effective `NUMBER_DICTATION` type and nonblank audio; reused the reader schemas for identifiers and body versions. Listening gates are unchanged.
+- Added pure reader-order-preserving sampling into one standalone Listening unit with translated clues, French audio/answers, edition metadata and save-only retry coverage. The existing published-reader schema owns the three-sentence minimum.
+- Scalar grading ignores only the flagged sentence punctuation, replacing it with spaces; hyphens, apostrophes and strict accents remain significant. Unflagged and nonscalar grading are unchanged.
+- Full suite: 2,224 tests pass; format, shape, i18n, build and UI detector exit 0. Typecheck and lint fail in this worktree because Worker dependencies are absent; the requested filtered typecheck emits no diagnostics for the changed areas. The grammar CLI fixture now copies the pure reader dependencies required by exercise metadata. Awaiting lead verification; D2 UI/device integration is not implemented or exercised.
+
 ## 2026-10-24: Today checklist (T1 to T4)
 
 - Today is the page the app opens on (`#/today`; the Library stays at `#/read`). Up to four steps, each a link into an existing page with a status read from stored data: review words (real due and new counts), the next graded reader, sound pairs (always shown), and saved mistakes. "Done today" is derived from review, checkpoint and attempt timestamps in the local day; nothing new is stored. Plan: `docs/today-plan.md`.

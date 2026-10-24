@@ -755,6 +755,10 @@
     "consonants": "Consonants",
     "play": "Play {{word}}, sound {{symbol}}"
   },
+  "readerDictation": {
+    "title": "Dictation",
+    "instruction": "Listen and type the sentence you hear. Punctuation is not checked."
+  },
   "minimalPairs": {
     "progress": {
       "title": "Sound-pair answers",

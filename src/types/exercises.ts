@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { LearningAreaSchema, supportsListening, type LearningArea } from './learningArea';
 import { GrammarTagSchema, type GrammarTag } from './grammar';
 import { NounGenderDrillMetaSchema } from './nounGenderDrill';
+import { ReaderDictationMetaSchema } from './readerDictation';
 import {
   CheckpointQuestionSchema,
   TopicOriginSchema,
@@ -75,6 +76,13 @@ export function refineExerciseItem(
       for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
     if (type !== 'GENDER_CHECK' || item.grammarTag !== 'gender-number' || !['M', 'F'].includes(String(answer)))
       issue('meta', 'Noun-gender metadata requires a gender-number M/F gender check');
+  }
+  if (item.meta?.source === 'reader-dictation') {
+    const parsed = ReaderDictationMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'NUMBER_DICTATION' || !item.audioText?.trim())
+      issue('meta', 'Reader-dictation metadata requires number dictation with nonblank audio text');
   }
   if (
     ['DIALOGUE_ORDER', 'MATCH_PAIRS', 'ODD_ONE_OUT', 'GENDER_CHECK'].includes(type) &&
