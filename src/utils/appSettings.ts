@@ -1,4 +1,5 @@
 import { VocabularyRunLogSchema, type VocabularyRunRecord } from '../services/vocabulary/game/runLog';
+import { VocabularyGoalSchema, type VocabularyGoal } from '../services/vocabulary/game/goal';
 import type { GradingOptions } from '../services/exercises/grading';
 import { getProvider, providerRequiresKey } from '../services/ai/providers';
 import { normalizeModelId } from '../services/ai/catalogue';
@@ -48,6 +49,8 @@ export interface AppSettings {
   contentService: ContentServiceSettings;
   /** Last 90 finished game chunks on this device. Never part of a backup. */
   vocabularyRunLog: VocabularyRunRecord[];
+  /** The opt-in exam-date goal. Never part of a backup. */
+  vocabularyGoal: VocabularyGoal | null;
   /** Endpoint overrides by provider id; absent means the provider's default. Part of a backup. */
   baseUrls: Record<string, string>;
   /** Accents count as spelling mistakes when checking an answer. */
@@ -134,6 +137,7 @@ function defaults(): AppSettings {
       key: '',
     },
     vocabularyRunLog: [],
+    vocabularyGoal: null,
     baseUrls: {},
     practiceStrictAccents: false,
     practiceDictationSpeed: DEFAULT_DICTATION_SPEED,
@@ -204,6 +208,7 @@ function normalize(value: unknown): AppSettings {
     apiKeys,
     contentService: contentService(raw.contentService),
     vocabularyRunLog: VocabularyRunLogSchema.safeParse(raw.vocabularyRunLog).data ?? [],
+    vocabularyGoal: VocabularyGoalSchema.safeParse(raw.vocabularyGoal).data ?? null,
     baseUrls,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),
     practiceDictationSpeed: speedOr(raw.practiceDictationSpeed),
