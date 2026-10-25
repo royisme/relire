@@ -7,7 +7,7 @@ export const SETTINGS_SECTIONS = ['ai', 'practice', 'words', 'prompts', 'data', 
 export const AI_PURPOSES = ['text', 'ocr', 'speech', 'assessment'] as const;
 export type AiPurposeRoute = (typeof AI_PURPOSES)[number];
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
-export const STUDY_TABS = ['words', 'shadowing', 'mistakes'] as const;
+export const STUDY_TABS = ['shadowing', 'mistakes'] as const;
 export type StudyTab = (typeof STUDY_TABS)[number];
 export type GrammarSectionRoute = 'conjugation' | 'gender';
 export type Route =
@@ -20,6 +20,7 @@ export type Route =
   | { name: 'gradedReaders' }
   | { name: 'gradedReader'; readerId: string; version?: string; sentence?: string }
   | { name: 'study'; tab: StudyTab }
+  | { name: 'words' }
   | { name: 'wordsAll' }
   | { name: 'wordsReview' }
   | { name: 'wordsPlay' }
@@ -72,14 +73,16 @@ export function routeHref(route: Route): string {
     }
     case 'study':
       return `#/study/${route.tab}`;
+    case 'words':
+      return '#/words';
     case 'wordsAll':
-      return '#/study/words/all';
+      return '#/words/all';
     case 'wordsReview':
-      return '#/study/words/review';
+      return '#/words/review';
     case 'wordsPlay':
-      return '#/study/words/play';
+      return '#/words/play';
     case 'wordsMap':
-      return '#/study/words/map';
+      return '#/words/map';
     case 'grammar':
       if (route.section === 'gender') return '#/grammar/gender';
       if (route.section === 'conjugation')
@@ -175,22 +178,17 @@ export function parseRoute(
           : { name: 'grammar', section: 'conjugation', ...(verb ? { verb } : {}) };
     } else if (root === 'grammar' && sub === 'topics' && parts.length === 3 && hasContentService)
       route = { name: 'grammarTopic', topicId: decodeURIComponent(third) };
-    else if (root === 'study' && parts.length === 1) route = { name: 'study', tab: 'words' };
+    else if (root === 'study' && parts.length === 1) route = { name: 'study', tab: 'mistakes' };
     else if (root === 'study' && parts.length === 2 && (STUDY_TABS as readonly string[]).includes(sub))
       route = { name: 'study', tab: sub as StudyTab };
-    else if (
-      root === 'study' &&
-      sub === 'words' &&
-      parts.length === 3 &&
-      !query &&
-      ['all', 'review', 'play', 'map'].includes(third)
-    )
+    else if (root === 'words' && parts.length === 1) route = { name: 'words' };
+    else if (root === 'words' && parts.length === 2 && !query && ['all', 'review', 'play', 'map'].includes(sub))
       route =
-        third === 'all'
+        sub === 'all'
           ? { name: 'wordsAll' }
-          : third === 'review'
+          : sub === 'review'
             ? { name: 'wordsReview' }
-            : third === 'play'
+            : sub === 'play'
               ? { name: 'wordsPlay' }
               : { name: 'wordsMap' };
     else if (root === 'speaking' && parts.length === 1) route = { name: 'speaking' };
@@ -233,6 +231,7 @@ export type Area =
   | 'listening'
   | 'writing'
   | 'speaking'
+  | 'words'
   | 'study'
   | 'progress'
   | 'settings'
@@ -246,10 +245,12 @@ export function areaOf(route: Route): Area | null {
     case 'gradedReaders':
     case 'gradedReader':
       return 'read';
+    case 'words':
     case 'wordsAll':
     case 'wordsReview':
     case 'wordsPlay':
     case 'wordsMap':
+      return 'words';
     case 'study':
       return 'study';
     case 'grammar':
@@ -273,10 +274,10 @@ export function areaOf(route: Route): Area | null {
   }
 }
 
-export function vocabularyPlaceOf(route: Route): 'today' | 'all' | 'review' | 'play' | 'map' {
+export function vocabularyPlaceOf(route: Route): 'home' | 'all' | 'review' | 'play' | 'map' {
   if (route.name === 'wordsAll') return 'all';
   if (route.name === 'wordsReview') return 'review';
   if (route.name === 'wordsPlay') return 'play';
   if (route.name === 'wordsMap') return 'map';
-  return 'today';
+  return 'home';
 }

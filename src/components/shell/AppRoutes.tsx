@@ -6,6 +6,7 @@ import { NotFoundView } from './NotFoundView';
 import { LearningNavigation } from './LearningNavigation';
 import { ReaderView } from '../ReaderView';
 import { StudyView } from '../study/StudyView';
+import { VocabularyView } from '../VocabularyView';
 import { UnitView } from '../practice/UnitView';
 import { AnalyticsDashboard } from '../AnalyticsDashboard';
 import { ImportArticlePage } from '../import/ImportArticlePage';
@@ -24,7 +25,7 @@ import type { useReaderLookup } from '../../hooks/useReaderLookup';
 import { navigate } from '../../hooks/useRoute';
 import { readerIdentity } from '../../types/readerSource';
 import { sourceOfRecording } from '../../storage/shadowing';
-import { LIBRARY, vocabularyPlaceOf, type AiPurposeRoute, type Route } from '../../utils/routes';
+import { areaOf, LIBRARY, vocabularyPlaceOf, type AiPurposeRoute, type Route } from '../../utils/routes';
 
 const PracticePage = retryableLazy(async () => ({
   default: (await import('../practice/PracticePage')).PracticePage,
@@ -181,19 +182,17 @@ export function AppRoutes({
           </>
         ))}
 
-      {(route.name === 'study' || route.name.startsWith('words')) && (
+      {areaOf(route) === 'words' && <VocabularyView model={vocabulary} place={vocabularyPlaceOf(route)} />}
+
+      {route.name === 'study' && (
         <StudyView
-          tab={route.name === 'study' ? route.tab : 'words'}
+          tab={route.tab}
           sectionsInSidebar={expanded}
           mistakes={{
             onMissingKey: requestKey,
             onWord: (word, sentence, context, source) => {
               void handleWordClick(word, sentence, context, source);
             },
-          }}
-          vocabulary={{
-            model: vocabulary,
-            place: vocabularyPlaceOf(route),
           }}
           shadowing={{
             articles,

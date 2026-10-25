@@ -327,10 +327,10 @@ test('a joined unseen book front materializes only learner fields on reveal and 
   expect((await exportData()).vocab).toHaveLength(1);
 });
 
-test('Words routes roundtrip and all retain Study area', () => {
-  for (const name of ['wordsAll', 'wordsReview'] as const) {
+test('Words routes roundtrip and all retain the top-level Words area', () => {
+  for (const name of ['words', 'wordsAll', 'wordsReview', 'wordsPlay', 'wordsMap'] as const) {
     const route = { name };
     expect(parseRoute(routeHref(route)).route).toEqual(route);
-    expect(areaOf(route)).toBe('study');
+    expect(areaOf(route)).toBe('words');
   }
 });

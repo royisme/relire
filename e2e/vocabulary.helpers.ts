@@ -73,7 +73,7 @@ export async function seed(page: Page, language = 'en', theme = 'light', count =
     },
     { vocab: rows, book },
   );
-  await page.goto('/#/study/words');
+  await page.goto('/#/words');
   return rows;
 }
 export async function refuseWrites(page: Page, refuse: boolean, reason = 'TEST vocabulary disk refused') {

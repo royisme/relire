@@ -33,9 +33,6 @@ async function mockTopics(page: Page) {
 async function go(page: Page, href: string, copy: Copy = en) {
   if (href === '#/grammar/exercises' && !(await page.locator(`a[href="${href}"]`).first().isVisible()))
     await go(page, '#/grammar', copy);
-  if (href === '#/study/mistakes' && !(await page.locator(`a[href="${href}"]`).first().isVisible())) {
-    await go(page, '#/study/words', copy);
-  }
   const link = page.locator(`a[href="${href}"]`).first();
   if (!(await link.isVisible())) await page.getByRole('button', { name: copy.nav.menu, exact: true }).click();
   await page.locator(`a[href="${href}"]`).filter({ visible: true }).first().click();

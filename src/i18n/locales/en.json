@@ -18,6 +18,7 @@
   },
   "nav": {
     "vocab": "My study",
+    "words": "Words",
     "analytics": "Progress",
     "installApp": "Install app",
     "settings": "Settings",
@@ -321,7 +322,7 @@
     "title": "Words",
     "subtitle": "Book words and personal bookmarks share one review schedule.",
     "pages": "Words pages",
-    "today": "Today",
+    "overview": "Overview",
     "allWords": "All words",
     "due": "Due now",
     "learning": "Learning / relearning",
@@ -1248,7 +1249,6 @@
   },
   "study": {
     "label": "My study",
-    "words": "Words",
     "shadowing": "Shadowing",
     "mistakes": "Mistakes"
   },

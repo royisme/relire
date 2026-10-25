@@ -9,7 +9,7 @@ const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
 const wordAnswer = (word: string) => ({ ...(defaultAnswers.word as object), word, lemma: word });
 
 for (const phone of [false, true]) {
-  test(`prompt word lookup retries with explicit unit context, saves to My study and preserves input keys ${phone ? '@phone' : ''}`, async ({
+  test(`prompt word lookup retries with explicit unit context, saves to Words and preserves input keys ${phone ? '@phone' : ''}`, async ({
     page,
     ai,
   }) => {
@@ -82,7 +82,7 @@ for (const phone of [false, true]) {
     await expect(item.getByText('Correct', { exact: true })).toBeAttached();
     expect((await stored(page)).attempts).toHaveLength(1);
     expect(await overflowing(page.locator('body'))).toEqual([]);
-    await page.goto('/#/study/words/all');
+    await page.goto('/#/words/all');
     await expect(page.getByText('ami', { exact: true }).first()).toBeVisible();
     await page.getByRole('button', { name: 'ami', exact: true }).click();
     const saved = page.getByRole('dialog', { name: 'ami', exact: true });

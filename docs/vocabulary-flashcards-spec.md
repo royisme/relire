@@ -275,7 +275,7 @@ With no complete book, first-use failure is unavailable, not zero words. Saved l
 
 ## 9. Routes, screens and visual contract
 
-Keep Words under My study; no new top-level navigation. Define real routes for places, not a component-local page switch:
+**Superseded 2026-10-25 by `docs/navigation-plan.md`:** Words is a top-level sidebar row at `#/words` (`/all`, `/review`, `/play`, `/map`), the home tab is called Overview, and `#/study/words…` no longer exists; read the routes below with that mapping. Define real routes for places, not a component-local page switch:
 
 | Route | Purpose |
 | --- | --- |

@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: N1 code on branch `words-top` (tests pending)
+
+- Words is a top-level row after Reading at `#/words` (`#/words/all`, `/review`, `/play`, `/map`), with the due badge on the row at every width; `#/study` now opens Mistakes and `#/study/words…` is not found. `StudyView` lost the Words tab. The Words home tab is now called Overview, and the Chinese Words label is aligned. Docs and the DESIGN.md badge rules are updated.
+- Independent N1 tests (GPT, a different model from the code's author) cover routes, top-level navigation, separate badges, Overview/locales and key-banner decisions; e2e addresses and selectors are updated and typechecked, **not run**. Baseline 2,582 tests with 14 failing; the test worker first left 4 Today assertions red, but the lead's acceptance line was wrong: Today's words step keeps opening Review at `#/words/review` (`plan`: `TodayCard.tsx:37` unchanged), so those assertions now expect that and the suite is green (2,596). Typecheck, lint, i18n, format and shape exit 0. **Unverified:** no browser, no e2e run.
+
 ## 2026-10-25: N0 landed (App.tsx split, `app-split`)
 
 - `App.tsx` (498 of 500 lines) is now 142. `useAppData` owns startup, articles, stats, failed saves and the guide flag; `useReaderLookup` keeps the reader document, lookup sheets, bookmark and assessment callback together; `AppShell` (with `SaveFailedBanner` and `MissingKeyBanner`) draws the frame; `AppRoutes` is the route-to-page switch with the lazy pages and their Suspense boundaries unchanged. Markup, props, keys and behaviour are unchanged; state that outlives a page (key request, log source, hasKey) stays in `App`.

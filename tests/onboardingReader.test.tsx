@@ -55,10 +55,19 @@ describe('the key banner leaves the graded routes alone', () => {
   });
 
   test('every other place keeps the banner', () => {
-    for (const hash of ['#/read', '#/read/test-article', '#/study/words', '#/speaking', '#/grammar'])
+    for (const hash of ['#/read', '#/read/test-article', '#/words', '#/speaking', '#/grammar'])
       expect(worksWithoutKey(parseRoute(hash).route)).toBe(false);
   });
 });
+
+test.each(['#/words', '#/words/all', '#/words/review', '#/words/play', '#/words/map'])(
+  'the missing-key banner decision stays on for %s',
+  (hash) => {
+    const route = parseRoute(hash).route;
+    expect(route.name).not.toBe('notFound');
+    expect(worksWithoutKey(route)).toBe(false);
+  },
+);
 
 // The dialog is rendered with React's state hooks stepped by slot, so no DOM test environment is needed.
 function renderSteps(props: Parameters<typeof OnboardingDialog>[0] = { onClose: () => {}, onKeySaved: () => {} }) {

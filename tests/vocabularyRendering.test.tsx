@@ -38,6 +38,7 @@ Object.defineProperty(globalThis, 'window', {
 });
 const { VocabularyBrowser } = await import('../src/components/vocabulary/VocabularyBrowser');
 const { VocabularyHome } = await import('../src/components/vocabulary/VocabularyHome');
+const { VocabularyView } = await import('../src/components/VocabularyView');
 const { VocabularyReview } = await import('../src/components/vocabulary/VocabularyReview');
 const { WordsSection } = await import('../src/components/settings/WordsSection');
 if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
@@ -73,6 +74,38 @@ const model: VocabularyModel = {
   async refresh() {},
   async savePreferences() {},
 };
+
+test('Words and Overview use the owner-approved labels in the real en/zh locales', () => {
+  for (const [copy, words, overview] of [
+    [en, 'Words', 'Overview'],
+    [zh, '\u8bcd\u6c47', '\u6982\u89c8'],
+  ] as const) {
+    expect(copy.nav.words).toBe(words);
+    expect(copy.vocab.title).toBe(words);
+    expect(copy.settings.sections.words.title).toBe(words);
+    expect(copy.today.practice.words).toBe(words);
+    expect(copy.vocab.overview).toBe(overview);
+    expect(copy.vocab).not.toHaveProperty('today');
+  }
+});
+
+test('Words home owns Overview, All words and Map links outside My study in both locales', async () => {
+  for (const language of ['en', 'zh']) {
+    await i18n.changeLanguage(language);
+    const html = render(<VocabularyView model={model} />);
+    const nav = html.match(/<nav\b[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? '';
+    const links = nav.match(/<a\b[^>]*>[\s\S]*?<\/a>/g) ?? [];
+    expect(links).toHaveLength(3);
+    expect(links[0]).toContain('href="#/words" aria-current="page"');
+    expect(links[0]).toContain(`>${i18n.t('vocab.overview')}</a>`);
+    expect(links[1]).toContain('href="#/words/all"');
+    expect(links[1]).toContain(`>${i18n.t('vocab.allWords')}</a>`);
+    expect(links[2]).toContain('href="#/words/map"');
+    expect(links[2]).toContain(`>${i18n.t('vocab.map.title')}</a>`);
+    expect(nav).not.toContain('#/study');
+    expect(links.filter((link) => link.includes('aria-current'))).toHaveLength(1);
+  }
+});
 
 test('Settings Words and waiting Review show the actual bounded reason before any details Sheet is opened in both locales', async () => {
   for (const language of ['en', 'zh']) {
@@ -136,7 +169,7 @@ test('import results reserve a live status slot in every state, and imported ans
   }
 });
 
-test('Today counts stay and keep no Words settings link or form', async () => {
+test('Overview counts stay and keep no Words settings link or form', async () => {
   await i18n.changeLanguage('en');
   const html = render(<VocabularyHome model={model} />);
   expect(html).toContain('New remaining today');
@@ -149,7 +182,8 @@ test('Review has only Back to Words, with no footer Browse words link', async ()
   await i18n.changeLanguage('en');
   const html = render(<VocabularyReview model={model} />);
   expect(html).toContain('Back to Words');
-  expect(html).not.toContain('href="#/study/words/all"');
+  expect(html).toContain('href="#/words"');
+  expect(html).not.toContain('href="#/words/all"');
   expect(html).not.toContain('Browse words');
 });
 test('the locked real card contains no answer DOM or visible flip action', async () => {
