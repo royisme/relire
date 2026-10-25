@@ -285,7 +285,7 @@ With no complete book, first-use failure is unavailable, not zero words. Saved l
 
 Extend `Route`, `routeHref`, `parseRoute`, `areaOf`, `NavTree`, shell current-area logic and `StudyView`; preserve Back/reload. Use new route variants for the deeper Words places, not Grammar's `section: 'conjugation'`. All three routes keep My study/Words active in expanded sidebar, rail and compact study navigation. No current word/source is sent over the network; transient filters/reveal need no routes.
 
-Today and Browse share two real page links, Today and All words, above their content, with `aria-current="page"` on the matching destination; these are not Segmented radios. The Words Overview has one next action that follows the real queue and links to Review; Browse has an outline Review due words link to that same review route (it does not bypass queue/quota). Review's Back to Words always targets Today. Do not add a second sidebar or label Review as the All words destination.
+Today and Browse share two real page links, Today and All words, above their content, with `aria-current="page"` on the matching destination; these are not Segmented radios. The Words Overview has one next action that follows the real queue and links to Review; Browse has an outline Review words that are ready link to that same review route (it does not bypass queue/quota). Review's Back to Words always targets Today. Do not add a second sidebar or label Review as the All words destination.
 
 ### Today and browser
 
@@ -299,7 +299,7 @@ Browse composes existing `ui/table` with TanStack Table. Search word and actuall
 
 ```text
 Back to Words                         Session ratings / introductions
-Due now: n    New remaining today: n
+Ready to review: n    New words left today: n
 +----------------------------------------------------+
 | Front: French word, explicit Listen                |
 |         < click either face for two-way flip >     |

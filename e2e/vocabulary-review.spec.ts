@@ -59,7 +59,7 @@ test('Words review commits introduction before answers, flips without writes, an
   await page.getByRole('button', { name: 'Remembered', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'test-c', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Skip for now', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nothing more for now' })).toBeVisible();
   const rows = await stored(page);
   expect(rows.map((row) => row.history.map((record) => record.outcome))).toEqual([['forgot'], ['remembered'], []]);
   expect(rows[2].introducedAt).toBeNull();
@@ -132,8 +132,8 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
   await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).not.toContainText('TEST meaning');
   expect((await stored(page)).every((row) => row.introducedAt === null)).toBe(true);
-  await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
-  await expect(page.getByText('Due now: 0 · New remaining today: 0', { exact: true })).toBeVisible();
+  await expect(page.locator('[data-vocabulary-status]')).toContainText('You have reached today’s limit of new words');
+  await expect(page.getByText('Ready to review: 0 · New words left today: 0', { exact: true })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     await storage.saveVocabularyPreferences({ newPerDay: 20, retentionPercent: 90 });
@@ -308,7 +308,7 @@ test('7000 synthetic entries paginate at50; unseen fronts create no row and no-k
   await page.getByRole('searchbox').fill('test-6999');
   await expect(page.getByRole('row')).toHaveCount(2);
   expect(await stored(page)).toEqual([]);
-  await page.getByRole('link', { name: 'Review due words' }).click();
+  await page.getByRole('link', { name: 'Review words that are ready' }).click();
   await expect(page.getByRole('heading', { name: 'test-0', exact: true })).toBeVisible();
   expect(await stored(page)).toEqual([]);
   await page.getByRole('button', { name: 'Skip for now' }).click();
