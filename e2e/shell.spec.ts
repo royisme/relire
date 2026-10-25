@@ -57,12 +57,9 @@ test.describe('sidebar', () => {
       'href',
       '#/speaking/read-aloud',
     );
-    await expect(nav.getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute('aria-current', 'page');
-    await expect(nav.getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute(
-      'href',
-      '#/speaking/recordings',
-    );
-    await expect(nav.locator('a[href^="#/speaking/"]')).toHaveCount(2);
+    // Recordings is not a sidebar row: Speaking is the current area, Read aloud its only child.
+    await expect(nav.getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
+    await expect(nav.locator('a[href^="#/speaking/"]')).toHaveCount(1);
     await expect(nav.getByRole('link', { name: 'Words' })).toBeVisible();
 
     await nav.getByRole('link', { name: 'Words' }).click();
@@ -155,14 +152,11 @@ test.describe('routes', () => {
     await expect(page).toHaveURL(/#\/speaking\/recordings$/);
     await page.reload();
     await expect(page).toHaveURL(/#\/speaking\/recordings$/);
-    await expect(sidebar(page).getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute(
-      'aria-current',
-      'page',
-    );
     await expect(sidebar(page).getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
       'aria-current',
       'true',
     );
+    await expect(sidebar(page).getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
     const back = page.getByRole('main').getByRole('link', { name: 'Speaking', exact: true });
     await expect(back).toHaveAttribute('href', '#/speaking');
     await page.goBack();
@@ -439,7 +433,6 @@ test.describe('phones', () => {
       'Reading',
       'Words',
       'Read aloud',
-      'Recordings',
       'Mistakes',
       'Grammar',
       'Listening',
@@ -451,19 +444,18 @@ test.describe('phones', () => {
       await expect(drawer.getByRole('link', { name, exact: true })).toBeVisible();
     await expect(drawer.getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
     await expect(drawer.locator('a[href^="#/study"]')).toHaveCount(0);
+    // Recordings is not a row: Read aloud is Speaking's only drawer child.
+    await expect(drawer.getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
     await expect(drawer.getByRole('link', { name: 'Words', exact: true })).toHaveAttribute('href', '#/words');
     await expect(drawer.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('href', '#/mistakes');
-    await expect(drawer.locator('a[href^="#/speaking/"]')).toHaveCount(2);
-    await drawer.getByRole('link', { name: 'Recordings', exact: true }).click();
+    await expect(drawer.locator('a[href^="#/speaking/"]')).toHaveCount(1);
+    // Following a drawer link navigates for real and closes the drawer.
+    await drawer.getByRole('link', { name: 'Read aloud', exact: true }).click();
     await expect(drawer).toBeHidden();
-    await expect(page).toHaveURL(/#\/speaking\/recordings$/);
-    await expect(page.getByRole('main').getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
-      'href',
-      '#/speaking',
-    );
+    await expect(page).toHaveURL(/#\/speaking\/read-aloud$/);
     await page.getByRole('button', { name: 'Menu', exact: true }).click();
     await expect(drawer.getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute('aria-current', 'true');
-    await expect(drawer.getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(drawer.getByRole('link', { name: 'Read aloud', exact: true })).toHaveAttribute('aria-current', 'page');
     await drawer.getByRole('link', { name: 'Mistakes', exact: true }).click();
     await expect(drawer).toBeHidden();
     await expect(page).toHaveURL(/#\/mistakes$/);

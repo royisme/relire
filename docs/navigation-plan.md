@@ -9,7 +9,7 @@ Owner, 2026-10-25: **"Follow the flat design"** and **"App.tsx can be split; com
 - No "My" area and no "My study" group. The sidebar mixed two axes (skill and ownership); a "My" area would mix them again (one look-back page, two action pages, one page that does not exist), and 我的 reads as account/profile in Chinese apps.
 - **Words** becomes a top-level row, with the due badge on that row at every width. This is the main gain: today the due badge shows only on the expanded sidebar, inside My study.
 - **Mistakes** becomes a top-level row with its own unresolved-count badge. Mistakes span four learning areas (`PRODUCT.md`), so it cannot sit under one skill.
-- **Shadowing** becomes **Speaking → Recordings**.
+- **Shadowing** becomes **Speaking → Recordings** (a page reached from Speaking, not a sidebar row).
 - `App.tsx` is split first (step N0), because it is at 498 of the 500 lines `shape:check` allows and every later step would otherwise fail.
 - This **reverses** `docs/learning-navigation-tasks.md` ("My study retains Words, Mistakes and Shadowing"); N3 adds a dated reversal line there and keeps the history.
 
@@ -17,6 +17,7 @@ Defaults the lead applies until the owner says otherwise (cheap to change; they 
 
 - zh labels: **词汇** for Words (the page title already says 词汇), **概览** for the Words home tab (was "Today", which collided with the app's Today), **跟读录音** for Recordings.
 - Recordings sit under Speaking (the log compares your voice with the reference, which is pronunciation); fallback Reading → Recordings.
+- 2026-10-25: owner: Recordings is a function of Speaking, not a menu entry. It keeps `#/speaking/recordings`, its page and the Speaking-page link, and leaves the sidebar.
 
 Still the owner's, **not part of N0 to N3** (listed at the end): G1, G2, K1.
 
@@ -30,7 +31,7 @@ Reading        (children unchanged: Library, Graded readers, Exercises, Import a
 Words   [due]  (no sidebar children; the page draws Overview / All words / Map)
 Grammar        (children unchanged)
 Listening
-Speaking       (children: Read aloud, Recordings)
+Speaking       (child: Read aloud; Recordings is a link on the Speaking page and from the reader, not a sidebar row)
 Writing        (only with a saved writing unit, unchanged)
 ──────
 Mistakes [open]
@@ -59,7 +60,7 @@ Install app · Settings · About
 | --- | --- | --- |
 | Words (nav row, page title) | Words | 词汇 (also align `settings.sections.words.title` and `today.practice.words`, now 生词) |
 | Words home tab (was Today) | Overview | 概览 |
-| Speaking → Recordings (was Shadowing): nav row, Speaking link and the page title (`shadowingLog.title`) | Recordings | 跟读录音 |
+| Recordings (was Shadowing): the page title (`shadowingLog.title`) and the Speaking-page link, not a nav row | Recordings | 跟读录音 |
 | Mistakes, Progress | unchanged | 错题本, 进度 |
 
 `learning.shadowingContext` points at the reader microphone only ("For saved shadowing takes, use the microphone beside a sentence in the reader." / "要保存跟读录音，请使用阅读页句子旁的麦克风。"); the Recordings link under it already names the place, so the sentence does not repeat it.
@@ -70,7 +71,7 @@ Install app · Settings · About
 2. Mistakes counts unresolved items.
 3. Each count sits on its own top-level row at every width: row end when expanded and in the drawer, corner on the rail. Zero shows nothing.
 4. Never a sum, a count on a parent or group, on the header or on the menu button, or a dot that stands for "something".
-5. No badge on Recordings, Progress, Reading or Grammar.
+5. No badge on Progress, Reading or Grammar.
 
 Restated rail rule for `DESIGN.md` Navigation: *a row that owns one metric shows it as a corner badge; no row ever shows a combined count.*
 
@@ -105,7 +106,7 @@ Acceptance: identical markup and behaviour (existing tests unchanged and green; 
 
 ### N3. Recordings under Speaking; delete My study
 
-`recordings` route in the `speaking` area; delete `study`, `STUDY_TABS`, `StudyTab`, `StudyView.tsx` and the study block in `NavTree`; Speaking children are Read aloud and Recordings; `ShadowingLog` owns its page wrapper and a back link to Speaking; `SpeakingPage` links to Recordings instead of the copy-only pointer; the reader's "open log" navigations; locale (`learning.shadowingContext`; remove `nav.vocab`, `study.label`, `study.words`, `study.shadowing`); stale comments. Tests: routes, `learningNavigation` (Speaking children, no My study), `navBadges` header and My study assertions removed. e2e: rewrite or delete `study-navigation.spec.ts`; `shadowing*.spec.ts`, `passage-shadowing.spec.ts`, `shell.spec.ts`. Docs: `PRODUCT.md`, `DESIGN.md`, `architecture.md` (`:40`, route table, shell layout, shadowing data flow), `ui.md`, `README.md`, `docs/roadmap.md`, `docs/grammar-pack.md`, a dated reversal line in `learning-navigation-tasks.md`, CHANGELOG. Leave older dated records (`merge-plan`, `merge-progress`, `shadowing-log-design`, `graded-readers-trial`, `today-plan`) as history.
+`recordings` route in the `speaking` area; delete `study`, `STUDY_TABS`, `StudyTab`, `StudyView.tsx` and the study block in `NavTree`; Speaking's child is Read aloud only (Recordings is reached from the Speaking page and the reader, not the sidebar); `ShadowingLog` owns its page wrapper and a back link to Speaking; `SpeakingPage` links to Recordings instead of the copy-only pointer; the reader's "open log" navigations; locale (`learning.shadowingContext`; remove `nav.vocab`, `study.label`, `study.words`, `study.shadowing`); stale comments. Tests: routes, `learningNavigation` (Speaking children, no My study), `navBadges` header and My study assertions removed. e2e: rewrite or delete `study-navigation.spec.ts`; `shadowing*.spec.ts`, `passage-shadowing.spec.ts`, `shell.spec.ts`. Docs: `PRODUCT.md`, `DESIGN.md`, `architecture.md` (`:40`, route table, shell layout, shadowing data flow), `ui.md`, `README.md`, `docs/roadmap.md`, `docs/grammar-pack.md`, a dated reversal line in `learning-navigation-tasks.md`, CHANGELOG. Leave older dated records (`merge-plan`, `merge-progress`, `shadowing-log-design`, `graded-readers-trial`, `today-plan`) as history.
 
 ## Risks
 

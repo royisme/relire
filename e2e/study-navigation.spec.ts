@@ -1,4 +1,4 @@
-/** Speaking owns Read aloud and Recordings; About is independent, and filters remain keyboard-operable radios. */
+/** Speaking owns one sidebar child, Read aloud; Recordings is a page reached from Speaking. About is independent, and filters remain keyboard-operable radios. */
 import { expect, overflowing, test } from './fixtures';
 import type { Locator, Page } from '@playwright/test';
 
@@ -21,19 +21,16 @@ async function speakingLinks(page: Page, rail = false) {
   );
   await expect(sidebar.getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
   await expect(page.locator('a[href^="#/study"]')).toHaveCount(0);
-  await expect(sidebar.locator('a[href^="#/speaking/"]')).toHaveCount(rail ? 0 : 2);
-  for (const [name, href] of [
-    ['Read aloud', '#/speaking/read-aloud'],
-    ['Recordings', '#/speaking/recordings'],
-  ]) {
-    const link = sidebar.getByRole('link', { name, exact: true });
-    await expect(link).toHaveCount(rail ? 0 : 1);
-    if (rail) continue;
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('href', href);
-    if (name === 'Recordings') await expect(link).toHaveAttribute('aria-current', 'page');
-    else await expect(link).not.toHaveAttribute('aria-current');
-    await touchTarget(link);
+  // Read aloud is Speaking's only sidebar child; Recordings is a page link, never a row.
+  await expect(sidebar.locator('a[href^="#/speaking/"]')).toHaveCount(rail ? 0 : 1);
+  await expect(sidebar.getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
+  const readAloud = sidebar.getByRole('link', { name: 'Read aloud', exact: true });
+  await expect(readAloud).toHaveCount(rail ? 0 : 1);
+  if (!rail) {
+    await expect(readAloud).toBeVisible();
+    await expect(readAloud).toHaveAttribute('href', '#/speaking/read-aloud');
+    await expect(readAloud).not.toHaveAttribute('aria-current');
+    await touchTarget(readAloud);
   }
   const back = main.getByRole('link', { name: 'Speaking', exact: true });
   await expect(back).toBeVisible();
@@ -45,7 +42,7 @@ async function speakingLinks(page: Page, rail = false) {
   expect(await overflowing(page.locator('body'))).toEqual([]);
 }
 
-test('Speaking children use the expanded sidebar; Recordings keeps its back link on the rail and tablet', async ({
+test('Read aloud is the only Speaking sidebar child; Recordings keeps its back link on the rail and tablet', async ({
   page,
 }) => {
   await page.goto('/#/speaking/recordings');
@@ -87,10 +84,11 @@ test('Grammar opens Topics and switches to its distinct Conjugation address', as
   await page.locator('[data-sidebar]').getByRole('link', { name: 'Speaking', exact: true }).click();
   await page.getByRole('main').getByRole('link', { name: 'Recordings', exact: true }).click();
   await expect(page).toHaveURL(/#\/speaking\/recordings$/);
-  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute(
+  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
     'aria-current',
-    'page',
+    'true',
   );
+  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
   await page.getByRole('link', { name: 'Grammar', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
   await page.goBack();
@@ -179,11 +177,11 @@ test('phone Recordings survives reload and Back; the drawer has About last and n
   await page.getByRole('button', { name: 'Menu', exact: true }).click();
   const drawer = page.getByRole('dialog', { name: 'Menu', exact: true });
   await expect(drawer.getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
-  await expect(drawer.getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute('aria-current', 'page');
-  await expect(drawer.getByRole('link', { name: 'Read aloud', exact: true })).toHaveAttribute(
-    'href',
-    '#/speaking/read-aloud',
-  );
+  await expect(drawer.getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
+  await expect(drawer.getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute('aria-current', 'true');
+  const readAloud = drawer.getByRole('link', { name: 'Read aloud', exact: true });
+  await expect(readAloud).toHaveAttribute('href', '#/speaking/read-aloud');
+  await expect(readAloud).not.toHaveAttribute('aria-current');
   await expect(drawer.getByRole('button', { name: /sidebar/ })).toHaveCount(0);
   await expect(drawer.getByRole('link').last()).toHaveAttribute('href', '#/about');
   await drawer.getByRole('link', { name: 'About', exact: true }).click();
@@ -205,11 +203,11 @@ test('phone Library filters retain 40px radio targets and selection @phone', asy
   expect(await overflowing(page.locator('body'))).toEqual([]);
 });
 
-for (const [lang, names] of [
-  ['zh', ['朗读', '跟读录音']],
-  ['en', ['Read aloud', 'Recordings']],
+for (const [lang, readAloud, recordings] of [
+  ['zh', '朗读', '跟读录音'],
+  ['en', 'Read aloud', 'Recordings'],
 ] as const) {
-  test(`Speaking's two drawer children fit a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
+  test(`Speaking's single drawer child fits a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
     page,
   }) => {
     await page.addInitScript((value) => localStorage.setItem('relire_lang', value), lang);
@@ -217,24 +215,23 @@ for (const [lang, names] of [
     expect(await overflowing(page.locator('body'))).toEqual([]);
     await page.getByRole('button', { name: lang === 'zh' ? '菜单' : 'Menu', exact: true }).click();
     const drawer = page.getByRole('dialog', { name: lang === 'zh' ? '菜单' : 'Menu', exact: true });
-    for (const name of names) await expect(drawer.getByRole('link', { name, exact: true })).toBeVisible();
-    await expect(drawer.locator('a[href^="#/speaking/"]')).toHaveCount(2);
-    await expect(drawer.getByRole('link', { name: names[1], exact: true })).toHaveAttribute('aria-current', 'page');
+    const child = drawer.getByRole('link', { name: readAloud, exact: true });
+    await expect(child).toBeVisible();
+    // Read aloud is Speaking's only drawer child, never current on the recordings page.
+    await expect(drawer.locator('a[href^="#/speaking/"]')).toHaveCount(1);
+    await expect(drawer.getByRole('link', { name: recordings, exact: true })).toHaveCount(0);
+    await expect(child).not.toHaveAttribute('aria-current');
     await page.evaluate(() => document.fonts.ready);
     expect(await drawer.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
-    // Both children lie inside the drawer and the screen, with no clipped text.
+    // The child lies inside the drawer and the screen, with no clipped text.
     const strip = (await drawer.boundingBox())!;
-    const boxes = await Promise.all(
-      names.map(async (name) => (await drawer.getByRole('link', { name, exact: true }).boundingBox())!),
-    );
-    for (const box of boxes) {
-      expect(box.x).toBeGreaterThanOrEqual(strip.x);
-      expect(box.x + box.width).toBeLessThanOrEqual(strip.x + strip.width);
-      expect(box.x + box.width).toBeLessThanOrEqual(360);
-      expect(box.height).toBeGreaterThanOrEqual(40);
-      expect(box.width).toBeGreaterThanOrEqual(40);
-    }
-    for (const name of names) expect(await overflowing(drawer.getByRole('link', { name, exact: true }))).toEqual([]);
+    const box = (await child.boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(strip.x);
+    expect(box.x + box.width).toBeLessThanOrEqual(strip.x + strip.width);
+    expect(box.x + box.width).toBeLessThanOrEqual(360);
+    expect(box.height).toBeGreaterThanOrEqual(40);
+    expect(box.width).toBeGreaterThanOrEqual(40);
+    expect(await overflowing(child)).toEqual([]);
     expect(await overflowing(page.locator('body'))).toEqual([]);
   });
 }

@@ -116,7 +116,7 @@ There is no router dependency. The address is the single source of truth for whe
 | `#/{read|grammar|listening|writing}/exercises/set/:setId` | Complete original mixed batch, real area labels and whole totals; at least one unit must match the entry area. Whole-set deletion names all areas and the real count |
 | `#/{read|grammar|listening|writing}/exercises/unit/:unitId` | Existing unit workspace; actual area must match or not-found |
 | `#/speaking` | Pronunciation hub: Read aloud, Sound pairs creation and saved-answer counts, Letter sounds spelling reference, French sounds IPA chart and reader-shadowing context |
-| `#/speaking/recordings` | Recordings: the saved shadowing log (route `recordings`, area `speaking`, a child of Speaking in the sidebar) |
+| `#/speaking/recordings` | Recordings: the saved shadowing log (route `recordings`, area `speaking`, opened from a link on the Speaking page and from the reader, not a sidebar row) |
 | `#/speaking/read-aloud` | Article chooser or honest empty entry |
 | `#/speaking/read-aloud/:articleId?sentence=...` | Existing recorder workspace with durable selected source/sentence; missing selections never adopt another article |
 | `#/progress` | Progress |

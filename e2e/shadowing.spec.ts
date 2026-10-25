@@ -148,10 +148,7 @@ test('the log lists recordings in article order, opens the reader and deletes ta
     'aria-current',
     'true',
   );
-  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute(
-    'aria-current',
-    'page',
-  );
+  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Recordings' })).toBeVisible();
   const rows = page.locator('button[title="Open in the reader"]');
   await expect(rows).toHaveText([first, second]);
