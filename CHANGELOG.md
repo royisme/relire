@@ -149,6 +149,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- The Review page counter and the run summary's next-card time now agree with the Overview and Today: new words left are bounded by the cards really available, and a review card is ready from the start of its due day.
 - Dialogs, lookup sheets and the phone menu keep keyboard focus inside, return it to the opener when closed and prevent the page behind them from scrolling, including when overlays are stacked.
 - Vocabulary runs show loading or the real snapshot error between cards, not “Queue cleared” until the queue is empty.
 - Listening on a revealed vocabulary game card always uses this device’s French voice, never a paid speech provider.

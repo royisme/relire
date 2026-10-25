@@ -30,7 +30,8 @@ import {
   type RunCardState,
 } from './runKey';
 import { RunChallengeCard, RunRevealedCard } from './RunCard';
-import { RunCleared, RunDone, RunWaiting, runNextDue } from './RunEnd';
+import { RunCleared, RunDone, RunWaiting } from './RunEnd';
+import { nextAvailableAt } from '../../../services/today/inputs';
 import {
   RUN_SIZES,
   chunkRatings,
@@ -248,7 +249,7 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
       .length === 0;
   useRunLog(chunk, session.ratings, session.now, queueEmpty);
 
-  const nextDue = runNextDue(model.rows, session.now);
+  const nextDue = nextAvailableAt(model.rows, session.now);
   return (
     <div
       data-vocabulary-run

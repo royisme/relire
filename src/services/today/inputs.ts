@@ -12,11 +12,21 @@ import type { TopicStudied } from '../../types/topicStudied';
 import type { VocabularyBook, VocabularyDay, VocabularyRow } from '../../types/vocabulary';
 import type { TodayGrammar, TodayReader, TodayWords } from './plan';
 
+/** The next moment any scheduled card, of any phase, becomes studyable (not the queue's learning-step `nextDue`); null when none waits. */
+export function nextAvailableAt(rows: readonly VocabularyRow[], now: number): number | null {
+  let next: number | null = null;
+  for (const row of rows) {
+    if (!row.schedule) continue;
+    const availableAt = vocabularyAvailableAt(row.schedule);
+    if (availableAt > now && (next === null || availableAt < next)) next = availableAt;
+  }
+  return next;
+}
+
 /**
  * The words step's counts. Due candidates carry a schedule by construction.
  * The queue's new-card filter passes every unseen entry while the daily
- * allowance lasts (introductions persist one card at a time, like
- * `useVocabularyReview.remaining`), so the allowance caps the new count here;
+ * allowance lasts (introductions persist one card at a time), so the allowance caps the new count here;
  * it is also bounded by the cards actually available.
  */
 export function wordsInput(
@@ -33,17 +43,10 @@ export function wordsInput(
     if (candidate.row?.schedule) due++;
     else unseen++;
   }
-  // The next moment any scheduled card, of any phase, becomes studyable (not the queue's learning-step `nextDue`).
-  let nextDue: number | null = null;
-  for (const row of rows) {
-    if (!row.schedule) continue;
-    const availableAt = vocabularyAvailableAt(row.schedule);
-    if (availableAt > now && (nextDue === null || availableAt < nextDue)) nextDue = availableAt;
-  }
   return {
     due,
     newAvailable: Math.min(unseen, Math.max(0, newPerDay - day.introducedKeys.length)),
-    nextDue,
+    nextDue: nextAvailableAt(rows, now),
     reviewsToday: reviewsToday(rows, now),
   };
 }
