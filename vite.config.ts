@@ -69,7 +69,8 @@ export default defineConfig(({ command }) => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}', 'pdfjs/**/*'],
+          // The licence and notice text assets the About page links (data/lexicon), so they work offline too.
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}', 'pdfjs/**/*', 'assets/**/*.{md,txt}'],
           // Include the PDF worker and binary resources (not covered by the app's extensions).
           maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           runtimeCaching: [

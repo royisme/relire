@@ -19,3 +19,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Scope
+
+This license covers the code and documentation of this repository. The dictionary
+data files under data/lexicon/ are a work based on Morphalou 3.1 (ATILF, CNRS /
+Université de Lorraine) and are licensed under the LGPL-LR; see
+data/lexicon/NOTICE.md and data/lexicon/LGPL-LR.txt.

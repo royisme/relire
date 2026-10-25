@@ -623,8 +623,9 @@
       "source": "在 GitHub 查看源代码",
       "lexicon": "对于不在已审核词表里的动词，单词页中的动词形式和时态来自 {{name}}，由 {{maintainer}} 维护，许可证为 {{licence}}。",
       "lexiconSource": "{{name}} 数据来源",
-      "lexiconRebuild": "这些数据不在代码仓库里，可以用原始下载文件重新生成。",
-      "lexiconNotice": "重新生成的方法"
+      "lexiconRebuild": "词典数据以生成文件的形式随应用一起分发。",
+      "lexiconNotice": "重新生成或替换的方法",
+      "lexiconLicence": "LGPL-LR 许可证文本"
     },
     "strictAccents": "严格重音符号",
     "strictAccentsNote": "开启后，重音符号写错即判错；关闭时，不带重音符号的答案也算对。",

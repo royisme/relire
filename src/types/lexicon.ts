@@ -1,4 +1,4 @@
-/** Owns the lexicon service contract: the two response shapes and the per-part-of-speech `data`. Not the import or the HTTP code. */
+/** Owns the lexicon contract: the two response shapes, the per-part-of-speech `data` and the bundled data file's shape. Not the build or the HTTP code. */
 import { z } from 'zod';
 import { FINITE_PERSONS, IMPERATIVE_PERSONS, TENSES, isCompoundTense } from './grammarPack';
 
@@ -32,11 +32,11 @@ export const AdjectiveDataSchema = z.partialRecord(z.enum(AGREEMENTS), forms);
 /** Morphalou's own GENRE values, stored as they are. A noun with two different genders is refused at import. */
 export const GenderSchema = z.enum(['masculine', 'feminine', 'invariable', '-']);
 
-export const LexiconEntrySchema = z.discriminatedUnion('pos', [
-  z.strictObject({ pos: z.literal('verb'), data: VerbDataSchema }),
-  z.strictObject({ pos: z.literal('noun'), gender: GenderSchema, data: NounDataSchema }),
-  z.strictObject({ pos: z.literal('adjective'), data: AdjectiveDataSchema }),
-]);
+const VerbEntrySchema = z.strictObject({ pos: z.literal('verb'), data: VerbDataSchema });
+const NounEntrySchema = z.strictObject({ pos: z.literal('noun'), gender: GenderSchema, data: NounDataSchema });
+const AdjectiveEntrySchema = z.strictObject({ pos: z.literal('adjective'), data: AdjectiveDataSchema });
+
+export const LexiconEntrySchema = z.discriminatedUnion('pos', [VerbEntrySchema, NounEntrySchema, AdjectiveEntrySchema]);
 
 export const LexiconSourceSchema = z.strictObject({
   name: z.string().min(1),
@@ -56,6 +56,26 @@ export const LexiconFormResponseSchema = z.strictObject({
   source: LexiconSourceSchema,
 });
 
+/** One entry of the bundled data file: the response entry plus the lemma it belongs to. */
+const LexiconBundleEntrySchema = z.discriminatedUnion('pos', [
+  VerbEntrySchema.extend({ lemma: z.string().min(1) }),
+  NounEntrySchema.extend({ lemma: z.string().min(1) }),
+  AdjectiveEntrySchema.extend({ lemma: z.string().min(1) }),
+]);
+
+/** `data/lexicon/lexicon.json`: the generated file the app ships (the response schemas stay the client's contract). */
+export const LexiconBundleSchema = z.strictObject({
+  source: z.strictObject({
+    ...LexiconSourceSchema.shape,
+    sourceVersion: z.string().min(1),
+    changes: z.string().min(1),
+    modified: z.iso.date(),
+  }),
+  entries: z.array(LexiconBundleEntrySchema),
+  forms: z.record(z.string().min(1), z.array(z.tuple([z.string().min(1), z.enum(LEXICON_POS)]))),
+});
+
 export type LexiconLemmaResponse = z.infer<typeof LexiconLemmaResponseSchema>;
 export type LexiconFormResponse = z.infer<typeof LexiconFormResponseSchema>;
+export type LexiconBundle = z.infer<typeof LexiconBundleSchema>;
 export type VerbData = z.infer<typeof VerbDataSchema>;

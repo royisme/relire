@@ -113,4 +113,4 @@ Issues and pull requests are welcome. Please read `PRODUCT.md` and `DESIGN.md` b
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) for the code and documentation. The dictionary data files under `data/lexicon/` are a work based on Morphalou 3.1 and are licensed under the LGPL-LR; see [data/lexicon/NOTICE.md](data/lexicon/NOTICE.md) and [data/lexicon/LGPL-LR.txt](data/lexicon/LGPL-LR.txt).

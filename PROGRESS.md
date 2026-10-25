@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: LB1 landed (the lexicon as a committed data file)
+
+- Plan `docs/lexicon-bundle-plan.md` (option D, owner decision; one review by gpt-6-astra, nine problems applied). `LexiconBundleSchema`, `scripts/lexicon/build.ts` (generate and `--check`; `--check` also requires the unique `(lemma, pos)` set to equal `data/lexicon/lemmas.txt`), the Morphalou notice and licence moved to `data/lexicon/` (licence text unchanged), the About page links to local copies emitted by Vite and precached (`?no-inline`), scope notes in `LICENSE` and both READMEs. Worker: glm-5.3 (`91f68c9`). I generated `data/lexicon/lexicon.json` on the owner's machine from the real Morphalou files: 5,022 entries, 42,593 forms, `morphalou-3.1+76763fc2`, byte-identical on a second run, and added the CI step in the same commit.
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,432), Worker typecheck, every CI `--check` including the new one, build (the two licence assets in `dist/assets` and in the `sw.js` precache), detector `[]`. **Unverified:** the real-data run is the owner's machine only; fidelity of the file to the CSVs cannot be checked in CI; the About links in a browser. Next: LB2 (the client loader), then LB3 (remove the server side).
+
 ## 2026-10-24: RS3 landed (the Worker inside `vite dev`)
 
 - `@cloudflare/vite-plugin` 1.63.1 (newest stable at least two weeks old; peer range includes Vite 8) is applied in `vite.config.ts` for `serve` only, with `configPath` `worker/wrangler.jsonc`, `persistState` the publishers' `worker/.wrangler/state` (the plugin appends `v3`), `remoteBindings: false` (its default is true), and in-memory overrides: `assets.run_worker_first: ['/v1/*']` and `compatibility_date` 2026-10-13 (the plugin's workerd is older than the Worker's 2026-10-19). `wrangler dev` in `worker/` still works. Worker: glm-5.3 (`296c252`), spike first, all six gates passed with evidence.
