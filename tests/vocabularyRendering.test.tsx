@@ -171,8 +171,10 @@ test('import results reserve a live status slot in every state, and imported ans
 
 test('Overview counts stay and keep no Words settings link or form', async () => {
   await i18n.changeLanguage('en');
-  const html = render(<VocabularyHome model={model} />);
-  expect(html).toContain('New remaining today');
+  const html = render(<VocabularyHome model={model} book={undefined} loading={false} />);
+  const labels = [...html.matchAll(/<dt\b[^>]*>(.*?)<\/dt>/g)].map((match) => match[1]);
+  expect(labels).toEqual([i18n.t('vocab.due'), i18n.t('vocab.learning'), i18n.t('vocab.available')]);
+  expect(labels[2]).toBe('New words available today');
   expect(html).not.toContain('href="#/settings/words"');
   expect(html).not.toContain('New words per day');
   expect(html).not.toContain('Built-in wordbook');

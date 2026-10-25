@@ -75,7 +75,7 @@ function attempt(unitId: string, itemId: string, timestamp: number, correct = fa
 
 function input(changes: Partial<TodayInput> = {}): TodayInput {
   return {
-    words: { value: { due: 0, newAvailable: 0, reviewsToday: 0 } },
+    words: { value: { due: 0, newAvailable: 0, nextDue: null, reviewsToday: 0 } },
     readers: { value: [] },
     sound: { value: { attemptsToday: 0 } },
     mistakes: { value: { unresolved: 0, attemptsToday: 0 } },
@@ -190,7 +190,7 @@ test('mistakes match the full item-state key and count attempts regardless of ve
 
 test('plan order is words, read, sound, mistakes, with real counts and deterministic unmodified inputs', () => {
   const source = input({
-    words: { value: { due: 2, newAvailable: 3, reviewsToday: 1 } },
+    words: { value: { due: 2, newAvailable: 3, nextDue: tomorrow, reviewsToday: 1 } },
     readers: { value: [reader(1, 'notOpened')] },
     mistakes: { value: { unresolved: 4, attemptsToday: 0 } },
   });
@@ -230,11 +230,11 @@ test('empty words, readers and mistakes are omitted; sound is always shown', () 
 });
 
 test.each([
-  { due: 1, newAvailable: 0, reviewsToday: 0, done: false },
-  { due: 0, newAvailable: 2, reviewsToday: 0, done: false },
-  { due: 1, newAvailable: 0, reviewsToday: 2, done: false },
-  { due: 0, newAvailable: 1, reviewsToday: 2, done: false },
-  { due: 0, newAvailable: 0, reviewsToday: 2, done: true },
+  { due: 1, newAvailable: 0, nextDue: null, reviewsToday: 0, done: false },
+  { due: 0, newAvailable: 2, nextDue: null, reviewsToday: 0, done: false },
+  { due: 1, newAvailable: 0, nextDue: tomorrow, reviewsToday: 2, done: false },
+  { due: 0, newAvailable: 1, nextDue: tomorrow, reviewsToday: 2, done: false },
+  { due: 0, newAvailable: 0, nextDue: tomorrow, reviewsToday: 2, done: true },
 ])('words need a review today and an empty queue to be done: %j', ({ done, ...value }) => {
   expect(buildTodayPlan(input({ words: { value } })).steps[0]).toEqual({
     id: 'words',
@@ -332,7 +332,7 @@ test('an absent grammar input gives no grammar step', () => {
 test('a grammar value with a next topic is the last step and carries its topic and title', () => {
   const plan = buildTodayPlan(
     input({
-      words: { value: { due: 1, newAvailable: 0, reviewsToday: 0 } },
+      words: { value: { due: 1, newAvailable: 0, nextDue: null, reviewsToday: 0 } },
       readers: { value: [reader(1, 'notOpened')] },
       mistakes: { value: { unresolved: 2, attemptsToday: 0 } },
       grammar: { value: { next: { topicId: 'test-one', title: 'TEST one' }, studiedToday: false } },
@@ -361,7 +361,7 @@ test.each([
 
 test('a grammar error keeps its step in place with the real message and leaves the other steps unchanged', () => {
   const source = input({
-    words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
+    words: { value: { due: 0, newAvailable: 0, nextDue: null, reviewsToday: 1 } },
     readers: { value: [reader(1, 'read', true)] },
     sound: { value: { attemptsToday: 1 } },
     mistakes: { value: { unresolved: 0, attemptsToday: 1 } },
@@ -377,21 +377,20 @@ test('a grammar error keeps its step in place with the real message and leaves t
 
 test('allDone requires every shown step to be done', () => {
   const source = input({
-    words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
+    words: { value: { due: 0, newAvailable: 0, nextDue: null, reviewsToday: 1 } },
     readers: { value: [reader(1, 'opened', true)] },
     sound: { value: { attemptsToday: 1 } },
     mistakes: { value: { unresolved: 2, attemptsToday: 1 } },
   });
   expect(buildTodayPlan(source).allDone).toBe(true);
   expect(buildTodayPlan({ ...source, sound: { value: { attemptsToday: 0 } } }).allDone).toBe(false);
-  expect(buildTodayPlan({ ...source, words: { value: { due: 1, newAvailable: 0, reviewsToday: 1 } } }).allDone).toBe(
-    false,
-  );
+  const words = { value: { due: 1, newAvailable: 0, nextDue: null, reviewsToday: 1 } };
+  expect(buildTodayPlan({ ...source, words }).allDone).toBe(false);
 });
 
 test('allDone counts the grammar step like any other step', () => {
   const four = input({
-    words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
+    words: { value: { due: 0, newAvailable: 0, nextDue: null, reviewsToday: 1 } },
     readers: { value: [reader(1, 'read', true)] },
     sound: { value: { attemptsToday: 1 } },
   });
@@ -427,7 +426,7 @@ test.each(['words', 'readers', 'sound', 'mistakes'] as const)(
   'a %s source failure leaves other steps intact',
   (key) => {
     const source = input({
-      words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
+      words: { value: { due: 0, newAvailable: 0, nextDue: null, reviewsToday: 1 } },
       readers: { value: [reader(1, 'read', true)] },
       sound: { value: { attemptsToday: 1 } },
       mistakes: { value: { unresolved: 0, attemptsToday: 1 } },
@@ -470,7 +469,7 @@ test('nextIndex is undefined when every step is done or failed', () => {
 
 test('doneCount counts done steps only; a failed step is never done', () => {
   const source = input({
-    words: { value: { due: 0, newAvailable: 0, reviewsToday: 1 } },
+    words: { value: { due: 0, newAvailable: 0, nextDue: null, reviewsToday: 1 } },
     readers: { value: [reader(1, 'read', true)] },
     sound: { value: { attemptsToday: 1 } },
     mistakes: { value: { unresolved: 1, attemptsToday: 0 } },
@@ -481,7 +480,7 @@ test('doneCount counts done steps only; a failed step is never done', () => {
 
 test('counts carry each source value and omit a key when that source failed, never 0', () => {
   const source = input({
-    words: { value: { due: 1, newAvailable: 0, reviewsToday: 5 } },
+    words: { value: { due: 1, newAvailable: 0, nextDue: null, reviewsToday: 5 } },
     counts: { exercises: { value: 7 }, readers: { value: 2 } },
   });
   expect(buildTodayPlan(source).counts).toEqual({ reviews: 5, exercises: 7, readers: 2 });

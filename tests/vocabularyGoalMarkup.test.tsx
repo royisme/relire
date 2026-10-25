@@ -79,7 +79,7 @@ for (const language of ['en', 'zh'] as const) {
     ];
     for (const [goal, dayLine] of states) {
       saveAppSettings({ vocabularyGoal: goal });
-      const html = render(<VocabularyHome model={model} />);
+      const html = render(<VocabularyHome model={model} book={undefined} loading={false} />);
       expect(html).toContain(`aria-label="${i18n.t('vocab.goal.title')}"`);
       expect(html).toContain(dayLine);
       expect(html).toContain(i18n.t('vocab.goal.progress', { mature: 3, target: 3 }));
@@ -90,7 +90,7 @@ for (const language of ['en', 'zh'] as const) {
   test(`${language}: four weekly numbers, oldest first, each labelled with its week start date`, async () => {
     await i18n.changeLanguage(language);
     saveAppSettings({ vocabularyGoal: { examDate: '2026-11-08', matureTarget: 3 } });
-    const html = render(<VocabularyHome model={model} />);
+    const html = render(<VocabularyHome model={model} book={undefined} loading={false} />);
     expect(series.map((week) => week.count)).toEqual([1, 1, 0, 1]);
     // Seven rhythm days plus four week labels.
     expect(html.match(/<time /g)).toHaveLength(11);
@@ -106,7 +106,7 @@ for (const language of ['en', 'zh'] as const) {
 
 test('without a goal the home shows only the quiet set-a-goal control and no goal block', async () => {
   await i18n.changeLanguage('en');
-  const html = render(<VocabularyHome model={model} />);
+  const html = render(<VocabularyHome model={model} book={undefined} loading={false} />);
   expect(html).toContain(i18n.t('vocab.goal.set'));
   expect(html).not.toContain(`aria-label="${i18n.t('vocab.goal.title')}"`);
   expect(html).not.toContain(i18n.t('vocab.goal.weekly'));
