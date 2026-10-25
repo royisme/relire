@@ -144,7 +144,7 @@ Plan of record: `docs/navigation-plan.md` (owner decision 2026-10-25: flat tree,
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| N0 | Split `App.tsx` (498 of 500 lines) into an app-data hook, a shell and a route view | pure refactor: markup and behaviour unchanged, existing tests green, every touched file ≤ 500 lines, App well below | not started |
+| N0 | Split `App.tsx` (498 of 500 lines) into an app-data hook, a shell and a route view | pure refactor: markup and behaviour unchanged, existing tests green, every touched file ≤ 500 lines, App well below | landed (this commit); `App.tsx` is 142 lines |
 | N1 | Words at the top level (`#/words…`, due badge on the row at every width, Overview label) | routes, badges expanded and rail, e2e hashes updated (not run), `DESIGN.md` badge rule restated | not started |
 | N2 | Mistakes at the top level (`#/mistakes`, unresolved badge) | routes, badges never summed, Today and Gender links | not started |
 | N3 | Recordings under Speaking (`#/speaking/recordings`); delete My study, `STUDY_TABS` and `StudyView` | routes, Speaking children, locale keys removed, PRODUCT/DESIGN/architecture updated, reversal line in `learning-navigation-tasks.md` | not started |
