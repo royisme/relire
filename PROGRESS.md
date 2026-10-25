@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: VG3 landed (weekly rhythm, run summary, device-local run log)
+
+- `rhythm.ts` (seven local days by calendar arithmetic, "now" vs "gained this week" with the first-attainment rule), seven marks and a text count on the Words home, both numbers in the run's done state, and `runLog.ts` (last 90 finished chunks in `appSettings`, excluded from backups in both directions, written once per chunk; no UI). No streak or loss state exists.
+- Verified in the worktree (exit 0): typecheck, lint, full suite (2,510), i18n, format, build, detector `[]`; the protected files are unchanged. **Unverified:** no browser; the look of the marks.
+
 ## 2026-10-25: VG2 landed (the vocabulary run)
 
 - `#/study/words/play`, a "Play a run" link beside Start, `lexiconFormsOf`, and the run view in `src/components/vocabulary/game/` (challenge before the flip, "I don't know" reveals, Just flip, runs of 5, 10 or 20 ratings counted from a baseline in one hook instance, done-for-now and queue-cleared states, its own pure key function). `useVocabularyReview.ts`, `storage/vocabulary.ts`, `VocabularyReview.tsx` and the VG1 core are unchanged.
