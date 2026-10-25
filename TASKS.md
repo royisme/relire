@@ -167,10 +167,10 @@ Open GitHub issues (2026-10-25) and what each waits for; nothing here is ready f
 | #14 irregular verbs | the language-reviewer items (#16); the 15 new verbs are reviewed and in the pack (19 in all; #43 closed 2026-10-22) and the rest is content, paused |
 | #16 conjugation copy and sentence-pattern rules | the owner |
 | #17 visual acceptance of the new screens | the owner, on a real browser and phone |
-| #21 real-provider check of the conjugation prompt | the owner's real key |
-| #24 README screenshot of the pack table | a new screenshot of the current word sheet (the README text is current; `docs/media/word-analysis.jpg` and the zh-CN one still show the old AI conjugation block): the owner with a key, or a keyless capture; the owner chooses |
+| #21 real-provider check of the conjugation prompt | a script the owner runs in their own shell with keys in environment variables (owner said yes 2026-10-25; being built as step CV1); then the lead writes the note from its output |
+| #24 README screenshot of the pack table | a new screenshot of the current word sheet (the README text is current; `docs/media/word-analysis.jpg` and the zh-CN one still show the old AI conjugation block); the owner said (2026-10-25) to use the relevant skill for the capture and to decide **last** |
 | #29 split the `-eur` rule | on hold (owner, 2026-10-22) until a meaning-based design exists |
 | #62, #64, #65 graded readers | content is paused by the owner's priority; R0-1 to R0-6 landed; R0-7 and R2 need content and a human review. #63 (R1) closed 2026-10-25 |
-| #67 human language review (topics, letter sounds, readers) | the owner picks the reviewer |
+| #67 human language review (topics, letter sounds, readers) | the owner reviews it themselves (decision 2026-10-25); it is their time |
 
 Accounts and a paid tier are deferred in `docs/roadmap.md`. #13 (grammar topics pack, TP1 to TP5) was closed on 2026-10-24.
