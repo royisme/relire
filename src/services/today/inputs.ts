@@ -4,6 +4,7 @@ import { readerListStatus } from '../gradedReaders/status';
 import { nextTopicEntry } from '../grammarTopics/order';
 import type { ReaderSummary } from '../gradedReaders/catalogue';
 import { vocabularyQueue } from '../vocabulary/queue';
+import { vocabularyAvailableAt } from '../../utils/srs';
 import type { PublishedReader } from '../../types/gradedReader';
 import type { GrammarTopicList } from '../../types/grammarTopic';
 import type { ReaderProgress } from '../../types/readerProgress';
@@ -32,11 +33,12 @@ export function wordsInput(
     if (candidate.row?.schedule) due++;
     else unseen++;
   }
-  // Any phase: a review card due on a later day counts, unlike the queue's learning-step `nextDue`.
+  // The next moment any scheduled card, of any phase, becomes studyable (not the queue's learning-step `nextDue`).
   let nextDue: number | null = null;
   for (const row of rows) {
-    const dueAt = row.schedule?.dueAt;
-    if (dueAt !== undefined && dueAt > now && (nextDue === null || dueAt < nextDue)) nextDue = dueAt;
+    if (!row.schedule) continue;
+    const availableAt = vocabularyAvailableAt(row.schedule);
+    if (availableAt > now && (nextDue === null || availableAt < nextDue)) nextDue = availableAt;
   }
   return {
     due,

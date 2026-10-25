@@ -289,7 +289,7 @@ Today and Browse share two real page links, Today and All words, above their con
 
 ### Today and browser
 
-Today shows real pending review count, learning/relearning count and remaining new introduction allowance, then Start/continue. It holds neither the book controls nor the limit form; Settings → Words solely owns them. Unavailable book data is not a fake zero-word catalogue.
+Today shows the due, learning/relearning and available-new counts from `wordsInput` (the same numbers the Today page shows, with an en dash while the learner rows or the book are not ready) and one filled next action that follows the real queue: Review N words, else Learn N new words, else the time the next scheduled word becomes studyable, else a calm sentence about importing words. It holds neither the book controls nor the limit form; Settings → Words solely owns them. Unavailable book data is not a fake zero-word catalogue.
 
 Settings → Words (`#/settings/words`) owns the new-per-day limit and the built-in wordbook's download/update state, count, progress and failure/restart. Daily-new accepts integer0..100, default20; target retention accepts integer80..95%, default90. Both save together through the one ready `useVocabulary` model into vocabulary preferences, not AppSettings. The page holds both nullable text drafts across section switches and an older save cannot clear newer input. Save waits for the initial read; saving/errors keep a fixed control/status slot. Retention is a scheduling target, not measured memory; higher targets mean more reviews. Brief settings-only copy clarifies pre-flip Fuzzy versus post-reveal recognition.
 

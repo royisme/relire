@@ -5,7 +5,7 @@ export type TodayStepId = 'words' | 'read' | 'sound' | 'mistakes' | 'grammar';
 export interface TodayWords {
   due: number;
   newAvailable: number;
-  /** When the earliest scheduled card, of any phase, next falls due after now; the Words Overview shows it, Today ignores it. */
+  /** The next moment a scheduled card, of any phase, becomes studyable after now; the Words Overview shows it, Today ignores it. */
   nextDue: number | null;
   reviewsToday: number;
 }

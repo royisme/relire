@@ -43,12 +43,16 @@ function serialize(card: Card): VocabularySchedule {
 export function initialVocabularySchedule(now: number): VocabularySchedule {
   return serialize(createEmptyCard(reviewTime(now)));
 }
+/** When a scheduled card becomes studyable: a review card from the start of its due day, a learning step at its exact time. */
+export function vocabularyAvailableAt(schedule: VocabularySchedule): number {
+  if (schedule.phase !== 'review') return schedule.dueAt;
+  const day = new Date(schedule.dueAt);
+  day.setHours(0, 0, 0, 0);
+  return day.getTime();
+}
 export function vocabularyDue(schedule: VocabularySchedule | null, now: number): boolean {
-  const date = reviewTime(now);
-  return (
-    schedule !== null &&
-    (schedule.phase === 'review' ? formatDate(new Date(schedule.dueAt)) <= formatDate(date) : schedule.dueAt <= now)
-  );
+  reviewTime(now);
+  return schedule !== null && vocabularyAvailableAt(schedule) <= now;
 }
 export function nextVocabularySchedule(
   prior: VocabularySchedule,

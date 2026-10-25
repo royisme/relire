@@ -12,13 +12,16 @@ const actionClass = 'inline-flex min-h-10 items-center rounded-md bg-accent-700 
 export function VocabularyHome({
   model,
   book,
-  loading,
+  pending,
+  failed,
 }: {
   model: VocabularyModel;
   /** The cached or downloaded wordbook, if any. */
   book: VocabularyBook | undefined;
-  /** The wordbook is still being read or downloaded and nothing is cached. */
-  loading: boolean;
+  /** The wordbook is still being read or downloaded with nothing cached, or failed to load. */
+  pending: boolean;
+  /** The wordbook failed to load; the page status line shows the error, so the slot stays empty and not busy. */
+  failed?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const rhythm = summarizeRhythm(model.rows, model.now);
@@ -30,10 +33,10 @@ export function VocabularyHome({
     model.now,
   );
   const learning = model.rows.filter((row) => row.schedule && row.schedule.phase !== 'review').length;
-  const waiting = loading || !model.ready;
+  const waiting = pending || !model.ready;
   return (
     <div className="space-y-8">
-      <div className="flex h-12 items-center" aria-busy={waiting ? 'true' : undefined}>
+      <div className="flex h-12 items-center" aria-busy={waiting && !failed ? 'true' : undefined}>
         {waiting ? null : due > 0 ? (
           <Link to={{ name: 'wordsReview' }} className={actionClass}>
             {t('vocab.action.review', { count: due })}
@@ -45,9 +48,10 @@ export function VocabularyHome({
         ) : nextDue !== null ? (
           <p className="text-sm text-ink-700">
             {t('vocab.action.next', {
-              time: new Intl.DateTimeFormat(i18n.resolvedLanguage, { dateStyle: 'medium', timeStyle: 'short' }).format(
-                nextDue,
-              ),
+              time: new Intl.DateTimeFormat(i18n.resolvedLanguage, {
+                dateStyle: 'medium',
+                ...(new Date(nextDue).setHours(0, 0, 0, 0) === nextDue ? {} : { timeStyle: 'short' }),
+              }).format(nextDue),
             })}
           </p>
         ) : (
@@ -56,9 +60,9 @@ export function VocabularyHome({
       </div>
       <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
         {[
-          [t('vocab.due'), due],
-          [t('vocab.learning'), learning],
-          [t('vocab.available'), newAvailable],
+          [t('vocab.due'), waiting ? '–' : due],
+          [t('vocab.learning'), waiting ? '–' : learning],
+          [t('vocab.available'), waiting ? '–' : newAvailable],
         ].map(([label, count]) => (
           <div key={label}>
             <dt className="text-ink-600">{label}</dt>

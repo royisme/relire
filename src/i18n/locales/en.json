@@ -333,7 +333,7 @@
       "learn_one": "Learn {{count}} new word",
       "learn_other": "Learn {{count}} new words",
       "next": "Your next word returns on {{time}}.",
-      "empty": "Nothing to study right now. Add words from All words, or come back tomorrow."
+      "empty": "Nothing to study right now. Import a word list below, or save words while you read."
     },
     "play": "Play a run",
     "map": {
