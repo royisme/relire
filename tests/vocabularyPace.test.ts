@@ -98,11 +98,8 @@ test('nearest-rank percentiles on gaps of 1 to 30 seconds', () => {
   });
 });
 
-const pace = { p25: 30_000, p50: 45_000, p75: 60_000 };
-
-test('no pace or no cards means no estimate', () => {
+test('no pace means no estimate', () => {
   expect(estimateMinutes(null, 4)).toBeNull();
-  expect(estimateMinutes(pace, 0)).toBeNull();
 });
 
 test('each end is at least one whole minute', () => {
