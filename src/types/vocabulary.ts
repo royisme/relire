@@ -143,6 +143,13 @@ export const VocabularyAnalysisSchema = z.strictObject({
 export const VocabularyDefinitionSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('ai'), analysis: VocabularyAnalysisSchema }),
   z.strictObject({
+    kind: z.literal('imported'),
+    front: french,
+    back: text,
+    example: french.optional(),
+    tags: z.array(text),
+  }),
+  z.strictObject({
     kind: z.literal('reader'),
     readerId: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
     version: VocabularyHashSchema,
@@ -168,11 +175,16 @@ export const VocabularyContextSchema = z
     sentence: z.string(),
     savedAt: timestamp,
     requestLanguage: z.enum(['en', 'zh']),
-    source: source.optional(),
+    source: z
+      .union([source, z.strictObject({ kind: z.literal('import'), id: text, title: text, noteId: text })])
+      .optional(),
     definition: VocabularyDefinitionSchema,
   })
   .refine((c) => c.id === vocabularyContextKey(c), 'Invalid context identity')
   .refine((c) => {
+    if (c.definition.kind === 'imported')
+      return c.source?.kind === 'import' && c.sentence === (c.definition.example ?? '');
+    if (c.source?.kind === 'import') return false;
     if (c.definition.kind !== 'reader') return true;
     const sentences = splitArticle(c.sentence).flat();
     return (
@@ -183,7 +195,7 @@ export const VocabularyContextSchema = z
       sentences.length === 1 &&
       sentences[0].text === c.sentence
     );
-  }, 'Reader definition needs its edition source and sentence');
+  }, 'Definition needs its matching source and sentence');
 export const VocabularyBookSourceSchema = z.strictObject({
   bookId: z.literal('tcf-7000'),
   version: VocabularyHashSchema,
@@ -232,6 +244,8 @@ export const VocabularyRowSchema = z
     if (new Set(row.contexts.map((c) => c.id)).size !== row.contexts.length) invalid('Duplicate context');
     if (row.contexts.some((c) => c.definition.kind === 'ai' && vocabularyKey(c.definition.analysis.word) !== row.key))
       invalid('Analysis word mismatch');
+    if (row.contexts.some((c) => c.definition.kind === 'imported' && vocabularyKey(c.definition.front) !== row.key))
+      invalid('Imported front mismatch');
     let revision = 0;
     const operations = new Set<string>();
     for (const record of row.history) {

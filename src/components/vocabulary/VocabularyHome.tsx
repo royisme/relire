@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { summarizeRhythm } from '../../services/vocabulary/game/rhythm';
 import { vocabularyDue } from '../../utils/srs';
 import { Link } from '../shell/Link';
+import { VocabularyImport } from './VocabularyImport';
 export function VocabularyHome({ model }: { model: VocabularyModel }) {
   const { t, i18n } = useTranslation();
   const rhythm = summarizeRhythm(model.rows, model.now);
@@ -58,6 +59,7 @@ export function VocabularyHome({ model }: { model: VocabularyModel }) {
         >
           {t('vocab.play')}
         </Link>
+        <VocabularyImport />
       </div>
     </div>
   );
