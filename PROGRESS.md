@@ -4,6 +4,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: Wrong deepseek route used for four worker runs (corrected)
+
+- The owner wanted pi's **magpie** route for deepseek-flash (`magpie/deepseek/deepseek-flash`); the lead dispatched `deepseek/deepseek-flash`, which pi reads as the direct `deepseek` provider, a route that `docs/agent-delegation.md` lists under "Never" (the lead did not consult that table when switching models). Affected runs: LB2, LB3, Le ou la (LG1) and VG1, about 2 CNY of the direct balance. The code from those runs was checked and merged on its own merits (all checks, a real-data measurement for VG1), and the model is the same, but the route was not the owner's. The delegation table now has the magpie row (smoke-tested, "smoke ok" in about 3 s) and the lead uses it from here.
+
 ## 2026-10-24: VG1 landed (the vocabulary game's pure core)
 
 - `src/services/vocabulary/game/challenge.ts` (kinds chosen from the card's real state, the surface-form finder with the plan's tiers, distractor rules, a seed with the appearance index, typed and choice grading) and `regions.ts` (counts per wordbook page and "Saved from reading": introduced, learning, young, mature at 21 days or more, leeches at 8 lapses, unseen), 29 tests. Worker: deepseek-flash (`5ee0ae4`, about 0.5 CNY). No UI, no storage, no existing file touched.
