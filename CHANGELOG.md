@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Words has a map of book pages, imported decks and saved words with real state counts, expandable word lists and a leech collection; leech cards show memory hints and examples after reveal without changing ratings or scheduling.
 - Words shows your last seven days of practice without a streak, and run summaries distinguish words in review or mature now from words first reaching maturity this week; finished chunks are logged only on this device, never in backups.
 - Import Anki plain-text, TSV and CSV decks in Words: choose columns, preview normalized notes, merge duplicates without resetting reviews, and see every rejected row and its reason; imported cards join the daily queue and survive backups.
 - Words has an optional run mode ("Play a run" beside Start): before each flip the card asks one retrieval question — choose the meaning, fill the blank, hear and type, or produce the French — and your answer is shown as information only (“you chose X, the card says Y”), never as a score and never pre-selecting a self-rating; you still reveal and rate exactly as in the plain review, a Just flip control always skips the question, and a run ends after 5, 10 or 20 self-ratings with the real next due time and a Continue. Nothing about scheduling changed.
