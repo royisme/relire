@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: LB2 landed (the client reads the bundled lexicon)
+
+- `lexiconForm` and `lexiconLemma` keep their signatures and now read `data/lexicon/lexicon.json` through `new URL(..., import.meta.url)`: one fetch bounded at 10 s over the fetch and the body read, `LexiconBundleSchema`, two maps, the four-field `source`, a shared in-flight promise cleared on failure. The `contentServiceUrl()` gating and the no-service fast path are removed from `useWordSheetPack` and `useLexiconVerb`; the file is in the PWA precache (limit raised from 3 to 4 MiB; raw size 3,092,981 bytes). Worker: deepseek-flash (`f4ee290`, about 0.4 CNY).
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,430), Worker typecheck, `build.ts --check`, build (asset in `dist/assets` and in `sw.js`), detector `[]`. **Unverified:** first-lookup time and memory on a phone; browser behaviour; the e2e edits (`e2e/lexicon-word.spec.ts` lost most of its stubs and was never run). The diffs of LB1 and LB2 are not yet reviewed (codex and zai were above 80% of their 5-hour windows); review is pending.
+
 ## 2026-10-24: LB1 landed (the lexicon as a committed data file)
 
 - Plan `docs/lexicon-bundle-plan.md` (option D, owner decision; one review by gpt-6-astra, nine problems applied). `LexiconBundleSchema`, `scripts/lexicon/build.ts` (generate and `--check`; `--check` also requires the unique `(lemma, pos)` set to equal `data/lexicon/lemmas.txt`), the Morphalou notice and licence moved to `data/lexicon/` (licence text unchanged), the About page links to local copies emitted by Vite and precached (`?no-inline`), scope notes in `LICENSE` and both READMEs. Worker: glm-5.3 (`91f68c9`). I generated `data/lexicon/lexicon.json` on the owner's machine from the real Morphalou files: 5,022 entries, 42,593 forms, `morphalou-3.1+76763fc2`, byte-identical on a second run, and added the CI step in the same commit.
