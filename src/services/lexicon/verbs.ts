@@ -23,7 +23,7 @@ export interface LexiconVerbLines {
 /** At most as many lines as the pack's own lookup draws. */
 const MAX_LINES = 4;
 
-/** Verbs of the lexicon that write `word`, except those the pack already names; a 404 is no line. */
+/** Verbs of the lexicon that write `word`, except those the pack already names; a word the bundle does not hold is no line. */
 export async function lexiconVerbLines(word: string): Promise<LexiconVerbLines> {
   try {
     const [form, pack] = await Promise.all([lexiconForm(word), loadGrammarPack().catch(() => undefined)]);

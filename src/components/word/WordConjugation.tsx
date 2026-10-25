@@ -1,7 +1,7 @@
 /**
  * The conjugation slot of the word sheet for a verb: for a pack verb (the lemma is exactly a pack infinitive) one
  * disclosure, "Show all tenses", over the pack's own table, with the cells the tapped word writes marked; else
- * the lexicon's simple tenses when a content service has the verb (DictionaryTenses), else one link to the
+ * the lexicon's simple tenses when the bundle has the verb (DictionaryTenses), else one link to the
  * Conjugation page. The table is closed on arrival, so the slot is the same 40px as its loading line and the
  * button never changes size. Loading and a load error take the slot's place (the real error text); nothing about
  * the verb is guessed. Loaded lazily with the pack, the engine and the page's tense section, so none of them is

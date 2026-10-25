@@ -1,6 +1,7 @@
 /**
- * The bundled lexicon's two loaders and the word sheet's two questions, over the committed data file: only `fetch`
- * is replaced (with the real file), so the lookups, the folding and the response shapes are the app's own.
+ * The bundled lexicon's two loaders and the word sheet's two questions, over the committed data file (one retry
+ * case answers the hand fixture bundle instead): only `fetch` is replaced, so the lookups, the folding and the
+ * response shapes are the app's own.
  */
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import { createElement } from 'react';
@@ -9,6 +10,7 @@ import { useLexiconVerb } from '../src/hooks/useLexiconVerb';
 import { lexiconForm, lexiconLemma, resetLexiconForTests } from '../src/services/lexicon/load';
 import { lexiconVerb, lexiconVerbLines } from '../src/services/lexicon/verbs';
 import { LexiconFormResponseSchema, LexiconLemmaResponseSchema } from '../src/types/lexicon';
+import { chanterData } from './fixtures/lexicon';
 import { failure } from './fixtures/storage';
 
 /** The committed data file, at the URL the loader resolves. */
@@ -108,6 +110,42 @@ test('the sheet names the lexicon verb of a tapped form, and skips what the pack
   expect(await lexiconVerbLines('sommes')).toEqual({ lines: [] });
   expect(await lexiconVerbLines('chanter')).toEqual({ lines: [] });
   expect(await lexiconVerbLines('xyzzy')).toEqual({ lines: [] });
+});
+
+test("a settled verb-line failure does not stick: the section's re-ask through the same seam draws its lines", async () => {
+  answerWith(() => Promise.reject(new TypeError('TEST ONLY offline')));
+  expect(await lexiconVerbLines('chantons')).toEqual({ lines: [], error: 'TEST ONLY offline' });
+  answerWith(() =>
+    Promise.resolve(
+      Response.json({
+        source: {
+          name: 'TEST lexicon',
+          maintainer: 'Relire tests',
+          licence: 'test-only',
+          url: 'https://example.test/lexicon.json',
+          sourceVersion: 'test',
+          changes: 'Invented test data',
+          modified: '2026-01-01',
+        },
+        entries: [{ lemma: 'chanter', pos: 'verb', data: chanterData() }],
+        forms: { chantons: [['chanter', 'verb']] },
+      }),
+    ),
+  );
+  expect(await lexiconVerbLines('chantons')).toEqual({
+    lines: [
+      {
+        infinitive: 'chanter',
+        match: {
+          tenses: [
+            { tense: 'present', persons: ['1pl'] },
+            { tense: 'imperatif', persons: ['1pl'] },
+          ],
+          participles: [],
+        },
+      },
+    ],
+  });
 });
 
 test('a lemma the AI named is tried as written, then without its pronoun; a non-verb is no verb data', async () => {

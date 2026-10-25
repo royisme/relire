@@ -1,5 +1,5 @@
 /**
- * The conjugation slot of a verb that is not in the pack, when a content service is configured: the simple tenses
+ * The conjugation slot of a verb that is not in the pack: the simple tenses
  * the lexicon holds, behind the same "Show all tenses" disclosure, marked as from the dictionary and not
  * reviewed, with the tapped cells marked and one line sending compound tenses to the Conjugation page (the
  * lexicon has no passé composé and no auxiliary, so none is drawn). Without an entry, `fallback` (the plain link
