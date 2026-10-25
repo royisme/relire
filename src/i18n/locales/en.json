@@ -335,6 +335,10 @@
       "next": "Your next word returns on {{time}}.",
       "empty": "Nothing to study right now. Import a word list below, or save words while you read."
     },
+    "pace": {
+      "range": "About {{from}}–{{to}} min at your usual pace",
+      "single": "About {{from}} min at your usual pace"
+    },
     "play": "Play a run",
     "map": {
       "title": "Map",
