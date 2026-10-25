@@ -12,6 +12,7 @@ import { FRENCH_IPA } from '../src/data/frenchIpa';
 import * as storage from '../src/storage/exercises';
 import * as accuracyHook from '../src/hooks/useExerciseAccuracy';
 import { testRow } from './fixtures/vocabulary';
+import { dialogBody } from './fixtures/dialogBody';
 
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
 Object.defineProperty(globalThis, 'window', {
@@ -173,9 +174,15 @@ test('Speaking action opens the shared dialog on Sound pairs in Listening and Cl
     translation.mockRestore();
   }
   // The shared dialog accepts that entry choice and immediately mounts its existing lazy drill form.
-  const dialog = render(
-    <AddExercisesDialog articles={[]} area="listening" initialChoice="pairs" onMissingKey={noop} onClose={noop} />,
-  );
+  // The Dialog portals on the client only, so its content is rendered without the wrapper.
+  const Body = dialogBody(AddExercisesDialog, {
+    articles: [],
+    area: 'listening',
+    initialChoice: 'pairs',
+    onMissingKey: noop,
+    onClose: noop,
+  } as const);
+  const dialog = render(<Body />);
   expect(dialog).toContain('aria-pressed="true"');
   expect(dialog).toContain('min-h-96');
 });
