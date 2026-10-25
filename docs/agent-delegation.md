@@ -38,7 +38,7 @@ Use this loop only when a mistake would surface late: work that spans several fi
 3. **Cited research on `agy` runs with `PI_THINKING=high`** (the script's default), with concrete questions. At `medium` it has produced claims without sources.
 4. **Never `gemini-3.1-pro`.** Unverified, and hard tasks belong to `pi` or Sonnet anyway.
 5. **If `pi` is rate-limited, wait for it or give the task to Sonnet. Never downgrade a hard task to `agy`.** Simple tasks are already on `agy` and are unaffected.
-6. **No multi-file code implementation on `agy`.** There is no evidence it does that well.
+6. **Code implementation on `agy` (`antigravity/gemini-3.8-flash` through `pi`) is allowed (owner decision 2026-10-25: use Gemini 3.8 and pi to speed up implementation).** Give it a bounded, well-specified task in its own worktree, keep the code/tests split (another model writes the tests), and review it as you would any worker; a multi-file or design-heavy step still gets the stricter review. This replaces the earlier "no multi-file code on agy" rule.
 7. **`agy` is not sandboxed** (section 8). Give it a throwaway directory or a worktree, never the lead's checkout, and never secrets.
 
 Rules for `agy` output:
