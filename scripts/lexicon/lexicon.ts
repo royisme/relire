@@ -1,4 +1,6 @@
-/** Owns turning Morphalou rows into lexicon entries and their form index; not SQL, files or the command line. */
+/** Owns turning Morphalou rows into lexicon entries, their form index and the source fingerprint; not the bundle, SQL or the command line. */
+import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { FINITE_PERSONS, IMPERATIVE_PERSONS } from '../../src/types/grammarPack';
 import { AGREEMENTS, LEXICON_TENSES } from '../../src/types/lexicon';
@@ -115,6 +117,13 @@ export async function loadLexicon(dir: string, wanted?: ReadonlySet<string>): Pr
   const lexicon: Lexicon = new Map();
   for (const [pos, file] of SOURCES) await collect(pos, fileLines(join(dir, file)), lexicon, wanted);
   return lexicon;
+}
+
+/** `morphalou-3.1+` and the first 8 hex of the SHA-256 of the source files' bytes, so it changes when the source does. */
+export async function sourceVersion(dir: string): Promise<string> {
+  const hash = createHash('sha256');
+  for (const [, file] of SOURCES) for await (const chunk of createReadStream(join(dir, file))) hash.update(chunk);
+  return `morphalou-3.1+${hash.digest('hex').slice(0, 8)}`;
 }
 
 /** One `pos:lemma` per line, as `select.ts` writes it. Returns the `lemma\0pos` ids. */

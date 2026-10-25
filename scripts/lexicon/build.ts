@@ -1,8 +1,7 @@
 /** Owns the committed bundle `data/lexicon/lexicon.json`: deterministic generation from Morphalou and a source-free `--check`; not selection, SQL or the Worker. */
 import { fileURLToPath } from 'node:url';
 import { LexiconBundleSchema, type LexiconBundle } from '../../src/types/lexicon';
-import { sourceVersion } from './import';
-import { entryRow, loadLexicon, morphalouDir, parseAllowlist, type Lexicon, type Pos } from './lexicon';
+import { entryRow, loadLexicon, morphalouDir, parseAllowlist, sourceVersion, type Lexicon, type Pos } from './lexicon';
 
 const repository = new URL('../../', import.meta.url);
 
