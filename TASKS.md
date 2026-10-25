@@ -77,7 +77,7 @@ Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlo
 
 ### Next: remote publication of the content service (owner decision 2026-10-24; plan `docs/d-remote-plan.md` under Argon review)
 
-First deployment: no accounts, public read-only, rate limited, CORS limited to the deployment origins; topics, lexicon and the vocabulary book (the owner's own, `unreviewed`) go up together (ADR amendment). Needs a short plan doc and an Argon review before dispatch.
+First deployment: no accounts, public read-only, rate limited, CORS limited to the deployment origins; topics, the vocabulary book (the owner's own, `unreviewed`) and graded readers go up together (ADR amendment), with the lexicon shipped with the app. Needs a short plan doc and an Argon review before dispatch.
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
@@ -86,7 +86,7 @@ First deployment: no accounts, public read-only, rate limited, CORS limited to t
 | D-remote-2b | Halve the vocabulary page size (and pace the download), only if the owner's check of Cloudflare's D1 limits rejects a 108 KB page (**not needed**: read 2026-10-24, a bound value is bounded by the 2 MB row limit; see `worker/README.md` "Cloudflare limits") | the lead's full re-run exits 0 | closed: not needed |
 | D-remote-3 | Topics and lexicon `--apply-remote`, interactive, with a read-only check as the only success criterion | tests pass; check mismatch fails the run | landed (`922448d`); Argon pass (no path to remote without `allowRemote` and a TTY; success only by the read-only check); all checks exit 0 in the main checkout |
 | D-origins | `.gitignore` for `worker/wrangler.deploy.jsonc`; `worker/README.md` rewritten wherever stale, with a rooted runbook | the placeholder stays in the committed file; the README no longer tells the owner to edit it | landed; the runbook is for the owner and was never run by an agent; acceptance greps exit 0 |
-| D-limit | ~~Tap a verb form repeatedly on the deployed URL and set the per-IP limit~~ | closed 2026-10-25: its premise is gone (the lexicon ships with the app, so a tap sends no request; issue #31 closed). The remaining deployed checks (rows written in the dashboard, whether the Rate Limiting binding is accepted on the free plan) are in issue #68 | closed |
+| D-limit | After the first deployment: tap a grammar topic repeatedly on the deployed URL (tapping words no longer exercises the Worker for words; tap a grammar topic instead), read the 429 behaviour and the dashboard row metrics, then set the per-IP limit (issue #31; the duplicate-request half landed in `ee34d4a`) | a measured limit is recorded in `worker/README.md`; the limiter note is updated | not started; owner-run, after D-remote |
 
 Plan `docs/d-remote-plan.md` (written by Opus; two Argon reviews, both fail, every finding the lead verified is applied) is ready to dispatch. Dispatch D-remote-1 first; D-remote-2b waits for the owner's limit check. Each diff then gets an independent Argon review.
 
