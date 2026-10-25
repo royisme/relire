@@ -138,6 +138,19 @@ An optional learning mode, not a new product tone. The goal the owner set: **sti
 
 Vocabulary review follow-up (branch `vocab-fixes`): all eight source-verified findings addressed; expanded imports bounded, queue loading separated from completion, game speech device-only, partial runs logged, closed-class meanings retained, card slots fixed, refusals localized, and test imports corrected. Static/unit/build checks pass (2,579 tests); lead diff review and owner-manual mobile/IME/device/real-export checks remain. Plain-mode run logging is out of scope.
 
+### Navigation: a flat tree with Words at the top level
+
+Plan of record: `docs/navigation-plan.md` (owner decision 2026-10-25: flat tree, no "My" area, `App.tsx` may be split). Words and Mistakes become top-level rows with their own badges, Shadowing becomes Speaking → Recordings, My study goes away. One step at a time, each with the full check chain and a second-model read-only review.
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| N0 | Split `App.tsx` (498 of 500 lines) into an app-data hook, a shell and a route view | pure refactor: markup and behaviour unchanged, existing tests green, every touched file ≤ 500 lines, App well below | not started |
+| N1 | Words at the top level (`#/words…`, due badge on the row at every width, Overview label) | routes, badges expanded and rail, e2e hashes updated (not run), `DESIGN.md` badge rule restated | not started |
+| N2 | Mistakes at the top level (`#/mistakes`, unresolved badge) | routes, badges never summed, Today and Gender links | not started |
+| N3 | Recordings under Speaking (`#/speaking/recordings`); delete My study, `STUDY_TABS` and `StudyView` | routes, Speaking children, locale keys removed, PRODUCT/DESIGN/architecture updated, reversal line in `learning-navigation-tasks.md` | not started |
+
+Owner-gated and not in N0 to N3: G1 (Today shows days to the exam), G2 (an exam date without a words target), K1 (Words without the missing-key banner).
+
 ### Content (paused by the owner's priority)
 
 Stages 1 to 3 have private drafts with AI review records (not human review). Stages 4 to 12 are not written; stage 4 has an unreviewed draft. Resume after the platform: R0-7 for stages 4 to 5, R2 for 6 to 12, a human language review before any real beginner uses the readers.
