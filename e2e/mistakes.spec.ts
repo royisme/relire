@@ -6,7 +6,7 @@ import { checkButton, openUnit, row, seedUnits, stored } from './practice.helper
 
 type Storage = typeof import('../src/storage/exercises');
 type Db = typeof import('../src/storage/db');
-const NOTEBOOK = '/#/study/mistakes';
+const NOTEBOOK = '/#/mistakes';
 const PROMPT = 'Je ne [___] pas de pain (manger).';
 const UNIT = 'unit-fill-blanks';
 const TITLE = 'Conjuguer au présent et au futur';
@@ -83,9 +83,8 @@ test('wrong answer → grouped notebook → explanation → actual word saved �
   await page.getByRole('link', { name: 'Words', exact: true }).click();
   await page.getByRole('link', { name: 'All words', exact: true }).click();
   await expect(page.getByRole('button', { name: 'pain', exact: true })).toBeVisible();
-  await page.getByRole('link', { name: 'My study', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/mistakes$/);
   await page.getByRole('link', { name: /^Mistakes/ }).click();
+  await expect(page).toHaveURL(/#\/mistakes$/);
   await entry(page).getByRole('link', { name: 'Retry in unit' }).click();
   await expect(row(page, 'Je ne').getByRole('textbox')).toHaveValue('mangez');
   await expect(row(page, 'Je ne').getByRole('textbox')).not.toBeEditable();
@@ -136,7 +135,7 @@ test('empty notebook, real read error and query retry; mounted notifications ref
     const { db }: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     const d = await db();
     const original = d.getAllFromIndex.bind(d);
-    // The notebook and the My study → Mistakes count both read attempts: keep refusing until the retry.
+    // The notebook and the top-level Mistakes count both read attempts: keep refusing until the retry.
     const flag = globalThis as { notebookRefuses?: boolean };
     flag.notebookRefuses = true;
     d.getAllFromIndex = ((...args: Parameters<typeof original>) => {
@@ -302,9 +301,8 @@ test('late explanation is dropped after unmount', async ({ page, ai }) => {
   await page.getByRole('link', { name: 'Words', exact: true }).click();
   await pause(900);
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await page.getByRole('link', { name: 'My study', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/mistakes$/);
   await page.getByRole('link', { name: /^Mistakes/ }).click();
+  await expect(page).toHaveURL(/#\/mistakes$/);
   await expect(page.getByRole('heading', { name: 'Mistakes', exact: true })).toBeVisible();
   await expect(page.getByText('Unmounted answer')).toHaveCount(0);
 });

@@ -111,7 +111,7 @@ for (const language of ['en', 'zh'] as const) {
         await workbench(page).getByRole('button', { name: strings.actions.check, exact: true }).click();
         await expect(workbench(page).getByRole('status')).toHaveText(strings.result.right);
         expect((await stored(page)).attempts).toHaveLength(2);
-        await page.goto('/#/study/mistakes');
+        await page.goto('/#/mistakes');
         await page.getByRole('button', { name: strings.result.readFeedback, exact: true }).click();
         await expect(page.getByRole('dialog')).toContainText(
           topic.learning.checkpoints[0].questions[0].feedback.byAnswer![0].message.summary[language],
@@ -124,7 +124,7 @@ for (const language of ['en', 'zh'] as const) {
         ).toBeVisible();
         await index(page, language).getByRole('button').first().click();
         await expect(workbench(page).getByRole('status')).toHaveText(strings.result.right);
-        await page.goto('/#/study/mistakes');
+        await page.goto('/#/mistakes');
         const deletedToken = await page.evaluate(async (id) => {
           const storage: Storage = await import(/* @vite-ignore */ '/src/storage/exercises.ts' as string);
           await storage.deleteUnit(id);
@@ -310,7 +310,7 @@ test('a replacement topic revision leaves Mistakes Retry on the original saved q
   expect(revisions.units).toHaveLength(2);
   expect(revisions.units.find((unit) => unit.id === original.id)).toEqual(original);
   expect(new Set(revisions.units.map((unit) => unit.topicOrigin!.exerciseRevision)).size).toBe(2);
-  await page.goto('/#/study/mistakes');
+  await page.goto('/#/mistakes');
   const originalHref = `#/grammar/exercises/unit/${encodeURIComponent(original.id)}`;
   await page.locator(`a[href="${originalHref}"]`).click();
   await expect(

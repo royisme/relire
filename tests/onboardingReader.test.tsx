@@ -60,7 +60,7 @@ describe('the key banner leaves the graded routes alone', () => {
   });
 });
 
-test.each(['#/words', '#/words/all', '#/words/review', '#/words/play', '#/words/map'])(
+test.each(['#/words', '#/words/all', '#/words/review', '#/words/play', '#/words/map', '#/mistakes'])(
   'the missing-key banner decision stays on for %s',
   (hash) => {
     const route = parseRoute(hash).route;

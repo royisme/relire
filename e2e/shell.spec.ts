@@ -19,6 +19,14 @@ test.describe('sidebar', () => {
     await page.goto('/#/read');
     await expect(sidebar(page)).toHaveAttribute('data-sidebar', 'expanded');
     await expect(sidebar(page).getByRole('link', { name: 'My study', exact: true })).toContainText('My study');
+    await expect(sidebar(page).getByRole('link', { name: 'My study', exact: true })).toHaveAttribute(
+      'href',
+      '#/study/shadowing',
+    );
+    await expect(sidebar(page).getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute(
+      'href',
+      '#/mistakes',
+    );
     await expect(sidebar(page).getByRole('link', { name: 'Words', exact: true })).toHaveAttribute('href', '#/words');
     expect((await sidebar(page).boundingBox())!.width).toBe(240);
 
@@ -112,25 +120,26 @@ test.describe('routes', () => {
 
   test('resolving a default replaces the entry instead of adding one', async ({ page }) => {
     await page.goto('/#/study');
-    await expect(page).toHaveURL(/#\/study\/mistakes$/);
+    await expect(page).toHaveURL(/#\/study\/shadowing$/);
     await page.getByRole('link', { name: 'Progress' }).click();
     await expect(page).toHaveURL(/#\/progress$/);
 
     await page.goBack();
-    await expect(page).toHaveURL(/#\/study\/mistakes$/);
+    await expect(page).toHaveURL(/#\/study\/shadowing$/);
     // One more Back leaves the app; there is no `#/study` entry in between.
     await page.goBack();
     expect(page.url()).not.toContain('#/study');
   });
 
-  test('the study tab lives in the address, so it survives a reload and Back', async ({ page }) => {
-    await page.goto('/#/study/mistakes');
-    await page.getByRole('link', { name: 'Shadowing', exact: true }).click();
+  test('the study tab lives in the address, so it survives a reload and Back from Mistakes', async ({ page }) => {
+    await page.goto('/#/mistakes');
+    await page.getByRole('link', { name: 'My study', exact: true }).click();
     await expect(page).toHaveURL(/#\/study\/shadowing$/);
     await page.reload();
     await expect(page.getByRole('link', { name: 'Shadowing', exact: true })).toHaveAttribute('aria-current', 'page');
     expect(await stored(page, 'relire_study_tab')).toBeNull();
     await page.goBack();
+    await expect(page).toHaveURL(/#\/mistakes$/);
     await expect(page.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
   });
 
@@ -290,6 +299,7 @@ test.describe('layout', () => {
     '#/read',
     '#/words',
     '#/study/shadowing',
+    '#/mistakes',
     '#/grammar',
     '#/grammar/exercises',
     '#/progress',
@@ -313,6 +323,16 @@ test.describe('layout', () => {
       expect(first.width, route).toBeLessThanOrEqual(page.viewportSize()!.width);
       await page.waitForTimeout(300);
       expect(await layout(page, 'main'), `${route} moved after loading`).toEqual(first);
+      // Mistakes is available on every route, not just while My study is current.
+      const phone = page.viewportSize()!.width < 768;
+      if (phone) await page.getByRole('button', { name: 'Menu', exact: true }).click();
+      const nav = phone ? page.getByRole('dialog', { name: 'Menu', exact: true }) : sidebar(page);
+      await expect(nav.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('href', '#/mistakes');
+      await expect(nav.getByRole('link', { name: 'Mistakes', exact: true })).toBeVisible();
+      if (phone) {
+        await nav.getByRole('button', { name: 'Close', exact: true }).click();
+        await expect(nav).toBeHidden();
+      }
     }
   }
 
@@ -375,9 +395,14 @@ test.describe('phones', () => {
       'About',
     ])
       await expect(drawer.getByRole('link', { name, exact: true })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('href', '#/mistakes');
     await drawer.getByRole('link', { name: 'Mistakes', exact: true }).click();
     await expect(drawer).toBeHidden();
-    await expect(page).toHaveURL(/#\/study\/mistakes$/);
+    await expect(page).toHaveURL(/#\/mistakes$/);
+    await expect(page.getByRole('heading', { name: 'Mistakes', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    await expect(drawer.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(drawer.getByRole('link', { name: 'Shadowing', exact: true })).toHaveCount(0);
   });
 
   test('Settings is a list of sections, then the section, with a way back @phone', async ({ page }) => {

@@ -10,6 +10,7 @@ import {
   History,
   Info,
   Mic,
+  NotebookPen,
   PenLine,
   Settings,
   SpellCheck,
@@ -127,7 +128,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
       <div className="space-y-0.5 border-t border-ink-200 px-2 py-3">
         <NavItem
           {...item}
-          to={{ name: 'study', tab: 'mistakes' }}
+          to={{ name: 'study', tab: 'shadowing' }}
           icon={History}
           label={t('nav.vocab')}
           current={area === 'study' ? (rail ? 'page' : 'area') : undefined}
@@ -141,10 +142,17 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
               to={{ name: 'study', tab }}
               label={t(`study.${tab}`)}
               current={route.name === 'study' && route.tab === tab ? 'page' : undefined}
-              badge={tab === 'mistakes' ? mistakes : undefined}
-              badgeLabel={tab === 'mistakes' ? t('nav.toReview', { count: mistakes }) : undefined}
             />
           ))}
+        <NavItem
+          {...item}
+          to={{ name: 'mistakes' }}
+          icon={NotebookPen}
+          label={t('study.mistakes')}
+          badge={mistakes}
+          badgeLabel={t('nav.toReview', { count: mistakes })}
+          current={area === 'mistakes' ? 'page' : undefined}
+        />
         <NavItem
           {...item}
           to={{ name: 'progress' }}

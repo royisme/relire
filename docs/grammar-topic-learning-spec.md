@@ -36,7 +36,7 @@ Use existing routes through `routeHref` and `shell/Link`, not manually concatena
 | `#/grammar/exercises` | Once the learner has answered, the saved topic revision appears as an ordinary saved set with its localized topic title and real item counts. |
 | `#/grammar/exercises/set/:setId` | Existing set table; each topic revision is a one-unit set, not a global cross-level topic collection. |
 | `#/grammar/exercises/unit/:unitId` | Opens that exact saved revision with the same question workbench and authored feedback, without fetching the topic. Includes an explicitly optional link to the current topic reference. |
-| `#/study/mistakes` | Retry opens the original saved unit, never today's replacement question. A deleted unit retains readable attempts but loses its retry link. |
+| `#/mistakes` | Retry opens the original saved unit, never today's replacement question. A deleted unit retains readable attempts but loses its retry link. |
 
 ### Start and resume
 

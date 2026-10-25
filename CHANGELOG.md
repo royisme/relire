@@ -98,6 +98,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Changed
 - Words is now its own sidebar entry, with the due count visible on the rail and in the phone menu; the Words home tab is now called Overview.
+- Mistakes is now its own sidebar entry, with its unresolved count visible on the rail and in the phone menu.
 - Today is now the page the app opens on; the Library remains at `#/read`.
 - A graded reader's header now names its review in one short line — AI-written and AI-reviewed, human-reviewed, or not recorded — instead of pasting the whole review record beside the level.
 - French sounds and Sound pairs moved from Progress to Speaking.

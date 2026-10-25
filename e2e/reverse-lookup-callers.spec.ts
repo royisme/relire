@@ -61,7 +61,7 @@ for (const phone of [false, true]) {
         await item.getByRole('textbox').fill('mangez');
         await checkButton(item).click();
         await expect(item.getByText('Incorrect', { exact: true })).toBeAttached();
-        await page.goto('/#/study/mistakes');
+        await page.goto('/#/mistakes');
         await expect(page.getByRole('heading', { name: 'Mistakes', exact: true })).toBeVisible();
       } else if (caller === 'inline passage' || caller === 'passage reader') {
         await openUnit(page, PASSAGE_UNIT, 'Compléter le passage');

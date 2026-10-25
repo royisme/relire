@@ -7,7 +7,7 @@ export const SETTINGS_SECTIONS = ['ai', 'practice', 'words', 'prompts', 'data', 
 export const AI_PURPOSES = ['text', 'ocr', 'speech', 'assessment'] as const;
 export type AiPurposeRoute = (typeof AI_PURPOSES)[number];
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
-export const STUDY_TABS = ['shadowing', 'mistakes'] as const;
+export const STUDY_TABS = ['shadowing'] as const;
 export type StudyTab = (typeof STUDY_TABS)[number];
 export type GrammarSectionRoute = 'conjugation' | 'gender';
 export type Route =
@@ -25,6 +25,7 @@ export type Route =
   | { name: 'wordsReview' }
   | { name: 'wordsPlay' }
   | { name: 'wordsMap' }
+  | { name: 'mistakes' }
   | { name: 'grammar'; section?: GrammarSectionRoute; verb?: string; tag?: GrammarTag }
   | { name: 'grammarTopic'; topicId: string }
   | { name: 'practice'; area: LearningArea }
@@ -83,6 +84,8 @@ export function routeHref(route: Route): string {
       return '#/words/play';
     case 'wordsMap':
       return '#/words/map';
+    case 'mistakes':
+      return '#/mistakes';
     case 'grammar':
       if (route.section === 'gender') return '#/grammar/gender';
       if (route.section === 'conjugation')
@@ -178,7 +181,7 @@ export function parseRoute(
           : { name: 'grammar', section: 'conjugation', ...(verb ? { verb } : {}) };
     } else if (root === 'grammar' && sub === 'topics' && parts.length === 3 && hasContentService)
       route = { name: 'grammarTopic', topicId: decodeURIComponent(third) };
-    else if (root === 'study' && parts.length === 1) route = { name: 'study', tab: 'mistakes' };
+    else if (root === 'study' && parts.length === 1) route = { name: 'study', tab: 'shadowing' };
     else if (root === 'study' && parts.length === 2 && (STUDY_TABS as readonly string[]).includes(sub))
       route = { name: 'study', tab: sub as StudyTab };
     else if (root === 'words' && parts.length === 1) route = { name: 'words' };
@@ -191,6 +194,7 @@ export function parseRoute(
             : sub === 'play'
               ? { name: 'wordsPlay' }
               : { name: 'wordsMap' };
+    else if (root === 'mistakes' && parts.length === 1) route = { name: 'mistakes' };
     else if (root === 'speaking' && parts.length === 1) route = { name: 'speaking' };
     else if (root === 'speaking' && sub === 'read-aloud' && parts.length <= 3)
       route = { name: 'readAloud', ...(third ? { articleId: decodeURIComponent(third) } : {}), ...focused };
@@ -233,6 +237,7 @@ export type Area =
   | 'speaking'
   | 'words'
   | 'study'
+  | 'mistakes'
   | 'progress'
   | 'settings'
   | 'about';
@@ -265,6 +270,7 @@ export function areaOf(route: Route): Area | null {
     case 'speaking':
       return 'speaking';
     case 'today':
+    case 'mistakes':
     case 'progress':
     case 'settings':
     case 'about':
