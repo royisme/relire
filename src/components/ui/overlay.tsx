@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ReactNode, RefObject } from 'react';
 import { cn } from '../../lib/utils';
 import { Dialog, DialogContent } from './dialog';
@@ -54,16 +54,9 @@ function usePanelFocus(dialog: RefObject<HTMLElement | null>) {
       if (e.key !== 'Tab' || e.defaultPrevented) return;
       if (Array.from(document.querySelectorAll('[role="dialog"]')).at(-1) !== panel) return;
       const focusable = Array.from(
-        panel.querySelectorAll<HTMLElement>(
-          'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]',
-        ),
+        panel.querySelectorAll<HTMLElement>('a[href], button, input, select, textarea, [tabindex]'),
       ).filter(
-        (element) =>
-          element.tabIndex >= 0 &&
-          !element.matches(':disabled') &&
-          !element.closest('[hidden], [inert]') &&
-          element.getClientRects().length > 0 &&
-          getComputedStyle(element).visibility !== 'hidden',
+        (element) => element.tabIndex >= 0 && !element.matches(':disabled') && element.getClientRects().length > 0,
       );
       const first = focusable[0];
       const last = focusable.at(-1);
@@ -139,8 +132,6 @@ export function Drawer({ onClose, label, className, children }: OverlayProps) {
 
 /** Dialog: tasks that need focus (settings, import, install). */
 function OverlayDialog({ onClose, label, className, children }: OverlayProps) {
-  // Share ownership with the hand-written panels; Base UI leaves an existing scroll lock alone.
-  useLayoutEffect(lockPageScroll, []);
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
