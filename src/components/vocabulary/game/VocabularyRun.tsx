@@ -5,23 +5,15 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, EqualApproximately, X } from 'lucide-react';
-import type { VocabularyBook, VocabularyBookSource, VocabularyOutcome, VocabularyRow } from '../../../types/vocabulary';
+import type { VocabularyBook, VocabularyOutcome } from '../../../types/vocabulary';
 import type { VocabularyModel } from '../../../hooks/useVocabulary';
 import { useVocabularyReview } from '../../../hooks/useVocabularyReview';
 import { formatDate } from '../../../utils/srs';
-import { getAppSettings, practiceGrading, saveAppSettings } from '../../../utils/appSettings';
-import { appendRunLog } from '../../../services/vocabulary/game/runLog';
+import { practiceGrading } from '../../../utils/appSettings';
+import { vocabularyQueue } from '../../../services/vocabulary/queue';
 import { getSpeechState, speechKey, stopSpeech } from '../../../utils/speech';
 import { lexiconFormsOf } from '../../../services/lexicon/load';
-import {
-  buildChallenge,
-  cardContent,
-  challengeSeed,
-  cleanHeadword,
-  gradeChoice,
-  gradeTyped,
-  type ChallengePoolItem,
-} from '../../../services/vocabulary/game/challenge';
+import { challengeSeed, cleanHeadword, gradeChoice, gradeTyped } from '../../../services/vocabulary/game/challenge';
 import { Button } from '../../ui/button';
 import { Segmented } from '../../ui/segmented';
 import { Sheet, OverlayHeader } from '../../ui/overlay';
@@ -38,7 +30,29 @@ import {
   type RunCardState,
 } from './runKey';
 import { RunChallengeCard, RunRevealedCard } from './RunCard';
-import { RunCleared, RunDone, runNextDue } from './RunEnd';
+import { RunCleared, RunDone, RunWaiting, runNextDue } from './RunEnd';
+import {
+  RUN_SIZES,
+  chunkRatings,
+  chunkReached,
+  continueChunk,
+  buildRunChallenge,
+  runPool,
+  type RunChunk,
+  type RunSize,
+} from './runModel';
+import { useRunLog } from './useRunLog';
+export {
+  RUN_SIZES,
+  chunkRatings,
+  chunkReached,
+  continueChunk,
+  closedClassPos,
+  posOf,
+  runPool,
+  type RunChunk,
+  type RunSize,
+} from './runModel';
 
 export * from './runKey';
 export * from './RunCard';
@@ -52,69 +66,6 @@ const recallColors = {
   remembered: 'border-ok-200 bg-ok-50 text-ok-800 hover:bg-ok-100',
 };
 
-/** The selectable run lengths, in ratings (fork 1b: 20 by default, 5 for a low-energy day). */
-export const RUN_SIZES = [5, 10, 20] as const;
-export type RunSize = (typeof RUN_SIZES)[number];
-
-/** One chunk of a run: its length and the rating count it started from. */
-export interface RunChunk {
-  size: RunSize;
-  baseline: number;
-}
-
-/** The ratings done inside the current chunk; never below zero. */
-export const chunkRatings = (chunk: RunChunk, ratings: number) => Math.max(0, ratings - chunk.baseline);
-
-/** A run is done for now once its chunk of ratings is reached. */
-export const chunkReached = (chunk: RunChunk, ratings: number) => chunkRatings(chunk, ratings) >= chunk.size;
-
-/** Continue keeps the same run (and the hook's exclusions) and counts the next chunk from where this one ended. */
-export const continueChunk = (chunk: RunChunk, ratings: number): RunChunk => ({ ...chunk, baseline: ratings });
-
-/**
- * A closed-class headword (preposition, conjunction, article, pronoun, possessive) has several defensible
- * answers in a blank, so its card never gets a cloze: the build hands VG1 a card without examples and its own
- * ladder falls to the next easier kind. The book's free-text POS strings carry OCR noise (`prêp.`, `loc.prép.`),
- * so the marks are matched accent-insensitively anywhere in the string.
- */
-const CLOSED_CLASS_MARKS = ['prep', 'conj', 'pron', 'poss', 'art'];
-export function closedClassPos(pos: string | undefined): boolean {
-  if (!pos) return false;
-  const plain = pos.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
-  return CLOSED_CLASS_MARKS.some((mark) => plain.includes(mark));
-}
-
-/** The card's leading part of speech: its book sense first, then its personal definition, as VG1 reads content. */
-export function posOf(card: {
-  bookSource?: VocabularyBookSource;
-  contexts: VocabularyRow['contexts'];
-}): string | undefined {
-  return cardContent(card, 'en').pos;
-}
-
-/** One distractor source: a card of the learner's own, with the glosses and POS VG1's pool reads. */
-function poolItemOf(row: VocabularyRow): ChallengePoolItem {
-  const content = cardContent(row, 'en');
-  return {
-    word: row.word,
-    gloss: { en: content.gloss, zh: cardContent(row, 'zh').gloss },
-    pos: content.pos,
-    ...(content.deck !== undefined ? { deck: content.deck } : {}),
-  };
-}
-
-/** Where distractors come from: the learner's own cards, then the book when it is present. */
-export function runPool(rows: readonly VocabularyRow[], book?: VocabularyBook): ChallengePoolItem[] {
-  return [
-    ...rows.map(poolItemOf),
-    ...(book?.entries ?? []).map((entry) => ({
-      word: entry.word,
-      gloss: entry.senses[0]?.gloss ?? {},
-      pos: entry.senses[0]?.pos,
-    })),
-  ];
-}
-
 export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: VocabularyBook }) {
   const { t, i18n } = useTranslation();
   const session = useVocabularyReview(model, book);
@@ -124,7 +75,6 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
   const [errorOpen, setErrorOpen] = useState(false);
   const [voiceAvailable, setVoiceAvailable] = useState(deviceVoiceReady);
   const appearances = useRef(new Map<string, number>());
-  const loggedBaseline = useRef<number | null>(null);
   const submittedControl = useRef<HTMLButtonElement | null>(null);
   const recallControls = useRef<Partial<Record<VocabularyOutcome, HTMLButtonElement | null>>>({});
   // The first control of a card is sometimes a button and sometimes the typed field, so a callback keeps it.
@@ -184,23 +134,12 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
           contexts: active.row?.contexts ?? [],
           schedule: active.row?.schedule ?? null,
         };
-        // A closed-class headword never gets a cloze, so VG1's ladder sees a card without examples.
-        const input = closedClassPos(posOf(cardInput))
-          ? {
-              ...cardInput,
-              bookSource: cardInput.bookSource && {
-                ...cardInput.bookSource,
-                senses: cardInput.bookSource.senses.map((sense) => ({ ...sense, examples: [] })),
-              },
-              contexts: [],
-            }
-          : cardInput;
         setCard({
           key,
           ready: true,
           // buildChallenge asks formsOf for this one card's lemma only, so its set answers for it.
-          challenge: buildChallenge({
-            card: input,
+          challenge: buildRunChallenge({
+            card: cardInput,
             pool: runPool(model.rows, book),
             seed: challengeSeed(formatDate(new Date(session.now)), key, (active.row?.history.length ?? 0) + seen),
             lang: i18n.resolvedLanguage === 'zh' ? 'zh' : 'en',
@@ -299,18 +238,15 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
     };
   });
 
-  useEffect(() => {
-    if (!chunkReached(chunk, session.ratings) || loggedBaseline.current === chunk.baseline) return;
-    loggedBaseline.current = chunk.baseline;
-    saveAppSettings({
-      vocabularyRunLog: appendRunLog(getAppSettings().vocabularyRunLog, {
-        date: formatDate(new Date(session.now)),
-        mode: 'game',
-        chunkSize: chunk.size,
-        ratings: chunkRatings(chunk, session.ratings),
-      }),
-    });
-  }, [chunk, session.ratings, session.now]);
+  // This view never calls skip(), so the hook's exclusion set is always empty.
+  const queueEmpty =
+    model.ready &&
+    !active &&
+    !session.busy &&
+    !message &&
+    vocabularyQueue(model.rows, book, model.day, model.preferences.newPerDay, session.now, new Set()).candidates
+      .length === 0;
+  useRunLog(chunk, session.ratings, session.now, queueEmpty);
 
   const nextDue = runNextDue(model.rows, session.now);
   return (
@@ -362,8 +298,9 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
           onContinue={() => setChunk(continueChunk(chunk, session.ratings))}
         />
       ) : !active ? (
-        <>
-          <RunCleared nextDue={nextDue} />
+        <div className="mx-auto w-full max-w-[25rem] space-y-6">
+          {queueEmpty ? <RunCleared nextDue={nextDue} /> : <RunWaiting error={message} />}
+          <div className="h-20" />
           <div
             data-vocabulary-status
             role="status"
@@ -388,10 +325,10 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
               </>
             )}
           </div>
-        </>
+        </div>
       ) : (
         <div className="mx-auto w-full max-w-[25rem] space-y-6">
-          <div className="rounded-lg border border-ink-200 bg-surface p-5">
+          <div className="h-[42rem] overflow-y-auto rounded-lg border border-ink-200 bg-surface p-5">
             {phase === 'revealed' && active ? (
               <RunRevealedCard
                 word={active.candidate.word}
@@ -420,35 +357,37 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
               />
             )}
           </div>
-          {revealed && (
-            <div className="mx-auto grid max-w-xs grid-cols-3 gap-3">
-              {outcomes.map((outcome) => {
-                const Icon = recallIcons[outcome];
-                return (
-                  <div key={outcome} className="flex min-w-0 flex-col items-center gap-1.5">
-                    <Button
-                      ref={(control) => {
-                        recallControls.current[outcome] = control;
-                      }}
-                      type="button"
-                      data-run-key
-                      variant="outline"
-                      size="icon"
-                      className={`h-12 w-12 shrink-0 rounded-full ${recallColors[outcome]}`}
-                      disabled={session.busy || (!!session.pending && session.pending.outcome !== outcome)}
-                      aria-label={t(`vocab.${outcome}`)}
-                      aria-pressed={session.pending?.outcome === outcome}
-                      aria-busy={session.busy && session.pending?.outcome === outcome}
-                      onClick={() => rate(outcome)}
-                    >
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </Button>
-                    <span className="text-center text-xs text-ink-700">{t(`vocab.${outcome}`)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <div className="h-20">
+            {revealed && (
+              <div className="mx-auto grid max-w-xs grid-cols-3 gap-3">
+                {outcomes.map((outcome) => {
+                  const Icon = recallIcons[outcome];
+                  return (
+                    <div key={outcome} className="flex min-w-0 flex-col items-center gap-1.5">
+                      <Button
+                        ref={(control) => {
+                          recallControls.current[outcome] = control;
+                        }}
+                        type="button"
+                        data-run-key
+                        variant="outline"
+                        size="icon"
+                        className={`h-12 w-12 shrink-0 rounded-full ${recallColors[outcome]}`}
+                        disabled={session.busy || (!!session.pending && session.pending.outcome !== outcome)}
+                        aria-label={t(`vocab.${outcome}`)}
+                        aria-pressed={session.pending?.outcome === outcome}
+                        aria-busy={session.busy && session.pending?.outcome === outcome}
+                        onClick={() => rate(outcome)}
+                      >
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                      </Button>
+                      <span className="text-center text-xs text-ink-700">{t(`vocab.${outcome}`)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <div
             data-vocabulary-status
             className="flex h-16 min-w-0 items-start gap-2 overflow-hidden text-sm text-ink-600"

@@ -141,6 +141,10 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Vocabulary runs show loading or the real snapshot error between cards, not “Queue cleared” until the queue is empty.
+- Listening on a revealed vocabulary game card always uses this device’s French voice, never a paid speech provider.
+- Vocabulary game challenges keep their card and control slots fixed while loading, answering and revealing, including on narrow screens.
+- Text-import refusals and rejected-row reasons now follow the interface language, including Chinese.
 - The Le ou la round cannot be played by a held Enter key anymore (a repeated key no longer clicks le or Next on its own), Enter or Space on a focused le/la button now answers that button instead of doing nothing, an answer whose save fails no longer counts in the round (End round waits for it), a Retry after a failed round open reopens the same saved set instead of saving a second one, and when a round ends the focus and the counts are announced and Back returns focus to "Play a round".
 - The Grammar entry in the sidebar no longer shares its icon with the language switcher.
 - The pronunciation check prompts no longer show example scores the model could copy.

@@ -4,6 +4,13 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: vocabulary review fixes (`vocab-fixes`, awaiting lead review)
+
+- Confirmed all eight findings against the code. ZIP collections are bounded by declared expansion before inflation; Zstandard output is capped during streaming (200 MiB database limit), including frames without a declared content size. Plain text is capped before reading (10 MiB) and at 20,000 logical notes. Importer-authored refusals retain translation keys/parameters through the result UI.
+- Run loading/failure no longer means queue completion; the unchanged hook's queue inputs determine exhaustion. Revealed game speech explicitly uses the device. Closed-class AI/reader cards keep their gloss and ask for recognition. Challenge, action, card and recall slots keep fixed heights. Small run-model and logging modules keep the run view below 500 lines.
+- Game logging records unlogged ratings on exhaustion/unmount, flushes the previous size when size changes, and resets the logging baseline on size/Continue. No plain-mode writer was added. The two protected review files are unchanged; test namespace imports were replaced with dynamic imports.
+- Verified in this worktree: requested typecheck → lint → test → i18n → format → build chain exit 0 (2,579 tests, no flaky failure); detector exit 0 with `[]`; shape and diff checks exit 0. AI/speech are mocked, IndexedDB/Anki fixtures synthetic. **Unverified:** browser layout/focus at 360 px and in themes, IME/phone keyboards, a real French device voice and real Anki exports. Build retains its large-chunk warning. Lead review remains pending.
+
 ## 2026-10-25: VG6 landed (the opt-in goal); the vocabulary plan is complete except VG7
 
 - An optional exam date and a mature-word target in `appSettings` (device-local, excluded from backups in both directions, validated once in `goal.ts`: a past date and a non-positive target are refused with real messages). With a goal set the Words home shows the days left (calendar days, DST-safe), the real mature count now, the target and the last four weekly "words gained" numbers from `weeklyGained`, which `gainedThisWeek` now uses too (one first-attainment rule). No forecast, no "on track" wording; with no goal set nothing about goals shows.

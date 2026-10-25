@@ -6,14 +6,15 @@
  * these tests call the same refresh where the queue's next card matters).
  */
 import { beforeEach, expect, spyOn, test } from 'bun:test';
-import * as React from 'react';
+import type { EffectCallback } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { freshDb } from './fixtures/storage';
 import { testCandidate, testDefinition, testLookup } from './fixtures/vocabulary';
 import { useVocabularyReview } from '../src/hooks/useVocabularyReview';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import { gradeChoice } from '../src/services/vocabulary/game/challenge';
-import * as storage from '../src/storage/vocabulary';
+const storage = await import('../src/storage/vocabulary');
+const React = await import('react');
 import '../src/i18n';
 const { getVocabularySnapshot, readVocabulary, saveVocabularyBookmark, saveVocabularyPreferences } = storage;
 
@@ -35,7 +36,7 @@ function reviewHarness(model: VocabularyModel) {
   // Drive the hook's state and selection effect only; do not install browser wake/focus listeners.
   const slots: unknown[] = [];
   let index = 0;
-  let effects: React.EffectCallback[] = [];
+  let effects: EffectCallback[] = [];
   const selection: { cleanup?: () => void } = {};
   const state = spyOn(React, 'useState').mockImplementation(((initial: unknown) => {
     const slot = index++;

@@ -65,12 +65,11 @@ for (const language of ['en', 'zh'] as const) {
     expect(html).toContain('role="status"');
     expect(html).toContain('aria-live="polite"');
     expect(html).toContain('h-32');
-    expect(html).toContain('Unsupported HTML entity: &amp;unknown;');
+    const reason = instance.t('vocab.import.errors.unsupportedEntity', { entity: '&unknown;' });
+    expect(html).toContain(reason.replace('&unknown;', '&amp;unknown;'));
     expect(html).toContain(instance.t('vocab.import.result', { imported: 1, merged: 0, rejected: 1 }));
     expect(html).toContain(
-      instance
-        .t('vocab.import.rejectedRow', { row: 2, reason: batch.rejected[0].reason })
-        .replace('&unknown;', '&amp;unknown;'),
+      instance.t('vocab.import.rejectedRow', { row: 2, reason }).replace('&unknown;', '&amp;unknown;'),
     );
   });
 }

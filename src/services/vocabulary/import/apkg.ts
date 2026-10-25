@@ -6,8 +6,10 @@ import type { Database, SqlJsStatic } from 'sql.js';
 import type { PlainTextImport } from './plainText';
 import { loadImportSql } from './sqlLoader';
 import { errorMessage } from '../../ai/errors';
+import { ImportRefusal } from './refusal';
 
 export const MAX_APKG_BYTES = 50 * 1024 * 1024;
+export const MAX_DATABASE_BYTES = 200 * 1024 * 1024;
 const collections = ['collection.anki21b', 'collection.anki21', 'collection.anki2'];
 
 export interface ApkgNoteType {
@@ -64,6 +66,11 @@ function unzipCollection(bytes: Uint8Array) {
     const names: string[] = [];
     unzipSync(bytes, {
       filter: (entry) => {
+        if (collections.includes(entry.name) && entry.originalSize > MAX_DATABASE_BYTES)
+          throw new ImportRefusal({
+            key: 'vocab.import.errors.databaseTooLarge',
+            params: { size: MAX_DATABASE_BYTES / 1024 / 1024 },
+          });
         names.push(entry.name);
         return false;
       },
@@ -72,15 +79,39 @@ function unzipCollection(bytes: Uint8Array) {
     // Inspect the directory first: even obsolete collections must not be inflated, let alone media.
     return name ? { name, bytes: unzipSync(bytes, { filter: (entry) => entry.name === name })[name] } : null;
   } catch (error) {
+    if (error instanceof ImportRefusal) throw error;
     throw new Error(t('vocab.import.apkg.zip', { reason: errorMessage(error) }));
   }
 }
 
-async function decodeCollection(bytes: Uint8Array) {
-  const { decompress } = await import('fzstd');
+export async function decodeCollection(bytes: Uint8Array, maxBytes = MAX_DATABASE_BYTES): Promise<Uint8Array> {
+  const { Decompress } = await import('fzstd');
   try {
-    return decompress(bytes);
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    const stream = new Decompress((chunk) => {
+      size += chunk.byteLength;
+      // Throw inside the synchronous callback to stop decoding before retaining any excess output.
+      if (size > maxBytes)
+        throw new ImportRefusal({
+          key: 'vocab.import.errors.databaseTooLarge',
+          params: { size: maxBytes / 1024 / 1024 },
+        });
+      chunks.push(chunk);
+    });
+    const chunkSize = 1024 * 1024;
+    for (let offset = 0; offset < bytes.byteLength; offset += chunkSize)
+      stream.push(bytes.subarray(offset, offset + chunkSize));
+    stream.push(new Uint8Array(0), true);
+    const output = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      output.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    return output;
   } catch (error) {
+    if (error instanceof ImportRefusal) throw error;
     throw new Error(t('vocab.import.apkg.zstd', { reason: errorMessage(error) }));
   }
 }

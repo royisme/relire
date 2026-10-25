@@ -136,6 +136,8 @@ An optional learning mode, not a new product tone. The goal the owner set: **sti
 | VG7 | Feel (deferred by the plan; sound out of scope) | | later; owner-gated |
 | VG8 | `.apkg` import beside `.txt` and `.csv` (owner decision 2026-10-25: dependencies approved; the lead provisions the installs) | dependency check (size, licence, maintenance) first; lazy-loaded; VG4's normalization and refusals reused; tests on small invented packages; FSRS seeding from a revlog stays later | landed (`5a10810` merged in `da59aa6`, codex gpt-6.1-sol; `fflate`, `fzstd`, `sql.js` installed by the lead in `b6f887e`); 2,551 tests; the import pipeline, entity table and the three libraries load only on the first file pick (main bundle 759 KB to 738 KB); the 685 KB sql.js wasm is precached; **unverified:** no browser and no REAL Anki export (invented fixtures only; the owner should try one real `.apkg` and one `.txt`) |
 
+Vocabulary review follow-up (branch `vocab-fixes`): all eight source-verified findings addressed; expanded imports bounded, queue loading separated from completion, game speech device-only, partial runs logged, closed-class meanings retained, card slots fixed, refusals localized, and test imports corrected. Static/unit/build checks pass (2,579 tests); lead diff review and owner-manual mobile/IME/device/real-export checks remain. Plain-mode run logging is out of scope.
+
 ### Content (paused by the owner's priority)
 
 Stages 1 to 3 have private drafts with AI review records (not human review). Stages 4 to 12 are not written; stage 4 has an unreviewed draft. Resume after the platform: R0-7 for stages 4 to 5, R2 for 6 to 12, a human language review before any real beginner uses the readers.

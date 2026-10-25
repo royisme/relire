@@ -1,4 +1,4 @@
-/** Device-only finished chunks, separate from scheduler rows and review history. */
+/** Device-only game activity, including partial chunks, separate from scheduler rows and review history. */
 import { z } from 'zod';
 import { VocabularyDateSchema } from '../../../types/vocabulary';
 

@@ -64,10 +64,14 @@ export function RunChallengeCard({
               : t('vocab.game.kindClozeType');
   return (
     <div className="space-y-5">
-      <p className="min-h-6 text-xs text-ink-500">
+      <p className="h-6 overflow-auto text-xs text-ink-500">
         {phase === 'plain' ? null : phase === 'loading' ? null : kindLabel}
       </p>
-      <div className="min-h-40 space-y-4" aria-busy={phase === 'loading' || undefined}>
+      <div
+        data-run-challenge-slot
+        className="h-80 space-y-4 overflow-y-auto"
+        aria-busy={phase === 'loading' || undefined}
+      >
         {phase === 'loading' ? null : phase === 'plain' ? (
           <>
             <p lang="fr" className="break-words text-center font-serif text-3xl font-semibold text-ink-900">
@@ -132,26 +136,24 @@ export function RunChallengeCard({
                   ))}
                 </div>
               ) : (
-                answering && (
-                  <Input
-                    ref={firstControl}
-                    lang="fr"
-                    value={typed}
-                    autoComplete="off"
-                    readOnly={!answering}
-                    aria-label={t('vocab.game.answerLabel')}
-                    className="max-w-xs"
-                    onChange={(event) => onTypedChange(event.currentTarget.value)}
-                    onKeyDown={(event) => {
-                      // Only a keydown that commits no IME composition submits, so Android keyboards and dead
-                      // keys keep composing; the document handler never sees this key as the run's own.
-                      if (event.key === 'Enter' && !event.nativeEvent.isComposing && event.keyCode !== 229) {
-                        event.preventDefault();
-                        onTypedSubmit();
-                      }
-                    }}
-                  />
-                )
+                <Input
+                  ref={firstControl}
+                  lang="fr"
+                  value={typed}
+                  autoComplete="off"
+                  readOnly={!answering}
+                  aria-label={t('vocab.game.answerLabel')}
+                  className="max-w-xs"
+                  onChange={(event) => onTypedChange(event.currentTarget.value)}
+                  onKeyDown={(event) => {
+                    // Only a keydown that commits no IME composition submits, so Android keyboards and dead
+                    // keys keep composing; the document handler never sees this key as the run's own.
+                    if (event.key === 'Enter' && !event.nativeEvent.isComposing && event.keyCode !== 229) {
+                      event.preventDefault();
+                      onTypedSubmit();
+                    }
+                  }}
+                />
               )}
             </>
           )
@@ -182,7 +184,7 @@ export function RunChallengeCard({
           </>
         )}
       </div>
-      <div className="flex min-h-10 flex-wrap items-center gap-2">
+      <div className="grid h-24 grid-cols-2 content-start gap-2 overflow-y-auto">
         {answering && !options && (
           <Button data-run-key type="button" disabled={busy || !typed.trim()} onClick={onTypedSubmit}>
             {t('vocab.game.answer')}
@@ -241,6 +243,7 @@ export function RunRevealedCard({
         <span data-vocabulary-independent>
           <SpeakButton
             text={word}
+            engine="device"
             label={t('wordModal.listen')}
             stopLabel={t('reader.stop')}
             variant="ghost"

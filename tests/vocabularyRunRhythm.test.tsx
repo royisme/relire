@@ -133,7 +133,8 @@ test('a reached chunk logs once across effect replay, clock ticks and size chang
   const paint = () => {
     index = 0;
     effects.length = 0;
-    const html = render(<run.VocabularyRun model={model} />);
+    const waiting = { ...testRow('TEST waiting'), bookmarked: true, bookmarkedAt: 1 };
+    const html = render(<run.VocabularyRun model={{ ...model, rows: [waiting] }} />);
     expect(effects).toHaveLength(1);
     effects[0]();
     effects[0](); // React Strict Mode replays effects with the same refs.

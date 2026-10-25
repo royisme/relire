@@ -4,7 +4,6 @@
  * keyboard, no visual acceptance: the look at 360 px, the three themes, IME and a phone stay owner-manual.
  */
 import { expect, spyOn, test } from 'bun:test';
-import * as React from 'react';
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
@@ -25,6 +24,7 @@ import {
 
 // The run's link, settings and key modules read `window` and `localStorage` when they load; the card and the
 // end screens are rendered as static markup, so this browser stand-in lives only around the import.
+const React = await import('react');
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
 Object.defineProperty(globalThis, 'window', {
   configurable: true,

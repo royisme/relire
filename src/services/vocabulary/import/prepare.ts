@@ -3,6 +3,7 @@ import { VocabularyContextSchema, type VocabularyRow } from '../../../types/voca
 import { vocabularyContextKey } from '../identity';
 import type { PlainTextImport } from './plainText';
 import entities from './entities.json';
+import { ImportRefusal, importReason, type ImportReason } from './refusal';
 
 export interface ImportColumns {
   front: number;
@@ -15,7 +16,7 @@ export interface ImportedNote {
 }
 export interface RejectedNote {
   row: number;
-  reason: string;
+  reason: ImportReason;
 }
 export interface PreparedImport {
   notes: ImportedNote[];
@@ -31,11 +32,11 @@ export function normalizeImportText(value: string): string {
     .replace(/&(#x[\da-f]+|#\d+|[a-z][\da-z]+);/gi, (entity: string, name: string) => {
       if (!name.startsWith('#')) {
         if (Object.hasOwn(namedEntities, name)) return namedEntities[name];
-        throw new Error(`Unsupported HTML entity: ${entity}`);
+        throw new ImportRefusal({ key: 'vocab.import.errors.unsupportedEntity', params: { entity } });
       }
       const code = name[1].toLowerCase() === 'x' ? parseInt(name.slice(2), 16) : Number(name.slice(1));
       if (code === 0 || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff))
-        throw new Error(`Invalid HTML entity: ${entity}`);
+        throw new ImportRefusal({ key: 'vocab.import.errors.invalidEntity', params: { entity } });
       return String.fromCodePoint(code);
     })
     .replace(/\[sound:[^\]]*\]/gi, '')
@@ -44,7 +45,7 @@ export function normalizeImportText(value: string): string {
     .trim();
   // oxlint-disable-next-line no-control-regex -- Imported files may contain non-text control bytes.
   if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u.test(plain))
-    throw new Error('Text contains a control character');
+    throw new ImportRefusal({ key: 'vocab.import.errors.controlCharacter' });
   return plain;
 }
 
@@ -73,11 +74,15 @@ export function prepareVocabularyImport(
   const rejected: RejectedNote[] = [];
   for (const row of parsed.rows) {
     try {
-      if (row.error) throw new Error(row.error);
+      if (row.error) {
+        rejected.push({ row: row.row, reason: row.error });
+        continue;
+      }
       if (columns.front === columns.back || columns.example === columns.front || columns.example === columns.back)
-        throw new Error('Choose different columns for the word, answer and example');
+        throw new ImportRefusal({ key: 'vocab.import.errors.differentColumns' });
       const read = (column: number) => {
-        if (row.fields[column] === undefined) throw new Error(`Missing column ${column + 1}`);
+        if (row.fields[column] === undefined)
+          throw new ImportRefusal({ key: 'vocab.import.errors.missingColumn', params: { column: column + 1 } });
         return normalizeImportText(row.fields[column]);
       };
       const deck =
@@ -107,13 +112,16 @@ export function prepareVocabularyImport(
       if (!context.success) {
         rejected.push({
           row: row.row,
-          reason: context.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; '),
+          reason: {
+            key: 'vocab.import.errors.invalidFields',
+            params: { fields: [...new Set(context.error.issues.map((issue) => issue.path.join('.')))].join(', ') },
+          },
         });
         continue;
       }
       notes.push({ word: front, context: context.data });
     } catch (error) {
-      rejected.push({ row: row.row, reason: error instanceof Error ? error.message : String(error) });
+      rejected.push({ row: row.row, reason: importReason(error) });
     }
   }
   return { notes, rejected };

@@ -3,7 +3,13 @@ import { beforeEach, expect, test } from 'bun:test';
 import { zipSync } from 'fflate';
 import { decompress } from 'fzstd';
 import '../src/i18n';
-import { checkApkgSize, MAX_APKG_BYTES, readApkg, readApkgFile } from '../src/services/vocabulary/import/apkg';
+import {
+  checkApkgSize,
+  decodeCollection,
+  MAX_APKG_BYTES,
+  readApkg,
+  readApkgFile,
+} from '../src/services/vocabulary/import/apkg';
 import { defaultImportColumns, prepareVocabularyImport } from '../src/services/vocabulary/import/prepare';
 import {
   getVocabularySnapshot,
@@ -17,6 +23,7 @@ import { fixtureCollection, fixtureNotes, fixturePackage, importSql, rawZstd } f
 import { freshDb, failure } from './fixtures/storage';
 import { errorMessage } from '../src/services/ai/errors';
 import { testDefinition, testLookup } from './fixtures/vocabulary';
+import { streamingCollection } from './fixtures/streamZstd';
 
 const now = 123456789;
 beforeEach(freshDb);
@@ -74,6 +81,19 @@ for (const schema of [11, 18] as const) {
 test('single RAW-block Zstandard helper decodes to the exact SQLite bytes with fzstd', () => {
   const bytes = fixtureCollection(18);
   expect(decompress(rawZstd(bytes))).toEqual(bytes);
+});
+
+test('a real streaming Zstandard frame without content size decodes to SQLite and imports', async () => {
+  expect(streamingCollection[4] & 0xe0).toBe(0); // No content-size flag or single-segment size.
+  expect(await decodeCollection(streamingCollection)).toEqual(fixtureCollection(18));
+  const types = await readApkg(fixturePackage(streamingCollection, 'collection.anki21b'));
+  const batch = prepareVocabularyImport(types[0].parsed, { front: 0, back: 1, example: 2 }, 'unused', 'en', now);
+  expect(batch.rejected).toEqual([]);
+  expect(await importVocabularyNotes(batch.notes, now)).toEqual({ imported: 2, merged: 0 });
+  expect((await getVocabularySnapshot('chat')).row?.contexts[0].definition).toMatchObject({
+    kind: 'imported',
+    back: 'cat pet',
+  });
 });
 
 test('newest collection wins over anki21 and the update stub; anki21 wins over anki2', async () => {
@@ -135,8 +155,14 @@ test('refused notes keep their one-based position within the chosen type and the
   const batch = prepareVocabularyImport(types[0].parsed, { front: 0, back: 1, example: null }, 'unused', 'en', now);
   expect(batch.notes).toHaveLength(1);
   expect(batch.rejected.map((note) => note.row)).toEqual([2, 3, 4]);
-  expect(batch.rejected[0].reason).toContain('nonblank');
-  expect(batch.rejected[1].reason).toBe('Unsupported HTML entity: &unknown;');
+  expect(batch.rejected[0].reason).toEqual({
+    key: 'vocab.import.errors.invalidFields',
+    params: { fields: 'definition.front' },
+  });
+  expect(batch.rejected[1].reason).toEqual({
+    key: 'vocab.import.errors.unsupportedEntity',
+    params: { entity: '&unknown;' },
+  });
   expect(batch.rejected[2].reason).toBe('The note has 1 fields; its note type declares 3.');
 });
 

@@ -16,7 +16,7 @@ import type {
 import type { PlainTextImport } from '../../services/vocabulary/import/plainText';
 import type { ApkgNoteType } from '../../services/vocabulary/import/apkg';
 import { importVocabularyNotes } from '../../storage/vocabulary';
-import { errorMessage } from '../../services/ai/errors';
+import { importReason, type ImportReason } from '../../services/vocabulary/import/refusal';
 
 const features = tableFeatures({});
 const helper = createColumnHelper<typeof features, ImportedNote>();
@@ -31,7 +31,7 @@ export function VocabularyImport() {
   const [columns, setColumns] = useState<ImportColumns>({ front: 0, back: 1, example: null });
   const [deck, setDeck] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ImportReason | null>(null);
   const [result, setResult] = useState<{ imported: number; merged: number; rejected: RejectedNote[] } | null>(null);
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
   const prepared = useMemo(
@@ -80,12 +80,12 @@ export function VocabularyImport() {
         setNoteTypes(await readApkgFile(file));
         return;
       }
-      const { parsePlainText } = await import('../../services/vocabulary/import/plainText');
-      const next = parsePlainText(await file.text());
+      const { readPlainTextFile } = await import('../../services/vocabulary/import/plainText');
+      const next = await readPlainTextFile(file);
       setColumns(defaultImportColumns(next));
       setParsed(next);
     } catch (err) {
-      setError(errorMessage(err));
+      setError(importReason(err));
     } finally {
       setBusy(false);
     }
@@ -100,7 +100,7 @@ export function VocabularyImport() {
       const counts = await importVocabularyNotes(batch.notes, now);
       setResult({ ...counts, rejected: batch.rejected });
     } catch (err) {
-      setError(errorMessage(err));
+      setError(importReason(err));
     } finally {
       setBusy(false);
     }
@@ -303,11 +303,12 @@ export function VocabularyImportResult({
   result,
   ready,
 }: {
-  error: string | null;
+  error: ImportReason | null;
   result: { imported: number; merged: number; rejected: RejectedNote[] } | null;
   ready: { rows: number; accepted: number; rejected: number } | null;
 }) {
   const { t } = useTranslation();
+  const reasonText = (reason: ImportReason) => (typeof reason === 'string' ? reason : t(reason.key, reason.params));
   return (
     <div
       role="status"
@@ -316,7 +317,7 @@ export function VocabularyImportResult({
       className="h-32 overflow-auto break-words text-sm text-ink-700"
     >
       {error ? (
-        t('vocab.import.failed', { reason: error })
+        t('vocab.import.failed', { reason: reasonText(error) })
       ) : result ? (
         <>
           <p>
@@ -328,7 +329,9 @@ export function VocabularyImportResult({
           </p>
           <ul>
             {result.rejected.map((note) => (
-              <li key={note.row}>{t('vocab.import.rejectedRow', { row: note.row, reason: note.reason })}</li>
+              <li key={note.row}>
+                {t('vocab.import.rejectedRow', { row: note.row, reason: reasonText(note.reason) })}
+              </li>
             ))}
           </ul>
         </>
