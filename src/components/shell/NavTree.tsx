@@ -36,6 +36,14 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
   const links = [
     { to: { name: 'today' } as Route, area: 'today', icon: CalendarCheck, label: t('today.title') },
     { to: { name: 'library' } as Route, area: 'read', icon: BookOpen, label: t('learning.areas.reading') },
+    {
+      to: { name: 'words' } as Route,
+      area: 'words',
+      icon: BookmarkCheck,
+      label: t('nav.words'),
+      badge: dueCount,
+      badgeLabel: t('nav.due', { count: dueCount }),
+    },
     { to: { name: 'grammar' } as Route, area: 'grammar', icon: SpellCheck, label: t('learning.areas.grammar') },
     {
       to: { name: 'practice', area: 'listening' } as Route,
@@ -83,6 +91,8 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
               to={link.to}
               icon={link.icon}
               label={link.label}
+              badge={link.badge}
+              badgeLabel={link.badgeLabel}
               current={area === link.area ? (!rail && children.length > 0 ? 'area' : 'page') : undefined}
             />
             {!rail && area === link.area && (
@@ -116,7 +126,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
       <div className="space-y-0.5 border-t border-ink-200 px-2 py-3">
         <NavItem
           {...item}
-          to={{ name: 'study', tab: 'words' }}
+          to={{ name: 'study', tab: 'mistakes' }}
           icon={BookmarkCheck}
           label={t('nav.vocab')}
           current={area === 'study' ? (rail ? 'page' : 'area') : undefined}
@@ -129,24 +139,9 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
               {...item}
               to={{ name: 'study', tab }}
               label={t(`study.${tab}`)}
-              current={
-                (route.name === 'study' && route.tab === tab) ||
-                ((route.name === 'wordsAll' ||
-                  route.name === 'wordsReview' ||
-                  route.name === 'wordsPlay' ||
-                  route.name === 'wordsMap') &&
-                  tab === 'words')
-                  ? 'page'
-                  : undefined
-              }
-              badge={tab === 'words' ? dueCount : tab === 'mistakes' ? mistakes : undefined}
-              badgeLabel={
-                tab === 'words'
-                  ? t('nav.due', { count: dueCount })
-                  : tab === 'mistakes'
-                    ? t('nav.toReview', { count: mistakes })
-                    : undefined
-              }
+              current={route.name === 'study' && route.tab === tab ? 'page' : undefined}
+              badge={tab === 'mistakes' ? mistakes : undefined}
+              badgeLabel={tab === 'mistakes' ? t('nav.toReview', { count: mistakes }) : undefined}
             />
           ))}
         <NavItem

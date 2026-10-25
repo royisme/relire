@@ -1,4 +1,4 @@
-/** One Words area: real Today/Browse/Review routes share the same learner model and complete-book cache. */
+/** One Words area: real Overview/Browse/Review routes share the same learner model and complete-book cache. */
 import { Suspense } from 'react';
 import { retryableLazy } from '../utils/retryableLazy';
 import { useTranslation } from 'react-i18next';
@@ -15,10 +15,10 @@ const VocabularyBrowser = retryableLazy(async () => ({
   default: (await import('./vocabulary/VocabularyBrowser')).VocabularyBrowser,
 }));
 export function VocabularyView({
-  place = 'today',
+  place = 'home',
   model,
 }: {
-  place?: 'today' | 'all' | 'review' | 'play' | 'map';
+  place?: 'home' | 'all' | 'review' | 'play' | 'map';
   model: VocabularyModel;
 }) {
   const { t } = useTranslation();
@@ -31,11 +31,11 @@ export function VocabularyView({
           <PageHeader title={t('vocab.title')} subtitle={t('vocab.subtitle')} />
           <nav aria-label={t('vocab.pages')} className="flex gap-4 border-b border-ink-200 text-sm">
             <Link
-              to={{ name: 'study', tab: 'words' }}
-              aria-current={place === 'today' ? 'page' : undefined}
-              className={`inline-flex min-h-10 items-center border-b-2 ${place === 'today' ? 'border-accent-700 font-medium text-ink-950' : 'border-transparent text-ink-600'}`}
+              to={{ name: 'words' }}
+              aria-current={place === 'home' ? 'page' : undefined}
+              className={`inline-flex min-h-10 items-center border-b-2 ${place === 'home' ? 'border-accent-700 font-medium text-ink-950' : 'border-transparent text-ink-600'}`}
             >
-              {t('vocab.today')}
+              {t('vocab.overview')}
             </Link>
             <Link
               to={{ name: 'wordsAll' }}

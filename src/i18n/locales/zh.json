@@ -18,6 +18,7 @@
   },
   "nav": {
     "vocab": "我的学习",
+    "words": "词汇",
     "analytics": "进度",
     "installApp": "安装应用",
     "settings": "设置",
@@ -53,7 +54,7 @@
     },
     "practice": {
       "title": "也可以选一项技能自行练习",
-      "words": "生词",
+      "words": "词汇",
       "read": "阅读",
       "speaking": "口语",
       "grammar": "语法"
@@ -321,7 +322,7 @@
     "title": "词汇",
     "subtitle": "内置词汇与个人收藏共用一份复习计划。",
     "pages": "词汇页面",
-    "today": "今天",
+    "overview": "概览",
     "allWords": "全部词汇",
     "due": "现在待复习",
     "learning": "学习与重学中",
@@ -741,7 +742,7 @@
         "desc": "练习答案的判定方式，以及听写的播放。"
       },
       "words": {
-        "title": "生词",
+        "title": "词汇",
         "desc": "每日新词上限，以及本机的内置词书。"
       },
       "prompts": {
@@ -1240,7 +1241,6 @@
   },
   "study": {
     "label": "我的学习",
-    "words": "生词",
     "shadowing": "跟读",
     "mistakes": "错题本"
   },

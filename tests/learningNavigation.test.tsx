@@ -195,7 +195,7 @@ test('learning-first sidebar has no generic Practice or study Grammar; Writing r
     retry: () => {},
   });
   try {
-    const html = render(<NavTree route={{ name: 'study', tab: 'words' }} dueCount={0} />);
+    const html = render(<NavTree route={{ name: 'words' }} dueCount={0} />);
     for (const href of ['#/read', '#/grammar', '#/listening', '#/speaking', '#/study/words'])
       expect(html).toContain(`href="${href}"`);
     expect(html.indexOf('href="#/speaking"')).toBeLessThan(html.indexOf('href="#/study/words"'));

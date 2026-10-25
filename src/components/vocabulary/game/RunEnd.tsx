@@ -70,7 +70,7 @@ export function RunDone({
           {t('vocab.game.continueRun')}
         </Button>
         <Link
-          to={{ name: 'study', tab: 'words' }}
+          to={{ name: 'words' }}
           className="inline-flex min-h-10 items-center rounded-md border border-ink-300 bg-surface px-4 text-sm text-ink-800 hover:bg-ink-100"
         >
           {t('vocab.back')}
@@ -101,10 +101,7 @@ export function RunCleared({ nextDue }: { nextDue: number | null }) {
     <section className="space-y-3 border-y border-ink-200 py-10">
       <h1 className="font-serif text-2xl font-semibold">{t('vocab.game.queueCleared')}</h1>
       <RunNextDueLine due={nextDue} />
-      <Link
-        to={{ name: 'study', tab: 'words' }}
-        className="inline-flex min-h-10 items-center text-accent-900 underline"
-      >
+      <Link to={{ name: 'words' }} className="inline-flex min-h-10 items-center text-accent-900 underline">
         {t('vocab.back')}
       </Link>
     </section>

@@ -82,7 +82,7 @@ test('rapid repeated traversal remains at the indexed import entry after Keep', 
   await page.evaluate(async () => {
     const { navigate } = (await import('/src/hooks/useRoute.ts' as string)) as typeof import('../src/hooks/useRoute');
     navigate({ name: 'progress' });
-    navigate({ name: 'study', tab: 'words' });
+    navigate({ name: 'words' });
     navigate({ name: 'importExercises', area: 'grammar' });
   });
   await page.getByLabel('Text to send').fill('Texte à garder.');

@@ -1,8 +1,7 @@
-/** My study contains learner-owned Words, Mistakes and saved Shadowing only. */
+/** My study contains learner-owned Mistakes and saved Shadowing only. */
 import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 import { STUDY_TABS, type StudyTab } from '../../utils/routes';
-import { VocabularyView } from '../VocabularyView';
 import { Link } from '../shell/Link';
 import { MistakeNotebook } from './MistakeNotebook';
 import { ShadowingLog } from './ShadowingLog';
@@ -10,11 +9,10 @@ import { ShadowingLog } from './ShadowingLog';
 interface Props {
   tab: StudyTab;
   sectionsInSidebar: boolean;
-  vocabulary: ComponentProps<typeof VocabularyView>;
   shadowing: ComponentProps<typeof ShadowingLog>;
   mistakes: ComponentProps<typeof MistakeNotebook>;
 }
-export function StudyView({ tab, sectionsInSidebar, vocabulary, shadowing, mistakes }: Props) {
+export function StudyView({ tab, sectionsInSidebar, shadowing, mistakes }: Props) {
   const { t } = useTranslation();
   return (
     <div>
@@ -32,13 +30,9 @@ export function StudyView({ tab, sectionsInSidebar, vocabulary, shadowing, mista
           ))}
         </nav>
       )}
-      {tab === 'words' ? (
-        <VocabularyView {...vocabulary} />
-      ) : (
-        <div className="mx-auto min-w-0 max-w-5xl px-4 py-6 sm:px-6">
-          {tab === 'mistakes' ? <MistakeNotebook {...mistakes} /> : <ShadowingLog {...shadowing} />}
-        </div>
-      )}
+      <div className="mx-auto min-w-0 max-w-5xl px-4 py-6 sm:px-6">
+        {tab === 'mistakes' ? <MistakeNotebook {...mistakes} /> : <ShadowingLog {...shadowing} />}
+      </div>
     </div>
   );
 }

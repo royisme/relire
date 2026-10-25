@@ -126,7 +126,7 @@ test('graded list and reader reserve the graded segment with pinned-version and 
 });
 
 test('Grammar is separate from My study and local references/exercises survive service absence', () => {
-  expect(STUDY_TABS).toEqual(['words', 'shadowing', 'mistakes']);
+  expect(STUDY_TABS).toEqual(['shadowing', 'mistakes']);
   for (const tab of STUDY_TABS) roundTrip({ name: 'study', tab });
   roundTrip({ name: 'wordsAll' });
   roundTrip({ name: 'wordsReview' });
@@ -143,7 +143,7 @@ test('Grammar is separate from My study and local references/exercises survive s
   expect(vocabularyPlaceOf({ name: 'wordsPlay' })).toBe('play');
   expect(vocabularyPlaceOf({ name: 'wordsReview' })).toBe('review');
   expect(vocabularyPlaceOf({ name: 'wordsAll' })).toBe('all');
-  expect(vocabularyPlaceOf({ name: 'study', tab: 'words' })).toBe('today');
+  expect(vocabularyPlaceOf({ name: 'words' })).toBe('home');
   expect(parse('#/study').canonical).toBe('#/study/words');
   // The run keeps its own address, and a third segment outside the four known ones is still unknown.
   for (const hash of ['#/study/words/reviewx', '#/study/words/Play', '#/study/words/all/x'])

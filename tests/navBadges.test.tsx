@@ -49,7 +49,7 @@ const render = (rail: boolean) => {
   try {
     return renderToStaticMarkup(
       <I18nextProvider i18n={i18n}>
-        <NavTree route={{ name: 'study', tab: 'words' }} dueCount={3} rail={rail} />
+        <NavTree route={{ name: 'words' }} dueCount={3} rail={rail} />
       </I18nextProvider>,
     );
   } finally {

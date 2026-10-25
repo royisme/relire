@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: N1 code on branch `words-top` (tests pending)
+
+- Words is a top-level row after Reading at `#/words` (`#/words/all`, `/review`, `/play`, `/map`), with the due badge on the row at every width; `#/study` now opens Mistakes and `#/study/words…` is not found. `StudyView` lost the Words tab. The Words home tab is now called Overview, and the Chinese Words label is aligned. Docs and the DESIGN.md badge rules are updated.
+- Tests that assert the old addresses and labels fail until the separate test worker updates them. **Unverified:** no browser.
+
 ## 2026-10-25: N0 landed (App.tsx split, `app-split`)
 
 - `App.tsx` (498 of 500 lines) is now 142. `useAppData` owns startup, articles, stats, failed saves and the guide flag; `useReaderLookup` keeps the reader document, lookup sheets, bookmark and assessment callback together; `AppShell` (with `SaveFailedBanner` and `MissingKeyBanner`) draws the frame; `AppRoutes` is the route-to-page switch with the lazy pages and their Suspense boundaries unchanged. Markup, props, keys and behaviour are unchanged; state that outlives a page (key request, log source, hasKey) stays in `App`.

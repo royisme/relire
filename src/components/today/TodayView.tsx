@@ -17,7 +17,7 @@ export function TodayView({ plan, now }: { plan: TodayPlan; now: number }) {
     return [t(`today.guidance.${step.id}`)];
   });
   const practice: { id: string; to: Route }[] = [
-    { id: 'words', to: { name: 'study', tab: 'words' } },
+    { id: 'words', to: { name: 'words' } },
     { id: 'read', to: { name: 'library' } },
     { id: 'speaking', to: { name: 'speaking' } },
     { id: 'grammar', to: { name: 'grammar' } },
