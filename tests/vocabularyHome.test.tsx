@@ -31,7 +31,8 @@ await i18n.init({
 });
 const render = (node: ReactNode) => renderToStaticMarkup(<I18nextProvider i18n={i18n}>{node}</I18nextProvider>);
 const now = new Date(2026, 9, 25, 12).getTime();
-const tomorrow = new Date(2026, 9, 26, 12).getTime();
+const tomorrow = new Date(2026, 9, 26, 15).getTime();
+const tomorrowMidnight = new Date(2026, 9, 26).getTime();
 const model: VocabularyModel = {
   rows: [],
   now,
@@ -45,8 +46,12 @@ const model: VocabularyModel = {
 };
 const book = await testBook(3);
 const oneNew = await testBook(1);
+const twoNew = await testBook(2);
 const due = { ...testRow('test-due'), schedule: testMatureSchedule(now) };
-const dueLearning = { ...testRow('test-due-learning'), schedule: initialVocabularySchedule(now) };
+const dueLearning = {
+  ...testRow('test-due-learning'),
+  schedule: { ...initialVocabularySchedule(now), phase: 'learning' as const },
+};
 const future = { ...testRow('test-future'), schedule: testMatureSchedule(tomorrow) };
 const futureLearning = {
   ...testRow('test-future-learning'),
@@ -57,30 +62,97 @@ const states: {
   name: string;
   model: VocabularyModel;
   book?: VocabularyBook;
-  loading?: boolean;
+  pending?: boolean;
+  failed?: boolean;
   action: 'review' | 'learn' | 'next' | 'empty' | null;
-  count?: number;
+  labels?: { en: string; zh: string };
   nextDue?: number;
+  dateOnly?: boolean;
 }[] = [
-  { name: 'loading beats due, new and next', model: populated, book, loading: true, action: null },
+  { name: 'pending beats due, new and next', model: populated, book, pending: true, action: null },
   { name: 'not ready beats due, new and next', model: { ...populated, ready: false }, book, action: null },
-  { name: 'both loading flags with an empty queue', model: { ...model, ready: false }, loading: true, action: null },
-  { name: 'one due beats new and next', model: populated, book, action: 'review', count: 1 },
+  { name: 'both waiting flags with an empty queue', model: { ...model, ready: false }, pending: true, action: null },
+  { name: 'wordbook failure is not loading', model, pending: true, failed: true, action: null },
   {
-    name: 'plural due across phases',
-    model: { ...model, rows: [due, dueLearning, future] },
+    name: 'one due beats new and next',
+    model: populated,
     book,
     action: 'review',
-    count: 2,
+    labels: { en: 'Review 1 word', zh: '\u590d\u4e60 1 \u4e2a\u8bcd' },
   },
-  { name: 'one new beats next', model: { ...model, rows: [future] }, book: oneNew, action: 'learn', count: 1 },
-  { name: 'plural new beats next', model: { ...model, rows: [future] }, book, action: 'learn', count: 3 },
-  { name: 'review returns tomorrow', model: { ...model, rows: [future] }, action: 'next', nextDue: tomorrow },
+  {
+    name: 'plural due across phases',
+    model: {
+      ...model,
+      rows: [
+        due,
+        dueLearning,
+        { ...testRow('test-due-relearning'), schedule: { ...dueLearning.schedule, phase: 'relearning' } },
+        future,
+      ],
+    },
+    book,
+    action: 'review',
+    labels: { en: 'Review 3 words', zh: '\u590d\u4e60 3 \u4e2a\u8bcd' },
+  },
+  {
+    name: 'one new beats next',
+    model: { ...model, rows: [future] },
+    book: oneNew,
+    action: 'learn',
+    labels: { en: 'Learn 1 new word', zh: '\u5b66\u4e60 1 \u4e2a\u65b0\u8bcd' },
+  },
+  {
+    name: 'plural new beats next',
+    model: { ...model, rows: [future] },
+    book: twoNew,
+    action: 'learn',
+    labels: { en: 'Learn 2 new words', zh: '\u5b66\u4e60 2 \u4e2a\u65b0\u8bcd' },
+  },
+  {
+    name: 'review returns tomorrow at midnight, displayed as date only',
+    model: { ...model, rows: [future] },
+    action: 'next',
+    nextDue: tomorrowMidnight,
+    dateOnly: true,
+  },
   {
     name: 'earliest learning return beats later review',
     model: { ...model, rows: [future, futureLearning] },
     action: 'next',
     nextDue: now + 60_000,
+  },
+  {
+    name: 'review midnight wins over a learning card due tomorrow at 10:00',
+    model: {
+      ...model,
+      rows: [
+        future,
+        { ...futureLearning, schedule: { ...futureLearning.schedule, dueAt: new Date(2026, 9, 26, 10).getTime() } },
+      ],
+    },
+    action: 'next',
+    nextDue: tomorrowMidnight,
+    dateOnly: true,
+  },
+  {
+    name: 'learning exactly at midnight is also date only',
+    model: {
+      ...model,
+      rows: [{ ...futureLearning, schedule: { ...futureLearning.schedule, dueAt: tomorrowMidnight } }],
+    },
+    action: 'next',
+    nextDue: tomorrowMidnight,
+    dateOnly: true,
+  },
+  {
+    name: 'one millisecond after midnight includes a short time',
+    model: {
+      ...model,
+      rows: [{ ...futureLearning, schedule: { ...futureLearning.schedule, dueAt: tomorrowMidnight + 1 } }],
+    },
+    action: 'next',
+    nextDue: tomorrowMidnight + 1,
   },
   { name: 'C0 with no book or rows', model, action: 'empty' },
   {
@@ -98,7 +170,9 @@ afterEach(restoreSettingsStorage);
 for (const language of ['en', 'zh'] as const) {
   test.each(states)(`${language}: $name`, async (state) => {
     await i18n.changeLanguage(language);
-    const html = render(<VocabularyHome model={state.model} book={state.book} loading={state.loading ?? false} />);
+    const html = render(
+      <VocabularyHome model={state.model} book={state.book} pending={state.pending ?? false} failed={state.failed} />,
+    );
     const slot = html.match(/^<div\b[^>]*><div\b([^>]*)>([\s\S]*?)<\/div>/);
     expect(slot).not.toBeNull();
     expect(slot![1].match(/class="([^"]*)"/)?.[1].split(' ')).toContain('h-12');
@@ -114,8 +188,15 @@ for (const language of ['en', 'zh'] as const) {
     expect(html).not.toContain('href="#/words/map"');
 
     if (state.action === null) {
-      expect(slot![1]).toContain('aria-busy="true"');
+      expect(slot![1].includes('aria-busy="true"')).toBe(!state.failed);
       expect(content).toBe('');
+      const stats = [...html.matchAll(/<dt\b[^>]*>(.*?)<\/dt><dd\b[^>]*>(.*?)<\/dd>/g)];
+      expect(stats.map((stat) => stat[1])).toEqual([
+        i18n.t('vocab.due'),
+        i18n.t('vocab.learning'),
+        i18n.t('vocab.available'),
+      ]);
+      expect(stats.map((stat) => stat[2])).toEqual(['\u2013', '\u2013', '\u2013']);
       expect(filled).toHaveLength(0);
       expect(html).not.toContain('href="#/words/review"');
       return;
@@ -126,9 +207,20 @@ for (const language of ['en', 'zh'] as const) {
         ? undefined
         : new Intl.DateTimeFormat(language, {
             dateStyle: 'medium',
-            timeStyle: 'short',
+            ...(state.dateOnly ? {} : { timeStyle: 'short' }),
           }).format(state.nextDue);
-    const expected = render(<>{i18n.t(`vocab.action.${state.action}`, { count: state.count, time })}</>);
+    const expected = render(
+      <>
+        {state.labels?.[language] ??
+          (state.action === 'next'
+            ? language === 'en'
+              ? `Your next word returns on ${time}.`
+              : `\u4e0b\u4e00\u4e2a\u8bcd\u5c06\u5728 ${time} \u56de\u6765\u590d\u4e60\u3002`
+            : language === 'en'
+              ? 'Nothing to study right now. Import a word list below, or save words while you read.'
+              : '\u73b0\u5728\u6ca1\u6709\u8981\u5b66\u7684\u8bcd\u3002\u53ef\u4ee5\u5728\u4e0b\u65b9\u5bfc\u5165\u8bcd\u8868\uff0c\u6216\u5728\u9605\u8bfb\u65f6\u6536\u85cf\u751f\u8bcd\u3002')}
+      </>,
+    );
     if (state.action === 'review' || state.action === 'learn') {
       expect(content.match(/<a\b/g)).toHaveLength(1);
       expect(content).toContain('href="#/words/review"');
@@ -155,8 +247,8 @@ for (const language of ['en', 'zh'] as const) {
     }));
     const current = { ...model, rows, day: { ...model.day, introducedKeys: rows.map((row) => row.key) } };
     const input = wordsInput(rows, book, current.day, 20, now);
-    expect(input).toEqual({ due: 1, newAvailable: 1, nextDue: tomorrow, reviewsToday: 0 });
-    const html = render(<VocabularyHome model={current} book={book} loading={false} />);
+    expect(input).toEqual({ due: 1, newAvailable: 1, nextDue: tomorrowMidnight, reviewsToday: 0 });
+    const html = render(<VocabularyHome model={current} book={book} pending={false} />);
     const stats = [...html.matchAll(/<dt\b[^>]*>(.*?)<\/dt><dd\b[^>]*>(\d+)<\/dd>/g)];
     expect(stats.map((stat) => stat[1])).toEqual([
       i18n.t('vocab.due'),

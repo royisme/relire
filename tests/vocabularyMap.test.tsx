@@ -207,7 +207,7 @@ for (const language of ['en', 'zh'] as const) {
     expect(picture.match(/flex-grow:1/g)).toHaveLength(5);
     for (const state of ['new', 'learning', 'young', 'mature'])
       expect(picture).toContain(i18n.t('vocab.map.segment', { label: i18n.t(`vocab.map.tier.${state}`), words: 1 }));
-    const home = render(<VocabularyHome model={model} book={book} loading={false} />);
+    const home = render(<VocabularyHome model={model} book={book} pending={false} />);
     expect(home).not.toContain('href="#/words/map"');
     const view = render(<VocabularyView model={model} />);
     const nav = view.match(/<nav\b[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? '';

@@ -20,7 +20,7 @@ test('Words review commits introduction before answers, flips without writes, an
   ai,
 }) => {
   await seed(page, 'en', 'light', 3);
-  await page.getByRole('link', { name: 'Start / continue review' }).click();
+  await page.getByRole('link', { name: 'Learn 3 new words', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();
   const backFace = page.locator('[data-vocabulary-face="back"]');
   const flip = page.locator('[data-vocabulary-face="front"] h1');
@@ -273,7 +273,7 @@ test('explicit Listen uses the selected device engine and session speech stops o
       speechVoice: '',
     });
   });
-  await page.getByRole('link', { name: 'Start / continue review' }).click();
+  await page.getByRole('link', { name: 'Learn 2 new words', exact: true }).click();
   await page.getByRole('button', { name: 'Listen', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.deviceSpeechTest.spoken)).toEqual(['test-a']);
@@ -319,7 +319,8 @@ test('7000 synthetic entries paginate at50; unseen fronts create no row and no-k
   expect((await stored(page))[0].key).toBe('test-1');
   await page.getByRole('link', { name: 'Back to Words' }).click();
   await page.context().setOffline(true);
-  await page.getByRole('link', { name: 'Start / continue review' }).click();
+  // test-1 was introduced but not rated: its New schedule is already due.
+  await page.getByRole('link', { name: 'Review 1 word', exact: true }).click();
   await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).toContainText('TEST meaning test-1');
   await page.evaluate(async () => {

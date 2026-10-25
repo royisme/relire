@@ -16,6 +16,7 @@ import {
   initialVocabularySchedule,
   nextVocabularySchedule,
   vocabularyDue,
+  vocabularyAvailableAt,
   VocabularyClockError,
 } from '../src/utils/srs';
 import { testMatureSchedule } from './fixtures/vocabulary';
@@ -175,11 +176,13 @@ test('local Review day is available before its time; intraday phases require the
         const dueAt = new Date(2026, month, day, 18).getTime();
         const midnight = new Date(2026, month, day).getTime();
         const review = { ...testMatureSchedule(dueAt), dueAt };
+        expect(vocabularyAvailableAt(review)).toBe(midnight);
         expect(vocabularyDue(review, midnight - 1)).toBe(false);
         expect(vocabularyDue(review, midnight)).toBe(true);
         expect(vocabularyDue(review, dueAt)).toBe(true);
         for (const phase of ['new', 'learning', 'relearning'] as const) {
           const schedule = phase === 'new' ? initialVocabularySchedule(dueAt) : { ...review, phase };
+          expect(vocabularyAvailableAt(schedule)).toBe(dueAt);
           expect(vocabularyDue(schedule, dueAt - 1)).toBe(false);
           expect(vocabularyDue(schedule, dueAt)).toBe(true);
         }
@@ -212,6 +215,32 @@ test('local Review day is available before its time; intraday phases require the
   }
   expect(vocabularyDue(null, now)).toBe(false);
 });
+test('a review due tomorrow at 15:00 becomes available at local midnight, exactly when vocabularyDue changes', () => {
+  const today = new Date(2026, 9, 24, 12, 30).getTime();
+  const dueAt = new Date(2026, 9, 25, 15).getTime();
+  const midnight = new Date(2026, 9, 25).getTime();
+  const schedule = testMatureSchedule(dueAt);
+  const before = structuredClone(schedule);
+  expect(vocabularyAvailableAt(schedule)).toBe(midnight);
+  expect(vocabularyDue(schedule, today)).toBe(false);
+  expect(vocabularyDue(schedule, midnight - 1)).toBe(false);
+  expect(vocabularyDue(schedule, midnight)).toBe(true);
+  expect(vocabularyDue(schedule, new Date(2026, 9, 25, 10).getTime())).toBe(true);
+  expect(schedule).toEqual(before);
+});
+
+test.each(['new', 'learning', 'relearning'] as const)(
+  '%s becomes available at exact dueAt, not local midnight',
+  (phase) => {
+    const dueAt = new Date(2026, 9, 25, 10, 15, 30, 123).getTime();
+    const schedule = { ...initialVocabularySchedule(dueAt), phase };
+    expect(vocabularyAvailableAt(schedule)).toBe(dueAt);
+    expect(vocabularyDue(schedule, new Date(2026, 9, 25).getTime())).toBe(false);
+    expect(vocabularyDue(schedule, dueAt - 1)).toBe(false);
+    expect(vocabularyDue(schedule, dueAt)).toBe(true);
+  },
+);
+
 test('bad inputs and backward clocks fail instead of forging elapsed time or accepting q codes', () => {
   const prior = testMatureSchedule(now);
   for (const time of [NaN, Infinity, -1, now + 0.5, 8_640_000_000_000_001, prior.lastReviewedAt! - 1])

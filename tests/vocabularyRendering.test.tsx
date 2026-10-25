@@ -133,6 +133,36 @@ test('Settings Words and waiting Review show the actual bounded reason before an
     expect(html).not.toContain('role="dialog"');
   }
 });
+test('Overview shows the real wordbook error, never C0 or a busy action, and prefers a model error when both fail', async () => {
+  try {
+    for (const language of ['en', 'zh'] as const) {
+      await i18n.changeLanguage(language);
+      bookContent.error = 'TEST wordbook cache read refused';
+      for (const error of [null, 'TEST learner rows read refused']) {
+        const html = render(<VocabularyView place="home" model={{ ...model, error }} />);
+        const status = html.match(/<p\b[^>]*role="alert"[^>]*>(.*?)<\/p>/)?.[0];
+        expect(status).toContain(`>${error ?? bookContent.error}</p>`);
+        expect(status).toContain('h-12');
+        if (error) expect(html).not.toContain(bookContent.error);
+        const slot = html.match(/<div class="space-y-8"><div\b([^>]*)>([\s\S]*?)<\/div>/);
+        expect(slot).not.toBeNull();
+        expect(slot![1]).toContain('h-12');
+        expect(slot![1]).not.toContain('aria-busy');
+        expect(slot![2]).toBe('');
+        expect(html).not.toContain(i18n.t('vocab.action.empty'));
+        expect(html).not.toContain('href="#/words/review"');
+        expect([...html.matchAll(/<dd\b[^>]*>(.*?)<\/dd>/g)].map((stat) => stat[1])).toEqual([
+          '\u2013',
+          '\u2013',
+          '\u2013',
+        ]);
+      }
+    }
+  } finally {
+    bookContent.error = null;
+  }
+});
+
 test('import results reserve a live status slot in every state, and imported answers render without AI/reader assumptions', async () => {
   for (const language of ['en', 'zh'] as const) {
     await i18n.changeLanguage(language);
@@ -171,7 +201,7 @@ test('import results reserve a live status slot in every state, and imported ans
 
 test('Overview counts stay and keep no Words settings link or form', async () => {
   await i18n.changeLanguage('en');
-  const html = render(<VocabularyHome model={model} book={undefined} loading={false} />);
+  const html = render(<VocabularyHome model={model} book={undefined} pending={false} />);
   const labels = [...html.matchAll(/<dt\b[^>]*>(.*?)<\/dt>/g)].map((match) => match[1]);
   expect(labels).toEqual([i18n.t('vocab.due'), i18n.t('vocab.learning'), i18n.t('vocab.available')]);
   expect(labels[2]).toBe('New words available today');
