@@ -151,6 +151,20 @@ Plan of record: `docs/navigation-plan.md` (owner decision 2026-10-25: flat tree,
 
 Owner-gated and not in N0 to N3: G1 (Today shows days to the exam), G2 (an exam date without a words target), K1 (Words without the missing-key banner).
 
+### Word Atlas learnings
+
+Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Word Atlas: six slice analyses, a consolidation and an Opus review, 2026-10-25). We take presentation and process, not mechanics. Dispatch only after the owner answers the grouped decisions in that file.
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| P1 | Words Overview: one filled action whose label follows the real queue (counts from `wordsInput`; fixes the bare-allowance count; drops the duplicate Map button) | states A, B, C, C0 and loading; Overview count equals Today's; one filled control at most; fixed-height slot; en and zh | waiting for the owner (B1) |
+| P1b | Time estimate from the learner's own history (5b item 1 rule) | median within-session gap, at least 30 gaps, range or omitted | waiting for the owner (Q4) |
+| P2 | Wordbook review label from the manifest | never "reviewed" for the unreviewed state | not started |
+| P3 | README factual fix (both languages) and the stale `PRODUCT.md` First run line | providers, privacy incl. content service and Google Fonts, missing areas, stale caption | not started |
+| P4 | Copy pass (about 15 strings, en and zh) | keys kept, `i18n:check`, the lead reads every zh line | waiting for the owner (B2) |
+| P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | waiting for the owner (B3) |
+| P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | last; waiting for the owner (Q1, Q2, Q8 to Q10, Q12) |
+
 ### Content (paused by the owner's priority)
 
 Stages 1 to 3 have private drafts with AI review records (not human review). Stages 4 to 12 are not written; stage 4 has an unreviewed draft. Resume after the platform: R0-7 for stages 4 to 5, R2 for 6 to 12, a human language review before any real beginner uses the readers.
