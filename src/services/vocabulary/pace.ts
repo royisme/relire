@@ -7,14 +7,14 @@ export interface CardPace {
   p50: number;
   p75: number;
 }
-/** Milliseconds per rating: percentiles of the gaps inside sessions, the first rating of each session dropped. */
+/** Milliseconds per rating: percentiles of the gaps inside sessions; a session of k ratings yields k-1 gaps, because the first rating's own duration is unknown. */
 export function cardPace(rows: VocabularyRow[]): CardPace | null {
   const times = rows.flatMap((row) => row.history.map((record) => record.reviewedAt)).sort((a, b) => a - b);
   const gaps: number[] = [];
   let sessionStart = 0;
   for (let i = 1; i <= times.length; i++) {
     if (i < times.length && times[i] - times[i - 1] <= SESSION_GAP_MS) continue;
-    for (let j = sessionStart + 2; j < i; j++) gaps.push(times[j] - times[j - 1]);
+    for (let j = sessionStart + 1; j < i; j++) gaps.push(times[j] - times[j - 1]);
     sessionStart = i;
   }
   if (gaps.length < MIN_GAPS) return null;
