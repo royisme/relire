@@ -25,12 +25,18 @@ export function wordsInput(
   newPerDay: number,
   now: number,
 ): TodayWords {
-  const { candidates, nextDue } = vocabularyQueue(rows, book, day, newPerDay, now, new Set());
+  const { candidates } = vocabularyQueue(rows, book, day, newPerDay, now, new Set());
   let due = 0;
   let unseen = 0;
   for (const candidate of candidates) {
     if (candidate.row?.schedule) due++;
     else unseen++;
+  }
+  // Any phase: a review card due on a later day counts, unlike the queue's learning-step `nextDue`.
+  let nextDue: number | null = null;
+  for (const row of rows) {
+    const dueAt = row.schedule?.dueAt;
+    if (dueAt !== undefined && dueAt > now && (nextDue === null || dueAt < nextDue)) nextDue = dueAt;
   }
   return {
     due,
