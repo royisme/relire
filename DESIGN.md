@@ -213,6 +213,8 @@ Four choices from the theme menu in the header: **Match system** (light or dark,
 **UI Font:** Public Sans (with system UI, PingFang SC)
 **Phonetic Font:** Fira Code, for IPA and code only
 
+The fonts are self-hosted: Google's unmodified latin variable woff2 builds live in `public/fonts/` under the SIL Open Font License 1.1 (licence texts beside them) and are declared with `@font-face` in `src/index.css`; the app never requests fonts from Google.
+
 **Character:** a book face for the language being learned and a plain public-signage sans for everything that operates on it. Chinese and French set together; layouts tolerate mixed CJK and Latin lines and long French words.
 
 ### Hierarchy

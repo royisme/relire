@@ -19,7 +19,7 @@ Every dispatch: `magpie quota` first. Code and tests come from different models 
 - **P1 Words Overview next action (S).** The Overview shows one filled action whose label follows the real queue: due words, else new words, else none with the next due time; no streak, ring or goal framing; no "+5 more". Counts come from `wordsInput` (`src/services/today/inputs.ts`), so the Overview and Today agree. Fixes a real counting bug (the home shows the bare daily allowance instead of the words actually available) and removes the duplicate Map button. Owner gate: B1.
 - **P1b Time estimate (S).** The rule already in `docs/vocab-game-plan.md` 5b item 1 (median within-session gap, at least 30 gaps, shown as a range or omitted). Owner gate: Q4.
 - **P2 Wordbook review label (S).** Where a built-in meaning shows, say the book's real review status from its manifest (unreviewed, or reviewed by whom); never "reviewed" for the unreviewed state. Fills the honesty gap.
-- **P3 README factual fix, both languages (S).** Providers, privacy (AI provider, optional content service, Google Fonts), the missing areas, the stale conjugation caption, and `PRODUCT.md` First run.
+- **P3 README factual fix, both languages (S).** Providers, privacy (AI provider, optional content service; fonts are now bundled, so no Google Fonts disclosure), the missing areas, the stale conjugation caption, and `PRODUCT.md` First run.
 - **P4 Copy pass (S).** Calm full sentences, no jargon (introduction allowance, leech, lapses), reasons for defaults; about 15 strings in en and zh. Owner gate: B2 and the table.
 - **P5 Overlay accessibility (S-M).** Dialog: initial focus, restore, Tab trap; Sheet and Drawer: Tab trap and scroll lock. Owner gate: B3 (exception to the hand-written overlay rule).
 - **P6 README restructure, screenshots and the screenshot skill (issue #24). Last.** Outline, numbers table (only rows computable from data, with the command), honesty block, shot list from real committed data only, and a skill that refuses non-real data.
@@ -34,7 +34,7 @@ Every dispatch: `magpie quota` first. Code and tests come from different models 
 - **Q10** screenshots only from committed public content (the sample articles, bundled readers, reviewed verbs, gender pack), personal words saved from it and real cached AI answers, restored from an owner backup kept in `.local/`; never wordbook entries or unpublished reader or topic text; phone shots allowed.
 - **B2** the Chinese term for the API key: 密钥 (19 lines) or Key (32 lines); recommended Key.
 - **B3** overlay accessibility: hand-written fix for Sheet and Drawer, move Dialog onto the shadcn Base UI dialog.
-- **B4** disclose Google Fonts in the README now; self-hosting is a separate issue.
+- **B4** (replaced by F1 after the legal review of 2026-10-25) was to disclose Google Fonts in the README; the fonts are now bundled instead, so there is nothing to disclose.
 
 ## Licence
 

@@ -51,6 +51,9 @@ jobs:
           cp marketing/sw.js site/sw.js
           cp marketing/zh/index.html site/zh/index.html
 
+          # The marketing pages load the same bundled fonts as the app.
+          cp -R public/fonts site/fonts
+
           # Reuse existing product screenshots and app icons as marketing assets.
           cp -R docs/media/. site/assets/
           cp public/icon.svg site/icon.svg
