@@ -97,6 +97,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- The fonts are bundled with the app and the marketing pages, so opening Relire no longer sends a request, or your IP address, to Google Fonts; the app and its fonts work offline.
 - Shadowing recordings now live at Speaking → Recordings (`#/speaking/recordings`), opened from the Speaking page and from the reader rather than the sidebar, the page is titled Recordings (跟读录音) like its link, and My study is gone; the old `#/study` addresses show not found.
 - Words is now its own sidebar entry, with the due count visible on the rail and in the phone menu; the Words home tab is now called Overview.
 - Mistakes is now its own sidebar entry, with its unresolved count visible on the rail and in the phone menu.

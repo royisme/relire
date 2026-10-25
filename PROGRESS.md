@@ -4,6 +4,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: F1 fonts bundled
+
+- The three fonts (Source Serif 4 roman and italic, Public Sans, Fira Code) are Google's unmodified latin woff2 builds in `public/fonts/` with their SIL OFL 1.1 texts; `src/index.css` and `marketing/styles.css` declare them, the Google links and the two Google `runtimeCaching` entries are gone, the Pages workflow copies `public/fonts` to the site root, and both READMEs state the real server list. Static checks only; tests pending, nothing opened in a browser.
+
 ## 2026-10-25: Recordings out of the sidebar
 
 - Owner decision: Recordings is a function of Speaking, not a menu entry. Speaking's only sidebar child is Read aloud; Recordings opens from the Speaking page link and the reader's "All recordings", at the same route, and Speaking stays the highlighted area there. Tests pending (nav tests expect two Speaking children). **Unverified:** no browser.
