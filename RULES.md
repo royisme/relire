@@ -30,6 +30,7 @@ What an agent (or a person) must never do in this repository, and the working ag
 **Delegation**
 - Never dispatch a worker, or rule a model out, without running `magpie quota` first.
 - Never let the author of a piece of content also be its independent reviewer: authors and reviewers come from different model families.
+- Never let one model write both a change and the tests that judge it (owner, 2026-10-25): it can bend the tests to pass. The implementer leaves existing assertions alone except what keeps `typecheck` green; new or changed unit tests and all e2e come from a second worker on another model (e2e: `openai-codex/gpt-6.1-sol`), written from the step's acceptance lines. A pure refactor writes and edits no test. The lead reads every test diff for weakened or fitted assertions (`docs/agent-delegation.md`, section 5).
 - Never trust a worker's report: re-run every check, read the diff, read the exit codes, then merge.
 
 ## Working agreements
