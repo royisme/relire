@@ -53,21 +53,45 @@ interface Round {
 
 export type GenderKeyAction = 'le' | 'la' | 'next';
 
+export interface GenderKeyOutcome {
+  /** What the round does with the key, or null when the key belongs to someone else. */
+  action: GenderKeyAction | null;
+  /** True when the browser's own handling must be stopped even though nothing acts. */
+  preventDefault: boolean;
+}
+
+export interface GenderKeyFacts {
+  repeated: boolean;
+  composing: boolean;
+  /** Focus is in another control (a field, link or other button) that owns its keys. */
+  foreignControl: boolean;
+  /** A dialog or menu is open anywhere in the document. */
+  overlayOpen: boolean;
+  /** The card is answered: only the Next keys work. */
+  answered: boolean;
+  /** The choice button the key landed on, if any. */
+  choice: GenderPick | null;
+  /** The key landed on one of the round's own buttons (a choice or Next). */
+  onRoundButton: boolean;
+}
+
 /**
- * The round's key, or null when the keydown belongs to someone else: a repeating or held key, an IME
- * composition, or a field, link, other button or open dialog that owns its own keys. Once the card is
- * answered its answer keys are inert, except the right arrow, which advances with Enter and Space.
+ * The round's key. Guarded keys (repeating, held, IME composition) and open overlays never act, but on the
+ * round's own buttons their native activation is still cancelled, so a held Enter cannot click le or Next
+ * by itself. Before the answer, Enter/Space on a choice button is that button's pick, not Next; after it,
+ * only Enter, Space and the right arrow advance, and the answer keys are inert.
  */
-export function genderKey(
-  key: string,
-  facts: { repeated: boolean; composing: boolean; foreignControl: boolean; answered: boolean },
-): GenderKeyAction | null {
-  if (facts.repeated || facts.composing || facts.foreignControl) return null;
-  if (key === 'Enter' || key === ' ') return 'next';
+export function genderKey(key: string, facts: GenderKeyFacts): GenderKeyOutcome {
+  if (facts.composing || facts.repeated || facts.overlayOpen)
+    return { action: null, preventDefault: facts.onRoundButton };
+  if (facts.foreignControl) return { action: null, preventDefault: false };
+  if (facts.choice && !facts.answered && (key === 'Enter' || key === ' '))
+    return { action: facts.choice === 'M' ? 'le' : 'la', preventDefault: true };
+  if (key === 'Enter' || key === ' ' || (facts.answered && key === 'ArrowRight'))
+    return { action: 'next', preventDefault: true };
+  if (facts.answered) return { action: null, preventDefault: false };
   const pick = key === '1' || key === 'ArrowLeft' ? 'le' : key === '2' || key === 'ArrowRight' ? 'la' : null;
-  if (!pick) return null;
-  if (facts.answered) return pick === 'la' ? 'next' : null;
-  return pick;
+  return { action: pick, preventDefault: pick !== null };
 }
 
 /** True when focus is in a control that owns its keys; the round's own buttons are marked, so they do not count. */
@@ -78,6 +102,40 @@ function ownedByAnotherControl(target: EventTarget | null): boolean {
     null
   );
 }
+
+/** Where a keydown landed among the round's own controls: on any of its buttons, and on which choice. */
+function roundTarget(target: EventTarget | null): { onRoundButton: boolean; choice: GenderPick | null } {
+  const button = target instanceof Element ? target.closest('[data-gender-key]') : null;
+  if (!button) return { onRoundButton: false, choice: null };
+  const choice = button.getAttribute('data-gender-choice');
+  return { onRoundButton: true, choice: choice === 'M' || choice === 'F' ? choice : null };
+}
+
+/**
+ * The round after a pick is shown: a returning card writes nothing, so it advances at once; a first answer
+ * keeps the deck untouched until its write commits (the deck does not advance until it succeeds).
+ */
+export function showPick(round: Round, choice: GenderPick, correct: boolean): Round {
+  const first = !wasAnswered(round.deck, round.shown);
+  return {
+    ...round,
+    deck: first ? round.deck : answerCard(round.deck, round.shown, correct),
+    pick: choice,
+    saving: first,
+    error: null,
+  };
+}
+
+/** The round once the shown card's first answer is committed: only now does the deck take the answer. */
+export const commitPick = (round: Round, correct: boolean): Round => ({
+  ...round,
+  deck: answerCard(round.deck, round.shown, correct),
+  saving: false,
+});
+
+/** The unit the next open uses: one kept from a failed token read is reused as-is, so its retry never saves again. */
+export const unitToOpen = (kept: ExerciseUnit | null, saved: ExerciseUnit[] | undefined): ExerciseUnit | undefined =>
+  kept ?? saved?.[0];
 
 /** Grades the card on screen locally; the reviewed pack, not the browser, decides the answer. */
 function judgeCard(state: Round, choice: GenderPick) {
@@ -98,13 +156,19 @@ export function GenderGame({ pack, onBack }: { pack: NounGenderPack; onBack: () 
   const [openError, setOpenError] = useState<string | null>(null);
   // Bumped by every round start and by unmount, so work that outlived its round cannot touch the next one.
   const session = useRef(0);
+  /** The unit of the round being opened, kept across a failed token read so Retry reopens it instead of saving a second set. */
+  const savedUnit = useRef<ExerciseUnit | null>(null);
+  // Held keys outlive the key effect, which re-runs on every card update; otherwise an Enter held through a
+  // round change is forgotten and its native repeats can click the new card's choices.
+  const held = useRef(new Set<string>());
 
   /** Saves one round's unit and opens its deck; a replaced or unmounted round drops the result. */
-  const openRound = async () => {
+  const openRound = async (kept: ExerciseUnit | null) => {
     const id = ++session.current;
-    const units = await save(() => prepareGenderDrills({ pack, count: ROUND_SIZE, t }));
-    if (!units) return;
-    const [unit] = units;
+    const units = kept ? undefined : await save(() => prepareGenderDrills({ pack, count: ROUND_SIZE, t }));
+    const unit = unitToOpen(kept, units);
+    if (!unit) return;
+    savedUnit.current = unit;
     await getResetToken(unit.id).then(
       (token) => {
         if (session.current !== id) return;
@@ -124,25 +188,32 @@ export function GenderGame({ pack, onBack }: { pack: NounGenderPack; onBack: () 
     );
   };
 
-  /** A round from a button: the old card and its errors go at once, then the new unit is saved. */
+  /** A round from a button: the old card and its errors go at once, then a new unit is saved. */
   const start = () => {
+    savedUnit.current = null;
     setRound(null);
     setEnded(false);
     setOpenError(null);
-    void openRound();
+    void openRound(null);
+  };
+
+  /** The error screen's Retry: a token-read failure reopens the same unit, a save failure re-saves the kept payload. */
+  const retryOpen = () => {
+    setOpenError(null);
+    void openRound(savedUnit.current);
   };
 
   // One round per mount. A second round is the Play again button, never a re-render of this effect.
   useEffect(() => {
     const game = session;
-    void openRound();
+    void openRound(null);
     return () => {
       game.current++;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** Writes the first answer of the card on screen: the one write each card gets. A returning card writes nothing. */
+  /** Writes the first answer of the card on screen — the one write each card gets — and commits it to the deck only once it is saved. */
   const write = useCallback(async (state: Round, choice: GenderPick) => {
     const judged = judgeCard(state, choice);
     if (!judged) return;
@@ -156,7 +227,7 @@ export function GenderGame({ pack, onBack }: { pack: NounGenderPack; onBack: () 
         answer: judged.answer,
         result: { correct: judged.correct, strictAccents: judged.strictAccents },
       });
-      if (session.current === id) setRound((previous) => (previous ? { ...previous, saving: false } : previous));
+      if (session.current === id) setRound((previous) => (previous ? commitPick(previous, judged.correct) : previous));
     } catch (error) {
       if (session.current !== id) return;
       const message = errorMessage(error);
@@ -169,15 +240,8 @@ export function GenderGame({ pack, onBack }: { pack: NounGenderPack; onBack: () 
       if (!round || round.pick) return;
       const judged = judgeCard(round, choice);
       if (!judged) return;
-      const first = !wasAnswered(round.deck, round.shown);
-      setRound({
-        ...round,
-        deck: answerCard(round.deck, round.shown, judged.correct),
-        pick: choice,
-        saving: first,
-        error: null,
-      });
-      if (first) void write(round, choice);
+      setRound(showPick(round, choice, judged.correct));
+      if (!wasAnswered(round.deck, round.shown)) void write(round, choice);
     },
     [round, write],
   );
@@ -194,22 +258,25 @@ export function GenderGame({ pack, onBack }: { pack: NounGenderPack; onBack: () 
   const over = ended || (round !== null && round.pick === null && currentCard(round.deck) === undefined);
 
   useEffect(() => {
-    const held = new Set<string>();
     const keydown = (event: KeyboardEvent) => {
-      const action = genderKey(event.key, {
-        repeated: event.repeat || held.has(event.code),
+      const spot = roundTarget(event.target);
+      const outcome = genderKey(event.key, {
+        repeated: event.repeat || held.current.has(event.code),
         composing: event.isComposing || event.keyCode === 229,
         foreignControl: ownedByAnotherControl(event.target),
+        overlayOpen: document.querySelector('[role="dialog"], [role="menu"]') !== null,
         answered: round !== null && round.pick !== null,
+        choice: spot.choice,
+        onRoundButton: spot.onRoundButton,
       });
-      held.add(event.code);
-      if (!action || !round || over) return;
-      event.preventDefault();
-      if (action === 'next') return next();
-      choose(action === 'le' ? 'M' : 'F');
+      held.current.add(event.code);
+      if (outcome.preventDefault) event.preventDefault();
+      if (!outcome.action || !round || over) return;
+      if (outcome.action === 'next') return next();
+      choose(outcome.action === 'le' ? 'M' : 'F');
     };
-    const keyup = (event: KeyboardEvent) => held.delete(event.code);
-    const blur = () => held.clear();
+    const keyup = (event: KeyboardEvent) => held.current.delete(event.code);
+    const blur = () => held.current.clear();
     document.addEventListener('keydown', keydown, true);
     document.addEventListener('keyup', keyup, true);
     window.addEventListener('blur', blur);
@@ -235,7 +302,7 @@ export function GenderGame({ pack, onBack }: { pack: NounGenderPack; onBack: () 
           )}
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button onClick={start} disabled={message === null}>
+          <Button onClick={retryOpen} disabled={message === null}>
             {t('common.retry')}
           </Button>
           <Button variant="outline" onClick={onBack}>
@@ -306,7 +373,7 @@ export function GenderCard({ item, summary, pick, saving, error, onPick, onNext,
             {t('nounGender.game.counter', { right: summary.right, total: summary.total })}
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onEnd}>
+        <Button variant="ghost" disabled={saving || error !== null} onClick={onEnd}>
           {t('nounGender.game.endRound')}
         </Button>
       </div>
@@ -336,7 +403,7 @@ export function GenderCard({ item, summary, pick, saving, error, onPick, onNext,
             <p role="alert" className="mt-1 break-words text-bad-700">
               {error}
             </p>
-            <Button variant="outline" size="sm" className="mt-2" onClick={onRetry}>
+            <Button variant="outline" className="mt-2" onClick={onRetry}>
               {t('common.retry')}
             </Button>
           </>
@@ -359,6 +426,7 @@ export function GenderCard({ item, summary, pick, saving, error, onPick, onNext,
       <div className="mt-4 grid grid-cols-3 gap-2">
         <Button
           data-gender-key
+          data-gender-choice="M"
           ref={firstChoice}
           variant="outline"
           disabled={locked}
@@ -372,6 +440,7 @@ export function GenderCard({ item, summary, pick, saving, error, onPick, onNext,
         </Button>
         <Button
           data-gender-key
+          data-gender-choice="F"
           variant="outline"
           disabled={locked}
           aria-label={t('practice.genderFeminine')}
@@ -399,10 +468,17 @@ interface GenderRecapProps {
 /** The end of a round: real counts, the guessing line, Mistakes and the way back to the reference. */
 export function GenderRecap({ summary, onPlayAgain, onBack }: GenderRecapProps) {
   const { t } = useTranslation();
+  const heading = useRef<HTMLHeadingElement>(null);
+  // The card's focused control unmounts with it, so the recap takes focus itself and announces its counts.
+  useEffect(() => {
+    heading.current?.focus({ preventScroll: true });
+  }, []);
   return (
     <div className="rounded-lg border border-ink-200 bg-surface p-5">
-      <h3 className="font-serif text-lg font-semibold text-ink-900">{t('nounGender.game.title')}</h3>
-      <p className="tnum mt-3 break-words text-ink-800">
+      <h3 ref={heading} tabIndex={-1} className="font-serif text-lg font-semibold text-ink-900">
+        {t('nounGender.game.title')}
+      </h3>
+      <p role="status" className="tnum mt-3 break-words text-ink-800">
         {t('nounGender.game.summary', { total: summary.answered, right: summary.firstTryRight })}
       </p>
       <p className="mt-1 break-words text-sm text-ink-600">{t('nounGender.game.chance')}</p>

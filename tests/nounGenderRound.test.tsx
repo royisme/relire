@@ -13,6 +13,7 @@ import zh from '../src/i18n/locales/zh.json';
 import data from '../src/data/noun-gender/pack.json';
 import { NounGenderPackSchema } from '../src/types/nounGender';
 import { emptyAnswer } from '../src/services/exercises/answer';
+import type { GenderKeyFacts } from '../src/components/study/grammar/GenderGame';
 import { prepareGenderDrills } from '../src/services/exercises/fromGender';
 import { answerCard, createDeck, summaryOf } from '../src/services/nounGender/deck';
 import { checkItem, getResetToken, listAttempts, listMistakes, saveUnits } from '../src/storage/exercises';
@@ -29,7 +30,8 @@ Object.defineProperty(globalThis, 'localStorage', {
   configurable: true,
   value: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
 });
-const { GenderCard, GenderRecap, ROUND_SIZE, genderKey } = await import('../src/components/study/grammar/GenderGame');
+const { GenderCard, GenderRecap, ROUND_SIZE, commitPick, genderKey, showPick, unitToOpen } =
+  await import('../src/components/study/grammar/GenderGame');
 if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
 else Reflect.deleteProperty(globalThis, 'window');
 Reflect.deleteProperty(globalThis, 'localStorage');
@@ -144,24 +146,90 @@ test('the end screen states the real counts, the guessing line, Mistakes and the
   expect(t('nounGender.game.chance')).not.toMatch(/\b(le|la|les|un|une)\b/i);
 });
 
-test('the round keys answer and advance, and stay out of held keys, compositions and other controls', () => {
-  const quiet = { repeated: false, composing: false, foreignControl: false, answered: false };
-  expect(genderKey('1', quiet)).toBe('le');
-  expect(genderKey('ArrowLeft', quiet)).toBe('le');
-  expect(genderKey('2', quiet)).toBe('la');
-  expect(genderKey('ArrowRight', quiet)).toBe('la');
-  expect(genderKey('Enter', quiet)).toBe('next');
-  expect(genderKey(' ', quiet)).toBe('next');
-  expect(genderKey('3', quiet)).toBeNull();
-  expect(genderKey('1', { ...quiet, repeated: true })).toBeNull();
-  expect(genderKey('2', { ...quiet, composing: true })).toBeNull();
-  expect(genderKey('Enter', { ...quiet, foreignControl: true })).toBeNull();
-  // An answered card takes the right arrow as Next, and ignores the answer keys and Space-free repeats.
+test('the round keys answer and advance; guarded keys and open overlays never click the round buttons', () => {
+  const quiet: GenderKeyFacts = {
+    repeated: false,
+    composing: false,
+    foreignControl: false,
+    overlayOpen: false,
+    answered: false,
+    choice: null,
+    onRoundButton: false,
+  };
+  expect(genderKey('1', quiet)).toEqual({ action: 'le', preventDefault: true });
+  expect(genderKey('ArrowLeft', quiet)).toEqual({ action: 'le', preventDefault: true });
+  expect(genderKey('2', quiet)).toEqual({ action: 'la', preventDefault: true });
+  expect(genderKey('ArrowRight', quiet)).toEqual({ action: 'la', preventDefault: true });
+  expect(genderKey('Enter', quiet)).toEqual({ action: 'next', preventDefault: true });
+  expect(genderKey(' ', quiet)).toEqual({ action: 'next', preventDefault: true });
+  expect(genderKey('3', quiet)).toEqual({ action: null, preventDefault: false });
+  // Enter/Space on a focused choice button is that button's own pick, never a no-op "next".
+  expect(genderKey('Enter', { ...quiet, choice: 'M', onRoundButton: true })).toEqual({
+    action: 'le',
+    preventDefault: true,
+  });
+  expect(genderKey(' ', { ...quiet, choice: 'F', onRoundButton: true })).toEqual({
+    action: 'la',
+    preventDefault: true,
+  });
+  // A repeated or held key (the component reads its set from a ref, so a round update cannot clear it), an
+  // IME composition or an open overlay anywhere in the document never acts, but on the round's own buttons
+  // the native activation is still cancelled, so a held Enter cannot answer le or click Next.
+  const heldOnLe: GenderKeyFacts = { ...quiet, repeated: true, choice: 'M', onRoundButton: true };
+  expect(genderKey('Enter', heldOnLe)).toEqual({ action: null, preventDefault: true });
+  expect(genderKey('Enter', { ...heldOnLe, onRoundButton: false, choice: null })).toEqual({
+    action: null,
+    preventDefault: false,
+  });
+  expect(genderKey('Enter', { ...quiet, composing: true, onRoundButton: true })).toEqual({
+    action: null,
+    preventDefault: true,
+  });
+  expect(genderKey('1', { ...quiet, overlayOpen: true })).toEqual({ action: null, preventDefault: false });
+  expect(genderKey('1', { ...quiet, overlayOpen: true, onRoundButton: true })).toEqual({
+    action: null,
+    preventDefault: true,
+  });
+  expect(genderKey('Enter', { ...quiet, foreignControl: true })).toEqual({ action: null, preventDefault: false });
+  // An answered card advances with Enter, Space and the right arrow only; the answer keys, including 2, do nothing.
   const answered = { ...quiet, answered: true };
-  expect(genderKey('2', answered)).toBe('next');
-  expect(genderKey('ArrowRight', answered)).toBe('next');
-  expect(genderKey('1', answered)).toBeNull();
-  expect(genderKey('ArrowLeft', answered)).toBeNull();
-  expect(genderKey('Enter', answered)).toBe('next');
-  expect(genderKey(' ', answered)).toBe('next');
+  expect(genderKey('Enter', answered)).toEqual({ action: 'next', preventDefault: true });
+  expect(genderKey(' ', answered)).toEqual({ action: 'next', preventDefault: true });
+  expect(genderKey('ArrowRight', answered)).toEqual({ action: 'next', preventDefault: true });
+  expect(genderKey('2', answered)).toEqual({ action: null, preventDefault: false });
+  expect(genderKey('1', answered)).toEqual({ action: null, preventDefault: false });
+  expect(genderKey('ArrowLeft', answered)).toEqual({ action: null, preventDefault: false });
+});
+
+test('a first answer leaves the deck untouched until its write commits, so a failed write changes nothing', () => {
+  const fresh = {
+    unit: everything,
+    token: 1,
+    deck: createDeck(['a', 'b']),
+    shown: 'a',
+    pick: null,
+    saving: false,
+    error: null,
+  };
+  // The pick is shown with its verdict, but the deck waits for the write.
+  const shown = showPick(fresh, 'M', false);
+  expect(shown).toEqual({ ...fresh, pick: 'M', saving: true });
+  // A failed write keeps the real message and the deck exactly as it was.
+  const failed = { ...shown, saving: false, error: 'TEST write refused' };
+  expect(failed.deck.queue).toEqual(['a', 'b']);
+  expect(failed.deck.firstTry).toEqual({});
+  // The retry commits the same pick: only now does the miss go to the end of the queue.
+  expect(commitPick(failed, false).deck.queue).toEqual(['b', 'a']);
+  // A returning card writes nothing, so it advances at once; a first answer on 'b' would wait instead.
+  const returning = showPick({ ...commitPick(failed, false), pick: null }, 'F', true);
+  expect(returning.deck.queue).toEqual(['b']);
+  expect(returning.saving).toBe(false);
+});
+
+test('a token-read retry reuses the kept unit instead of saving a second set', async () => {
+  const [unit] = prepareGenderDrills({ pack, count: ROUND_SIZE, t });
+  // After a successful save and a failed token read, the kept unit wins and no new batch is even consulted.
+  expect(unitToOpen(unit, undefined)).toBe(unit);
+  expect(unitToOpen(null, [unit])).toBe(unit);
+  expect(unitToOpen(null, undefined)).toBeUndefined();
 });
