@@ -26,6 +26,7 @@ Object.defineProperty(globalThis, 'window', {
   }),
 });
 const { SpeakingPage } = await import('../src/components/practice/SpeakingPage');
+const { ShadowingLog } = await import('../src/components/study/ShadowingLog');
 const { UnitView } = await import('../src/components/practice/UnitView');
 const { MistakeNotebook } = await import('../src/components/study/MistakeNotebook');
 const { UnitTable } = await import('../src/components/practice/UnitTable');
@@ -196,22 +197,15 @@ test('learning-first sidebar has no generic Practice or study Grammar; Writing r
   });
   try {
     const html = render(<NavTree route={{ name: 'words' }} dueCount={0} />);
-    for (const href of [
-      '#/read',
-      '#/words',
-      '#/grammar',
-      '#/listening',
-      '#/speaking',
-      '#/study/shadowing',
-      '#/mistakes',
-    ])
+    for (const href of ['#/read', '#/words', '#/grammar', '#/listening', '#/speaking', '#/mistakes'])
       expect(html).toContain(`href="${href}"`);
     expect(html.indexOf('href="#/read"')).toBeLessThan(html.indexOf('href="#/words"'));
     expect(html.indexOf('href="#/words"')).toBeLessThan(html.indexOf('href="#/grammar"'));
     expect(html).not.toContain('href="#/words/');
-    expect(html).not.toContain('href="#/study/words');
+    // My study is gone: no row, no label, no address anywhere in the tree.
+    expect(html).not.toContain('My study');
+    expect(html).not.toContain('href="#/study');
     expect(html).not.toContain('href="#/practice');
-    expect(html).not.toContain('href="#/study/grammar');
     expect(html).not.toContain('href="#/writing"');
     units.mockReturnValue({ units: [{ ...unitOf('OPEN_QA'), learningArea: 'writing' }], error: null });
     expect(render(<NavTree route={{ name: 'practice', area: 'writing' }} dueCount={0} rail />)).toContain(
@@ -221,6 +215,54 @@ test('learning-first sidebar has no generic Practice or study Grammar; Writing r
     units.mockRestore();
     mistakes.mockRestore();
   }
+});
+
+test('Recordings is a Speaking child when there is room: current on its page, never drawn on the rail', () => {
+  const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({ units: [], error: null });
+  const mistakes = spyOn(mistakesHook, 'useMistakes').mockReturnValue({
+    rows: [],
+    loading: false,
+    error: null,
+    retry: () => {},
+  });
+  try {
+    for (const route of [{ name: 'speaking' }, { name: 'readAloud' }, { name: 'recordings' }] as const) {
+      // Expanded and the drawer share the tree: both children are listed under Speaking, which stays highlighted.
+      const html = render(<NavTree route={route} dueCount={0} />);
+      expect(html).toContain('href="#/speaking/read-aloud"');
+      expect(html).toContain('href="#/speaking/recordings"');
+      expect(/href="#\/speaking"[^>]*aria-current="true"/.test(html)).toBe(true);
+      const rail = render(<NavTree route={route} dueCount={0} rail />);
+      expect(rail).not.toContain('href="#/speaking/read-aloud"');
+      expect(rail).not.toContain('href="#/speaking/recordings"');
+      expect(/href="#\/speaking"[^>]*aria-current="page"/.test(rail)).toBe(true);
+    }
+    expect(
+      /href="#\/speaking\/recordings"[^>]*aria-current="page"/.test(
+        render(<NavTree route={{ name: 'recordings' }} dueCount={0} />),
+      ),
+    ).toBe(true);
+  } finally {
+    units.mockRestore();
+    mistakes.mockRestore();
+  }
+});
+
+test('Speaking links to Recordings with a text link and keeps exactly one filled button; the log links back', () => {
+  const home = render(
+    <SpeakingPage articles={[article]} workspace={false} onAssessed={() => {}} onMissingKey={() => {}} />,
+  );
+  const recordingsAnchor = home.match(/<a [^>]*href="#\/speaking\/recordings"[^>]*>/)?.[0];
+  expect(recordingsAnchor).toContain('underline');
+  expect(recordingsAnchor).not.toContain('bg-accent-700');
+  expect(home).toContain(`>${i18n.t('nav.recordings')}<`);
+  expect(home.match(/bg-accent-700/g)).toHaveLength(1);
+  const log = render(
+    <ShadowingLog articles={[]} units={[]} unitsError={null} initialSourceId={null} onOpenSentence={() => {}} />,
+  );
+  expect(log.match(/href="#\/speaking"/g)).toHaveLength(1);
+  expect(log.match(/<a [^>]*href="#\/speaking"[^>]*>/)?.[0]).toContain('underline');
+  expect(log).toContain(`>${i18n.t('learning.speaking')}<`);
 });
 
 test('Graded readers is linked from the Reading destinations and stays current on the reader route', () => {

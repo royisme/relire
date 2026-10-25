@@ -124,6 +124,33 @@ test('graded list and reader reserve the graded segment with pinned-version and 
     expect(result).toEqual({ route: { name: 'gradedReader', readerId: 'r' }, canonical: '#/read/graded/r' });
 });
 
+test('Recordings is a Speaking sub-page of exactly two segments and keeps the key banner', () => {
+  const route: Route = { name: 'recordings' };
+  roundTrip(route);
+  expect(routeHref(route)).toBe('#/speaking/recordings');
+  expect(areaOf(route)).toBe('speaking');
+  expect(worksWithoutKey(route)).toBe(false);
+  for (const service of [true, false])
+    expect(parseRoute('#/speaking/recordings', service)).toEqual({ route, canonical: null });
+  // A third segment is not a recordings address; a stray query only canonicalizes away.
+  expect(parse('#/speaking/recordings/x').route.name).toBe('notFound');
+  expect(parse('#/speaking/recordings?x=1')).toEqual({ route, canonical: '#/speaking/recordings' });
+  // The bare Speaking hub and the read-aloud workspace keep their own addresses.
+  expect(parse('#/speaking')).toEqual({ route: { name: 'speaking' }, canonical: null });
+  roundTrip({ name: 'readAloud' });
+  roundTrip({ name: 'readAloud', articleId: 'a b', sentence: 'Bonjour.' });
+  expect(parse('#/speaking/read-aloud/a%20b?sentence=Bonjour.')).toEqual({
+    route: { name: 'readAloud', articleId: 'a b', sentence: 'Bonjour.' },
+    canonical: null,
+  });
+});
+
+test('My study is deleted: its addresses are not found with no redirect, with or without the service', () => {
+  for (const hash of ['#/study', '#/study/shadowing', '#/study/mistakes', '#/study/words'])
+    for (const service of [true, false])
+      expect(parseRoute(hash, service)).toEqual({ route: { name: 'notFound' }, canonical: null });
+});
+
 test('Mistakes has its own route and area, keeps the key banner and has no old study alias', () => {
   const route: Route = { name: 'mistakes' };
   roundTrip(route);

@@ -1,4 +1,4 @@
-/** Badge ownership: the due count sits on the Words row, the unresolved count on Mistakes, and never on My study. */
+/** Badge ownership: the due count sits on the Words row, the unresolved count on Mistakes, and never on a parent row. */
 import { afterAll, expect, spyOn, test } from 'bun:test';
 import { renderToString } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
@@ -75,6 +75,20 @@ test('the Mistakes label stays unchanged in English and Chinese', () => {
   expect(zh.study.mistakes).toBe('错题本');
 });
 
+test('Recordings exists as a label in both locales and the My study strings are gone', () => {
+  expect(en.nav.recordings).toBe('Recordings');
+  expect(zh.nav.recordings).toBe('跟读录音');
+  expect(en.learning.shadowingContext).toContain('Speaking → Recordings');
+  expect(zh.learning.shadowingContext).toContain('口语 → 跟读录音');
+  for (const locale of [en, zh]) {
+    expect(locale.nav).not.toHaveProperty('vocab');
+    expect(locale.study).not.toHaveProperty('label');
+    expect(locale.study).not.toHaveProperty('shadowing');
+    expect(JSON.stringify(locale)).not.toContain('My study');
+    expect(JSON.stringify(locale)).not.toContain('我的学习');
+  }
+});
+
 test('the due metric excludes unintroduced new cards and future learning steps', () => {
   const now = new Date(2026, 9, 25, 12).getTime();
   const review = { ...testMatureSchedule(now), dueAt: now - 86_400_000 };
@@ -89,7 +103,7 @@ test('the due metric excludes unintroduced new cards and future learning steps',
   ).toEqual([true, true, true, false, false]);
 });
 
-test('the due badge belongs to the Words row and the unresolved count to Mistakes, not to My study', () => {
+test('the due badge belongs to the Words row and the unresolved count to Mistakes, never to a parent', () => {
   const html = render(false);
   const words = row(html, 'Words');
   expect(words).toContain('>3<');
@@ -101,25 +115,24 @@ test('the due badge belongs to the Words row and the unresolved count to Mistake
   expect(mistakes).toContain('2 to review');
   expect(mistakes).toContain('href="#/mistakes"');
   expect(mistakes).toContain('ml-auto');
-  // My study is only the parent: it shows no count of its own, so 3 and 2 are never added into one number.
-  const parent = row(html, 'My study');
-  expect(parent).not.toMatch(/tnum/);
-  expect(parent).not.toContain('>5<');
-  expect(parent).toContain('href="#/study/shadowing"');
-  expect(parent).toContain('<svg');
+  // My study is gone: nothing sums the two metrics, and no parent row carries a count.
+  expect(html).not.toContain('My study');
+  expect(html).not.toContain('href="#/study');
   const study = render(false, 3, { name: 'recordings' });
-  const children = study.slice(
-    study.indexOf(row(study, 'My study')) + row(study, 'My study').length,
+  const between = study.slice(
+    study.indexOf(row(study, 'Speaking')) + row(study, 'Speaking').length,
     study.indexOf(row(study, 'Mistakes')),
   );
-  expect([...children.matchAll(/href="([^"]+)"/g)].map((match) => match[1])).toEqual(['#/study/shadowing']);
-  expect(row(study, 'Shadowing')).not.toMatch(/tnum/);
-  for (const tab of ['Grammar', 'Reading', 'Progress']) expect(row(html, tab)).not.toMatch(/tnum/);
+  expect([...between.matchAll(/href="([^"]+)"/g)].map((match) => match[1])).toEqual([
+    '#/speaking/read-aloud',
+    '#/speaking/recordings',
+  ]);
+  expect(row(study, 'Recordings')).not.toMatch(/tnum/);
+  for (const tab of ['Grammar', 'Reading', 'Progress', 'Speaking']) expect(row(html, tab)).not.toMatch(/tnum/);
   expect(html).not.toContain('>5<');
-  expect(parent.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/)?.[0]).not.toBe(words.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/)?.[0]);
 });
 
-test('the rail keeps Words and Mistakes counts on their own corners, never on My study or a hidden child', () => {
+test('the rail keeps Words and Mistakes counts on their own corners and shows no study child', () => {
   const html = render(true);
   const words = row(html, 'Words');
   expect(words).toContain('href="#/words"');
@@ -128,10 +141,6 @@ test('the rail keeps Words and Mistakes counts on their own corners, never on My
   expect(words).toContain('tnum');
   expect(words).toContain('absolute top-0 right-0');
   expect(words).not.toContain('>Words<');
-  const myStudy = row(html, 'My study');
-  expect(myStudy).toContain('aria-label="My study"');
-  expect(myStudy).not.toMatch(/tnum/);
-  expect(myStudy).not.toContain('>5<');
   const mistakes = row(html, 'Mistakes');
   expect(mistakes).toContain('href="#/mistakes"');
   expect(mistakes).toContain('aria-label="Mistakes, 2 to review"');
@@ -140,9 +149,14 @@ test('the rail keeps Words and Mistakes counts on their own corners, never on My
   expect(mistakes).toContain('absolute top-0 right-0');
   expect(mistakes).not.toContain('>Mistakes<');
   expect(html).not.toContain('>5<');
-  // The sole Shadowing address is My study itself; no separate child is rendered on the rail.
-  expect(html.match(/href="#\/study\/shadowing"/g)).toHaveLength(1);
-  expect(html).not.toContain('title="Shadowing"');
+  expect(html).not.toContain('My study');
+  expect(html).not.toContain('href="#/study');
+  // The rail never draws a child: Recordings is reachable only through the hub or the drawer.
+  const speaking = row(html, 'Speaking');
+  expect(speaking).toContain('href="#/speaking"');
+  expect(speaking).not.toMatch(/tnum/);
+  expect(html).not.toContain('href="#/speaking/recordings"');
+  expect(html).not.toContain('title="Recordings"');
 });
 
 for (const rail of [false, true]) {
@@ -161,7 +175,8 @@ for (const rail of [false, true]) {
       expect(html).not.toContain('>All words<');
       expect(html).not.toContain('>Map<');
       expect(words).toContain('>3<');
-      expect(row(html, 'My study')).not.toMatch(/tnum/);
+      expect(html).not.toContain('My study');
+      expect(html).not.toContain('href="#/study');
     }
   });
 
@@ -173,30 +188,30 @@ for (const rail of [false, true]) {
           const html = render(rail, 3, route);
           const mistakes = row(html, i18n.t('study.mistakes'));
           const progress = row(html, i18n.t('nav.analytics'));
-          const parent = row(html, i18n.t('nav.vocab'));
+          const speaking = row(html, i18n.t('learning.speaking'));
           expect(mistakes).toContain('href="#/mistakes"');
           expect(mistakes).toContain('lucide-notebook-pen');
           expect(mistakes.includes('aria-current="page"')).toBe(route.name === 'mistakes');
-          expect(html.indexOf(parent)).toBeLessThan(html.indexOf(mistakes));
+          expect(html.indexOf(speaking)).toBeLessThan(html.indexOf(mistakes));
           expect(html.indexOf(mistakes)).toBeLessThan(html.indexOf(progress));
           // No link between these sibling rows: Mistakes never owns a child, even when current.
           expect(html.slice(html.indexOf(mistakes) + mistakes.length, html.indexOf(progress))).not.toContain('<a ');
           expect(html.match(/href="#\/mistakes"/g)).toHaveLength(1);
           expect(html).not.toContain('href="#/mistakes/');
           expect(html).not.toContain('href="#/study/mistakes');
-          expect(parent).toContain('href="#/study/shadowing"');
-          expect(parent).not.toMatch(/tnum|sr-only/);
-          const between = html.slice(html.indexOf(parent) + parent.length, html.indexOf(mistakes));
+          // Speaking lists Read aloud and Recordings when there is room; the rail never draws a child.
+          const between = html.slice(html.indexOf(speaking) + speaking.length, html.indexOf(mistakes));
           expect([...between.matchAll(/href="([^"]+)"/g)].map((match) => match[1])).toEqual(
-            !rail && route.name === 'recordings' ? ['#/study/shadowing'] : [],
+            !rail && route.name === 'recordings' ? ['#/speaking/read-aloud', '#/speaking/recordings'] : [],
           );
+          if (!rail && route.name === 'recordings') {
+            expect(row(html, i18n.t('learning.readAloud'))).toContain('href="#/speaking/read-aloud"');
+            expect(row(html, i18n.t('nav.recordings'))).toContain('href="#/speaking/recordings"');
+            expect(row(html, i18n.t('nav.recordings'))).toContain('aria-current="page"');
+            expect(speaking).toContain('aria-current="true"');
+          }
           // The lower group's rule separates these rows from the skill destinations.
-          expect(
-            html.slice(
-              html.indexOf(row(html, i18n.t('learning.speaking'))) + row(html, i18n.t('learning.speaking')).length,
-              html.indexOf(parent),
-            ),
-          ).toContain('border-t');
+          expect(html.slice(html.indexOf(speaking) + speaking.length, html.indexOf(mistakes))).toContain('border-t');
           expect(mistakes).toContain('>2<');
           expect(mistakes).not.toContain('>3<'); // The third fixture row is resolved.
           expect(mistakes).toContain(i18n.t('nav.toReview', { count: 2 }));
@@ -210,8 +225,15 @@ for (const rail of [false, true]) {
           expect(words).not.toContain('>2<');
           expect(html.match(/class="tnum /g)).toHaveLength(2);
           expect(html).not.toContain('>5<');
-          for (const label of ['nav.analytics', 'learning.areas.reading', 'learning.areas.grammar'])
+          for (const label of [
+            'nav.analytics',
+            'learning.areas.reading',
+            'learning.areas.grammar',
+            'learning.speaking',
+          ])
             expect(row(html, i18n.t(label))).not.toMatch(/tnum|sr-only/);
+          expect(html).not.toContain('My study');
+          expect(html).not.toContain('href="#/study');
         }
       } finally {
         await i18n.changeLanguage('en');
@@ -227,7 +249,7 @@ for (const rail of [false, true]) {
       expect(mistakes).not.toContain('to review');
       expect(mistakes).not.toContain('>0<');
       expect(row(html, 'Words')).toContain('>3<');
-      expect(row(html, 'My study')).not.toMatch(/tnum/);
+      expect(html).not.toContain('My study');
     }
   });
 
@@ -237,7 +259,6 @@ for (const rail of [false, true]) {
     expect(words).not.toMatch(/tnum|sr-only/);
     expect(words).not.toContain('due');
     expect(words).not.toContain('>0<');
-    expect(row(html, 'My study')).not.toMatch(/tnum/);
     expect(row(html, 'Mistakes')).toContain('>2<');
     expect(row(html, 'Mistakes')).toContain('2 to review');
   });

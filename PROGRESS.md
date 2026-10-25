@@ -6,6 +6,8 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 ## 2026-10-25: N3 code on branch `recordings` (tests pending)
 
+- Independent N3 tests cover the recordings round trip, the deleted study addresses, the Speaking children at every width and the locale removals; 2,610 tests pass and all six checks exit 0. E2e remains the e2e worker's. **Unverified:** no browser.
+
 - Recordings is Speaking's second child at `#/speaking/recordings` (route `recordings`, area `speaking`, no badge); My study, `STUDY_TABS`, `StudyTab`, `StudyView` and the `study` area are deleted, so `#/study` and `#/study/shadowing` are not found. `ShadowingLog` owns its page container and a back link to Speaking; Speaking links to Recordings; the reader's "open log" opens it and App drops `logSourceId` when the learner leaves it. Locale keys `nav.vocab`, `study.label` and `study.shadowing` are gone; `nav.recordings` is new. Docs updated. Existing assertions on the old addresses and My study fail until the test worker runs; typecheck needed literal changes in `tests/navBadges.test.tsx` and removal of one obsolete test (and the `STUDY_TABS` import) in `tests/routes.test.ts`. **Unverified:** no browser.
 
 ## 2026-10-25: N2 code on branch `mistakes-top` (tests pending)
