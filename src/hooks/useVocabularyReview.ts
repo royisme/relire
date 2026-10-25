@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { VocabularyBook, VocabularyRow, VocabularyTokens, VocabularyOutcome } from '../types/vocabulary';
 import { t } from 'i18next';
-import { vocabularyDue, VocabularyClockError } from '../utils/srs';
+import { VocabularyClockError } from '../utils/srs';
 import { vocabularyQueue, type VocabularyJoined } from '../services/vocabulary/queue';
 import {
   getVocabularySnapshot,
@@ -11,6 +11,7 @@ import {
   StaleVocabularyError,
   VocabularyQuotaError,
 } from '../storage/vocabulary';
+import { wordsInput } from '../services/today/inputs';
 import type { VocabularyModel } from './useVocabulary';
 export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBook) {
   const [active, setActive] = useState<{
@@ -42,6 +43,7 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     setQuotaReached(false);
   }
   const queue = vocabularyQueue(model.rows, book, model.day, model.preferences.newPerDay, now, excluded);
+  const counts = wordsInput(model.rows, book, model.day, model.preferences.newPerDay, now);
   useEffect(() => {
     alive.current = true;
     const wake = () => {
@@ -159,8 +161,8 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     introductions,
     now,
     nextDue: queue.nextDue,
-    due: model.rows.filter((row) => vocabularyDue(row.schedule, now)).length,
-    remaining: Math.max(0, model.preferences.newPerDay - model.day.introducedKeys.length),
+    due: counts.due,
+    remaining: counts.newAvailable,
     reveal,
     recall,
     skip,

@@ -5,15 +5,6 @@ import type { VocabularyRow } from '../../../types/vocabulary';
 import { Button } from '../../ui/button';
 import { Link } from '../../shell/Link';
 
-/**
- * The earliest time any scheduled card comes back, learning or review phase alike; null when nothing waits.
- * The hook's own `nextDue` counts only learning steps, which is not what a finished run wants to say.
- */
-export function runNextDue(rows: readonly VocabularyRow[], now: number): number | null {
-  const future = rows.flatMap((row) => (row.schedule && row.schedule.dueAt > now ? [row.schedule.dueAt] : []));
-  return future.length ? Math.min(...future) : null;
-}
-
 /** The line a finished state shows: when the next card really comes back, or that nothing waits. */
 export function RunNextDueLine({ due }: { due: number | null }) {
   const { t } = useTranslation();

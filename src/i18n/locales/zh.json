@@ -534,7 +534,7 @@
       "continueRun": "继续",
       "queueCleared": "队列已清空",
       "loadingCard": "正在读取下一张卡片…",
-      "nextDue": "下一张卡片将于 {{time}} 到期。",
+      "nextDue": "下一张卡片将在 {{time}} 可以复习。",
       "nothingWaiting": "没有安排中的下一张卡片。",
       "kindRecognize": "选择含义",
       "kindClozeChoice": "选出填入空格的词",

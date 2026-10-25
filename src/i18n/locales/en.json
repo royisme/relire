@@ -534,7 +534,7 @@
       "continueRun": "Continue",
       "queueCleared": "Queue cleared",
       "loadingCard": "Loading the next card…",
-      "nextDue": "The next card is due at {{time}}.",
+      "nextDue": "The next card is ready at {{time}}.",
       "nothingWaiting": "Nothing is scheduled next.",
       "kindRecognize": "Choose the meaning",
       "kindClozeChoice": "Choose the word for the blank",
