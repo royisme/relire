@@ -1,6 +1,6 @@
 # Drizzle for the content service's D1 (step RS4)
 
-Plan of record. Written 2026-10-24 on the owner's instruction. **Owner decision (2026-10-24): option B.** Review 1 (gpt-6-astra, verdict fail, eight problems) is applied below; the reviewer's own recommendation was option A (not worth the dependency for thirteen simple reads), and the owner has chosen B knowing that. Nothing here is built. `docs/remote-settings-plan.md` "Not in this plan" required this plan to say what Drizzle buys against a new dependency before any code; sections 2 and 3 do that, and section 3 ends in a recommendation the owner decides.
+Plan of record. Written 2026-10-24 on the owner's instruction. **Owner decision (2026-10-24): option B.** Review 1 (gpt-6-astra, verdict fail, eight problems) is applied below; the reviewer's own recommendation was option A (not worth the dependency for thirteen simple reads), and the owner has chosen B knowing that. Nothing here is built. **Paused 2026-10-24:** if the lexicon leaves D1 (`docs/lexicon-r2-plan.md`), `0002_lexicon.sql`, the `lexiconVersion` seed and the lexicon tables disappear from the schema baseline this plan compares against; the plan is revised before any spike. `docs/remote-settings-plan.md` "Not in this plan" required this plan to say what Drizzle buys against a new dependency before any code; sections 2 and 3 do that, and section 3 ends in a recommendation the owner decides.
 
 ## Facts (read 2026-10-24)
 
