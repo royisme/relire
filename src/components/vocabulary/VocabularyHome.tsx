@@ -6,6 +6,7 @@ import { Check } from 'lucide-react';
 import { cardPace, estimateMinutes } from '../../services/vocabulary/pace';
 import { summarizeRhythm } from '../../services/vocabulary/game/rhythm';
 import { wordsInput } from '../../services/today/inputs';
+import { formatAvailableAt } from '../../utils/srs';
 import { Link } from '../shell/Link';
 import { VocabularyGoal } from './VocabularyGoal';
 import { VocabularyImport } from './VocabularyImport';
@@ -51,10 +52,7 @@ export function VocabularyHome({
         ) : nextDue !== null ? (
           <p className="text-sm text-ink-700">
             {t('vocab.action.next', {
-              time: new Intl.DateTimeFormat(i18n.resolvedLanguage, {
-                dateStyle: 'medium',
-                ...(new Date(nextDue).setHours(0, 0, 0, 0) === nextDue ? {} : { timeStyle: 'short' }),
-              }).format(nextDue),
+              time: formatAvailableAt(nextDue, i18n.resolvedLanguage),
             })}
           </p>
         ) : (

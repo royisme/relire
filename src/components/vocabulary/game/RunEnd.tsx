@@ -2,17 +2,18 @@ import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import { summarizeRhythm } from '../../../services/vocabulary/game/rhythm';
 import type { VocabularyRow } from '../../../types/vocabulary';
+import { formatAvailableAt } from '../../../utils/srs';
 import { Button } from '../../ui/button';
 import { Link } from '../../shell/Link';
 
 /** The line a finished state shows: when the next card really comes back, or that nothing waits. */
 export function RunNextDueLine({ due }: { due: number | null }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <p className="tnum break-words text-sm text-ink-600">
       {due === null
         ? t('vocab.game.nothingWaiting')
-        : t('vocab.game.nextDue', { time: new Date(due).toLocaleString() })}
+        : t('vocab.game.nextDue', { time: formatAvailableAt(due, i18n.resolvedLanguage) })}
     </p>
   );
 }
@@ -55,7 +56,7 @@ export function RunDone({
           <dd className="tnum break-words">{t('vocab.game.firstMature', { words: rhythm.gainedThisWeek })}</dd>
         </div>
       </dl>
-      <RunNextDueLine due={nextDue} />
+      {due === 0 ? <RunNextDueLine due={nextDue} /> : null}
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={onContinue}>
           {t('vocab.game.continueRun')}

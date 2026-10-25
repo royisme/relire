@@ -50,6 +50,14 @@ export function vocabularyAvailableAt(schedule: VocabularySchedule): number {
   day.setHours(0, 0, 0, 0);
   return day.getTime();
 }
+/** Localized date/time for when a card becomes studyable: date only for local midnight, date and short time otherwise. */
+export function formatAvailableAt(time: number, language?: string): string {
+  const isMidnight = new Date(time).setHours(0, 0, 0, 0) === time;
+  return new Intl.DateTimeFormat(language, {
+    dateStyle: 'medium',
+    ...(isMidnight ? {} : { timeStyle: 'short' }),
+  }).format(time);
+}
 export function vocabularyDue(schedule: VocabularySchedule | null, now: number): boolean {
   reviewTime(now);
   return schedule !== null && vocabularyAvailableAt(schedule) <= now;
