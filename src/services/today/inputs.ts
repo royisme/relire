@@ -1,4 +1,4 @@
-/** Owns the pure joins from stored vocabulary, reader and studied-topic data to Today's step input values, not selection, storage reads or hooks. */
+/** Owns the pure joins from stored vocabulary, reader and studied-topic data to Today's step input values (the words join also feeds the Words Overview), not selection, storage reads or hooks. */
 import { readerIdsActiveToday, reviewsToday, startOfLocalDay } from './activity';
 import { readerListStatus } from '../gradedReaders/status';
 import { nextTopicEntry } from '../grammarTopics/order';

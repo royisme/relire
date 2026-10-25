@@ -6,7 +6,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 ## 2026-10-25: Words Overview next action (P1)
 
-- The Overview shows `wordsInput`'s due and new counts (the bare allowance is gone), one filled action in a fixed-height slot (Review N words, Learn N new words, the time the next scheduled word of any phase returns, or a note to add words or come back tomorrow; plain Review, not the run), Play a run as the outlined link and no Map link. `wordsInput` also returns `nextDue`. Tests pending (old Overview and `wordsInput` assertions). **Unverified:** no browser.
+- The Overview shows `wordsInput`'s due and new counts (the bare allowance is gone), one filled action in a fixed-height slot (Review N words, Learn N new words, the time the next scheduled word of any phase returns, or a note to import a list or save words while reading; plain Review, not the run), Play a run as the outlined link and no Map link. `wordsInput` also returns `nextDue`. A wordbook or learner-data failure shows the real error with no action and dashes instead of counts. Unit tests landed and pass. **Unverified:** no browser.
 
 ## 2026-10-25: Recordings out of the sidebar
 

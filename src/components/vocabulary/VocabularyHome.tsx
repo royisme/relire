@@ -36,7 +36,7 @@ export function VocabularyHome({
   const waiting = pending || !model.ready;
   return (
     <div className="space-y-8">
-      <div className="flex h-12 items-center" aria-busy={waiting && !failed ? 'true' : undefined}>
+      <div className="flex h-12 items-center" aria-busy={waiting && !failed && !model.error ? 'true' : undefined}>
         {waiting ? null : due > 0 ? (
           <Link to={{ name: 'wordsReview' }} className={actionClass}>
             {t('vocab.action.review', { count: due })}
