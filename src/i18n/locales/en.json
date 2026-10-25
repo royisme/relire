@@ -125,7 +125,7 @@
     "speaking": "Speaking",
     "readAloud": "Read aloud",
     "speakingDesc": "Listen to an article sentence, record yourself and optionally ask your AI for a pronunciation estimate.",
-    "shadowingContext": "For saved shadowing takes, use the microphone beside a sentence in the reader. Find them under Speaking → Recordings.",
+    "shadowingContext": "For saved shadowing takes, use the microphone beside a sentence in the reader.",
     "chooseArticle": "Choose an article",
     "speakingEmpty": "Add an article in Reading before practising it aloud.",
     "sourceUnavailable": "The selected article or sentence is no longer available. Choose a source explicitly to continue."
@@ -1385,7 +1385,7 @@
     }
   },
   "shadowingLog": {
-    "title": "Shadowing",
+    "title": "Recordings",
     "subtitle": "Your recordings of reader sentences, kept on this device. The last three of each sentence are kept.",
     "source": "Source",
     "allSources": "All sources",
