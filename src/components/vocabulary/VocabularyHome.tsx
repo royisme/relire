@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { summarizeRhythm } from '../../services/vocabulary/game/rhythm';
 import { vocabularyDue } from '../../utils/srs';
 import { Link } from '../shell/Link';
+import { VocabularyGoal } from './VocabularyGoal';
 import { VocabularyImport } from './VocabularyImport';
 export function VocabularyHome({ model }: { model: VocabularyModel }) {
   const { t, i18n } = useTranslation();
@@ -46,6 +47,7 @@ export function VocabularyHome({ model }: { model: VocabularyModel }) {
           ))}
         </ol>
       </section>
+      <VocabularyGoal rows={model.rows} now={model.now} mature={rhythm.now.mature} />
       <div className="flex flex-wrap items-center gap-3">
         <Link
           to={{ name: 'wordsReview' }}

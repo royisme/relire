@@ -424,6 +424,27 @@
       "ratedDay": "{{date}}: rated words",
       "day": "{{date}}"
     },
+    "goal": {
+      "set": "Set a goal",
+      "change": "Change goal",
+      "title": "Vocabulary goal",
+      "description": "An exam date and a target number of mature words (interval of 21 days or more). Kept on this device only; removing it changes nothing else.",
+      "examDate": "Exam date",
+      "target": "Mature-word target",
+      "save": "Save goal",
+      "clear": "Remove goal",
+      "daysLeft_one": "{{count}} day to your exam date",
+      "daysLeft_other": "{{count}} days to your exam date",
+      "examToday": "Your exam date is today.",
+      "examPassed": "The exam date has passed.",
+      "progress": "Mature now: {{mature}} · Target: {{target}}",
+      "weekly": "Words first reaching maturity, by week (last 4 weeks)",
+      "errors": {
+        "missingDate": "Choose an exam date.",
+        "pastDate": "The date is in the past. Choose today or a later date.",
+        "invalidTarget": "Enter a whole number of 1 or more."
+      }
+    },
     "game": {
       "now": "Now",
       "keptNow": "In review: {{review}} · Mature (interval 21+ days): {{mature}}",
