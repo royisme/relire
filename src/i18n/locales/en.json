@@ -394,7 +394,17 @@
     "contextSaved": "Context saved",
     "removeBookmark": "Remove bookmark",
     "removeHelp": "Removing a bookmark keeps saved contexts, learning schedule and rating history.",
+    "rhythm": {
+      "title": "Weekly rhythm",
+      "count": "{{days}} of the last 7 days",
+      "ratedDay": "{{date}}: rated words",
+      "day": "{{date}}"
+    },
     "game": {
+      "now": "Now",
+      "keptNow": "In review: {{review}} · Mature (interval 21+ days): {{mature}}",
+      "gainedThisWeek": "Gained this week (last 7 days)",
+      "firstMature": "First reached maturity: {{words}}",
       "runLength": "Run length",
       "chunkProgress": "{{done}} of {{size}} ratings this run",
       "doneTitle": "Done for now",

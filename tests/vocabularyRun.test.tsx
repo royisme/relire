@@ -400,7 +400,15 @@ test('the done-for-now screen states the real counts, the real next due time, Co
   await i18n.changeLanguage('en');
   const due = new Date(2026, 9, 24, 12, 30).getTime();
   const html = render(
-    <run.RunDone ratings={6} due={4} nextDue={due} onContinue={() => {}} heading={{ current: null }} />,
+    <run.RunDone
+      ratings={6}
+      rows={[]}
+      now={due}
+      due={4}
+      nextDue={due}
+      onContinue={() => {}}
+      heading={{ current: null }}
+    />,
   );
   expect(html).toContain(i18n.t('vocab.game.doneTitle'));
   expect(html).toContain(i18n.t('vocab.game.doneCounts', { ratings: 6, due: 4 }));
@@ -409,7 +417,15 @@ test('the done-for-now screen states the real counts, the real next due time, Co
   expect(html).toContain('href="#/study/words"');
   expect(html.match(/role="status"/g)).toHaveLength(1);
   const nothing = render(
-    <run.RunDone ratings={6} due={0} nextDue={null} onContinue={() => {}} heading={{ current: null }} />,
+    <run.RunDone
+      ratings={6}
+      rows={[]}
+      now={due}
+      due={0}
+      nextDue={null}
+      onContinue={() => {}}
+      heading={{ current: null }}
+    />,
   );
   expect(nothing).toContain(i18n.t('vocab.game.nothingWaiting'));
 });

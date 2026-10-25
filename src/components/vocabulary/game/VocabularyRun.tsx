@@ -1,8 +1,6 @@
 /**
- * The vocabulary run (the game's VG2 step): one retrieval challenge before each flip, then exactly the plain
- * review's reveal and rating underneath (`useVocabularyReview`, no second write path), and a run that ends after
- * a chunk of ratings. Owns the per-card challenge state, its own guarded keys, the chunk counter and the
- * focus moves; does not own the challenge rules (`services/vocabulary/game/challenge`), the queue or the writes.
+ * Retrieval before reveal, then the plain review's rating path. Owns challenges, keys, chunks and focus,
+ * not scheduling or vocabulary writes.
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +9,8 @@ import type { VocabularyBook, VocabularyBookSource, VocabularyOutcome, Vocabular
 import type { VocabularyModel } from '../../../hooks/useVocabulary';
 import { useVocabularyReview } from '../../../hooks/useVocabularyReview';
 import { formatDate } from '../../../utils/srs';
-import { practiceGrading } from '../../../utils/appSettings';
+import { getAppSettings, practiceGrading, saveAppSettings } from '../../../utils/appSettings';
+import { appendRunLog } from '../../../services/vocabulary/game/runLog';
 import { getSpeechState, speechKey, stopSpeech } from '../../../utils/speech';
 import { lexiconFormsOf } from '../../../services/lexicon/load';
 import {
@@ -134,6 +133,7 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
   const [errorOpen, setErrorOpen] = useState(false);
   const [voiceAvailable, setVoiceAvailable] = useState(deviceVoiceReady);
   const appearances = useRef(new Map<string, number>());
+  const loggedBaseline = useRef<number | null>(null);
   const submittedControl = useRef<HTMLButtonElement | null>(null);
   const recallControls = useRef<Partial<Record<VocabularyOutcome, HTMLButtonElement | null>>>({});
   // The first control of a card is sometimes a button and sometimes the typed field, so a callback keeps it.
@@ -155,7 +155,7 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
   const revealed = session.revealed;
   const phase = runPhase(card, revealed);
   // Reset during render, so a replaced or stale card cannot paint a previous card's challenge or answer.
-  if (card?.key !== key) {
+  if ((card?.key ?? null) !== key) {
     setCard(key ? { key, ready: false, challenge: undefined, result: null } : null);
     setTyped('');
   }
@@ -275,6 +275,7 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
 
   useEffect(() => {
     const keydown = (event: KeyboardEvent) => {
+      if (chunkReached(chunk, session.ratings)) return;
       const spot = runTarget(event.target);
       const outcome = runKey(event.key, {
         repeated: event.repeat || held.current.has(event.code),
@@ -306,6 +307,19 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
       window.removeEventListener('blur', blur);
     };
   });
+
+  useEffect(() => {
+    if (!chunkReached(chunk, session.ratings) || loggedBaseline.current === chunk.baseline) return;
+    loggedBaseline.current = chunk.baseline;
+    saveAppSettings({
+      vocabularyRunLog: appendRunLog(getAppSettings().vocabularyRunLog, {
+        date: formatDate(new Date(session.now)),
+        mode: 'game',
+        chunkSize: chunk.size,
+        ratings: chunkRatings(chunk, session.ratings),
+      }),
+    });
+  }, [chunk, session.ratings, session.now]);
 
   const nextDue = runNextDue(model.rows, session.now);
   return (
@@ -346,7 +360,17 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
           onChange={(size) => setChunk((current) => ({ ...current, size: Number(size) as RunSize }))}
         />
       </div>
-      {!active ? (
+      {chunkReached(chunk, session.ratings) ? (
+        <RunDone
+          ratings={chunkRatings(chunk, session.ratings)}
+          rows={model.rows}
+          now={session.now}
+          due={session.due}
+          nextDue={nextDue}
+          heading={doneHeading}
+          onContinue={() => setChunk(continueChunk(chunk, session.ratings))}
+        />
+      ) : !active ? (
         <>
           <RunCleared nextDue={nextDue} />
           <div
@@ -374,14 +398,6 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
             )}
           </div>
         </>
-      ) : chunkReached(chunk, session.ratings) ? (
-        <RunDone
-          ratings={chunkRatings(chunk, session.ratings)}
-          due={session.due}
-          nextDue={nextDue}
-          heading={doneHeading}
-          onContinue={() => setChunk(continueChunk(chunk, session.ratings))}
-        />
       ) : (
         <div className="mx-auto w-full max-w-[25rem] space-y-6">
           <div className="rounded-lg border border-ink-200 bg-surface p-5">

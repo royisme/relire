@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
+import { summarizeRhythm } from '../../../services/vocabulary/game/rhythm';
 import type { VocabularyRow } from '../../../types/vocabulary';
 import { Button } from '../../ui/button';
 import { Link } from '../../shell/Link';
@@ -28,18 +29,23 @@ export function RunNextDueLine({ due }: { due: number | null }) {
 /** The end of a chunk: the real counts, the real next due time, Continue and the way back to Words. */
 export function RunDone({
   ratings,
+  rows,
+  now,
   due,
   nextDue,
   onContinue,
   heading,
 }: {
   ratings: number;
+  rows: readonly VocabularyRow[];
+  now: number;
   due: number;
   nextDue: number | null;
   onContinue: () => void;
   heading: RefObject<HTMLHeadingElement | null>;
 }) {
   const { t } = useTranslation();
+  const rhythm = summarizeRhythm(rows, now);
   return (
     <section className="space-y-3 border-y border-ink-200 py-10">
       <h1 ref={heading} tabIndex={-1} className="font-serif text-2xl font-semibold">
@@ -48,6 +54,16 @@ export function RunDone({
       <p role="status" className="tnum break-words text-sm text-ink-800">
         {t('vocab.game.doneCounts', { ratings, due })}
       </p>
+      <dl className="space-y-3 text-sm">
+        <div>
+          <dt className="text-ink-600">{t('vocab.game.now')}</dt>
+          <dd className="tnum break-words">{t('vocab.game.keptNow', rhythm.now)}</dd>
+        </div>
+        <div>
+          <dt className="text-ink-600">{t('vocab.game.gainedThisWeek')}</dt>
+          <dd className="tnum break-words">{t('vocab.game.firstMature', { words: rhythm.gainedThisWeek })}</dd>
+        </div>
+      </dl>
       <RunNextDueLine due={nextDue} />
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={onContinue}>
