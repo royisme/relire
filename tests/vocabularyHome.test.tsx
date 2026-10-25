@@ -9,7 +9,7 @@ import zh from '../src/i18n/locales/zh.json';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import type { VocabularyBook } from '../src/types/vocabulary';
 import { wordsInput } from '../src/services/today/inputs';
-import { initialVocabularySchedule } from '../src/utils/srs';
+import { formatAvailableAt, initialVocabularySchedule } from '../src/utils/srs';
 import { testBook, testMatureSchedule, testRow } from './fixtures/vocabulary';
 import { freshSettingsStorage, restoreSettingsStorage } from './fixtures/contentServiceSettings';
 
@@ -234,6 +234,12 @@ for (const language of ['en', 'zh'] as const) {
     }
     expect(content).toMatch(/^<p\b[^>]*>[^<]+<\/p>$/);
     expect(content).toContain(`>${expected}</p>`);
+    if (state.action === 'next') {
+      // The Overview and the shared formatter agree on the same nextDue, in this language.
+      expect(state.nextDue).toBeDefined();
+      expect(time).toBe(formatAvailableAt(state.nextDue!, language));
+      expect(content).toContain(formatAvailableAt(state.nextDue!, language));
+    }
     expect(content).not.toContain('<a');
     expect(html).not.toContain('href="#/words/review"');
     expect(filled).toHaveLength(0);

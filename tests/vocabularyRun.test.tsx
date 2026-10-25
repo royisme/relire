@@ -13,6 +13,7 @@ import zh from '../src/i18n/locales/zh.json';
 import { testBook, testMatureSchedule, testRow } from './fixtures/vocabulary';
 import { vocabularyContextKey } from '../src/services/vocabulary/identity';
 import { nextAvailableAt } from '../src/services/today/inputs';
+import { formatAvailableAt } from '../src/utils/srs';
 import type { VocabularyRow } from '../src/types/vocabulary';
 import {
   buildChallenge,
@@ -400,47 +401,45 @@ for (const language of ['en', 'zh'] as const) {
   });
 }
 
-test('the done-for-now screen states the real counts, the real next due time, Continue and the way back', async () => {
+test('the done-for-now screen states the real counts, the next time only with nothing due, Continue and the way back', async () => {
   await i18n.changeLanguage('en');
-  const due = new Date(2026, 9, 24, 12, 30).getTime();
-  const html = render(
-    <run.RunDone
-      ratings={6}
-      rows={[]}
-      now={due}
-      due={4}
-      nextDue={due}
-      onContinue={() => {}}
-      heading={{ current: null }}
-    />,
-  );
+  const now = new Date(2026, 9, 24, 12, 30).getTime();
+  const next = new Date(2026, 9, 25, 15).getTime();
+  const end = { ratings: 6, rows: [], now, onContinue: () => {}, heading: { current: null } };
+  const done = (due: number, nextDue: number | null) => render(<run.RunDone {...end} due={due} nextDue={nextDue} />);
+  const html = done(0, next);
   expect(html).toContain(i18n.t('vocab.game.doneTitle'));
-  expect(html).toContain(i18n.t('vocab.game.doneCounts', { ratings: 6, due: 4 }));
-  expect(html).toContain(i18n.t('vocab.game.nextDue', { time: new Date(due).toLocaleString() }));
+  expect(html).toContain(i18n.t('vocab.game.doneCounts', { ratings: 6, due: 0 }));
+  expect(html).toContain(i18n.t('vocab.game.nextDue', { time: formatAvailableAt(next, 'en') }));
   expect(html).toContain(i18n.t('vocab.game.continueRun'));
   expect(html).toContain('href="#/words"');
   expect(html.match(/role="status"/g)).toHaveLength(1);
-  const nothing = render(
-    <run.RunDone
-      ratings={6}
-      rows={[]}
-      now={due}
-      due={0}
-      nextDue={null}
-      onContinue={() => {}}
-      heading={{ current: null }}
-    />,
-  );
-  expect(nothing).toContain(i18n.t('vocab.game.nothingWaiting'));
+  expect(done(0, null)).toContain(i18n.t('vocab.game.nothingWaiting'));
+  // Cards still due: no next-time line and no "nothing waits" claim, but Continue and the way back stay.
+  const stillDue = done(4, next);
+  expect(stillDue).toContain(i18n.t('vocab.game.doneCounts', { ratings: 6, due: 4 }));
+  // Every rendering of that instant carries the line's own wording, so none of it may appear.
+  expect(stillDue).not.toContain(i18n.t('vocab.game.nextDue', { time: '\u0000' }).split('\u0000')[0]);
+  const shortTime = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(next);
+  expect(stillDue).not.toContain(shortTime);
+  expect(stillDue).not.toContain(i18n.t('vocab.game.nothingWaiting'));
+  expect(stillDue).toContain(i18n.t('vocab.game.continueRun'));
+  expect(stillDue).toContain('href="#/words"');
 });
 
-test('the queue-cleared screen says so and shows the same real next due time', async () => {
+test('the queue-cleared screen always states the next time, date alone at local midnight, or that nothing waits', async () => {
   await i18n.changeLanguage('en');
   const due = new Date(2026, 9, 25, 9, 5).getTime();
   const html = render(<run.RunCleared nextDue={due} />);
   expect(html).toContain(i18n.t('vocab.game.queueCleared'));
-  expect(html).toContain(i18n.t('vocab.game.nextDue', { time: new Date(due).toLocaleString() }));
+  expect(html).toContain(i18n.t('vocab.game.nextDue', { time: formatAvailableAt(due, 'en') }));
   expect(html).toContain('href="#/words"');
+  // A review card returns from local midnight, so its line carries no time part.
+  const midnight = new Date(2026, 9, 26).getTime();
+  const dateOnly = render(<run.RunCleared nextDue={midnight} />);
+  expect(dateOnly).toContain(new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(midnight));
+  expect(dateOnly).not.toMatch(/\d:\d\d/);
+  expect(render(<run.RunCleared nextDue={null} />)).toContain(i18n.t('vocab.game.nothingWaiting'));
 });
 
 test('fewer than 3 saved words never throws, drops options to 2 or falls back to plain flip', () => {
