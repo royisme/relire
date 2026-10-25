@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Import Anki `.apkg` packages in Words, including newer compressed collections: choose a note type and fields, keep deck names and tags, and merge notes without importing media or review history.
 - Words has a map of book pages, imported decks and saved words with real state counts, expandable word lists and a leech collection; leech cards show memory hints and examples after reveal without changing ratings or scheduling.
 - Words shows your last seven days of practice without a streak, and run summaries distinguish words in review or mature now from words first reaching maturity this week; finished chunks are logged only on this device, never in backups.
 - Import Anki plain-text, TSV and CSV decks in Words: choose columns, preview normalized notes, merge duplicates without resetting reviews, and see every rejected row and its reason; imported cards join the daily queue and survive backups.

@@ -1,5 +1,5 @@
 /** Local-only note import: permanent controls/preview/result slots, column choice before one durable batch. */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table';
 import { Dialog, DialogContent } from '../ui/dialog';
@@ -7,14 +7,14 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import {
-  defaultImportColumns,
+import type {
   prepareVocabularyImport,
-  type ImportedNote,
-  type ImportColumns,
-  type RejectedNote,
+  ImportedNote,
+  ImportColumns,
+  RejectedNote,
 } from '../../services/vocabulary/import/prepare';
-import { parsePlainText, type PlainTextImport } from '../../services/vocabulary/import/plainText';
+import type { PlainTextImport } from '../../services/vocabulary/import/plainText';
+import type { ApkgNoteType } from '../../services/vocabulary/import/apkg';
 import { importVocabularyNotes } from '../../storage/vocabulary';
 import { errorMessage } from '../../services/ai/errors';
 
@@ -25,6 +25,9 @@ export function VocabularyImport() {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const [parsed, setParsed] = useState<PlainTextImport | null>(null);
+  const [pipeline, setPipeline] = useState<{ prepare: typeof prepareVocabularyImport } | null>(null);
+  const [noteTypes, setNoteTypes] = useState<ApkgNoteType[] | null>(null);
+  const [noteTypeId, setNoteTypeId] = useState<string | null>(null);
   const [columns, setColumns] = useState<ImportColumns>({ front: 0, back: 1, example: null });
   const [deck, setDeck] = useState('');
   const [busy, setBusy] = useState(false);
@@ -32,8 +35,8 @@ export function VocabularyImport() {
   const [result, setResult] = useState<{ imported: number; merged: number; rejected: RejectedNote[] } | null>(null);
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
   const prepared = useMemo(
-    () => (parsed ? prepareVocabularyImport(parsed, columns, deck, language, 0) : null),
-    [parsed, columns, deck, language],
+    () => (parsed && pipeline ? pipeline.prepare(parsed, columns, deck, language, 0) : null),
+    [parsed, pipeline, columns, deck, language],
   );
   const tableColumns = useMemo(
     () =>
@@ -48,25 +51,37 @@ export function VocabularyImport() {
     [t],
   );
   const table = useTable({ features, columns: tableColumns, data: prepared?.notes.slice(0, 5) ?? [] });
-  const width =
-    parsed?.rows.reduce(
-      (width, row) => Math.max(width, row.fields.length),
-      Math.max(2, parsed.headers.columns?.length ?? 0),
-    ) ?? 2;
+  const width = noteTypes
+    ? (parsed?.headers.columns?.length ?? 0)
+    : (parsed?.rows.reduce(
+        (width, row) => Math.max(width, row.fields.length),
+        Math.max(2, parsed.headers.columns?.length ?? 0),
+      ) ?? 2);
 
   const chooseFile = async (file: File | undefined) => {
     if (!file) return;
     setParsed(null);
+    setNoteTypes(null);
+    setNoteTypeId(null);
     setResult(null);
     setError(null);
-    if (!/\.(txt|tsv|csv)$/i.test(file.name)) {
+    if (!/\.(txt|tsv|csv|apkg)$/i.test(file.name)) {
       setError(t('vocab.import.fileType'));
       return;
     }
     setBusy(true);
     try {
+      const { defaultImportColumns, prepareVocabularyImport } =
+        await import('../../services/vocabulary/import/prepare');
+      setPipeline({ prepare: prepareVocabularyImport });
+      setDeck(file.name.replace(/\.(txt|tsv|csv|apkg)$/i, ''));
+      if (/\.apkg$/i.test(file.name)) {
+        const { readApkgFile } = await import('../../services/vocabulary/import/apkg');
+        setNoteTypes(await readApkgFile(file));
+        return;
+      }
+      const { parsePlainText } = await import('../../services/vocabulary/import/plainText');
       const next = parsePlainText(await file.text());
-      setDeck(file.name.replace(/\.(txt|tsv|csv)$/i, ''));
       setColumns(defaultImportColumns(next));
       setParsed(next);
     } catch (err) {
@@ -76,12 +91,12 @@ export function VocabularyImport() {
     }
   };
   const save = async () => {
-    if (!parsed || !prepared || busy || result) return;
+    if (!parsed || !prepared || !pipeline || busy || result) return;
     setBusy(true);
     setError(null);
     try {
       const now = Date.now();
-      const batch = prepareVocabularyImport(parsed, columns, deck, language, now);
+      const batch = pipeline.prepare(parsed, columns, deck, language, now);
       const counts = await importVocabularyNotes(batch.notes, now);
       setResult({ ...counts, rejected: batch.rejected });
     } catch (err) {
@@ -111,7 +126,7 @@ export function VocabularyImport() {
             <span>{t('vocab.import.file')}</span>
             <Input
               type="file"
-              accept=".txt,.tsv,.csv,text/plain,text/tab-separated-values,text/csv"
+              accept=".txt,.tsv,.csv,.apkg,text/plain,text/tab-separated-values,text/csv"
               disabled={busy}
               onChange={(event) => {
                 void chooseFile(event.target.files?.[0]);
@@ -119,11 +134,18 @@ export function VocabularyImport() {
               }}
             />
           </label>
-          <p className="h-6 text-sm text-ink-600">
-            {t('vocab.import.separator', {
-              separator: parsed ? t(`vocab.import.separators.${parsed.separator}`) : t('vocab.import.none'),
-            })}
-          </p>
+          <VocabularyImportNoteTypes
+            types={noteTypes}
+            value={noteTypeId}
+            busy={busy}
+            separator={parsed ? t(`vocab.import.separators.${parsed.separator}`) : t('vocab.import.none')}
+            onSelect={(type) => {
+              setNoteTypeId(String(type.id));
+              setParsed(type.parsed);
+              setColumns({ front: 0, back: 1, example: null });
+              setResult(null);
+            }}
+          />
           <label className="block space-y-1 text-sm">
             <span>{t('vocab.import.deck')}</span>
             <Input
@@ -216,6 +238,63 @@ export function VocabularyImport() {
         </div>
       </DialogContent>
     </Dialog.Root>
+  );
+}
+
+export function VocabularyImportNoteTypes({
+  types,
+  value,
+  busy,
+  separator,
+  onSelect,
+}: {
+  types: ApkgNoteType[] | null;
+  value: string | null;
+  busy: boolean;
+  separator: string;
+  onSelect: (type: ApkgNoteType) => void;
+}) {
+  const { t } = useTranslation();
+  const control = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (types) control.current?.focus();
+  }, [types]);
+  const items =
+    types?.map((type) => ({
+      value: String(type.id),
+      label: t('vocab.import.apkg.typeOption', {
+        name: type.name,
+        notes: type.noteCount,
+        fields: type.fieldNames.join(', '),
+      }),
+    })) ?? [];
+  return (
+    <div className="h-32 space-y-1 overflow-auto text-sm">
+      <span id="import-notetype">{t('vocab.import.apkg.noteType')}</span>
+      <Select
+        items={items}
+        value={value}
+        disabled={!types || busy}
+        onValueChange={(value) => {
+          const type = types?.find((type) => String(type.id) === value);
+          if (type) onSelect(type);
+        }}
+      >
+        <SelectTrigger ref={control} aria-labelledby="import-notetype">
+          <SelectValue placeholder={t('vocab.import.apkg.chooseType')} />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <p className="break-words text-ink-600">
+        {types ? t('vocab.import.apkg.contentOnly') : t('vocab.import.separator', { separator })}
+      </p>
+    </div>
   );
 }
 

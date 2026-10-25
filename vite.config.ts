@@ -71,12 +71,13 @@ export default defineConfig(({ command }) => {
         workbox: {
           // Include the PDF worker and binary resources (not covered by the app's extensions), the licence and notice
           // text assets the About page links (data/lexicon), and the bundled lexicon data file the word sheet reads,
-          // so lookups and the About links work offline after install too.
+          // and sql.js wasm so first-time package import works offline after install/update too.
           globPatterns: [
             '**/*.{js,css,html,ico,png,svg,woff,woff2}',
             'pdfjs/**/*',
             'assets/**/*.{md,txt}',
             'assets/lexicon-*.json',
+            'assets/sql-wasm-browser-*.wasm',
           ],
           // The bundled lexicon is 3,092,981 bytes (2.95 MiB) raw: just under the 3 MiB default, so raise it with a margin.
           maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
