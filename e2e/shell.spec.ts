@@ -375,9 +375,9 @@ test.describe('phones', () => {
       'About',
     ])
       await expect(drawer.getByRole('link', { name, exact: true })).toBeVisible();
-    await drawer.getByRole('link', { name: 'Shadowing', exact: true }).click();
+    await drawer.getByRole('link', { name: 'Mistakes', exact: true }).click();
     await expect(drawer).toBeHidden();
-    await expect(page).toHaveURL(/#\/study\/shadowing$/);
+    await expect(page).toHaveURL(/#\/study\/mistakes$/);
   });
 
   test('Settings is a list of sections, then the section, with a way back @phone', async ({ page }) => {

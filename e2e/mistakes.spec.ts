@@ -83,6 +83,8 @@ test('wrong answer → grouped notebook → explanation → actual word saved �
   await page.getByRole('link', { name: 'Words', exact: true }).click();
   await page.getByRole('link', { name: 'All words', exact: true }).click();
   await expect(page.getByRole('button', { name: 'pain', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'My study', exact: true }).click();
+  await expect(page).toHaveURL(/#\/study\/mistakes$/);
   await page.getByRole('link', { name: /^Mistakes/ }).click();
   await entry(page).getByRole('link', { name: 'Retry in unit' }).click();
   await expect(row(page, 'Je ne').getByRole('textbox')).toHaveValue('mangez');
@@ -300,6 +302,9 @@ test('late explanation is dropped after unmount', async ({ page, ai }) => {
   await page.getByRole('link', { name: 'Words', exact: true }).click();
   await pause(900);
   await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('link', { name: 'My study', exact: true }).click();
+  await expect(page).toHaveURL(/#\/study\/mistakes$/);
   await page.getByRole('link', { name: /^Mistakes/ }).click();
+  await expect(page.getByRole('heading', { name: 'Mistakes', exact: true })).toBeVisible();
   await expect(page.getByText('Unmounted answer')).toHaveCount(0);
 });
