@@ -26,19 +26,19 @@ for (const future of [false, true]) {
         await storage.rateVocabularyCard('test-b', result.tokens, 'TEST other-tab Again', 'forgot', Date.now());
     }, future);
     await page.locator('[data-vocabulary-face="front"] h1').click();
-    await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
+    await expect(page.locator('[data-vocabulary-status]')).toContainText('You have reached today’s limit of new words');
     await expect(page.locator('main')).not.toContainText('TEST meaning');
     expect((await stored(page)).find((row) => row.key === 'test-a')!.introducedAt).toBeNull();
     if (future) {
-      await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeFocused();
-      await expect(page.getByText(/Next learning step at/)).toContainText('60 seconds');
+      await expect(page.getByRole('heading', { name: 'Nothing more for now' })).toBeFocused();
+      await expect(page.getByText(/Your next word is ready at/)).toContainText('60 seconds');
       await page.clock.runFor(59_000);
       await expect(page.getByRole('heading', { name: 'test-b', exact: true })).toHaveCount(0);
       await page.clock.runFor(1000);
     }
     await expect(page.getByRole('heading', { name: 'test-b', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Flip card', exact: true })).toBeFocused();
-    await expect(page.getByText('Due now: 1 · New remaining today: 0', { exact: true })).toBeVisible();
+    await expect(page.getByText('Ready to review: 1 · New words left today: 0', { exact: true })).toBeVisible();
     await expect(page.locator('[data-vocabulary-face="back"] h2')).toHaveCount(0);
     await page.locator('[data-vocabulary-face="front"] h1').click();
     await expect(page.locator('[data-vocabulary-face="back"] h2')).toBeFocused();
@@ -64,20 +64,20 @@ test('quota waiting wakes at local midnight, and a later external limit change w
     ).put('meta', { date: label, introducedKeys: ['deleted-test'] }, `vocabularyDay:${label}`);
   });
   await page.locator('[data-vocabulary-face="front"] h1').click();
-  await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
-  await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeVisible();
+  await expect(page.locator('[data-vocabulary-status]')).toContainText('You have reached today’s limit of new words');
+  await expect(page.getByRole('heading', { name: 'Nothing more for now' })).toBeVisible();
   await page.clock.runFor(9999);
   await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toHaveCount(0);
   await page.clock.runFor(1);
   await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();
-  await expect(page.getByText('Due now: 0 · New remaining today: 1', { exact: true })).toBeVisible();
+  await expect(page.getByText('Ready to review: 0 · New words left today: 1', { exact: true })).toBeVisible();
   // Lose another reveal to a changed limit, then change it without a same-tab notification.
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     await storage.saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 90 });
   });
   await page.locator('[data-vocabulary-face="front"] h1').click();
-  await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nothing more for now' })).toBeVisible();
   await page.evaluate(async () => {
     const database: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
     await (await database.db()).put('meta', { newPerDay: 1, retentionPercent: 90 }, 'vocabularyPreferences');
