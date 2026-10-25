@@ -38,9 +38,7 @@ test('word-sheet preload waits for nouns, retains independent errors, retries on
     failNouns = reject;
   });
   void mock.module('../src/components/word/packSections', () => ({
-    loadedGrammarPack: () => undefined,
     loadGrammarPack: load,
-    loadedNounGenderPack: () => undefined,
     loadNounGenderPack: () => nouns,
     lexiconVerbLines: () => Promise.resolve({ lines: [] }),
   }));
@@ -63,9 +61,7 @@ test('word-sheet preload waits for nouns, retains independent errors, retries on
   });
   const grammarFailure = mock(() => Promise.reject(new Error('TEST grammar pack chunk unavailable')));
   void mock.module('../src/components/word/packSections', () => ({
-    loadedGrammarPack: () => undefined,
     loadGrammarPack: grammarFailure,
-    loadedNounGenderPack: () => undefined,
     loadNounGenderPack: () => retry,
     lexiconVerbLines: () => Promise.resolve({ lines: [], error: 'TEST lexicon unavailable' }),
   }));
@@ -89,11 +85,9 @@ test('word-sheet preload waits for nouns, retains independent errors, retries on
   expect(state).toBeUndefined();
   expect(useWordSheetPack(false, null)).toBeUndefined();
 
-  // Both packs already loaded: the lexicon ships with the app, so it is still asked and there is no no-service fast path.
+  // Both packs load successfully: the lexicon ships with the app, so it is still asked and there is no no-service fast path.
   void mock.module('../src/components/word/packSections', () => ({
-    loadedGrammarPack: () => ({}),
     loadGrammarPack: load,
-    loadedNounGenderPack: () => pack,
     loadNounGenderPack: () => Promise.resolve(pack),
     lexiconVerbLines: () => Promise.resolve({ lines: [], error: 'TEST lexicon unavailable' }),
   }));
