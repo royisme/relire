@@ -98,7 +98,7 @@ test('rapid repeated traversal remains at the indexed import entry after Keep', 
   }
   await page.evaluate(() => history.back());
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/words$/);
+  await expect(page).toHaveURL(/#\/words$/);
 });
 
 test('early bookkeeping without Navigation survives delayed module, native hashes, middle truncation and reload', async ({
@@ -139,12 +139,12 @@ test('early bookkeeping without Navigation survives delayed module, native hashe
   });
   await page.getByRole('button', { name: 'Keep editing' }).click();
   await page.evaluate(() => {
-    location.hash = '#/study/words';
+    location.hash = '#/words';
   });
   await page.getByRole('button', { name: 'Keep editing' }).click();
   await page.evaluate(() => history.forward());
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/words$/);
+  await expect(page).toHaveURL(/#\/words$/);
   await page.reload();
   await page.goBack();
   await expect(page).toHaveURL(/#\/import\/exercises\?area=grammar$/);

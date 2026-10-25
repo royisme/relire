@@ -11,7 +11,7 @@ for (const future of [false, true]) {
     await page.clock.install({ time: new Date(2026, 9, 20, 12) });
     await page.clock.pauseAt(new Date(2026, 9, 20, 12, 0, 1));
     await seed(page);
-    await page.goto('/#/study/words/review');
+    await page.goto('/#/words/review');
     await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();
     await page.evaluate(async (future) => {
       const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
@@ -50,7 +50,7 @@ test('quota waiting wakes at local midnight, and a later external limit change w
   await page.clock.install({ time: new Date(2026, 9, 20, 23, 59, 49) });
   await page.clock.pauseAt(new Date(2026, 9, 20, 23, 59, 50));
   await seed(page, 'en', 'light', 1);
-  await page.goto('/#/study/words/review');
+  await page.goto('/#/words/review');
   await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
@@ -113,7 +113,7 @@ test('a true card read failure stays visible without an automatic retry loop, th
   const attempts = () => page.evaluate(() => (globalThis as { cardReadAttempts?: number }).cardReadAttempts);
   const restore = () => page.evaluate(() => (globalThis as { restoreCardRead?: () => void }).restoreCardRead?.());
   try {
-    await page.goto('/#/study/words/review');
+    await page.goto('/#/words/review');
     await expect(page.locator('[data-vocabulary-status]')).toContainText('TEST card read refused');
     const failedAttempts = await attempts();
     await page.clock.runFor(5000);

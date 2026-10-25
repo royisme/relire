@@ -61,7 +61,7 @@ for (const language of ['en', 'zh']) {
     expect(html).toContain(i18n.t('today.steps.progress', { done: 2, total: 5 }));
     expect(rows).toHaveLength(5);
     const expected = [
-      ['#/study/words/review', i18n.t('today.words.status', { due: 2, newAvailable: 1 })],
+      ['#/words', i18n.t('today.words.status', { due: 2, newAvailable: 1 })],
       [`#/read/graded/test-reader?version=${version}`, i18n.t('today.read.continue', { order: 4 })],
       ['#/speaking', i18n.t('today.sound.status')],
       ['#/study/mistakes', i18n.t('today.mistakes.status', { count: 2 })],
@@ -97,6 +97,7 @@ for (const language of ['en', 'zh']) {
     const html = render({ steps: [step], allDone: false, nextIndex: 0, doneCount: 0, counts: {} });
     const action = links(items(html)[0]!)[0];
     expect(action).toContain(`>${i18n.t(`today.${step.id}.action`)}</a>`);
+    if (step.id === 'words') expect(action).toContain('href="#/words"');
     expect(html).toContain(i18n.t(`today.${step.id}.why`));
   });
 
@@ -245,7 +246,7 @@ for (const language of ['en', 'zh']) {
     expect(html).not.toContain(i18n.t('today.steps.progress', { done: 0, total: 0 }));
     const actions = links(html);
     expect(actions).toHaveLength(4);
-    ['#/study/words', '#/read', '#/speaking', '#/grammar'].forEach((href, index) => {
+    ['#/words', '#/read', '#/speaking', '#/grammar'].forEach((href, index) => {
       expect(actions[index]).toContain(`href="${href}"`);
       expect(actions[index]).toContain('border-ink-300');
       expect(actions[index]).not.toContain('<svg');

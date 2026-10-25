@@ -18,7 +18,8 @@ test.describe('sidebar', () => {
   test('collapses to a rail and expands again, and remembers it across reloads', async ({ page }) => {
     await page.goto('/#/read');
     await expect(sidebar(page)).toHaveAttribute('data-sidebar', 'expanded');
-    await expect(sidebar(page).getByRole('link', { name: 'My study' })).toContainText('My study');
+    await expect(sidebar(page).getByRole('link', { name: 'My study', exact: true })).toContainText('My study');
+    await expect(sidebar(page).getByRole('link', { name: 'Words', exact: true })).toHaveAttribute('href', '#/words');
     expect((await sidebar(page).boundingBox())!.width).toBe(240);
 
     await page.getByRole('button', { name: 'Collapse sidebar' }).click();
@@ -46,12 +47,15 @@ test.describe('sidebar', () => {
     await expect(nav.getByRole('link', { name: 'Words' })).toBeVisible();
 
     await nav.getByRole('link', { name: 'Words' }).click();
-    await expect(page).toHaveURL(/#\/study\/words$/);
+    await expect(page).toHaveURL(/#\/words$/);
     await expect(nav.getByRole('link', { name: 'Words' })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Shadowing' })).toHaveCount(0);
+    await expect(nav.locator('a[href^="#/words/"]')).toHaveCount(0);
 
     // Another area closes them, and Settings lists its sections.
     await nav.getByRole('link', { name: 'Progress' }).click();
-    await expect(nav.getByRole('link', { name: 'Words' })).toHaveCount(0);
+    await expect(nav.getByRole('link', { name: 'Words' })).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Shadowing' })).toHaveCount(0);
     await nav.getByRole('link', { name: 'Settings', exact: true }).click();
     for (const href of ['#/settings/ai/text', '#/settings/practice', '#/settings/prompts', '#/settings/data'])
       await expect(nav.locator(`a[href="${href}"]`)).toBeVisible();
@@ -108,26 +112,26 @@ test.describe('routes', () => {
 
   test('resolving a default replaces the entry instead of adding one', async ({ page }) => {
     await page.goto('/#/study');
-    await expect(page).toHaveURL(/#\/study\/words$/);
+    await expect(page).toHaveURL(/#\/study\/mistakes$/);
     await page.getByRole('link', { name: 'Progress' }).click();
     await expect(page).toHaveURL(/#\/progress$/);
 
     await page.goBack();
-    await expect(page).toHaveURL(/#\/study\/words$/);
+    await expect(page).toHaveURL(/#\/study\/mistakes$/);
     // One more Back leaves the app; there is no `#/study` entry in between.
     await page.goBack();
     expect(page.url()).not.toContain('#/study');
   });
 
   test('the study tab lives in the address, so it survives a reload and Back', async ({ page }) => {
-    await page.goto('/#/study/words');
+    await page.goto('/#/study/mistakes');
     await page.getByRole('link', { name: 'Shadowing', exact: true }).click();
     await expect(page).toHaveURL(/#\/study\/shadowing$/);
     await page.reload();
     await expect(page.getByRole('link', { name: 'Shadowing', exact: true })).toHaveAttribute('aria-current', 'page');
     expect(await stored(page, 'relire_study_tab')).toBeNull();
     await page.goBack();
-    await expect(page.getByRole('link', { name: 'Words', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
   });
 
   test('a settings section can be opened by its address and survives a reload', async ({ page }) => {
@@ -284,7 +288,7 @@ test.describe('a key request', () => {
 test.describe('layout', () => {
   const routes = [
     '#/read',
-    '#/study/words',
+    '#/words',
     '#/study/shadowing',
     '#/grammar',
     '#/grammar/exercises',
@@ -353,7 +357,7 @@ test.describe('between md and lg', () => {
 
 test.describe('phones', () => {
   test('the menu button opens a drawer with the same tree @phone', async ({ page }) => {
-    await page.goto('/#/study/words');
+    await page.goto('/#/study/shadowing');
     await expect(page.locator('[data-sidebar]')).toHaveCount(0);
     await page.getByRole('button', { name: 'Menu' }).click();
     const drawer = page.getByRole('dialog', { name: 'Menu' });

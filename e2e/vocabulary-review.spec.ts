@@ -89,7 +89,7 @@ test('commit failure keeps front hidden; rating failure keeps answer/decision an
   ai,
 }) => {
   await seed(page);
-  await page.goto('/#/study/words/review');
+  await page.goto('/#/words/review');
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   const status = page.locator('[data-vocabulary-status]');
   const reason = 'TEST vocabulary disk refused. ' + 'Long TEST storage reason. '.repeat(80);
@@ -123,7 +123,7 @@ test('commit failure keeps front hidden; rating failure keeps answer/decision an
 });
 test('quota race and restore epoch never expose a stale answer or accept an old rating', async ({ page }) => {
   await seed(page);
-  await page.goto('/#/study/words/review');
+  await page.goto('/#/words/review');
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
@@ -223,7 +223,7 @@ for (const failure of ['partial', 'rate', 'hash', 'storage'] as const) {
         await page.keyboard.press('Escape');
         await cacheFault(page, false);
         if (attempt === 0) {
-          await page.goto('/#/study/words/all');
+          await page.goto('/#/words/all');
           await expect(page.getByRole('button', { name: 'test-0', exact: true })).toBeVisible();
           await expect(page.getByRole('row')).toHaveCount(2);
           await page.reload();

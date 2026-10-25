@@ -125,29 +125,59 @@ test('graded list and reader reserve the graded segment with pinned-version and 
     expect(result).toEqual({ route: { name: 'gradedReader', readerId: 'r' }, canonical: '#/read/graded/r' });
 });
 
-test('Grammar is separate from My study and local references/exercises survive service absence', () => {
+test('My study contains only Shadowing and Mistakes, with bare Study defaulting to Mistakes', () => {
   expect(STUDY_TABS).toEqual(['shadowing', 'mistakes']);
-  for (const tab of STUDY_TABS) roundTrip({ name: 'study', tab });
+  for (const tab of STUDY_TABS) {
+    roundTrip({ name: 'study', tab });
+    expect(areaOf({ name: 'study', tab })).toBe('study');
+  }
+  expect(parse('#/study')).toEqual({ route: { name: 'study', tab: 'mistakes' }, canonical: '#/study/mistakes' });
+});
+
+test('Words is independent of My study and old word addresses have no aliases', () => {
+  roundTrip({ name: 'words' });
+  expect(routeHref({ name: 'words' })).toBe('#/words');
+  expect(routeHref({ name: 'wordsAll' })).toBe('#/words/all');
+  expect(routeHref({ name: 'wordsReview' })).toBe('#/words/review');
   roundTrip({ name: 'wordsAll' });
   roundTrip({ name: 'wordsReview' });
   roundTrip({ name: 'wordsPlay' });
   roundTrip({ name: 'wordsMap' });
-  expect(routeHref({ name: 'wordsMap' })).toBe('#/study/words/map');
-  expect(areaOf({ name: 'wordsMap' })).toBe('study');
+  expect(routeHref({ name: 'wordsMap' })).toBe('#/words/map');
+  expect(areaOf({ name: 'wordsMap' })).toBe('words');
   expect(vocabularyPlaceOf({ name: 'wordsMap' })).toBe('map');
-  expect(parseRoute('#/study/words/map', false).route).toEqual({ name: 'wordsMap' });
-  for (const hash of ['#/study/words/Map', '#/study/words/map/x', '#/study/words/map?x=1'])
+  expect(parseRoute('#/words/map', false).route).toEqual({ name: 'wordsMap' });
+  for (const hash of ['#/words/Map', '#/words/map/x', '#/words/map?x=1'])
     expect(parse(hash).route.name).toBe('notFound');
-  expect(routeHref({ name: 'wordsPlay' })).toBe('#/study/words/play');
-  expect(areaOf({ name: 'wordsPlay' })).toBe('study');
+  expect(routeHref({ name: 'wordsPlay' })).toBe('#/words/play');
+  expect(areaOf({ name: 'wordsPlay' })).toBe('words');
   expect(vocabularyPlaceOf({ name: 'wordsPlay' })).toBe('play');
   expect(vocabularyPlaceOf({ name: 'wordsReview' })).toBe('review');
   expect(vocabularyPlaceOf({ name: 'wordsAll' })).toBe('all');
   expect(vocabularyPlaceOf({ name: 'words' })).toBe('home');
-  expect(parse('#/study').canonical).toBe('#/study/words');
-  // The run keeps its own address, and a third segment outside the four known ones is still unknown.
-  for (const hash of ['#/study/words/reviewx', '#/study/words/Play', '#/study/words/all/x'])
+  for (const [name, suffix] of [
+    ['words', ''],
+    ['wordsAll', '/all'],
+    ['wordsReview', '/review'],
+    ['wordsPlay', '/play'],
+    ['wordsMap', '/map'],
+  ] as const) {
+    const route = { name };
+    expect(areaOf(route)).toBe('words');
+    for (const service of [true, false]) {
+      expect(parseRoute(`#/words${suffix}`, service)).toEqual({ route, canonical: null });
+      expect(parseRoute(`#/study/words${suffix}`, service)).toEqual({
+        route: { name: 'notFound' },
+        canonical: null,
+      });
+    }
+  }
+  // The run keeps its own address, and an unknown child still has no alias.
+  for (const hash of ['#/words/reviewx', '#/words/Play', '#/words/all/x'])
     expect(parse(hash).route.name).toBe('notFound');
+});
+
+test('Grammar is separate from My study and local references/exercises survive service absence', () => {
   roundTrip({ name: 'grammar' });
   roundTrip({ name: 'grammar', tag: 'articles' });
   expect(areaOf({ name: 'grammarTopic', topicId: 'topic' })).toBe('grammar');

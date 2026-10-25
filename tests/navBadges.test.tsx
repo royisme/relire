@@ -1,11 +1,15 @@
 /** Badge ownership: the due count sits on the Words row, the unresolved count on Mistakes, and never on My study. */
 import { afterAll, expect, spyOn, test } from 'bun:test';
-import * as React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
 import i18next from 'i18next';
 import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
+import type { Route } from '../src/utils/routes';
+import { vocabularyDue } from '../src/utils/srs';
+import { testMatureSchedule } from './fixtures/vocabulary';
+
+const React = await import('react');
 
 await import('../src/i18n');
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
@@ -33,7 +37,7 @@ await i18n.init({
   interpolation: { escapeValue: false },
 });
 
-const render = (rail: boolean) => {
+const render = (rail: boolean, dueCount = 3, route: Route = { name: 'study', tab: 'mistakes' }) => {
   const useStore = React.useSyncExternalStore;
   const store = spyOn(React, 'useSyncExternalStore').mockImplementation((subscribe, getSnapshot, getServerSnapshot) =>
     useStore(subscribe, getSnapshot, getServerSnapshot ?? getSnapshot),
@@ -47,9 +51,9 @@ const render = (rail: boolean) => {
     retry: () => {},
   })) as never);
   try {
-    return renderToStaticMarkup(
+    return renderToString(
       <I18nextProvider i18n={i18n}>
-        <NavTree route={{ name: 'words' }} dueCount={3} rail={rail} />
+        <NavTree route={route} dueCount={dueCount} rail={rail} />
       </I18nextProvider>,
     );
   } finally {
@@ -58,19 +62,35 @@ const render = (rail: boolean) => {
   }
 };
 
-/** The one row with this visible label (the parent and its Words child share an address). */
+/** Expanded/drawer labels are visible; rail labels live in title, even when aria-label also names a count. */
 const row = (html: string, label: string) => {
   const tags = [...html.matchAll(/<a [^>]*>[\s\S]*?<\/a>/g)].map((match) => match[0]);
-  const found = tags.filter((tag) => tag.includes(`>${label}<`));
+  const found = tags.filter((tag) => tag.includes(`>${label}<`) || tag.includes(`title="${label}"`));
   expect(found).toHaveLength(1);
   return found[0];
 };
+
+test('the due metric excludes unintroduced new cards and future learning steps', () => {
+  const now = new Date(2026, 9, 25, 12).getTime();
+  const review = { ...testMatureSchedule(now), dueAt: now - 86_400_000 };
+  expect(
+    [
+      review,
+      { ...review, phase: 'learning' as const, dueAt: now - 1 },
+      { ...review, phase: 'relearning' as const, dueAt: now },
+      null,
+      { ...review, phase: 'learning' as const, dueAt: now + 1 },
+    ].map((schedule) => vocabularyDue(schedule, now)),
+  ).toEqual([true, true, true, false, false]);
+});
 
 test('the due badge belongs to the Words row and the unresolved count to Mistakes, not to My study', () => {
   const html = render(false);
   const words = row(html, 'Words');
   expect(words).toContain('>3<');
   expect(words).toContain('3 due');
+  expect(words).toContain('href="#/words"');
+  expect(words).toContain('ml-auto');
   const mistakes = row(html, 'Mistakes');
   expect(mistakes).toContain('>2<');
   expect(mistakes).toContain('2 to review');
@@ -78,14 +98,66 @@ test('the due badge belongs to the Words row and the unresolved count to Mistake
   const parent = row(html, 'My study');
   expect(parent).not.toMatch(/tnum/);
   expect(parent).not.toContain('>5<');
-  for (const tab of ['Shadowing', 'Grammar']) expect(row(html, tab)).not.toMatch(/tnum/);
+  expect(parent).toContain('href="#/study/mistakes"');
+  expect(parent).toContain('<svg');
+  const children = html.slice(html.indexOf(parent) + parent.length, html.indexOf(row(html, 'Progress')));
+  expect([...children.matchAll(/href="([^"]+)"/g)].map((match) => match[1])).toEqual([
+    '#/study/shadowing',
+    '#/study/mistakes',
+  ]);
+  for (const tab of ['Shadowing', 'Grammar', 'Reading', 'Progress']) expect(row(html, tab)).not.toMatch(/tnum/);
+  expect(html).not.toContain('>5<');
+  expect(parent.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/)?.[0]).not.toBe(words.match(/<svg\b[^>]*>[\s\S]*?<\/svg>/)?.[0]);
 });
 
-test('the rail keeps one icon per area and shows no child count rather than a misleading one', () => {
+test('the rail keeps the Words due count on its corner, never on My study or a hidden child', () => {
   const html = render(true);
-  const tags = [...html.matchAll(/<a [^>]*>[\s\S]*?<\/a>/g)].map((match) => match[0]);
-  const myStudy = tags.filter((tag) => tag.includes('aria-label="My study"'));
-  expect(myStudy).toHaveLength(1);
-  expect(myStudy[0]).not.toMatch(/tnum/);
+  const words = row(html, 'Words');
+  expect(words).toContain('href="#/words"');
+  expect(words).toContain('aria-label="Words, 3 due"');
+  expect(words).toContain('>3<');
+  expect(words).toContain('tnum');
+  expect(words).toContain('absolute top-0 right-0');
+  expect(words).not.toContain('>Words<');
+  const myStudy = row(html, 'My study');
+  expect(myStudy).toContain('aria-label="My study"');
+  expect(myStudy).not.toMatch(/tnum/);
+  expect(myStudy).not.toContain('>5<');
   expect(html).not.toContain('to review');
+  expect(html).not.toContain('>5<');
+  expect(html).not.toContain('href="#/study/shadowing"');
 });
+
+for (const rail of [false, true]) {
+  test(`Words owns no sidebar children and stays between Reading and Grammar (${rail ? 'rail' : 'expanded/drawer'})`, () => {
+    for (const name of ['words', 'wordsAll', 'wordsReview', 'wordsPlay', 'wordsMap'] as const) {
+      const html = render(rail, 3, { name });
+      const words = row(html, 'Words');
+      expect(html.indexOf(row(html, 'Reading'))).toBeLessThan(html.indexOf(words));
+      expect(html.indexOf(words)).toBeLessThan(html.indexOf(row(html, 'Grammar')));
+      expect(words).toContain('aria-current="page"');
+      expect(words).toContain('<svg');
+      expect(html.match(/href="#\/words"/g)).toHaveLength(1);
+      expect(html).not.toContain('href="#/words/');
+      expect(html).not.toContain('href="#/study/words');
+      expect(html).not.toContain('>Overview<');
+      expect(html).not.toContain('>All words<');
+      expect(html).not.toContain('>Map<');
+      expect(words).toContain('>3<');
+      expect(row(html, 'My study')).not.toMatch(/tnum/);
+    }
+  });
+
+  test(`zero due shows no Words badge, without borrowing unresolved mistakes (${rail ? 'rail' : 'expanded/drawer'})`, () => {
+    const html = render(rail, 0);
+    const words = row(html, 'Words');
+    expect(words).not.toMatch(/tnum|sr-only/);
+    expect(words).not.toContain('due');
+    expect(words).not.toContain('>0<');
+    expect(row(html, 'My study')).not.toMatch(/tnum/);
+    if (!rail) {
+      expect(row(html, 'Mistakes')).toContain('>2<');
+      expect(row(html, 'Mistakes')).toContain('2 to review');
+    }
+  });
+}

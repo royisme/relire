@@ -414,7 +414,7 @@ test('the done-for-now screen states the real counts, the real next due time, Co
   expect(html).toContain(i18n.t('vocab.game.doneCounts', { ratings: 6, due: 4 }));
   expect(html).toContain(i18n.t('vocab.game.nextDue', { time: new Date(due).toLocaleString() }));
   expect(html).toContain(i18n.t('vocab.game.continueRun'));
-  expect(html).toContain('href="#/study/words"');
+  expect(html).toContain('href="#/words"');
   expect(html.match(/role="status"/g)).toHaveLength(1);
   const nothing = render(
     <run.RunDone
@@ -436,7 +436,7 @@ test('the queue-cleared screen says so and shows the same real next due time', a
   const html = render(<run.RunCleared nextDue={due} />);
   expect(html).toContain(i18n.t('vocab.game.queueCleared'));
   expect(html).toContain(i18n.t('vocab.game.nextDue', { time: new Date(due).toLocaleString() }));
-  expect(html).toContain('href="#/study/words"');
+  expect(html).toContain('href="#/words"');
 });
 
 test('fewer than 3 saved words never throws, drops options to 2 or falls back to plain flip', () => {

@@ -207,7 +207,7 @@ for (const language of ['en', 'zh'] as const) {
     for (const state of ['new', 'learning', 'young', 'mature'])
       expect(picture).toContain(i18n.t('vocab.map.segment', { label: i18n.t(`vocab.map.tier.${state}`), words: 1 }));
     const home = render(<VocabularyHome model={model} />);
-    expect(home).toContain('href="#/study/words/map"');
+    expect(home).toContain('href="#/words/map"');
   });
 
   test(`${language}: empty, loading and failures are real and retain a fixed status slot`, async () => {
@@ -215,7 +215,7 @@ for (const language of ['en', 'zh'] as const) {
     const empty = render(<VocabularyMap model={model} content={content} />);
     expect(empty).toContain(i18n.t('vocab.map.empty'));
     expect(empty).toContain(i18n.t('vocab.map.noLeeches'));
-    expect(empty).toContain('href="#/study/words/all"');
+    expect(empty).toContain('href="#/words/all"');
     expect(empty).not.toContain(i18n.t('vocab.map.saved'));
     const loading = render(<VocabularyMap model={{ ...model, ready: false }} content={{ ...content, busy: true }} />);
     expect(loading).toContain(i18n.t('common.loading'));

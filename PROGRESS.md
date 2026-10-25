@@ -7,7 +7,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 ## 2026-10-25: N1 code on branch `words-top` (tests pending)
 
 - Words is a top-level row after Reading at `#/words` (`#/words/all`, `/review`, `/play`, `/map`), with the due badge on the row at every width; `#/study` now opens Mistakes and `#/study/words…` is not found. `StudyView` lost the Words tab. The Words home tab is now called Overview, and the Chinese Words label is aligned. Docs and the DESIGN.md badge rules are updated.
-- Tests that assert the old addresses and labels fail until the separate test worker updates them. **Unverified:** no browser.
+- Independent N1 tests now cover routes, top-level navigation, separate badges, Overview/locales and key-banner decisions; e2e addresses/selectors are updated and typechecked, **not run**. Baseline: 2,582 tests, 14 failing. After: 2,596 tests, 4 failing: `src/components/today/TodayCard.tsx:37` still links the words step to `#/words/review`, contradicting the owner-required `#/words`; those en/zh assertions deliberately remain red. Typecheck, lint, i18n, format and shape exit 0. **Unverified:** no browser.
 
 ## 2026-10-25: N0 landed (App.tsx split, `app-split`)
 
