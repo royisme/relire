@@ -326,8 +326,15 @@
     "allWords": "All words",
     "due": "Due now",
     "learning": "Learning / relearning",
-    "remaining": "New remaining today",
-    "continue": "Start / continue review",
+    "available": "New words available today",
+    "action": {
+      "review_one": "Review {{count}} word",
+      "review_other": "Review {{count}} words",
+      "learn_one": "Learn {{count}} new word",
+      "learn_other": "Learn {{count}} new words",
+      "next": "Your next word returns on {{time}}.",
+      "empty": "No words yet. Add the wordbook or import your own in All words."
+    },
     "play": "Play a run",
     "map": {
       "title": "Map",

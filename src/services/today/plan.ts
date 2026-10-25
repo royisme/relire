@@ -5,6 +5,8 @@ export type TodayStepId = 'words' | 'read' | 'sound' | 'mistakes' | 'grammar';
 export interface TodayWords {
   due: number;
   newAvailable: number;
+  /** When the next learning step falls due, if none is waiting now; the Words Overview shows it, Today ignores it. */
+  nextDue: number | null;
   reviewsToday: number;
 }
 /** One merged-catalogue reader joined with progress; a service edition carries its version. */

@@ -68,7 +68,7 @@ export function VocabularyView({
           <VocabularyBrowser rows={model.rows} book={content.book} />
         </Suspense>
       ) : (
-        <VocabularyHome model={model} />
+        <VocabularyHome model={model} book={content.book} loading={content.busy && !content.book} />
       )}
     </div>
   );

@@ -25,7 +25,7 @@ export function wordsInput(
   newPerDay: number,
   now: number,
 ): TodayWords {
-  const { candidates } = vocabularyQueue(rows, book, day, newPerDay, now, new Set());
+  const { candidates, nextDue } = vocabularyQueue(rows, book, day, newPerDay, now, new Set());
   let due = 0;
   let unseen = 0;
   for (const candidate of candidates) {
@@ -35,6 +35,7 @@ export function wordsInput(
   return {
     due,
     newAvailable: Math.min(unseen, Math.max(0, newPerDay - day.introducedKeys.length)),
+    nextDue,
     reviewsToday: reviewsToday(rows, now),
   };
 }

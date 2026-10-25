@@ -4,6 +4,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: Words Overview next action (P1)
+
+- The Overview shows `wordsInput`'s due and new counts (the bare allowance is gone), one filled action in a fixed-height slot (Review N words, Learn N new words, the time the next word returns, or where to add words; plain Review, not the run), Play a run as the outlined link and no Map link. `wordsInput` also returns `nextDue`. Tests pending (old Overview and `wordsInput` assertions). **Unverified:** no browser.
+
 ## 2026-10-25: Recordings out of the sidebar
 
 - Owner decision: Recordings is a function of Speaking, not a menu entry. Speaking's only sidebar child is Read aloud; Recordings opens from the Speaking page link and the reader's "All recordings", at the same route, and Speaking stays the highlighted area there. Tests pending (nav tests expect two Speaking children). **Unverified:** no browser.
