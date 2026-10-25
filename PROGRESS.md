@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: LB3 landed; the lexicon is fully out of the service
+
+- Removed: `worker/src/lexicon.ts` and its routes, `worker/migrations/0002_lexicon.sql` (the numbering keeps a gap, nothing is deployed), `scripts/lexicon/import.ts` and its remote-apply protocol (`sourceVersion` moved to `scripts/lexicon/lexicon.ts`), the Worker lexicon tests and the lexicon parts of the D1 target and publisher tests. The Worker holds topics, the wordbook and readers. Worker: deepseek-flash (`3ecaed6`, about 0.4 CNY). Docs updated by the lead: `worker/README.md` (no day 2; one-day first deployment), ADR amendment 5, `docs/d-remote-plan.md` note, `AGENTS.md`, `PRODUCT.md`, `docs/architecture.md`, `docs/roadmap.md`, `docs/grammar-pack.md`, `docs/development.md`.
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,403), Worker typecheck, every CI `--check`, build, detector `[]`, and the removal grep. **Not yet done:** a review of the LB1 to LB3 diffs (waiting for codex quota), and the owner's checks (phone lookup time, the About links, the unrun `e2e/lexicon-word.spec.ts`).
+
 ## 2026-10-24: LB2 landed (the client reads the bundled lexicon)
 
 - `lexiconForm` and `lexiconLemma` keep their signatures and now read `data/lexicon/lexicon.json` through `new URL(..., import.meta.url)`: one fetch bounded at 10 s over the fetch and the body read, `LexiconBundleSchema`, two maps, the four-field `source`, a shared in-flight promise cleared on failure. The `contentServiceUrl()` gating and the no-service fast path are removed from `useWordSheetPack` and `useLexiconVerb`; the file is in the PWA precache (limit raised from 3 to 4 MiB; raw size 3,092,981 bytes). Worker: deepseek-flash (`f4ee290`, about 0.4 CNY).

@@ -1,5 +1,8 @@
 # Remote publication of the content service (D-remote, D-origins)
 
+> **Superseded in part (2026-10-24):** the lexicon left the content service (`docs/lexicon-bundle-plan.md`, LB1 to LB3). Every mention below of the lexicon's publisher (`scripts/lexicon/import.ts`), its remote apply, its read-only check, "day 2" and the 49,238 rows is history; the first deployment is one day (topics, vocabulary, readers).
+
+
 Status: draft for review (2026-10-24), revised after two Argon reviews (both fail; the findings the lead verified against the code are applied). Owner decision of 2026-10-24 (ADR `docs/adr-hosted-content-service.md`, amendment): the first deployment has no accounts, is public read-only, rate limited and CORS limited; topics, the lexicon, the vocabulary book (`unreviewed`) and non-bundled graded readers go up together. Platform only: no content changes, no deploy by an agent.
 
 ## Why

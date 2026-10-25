@@ -2,7 +2,7 @@
 
 The one file of project instructions for every agent. `CLAUDE.md` only imports it, so Claude Code, pi and other tools read the same text; edit this file, never `CLAUDE.md`.
 
-Relire is a static, browser-only PWA for French close reading and pronunciation practice for TCF Canada learners (no mock exams or official scores); it is becoming **Relire Plus** (`docs/merge-plan.md`). Stack: React 19, Vite, Tailwind v4, i18next, IndexedDB, the user's own AI key called from the browser; no server of its own: the only backend is an optional read-only content service for grammar, lexicon and wordbook content (`docs/adr-hosted-content-service.md`), which never sees an AI key, an answer, an article or a recording (it receives only the service access key the learner set for it, and a topic id, tapped word or book id/page/version) and is never required. Bun is the only package manager.
+Relire is a static, browser-only PWA for French close reading and pronunciation practice for TCF Canada learners (no mock exams or official scores); it is becoming **Relire Plus** (`docs/merge-plan.md`). Stack: React 19, Vite, Tailwind v4, i18next, IndexedDB, the user's own AI key called from the browser; no server of its own: the only backend is an optional read-only content service for grammar topics, the wordbook and graded readers (`docs/adr-hosted-content-service.md`; the verb-form dictionary is a data file shipped with the app, `docs/lexicon-bundle-plan.md`), which never sees an AI key, an answer, an article or a recording (it receives only the service access key the learner set for it, and a topic id, book id/page/version or reader id/version) and is never required. Bun is the only package manager.
 
 ## Hard rules
 

@@ -15,7 +15,7 @@ Goals
 
 Non-goals (phase 1)
 - No server, D1, API or accounts; no hosted delivery (the loader is the one seam, section 4).
-- No bundled third-party data: no Wiktionnaire, Lexique, Morphalou, Verbiste-derived or Clarte-derived tables. Morphalou is an offline oracle only for the conjugation pack; since 2026-10-19 a learner-sized selection of its forms (about 5,000 lemmas) is served by the content service, not bundled (`docs/adr-hosted-content-service.md`, `worker/NOTICE.md`).
+- No bundled third-party data: no Wiktionnaire, Lexique, Morphalou, Verbiste-derived or Clarte-derived tables. Morphalou is an offline oracle only for the conjugation pack; since 2026-10-24 a learner-sized selection of its forms (about 5,000 lemmas) ships with the app as a committed LGPL-LR data file (`data/lexicon/lexicon.json`, with `data/lexicon/NOTICE.md` and `LGPL-LR.txt`; `docs/lexicon-bundle-plan.md`, owner decision), after serving it from the content service for a few days (2026-10-19). The conjugation pack itself still bundles none of it.
 - No calculators, example sentences in the pack (AI examples appear only on the Part 3 screen), noun gender (now Part 4) or preposition content, daily-verb features, mastery stats, streaks, pronunciation scores, 12-colour token system.
 - No IPA (no phase-1 consumer; a future addition when a real consumer exists, Q13), no new grammar tags, no new exercise type, no AI call in the corpus path at runtime or in drills.
 - No participle drills, no inversion or negation forms (`va-t-il`, `ne mange pas`; reversed by Part 3 F6), no compound tenses other than passé composé, no spelling-by-sound logic.
@@ -256,7 +256,7 @@ Recommendation: license `data/grammar-pack/` and `src/data/grammar-pack/pack.jso
 Source: `/tmp/agy-research/run2.log` (agy report, the lead spot-checked it; not independently verified here). Relevant conclusions:
 - Wiktionnaire is CC BY-SA 4.0 (3.0 before June 2023); derived datasets are share-alike, incompatible with MIT bundling; checking against it is fine.
 - Lexique is contradictory: link text says BY-SA, the link targets BY-NC; OpenLexicon says BY-SA. Treat as not usable.
-- Morphalou 3.1 is LGPL-LR; bundling needs notices and replaceability. We only use it as an offline oracle for the pack, so none apply there; the content service's lexicon does serve a selection of its forms, so the notice and the rebuild recipe in `worker/NOTICE.md` apply to that.
+- Morphalou 3.1 is LGPL-LR; bundling needs notices and replaceability. We only use it as an offline oracle for the pack, so none apply there; the app's bundled lexicon file (`data/lexicon/`) does contain a selection of its forms, so the notice, the licence text and the rebuild recipe in `data/lexicon/NOTICE.md` apply to that (licence section 4, `docs/lexicon-bundle-plan.md`).
 - Verbiste-derived libraries (`verbecc`, `mlconjug3` data, `conjugation-fr`) are GPL or LGPL by lineage; `hbenbel/French-Dictionary` (declared MIT) derives from Wiktionary dumps and cannot be MIT; `french-verbs-lefff` data stays LGPL-LR. None are used.
 - The 1990 rectifications are an official norm and may be checked against; the Académie's site text may not be copied.
 - Individual forms are unprotectable facts; bulk extraction of a third-party database can trigger the EU database right (Directive 96/9/EC art. 7). The report calls the diff safe in its body and lists it as an open question for counsel at the end.
