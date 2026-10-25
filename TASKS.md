@@ -77,7 +77,7 @@ Owner feedback 2026-10-24: Today has no app design and no guidance; follow Parlo
 
 ### Next: remote publication of the content service (owner decision 2026-10-24; plan `docs/d-remote-plan.md` under Argon review)
 
-First deployment: no accounts, public read-only, rate limited, CORS limited to the deployment origins; topics, lexicon and the vocabulary book (the owner's own, `unreviewed`) go up together (ADR amendment). Needs a short plan doc and an Argon review before dispatch.
+First deployment: no accounts, public read-only, rate limited, CORS limited to the deployment origins; topics, the vocabulary book (the owner's own, `unreviewed`) and graded readers go up together (ADR amendment), with the lexicon shipped with the app. Needs a short plan doc and an Argon review before dispatch.
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
