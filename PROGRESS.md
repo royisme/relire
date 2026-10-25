@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: VG5 landed (the map and the leech group)
+
+- `#/study/words/map` with a "Map" link on the Words home: regions (book pages, imported decks, saved, other) with counts as text and a segmented bar, collapsible word lists with a tier label (new, learning, young, mature), a Leeches group (8 lapses or more, with memory trick and examples), and a boss card: a leech shows that extra context after the reveal in the run, never extra rating chances. `collection.ts` holds the pure `tierOf`, `leechesOf` and `bossContextOf`; `summarizeRegions` now returns member keys.
+- Verified (exit 0): typecheck, lint, full suite (2,536), i18n, format and shape, build, detector `[]`. **Unverified:** no browser.
+
 ## 2026-10-25: VG4 landed (Anki plain-text import)
 
 - Parser for Anki "Notes in Plain Text", TSV and CSV (headers, separators, quotes, BOM), normalization before validation (HTML, entities, `[sound:]`, apostrophes, NFC), refusals with row number and real reason, the `imported` definition and `import` source kinds, one atomic import transaction (duplicates merge without touching schedule or history; increasing `bookmarkedAt` in deck order), `cardContent`, regions and the run's pool learn the third kind, backup round-trip, and an import dialog on the Words home. `src/components/ui/dialog.tsx` was written by hand on Base UI (no network for `shadcn add`).
