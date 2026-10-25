@@ -330,6 +330,7 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
               <RunRevealedCard
                 word={active.candidate.word}
                 answer={{ ...active.candidate, row: active.row }}
+                book={book}
                 wordHeading={wordHeading}
                 onListen={() => {
                   ownedSpeech.current = speechKey(active.candidate.word);

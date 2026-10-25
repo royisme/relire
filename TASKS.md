@@ -162,7 +162,7 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | P1c | Review page counter `vocab.reviewCounts` "New remaining today" (`src/hooks/useVocabularyReview.ts`) still uses the bare allowance and can disagree with the Overview and Today | counter equals `wordsInput` newAvailable for the same data | not started |
 | P1d | `src/components/vocabulary/game/RunEnd.tsx:13` `runNextDue` uses raw `dueAt` (review cards due later today are already due, and review cards become due at local midnight): use `vocabularyAvailableAt` | run-end next-due time equals the Overview's rule | not started |
 | P1b | Time estimate from the learner's own history (5b item 1 rule) | median within-session gap, at least 30 gaps, range or omitted | ready (Q4 yes) |
-| P2 | Wordbook review label from the manifest | never "reviewed" for the unreviewed state | not started |
+| P2 | Wordbook review label from the manifest | never "reviewed" for the unreviewed state | built and tested (unit tests pass; browser unverified); challenge text intentionally unlabeled until reveal |
 | P3 | README factual fix (both languages) and the stale `PRODUCT.md` First run line | providers, privacy incl. content service and the font change from F1, missing areas, stale caption | not started |
 | P4 | Copy pass (about 15 strings, en and zh) | keys kept, `i18n:check`, the lead reads every zh line | ready (B2: Key) |
 | P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | built and tested (unit 2611 pass; e2e spec typechecked, never run) |

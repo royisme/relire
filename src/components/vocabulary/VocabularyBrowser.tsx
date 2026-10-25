@@ -152,7 +152,7 @@ export function VocabularyBrowser({ rows, book }: { rows: VocabularyRow[]; book?
           {t('vocab.next')}
         </Button>
       </div>
-      {detail && <VocabularyDetails key={detail.key} word={detail} onClose={() => setSelected(null)} />}
+      {detail && <VocabularyDetails key={detail.key} word={detail} book={book} onClose={() => setSelected(null)} />}
     </div>
   );
 }

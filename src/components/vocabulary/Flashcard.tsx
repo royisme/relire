@@ -3,10 +3,12 @@ import { useLayoutEffect, useRef, type ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/button';
 import { SpeakButton } from '../ui/speak-button';
+import type { VocabularyBook } from '../../types/vocabulary';
 import { VocabularyAnswer } from './VocabularyAnswer';
 export function Flashcard({
   word,
   answer,
+  book,
   face,
   busy,
   onFlip,
@@ -14,6 +16,7 @@ export function Flashcard({
 }: {
   word: string;
   answer: ComponentProps<typeof VocabularyAnswer>['word'] | null;
+  book?: VocabularyBook;
   face: 'front' | 'back';
   busy: boolean;
   onFlip: () => void;
@@ -134,7 +137,7 @@ export function Flashcard({
               </h2>
               {listen}
             </header>
-            <VocabularyAnswer word={answer} snapshot />
+            <VocabularyAnswer word={answer} snapshot book={book} />
           </section>
         )}
       </div>

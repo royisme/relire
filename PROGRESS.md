@@ -4,6 +4,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+- 2026-10-25, P2 built: `VocabularyAnswer` takes the cached book and shows its manifest review ("Built-in · not reviewed" / "reviewed by {name} on {date}") only when the manifest version equals the meaning's `bookSource.version`, else plain "Built-in"; threaded from the review, run and browse parents, no new storage or network. Only revealed answers and word details carry the label: Run challenge text is shown before the learner answers, so it stays unlabelled by decision. Tests landed (`059ada3`). **Unverified:** no browser.
 - 2026-10-25, P5 built: Dialog wraps Base UI; Sheet and Drawer share initial/restored focus, Tab containment and counted scroll locking; Escape stays topmost-only. Static/build/shape checks pass, detector `[]`; built and tested (unit 2611 pass; the five static-render tests now render the dialog content without the Base UI portal; `e2e/overlay-focus.spec.ts` typechecked, never run). Browser/visual acceptance unverified.
 
 ## 2026-10-25: F1 fonts bundled

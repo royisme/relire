@@ -147,6 +147,7 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
             key={key}
             word={active.candidate.word}
             answer={revealed ? { ...active.candidate, row: active.row } : null}
+            book={book}
             face={back ? 'back' : 'front'}
             busy={busy}
             onFlip={() => void flip()}
