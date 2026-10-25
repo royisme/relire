@@ -4,6 +4,12 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: VG6 landed (the opt-in goal); the vocabulary plan is complete except VG7
+
+- An optional exam date and a mature-word target in `appSettings` (device-local, excluded from backups in both directions, validated once in `goal.ts`: a past date and a non-positive target are refused with real messages). With a goal set the Words home shows the days left (calendar days, DST-safe), the real mature count now, the target and the last four weekly "words gained" numbers from `weeklyGained`, which `gainedThisWeek` now uses too (one first-attainment rule). No forecast, no "on track" wording; with no goal set nothing about goals shows.
+- Verified (exit 0) on the merged tree in the main checkout: typecheck, lint, full suite (2,565), i18n, format and shape, build, detector `[]`. **Unverified:** no browser.
+- State of `docs/vocab-game-plan.md`: VG1 to VG6 and VG8 landed; VG7 (feel) is deferred by the plan and owner-gated; seeding FSRS from a revlog is not built.
+
 ## 2026-10-25: VG8 landed (`.apkg` import)
 
 - `apkg.ts` reads a package with `fflate` (zip), `fzstd` (the zstd-compressed `collection.anki21b`) and `sql.js` (the collection), preferring `anki21b`, then `anki21`, then `anki2`, and refusing a stub-only package, a corrupt file or an oversize file with a real message. Notes of the chosen note type feed the same normalization, column picker, preview and merge as the text import. The dialog and the whole import pipeline (parser, `prepare.ts`, the 40 KB entity table, the three libraries) now load by dynamic import on the first file pick; the VG4 follow-up about the Words chunk is closed.
