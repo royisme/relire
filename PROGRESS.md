@@ -4,11 +4,17 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: Debt review of LB1 to LB3 and LG1 (gpt-6-astra, verdict fail, nine findings); fixes merged
+
+- The review (`ac1d207`, read-only) found one high, five medium and three low problems: the Le ou la round's keyboard and save flow, a stale lexicon error in the word sheet, 36 px targets, stale docs and dead re-exports. The lead checked findings 2, 3 and 4 against the code before dispatching.
+- Fixed by three workers, each merged after the lead re-ran the checks in its worktree: `gender-fixes` (GLM 5.3; held Enter, Enter/Space on a choice, the deck advances only after the save, a token-read Retry reuses the saved set, recap focus and announcement, 40 px targets), `docs-debt` (Gemini 3.8 flash; the lead restored the closed D-limit row it had reopened), `lexicon-retry` (GLM 5.3; the verb-form section asks again after a failed load, the dead `packSections` re-exports, stale comments).
+- Verified (exit 0 in each worktree): typecheck, lint, full suite (2,472 and 2,473 tests), i18n, format, build, detector `[]`. **Unverified:** key handling is tested as pure functions only (no DOM test library); held-key, focus and live-region behaviour have not run in a browser. No second review of the fixes yet.
+
 ## 2026-10-25: Opus review of the vocabulary game plan and VG1; fixes merged (VG1b)
 
 - An Opus `reviewer` read `docs/vocab-game-plan.md` and the VG1 code (verdict fail, 20 findings; verified the checkable ones: `removeVocabularyBookmark` keeps the schedule, `resetVocabularySchedule` keeps history, `routes.ts` sends any third segment other than `all` to review, book positions have 29 gaps (0 to 7,390), the review screen's key guard blocks composition keys). The plan now defines a chunk by ratings in one hook instance and shows `nextDue`, keeps Today unchanged, drops the forecast for a weekly series, says the self-rating hypothesis cannot be measured without a device-local run log (fork 1e), adds an "Other words" region and the VG2 and VG4 dependencies. The code findings were fixed by glm-5.3 (`49a1cb0`): the card's own word never a distractor, choice cloze options are headwords with gloss exclusion, one language per recognize question, an `other` region, pages by index, NFC and `\p{M}`, word boundaries and hyphen rule, `produce`/`listen` grading through `normalizeFrench` with nouns-only article stripping, a real fall-back ladder; 40 tests in the two files.
 - Verified in the main checkout (exit 0): typecheck, lint, format, shape, i18n, full suite (2,470), Worker typecheck, build, detector `[]`; the finder on the real book reaches 88.6% (96 entries gained from hyphenated headwords, 16 lost to the boundary and hyphen rules, listed in the plan). **Billing note:** Pro moved from 82% to 83% weekly and 57% to 64% in five hours during the Opus review (my own turns are included); the Team account stayed at 0%. The owner says the accounts switch automatically, so no action.
-- Still owed: the codex review of LB1 to LB3 and LG1 (starts at 00:55); VG2 is not dispatched before it.
+- The codex review of LB1 to LB3 and LG1 has run and its fixes are merged (next entry above).
 
 ## 2026-10-25: CV1 landed (the owner-run check of the conjugation prompt, issue #21)
 

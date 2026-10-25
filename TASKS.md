@@ -163,7 +163,7 @@ Open GitHub issues (2026-10-25) and what each waits for; nothing here is ready f
 | Issue | Waits for |
 | --- | --- |
 | #68 first deployment of the content service | the owner's own Cloudflare login (new 2026-10-25) |
-| #69 vocabulary game mode (tracking) | VG2 onward (`docs/vocab-game-plan.md`); the plan and VG1 are with the Opus review (new 2026-10-25) |
+| #69 vocabulary game mode (tracking) | VG2 onward (`docs/vocab-game-plan.md`); the plan and VG1 review is done and applied (VG1b); the debt-review fixes are merged and await a second look |
 | #14 irregular verbs | the language-reviewer items (#16); the 15 new verbs are reviewed and in the pack (19 in all; #43 closed 2026-10-22) and the rest is content, paused |
 | #16 conjugation copy and sentence-pattern rules | the owner |
 | #17 visual acceptance of the new screens | the owner, on a real browser and phone |
