@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: VG4 landed (Anki plain-text import)
+
+- Parser for Anki "Notes in Plain Text", TSV and CSV (headers, separators, quotes, BOM), normalization before validation (HTML, entities, `[sound:]`, apostrophes, NFC), refusals with row number and real reason, the `imported` definition and `import` source kinds, one atomic import transaction (duplicates merge without touching schedule or history; increasing `bookmarkedAt` in deck order), `cardContent`, regions and the run's pool learn the third kind, backup round-trip, and an import dialog on the Words home. `src/components/ui/dialog.tsx` was written by hand on Base UI (no network for `shadcn add`).
+- Entity names come from `entities.json` (Python's `html.entities.html5`, 2,125 names, 40 KB); numeric references are decoded in code. The merge with VG3 conflicted only in `CHANGELOG.md`; the combined run test file went over the 500-line shape limit, so its imported-row test moved to `tests/vocabularyRunImport.test.tsx`. Verified (exit 0) after the merge in the main checkout: typecheck, lint, full suite (2,525), i18n, format and shape, build, detector `[]`. **Unverified:** no browser; the dialog's look and focus; a real Anki export (only invented fixtures).
+
 ## 2026-10-25: VG3 landed (weekly rhythm, run summary, device-local run log)
 
 - `rhythm.ts` (seven local days by calendar arithmetic, "now" vs "gained this week" with the first-attainment rule), seven marks and a text count on the Words home, both numbers in the run's done state, and `runLog.ts` (last 90 finished chunks in `appSettings`, excluded from backups in both directions, written once per chunk; no UI). No streak or loss state exists.
