@@ -394,7 +394,17 @@
     "contextSaved": "语境已保存",
     "removeBookmark": "取消收藏",
     "removeHelp": "取消收藏会保留语境、复习计划和自评历史。",
+    "rhythm": {
+      "title": "一周节奏",
+      "count": "最近 7 天中有 {{days}} 天练习了词汇",
+      "ratedDay": "{{date}}：已自评词汇",
+      "day": "{{date}}"
+    },
     "game": {
+      "now": "当前状态",
+      "keptNow": "复习阶段：{{review}} 个 · 成熟词（间隔至少 21 天）：{{mature}} 个",
+      "gainedThisWeek": "本周新增（最近 7 天）",
+      "firstMature": "首次达到成熟：{{words}} 个词",
       "runLength": "本轮自评数",
       "chunkProgress": "本轮已完成 {{done}} / {{size}} 次自评",
       "doneTitle": "本轮完成",

@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Words shows your last seven days of practice without a streak, and run summaries distinguish words in review or mature now from words first reaching maturity this week; finished chunks are logged only on this device, never in backups.
 - Words has an optional run mode ("Play a run" beside Start): before each flip the card asks one retrieval question — choose the meaning, fill the blank, hear and type, or produce the French — and your answer is shown as information only (“you chose X, the card says Y”), never as a score and never pre-selecting a self-rating; you still reveal and rate exactly as in the plain review, a Just flip control always skips the question, and a run ends after 5, 10 or 20 self-ratings with the real next due time and a Continue. Nothing about scheduling changed.
 - Grammar → Gender has a "Play a round" mode (a prototype): twelve nouns one at a time, answer le or la with one key, see the ending tendency or exception, and a missed noun comes back later in the round; your first answer to each noun is saved to Mistakes like the exercise sheet.
 - The dictionary's verb forms (Morphalou 3.1, LGPL-LR) now ship inside the app: they work offline and without a content service, and the About page links the dictionary's notice and licence.

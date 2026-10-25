@@ -1,3 +1,4 @@
+import { VocabularyRunLogSchema, type VocabularyRunRecord } from '../services/vocabulary/game/runLog';
 import type { GradingOptions } from '../services/exercises/grading';
 import { getProvider, providerRequiresKey } from '../services/ai/providers';
 import { normalizeModelId } from '../services/ai/catalogue';
@@ -45,6 +46,8 @@ export interface AppSettings {
   apiKeys: Record<string, string>;
   /** The optional content service. Never part of a backup; the URL env variable only prefills it for dev. */
   contentService: ContentServiceSettings;
+  /** Last 90 finished game chunks on this device. Never part of a backup. */
+  vocabularyRunLog: VocabularyRunRecord[];
   /** Endpoint overrides by provider id; absent means the provider's default. Part of a backup. */
   baseUrls: Record<string, string>;
   /** Accents count as spelling mistakes when checking an answer. */
@@ -130,6 +133,7 @@ function defaults(): AppSettings {
       url: normalizeBaseUrl(import.meta.env.VITE_CONTENT_SERVICE_URL) ?? '',
       key: '',
     },
+    vocabularyRunLog: [],
     baseUrls: {},
     practiceStrictAccents: false,
     practiceDictationSpeed: DEFAULT_DICTATION_SPEED,
@@ -199,6 +203,7 @@ function normalize(value: unknown): AppSettings {
     providerRegions,
     apiKeys,
     contentService: contentService(raw.contentService),
+    vocabularyRunLog: VocabularyRunLogSchema.safeParse(raw.vocabularyRunLog).data ?? [],
     baseUrls,
     practiceStrictAccents: boolOr(raw.practiceStrictAccents, false),
     practiceDictationSpeed: speedOr(raw.practiceDictationSpeed),
