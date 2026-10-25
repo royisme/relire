@@ -121,9 +121,19 @@ A prototype with kill criteria: does a one-card, single-key round with the miss 
 | --- | --- | --- | --- |
 | LG1 | Le ou la: pure deck, `GenderGame`, the "Play a round" entry on Grammar → Gender, `nounGender.game.*` strings, deck and round tests | all checks exit 0 in the main checkout; first answer only written; a returning card writes nothing | landed (`ac7e89b` merged by deepseek-flash, about 0.5 CNY); 2,415 tests; diff review pending; **owner checked 2026-10-24: works, but has no game feel** (the study left out points, streaks and sound on purpose); kept on the branch while the owner says what "game feel" should mean |
 
-### Next: vocabulary as a game, on an Anki-style base (owner direction 2026-10-24)
+### Next: vocabulary as a game, on an Anki-style base (owner direction 2026-10-24; plan `docs/vocab-game-plan.md`)
 
-An optional learning mode, not a new product tone; spaced repetition stays the foundation (FSRS flashcards, wordbook, personal words); the game layer must serve retention and use only real activity for numbers. Steps: V-G0 research (Gemini 3.8, running), V-G1 design study (model chosen after the research and the quota reset), V-G2 plan and review, then small build steps. `DESIGN.md` has a scoped game-surface exception (motion, sound cues, number pops; owner 2026-10-24); the advisor's seam: the learner's own rating is the only FSRS input. Debt first: the astra review of LB1 to LB3 and LG1 once codex resets (00:53). An Anki file import (plain text first, `.apkg` needs new dependencies and the owner's approval) is part of the base.
+An optional learning mode, not a new product tone. The goal the owner set: **stickiness and persistence** (come back, finish a run, not boring); sound and effects are set aside. Fixed seam: FSRS receives only the learner's own Forgot/Fuzzy/Remembered through the existing review command. The plan's review (gpt-6-astra) is pending, after the debt review of LB1 to LB3 and LG1 (both wait for the codex 5-hour window to reset at 00:53; VG1 was dispatched on the owner's go-ahead before the plan review because it is pure code).
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| VG1 | Pure core: challenge builder (kinds by real state, surface-form finder, distractors, seeded by appearance, typed grading) and region summaries | tests for every rule in the plan; the real-book re-measurement matches the plan | landed (`5ee0ae4` merged by deepseek-flash); 29 tests, 2,444 in all; the real finder reaches 87.5% of the 7,362 entries (the plan's script said 86.3%); a spot check of 1,460 differing matches looked right; no UI |
+| VG2 | The run: challenge before reveal, the existing outcome buttons, chunks of 5, 10 or 20 with done-for-now, one entry beside Start | one introduce and one rate per card with the learner's outcome; retry keeps the operation id; the remainder stays due | not started; after the plan review |
+| VG3 | Weekly rhythm (not a streak) and the run summary from real history | counts match hand-computed history; no loss state | not started |
+| VG4 | Anki plain-text import (`imported` definition, `import` source, normalization, refusals with real reasons) | tests for columns, tags, duplicates, rejected rows, backup and restore | not started |
+| VG5 | The map (saved words, imported decks, the book when present) and the leech group | counts from rows | not started |
+| VG6 | Goal and projection (opt-in) | projection only after two weeks of history | not started |
+| VG7 | Feel (deferred); VG8 `.apkg`, FSRS seeding from a revlog | | later |
 
 ### Content (paused by the owner's priority)
 

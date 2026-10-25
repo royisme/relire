@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: VG1 landed (the vocabulary game's pure core)
+
+- `src/services/vocabulary/game/challenge.ts` (kinds chosen from the card's real state, the surface-form finder with the plan's tiers, distractor rules, a seed with the appearance index, typed and choice grading) and `regions.ts` (counts per wordbook page and "Saved from reading": introduced, learning, young, mature at 21 days or more, leeches at 8 lapses, unseen), 29 tests. Worker: deepseek-flash (`5ee0ae4`, about 0.5 CNY). No UI, no storage, no existing file touched.
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,444), Worker typecheck, build, detector `[]`. The lead re-ran the cloze measurement with the real finder on the owner's private book: **87.5%** of 7,362 entries have an example where a surface form is found (my first script said 86.3%; the finder is a little more generous), and a spot check of the 1,460 matches that differ from the headword (`commettre` found as `commis`, `national, e` as `nationale`, `placer` as `placé`) looked correct. **Unverified:** nothing runs in a browser yet; the diff has not been reviewed (codex window); the plan has not been reviewed.
+
 ## 2026-10-24: Vocabulary game research (Gemini 3.8) and how far to trust it
 
 - `.pi-runs/vocab-game-research/report.md` (local, 53 KB): products (Duolingo, Memrise, Quizlet, Anki add-ons, WaniKani, Clozemaster, Lingvist, Drops, roguelike/deck-builder learning games), a mechanics taxonomy, evidence, SRS-plus-game pitfalls, DOM/CSS implementation, Anki file formats.
