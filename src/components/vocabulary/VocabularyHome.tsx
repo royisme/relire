@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { VocabularyModel } from '../../hooks/useVocabulary';
 import type { VocabularyBook } from '../../types/vocabulary';
 import { Check } from 'lucide-react';
+import { cardPace, estimateMinutes } from '../../services/vocabulary/pace';
 import { summarizeRhythm } from '../../services/vocabulary/game/rhythm';
 import { wordsInput } from '../../services/today/inputs';
 import { Link } from '../shell/Link';
@@ -34,9 +35,11 @@ export function VocabularyHome({
   );
   const learning = model.rows.filter((row) => row.schedule && row.schedule.phase !== 'review').length;
   const waiting = pending || !model.ready;
+  const queued = due || newAvailable;
+  const estimate = waiting || !queued ? null : estimateMinutes(cardPace(model.rows), queued);
   return (
     <div className="space-y-8">
-      <div className="flex h-12 items-center" aria-busy={waiting && !failed && !model.error ? 'true' : undefined}>
+      <div className="flex h-12 items-center gap-4" aria-busy={waiting && !failed && !model.error ? 'true' : undefined}>
         {waiting ? null : due > 0 ? (
           <Link to={{ name: 'wordsReview' }} className={actionClass}>
             {t('vocab.action.review', { count: due })}
@@ -56,6 +59,11 @@ export function VocabularyHome({
           </p>
         ) : (
           <p className="text-sm text-ink-700">{t('vocab.action.empty')}</p>
+        )}
+        {estimate && (
+          <p className="text-sm text-ink-600">
+            {t(estimate.from === estimate.to ? 'vocab.pace.single' : 'vocab.pace.range', estimate)}
+          </p>
         )}
       </div>
       <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">

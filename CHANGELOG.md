@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- The Words Overview shows, beside Review or Learn, about how long it takes at your own pace ("About 4–6 min at your usual pace"), worked out from the gaps between your own ratings and left out until there is enough of your history.
 - Revealed answers and word details now say whether the wordbook has been reviewed ("Built-in · not reviewed", or who reviewed it and when); when the status of that book version is unknown they say only "Built-in". Run challenge text is not labelled, since it is shown before you answer.
 - Import Anki `.apkg` packages in Words, including newer compressed collections: choose a note type and fields, keep deck names and tags, and merge notes without importing media or review history.
 - Words has a map of book pages, imported decks and saved words with real state counts, expandable word lists and a leech collection; leech cards show memory hints and examples after reveal without changing ratings or scheduling.
