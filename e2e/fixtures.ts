@@ -6,7 +6,7 @@
  * phonetic data by default; tests supply what they assert.
  */
 import { test as base, expect, type Locator, type Page } from '@playwright/test';
-import { mockIndex, mockLexicon, mockTopics, mockVocabulary } from './contentService.helpers';
+import { mockIndex, mockTopics, mockVocabulary } from './contentService.helpers';
 import {
   CATALOG_ARTICLE,
   CATALOG_EXERCISES,
@@ -163,7 +163,6 @@ export const test = base.extend<{ ai: MockAi }>({
   page: async ({ page }, use) => {
     await mockTopics(page);
     await mockIndex(page);
-    await mockLexicon(page);
     await mockVocabulary(page);
     await use(page);
   },

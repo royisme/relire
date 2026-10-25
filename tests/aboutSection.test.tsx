@@ -34,6 +34,7 @@ test('the entry names the data, its maintainer, licence, source link and the loc
   expect(html).toContain('Morphalou 3.1');
   expect(html).toContain('ATILF (CNRS / Université de Lorraine)');
   expect(html).toContain('LGPL-LR');
+  expect(html).toContain('a dictionary that ships with the app and needs no service');
   expect(html).toContain('href="http://www.cnrtl.fr/lexiques/morphalou/"');
   expect(html).toContain('data/lexicon/NOTICE.md');
   expect(html).toContain('data/lexicon/LGPL-LR.txt');
@@ -44,6 +45,7 @@ test('without a content service the Morphalou entry and the local links stay; th
   serviceOff();
   const html = render();
   expect(html).toContain('Morphalou');
+  expect(html).toContain('a dictionary that ships with the app and needs no service');
   expect(html).toContain('data/lexicon/NOTICE.md');
   expect(html).toContain('data/lexicon/LGPL-LR.txt');
   expect(html).not.toContain('from a content service');

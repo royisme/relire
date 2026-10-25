@@ -617,7 +617,7 @@
       },
       "service": {
         "title": "Content service",
-        "desc": "The optional service behind grammar topics, the lexicon, the wordbook and extra readers."
+        "desc": "The optional service behind grammar topics, the wordbook and extra readers."
       }
     },
     "about": {
@@ -625,10 +625,10 @@
       "desc": "What Relire Plus is and where your data goes.",
       "what": "Relire Plus is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
-      "servicePrivacy": "This version can read grammar topics, a French dictionary, a complete paged wordbook and additional graded readers from a content service. Requests carry a topic id, tapped word, book id/page/version, or published reader id/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules or recordings, and never an AI provider key: the only key it receives is the access key you set for it. Wordbook download exposes the whole published book to clients.",
+      "servicePrivacy": "This version can read grammar topics, a complete paged wordbook and additional graded readers from a content service. Requests carry a topic id, book id/page/version, or published reader id/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules or recordings, and never an AI provider key: the only key it receives is the access key you set for it. Wordbook download exposes the whole published book to clients.",
       "scope": "Relire Plus is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
       "source": "Source code on GitHub",
-      "lexicon": "For verbs outside the reviewed list, the word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}.",
+      "lexicon": "The word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}: a dictionary that ships with the app and needs no service.",
       "lexiconSource": "{{name}} source",
       "lexiconRebuild": "The dictionary data ships with the app as a generated file.",
       "lexiconNotice": "How to rebuild or replace it",
