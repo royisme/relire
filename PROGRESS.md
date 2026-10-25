@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: VG8 landed (`.apkg` import)
+
+- `apkg.ts` reads a package with `fflate` (zip), `fzstd` (the zstd-compressed `collection.anki21b`) and `sql.js` (the collection), preferring `anki21b`, then `anki21`, then `anki2`, and refusing a stub-only package, a corrupt file or an oversize file with a real message. Notes of the chosen note type feed the same normalization, column picker, preview and merge as the text import. The dialog and the whole import pipeline (parser, `prepare.ts`, the 40 KB entity table, the three libraries) now load by dynamic import on the first file pick; the VG4 follow-up about the Words chunk is closed.
+- Verified (exit 0) in the worktree, whose base already held VG5: typecheck, lint, full suite (2,551), i18n, format and shape, build, detector `[]`; the lead grepped the built chunks (the entity table only in `prepare-*.js`) and the clean merge into the main checkout. **Unverified:** no browser, no REAL Anki export; FSRS seeding from a revlog is not done.
+
 ## 2026-10-25: VG5 landed (the map and the leech group)
 
 - `#/study/words/map` with a "Map" link on the Words home: regions (book pages, imported decks, saved, other) with counts as text and a segmented bar, collapsible word lists with a tier label (new, learning, young, mature), a Leeches group (8 lapses or more, with memory trick and examples), and a boss card: a leech shows that extra context after the reveal in the run, never extra rating chances. `collection.ts` holds the pure `tierOf`, `leechesOf` and `bossContextOf`; `summarizeRegions` now returns member keys.

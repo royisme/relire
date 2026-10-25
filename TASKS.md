@@ -134,7 +134,7 @@ An optional learning mode, not a new product tone. The goal the owner set: **sti
 | VG5 | The map (saved words, imported decks, the book when present) and the leech group | counts from rows | landed (`db5413f` merged in `3142ffd`, codex gpt-6.1-sol); 2,536 tests; the lead re-ran every check; plain review, hook and storage unchanged; **unverified:** no browser (the map's look, the bar, the boss card's layout are the owner's to check) |
 | VG6 | Goal and projection (opt-in) | projection only after two weeks of history | not started |
 | VG7 | Feel (deferred by the plan; sound out of scope) | | later; owner-gated |
-| VG8 | `.apkg` import beside `.txt` and `.csv` (owner decision 2026-10-25: dependencies approved; the lead provisions the installs) | dependency check (size, licence, maintenance) first; lazy-loaded; VG4's normalization and refusals reused; tests on small invented packages; FSRS seeding from a revlog stays later | not started; after VG4 |
+| VG8 | `.apkg` import beside `.txt` and `.csv` (owner decision 2026-10-25: dependencies approved; the lead provisions the installs) | dependency check (size, licence, maintenance) first; lazy-loaded; VG4's normalization and refusals reused; tests on small invented packages; FSRS seeding from a revlog stays later | landed (`5a10810` merged in `da59aa6`, codex gpt-6.1-sol; `fflate`, `fzstd`, `sql.js` installed by the lead in `b6f887e`); 2,551 tests; the import pipeline, entity table and the three libraries load only on the first file pick (main bundle 759 KB to 738 KB); the 685 KB sql.js wasm is precached; **unverified:** no browser and no REAL Anki export (invented fixtures only; the owner should try one real `.apkg` and one `.txt`) |
 
 ### Content (paused by the owner's priority)
 
