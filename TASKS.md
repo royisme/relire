@@ -119,7 +119,7 @@ A prototype with kill criteria: does a one-card, single-key round with the miss 
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| LG1 | Le ou la: pure deck, `GenderGame`, the "Play a round" entry on Grammar → Gender, `nounGender.game.*` strings, deck and round tests | all checks exit 0 in the main checkout; first answer only written; a returning card writes nothing | landed (`ac7e89b` merged by deepseek-flash, about 0.5 CNY); 2,415 tests; diff review pending; look at 360 px, themes and real keys is the owner's |
+| LG1 | Le ou la: pure deck, `GenderGame`, the "Play a round" entry on Grammar → Gender, `nounGender.game.*` strings, deck and round tests | all checks exit 0 in the main checkout; first answer only written; a returning card writes nothing | landed (`ac7e89b` merged by deepseek-flash, about 0.5 CNY); 2,415 tests; diff review pending; **owner checked 2026-10-24: works, but has no game feel** (the study left out points, streaks and sound on purpose); kept on the branch while the owner says what "game feel" should mean |
 
 ### Content (paused by the owner's priority)
 
