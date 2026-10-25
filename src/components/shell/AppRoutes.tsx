@@ -5,7 +5,7 @@ import { retryableLazy } from '../../utils/retryableLazy';
 import { NotFoundView } from './NotFoundView';
 import { LearningNavigation } from './LearningNavigation';
 import { ReaderView } from '../ReaderView';
-import { StudyView } from '../study/StudyView';
+import { ShadowingLog } from '../study/ShadowingLog';
 import { MistakeNotebook } from '../study/MistakeNotebook';
 import { VocabularyView } from '../VocabularyView';
 import { UnitView } from '../practice/UnitView';
@@ -50,7 +50,7 @@ interface AppRoutesProps {
   vocabulary: VocabularyModel;
   library: ReturnType<typeof useArticleLibrary>;
   reader: ReturnType<typeof useReaderLookup>;
-  /** Sections of Settings and Study list in the sidebar, so the page skips its own links. */
+  /** Sections of Settings list in the sidebar, so the page skips its own links. */
   expanded: boolean;
   requestKey: (purpose?: AiPurposeRoute) => void;
   /** The source the shadowing log opens at, and how the reader sets it. */
@@ -138,7 +138,7 @@ export function AppRoutes({
               vocabulary={vocabulary}
               onOpenShadowingLog={(sourceId) => {
                 setLogSourceId(sourceId);
-                navigate({ name: 'study', tab: 'shadowing' });
+                navigate({ name: 'recordings' });
               }}
             />
           )}
@@ -164,7 +164,7 @@ export function AppRoutes({
             onMissingKey={requestKey}
             onOpenShadowingLog={(sourceId) => {
               setLogSourceId(sourceId);
-              navigate({ name: 'study', tab: 'shadowing' });
+              navigate({ name: 'recordings' });
             }}
             focusText={route.sentence ?? null}
             activeWord={activeWord}
@@ -194,30 +194,26 @@ export function AppRoutes({
         />
       )}
 
-      {route.name === 'study' && (
-        <StudyView
-          tab={route.tab}
-          sectionsInSidebar={expanded}
-          shadowing={{
-            articles,
-            units: readerUnits.units,
-            unitsError: readerUnits.error,
-            initialSourceId: logSourceId,
-            onOpenSentence: (record) => {
-              const source = sourceOfRecording(record);
-              navigate(
-                source.kind === 'passage'
-                  ? { name: 'passage', unitId: source.unitId, sentence: record.text }
-                  : source.kind === 'graded'
-                    ? {
-                        name: 'gradedReader',
-                        readerId: source.readerId,
-                        version: source.version,
-                        sentence: record.text,
-                      }
-                    : { name: 'reader', articleId: source.articleId, sentence: record.text },
-              );
-            },
+      {route.name === 'recordings' && (
+        <ShadowingLog
+          articles={articles}
+          units={readerUnits.units}
+          unitsError={readerUnits.error}
+          initialSourceId={logSourceId}
+          onOpenSentence={(record) => {
+            const source = sourceOfRecording(record);
+            navigate(
+              source.kind === 'passage'
+                ? { name: 'passage', unitId: source.unitId, sentence: record.text }
+                : source.kind === 'graded'
+                  ? {
+                      name: 'gradedReader',
+                      readerId: source.readerId,
+                      version: source.version,
+                      sentence: record.text,
+                    }
+                  : { name: 'reader', articleId: source.articleId, sentence: record.text },
+            );
           }}
         />
       )}

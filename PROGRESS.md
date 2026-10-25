@@ -4,6 +4,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: N3 code on branch `recordings` (tests pending)
+
+- Recordings is Speaking's second child at `#/speaking/recordings` (route `recordings`, area `speaking`, no badge); My study, `STUDY_TABS`, `StudyTab`, `StudyView` and the `study` area are deleted, so `#/study` and `#/study/shadowing` are not found. `ShadowingLog` owns its page container and a back link to Speaking; Speaking links to Recordings; the reader's "open log" opens it and App drops `logSourceId` when the learner leaves it. Locale keys `nav.vocab`, `study.label` and `study.shadowing` are gone; `nav.recordings` is new. Docs updated. Existing assertions on the old addresses and My study fail until the test worker runs; typecheck needed literal changes in `tests/navBadges.test.tsx` and removal of one obsolete test (and the `STUDY_TABS` import) in `tests/routes.test.ts`. **Unverified:** no browser.
+
 ## 2026-10-25: N2 code on branch `mistakes-top` (tests pending)
 
 - Mistakes is a top-level row before Progress at `#/mistakes` (area `mistakes`), with the unresolved badge on the row at every width; `#/study/mistakes` is not found and bare `#/study` opens Shadowing. My study keeps Shadowing as its single child until N3. `MistakeNotebook` owns its page container; `StudyView` lost the Mistakes tab; the Today and Gender links point at `#/mistakes`. Docs updated. Tests and e2e not yet updated for N2 (existing assertions on the old addresses fail until the test worker runs); typecheck needed three literal changes in `tests/`. **Unverified:** no browser.

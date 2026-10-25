@@ -46,6 +46,12 @@ export function SpeakingPage({ articles, workspace, articleId, sentence, onAsses
             {t('learning.readAloud')}
           </Link>
           <p className="text-sm text-ink-600">{t('learning.shadowingContext')}</p>
+          <Link
+            to={{ name: 'recordings' }}
+            className="inline-flex min-h-10 items-center text-sm text-accent-900 underline"
+          >
+            {t('nav.recordings')}
+          </Link>
           <section className="min-w-0 space-y-4 border-t border-ink-200 pt-6" aria-labelledby="sound-pairs-title">
             <div>
               <h2 id="sound-pairs-title" className="font-serif text-lg font-semibold text-ink-900">

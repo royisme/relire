@@ -6,7 +6,6 @@ import {
   parseRoute,
   routeHref,
   SETTINGS_SECTIONS,
-  STUDY_TABS,
   vocabularyPlaceOf,
   worksWithoutKey,
   type Route,
@@ -123,19 +122,6 @@ test('graded list and reader reserve the graded segment with pinned-version and 
     ...['', '   ', 'a'.repeat(4001)].map((value) => parse(`#/read/graded/r?sentence=${encodeURIComponent(value)}`)),
   ])
     expect(result).toEqual({ route: { name: 'gradedReader', readerId: 'r' }, canonical: '#/read/graded/r' });
-});
-
-test('My study contains only Shadowing, with bare Study defaulting to Shadowing', () => {
-  expect(STUDY_TABS).toEqual(['shadowing']);
-  for (const tab of STUDY_TABS) {
-    roundTrip({ name: 'study', tab });
-    expect(areaOf({ name: 'study', tab })).toBe('study');
-  }
-  for (const service of [true, false])
-    expect(parseRoute('#/study', service)).toEqual({
-      route: { name: 'study', tab: 'shadowing' },
-      canonical: '#/study/shadowing',
-    });
 });
 
 test('Mistakes has its own route and area, keeps the key banner and has no old study alias', () => {

@@ -6,6 +6,7 @@ Authority: owner-approved `.pi-runs/learning-navigation/20261021/plan.md` (main 
 
 - Explicit required unit and attempt `learningArea`: reading, grammar, listening, writing; no inference, migration, or legacy fallback.
 - Reading, Grammar, Listening and Speaking are learning destinations. Writing appears only for saved writing units. My study retains Words, Mistakes and Shadowing.
+- 2026-10-25: reversed by `docs/navigation-plan.md`: Words and Mistakes are top-level, Shadowing is Speaking → Recordings, My study is removed.
 - Area lists scope units before aggregation; complete sets retain mixed-area ownership and explicit whole-set deletion.
 - Read aloud has durable source/sentence routes and reuses existing recording and assessment ownership.
 - Existing stores, controls, transactions and history remain shared. Listening supports number dictation only; no new training products.

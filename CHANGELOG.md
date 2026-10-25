@@ -97,6 +97,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- Shadowing recordings now live under Speaking → Recordings (`#/speaking/recordings`) and My study is gone; the old `#/study` addresses show not found.
 - Words is now its own sidebar entry, with the due count visible on the rail and in the phone menu; the Words home tab is now called Overview.
 - Mistakes is now its own sidebar entry, with its unresolved count visible on the rail and in the phone menu.
 - Today is now the page the app opens on; the Library remains at `#/read`.

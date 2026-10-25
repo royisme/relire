@@ -51,7 +51,7 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 ## What you can do
 
 - **Keep a library of articles.** Three B1 to C1 samples are included. Paste your own, then search, filter by level, sort, edit or delete them from a simple list. Choose text size and theme, and slow the audio down to 0.5×.
-- **Tap any word.** You get the lemma, meaning in context, IPA, the verb tense and example sentences. A verb from the reviewed list shows its conjugation table; any other verb links to the Conjugation page under My study, Grammar, which marks which forms the rules confirm. Save it to your vocabulary in one click.
+- **Tap any word.** You get the lemma, meaning in context, IPA, the verb tense and example sentences. A verb from the reviewed list shows its conjugation table; any other verb links to the Conjugation page under Grammar, which marks which forms the rules confirm. Save it to your vocabulary in one click.
 - **Break down a hard sentence.** Translation, syntax segments, grammar points, common collocations and a shadowing guide (rhythm groups, liaisons, intonation).
 - **Shadow and get feedback.** Record yourself reading a sentence and receive an overall score, plus feedback on individual sounds, liaisons and intonation.
 - **Look up any French sound.** A chart of the sounds of French in IPA, each with an example word you can tap to hear.

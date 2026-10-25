@@ -7,7 +7,6 @@ import {
   CalendarCheck,
   Download,
   Headphones,
-  History,
   Info,
   Mic,
   NotebookPen,
@@ -16,7 +15,7 @@ import {
   SpellCheck,
 } from 'lucide-react';
 import { PWAInstallButton } from '../PWAInstallButton';
-import { areaOf, routeHref, SETTINGS_SECTIONS, STUDY_TABS, type Route } from '../../utils/routes';
+import { areaOf, routeHref, SETTINGS_SECTIONS, type Route } from '../../utils/routes';
 import { contentServiceUrl } from '../../services/grammarTopics/service';
 import { useReaderUnits } from '../../hooks/useReaderUnits';
 import { useMistakes } from '../../hooks/useMistakes';
@@ -81,7 +80,10 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
             { to: { name: 'practice', area: 'grammar' }, label: t('learning.exercises') },
           ]
         : area === 'speaking'
-          ? [{ to: { name: 'readAloud' }, label: t('learning.readAloud') }]
+          ? [
+              { to: { name: 'readAloud' }, label: t('learning.readAloud') },
+              { to: { name: 'recordings' }, label: t('nav.recordings') },
+            ]
           : [];
   return (
     <nav aria-label={t('nav.main')} className="flex flex-1 flex-col">
@@ -126,24 +128,6 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
         ))}
       </div>
       <div className="space-y-0.5 border-t border-ink-200 px-2 py-3">
-        <NavItem
-          {...item}
-          to={{ name: 'study', tab: 'shadowing' }}
-          icon={History}
-          label={t('nav.vocab')}
-          current={area === 'study' ? (rail ? 'page' : 'area') : undefined}
-        />
-        {!rail &&
-          area === 'study' &&
-          STUDY_TABS.map((tab) => (
-            <NavItem
-              key={tab}
-              {...item}
-              to={{ name: 'study', tab }}
-              label={t(`study.${tab}`)}
-              current={route.name === 'study' && route.tab === tab ? 'page' : undefined}
-            />
-          ))}
         <NavItem
           {...item}
           to={{ name: 'mistakes' }}

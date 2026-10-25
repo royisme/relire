@@ -107,7 +107,7 @@ test('the due badge belongs to the Words row and the unresolved count to Mistake
   expect(parent).not.toContain('>5<');
   expect(parent).toContain('href="#/study/shadowing"');
   expect(parent).toContain('<svg');
-  const study = render(false, 3, { name: 'study', tab: 'shadowing' });
+  const study = render(false, 3, { name: 'recordings' });
   const children = study.slice(
     study.indexOf(row(study, 'My study')) + row(study, 'My study').length,
     study.indexOf(row(study, 'Mistakes')),
@@ -169,7 +169,7 @@ for (const rail of [false, true]) {
     test(`${language}: Mistakes owns a top-level row immediately before Progress, with no children (${rail ? 'rail' : 'expanded/drawer'})`, async () => {
       await i18n.changeLanguage(language);
       try {
-        for (const route of [{ name: 'mistakes' }, { name: 'words' }, { name: 'study', tab: 'shadowing' }] as const) {
+        for (const route of [{ name: 'mistakes' }, { name: 'words' }, { name: 'recordings' }] as const) {
           const html = render(rail, 3, route);
           const mistakes = row(html, i18n.t('study.mistakes'));
           const progress = row(html, i18n.t('nav.analytics'));
@@ -188,7 +188,7 @@ for (const rail of [false, true]) {
           expect(parent).not.toMatch(/tnum|sr-only/);
           const between = html.slice(html.indexOf(parent) + parent.length, html.indexOf(mistakes));
           expect([...between.matchAll(/href="([^"]+)"/g)].map((match) => match[1])).toEqual(
-            !rail && route.name === 'study' ? ['#/study/shadowing'] : [],
+            !rail && route.name === 'recordings' ? ['#/study/shadowing'] : [],
           );
           // The lower group's rule separates these rows from the skill destinations.
           expect(
