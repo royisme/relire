@@ -4,6 +4,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: Recordings out of the sidebar
+
+- Owner decision: Recordings is a function of Speaking, not a menu entry. Speaking's only sidebar child is Read aloud; Recordings opens from the Speaking page link and the reader's "All recordings", at the same route, and Speaking stays the highlighted area there. Tests pending (nav tests expect two Speaking children). **Unverified:** no browser.
+
 ## 2026-10-25: Recordings page title aligned
 
 - The page at `#/speaking/recordings` is titled Recordings / 跟读录音 like its nav label, and Speaking no longer names the place it links to. Tests pending (some pin the old title and the location sentence). **Unverified:** no browser.

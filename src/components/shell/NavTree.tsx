@@ -80,10 +80,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
             { to: { name: 'practice', area: 'grammar' }, label: t('learning.exercises') },
           ]
         : area === 'speaking'
-          ? [
-              { to: { name: 'readAloud' }, label: t('learning.readAloud') },
-              { to: { name: 'recordings' }, label: t('nav.recordings') },
-            ]
+          ? [{ to: { name: 'readAloud' }, label: t('learning.readAloud') }]
           : [];
   return (
     <nav aria-label={t('nav.main')} className="flex flex-1 flex-col">
