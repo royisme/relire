@@ -99,6 +99,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+- The "Import Anki notes" dialog sizes to its content without inner scroll windows on the web.
 - The install guide and the product description no longer say the AI needs a Gemini key: they say your chosen AI provider is called from your browser with your key, and that Ollama and your device's voice need no key.
 - Words wording is clearer in English and Chinese: plain sentences instead of terms like introduction allowance, leech, lapses, young and mature, and the retention hint now gives its 90% default.
 - The fonts are bundled with the app and the marketing pages, so opening Relire no longer sends a request, or your IP address, to Google Fonts; the app and its fonts work offline.
