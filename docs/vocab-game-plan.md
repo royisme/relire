@@ -2,6 +2,10 @@
 
 Plan of record for the vocabulary game mode. Written 2026-10-24 by the lead after the owner's direction (games are an optional learning mode, not a change of the app's tone; vocabulary first, on an Anki-style spaced-repetition base; `DESIGN.md` has a scoped game-surface exception) and an advisor consultation. Nothing here is built. The advisor's six corrections are applied below. It still needs a review (gpt-6-astra, sent after the pending debt review and its fixes, not at the same moment, so the two jobs do not exhaust the same 5-hour window) before any worker is dispatched. Inputs: `docs/learning-games-plan.md`, the Gemini research (`.pi-runs/vocab-game-research/report.md`, local; its reliability is noted in `PROGRESS.md`: real references, over-read conclusions), the owner's check of Le ou la ("works, but no game feel").
 
+## The goal, restated by the owner (2026-10-24)
+
+**Stickiness and persistence: a learner who keeps coming back, and a session that is not boring.** Sound and effects are set aside for now (the `DESIGN.md` exception stays granted, unused). What matters first is whether the learner starts, finishes and returns. The honest limit: the research the lead has says points and streaks raise short-term engagement but not retention of words, with novelty effects and a classroom study where badges lowered intrinsic motivation; the lead has no source showing which mechanic raises long-term persistence for an adult self-learner. So the plan uses the low-risk mechanics below, makes each one small and optional, and lets the owner's own use decide (kill criteria).
+
 ## The one idea
 
 **Make retrieval the play.** Today a card is: see the word, flip, rate yourself. The game puts an explicit, varied retrieval act *before* the flip (choose the meaning, fill the blank, hear and type, produce the French from the gloss), then the learner reveals and **rates themselves exactly as now**. The evidence that holds is on retrieval and spacing (the vocabulary meta-analysis of game design features, the retrieval-practice papers; see Evidence); the game layer around it (map, collection, feedback) is what makes a session feel like a game, and it is allowed to be as expressive as the `DESIGN.md` exception permits, but it never touches the scheduler.
@@ -56,9 +60,25 @@ A **region** is a group of the learner's real cards: a wordbook page (30 of them
 
 A word's card in a region list carries a tier label from its real state (new, learning, young, mature). Leeches (a real Anki concept; Anki's default threshold is 8 lapses, which is also this plan's default, adjustable; fork 4) are shown as a special group with the word's `memoryTrick` and examples; when a leech is due it is a **boss card**: more context shown after the reveal (never extra rating chances). All of this reads rows; nothing is stored.
 
-### 5. Feel (the `DESIGN.md` game-surface exception)
+### 5. Feel (deferred; the `DESIGN.md` game-surface exception)
+
+Deferred by the owner's reframing above; kept here so it is not lost. Sound is out of scope for now.
+
 
 Feedback tiers tied to real events, layered within about 100 ms and returning to rest: small (a challenge answered: a mark, a soft cue, the correct choice settling); medium (a word graduates to review, a word becomes mature, a region's mature count rises: a longer motion and a number pop of the real new count; the event is read from the row that `rateVocabularyCard` already returns, which the review hook may expose as `lastRated`, or from the row's newest history record after the model refreshes: the rating command itself is not changed); large (queue cleared, a breather's map change: a longer sequence). Sound cues are short synthesized tones from the Web Audio API (no assets, no dependency), unlocked by the first tap, with a visible mute remembered on the device (fork 1). Reduced motion means none; a "reduce effects" setting caps everything at small. Nothing blocks input; slots are fixed-size.
+
+### 5b. Persistence: what brings the learner back (first priority)
+
+Every item reads real data, none blocks a card, none punishes absence. Each is a separate small step and removable.
+
+1. **A start that costs one tap.** The Words home and Today show one primary action, "Start", with the real number of cards in the first run and, once there is enough history, a time estimate from the learner's own median seconds per rating (computed from the review history's timestamps; omitted when there is too little data, never a guess).
+2. **A run is a chunk with an end.** The queue can hold hundreds of due cards after a few missed days, which is the well-known way spaced repetition loses people. A run takes the **first 20 cards of the queue's own order** (default; the learner can pick 5, 10 or 20, with 5 as the "low-energy day" run), shows a clear "done for now" state with the real count still due, and offers Continue. This is presentation: which due cards are shown first and when to stop; nothing about the schedule or ratings changes, and the remainder stays due. A return after a gap shows the real due count and a run, with no "days missed" message.
+3. **A weekly rhythm, not a streak.** Seven small day marks for the last seven days from the review history (a day with any rating is marked) and a plain count ("4 of the last 7 days"). There is no streak that can be lost, no loss message, rest days are normal. Written as text as well as marks.
+4. **Visible accumulation.** The run summary and the map show what the learner has really kept: words moved to review, words that became mature (21 days or more) in this run and in the last week, from the history. This is the real sign that learning is sticking and the main honest reward.
+5. **A goal with a horizon (optional).** The learner may enter their exam date and a target number of mature words (device-local). The app then shows, only after two weeks of history, "at your last four weeks' pace: about N mature words by that date" as a projection from their own pace, labelled as such, never a prediction of an exam score (the app makes no official-score claims). Opt-in because a deadline can also create pressure.
+6. **Variety inside the session** is the challenge kinds of section 2 and, once present, the regions; no timer.
+
+What is deliberately not here: streak counters with loss, daily-reminder pressure (a browser app cannot push without a server anyway), leaderboards, extra "practice more" farming, XP.
 
 ### 6. Anki-style base
 
@@ -73,16 +93,18 @@ Pure code in `src/services/vocabulary/game/`: `challenge.ts` (kinds, builder, gr
 
 ## Steps (each small, a review per diff, the lead re-runs every check)
 
-- **VG1 Pure core and one measurement.** `challenge.ts` (including the surface-form finder and the distractor rules above) and `regions.ts` over invented book and rows, deterministic seeded tests. First the measurement on the owner's real book (the lead runs it on the owner's machine): the share of entries with an example that contains the headword or a known form; it sets the `cloze` default. Acceptance: tests for kind selection by state, fall-back when data is missing, the seed changing with the appearance index, distractors never equal to the answer or sharing a gloss, a missing `pos`, a personal word's pool, article stripping in `produce`, elision in `cloze`, region counts matching hand-computed rows with and without a book.
-- **VG2 The run, plain.** The run view wrapping `useVocabularyReview`: challenge before reveal, then the existing outcome buttons and keys, fixed slots, "just flip", chunks and the breather without effects, an entry beside Start. Acceptance: the same writes as the plain review (a test proves one `introduceVocabularyCard` and one `rateVocabularyCard` per card with the learner's outcome and nothing else; a retry reuses the operation id; the staleness and quota paths still behave), keys follow the review's guards.
-- **VG3 Anki plain-text import** (moved up: without the book the game would be nearly empty). The import dialog, the `imported` definition kind and `import` source kind, normalization and refusals with real messages, tests for column choice, tags, duplicates and rejected rows, backup and restore of the new kinds.
-- **VG4 Game feel.** Feedback tiers, number pops of real counts, synthesized cues, mute and reduce-effects settings. Acceptance: reduced motion shows no motion; sound is off until the first tap; every number traces to rows; nothing moves the page.
-- **VG5 The map and the run summary.** The region view and the end-of-run summary from real data, the leech group.
-- **VG6 Later.** `.apkg` (dependencies, owner approval), a weekly activity strip from real history (not a streak), seeding FSRS from a revlog.
+- **VG1 Pure core and one measurement.** `challenge.ts` (including the surface-form finder and the distractor rules) and `regions.ts` over invented book and rows, deterministic seeded tests. First the measurement on the owner's real book (the lead runs it on the owner's machine): the share of entries with an example that contains the headword or a known form; it sets the `cloze` default. Acceptance: tests for kind selection by state, fall-back when data is missing, the seed changing with the appearance index, distractors never equal to the answer or sharing a gloss, a missing `pos`, a personal word's pool, article stripping in `produce`, elision in `cloze`, region counts matching hand-computed rows with and without a book.
+- **VG2 The run, plain, with chunks.** The run view wrapping `useVocabularyReview`: challenge before reveal, then the existing outcome buttons and keys, fixed slots, "just flip", **runs of 5, 10 or 20 cards with a done-for-now state and Continue (5b items 1 and 2)**, an entry beside Start. Acceptance: the same writes as the plain review (a test proves one `introduceVocabularyCard` and one `rateVocabularyCard` per card with the learner's outcome and nothing else; a retry reuses the operation id; the staleness and quota paths still behave), keys follow the review's guards, the remainder after a chunk stays due.
+- **VG3 Weekly rhythm and the run summary** (5b items 3 and 4), from the real history. Acceptance: counts match hand-computed history; no streak or loss state exists; texts as well as marks.
+- **VG4 Anki plain-text import** (without it the free build has few cards). The import dialog, the `imported` definition kind and `import` source kind, normalization and refusals with real messages, tests for column choice, tags, duplicates and rejected rows, backup and restore of the new kinds.
+- **VG5 The map** (regions from saved words, imported decks and the book when present) and the leech group.
+- **VG6 Goal and projection** (5b item 5), opt-in.
+- **VG7 Feel (deferred).** Feedback tiers and number pops; sound is out of scope unless the owner asks again.
+- **VG8 Later.** `.apkg` (dependencies, owner approval), seeding FSRS from a revlog.
 
 ## Kill criteria and what the owner measures by hand
 
-After a week of use, no analytics: does the owner pick the game over the plain review unprompted; does the distribution of Forgot / Fuzzy / Remembered stay spread (if everything collapses to Remembered, the challenge is not making self-rating honest); do lapses over the following weeks look the same or better than before; is a card slower (the challenge adds time per card) in a way that reduces words reviewed per day more than it helps; is the sound or motion tiring. Kill or cut the parts that fail; keep the plain review untouched.
+After a week of use, no analytics: **does the owner come back on days when nothing forces it, and does a run feel finished rather than endless**; does the owner pick the game over the plain review unprompted; does the distribution of Forgot / Fuzzy / Remembered stay spread (if everything collapses to Remembered, the challenge is not making self-rating honest); do lapses over the following weeks look the same or better than before; is a card slower (the challenge adds time per card) in a way that reduces words reviewed per day more than it helps; is the sound or motion tiring. Kill or cut the parts that fail; keep the plain review untouched.
 
 ## Risks
 
@@ -96,9 +118,12 @@ After a week of use, no analytics: does the owner pick the game over the plain r
 
 ## Forks for the owner (defaults)
 
-1. **Sound default.** On in the game mode with one tap to mute (default), or off until the learner turns it on.
+1. **Sound.** Out of scope for now (owner, 2026-10-24).
+1b. **Run size default:** 20 cards, with 5 and 10 selectable (default), or the whole queue.
+1c. **Weekly rhythm:** show it (default), or leave it out.
+1d. **Exam-date goal and projection:** build it opt-in (default), or skip.
 2. **"Mature" threshold** for the map: phase review with `scheduledDays` of 21 or more (default, Anki's convention).
-3. **Chunk size** for breathers: 20 ratings (default), or one run per queue.
+3. **Chunk size:** see 1b.
 4. **Leech threshold:** 8 lapses (default, Anki's own), or lower.
 5. **Region names:** page ranges by book order (default), or CEFR bands if the book carries them (it does not today).
 6. **Anki import columns and decks as regions:** yes (default).
