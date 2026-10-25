@@ -271,6 +271,8 @@ Filters and modes (library level, vocabulary filter): an `ink-100` track with 4p
 | Sentence actions | With a mouse or keyboard, a compact pill at the end of the sentence (play, analyse, record). On touch screens (`hover: none`, `pointer: coarse`), a bar in the bottom dock with 40px buttons and close, never over the text; the tapped sentence is scrolled clear of it | `ReaderView`, `reader/SentenceBar` |
 | Practise a sentence | A docked card at the bottom of the reader | `PracticeCard` |
 
+Dialog wraps the Base UI dialog; Sheet and Drawer trap focus, restore it to the opener on close and lock page scroll while open.
+
 Esc closes the topmost thing: a modal sheet first, then the practice card, then speech. Close buttons are at least 40px on touch.
 
 ### Inputs / Fields

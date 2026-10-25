@@ -1,23 +1,89 @@
-import * as React from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { cn } from '../../lib/utils';
+import { Dialog, DialogContent } from './dialog';
 
 interface OverlayProps {
   onClose: () => void;
   label: string;
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-function useEscape(onClose: () => void, dialog?: React.RefObject<HTMLElement | null>) {
-  React.useEffect(() => {
+function useEscape(onClose: () => void, dialog: RefObject<HTMLElement | null>) {
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      if (dialog && Array.from(document.querySelectorAll('[role="dialog"]')).at(-1) !== dialog.current) return;
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (Array.from(document.querySelectorAll('[role="dialog"]')).at(-1) !== dialog.current) return;
+      e.preventDefault();
+      // A hand-written panel above a Base UI dialog owns Escape before Base UI sees it.
+      e.stopPropagation();
       onClose();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
   }, [onClose, dialog]);
+}
+
+let scrollLocks = 0;
+let pageOverflow = '';
+let pageGutter = '';
+
+function lockPageScroll() {
+  if (scrollLocks === 0) {
+    pageOverflow = document.body.style.overflow;
+    pageGutter = document.documentElement.style.scrollbarGutter;
+    if (window.innerWidth > document.documentElement.clientWidth)
+      document.documentElement.style.scrollbarGutter = 'stable';
+    document.body.style.overflow = 'hidden';
+  }
+  scrollLocks += 1;
+  return () => {
+    scrollLocks -= 1;
+    if (scrollLocks === 0) {
+      document.body.style.overflow = pageOverflow;
+      document.documentElement.style.scrollbarGutter = pageGutter;
+    }
+  };
+}
+
+function usePanelFocus(dialog: RefObject<HTMLElement | null>) {
+  useEffect(() => {
+    const panel = dialog.current!;
+    const opener = document.activeElement;
+    const unlock = lockPageScroll();
+    panel.focus({ preventScroll: true });
+    const onTab = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || e.defaultPrevented) return;
+      if (Array.from(document.querySelectorAll('[role="dialog"]')).at(-1) !== panel) return;
+      const focusable = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button, input, select, textarea, [tabindex], [contenteditable="true"]',
+        ),
+      ).filter(
+        (element) =>
+          element.tabIndex >= 0 &&
+          !element.matches(':disabled') &&
+          !element.closest('[hidden], [inert]') &&
+          element.getClientRects().length > 0 &&
+          getComputedStyle(element).visibility !== 'hidden',
+      );
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      const active = document.activeElement;
+      if (!focusable.some((element) => element === active) || (e.shiftKey ? active === first : active === last)) {
+        e.preventDefault();
+        (e.shiftKey ? last : first)?.focus({ preventScroll: true });
+        if (!first) panel.focus({ preventScroll: true });
+      }
+    };
+    document.addEventListener('keydown', onTab);
+    return () => {
+      document.removeEventListener('keydown', onTab);
+      unlock();
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true });
+    };
+  }, [dialog]);
 }
 
 /**
@@ -25,15 +91,9 @@ function useEscape(onClose: () => void, dialog?: React.RefObject<HTMLElement | n
  * The scrim is light so the article stays legible behind it.
  */
 export function Sheet({ onClose, label, className, children }: OverlayProps) {
-  const dialog = React.useRef<HTMLElement>(null);
+  const dialog = useRef<HTMLElement>(null);
   useEscape(onClose, dialog);
-  React.useEffect(() => {
-    const opener = document.activeElement;
-    dialog.current?.focus({ preventScroll: true });
-    return () => {
-      if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true });
-    };
-  }, []);
+  usePanelFocus(dialog);
   return (
     <div
       className="fixed inset-0 z-50 flex items-end md:items-stretch md:justify-end bg-scrim/25 anim-fade"
@@ -60,10 +120,14 @@ export function Sheet({ onClose, label, className, children }: OverlayProps) {
 
 /** Drawer: navigation on small screens. Slides in from the left. */
 export function Drawer({ onClose, label, className, children }: OverlayProps) {
-  useEscape(onClose);
+  const dialog = useRef<HTMLElement>(null);
+  useEscape(onClose, dialog);
+  usePanelFocus(dialog);
   return (
     <div className="fixed inset-0 z-50 bg-scrim/30 anim-fade" onClick={onClose}>
       <aside
+        ref={dialog}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={label}
@@ -77,27 +141,23 @@ export function Drawer({ onClose, label, className, children }: OverlayProps) {
 }
 
 /** Dialog: tasks that need focus (settings, import, install). */
-export function Dialog({ onClose, label, className, children }: OverlayProps) {
-  useEscape(onClose);
+function OverlayDialog({ onClose, label, className, children }: OverlayProps) {
+  // Share ownership with the hand-written panels; Base UI leaves an existing scroll lock alone.
+  useLayoutEffect(lockPageScroll, []);
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-scrim/40 anim-fade" onClick={onClose}>
-      <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={label}
-          onClick={(e) => e.stopPropagation()}
-          className={cn(
-            'w-full max-w-2xl rounded-lg border border-ink-200 bg-surface shadow-lg overflow-hidden',
-            className,
-          )}
-        >
-          {children}
-        </div>
-      </div>
-    </div>
+    <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        aria-label={label}
+        onClick={(event) => event.stopPropagation()}
+        className={cn('anim-fade m-auto max-h-none overflow-hidden p-0', className)}
+      >
+        {children}
+      </DialogContent>
+    </Dialog.Root>
   );
 }
+
+export { OverlayDialog as Dialog };
 
 /** Shared header for Sheet and Dialog. */
 export function OverlayHeader({
@@ -107,11 +167,11 @@ export function OverlayHeader({
   closeLabel,
   children,
 }: {
-  title: React.ReactNode;
-  subtitle?: React.ReactNode;
+  title: ReactNode;
+  subtitle?: ReactNode;
   onClose: () => void;
   closeLabel: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-ink-200 shrink-0">
