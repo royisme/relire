@@ -20,10 +20,11 @@ async function makePageScrollable(page: Page) {
   expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)).toBe(true);
 }
 
-/** Wheeling over `at` moves the page. */
-async function expectPageScrolls(page: Page, at: Point) {
+/** Wheeling over the middle of the page, the main content and not the sidebar, moves the page. */
+async function expectPageScrolls(page: Page) {
+  const { width, height } = page.viewportSize()!;
   await page.evaluate(() => scrollTo(0, 0));
-  await page.mouse.move(at.x, at.y);
+  await page.mouse.move(width / 2, height / 2);
   await page.mouse.wheel(0, 600);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
   await page.evaluate(() => scrollTo(0, 0));
@@ -77,7 +78,7 @@ interface Overlay {
 /** Opens the overlay twice: once closed with Escape, once with a backdrop click. */
 async function checkOverlay(page: Page, { opener, open, panel, inside, backdrop }: Overlay) {
   await makePageScrollable(page);
-  await expectPageScrolls(page, backdrop);
+  await expectPageScrolls(page);
   for (const close of ['Escape', 'backdrop']) {
     await open();
     await expect(panel).toBeVisible();
@@ -94,7 +95,7 @@ async function checkOverlay(page: Page, { opener, open, panel, inside, backdrop 
     else await page.mouse.click(backdrop.x, backdrop.y);
     await expect(panel).toHaveCount(0);
     await expect(opener).toBeFocused();
-    await expectPageScrolls(page, backdrop);
+    await expectPageScrolls(page);
   }
 }
 
@@ -175,5 +176,5 @@ test('Escape closes only the topmost overlay and the page stays locked until the
   await page.keyboard.press('Escape');
   await expect(sheet).toHaveCount(0);
   await expect(row).toBeFocused();
-  await expectPageScrolls(page, behind);
+  await expectPageScrolls(page);
 });

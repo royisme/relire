@@ -13,15 +13,12 @@ interface OverlayProps {
 function useEscape(onClose: () => void, dialog: RefObject<HTMLElement | null>) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (e.key !== 'Escape') return;
       if (Array.from(document.querySelectorAll('[role="dialog"]')).at(-1) !== dialog.current) return;
-      e.preventDefault();
-      // A hand-written panel above a Base UI dialog owns Escape before Base UI sees it.
-      e.stopPropagation();
       onClose();
     };
-    window.addEventListener('keydown', onKey, true);
-    return () => window.removeEventListener('keydown', onKey, true);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [onClose, dialog]);
 }
 
