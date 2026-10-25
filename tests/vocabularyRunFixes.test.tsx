@@ -15,7 +15,7 @@ Object.defineProperty(globalThis, 'window', {
   configurable: true,
   value: Object.assign(new EventTarget(), { location: { hash: '' }, relireHistory: { read: () => 0 } }),
 });
-const { VocabularyRun } = await import('../src/components/vocabulary/game/VocabularyRun');
+const { VocabularyRun, RunNextDueLine } = await import('../src/components/vocabulary/game/VocabularyRun');
 const review = await import('../src/hooks/useVocabularyReview');
 const speech = await import('../src/components/ui/speak-button');
 if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
@@ -209,4 +209,22 @@ test('the revealed game card explicitly requests device speech regardless of the
   } finally {
     speak.mockRestore();
   }
+});
+
+test('both locales finish with ready at the formatted time, through the real finished line', async () => {
+  const due = new Date(2026, 9, 26, 15).getTime();
+  for (const [language, line] of [
+    ['en', `The next card is ready at ${new Date(due).toLocaleString()}.`],
+    ['zh', `下一张卡片将在 ${new Date(due).toLocaleString()} 可以复习。`],
+  ] as const) {
+    await i18n.changeLanguage(language);
+    expect(
+      renderToStaticMarkup(
+        <I18nextProvider i18n={i18n}>
+          <RunNextDueLine due={due} />
+        </I18nextProvider>,
+      ),
+    ).toContain(line);
+  }
+  await i18n.changeLanguage('en');
 });

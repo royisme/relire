@@ -3,9 +3,19 @@ import { beforeEach, expect, spyOn, test } from 'bun:test';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { freshDb } from './fixtures/storage';
-import { testDefinition, testCandidate, testLookup } from './fixtures/vocabulary';
+import {
+  testBook,
+  testCandidate,
+  testDefinition,
+  testLookup,
+  testMatureSchedule,
+  testRow,
+} from './fixtures/vocabulary';
 import { useVocabularyReview } from '../src/hooks/useVocabularyReview';
+import { wordsInput } from '../src/services/today/inputs';
+import { initialVocabularySchedule } from '../src/utils/srs';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
+import type { VocabularyBook, VocabularyRow } from '../src/types/vocabulary';
 import * as storage from '../src/storage/vocabulary';
 import '../src/i18n';
 const { introduceVocabularyCard, readVocabulary, saveVocabularyBookmark, saveVocabularyPreferences } = storage;
@@ -24,7 +34,7 @@ async function reviewModel(words: string[], now: number): Promise<VocabularyMode
   };
   return model;
 }
-function reviewHarness(model: VocabularyModel) {
+function reviewHarness(model: VocabularyModel, book?: VocabularyBook) {
   // Drive the hook's state and selection effect only; do not install browser wake/focus listeners.
   const slots: unknown[] = [];
   let index = 0;
@@ -50,7 +60,7 @@ function reviewHarness(model: VocabularyModel) {
   });
   let current!: ReturnType<typeof useVocabularyReview>;
   function Probe() {
-    const session = useVocabularyReview(model);
+    const session = useVocabularyReview(model, book);
     React.useEffect(() => {
       current = session;
     });
@@ -201,6 +211,52 @@ test('a backward clock clears the invalid pending observation and permits a fres
   } finally {
     submit.mockRestore();
     harness.dispose();
+  }
+});
+
+test('the counter equals wordsInput for the same rows, book, day and now, not the spare allowance', async () => {
+  const now = new Date(2026, 9, 24, 12, 30).getTime();
+  const clock = spyOn(Date, 'now').mockReturnValue(now);
+  const book = await testBook(3, 'TEST');
+  // Two of the book's three entries are introduced today: a review card due this afternoon and a learning
+  // step due now; the third entry is still unseen.
+  const rows: VocabularyRow[] = [
+    {
+      ...testRow(book.entries[0].word),
+      introducedAt: now,
+      schedule: testMatureSchedule(new Date(2026, 9, 24, 15).getTime()),
+    },
+    {
+      ...testRow(book.entries[1].word),
+      introducedAt: now,
+      schedule: { ...initialVocabularySchedule(now), phase: 'learning', dueAt: now - 60_000 },
+    },
+  ];
+  const day = { date: '2026-10-24', introducedKeys: rows.map((row) => row.key) };
+  const model: VocabularyModel = {
+    rows,
+    now,
+    epoch: 0,
+    ready: true,
+    error: null,
+    preferences: { newPerDay: 20, retentionPercent: 90 },
+    day,
+    async refresh() {},
+    savePreferences: saveVocabularyPreferences,
+  };
+  const harness = reviewHarness(model, book);
+  try {
+    const session = harness.render();
+    const input = wordsInput(rows, book, day, 20, now);
+    // Hand-derived: two due cards and one new word left, min(1 unseen, 20 − 2 introduced) = 1, not the 18 spare allowance.
+    expect(input).toEqual({ due: 2, newAvailable: 1, nextDue: null, reviewsToday: 0 });
+    expect(session.due).toBe(input.due);
+    expect(session.remaining).toBe(input.newAvailable);
+    expect(session.due).toBe(2);
+    expect(session.remaining).toBe(1);
+  } finally {
+    harness.dispose();
+    clock.mockRestore();
   }
 });
 

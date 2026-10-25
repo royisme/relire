@@ -12,7 +12,8 @@ import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
 import { testBook, testMatureSchedule, testRow } from './fixtures/vocabulary';
 import { vocabularyContextKey } from '../src/services/vocabulary/identity';
-import type { VocabularyRow, VocabularySchedule } from '../src/types/vocabulary';
+import { nextAvailableAt } from '../src/services/today/inputs';
+import type { VocabularyRow } from '../src/types/vocabulary';
 import {
   buildChallenge,
   type Challenge,
@@ -77,20 +78,23 @@ test('a chunk counts ratings from its baseline, Continue keeps the run, and a sm
   expect(chunkRatings({ size: 5, baseline: 10 }, 3)).toBe(0);
 });
 
-test('the finished states report the earliest future due time across learning and review cards', () => {
-  const { runNextDue } = run;
-  const now = 1_000;
-  const schedule = (dueAt: number, phase: 'review' | 'learning'): VocabularySchedule => ({
-    ...testMatureSchedule(now),
-    dueAt,
-    phase,
+test('the finished states report the earliest future availability across learning and review cards', () => {
+  const now = new Date(2026, 9, 24, 12, 30).getTime();
+  const row = (dueAt: number, phase: 'review' | 'learning'): VocabularyRow => ({
+    ...testRow('test-mot'),
+    schedule: { ...testMatureSchedule(now), dueAt, phase },
   });
-  const row = (card: VocabularySchedule): VocabularyRow => ({ ...testRow('test-mot'), schedule: card });
-  expect(
-    runNextDue([row(schedule(2_000, 'learning')), row(schedule(1_500, 'review')), row(schedule(500, 'review'))], now),
-  ).toBe(1_500);
-  expect(runNextDue([row(schedule(500, 'review'))], now)).toBeNull();
-  expect(runNextDue([], now)).toBeNull();
+  const tomorrow = new Date(2026, 9, 25, 15).getTime();
+  const midnight = new Date(2026, 9, 25).getTime();
+  // A review card due tomorrow at 15:00 returns from its local midnight; one due later today is already available.
+  expect(nextAvailableAt([row(tomorrow, 'review')], now)).toBe(midnight);
+  expect(nextAvailableAt([row(new Date(2026, 9, 24, 15).getTime(), 'review')], now)).toBeNull();
+  // A learning step returns at its exact instant; a learning card due tomorrow at 10:00 loses to midnight.
+  expect(nextAvailableAt([row(now + 10 * 60_000, 'learning')], now)).toBe(now + 10 * 60_000);
+  const tenTomorrow = new Date(2026, 9, 25, 10).getTime();
+  expect(nextAvailableAt([row(tenTomorrow, 'learning'), row(tomorrow, 'review')], now)).toBe(midnight);
+  expect(nextAvailableAt([testRow('test-new')], now)).toBeNull(); // unscheduled rows never wait
+  expect(nextAvailableAt([], now)).toBeNull();
 });
 
 test('a closed-class part of speech blocks the cloze, with the book’s own noisy spellings', () => {

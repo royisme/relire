@@ -1,5 +1,5 @@
 /** P1 acceptance on real Overview markup and queue inputs; no browser or visual acceptance. */
-import { afterEach, beforeEach, expect, test } from 'bun:test';
+import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
@@ -20,6 +20,7 @@ Object.defineProperty(globalThis, 'window', {
   value: Object.assign(new EventTarget(), { location: { hash: '' }, relireHistory: { read: () => 0 } }),
 });
 const { VocabularyHome } = await import('../src/components/vocabulary/VocabularyHome');
+const { VocabularyReview } = await import('../src/components/vocabulary/VocabularyReview');
 if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
 else Reflect.deleteProperty(globalThis, 'window');
 
@@ -258,6 +259,42 @@ for (const language of ['en', 'zh'] as const) {
     expect(stats.map((stat) => Number(stat[2]))).toEqual([input.due, 1, input.newAvailable]);
     expect(stats[2][2]).toBe('1');
     expect(stats[2][2]).not.toBe('18');
+  });
+
+  test(`${language}: the Review page counter line agrees with the Overview action for the same data`, async () => {
+    await i18n.changeLanguage(language);
+    // newPerDay 20 with two of the book's three entries introduced today (both due tomorrow): one new word
+    // is left, not the 18 spare allowance, and the Overview offers exactly that one word.
+    const rows = book.entries.slice(0, 2).map((entry) => ({
+      ...testRow(entry.word),
+      introducedAt: now,
+      schedule: testMatureSchedule(tomorrow),
+    }));
+    const current = { ...model, rows, day: { ...model.day, introducedKeys: rows.map((row) => row.key) } };
+    expect(wordsInput(rows, book, current.day, 20, now)).toEqual({
+      due: 0,
+      newAvailable: 1,
+      nextDue: tomorrowMidnight,
+      reviewsToday: 0,
+    });
+    // The Review hook reads the live clock, so the same `now` drives its rendered line.
+    const clock = spyOn(Date, 'now').mockReturnValue(now);
+    let review: string;
+    try {
+      review = render(<VocabularyReview model={current} book={book} />);
+    } finally {
+      clock.mockRestore();
+    }
+    expect(review).toContain(
+      language === 'en'
+        ? 'Ready to review: 0 · New words left today: 1'
+        : '\u73b0\u5728\u5f85\u590d\u4e60\uff1a0 \u00b7 \u4eca\u5929\u8fd8\u53ef\u5b66\u7684\u65b0\u8bcd\uff1a1',
+    );
+    expect(review).not.toContain(
+      language === 'en' ? 'New words left today: 18' : '\u4eca\u5929\u8fd8\u53ef\u5b66\u7684\u65b0\u8bcd\uff1a18',
+    );
+    const home = render(<VocabularyHome model={current} book={book} pending={false} />);
+    expect(home).toContain(language === 'en' ? 'Learn 1 new word' : '\u5b66\u4e60 1 \u4e2a\u65b0\u8bcd');
   });
 }
 

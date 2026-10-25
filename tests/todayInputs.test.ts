@@ -1,6 +1,6 @@
 /** Pure Today input joins: queue counts, the merged reader catalogue and the grammar step; no storage, no hooks. */
 import { expect, test } from 'bun:test';
-import { grammarInput, readerEntries, wordsInput } from '../src/services/today/inputs';
+import { grammarInput, nextAvailableAt, readerEntries, wordsInput } from '../src/services/today/inputs';
 import { publishedReaderFixture } from './fixtures/gradedReaders';
 import { bookList } from './fixtures/grammarTopics';
 import { readerAnswer } from './fixtures/readerProgress';
@@ -131,6 +131,46 @@ test('review cards are already due from local midnight, even before dueAt, and c
   expect(wordsInput([today, tomorrow, overdue], undefined, day(), 0, now).nextDue).toBe(
     new Date(2026, 9, 25).getTime(),
   );
+});
+
+test('timezone: the same review instant returns at the local midnight of its due day, not a fixed one', async () => {
+  // Bun caches timezone state across test files. Keep TZ changes out of the suite's other tests.
+  if (!process.env.RELIRE_TEST_INPUTS_TZ) {
+    const child = Bun.spawn([process.execPath, 'test', import.meta.path, '-t', 'timezone'], {
+      env: { ...process.env, RELIRE_TEST_INPUTS_TZ: '1' },
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    const output = await new Response(child.stderr).text();
+    expect(await child.exited, output).toBe(0);
+    return;
+  }
+  const original = process.env.TZ;
+  try {
+    // One instant, 2026-10-25 02:30 UTC: still October 24 in Toronto (EDT, UTC-4), already October 25 in Shanghai (UTC+8).
+    const dueAt = Date.UTC(2026, 9, 25, 2, 30);
+    const before = Date.UTC(2026, 9, 24, 1);
+    const review = { ...testRow('test-review'), schedule: testMatureSchedule(dueAt) };
+    process.env.TZ = 'America/Toronto';
+    // Toronto local due day: October 24, 22:30; available from Toronto's October 24 midnight.
+    expect(nextAvailableAt([review], before)).toBe(new Date(2026, 9, 24).getTime());
+    // A review card due later in the local day is already available and waits no more.
+    const laterToday = { ...testRow('test-today'), schedule: testMatureSchedule(new Date(2026, 9, 24, 23).getTime()) };
+    expect(nextAvailableAt([laterToday], new Date(2026, 9, 24, 21).getTime())).toBeNull();
+    // A learning step keeps its exact instant in every zone.
+    const learning = {
+      ...testRow('test-learning'),
+      schedule: { ...initialVocabularySchedule(before), phase: 'learning' as const, dueAt: before + 10 * 60_000 },
+    };
+    expect(nextAvailableAt([learning], before)).toBe(before + 10 * 60_000);
+    process.env.TZ = 'Asia/Shanghai';
+    // The same instant is Shanghai's October 25, 10:30; available from Shanghai's October 25 midnight.
+    expect(nextAvailableAt([review], before)).toBe(new Date(2026, 9, 25).getTime());
+    expect(nextAvailableAt([learning], before)).toBe(before + 10 * 60_000);
+  } finally {
+    if (original === undefined) delete process.env.TZ;
+    else process.env.TZ = original;
+  }
 });
 
 const base = publishedReaderFixture();
