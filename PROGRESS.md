@@ -4,7 +4,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
-- 2026-10-25, P4 built: 35 Words strings in en and zh say it in plain words (no introduction allowance, leech, lapses, young or mature, relearning, due as jargon); the retention hint now names the 90% default. Locale strings only, keys and placeholders unchanged; `i18n:check` and static checks run, tests that pinned old strings are not yet updated.
+- 2026-10-25, P4 built: 34 Words strings in en and zh say it in plain words (no introduction allowance, leech, lapses, young or mature, relearning as jargon); the retention hint names the 90% default, "well known" says the gap the schedule set at the last review, and lapses say "forgotten in review". Locale strings only, keys and placeholders unchanged; the run summary still says "due" until TASKS P1d fixes the code. Static checks and unit tests pass; the tests that pinned old strings landed in cb2083c.
 - 2026-10-25, P5 built: Dialog wraps Base UI; Sheet and Drawer share initial/restored focus, Tab containment and counted scroll locking; Escape stays topmost-only. Static/build/shape checks pass, detector `[]`; built and tested (unit 2611 pass; the five static-render tests now render the dialog content without the Base UI portal; `e2e/overlay-focus.spec.ts` typechecked, never run). Browser/visual acceptance unverified.
 
 ## 2026-10-25: F1 fonts bundled
