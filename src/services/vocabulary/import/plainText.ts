@@ -1,10 +1,24 @@
 /** Local Anki/CSV boundary: quote-aware records retain physical source line numbers, including refused records. */
+import { ImportRefusal, type ImportReason } from './refusal';
+
+export const MAX_TEXT_BYTES = 10 * 1024 * 1024;
+export const MAX_TEXT_ROWS = 20_000;
+
+export async function readPlainTextFile(file: Pick<File, 'size' | 'text'>): Promise<PlainTextImport> {
+  if (file.size > MAX_TEXT_BYTES)
+    throw new ImportRefusal({
+      key: 'vocab.import.errors.textTooLarge',
+      params: { size: MAX_TEXT_BYTES / 1024 / 1024 },
+    });
+  return parsePlainText(await file.text());
+}
+
 export const SEPARATORS = { tab: '\t', comma: ',', semicolon: ';', space: ' ', pipe: '|' } as const;
 export type Separator = keyof typeof SEPARATORS;
 export interface ImportRow {
   row: number;
   fields: string[];
-  error?: string;
+  error?: ImportReason;
 }
 export interface ImportHeaders {
   html?: boolean;
@@ -32,7 +46,8 @@ export function parsePlainText(input: string): PlainTextImport {
     const separator = /^#separator:(.*)$/i.exec(line);
     if (separator) {
       const name = separator[1].trim().toLowerCase();
-      if (!Object.hasOwn(SEPARATORS, name)) throw new Error(`Unsupported separator: ${name}`);
+      if (!Object.hasOwn(SEPARATORS, name))
+        throw new ImportRefusal({ key: 'vocab.import.errors.separator', params: { name } });
       declared = name as Separator;
     }
     const html = /^#html:(true|false)$/i.exec(line);
@@ -40,7 +55,8 @@ export function parsePlainText(input: string): PlainTextImport {
     const column = /^#(guid|notetype|deck|tags) column:(.*)$/i.exec(line);
     if (column) {
       const value = Number(column[2]);
-      if (!Number.isInteger(value) || value < 1) throw new Error(`Invalid column header: ${line}`);
+      if (!Number.isInteger(value) || value < 1)
+        throw new ImportRefusal({ key: 'vocab.import.errors.columnHeader', params: { line } });
       const key = `${column[1].toLowerCase()}Column` as 'guidColumn' | 'notetypeColumn' | 'deckColumn' | 'tagsColumn';
       headers[key] = value - 1;
     }
@@ -81,7 +97,7 @@ function records(text: string, separator: string, firstLine: number): ImportRow[
   let field = '';
   let quoted = false;
   let closed = false;
-  let error: string | undefined;
+  let error: ImportReason | undefined;
   let line = firstLine;
   let row = firstLine;
   for (let i = 0; i <= text.length; i += 1) {
@@ -110,7 +126,7 @@ function records(text: string, separator: string, firstLine: number): ImportRow[
         if (char === '\n') line += 1;
         continue;
       }
-      error = 'Unclosed quoted field';
+      error = { key: 'vocab.import.errors.unclosedQuote' };
       quoted = false;
     }
     if (char === undefined || char === '\n' || char === separator) {
@@ -119,8 +135,11 @@ function records(text: string, separator: string, firstLine: number): ImportRow[
       const explicitlyEmpty = closed;
       closed = false;
       if (char === separator) continue;
-      if (fields.length > 1 || fields[0].trim() || explicitlyEmpty || error)
+      if (fields.length > 1 || fields[0].trim() || explicitlyEmpty || error) {
+        if (rows.length === MAX_TEXT_ROWS)
+          throw new ImportRefusal({ key: 'vocab.import.errors.tooManyRows', params: { rows: MAX_TEXT_ROWS } });
         rows.push({ row, fields, ...(error ? { error } : {}) });
+      }
       fields = [];
       error = undefined;
       line += 1;
@@ -131,7 +150,7 @@ function records(text: string, separator: string, firstLine: number): ImportRow[
       quoted = true;
       continue;
     }
-    if (char === '"' || closed) error = 'Unexpected character outside quoted field';
+    if (char === '"' || closed) error = { key: 'vocab.import.errors.unexpectedQuote' };
     field += char;
   }
   return rows;

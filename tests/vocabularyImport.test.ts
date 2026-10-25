@@ -58,9 +58,9 @@ test('separator declarations, BOM, CRLF and every optional Anki header are retai
     expect(result.separator).toBe(separator);
     expect(result.rows[0].fields).toEqual(['chat', 'cat']);
   }
-  expect(() => parsePlainText('#separator:unknown\na,b')).toThrow('Unsupported separator');
-  expect(() => parsePlainText('#separator:constructor\na,b')).toThrow('Unsupported separator');
-  expect(() => parsePlainText('#guid column:0\na,b')).toThrow('Invalid column header');
+  expect(() => parsePlainText('#separator:unknown\na,b')).toThrow('vocab.import.errors.separator');
+  expect(() => parsePlainText('#separator:constructor\na,b')).toThrow('vocab.import.errors.separator');
+  expect(() => parsePlainText('#guid column:0\na,b')).toThrow('vocab.import.errors.columnHeader');
 });
 
 test('automatic tab/semicolon/comma detection ignores delimiters inside quotes; quoted newlines and doubled quotes are data', () => {
@@ -111,9 +111,9 @@ test('column choices control the French/answer/example, row deck and tags; GUID 
   expect(changed.notes[0].context.id).toBe(batch.notes[0].context.id);
   expect(changed.notes[0].context.sentence).toBe('');
   expect(changed.notes[0].context.id).not.toBe(changed.notes[1].context.id);
-  expect(prepareVocabularyImport(parsed, { ...selected, back: 3 }, 'unused', 'en', now).rejected[0].reason).toContain(
-    'different columns',
-  );
+  expect(prepareVocabularyImport(parsed, { ...selected, back: 3 }, 'unused', 'en', now).rejected[0].reason).toEqual({
+    key: 'vocab.import.errors.differentColumns',
+  });
 });
 
 test('HTML, entities, sound, NFC and apostrophes normalize BEFORE French validation', () => {
@@ -140,15 +140,30 @@ test('every malformed or empty selected value is rejected with its physical row 
   );
   expect(batch.notes).toHaveLength(1);
   expect(batch.rejected.map((row) => row.row)).toEqual([3, 4, 5, 6]);
-  expect(batch.rejected[0].reason).toContain('nonblank');
-  expect(batch.rejected[1].reason).toContain('Missing column 2');
-  expect(batch.rejected[2].reason).toContain('&unknown;');
-  expect(batch.rejected[3].reason).toBe('Unclosed quoted field');
-  expect(prepare('chat,"cat"oops').rejected[0].reason).toContain('Unexpected character');
-  expect(prepare('chat,&#0;').rejected[0].reason).toContain('Invalid HTML entity');
-  expect(prepare('chat,&constructor;').rejected[0].reason).toContain('Unsupported HTML entity');
-  expect(prepare('chat,control\u0000').rejected[0].reason).toContain('control character');
-  expect(prepare('chat,&lt;b&gt;still markup&lt;/b&gt;').rejected[0].reason).toContain('NFC');
+  expect(batch.rejected[0].reason).toEqual({
+    key: 'vocab.import.errors.invalidFields',
+    params: { fields: 'definition.front' },
+  });
+  expect(batch.rejected[1].reason).toEqual({ key: 'vocab.import.errors.missingColumn', params: { column: 2 } });
+  expect(batch.rejected[2].reason).toEqual({
+    key: 'vocab.import.errors.unsupportedEntity',
+    params: { entity: '&unknown;' },
+  });
+  expect(batch.rejected[3].reason).toEqual({ key: 'vocab.import.errors.unclosedQuote' });
+  expect(prepare('chat,"cat"oops').rejected[0].reason).toEqual({ key: 'vocab.import.errors.unexpectedQuote' });
+  expect(prepare('chat,&#0;').rejected[0].reason).toEqual({
+    key: 'vocab.import.errors.invalidEntity',
+    params: { entity: '&#0;' },
+  });
+  expect(prepare('chat,&constructor;').rejected[0].reason).toEqual({
+    key: 'vocab.import.errors.unsupportedEntity',
+    params: { entity: '&constructor;' },
+  });
+  expect(prepare('chat,control\u0000').rejected[0].reason).toEqual({ key: 'vocab.import.errors.controlCharacter' });
+  expect(prepare('chat,&lt;b&gt;still markup&lt;/b&gt;').rejected[0].reason).toEqual({
+    key: 'vocab.import.errors.invalidFields',
+    params: { fields: 'definition.back' },
+  });
   const emptyExample = prepareVocabularyImport(
     parsePlainText('chat\tcat\t<br>'),
     { ...columns, example: 2 },
@@ -156,11 +171,14 @@ test('every malformed or empty selected value is rejected with its physical row 
     'en',
     now,
   );
-  expect(emptyExample.rejected[0].reason).toContain('example');
+  expect(emptyExample.rejected[0].reason).toEqual({
+    key: 'vocab.import.errors.invalidFields',
+    params: { fields: 'definition.example' },
+  });
   expect(
     prepareVocabularyImport(parsePlainText('#guid column:3\nchat\tcat\t'), columns, 'TEST', 'en', now).rejected[0]
       .reason,
-  ).toContain('noteId');
+  ).toEqual({ key: 'vocab.import.errors.invalidFields', params: { fields: 'source.noteId' } });
 });
 
 test('duplicates merge canonical rows, preserve review schedule/history/revision and existing contexts, and create no review writes', async () => {

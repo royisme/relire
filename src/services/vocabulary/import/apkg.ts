@@ -6,8 +6,10 @@ import type { Database, SqlJsStatic } from 'sql.js';
 import type { PlainTextImport } from './plainText';
 import { loadImportSql } from './sqlLoader';
 import { errorMessage } from '../../ai/errors';
+import { ImportRefusal } from './refusal';
 
 export const MAX_APKG_BYTES = 50 * 1024 * 1024;
+export const MAX_DATABASE_BYTES = 200 * 1024 * 1024;
 const collections = ['collection.anki21b', 'collection.anki21', 'collection.anki2'];
 
 export interface ApkgNoteType {
@@ -64,6 +66,11 @@ function unzipCollection(bytes: Uint8Array) {
     const names: string[] = [];
     unzipSync(bytes, {
       filter: (entry) => {
+        if (collections.includes(entry.name) && entry.originalSize > MAX_DATABASE_BYTES)
+          throw new ImportRefusal({
+            key: 'vocab.import.errors.databaseTooLarge',
+            params: { size: MAX_DATABASE_BYTES / 1024 / 1024 },
+          });
         names.push(entry.name);
         return false;
       },
@@ -72,6 +79,7 @@ function unzipCollection(bytes: Uint8Array) {
     // Inspect the directory first: even obsolete collections must not be inflated, let alone media.
     return name ? { name, bytes: unzipSync(bytes, { filter: (entry) => entry.name === name })[name] } : null;
   } catch (error) {
+    if (error instanceof ImportRefusal) throw error;
     throw new Error(t('vocab.import.apkg.zip', { reason: errorMessage(error) }));
   }
 }
@@ -79,8 +87,28 @@ function unzipCollection(bytes: Uint8Array) {
 async function decodeCollection(bytes: Uint8Array) {
   const { decompress } = await import('fzstd');
   try {
-    return decompress(bytes);
+    // A fixed output buffer also bounds concatenated frames and a frame that lies about its content size.
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    if (view.getUint32(0, true) !== 0xfd2fb528) return decompress(bytes, new Uint8Array(0));
+    const descriptor = view.getUint8(4);
+    const single = (descriptor & 32) !== 0;
+    const flag = descriptor >> 6;
+    const sizeBytes = flag ? 1 << flag : single ? 1 : 0;
+    if (!sizeBytes) throw new ImportRefusal({ key: 'vocab.import.errors.unknownDatabaseSize' });
+    const dictionary = descriptor & 3;
+    const offset = 5 + (single ? 0 : 1) + (dictionary === 3 ? 4 : dictionary);
+    const size = Array.from({ length: sizeBytes }, (_, i) => BigInt(view.getUint8(offset + i))).reduce(
+      (total, byte, i) => total + (byte << BigInt(8 * i)),
+      flag === 1 ? 256n : 0n,
+    );
+    if (size > BigInt(MAX_DATABASE_BYTES))
+      throw new ImportRefusal({
+        key: 'vocab.import.errors.databaseTooLarge',
+        params: { size: MAX_DATABASE_BYTES / 1024 / 1024 },
+      });
+    return decompress(bytes, new Uint8Array(Number(size)));
   } catch (error) {
+    if (error instanceof ImportRefusal) throw error;
     throw new Error(t('vocab.import.apkg.zstd', { reason: errorMessage(error) }));
   }
 }

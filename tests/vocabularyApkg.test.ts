@@ -135,8 +135,14 @@ test('refused notes keep their one-based position within the chosen type and the
   const batch = prepareVocabularyImport(types[0].parsed, { front: 0, back: 1, example: null }, 'unused', 'en', now);
   expect(batch.notes).toHaveLength(1);
   expect(batch.rejected.map((note) => note.row)).toEqual([2, 3, 4]);
-  expect(batch.rejected[0].reason).toContain('nonblank');
-  expect(batch.rejected[1].reason).toBe('Unsupported HTML entity: &unknown;');
+  expect(batch.rejected[0].reason).toEqual({
+    key: 'vocab.import.errors.invalidFields',
+    params: { fields: 'definition.front' },
+  });
+  expect(batch.rejected[1].reason).toEqual({
+    key: 'vocab.import.errors.unsupportedEntity',
+    params: { entity: '&unknown;' },
+  });
   expect(batch.rejected[2].reason).toBe('The note has 1 fields; its note type declares 3.');
 });
 

@@ -80,6 +80,20 @@ export function RunDone({
   );
 }
 
+/** Snapshot loading and failure are not queue completion. */
+export function RunWaiting({ error }: { error: string | null }) {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="status"
+      aria-busy={!error}
+      className="mx-auto h-[42rem] w-full max-w-[25rem] overflow-auto py-10 text-sm text-ink-600"
+    >
+      {error ?? t('vocab.game.loadingCard')}
+    </div>
+  );
+}
+
 /** The queue with nothing left to play right now: what really comes back next, and the way back to Words. */
 export function RunCleared({ nextDue }: { nextDue: number | null }) {
   const { t } = useTranslation();
