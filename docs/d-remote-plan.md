@@ -66,7 +66,7 @@ A local `getPlatformProxy` start takes about 0.3 s; with `NODE_ENV` unset it mak
 ## To verify before the steps
 
 Before the owner's first remote run (owner, or a worker reading Cloudflare docs the owner supplies):
-- **First:** D1's current limits on one bound value, row size and statement size, against the 108,810-byte page. If a page is rejected, D-remote-2b runs before D-remote-2 is used.
+- **First (answered 2026-10-24, `worker/README.md` "Cloudflare limits": a 108,810-byte page fits as a bound value; D-remote-2b is not needed):** D1's current limits on one bound value, row size and statement size, against the 108,810-byte page. If a page is rejected, D-remote-2b runs before D-remote-2 is used.
 - Whether a failed `--remote --file` import rolls back (Wrangler's note only), and whether a rolled-back import's rows count as written.
 - Whether index entries and `DELETE` rows count toward rows written (check the dashboard after day 1).
 

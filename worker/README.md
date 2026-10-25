@@ -64,7 +64,7 @@ W() { WRANGLER_SEND_METRICS=false WRANGLER_HIDE_BANNER=true node --no-warnings -
 `W` invokes the installed Wrangler directly with `node --no-warnings -- worker/node_modules/wrangler/wrangler-dist/cli.js`, never `bunx` and never `worker/node_modules/.bin/wrangler`: that launcher respawns `node` without the `--`, so Node 26 would read `--env-file` itself and exit before Wrangler starts. `--env-file .no-env-files` names a file that does not exist, so no `.env*` file or `.dev.vars` is loaded into Wrangler's process; the two variables disable telemetry and the banner. Do not use `wrangler dev --config $C`: with `"remote": true` it would connect `DB` to the deployed database. Every remote publisher flag below also refuses on its own: `Remote publication requires owner CLI authorization` outside the owner's terminal entrypoint, and `Remote publication requires TTY stdin and stdout` in a non-interactive shell, before any metadata or Wrangler access.
 
 1. **Local reference.** `W d1 migrations apply DB --local --config worker/wrangler.jsonc`, then re-publish topics and the vocabulary locally. Note the local `packVersion` and `vocabularyCurrent:tcf-7000`, and the sizes measured on your machine (largest topic body, largest vocabulary page body, page count) for the checks below.
-2. **Limits.** Read Cloudflare's current D1 limits (bound value, row, statement size) and rows-written rules. If the largest page (108,810 bytes when measured) is rejected, the page size must be halved in code first; a smaller page count changes the download pacing.
+2. **Limits.** Read once on 2026-10-24 (see "Cloudflare limits" below): a 108,810-byte vocabulary page fits as a bound value, so no page-size change is needed. Re-read the pages if the date is old when you deploy.
 3. **Account and database.** `W login` (or set `CLOUDFLARE_API_TOKEN`), `W d1 create relire-content`; write `$C` as described above; `W d1 migrations apply DB --remote --config $C`.
 4. **Publish** (migrations, topics, vocabulary and readers fit one free-plan day, 93 topics and 30 vocabulary pages; the lexicon no longer needs a second day): `bun scripts/grammar-topics/publish.ts --apply-remote` (answer Wrangler's confirmation yourself; the publisher's read-only check, not the prompt or the exit code, decides success), `bun scripts/vocabulary/publish.ts --apply-remote-unreviewed`, `bun scripts/graded-readers/publishRemote.ts --apply-remote` (with the current syllabus it prints `No non-bundled readers selected; nothing to publish.`). Read each exit code. Read-only counts: `W d1 execute DB --remote --config $C --command "SELECT count(*) FROM topics"` (93) and the same for `vocabulary_pages` (30). Note the dashboard's rows written.
 5. **Deploy, set the key, smoke-check.** `W deploy --config $C` (until the secret exists every request is `401`, which is the safe state). Then generate a key (`openssl rand -base64 32`) and set it: `W secret put ACCESS_KEYS --config $C` (paste the list when asked; never put it in a file in the repository). Smoke-check twice. Without a key: `/v1/topics` is `401` with a `WWW-Authenticate: Bearer` header, and the same from an allowed `Origin` also has `Access-Control-Allow-Origin`. With `-H "Authorization: Bearer <key>"`, `GET` the deployed URL: `/v1/topics` 200 with ETag equal to the local `packVersion`; `/v1/vocabulary/tcf-7000?page=0` 200 with `manifest.version` equal to the local `vocabularyCurrent:tcf-7000`, `pageCount` 30, review `unreviewed`; `/v1/readers` 404 `readers-unavailable`. A request with an allowed `Origin` gets `Access-Control-Allow-Origin`, one with another origin gets none; `POST` gets 405. The secret commands above were never run by an agent.
@@ -123,3 +123,24 @@ The app requests catalogue metadata and published reader id/artifact version onl
 ## Lexicon (moved out of the service)
 
 The verb-form dictionary is not served here. It is the committed data file `data/lexicon/lexicon.json`, built from Morphalou 3.1 (LGPL-LR) by `bun scripts/lexicon/build.ts` and read by the app; the notice, the licence text and the rebuild steps are in `data/lexicon/NOTICE.md` and `data/lexicon/LGPL-LR.txt`, and the plan is `docs/lexicon-bundle-plan.md`. `bun scripts/lexicon/select.ts` still writes the allowlist `data/lexicon/lemmas.txt` offline (see its header for `LEXIQUE_FILE` and `MORPHALOU_DIR`).
+
+## Cloudflare limits (read 2026-10-24)
+
+Read by Gemini 3.8 from the official pages and quoted; the D1 figures below were re-checked directly against the two D1 pages by the lead. Free plan unless stated.
+
+| Limit | Value | Page |
+| --- | --- | --- |
+| D1 string, BLOB or table row size | 2,000,000 bytes | <https://developers.cloudflare.com/d1/platform/limits/> |
+| D1 SQL statement length | 100,000 bytes | same |
+| D1 bound parameters per query | 100 (no separate per-value ceiling is documented; a value is bounded by the 2 MB string limit) | same |
+| D1 queries per Worker invocation | 50 (a `db.batch()` counts as one) | same |
+| D1 database size | 500 MB (account total 5 GB) | same |
+| D1 rows read / written per day | 5 million / 100,000; reset 00:00 UTC; over the limit queries fail | <https://developers.cloudflare.com/d1/platform/pricing/> |
+| Rows written counting | INSERT, UPDATE and DELETE; **an indexed column adds one written row** (primary keys on TEXT columns are indexes too); row size does not matter | same |
+| Workers requests per day / CPU per request / subrequests / memory | 100,000 / 10 ms / 50 / 128 MB (waiting on D1 is not CPU time) | <https://developers.cloudflare.com/workers/platform/limits/> |
+| Rate Limiting binding `period` | 10 or 60 seconds, counted per Cloudflare location and eventually consistent; **plan availability is not stated on the page** (needs Wrangler 4.36.0 or later) | <https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/> |
+
+What it means here:
+- **A vocabulary page (108,810 bytes) is fine as a bound parameter** (the vocabulary and reader publishers bind the body through `getPlatformProxy`). It would **not** fit as a literal inside a statement of a `wrangler d1 execute --file` import (100 KB per statement). The topic publisher does use SQL files; its largest `INSERT` was 16,091 bytes when measured (the staged file of 2026-10-23), well inside the limit.
+- **The first deployment fits one day:** 93 topics + 30 vocabulary pages + readers is a few hundred rows written even with the key indexes, against 100,000.
+- **Open until the first deploy:** whether the Rate Limiting binding is accepted on the free plan; the page does not say. If `W deploy` refuses it, the Worker still works without the binding (it skips limiting when the binding is absent) but then has no rate limit.
