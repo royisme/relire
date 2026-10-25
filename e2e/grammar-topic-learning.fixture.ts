@@ -31,7 +31,6 @@ export async function setup(page: Page, language: 'en' | 'zh' = 'en', theme = 'l
         !url.search &&
         ['/v1/topics', '/v1/tag-index', ...pack.topics.map((entry) => `/v1/topics/${entry.id}`)].includes(url.pathname)
       );
-    if (['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname)) return true;
     return (
       url.origin === 'http://localhost:5174' &&
       (url.pathname === '/' ||
@@ -49,9 +48,6 @@ export async function setup(page: Page, language: 'en' | 'zh' = 'en', theme = 'l
   });
   await page.route('**/*', async (route) => {
     if (!allowed(route.request())) return route.abort('blockedbyclient');
-    const url = new URL(route.request().url());
-    if (['fonts.googleapis.com', 'fonts.gstatic.com'].includes(url.hostname))
-      return route.fulfill({ contentType: 'text/css', body: '' });
     return route.fallback();
   });
   return { topic, secondTopic, referenceTopic, forbidden };
