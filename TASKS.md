@@ -133,7 +133,8 @@ An optional learning mode, not a new product tone. The goal the owner set: **sti
 | VG4 | Anki plain-text import (`imported` definition, `import` source, normalization, refusals with real reasons) | tests for columns, tags, duplicates, rejected rows, backup and restore | not started |
 | VG5 | The map (saved words, imported decks, the book when present) and the leech group | counts from rows | not started |
 | VG6 | Goal and projection (opt-in) | projection only after two weeks of history | not started |
-| VG7 | Feel (deferred); VG8 `.apkg`, FSRS seeding from a revlog | | later |
+| VG7 | Feel (deferred by the plan; sound out of scope) | | later; owner-gated |
+| VG8 | `.apkg` import beside `.txt` and `.csv` (owner decision 2026-10-25: dependencies approved; the lead provisions the installs) | dependency check (size, licence, maintenance) first; lazy-loaded; VG4's normalization and refusals reused; tests on small invented packages; FSRS seeding from a revlog stays later | not started; after VG4 |
 
 ### Content (paused by the owner's priority)
 

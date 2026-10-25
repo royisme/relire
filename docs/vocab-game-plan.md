@@ -85,7 +85,7 @@ What is deliberately not here: streak counters with loss, daily-reminder pressur
 
 Settings and import:
 - Plain-text and TSV import first (Anki "Notes in Plain Text", and CSV): the learner picks which column is the French word and which are the answer and the example; tags and deck become region labels; rows are created as personal words (bookmarked so they enter the queue in order) with a new definition kind `imported` carrying the fields. It is a data-shape change to `VocabularyDefinitionSchema`; nothing has shipped, so the schema and code change together with no compatibility step. Duplicates by `vocabularyKey` merge into the existing row. A row's `word` must pass the `french` validator (NFC, no HTML, curly apostrophes), and Anki exports routinely carry HTML, `[sound:...]` tags and straight apostrophes, so the importer normalizes before validating: HTML tags and entities become plain text (`<br>` a space), `[sound:...]` is removed, straight apostrophes become curly, text is NFC and trimmed. A value that is still invalid or empty after that is **rejected with its row number and the real reason**, shown in the import result next to counts of imported, merged and rejected rows; nothing is dropped silently. The context `source` kinds today are article, unit and reader, so an `import` kind (with the deck name) is added together with `imported`.
-- `.apkg` is a separate later step that needs new dependencies (a zip reader, SQLite in WebAssembly, a zstd decoder) and the owner's approval.
+- `.apkg` is a separate later step (VG8) that needs new dependencies (a zip reader, SQLite in WebAssembly, a zstd decoder). **Owner decision 2026-10-25: the import supports `.txt`, `.csv` and `.apkg`, and the new dependencies are approved.** The lead provisions the installs (workers never run `bun install`); each dependency is chosen after a size, licence and maintenance check and loaded lazily so none is in the main bundle.
 - Challenge availability for imported cards depends on their fields (front and back only: `produce`/`recognize` with distractors from the same deck).
 
 ### 7. Components (DOM and CSS only)
@@ -101,7 +101,7 @@ Pure code in `src/services/vocabulary/game/`: `challenge.ts` (kinds, builder, gr
 - **VG5 The map** (regions from saved words, imported decks and the book when present) and the leech group.
 - **VG6 Goal and weekly series** (5b item 5), opt-in, no forecast.
 - **VG7 Feel (deferred).** Feedback tiers and number pops; sound is out of scope unless the owner asks again.
-- **VG8 Later.** `.apkg` (dependencies, owner approval), seeding FSRS from a revlog.
+- **VG8 `.apkg` import** (owner decision 2026-10-25: dependencies approved; the import takes `.txt`, `.csv` and `.apkg`). Needs a dependency check first (zip reader, SQLite in WebAssembly, zstd decoder for the newer `collection.anki21b`, the media folder ignored), lazy loading, the VG4 normalization and refusals reused, and tests on small invented packages. Seeding FSRS from a revlog stays later and is not part of this step.
 
 ## Kill criteria and what the owner measures by hand
 
