@@ -54,7 +54,7 @@ export function MistakeNotebook({ onMissingKey, onWord }: Props) {
     );
   };
   return (
-    <>
+    <div className="mx-auto min-w-0 max-w-5xl px-4 py-6 sm:px-6">
       <div className="space-y-6">
         <header className="space-y-2">
           <h1 className="font-serif text-2xl font-semibold text-ink-900">{t('study.mistakes')}</h1>
@@ -202,6 +202,6 @@ export function MistakeNotebook({ onMissingKey, onWord }: Props) {
           />
         )
       )}
-    </>
+    </div>
   );
 }

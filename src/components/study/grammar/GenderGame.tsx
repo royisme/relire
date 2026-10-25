@@ -483,7 +483,7 @@ export function GenderRecap({ summary, onPlayAgain, onBack }: GenderRecapProps) 
       </p>
       <p className="mt-1 break-words text-sm text-ink-600">{t('nounGender.game.chance')}</p>
       <Link
-        to={{ name: 'study', tab: 'mistakes' }}
+        to={{ name: 'mistakes' }}
         className="mt-3 inline-flex min-h-10 items-center break-words text-sm text-accent-900 underline underline-offset-2"
       >
         {t('nounGender.game.mistakes')}

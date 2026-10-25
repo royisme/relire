@@ -146,7 +146,7 @@ Plan of record: `docs/navigation-plan.md` (owner decision 2026-10-25: flat tree,
 | --- | --- | --- | --- |
 | N0 | Split `App.tsx` (498 of 500 lines) into an app-data hook, a shell and a route view | pure refactor: markup and behaviour unchanged, existing tests green, every touched file ≤ 500 lines, App well below | landed (this commit); `App.tsx` is 142 lines |
 | N1 | Words at the top level (`#/words…`, due badge on the row at every width, Overview label) | routes, badges expanded and rail, e2e hashes updated (not run), `DESIGN.md` badge rule restated | landed (merged as N1 on `feat/graded-readers`): code by Sonnet `implementer` (`8bd2fb1`), tests and e2e by `gpt-6.1-sol` (`7f3dd6f`, `402738c`), reviewed by `gpt-6-astra` (4 findings fixed); 2,596 tests, all checks exit 0, detector `[]`; **unverified:** browser (rail badge, phone drawer), e2e not run |
-| N2 | Mistakes at the top level (`#/mistakes`, unresolved badge) | routes, badges never summed, Today and Gender links | not started |
+| N2 | Mistakes at the top level (`#/mistakes`, unresolved badge) | routes, badges never summed, Today and Gender links | code landed on branch `mistakes-top` (tests pending) |
 | N3 | Recordings under Speaking (`#/speaking/recordings`); delete My study, `STUDY_TABS` and `StudyView` | routes, Speaking children, locale keys removed, PRODUCT/DESIGN/architecture updated, reversal line in `learning-navigation-tasks.md` | not started |
 
 Owner-gated and not in N0 to N3: G1 (Today shows days to the exam), G2 (an exam date without a words target), K1 (Words without the missing-key banner).

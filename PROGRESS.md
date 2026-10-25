@@ -4,6 +4,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: N2 code on branch `mistakes-top` (tests pending)
+
+- Mistakes is a top-level row before Progress at `#/mistakes` (area `mistakes`), with the unresolved badge on the row at every width; `#/study/mistakes` is not found and bare `#/study` opens Shadowing. My study keeps Shadowing as its single child until N3. `MistakeNotebook` owns its page container; `StudyView` lost the Mistakes tab; the Today and Gender links point at `#/mistakes`. Docs updated. Tests and e2e not yet updated for N2 (existing assertions on the old addresses fail until the test worker runs); typecheck needed three literal changes in `tests/`. **Unverified:** no browser.
+
 ## 2026-10-25: N1 code on branch `words-top` (tests pending)
 
 - Words is a top-level row after Reading at `#/words` (`#/words/all`, `/review`, `/play`, `/map`), with the due badge on the row at every width; `#/study` now opens Mistakes and `#/study/words…` is not found. `StudyView` lost the Words tab. The Words home tab is now called Overview, and the Chinese Words label is aligned. Docs and the DESIGN.md badge rules are updated.

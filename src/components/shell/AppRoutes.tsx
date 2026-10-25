@@ -6,6 +6,7 @@ import { NotFoundView } from './NotFoundView';
 import { LearningNavigation } from './LearningNavigation';
 import { ReaderView } from '../ReaderView';
 import { StudyView } from '../study/StudyView';
+import { MistakeNotebook } from '../study/MistakeNotebook';
 import { VocabularyView } from '../VocabularyView';
 import { UnitView } from '../practice/UnitView';
 import { AnalyticsDashboard } from '../AnalyticsDashboard';
@@ -184,16 +185,19 @@ export function AppRoutes({
 
       {areaOf(route) === 'words' && <VocabularyView model={vocabulary} place={vocabularyPlaceOf(route)} />}
 
+      {route.name === 'mistakes' && (
+        <MistakeNotebook
+          onMissingKey={requestKey}
+          onWord={(word, sentence, context, source) => {
+            void handleWordClick(word, sentence, context, source);
+          }}
+        />
+      )}
+
       {route.name === 'study' && (
         <StudyView
           tab={route.tab}
           sectionsInSidebar={expanded}
-          mistakes={{
-            onMissingKey: requestKey,
-            onWord: (word, sentence, context, source) => {
-              void handleWordClick(word, sentence, context, source);
-            },
-          }}
           shadowing={{
             articles,
             units: readerUnits.units,

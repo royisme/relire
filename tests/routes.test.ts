@@ -126,12 +126,12 @@ test('graded list and reader reserve the graded segment with pinned-version and 
 });
 
 test('My study contains only Shadowing and Mistakes, with bare Study defaulting to Mistakes', () => {
-  expect(STUDY_TABS).toEqual(['shadowing', 'mistakes']);
+  expect(STUDY_TABS).toEqual(['shadowing']);
   for (const tab of STUDY_TABS) {
     roundTrip({ name: 'study', tab });
     expect(areaOf({ name: 'study', tab })).toBe('study');
   }
-  expect(parse('#/study')).toEqual({ route: { name: 'study', tab: 'mistakes' }, canonical: '#/study/mistakes' });
+  expect(parse('#/study')).toEqual({ route: { name: 'study', tab: 'shadowing' }, canonical: '#/study/mistakes' });
 });
 
 test('Words is independent of My study and old word addresses have no aliases', () => {

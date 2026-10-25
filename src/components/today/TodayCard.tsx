@@ -62,7 +62,7 @@ export function TodayCard({ plan }: { plan: TodayPlan }) {
                   <TodayRow
                     key={step.id}
                     {...row}
-                    to={{ name: 'study', tab: 'mistakes' }}
+                    to={{ name: 'mistakes' }}
                     status={t('today.mistakes.status', { count: step.unresolved })}
                   />
                 );

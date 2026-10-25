@@ -37,7 +37,7 @@ await i18n.init({
   interpolation: { escapeValue: false },
 });
 
-const render = (rail: boolean, dueCount = 3, route: Route = { name: 'study', tab: 'mistakes' }) => {
+const render = (rail: boolean, dueCount = 3, route: Route = { name: 'mistakes' }) => {
   const useStore = React.useSyncExternalStore;
   const store = spyOn(React, 'useSyncExternalStore').mockImplementation((subscribe, getSnapshot, getServerSnapshot) =>
     useStore(subscribe, getSnapshot, getServerSnapshot ?? getSnapshot),
