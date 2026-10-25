@@ -86,7 +86,7 @@ First deployment: no accounts, public read-only, rate limited, CORS limited to t
 | D-remote-2b | Halve the vocabulary page size (and pace the download), only if the owner's check of Cloudflare's D1 limits rejects a 108 KB page (**not needed**: read 2026-10-24, a bound value is bounded by the 2 MB row limit; see `worker/README.md` "Cloudflare limits") | the lead's full re-run exits 0 | closed: not needed |
 | D-remote-3 | Topics and lexicon `--apply-remote`, interactive, with a read-only check as the only success criterion | tests pass; check mismatch fails the run | landed (`922448d`); Argon pass (no path to remote without `allowRemote` and a TTY; success only by the read-only check); all checks exit 0 in the main checkout |
 | D-origins | `.gitignore` for `worker/wrangler.deploy.jsonc`; `worker/README.md` rewritten wherever stale, with a rooted runbook | the placeholder stays in the committed file; the README no longer tells the owner to edit it | landed; the runbook is for the owner and was never run by an agent; acceptance greps exit 0 |
-| D-limit | After the first deployment: tap a verb form repeatedly on the deployed URL, read the 429 behaviour and the dashboard row metrics, then set the per-IP limit (issue #31; the duplicate-request half landed in `ee34d4a`) | a measured limit is recorded in `worker/README.md`; the limiter note is updated | not started; owner-run, after D-remote |
+| D-limit | ~~Tap a verb form repeatedly on the deployed URL and set the per-IP limit~~ | closed 2026-10-25: its premise is gone (the lexicon ships with the app, so a tap sends no request; issue #31 closed). The remaining deployed checks (rows written in the dashboard, whether the Rate Limiting binding is accepted on the free plan) are in issue #68 | closed |
 
 Plan `docs/d-remote-plan.md` (written by Opus; two Argon reviews, both fail, every finding the lead verified is applied) is ready to dispatch. Dispatch D-remote-1 first; D-remote-2b waits for the owner's limit check. Each diff then gets an independent Argon review.
 
@@ -153,22 +153,24 @@ Speaking IA (French sounds and Sound pairs moved from Progress to Speaking) has 
 - Try by hand: the pronunciation features (practice-card marks, strip, Details), Sound pairs, the published local grammar topics; accept or change the open copy items (#16, #17, #24).
 - Human language review of the 91 locally published grammar topics (Chinese wording, kinship terms and a handful of Low items; their notes are in the local working notes). Tracked with the letter-sound rows and the readers in #67.
 - Re-publish the vocabulary book to local D1 (`bun scripts/vocabulary/publish.ts --apply-local-unreviewed`) so it serves the manifest without the removed `attribution` field.
-- Deploy the content service before any real learner depends on topics, the wordbook or later readers: create the D1 database, set `ALLOWED_ORIGINS`, run D-remote once it lands, then `wrangler deploy`. No rights gate remains for the wordbook or the lexicon.
+- Deploy the content service before any real learner depends on topics, the wordbook or later readers: the checklist is issue #68 and the runbook is in `worker/README.md` (one day; own Cloudflare login; the lexicon is no longer part of it).
+- Look at what landed on 2026-10-24: Settings > Content service (360 px, three themes; Test against a local Worker with a throwaway key in `worker/.dev.vars`); About with the dictionary notice and licence links; the word sheet's first dictionary lookup on a phone (3 MB file parsed on first use); Grammar > Gender "Play a round" (the prototype) with the keyboard and at 360 px. Findings go to #17.
 
 ## Not started
 
-Open GitHub issues (2026-10-24) and what each waits for; nothing here is ready for a worker except D-remote above:
+Open GitHub issues (2026-10-25) and what each waits for; nothing here is ready for a worker except D-remote above:
 
 | Issue | Waits for |
 | --- | --- |
-| #31 rate limit vs word-sheet taps | the first deployment (D-limit) |
-| #14 irregular verbs | the language-reviewer items (#16) and the owner's row review (#43, branch `pi/ds-flash-40`) |
+| #68 first deployment of the content service | the owner's own Cloudflare login (new 2026-10-25) |
+| #69 vocabulary game mode (tracking) | VG2 onward (`docs/vocab-game-plan.md`); the plan and VG1 are with the Opus review (new 2026-10-25) |
+| #14 irregular verbs | the language-reviewer items (#16); the 15 new verbs are reviewed and in the pack (19 in all; #43 closed 2026-10-22) and the rest is content, paused |
 | #16 conjugation copy and sentence-pattern rules | the owner |
 | #17 visual acceptance of the new screens | the owner, on a real browser and phone |
 | #21 real-provider check of the conjugation prompt | the owner's real key |
-| #24 README screenshot of the pack table | a real provider key (the text is done) |
+| #24 README screenshot of the pack table | a new screenshot of the current word sheet (the README text is current; `docs/media/word-analysis.jpg` and the zh-CN one still show the old AI conjugation block): the owner with a key, or a keyless capture; the owner chooses |
 | #29 split the `-eur` rule | on hold (owner, 2026-10-22) until a meaning-based design exists |
-| #62, #63, #64, #65 graded readers | content is paused by the owner's priority; runtime R1 is landed; R0-7 and R2 need content and a human review |
+| #62, #64, #65 graded readers | content is paused by the owner's priority; R0-1 to R0-6 landed; R0-7 and R2 need content and a human review. #63 (R1) closed 2026-10-25 |
 | #67 human language review (topics, letter sounds, readers) | the owner picks the reviewer |
 
 Accounts and a paid tier are deferred in `docs/roadmap.md`. #13 (grammar topics pack, TP1 to TP5) was closed on 2026-10-24.
