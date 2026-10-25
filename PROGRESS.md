@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: N0 landed (App.tsx split, `app-split`)
+
+- `App.tsx` (498 of 500 lines) is now 142. `useAppData` owns startup, articles, stats, failed saves and the guide flag; `useReaderLookup` keeps the reader document, lookup sheets, bookmark and assessment callback together; `AppShell` (with `SaveFailedBanner` and `MissingKeyBanner`) draws the frame; `AppRoutes` is the route-to-page switch with the lazy pages and their Suspense boundaries unchanged. Markup, props, keys and behaviour are unchanged; state that outlives a page (key request, log source, hasKey) stays in `App`.
+- Verified: see the check chain in the commit's report (typecheck, lint, test, i18n, format, build, detector). **Unverified:** no browser.
+
 ## 2026-10-25: vocabulary review fixes (`vocab-fixes`, awaiting lead review)
 
 - Confirmed all eight findings against the code. ZIP collections are bounded by declared expansion before inflation; Zstandard output is capped during streaming (200 MiB database limit), including frames without a declared content size. Plain text is capped before reading (10 MiB) and at 20,000 logical notes. Importer-authored refusals retain translation keys/parameters through the result UI.
