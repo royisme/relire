@@ -76,7 +76,7 @@ Restated rail rule for `DESIGN.md` Navigation: *a row that owns one metric shows
 
 ## Steps
 
-Each step is worker-sized and independently mergeable with all checks green (`typecheck`, `lint`, `test`, `i18n:check`, `format:check` including the 500-line shape limit, `build`, and `impeccable detect` printing `[]` for UI). Order: **N0 → N1 → N2 → N3**. The lead re-runs every check and reads each diff before merging; each diff gets a second-model read-only review (`gpt-6-astra` or Opus), and the lead reports e2e as "not run".
+Each step is worker-sized and independently mergeable with all checks green (`typecheck`, `lint`, `test`, `i18n:check`, `format:check` including the 500-line shape limit, `build`, and `impeccable detect` printing `[]` for UI). Order: **N0 → N1 → N2 → N3**. The e2e files of N1 to N3 are written by a **separate GPT worker** (`openai-codex/gpt-6.1-sol`) after the code step is merged, never by the model that wrote the code (owner rule, 2026-10-25: code and tests come from different models); they are typechecked and reported "not run". The lead re-runs every check and reads each diff before merging; each diff gets a second-model read-only review (`gpt-6-astra` or Opus), and the lead reports e2e as "not run".
 
 ### N0. Split `App.tsx` (pure refactor, no behaviour change)
 
