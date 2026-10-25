@@ -39,7 +39,7 @@ Since 2026-10-23 the audience also includes **learners starting from zero**, Chi
 
 ## Screens
 
-First run: a three-step guide (welcome, connect Gemini with a checked key, try a sample article). Skipping is allowed and leaves a persistent banner until a key is set.
+First run: when the selected text provider needs a key, none is saved and the guide has not been seen, a three-step guide opens once: welcome (graded readers open at once, with no key), connect the chosen AI provider (optional: check and save a key, or Continue without AI), then try the first graded reader or go to Today. Skip for now is offered on the first two steps and every exit marks the guide as seen. The landing page is Today, which works without a key; while the selected text provider needs a key and none is saved, a banner offers to add one on the other pages, except Today, the graded readers and Settings.
 
 
 - **Graded readers** (`#/read/graded`) and **Graded reader** (`#/read/graded/:readerId`): an ordered starter list with actual Opened/Read status, then authored word meanings, revealable sentence translations, saved words, device-voice listening, local checkpoints and explicit Mark read/unread, without an AI key or service. Readers are AI-reviewed, not human-reviewed; recording and optional Ask AI are not available yet.
