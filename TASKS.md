@@ -121,6 +121,10 @@ A prototype with kill criteria: does a one-card, single-key round with the miss 
 | --- | --- | --- | --- |
 | LG1 | Le ou la: pure deck, `GenderGame`, the "Play a round" entry on Grammar → Gender, `nounGender.game.*` strings, deck and round tests | all checks exit 0 in the main checkout; first answer only written; a returning card writes nothing | landed (`ac7e89b` merged by deepseek-flash, about 0.5 CNY); 2,415 tests; diff review pending; **owner checked 2026-10-24: works, but has no game feel** (the study left out points, streaks and sound on purpose); kept on the branch while the owner says what "game feel" should mean |
 
+### Next: vocabulary as a game, on an Anki-style base (owner direction 2026-10-24)
+
+An optional learning mode, not a new product tone; spaced repetition stays the foundation (FSRS flashcards, wordbook, personal words); the game layer must serve retention and use only real activity for numbers. Steps: V-G0 research (Gemini 3.8, running), V-G1 design study (model chosen after the research and the quota reset), V-G2 plan and review, then small build steps. An Anki file import (plain text first, `.apkg` needs new dependencies and the owner's approval) is part of the base.
+
 ### Content (paused by the owner's priority)
 
 Stages 1 to 3 have private drafts with AI review records (not human review). Stages 4 to 12 are not written; stage 4 has an unreviewed draft. Resume after the platform: R0-7 for stages 4 to 5, R2 for 6 to 12, a human language review before any real beginner uses the readers.
