@@ -7,8 +7,6 @@ export const SETTINGS_SECTIONS = ['ai', 'practice', 'words', 'prompts', 'data', 
 export const AI_PURPOSES = ['text', 'ocr', 'speech', 'assessment'] as const;
 export type AiPurposeRoute = (typeof AI_PURPOSES)[number];
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
-export const STUDY_TABS = ['shadowing'] as const;
-export type StudyTab = (typeof STUDY_TABS)[number];
 export type GrammarSectionRoute = 'conjugation' | 'gender';
 export type Route =
   | { name: 'today' }
@@ -19,7 +17,6 @@ export type Route =
   | { name: 'passage'; unitId: string; sentence?: string }
   | { name: 'gradedReaders' }
   | { name: 'gradedReader'; readerId: string; version?: string; sentence?: string }
-  | { name: 'study'; tab: StudyTab }
   | { name: 'words' }
   | { name: 'wordsAll' }
   | { name: 'wordsReview' }
@@ -33,6 +30,7 @@ export type Route =
   | { name: 'unit'; area: LearningArea; unitId: string }
   | { name: 'speaking' }
   | { name: 'readAloud'; articleId?: string; sentence?: string }
+  | { name: 'recordings' }
   | { name: 'progress' }
   | { name: 'about' }
   | {
@@ -72,8 +70,6 @@ export function routeHref(route: Route): string {
       ].join('&');
       return `#/read/graded/${encodeURIComponent(route.readerId)}${query ? `?${query}` : ''}`;
     }
-    case 'study':
-      return `#/study/${route.tab}`;
     case 'words':
       return '#/words';
     case 'wordsAll':
@@ -105,6 +101,8 @@ export function routeHref(route: Route): string {
       return '#/speaking';
     case 'readAloud':
       return `#/speaking/read-aloud${route.articleId ? `/${encodeURIComponent(route.articleId)}` : ''}${sentenceQuery(route.sentence)}`;
+    case 'recordings':
+      return '#/speaking/recordings';
     case 'progress':
       return '#/progress';
     case 'about':
@@ -181,9 +179,6 @@ export function parseRoute(
           : { name: 'grammar', section: 'conjugation', ...(verb ? { verb } : {}) };
     } else if (root === 'grammar' && sub === 'topics' && parts.length === 3 && hasContentService)
       route = { name: 'grammarTopic', topicId: decodeURIComponent(third) };
-    else if (root === 'study' && parts.length === 1) route = { name: 'study', tab: 'shadowing' };
-    else if (root === 'study' && parts.length === 2 && (STUDY_TABS as readonly string[]).includes(sub))
-      route = { name: 'study', tab: sub as StudyTab };
     else if (root === 'words' && parts.length === 1) route = { name: 'words' };
     else if (root === 'words' && parts.length === 2 && !query && ['all', 'review', 'play', 'map'].includes(sub))
       route =
@@ -198,6 +193,7 @@ export function parseRoute(
     else if (root === 'speaking' && parts.length === 1) route = { name: 'speaking' };
     else if (root === 'speaking' && sub === 'read-aloud' && parts.length <= 3)
       route = { name: 'readAloud', ...(third ? { articleId: decodeURIComponent(third) } : {}), ...focused };
+    else if (root === 'speaking' && sub === 'recordings' && parts.length === 2) route = { name: 'recordings' };
     else if (root === 'progress' && parts.length === 1) route = { name: 'progress' };
     else if (root === 'about' && parts.length === 1) route = { name: 'about' };
     else if (root === 'settings' && parts.length === 1) route = { name: 'settings', section: null };
@@ -236,7 +232,6 @@ export type Area =
   | 'writing'
   | 'speaking'
   | 'words'
-  | 'study'
   | 'mistakes'
   | 'progress'
   | 'settings'
@@ -256,8 +251,6 @@ export function areaOf(route: Route): Area | null {
     case 'wordsPlay':
     case 'wordsMap':
       return 'words';
-    case 'study':
-      return 'study';
     case 'grammar':
     case 'grammarTopic':
       return 'grammar';
@@ -267,6 +260,7 @@ export function areaOf(route: Route): Area | null {
     case 'unit':
       return learningAreaPath(route.area);
     case 'readAloud':
+    case 'recordings':
     case 'speaking':
       return 'speaking';
     case 'today':

@@ -4,13 +4,19 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
-## 2026-10-25: N2 code on branch `mistakes-top` (tests pending)
+## 2026-10-25: N3 landed (Recordings under Speaking; My study removed)
+
+- Independent N3 tests cover the recordings round trip, the deleted study addresses, the Speaking children at every width and the locale removals; 2,610 tests pass and all six checks exit 0. E2e was updated by a GPT worker (`0057ed4`), typechecked, **not run**. **Unverified:** no browser.
+
+- Recordings is Speaking's second child at `#/speaking/recordings` (route `recordings`, area `speaking`, no badge); My study, `STUDY_TABS`, `StudyTab`, `StudyView` and the `study` area are deleted, so `#/study` and `#/study/shadowing` are not found. `ShadowingLog` owns its page container and a back link to Speaking; Speaking links to Recordings; the reader's "open log" opens it and App drops `logSourceId` when the learner leaves it. Locale keys `nav.vocab`, `study.label` and `study.shadowing` are gone; `nav.recordings` is new. Docs updated. Existing assertions on the old addresses and My study fail until the test worker runs; typecheck needed literal changes in `tests/navBadges.test.tsx` and removal of one obsolete test (and the `STUDY_TABS` import) in `tests/routes.test.ts`. **Unverified:** no browser.
+
+## 2026-10-25: N2 landed (Mistakes at the top level)
 
 - Mistakes is a top-level row before Progress at `#/mistakes` (area `mistakes`), with the unresolved badge on the row at every width; `#/study/mistakes` is not found and bare `#/study` opens Shadowing. My study keeps Shadowing as its single child until N3. `MistakeNotebook` owns its page container; `StudyView` lost the Mistakes tab; the Today and Gender links point at `#/mistakes`. Docs updated. Tests and e2e not yet updated for N2 (existing assertions on the old addresses fail until the test worker runs); typecheck needed three literal changes in `tests/`. **Unverified:** no browser.
 
 - Independent N2 tests cover routes, separate row badges, key-banner decisions and Today/Gender links; 2,605 tests pass and all six requested checks exit 0. E2e updated and typechecked, **not run**; browser acceptance remains manual.
 
-## 2026-10-25: N1 code on branch `words-top` (tests pending)
+## 2026-10-25: N1 landed (Words at the top level)
 
 - Words is a top-level row after Reading at `#/words` (`#/words/all`, `/review`, `/play`, `/map`), with the due badge on the row at every width; `#/study` now opens Mistakes and `#/study/words…` is not found. `StudyView` lost the Words tab. The Words home tab is now called Overview, and the Chinese Words label is aligned. Docs and the DESIGN.md badge rules are updated.
 - Independent N1 tests (GPT, a different model from the code's author) cover routes, top-level navigation, separate badges, Overview/locales and key-banner decisions; e2e addresses and selectors are updated and typechecked, **not run**. Baseline 2,582 tests with 14 failing; the test worker first left 4 Today assertions red, but the lead's acceptance line was wrong: Today's words step keeps opening Review at `#/words/review` (`plan`: `TodayCard.tsx:37` unchanged), so those assertions now expect that and the suite is green (2,596). Typecheck, lint, i18n, format and shape exit 0. **Unverified:** no browser, no e2e run.

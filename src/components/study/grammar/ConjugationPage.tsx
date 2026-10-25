@@ -1,5 +1,5 @@
 /**
- * My study → Grammar → Conjugation: one input, a compact row of the reviewed pack's verbs beside it so the common
+ * Grammar → Conjugation: one input, a compact row of the reviewed pack's verbs beside it so the common
  * case needs no typing, and a Conjugate button; the result below. The input and button never change size and the
  * result region keeps a minimum height, so a request moves nothing; a failure shows its real reason at the top of
  * that region. Pressing a practise button makes the drills in place, in a region under the result, and never

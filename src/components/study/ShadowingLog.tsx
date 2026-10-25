@@ -1,4 +1,4 @@
-/** My study → Shadowing: sentence-first history with playback and per-take actions. */
+/** Speaking → Recordings: sentence-first history of saved shadowing takes, with playback and per-take actions. */
 import { useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeftRight, ChevronDown, Trash2 } from 'lucide-react';
@@ -12,6 +12,7 @@ import { errorMessage } from '../../services/ai/errors';
 import { playRecording, speakFrench, stopSpeech } from '../../utils/speech';
 import { getSpeechState } from '../../utils/speech/state';
 import { cleanArticleTitle } from '../../utils/i18nHelpers';
+import { Link } from '../shell/Link';
 import { PageHeader } from '../ui/page-header';
 import { Button } from '../ui/button';
 import { SpeakButton, SpeakIcon, useSpeechPhase } from '../ui/speak-button';
@@ -55,7 +56,10 @@ export function ShadowingLog({ articles, units, unitsError, initialSourceId, onO
   const total = log.groups.reduce((n, g) => n + g.rows.length + g.changed.length, 0) + log.removed.length;
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto min-w-0 max-w-5xl space-y-5 px-4 py-6 sm:px-6">
+      <Link to={{ name: 'speaking' }} className="inline-flex min-h-10 items-center text-sm text-accent-900 underline">
+        {t('learning.speaking')}
+      </Link>
       <PageHeader
         title={t('shadowingLog.title')}
         subtitle={t('shadowingLog.subtitle')}

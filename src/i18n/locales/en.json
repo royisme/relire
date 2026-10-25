@@ -17,7 +17,6 @@
     "retry": "Try again"
   },
   "nav": {
-    "vocab": "My study",
     "words": "Words",
     "analytics": "Progress",
     "installApp": "Install app",
@@ -30,7 +29,8 @@
     "due": "{{count}} due",
     "toReview": "{{count}} to review",
     "importArticle": "Import an article",
-    "gradedReaders": "Graded readers"
+    "gradedReaders": "Graded readers",
+    "recordings": "Recordings"
   },
   "today": {
     "title": "Today",
@@ -125,7 +125,7 @@
     "speaking": "Speaking",
     "readAloud": "Read aloud",
     "speakingDesc": "Listen to an article sentence, record yourself and optionally ask your AI for a pronunciation estimate.",
-    "shadowingContext": "For saved shadowing takes, use the microphone beside a sentence in the reader. Find those recordings in My study → Shadowing.",
+    "shadowingContext": "For saved shadowing takes, use the microphone beside a sentence in the reader. Find them under Speaking → Recordings.",
     "chooseArticle": "Choose an article",
     "speakingEmpty": "Add an article in Reading before practising it aloud.",
     "sourceUnavailable": "The selected article or sentence is no longer available. Choose a source explicitly to continue."
@@ -1248,8 +1248,6 @@
     "moveHint": "Drag to move. Double-click, or press Home, to dock it again."
   },
   "study": {
-    "label": "My study",
-    "shadowing": "Shadowing",
     "mistakes": "Mistakes"
   },
   "nounGender": {

@@ -47,7 +47,7 @@ interface ReaderViewProps {
   afterText?: React.ReactNode;
   onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void;
   onMissingKey: () => void;
-  /** Opens My study → Shadowing at this source. */
+  /** Opens Speaking → Recordings at this source. */
   onOpenShadowingLog: (sourceId: string) => void;
   /** Sentence text to bring into view on opening (from the shadowing log). */
   focusText?: string | null;

@@ -1,5 +1,5 @@
 /**
- * The Conjugation page (My study → Grammar): a pack verb is answered with no AI call and no key, any other verb
+ * The Conjugation page (Grammar → Conjugation): a pack verb is answered with no AI call and no key, any other verb
  * goes through a mocked `conjugate` answer, statuses and the Model/Rule pair are shown, the real error appears
  * inline, nothing moves on a request, and it renders in every theme. The AI is always mocked.
  */

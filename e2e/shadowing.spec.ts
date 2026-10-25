@@ -1,6 +1,6 @@
 /**
  * Shadowing: the practice card records a sentence with Chromium's fake microphone,
- * keeps three takes per sentence, and the My study → Shadowing log replays them.
+ * keeps three takes per sentence, and Speaking → Recordings replays them.
  * Every audio element that plays is logged with its blob type: TTS clips are
  * WAV, recordings are the recorder's own type (webm or ogg).
  */
@@ -143,6 +143,15 @@ test('the log lists recordings in article order, opens the reader and deletes ta
   await recordFor(page);
 
   await card(page).getByText('All recordings (1)').click();
+  await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
   await expect(page.getByRole('heading', { name: 'Shadowing' })).toBeVisible();
   const rows = page.locator('button[title="Open in the reader"]');
   await expect(rows).toHaveText([first, second]);

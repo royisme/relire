@@ -52,7 +52,7 @@ export default function App() {
   const vocabulary = useVocabulary();
 
   // State that belongs to one place is dropped when the learner leaves it (adjusted while rendering, not in an effect).
-  if (logSourceId && route.name !== 'study') setLogSourceId(null);
+  if (logSourceId && route.name !== 'recordings') setLogSourceId(null);
   if (keyRequest && route.name !== 'settings') setKeyRequest(null);
 
   // Settings → AI services, on the purpose that needs the key, with the key field ready; its way back is

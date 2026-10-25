@@ -53,7 +53,7 @@ async function prepareHistory(page: Page) {
     },
     { longSentence, soleSentence },
   );
-  await page.goto('/#/study/shadowing');
+  await page.goto('/#/speaking/recordings');
   await page.reload(); // App reads the saved article on startup, just like returning to existing history.
   await expect(page.getByRole('heading', { name: /Manon/ })).toBeVisible();
   await settled(page);

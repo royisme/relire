@@ -17,7 +17,6 @@
     "retry": "重试"
   },
   "nav": {
-    "vocab": "我的学习",
     "words": "词汇",
     "analytics": "进度",
     "installApp": "安装应用",
@@ -30,7 +29,8 @@
     "due": "{{count}} 个待复习",
     "toReview": "{{count}} 道待复习",
     "importArticle": "导入文章",
-    "gradedReaders": "分级读物"
+    "gradedReaders": "分级读物",
+    "recordings": "跟读录音"
   },
   "today": {
     "title": "今天",
@@ -125,7 +125,7 @@
     "speaking": "口语",
     "readAloud": "朗读",
     "speakingDesc": "听文章中的一句话，录下自己的朗读，也可请 AI 给出发音评估。",
-    "shadowingContext": "要保存跟读录音，请使用阅读页句子旁的麦克风。录音保存在“我的学习 → 跟读”。",
+    "shadowingContext": "要保存跟读录音，请使用阅读页句子旁的麦克风。录音保存在“口语 → 跟读录音”。",
     "chooseArticle": "选择文章",
     "speakingEmpty": "请先在阅读中添加文章，再练习朗读。",
     "sourceUnavailable": "所选文章或句子已不可用。请明确选择新的来源后继续。"
@@ -1240,8 +1240,6 @@
     "moveHint": "拖动可移动；双击或按 Home 键放回底部。"
   },
   "study": {
-    "label": "我的学习",
-    "shadowing": "跟读",
     "mistakes": "错题本"
   },
   "nounGender": {
