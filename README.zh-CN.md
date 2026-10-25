@@ -109,4 +109,4 @@ src/utils/srs.ts         FSRS-6 调度
 
 ## 许可证
 
-[MIT](LICENSE)
+代码与文档采用 [MIT](LICENSE)。`data/lexicon/` 下的词典数据文件是基于 Morphalou 3.1 的衍生作品，采用 LGPL-LR 许可证；见 [data/lexicon/NOTICE.md](data/lexicon/NOTICE.md) 与 [data/lexicon/LGPL-LR.txt](data/lexicon/LGPL-LR.txt)。

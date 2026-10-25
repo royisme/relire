@@ -630,8 +630,9 @@
       "source": "Source code on GitHub",
       "lexicon": "For verbs outside the reviewed list, the word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}.",
       "lexiconSource": "{{name}} source",
-      "lexiconRebuild": "This data is not kept in the repository: it can be rebuilt from the original download.",
-      "lexiconNotice": "How to rebuild it"
+      "lexiconRebuild": "The dictionary data ships with the app as a generated file.",
+      "lexiconNotice": "How to rebuild or replace it",
+      "lexiconLicence": "LGPL-LR licence text"
     },
     "strictAccents": "Strict accents",
     "strictAccentsNote": "On, an answer is only correct with the right accents. Off, an answer without accents still counts.",

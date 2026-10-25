@@ -1,12 +1,11 @@
-/** Owns the lexicon importer checks on an invented CSV: selection, mapping, SQL shape, determinism and the allowlist. */
+/** Owns the lexicon importer's SQL and remote-apply checks on an invented CSV; the parser, selection and bundle checks live in lexiconBuild.test.ts. */
 import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test';
-import { mkdtemp, readFile, readdir, rm, writeFile, mkdir, symlink } from 'node:fs/promises';
+import { mkdtemp, readdir, rm, mkdir, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { importLexicon, lexiconStatements, parseArgs, sourceVersion, STATEMENT_CAP } from '../scripts/lexicon/import';
+import { importLexicon, lexiconStatements, parseArgs, STATEMENT_CAP } from '../scripts/lexicon/import';
 import { entryRow, loadLexicon, parseAllowlist, type Lexicon } from '../scripts/lexicon/lexicon';
-import { LexiconEntrySchema } from '../src/types/lexicon';
 import { ALLOWLIST, writeMorphalouFixture } from './fixtures/morphalouCsv';
 import { createWorkerDb } from './fixtures/workerDb';
 
@@ -20,11 +19,6 @@ const rejection = (promise: Promise<unknown>) =>
 let root: string;
 let dir: string;
 let lexicon: Lexicon;
-const entry = (lemma: string, pos: string) => {
-  const found = lexicon.get(`${lemma}\0${pos}`);
-  if (!found) throw new Error(`no ${pos} ${lemma}`);
-  return { ...entryRow(found), forms: [...found.forms].sort(), data: JSON.parse(entryRow(found).data) };
-};
 
 beforeAll(async () => {
   root = await mkdtemp(join(tmpdir(), 'relire-lexicon-'));
@@ -33,109 +27,6 @@ beforeAll(async () => {
   lexicon = await loadLexicon(dir, new Set(parseAllowlist(ALLOWLIST)));
 });
 afterAll(() => rm(root, { recursive: true, force: true }));
-
-describe('verbs', () => {
-  test('maps the app tenses, persons, variants and participles; nothing else', () => {
-    const verb = entry('testmarcher', 'verb');
-    expect(verb.gender).toBeNull();
-    expect(verb.data).toEqual({
-      tenses: {
-        present: {
-          '1sg': ['testmarche', 'testmarche2', 'testmarcheb'],
-          '2sg': ['testmarches'],
-          '3sg': ['testmarche'],
-          '1pl': ['testmarchons'],
-          '2pl': ['testmarchez'],
-          '3pl': ['testmarchent'],
-        },
-        imparfait: { '1sg': ['testmarchais'] },
-        futur: { '1sg': ['testmarcherai'] },
-        conditionnel: { '1sg': ['testmarcherais'] },
-        subjonctif: { '1sg': ['testmarchesub'] },
-        imperatif: { '2sg': ['testmarche'], '1pl': ['testmarchons'], '2pl': ['testmarchez'] },
-      },
-      participles: {
-        present: ['testmarchant'],
-        past: { ms: ['testmarché'], fs: ['testmarchée'], mp: ['testmarchés'], fp: ['testmarchées'] },
-      },
-    });
-    expect(LexiconEntrySchema.parse({ pos: 'verb', data: verb.data })).toBeTruthy();
-    // The infinitive is a form of the lemma; the passé simple and the subjunctive imperfect are not stored.
-    expect(verb.forms).toContain('testmarcher');
-    expect(verb.forms).not.toContain('testmarchai');
-    expect(verb.forms).not.toContain('testmarchasse');
-  });
-
-  test('NFC keys, an invariable participle fills all four agreements', () => {
-    const verb = entry('testirrégulier', 'verb');
-    expect(verb.data).toEqual({
-      tenses: { present: { '3sg': ['testvá'] } },
-      participles: { past: { ms: ['testallé'], fs: ['testallé'], mp: ['testallé'], fp: ['testallé'] } },
-    });
-    expect(verb.forms).toEqual(['testallé', 'testvá']);
-  });
-
-  test('a pronominal verb is kept; its infinitive with a space is not a form', () => {
-    expect(entry('se testlaver', 'verb').forms).toEqual(['testlave', 'testlaver']);
-    expect(entry('se testgominer', 'verb').forms).toEqual(['testgomine']);
-  });
-});
-
-describe('nouns and adjectives', () => {
-  test('gender is Morphalou own value', () => {
-    expect(entry('testmaison', 'noun').gender).toBe('feminine');
-    expect(entry('testinvar', 'noun').gender).toBe('invariable');
-    expect(entry('testnogender', 'noun').gender).toBe('-');
-  });
-
-  test('forms by number; an invariable number fills both; the entity row parses', () => {
-    expect(entry('testmaison', 'noun').data).toEqual({ singular: ['testmaison'], plural: ['testmaisons'] });
-    expect(entry('testinvar', 'noun').data).toEqual({ singular: ['testinvar'], plural: ['testinvar'] });
-    expect(entry('testamp', 'noun').data).toEqual({ singular: ['test&x'] });
-  });
-
-  test('an uppercase form keeps its spelling in data and is a lowercase lookup key', () => {
-    const noun = entry('testsigle', 'noun');
-    expect(noun.data.singular).toEqual(['Testsigle']);
-    expect(noun.forms).toEqual(['testsigle', 'testsigles']);
-  });
-
-  test('forms by agreement; invariable gender and number fill the slots', () => {
-    expect(entry('testbeau', 'adjective').data).toEqual({
-      ms: ['testbeau'],
-      fs: ['testbelle'],
-      mp: ['testbeaux'],
-      fp: ['testbelles'],
-    });
-    expect(entry('testrouge', 'adjective').data).toEqual({
-      ms: ['testrouge'],
-      fs: ['testrouge'],
-      mp: ['testrouges'],
-      fp: ['testrouges'],
-    });
-    expect(entry('testchic', 'adjective').data).toEqual({
-      ms: ['testchic'],
-      fs: ['testchic'],
-      mp: ['testchic'],
-      fp: ['testchic'],
-    });
-    expect(entry('testbeau', 'adjective').gender).toBeNull();
-  });
-});
-
-describe('what is skipped', () => {
-  test('locutions, a verb not on the allowlist and capitalised lemmas never enter', async () => {
-    const everything = await loadLexicon(dir);
-    expect([...everything.keys()].some((id) => id.startsWith('test ad libitum'))).toBe(false);
-    expect([...everything.keys()].some((id) => id.startsWith('test rock'))).toBe(false);
-    expect([...everything.keys()].some((id) => id.startsWith('test à priori'))).toBe(false);
-    expect([...everything.keys()].some((id) => id.startsWith('Testangle') || id.startsWith('testangle'))).toBe(true);
-    expect(entry('testangle', 'noun').gender).toBe('masculine');
-    expect(everything.has('testnonlisted\0verb')).toBe(true);
-    expect(lexicon.has('testnonlisted\0verb')).toBe(false);
-    expect(lexicon.size).toBe(parseAllowlist(ALLOWLIST).length);
-  });
-});
 
 /** Applies the statements to SQLite built from the real migrations. */
 async function load(data: Lexicon, cap?: number) {
@@ -209,25 +100,6 @@ describe('SQL', () => {
   });
 });
 
-describe('determinism and version', () => {
-  test('the same source gives the same SQL and version; file order does not matter', async () => {
-    const other = join(root, 'csv-reversed');
-    await writeMorphalouFixture(other, true);
-    const wanted = new Set(parseAllowlist(ALLOWLIST));
-    const a = [...lexiconStatements(await loadLexicon(dir, wanted), 'v')];
-    const b = [...lexiconStatements(await loadLexicon(other, wanted), 'v')];
-    expect(b).toEqual(a);
-    expect(await sourceVersion(dir)).toBe(await sourceVersion(dir));
-    expect(await sourceVersion(dir)).toMatch(/^morphalou-3\.1\+[0-9a-f]{8}$/);
-  });
-
-  test('the version changes when one byte of a source file changes', async () => {
-    const changed = join(root, 'csv-changed');
-    await writeMorphalouFixture(changed, false, ';;;;;;;;;');
-    expect(await sourceVersion(changed)).not.toBe(await sourceVersion(dir));
-  });
-});
-
 test('pure argument parsing accepts SQL preparation and explicit apply modes only', () => {
   for (const args of [[], ['--apply-local'], ['--apply-remote']]) expect(parseArgs(args)).toBe(args[0]);
   for (const args of [
@@ -296,49 +168,4 @@ test('remote CLI refuses non-TTY streams before inputs, output, logs or Wrangler
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
-});
-
-describe('allowlist', () => {
-  // The importer reports counts on stdout; keep the test output clean.
-  const log = spyOn(console, 'log');
-  beforeAll(() => {
-    log.mockImplementation(() => {});
-  });
-  afterAll(() => log.mockRestore());
-  const importWith = async (list: string) => {
-    const project = await mkdtemp(join(root, 'project-'));
-    await mkdir(join(project, 'data/lexicon'), { recursive: true });
-    await writeFile(join(project, 'data/lexicon/lemmas.txt'), list);
-    await importLexicon([], { MORPHALOU_DIR: dir }, pathToFileURL(`${project}/`));
-    return readFile(join(project, '.local/lexicon/import.sql'), 'utf8');
-  };
-
-  test('imports only the listed lemmas', async () => {
-    const sql = await importWith('verb:testmarcher\nnoun:testmaison\n');
-    expect(sql).toContain("'testmarcher', 'verb'");
-    expect(sql).toContain("'testmaison', 'noun'");
-    expect(sql).not.toContain('testnonlisted');
-    expect(sql).not.toContain('testbeau');
-    expect(sql).toMatch(/'lexiconVersion', 'morphalou-3\.1\+[0-9a-f]{8}'/);
-  });
-
-  test('a listed lemma that Morphalou does not have fails loudly', async () => {
-    expect(await rejection(importWith('verb:testmarcher\nnoun:testabsent\nverb:testabsent2\n'))).toBe(
-      'Allowlisted but not in Morphalou: noun:testabsent, verb:testabsent2',
-    );
-  });
-
-  test('a listed noun that Morphalou gives two genders fails by name; unlisted, it never matters', async () => {
-    expect(await rejection(importWith('noun:testmaison\nnoun:testambigu\n'))).toBe(
-      'Conflicting Morphalou genders for testambigu: feminine, masculine',
-    );
-    expect(await importWith('noun:testmaison\n')).not.toContain('testambigu');
-  });
-
-  test('a malformed line is refused; unknown arguments are refused', async () => {
-    expect(await rejection(importWith('verb:testmarcher\nadverb:test\n'))).toBe('Bad allowlist line: adverb:test');
-    expect(await rejection(importLexicon(['--remote'], {}, pathToFileURL(`${root}/`)))).toBe(
-      'Usage: import.ts [--apply-local | --apply-remote]',
-    );
-  });
 });
