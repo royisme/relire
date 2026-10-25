@@ -1112,6 +1112,23 @@
     "exceptions": "A1 样本中的例外：",
     "ruleLine": "{{rule}}，词典中 {{n}} 个名词有 {{percent}}% 符合。这是词尾倾向，不代表该词的实际阴阳性。",
     "exception": "此名词是已审核的 A1 词表中不符合该词尾倾向的例外。",
+    "game": {
+      "title": "le 还是 la",
+      "play": "开始一轮",
+      "endRound": "结束本轮",
+      "le": "le",
+      "la": "la",
+      "next": "下一个",
+      "right": "答对",
+      "notQuite": "没答对",
+      "counter": "{{right}} / {{total}}",
+      "summary": "{{total}} 个名词，{{right}} 个一次答对",
+      "chance": "只有两个选项，全靠猜也大约能对一半。",
+      "mistakes": "打开错题",
+      "playAgain": "再来一轮",
+      "back": "返回",
+      "saving": "正在保存这一轮…"
+    },
     "rules": {
       "tion": "-tion 结尾通常为阴性",
       "sion": "-sion 结尾通常为阴性",
