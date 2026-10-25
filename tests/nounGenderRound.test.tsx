@@ -138,7 +138,8 @@ test('the end screen states the real counts, the guessing line, Mistakes and the
   // Two cards were answered, one of them right on its first try; the round's totals are never invented.
   expect(html).toContain(t('nounGender.game.summary', { total: 2, right: 1 }));
   expect(html).toContain(t('nounGender.game.chance'));
-  expect(html).toContain('href="#/study/mistakes"');
+  expect(html).toContain('href="#/mistakes"');
+  expect(html).not.toContain('href="#/study/mistakes"');
   expect(html).toContain(t('nounGender.game.playAgain'));
   expect(html).toContain(t('nounGender.game.back'));
   // The counts and the guessing line carry no French: the nouns and articles are data, not copy.

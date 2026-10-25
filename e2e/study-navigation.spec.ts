@@ -15,7 +15,7 @@ async function touchTarget(control: Locator) {
 async function studyLinks(page: Page, location: 'sidebar' | 'page', active: string) {
   const sidebar = page.locator('[data-sidebar]');
   const main = page.getByRole('main');
-  for (const name of ['Shadowing', 'Mistakes']) {
+  for (const name of ['Shadowing']) {
     const link = page.getByRole('link', { name, exact: true });
     await expect(link).toHaveCount(1);
     await expect(link).toBeVisible();
@@ -45,11 +45,14 @@ test('expanded, collapsed and tablet study pages keep just one visible set of pa
   await collapse.click();
   await studyLinks(page, 'page', 'Shadowing');
   await page.getByRole('link', { name: 'Mistakes', exact: true }).click();
-  await studyLinks(page, 'page', 'Mistakes');
+  await expect(page).toHaveURL(/#\/mistakes$/);
+  await expect(page.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('link', { name: 'My study', exact: true }).click();
+  await studyLinks(page, 'page', 'Shadowing');
   await page.getByRole('button', { name: 'Expand sidebar' }).click();
-  await studyLinks(page, 'sidebar', 'Mistakes');
+  await studyLinks(page, 'sidebar', 'Shadowing');
   await page.setViewportSize({ width: 900, height: 800 });
-  await studyLinks(page, 'page', 'Mistakes');
+  await studyLinks(page, 'page', 'Shadowing');
 });
 
 test('Grammar opens Topics and switches to its distinct Conjugation address', async ({ page }) => {
@@ -62,12 +65,12 @@ test('Grammar opens Topics and switches to its distinct Conjugation address', as
   await expect(page.getByRole('heading', { name: 'Conjugation', exact: true })).toBeVisible();
   await expect(page.locator('a[href="#/study/grammar"]')).toHaveCount(0);
   await page.getByRole('link', { name: 'My study', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/mistakes$/);
-  await expect(page.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(page).toHaveURL(/#\/study\/shadowing$/);
+  await expect(page.getByRole('link', { name: 'Shadowing', exact: true })).toHaveAttribute('aria-current', 'page');
   await page.getByRole('link', { name: 'Grammar', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
   await page.goBack();
-  await expect(page).toHaveURL(/#\/study\/mistakes$/);
+  await expect(page).toHaveURL(/#\/study\/shadowing$/);
 });
 
 test('About is the final footer link, not a Settings section', async ({ page }) => {
@@ -125,10 +128,12 @@ test('Library level filters have one Tab stop, all arrow keys and Home/End', asy
 test('phone study links stay local; the drawer has About last and no collapse control @phone', async ({ page }) => {
   await page.goto('/#/study/shadowing');
   await studyLinks(page, 'page', 'Shadowing');
-  await page.getByRole('link', { name: 'Mistakes', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/mistakes$/);
+  await page.getByRole('button', { name: 'Menu', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Menu' }).getByRole('link', { name: 'Mistakes', exact: true }).click();
+  await expect(page).toHaveURL(/#\/mistakes$/);
   await page.reload();
-  await studyLinks(page, 'page', 'Mistakes');
+  await expect(page.getByRole('heading', { name: 'Mistakes', exact: true })).toBeVisible();
+  await expect(page.getByRole('main').getByRole('link', { name: 'Shadowing', exact: true })).toHaveCount(0);
   await page.goBack();
   await studyLinks(page, 'page', 'Shadowing');
   await page.getByRole('button', { name: 'Menu', exact: true }).click();
@@ -161,14 +166,14 @@ test('phone Library filters retain 40px radio targets and selection @phone', asy
 });
 
 for (const [lang, names] of [
-  ['zh', ['跟读', '错题本']],
-  ['en', ['Shadowing', 'Mistakes']],
+  ['zh', ['跟读']],
+  ['en', ['Shadowing']],
 ] as const) {
-  test(`the two study tabs fit a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
+  test(`the single study tab fits a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
     page,
   }) => {
     await page.addInitScript((value) => localStorage.setItem('relire_lang', value), lang);
-    await page.goto('/#/study/mistakes');
+    await page.goto('/#/study/shadowing');
     const tabs = page.getByRole('main').getByRole('navigation').first();
     for (const name of names) await expect(tabs.getByRole('link', { name, exact: true })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);

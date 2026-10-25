@@ -132,7 +132,7 @@ for (const phone of [false, true]) {
       await page.goBack();
       await expect(page.getByRole('dialog')).toHaveCount(0);
     }
-    await go(page, '#/study/mistakes', copy);
+    await go(page, '#/mistakes', copy);
     for (const tag of tags) {
       const entry = notebookRow(page, tag, copy);
       await label(entry, tag, true, copy);
@@ -198,7 +198,7 @@ for (const failure of [false, true]) {
     await row(page, 'Je ne').getByRole('button', { name: en.practice.explain, exact: true }).click();
     await label(page.getByRole('dialog'), 'present', false);
     await page.keyboard.press('Escape');
-    await go(page, '#/study/mistakes');
+    await go(page, '#/mistakes');
     await label(notebookRow(page, 'present'), 'present', false);
     await notebookRow(page, 'present').getByRole('button', { name: en.practice.explain, exact: true }).click();
     await label(page.getByRole('dialog'), 'present', false);
@@ -250,7 +250,7 @@ for (const site of ['item', 'notebook', 'practice-sheet', 'notebook-sheet', 'pro
       await wrong(item);
       if (site === 'practice-sheet') await item.getByRole('button', { name: en.practice.explain, exact: true }).click();
       else {
-        await go(page, site === 'progress' ? '#/progress' : '#/study/mistakes');
+        await go(page, site === 'progress' ? '#/progress' : '#/mistakes');
         if (site === 'notebook-sheet')
           await notebookRow(page, 'present').getByRole('button', { name: en.practice.explain, exact: true }).click();
       }

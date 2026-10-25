@@ -125,13 +125,29 @@ test('graded list and reader reserve the graded segment with pinned-version and 
     expect(result).toEqual({ route: { name: 'gradedReader', readerId: 'r' }, canonical: '#/read/graded/r' });
 });
 
-test('My study contains only Shadowing and Mistakes, with bare Study defaulting to Mistakes', () => {
+test('My study contains only Shadowing, with bare Study defaulting to Shadowing', () => {
   expect(STUDY_TABS).toEqual(['shadowing']);
   for (const tab of STUDY_TABS) {
     roundTrip({ name: 'study', tab });
     expect(areaOf({ name: 'study', tab })).toBe('study');
   }
-  expect(parse('#/study')).toEqual({ route: { name: 'study', tab: 'shadowing' }, canonical: '#/study/mistakes' });
+  for (const service of [true, false])
+    expect(parseRoute('#/study', service)).toEqual({
+      route: { name: 'study', tab: 'shadowing' },
+      canonical: '#/study/shadowing',
+    });
+});
+
+test('Mistakes has its own route and area, keeps the key banner and has no old study alias', () => {
+  const route: Route = { name: 'mistakes' };
+  roundTrip(route);
+  expect(routeHref(route)).toBe('#/mistakes');
+  expect(areaOf(route)).toBe('mistakes');
+  expect(worksWithoutKey(route)).toBe(false);
+  for (const service of [true, false]) {
+    expect(parseRoute('#/mistakes', service)).toEqual({ route, canonical: null });
+    expect(parseRoute('#/study/mistakes', service)).toEqual({ route: { name: 'notFound' }, canonical: null });
+  }
 });
 
 test('Words is independent of My study and old word addresses have no aliases', () => {

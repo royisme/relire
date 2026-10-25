@@ -64,7 +64,7 @@ for (const language of ['en', 'zh']) {
       ['#/words/review', i18n.t('today.words.status', { due: 2, newAvailable: 1 })],
       [`#/read/graded/test-reader?version=${version}`, i18n.t('today.read.continue', { order: 4 })],
       ['#/speaking', i18n.t('today.sound.status')],
-      ['#/study/mistakes', i18n.t('today.mistakes.status', { count: 2 })],
+      ['#/mistakes', i18n.t('today.mistakes.status', { count: 2 })],
       ['#/grammar/topics/test-one', i18n.t('today.grammar.status', { title: 'TEST one' })],
     ];
     expected.forEach(([href, status], index) => {
@@ -98,6 +98,7 @@ for (const language of ['en', 'zh']) {
     const action = links(items(html)[0]!)[0];
     expect(action).toContain(`>${i18n.t(`today.${step.id}.action`)}</a>`);
     if (step.id === 'words') expect(action).toContain('href="#/words/review"');
+    if (step.id === 'mistakes') expect(action).toContain('href="#/mistakes"');
     expect(html).toContain(i18n.t(`today.${step.id}.why`));
   });
 
