@@ -7,6 +7,7 @@ import {
   CalendarCheck,
   Download,
   Headphones,
+  History,
   Info,
   Mic,
   PenLine,
@@ -127,7 +128,7 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
         <NavItem
           {...item}
           to={{ name: 'study', tab: 'mistakes' }}
-          icon={BookmarkCheck}
+          icon={History}
           label={t('nav.vocab')}
           current={area === 'study' ? (rail ? 'page' : 'area') : undefined}
         />
