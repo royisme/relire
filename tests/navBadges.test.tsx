@@ -131,11 +131,10 @@ test('the due badge belongs to the Words row and the unresolved count to Mistake
     study.indexOf(row(study, 'Speaking')) + row(study, 'Speaking').length,
     study.indexOf(row(study, 'Mistakes')),
   );
-  expect([...between.matchAll(/href="([^"]+)"/g)].map((match) => match[1])).toEqual([
-    '#/speaking/read-aloud',
-    '#/speaking/recordings',
-  ]);
-  expect(row(study, 'Recordings')).not.toMatch(/tnum/);
+  // Read aloud is Speaking's only child; Recordings left the tree, so no row exists that could carry a count.
+  expect([...between.matchAll(/href="([^"]+)"/g)].map((match) => match[1])).toEqual(['#/speaking/read-aloud']);
+  expect(study).not.toContain('href="#/speaking/recordings"');
+  expect(study).not.toContain('>Recordings<');
   for (const tab of ['Grammar', 'Reading', 'Progress', 'Speaking']) expect(row(html, tab)).not.toMatch(/tnum/);
   expect(html).not.toContain('>5<');
 });
@@ -207,15 +206,17 @@ for (const rail of [false, true]) {
           expect(html.match(/href="#\/mistakes"/g)).toHaveLength(1);
           expect(html).not.toContain('href="#/mistakes/');
           expect(html).not.toContain('href="#/study/mistakes');
-          // Speaking lists Read aloud and Recordings when there is room; the rail never draws a child.
+          // Speaking lists only Read aloud when there is room; the rail never draws a child, and Recordings left the tree.
           const between = html.slice(html.indexOf(speaking) + speaking.length, html.indexOf(mistakes));
           expect([...between.matchAll(/href="([^"]+)"/g)].map((match) => match[1])).toEqual(
-            !rail && route.name === 'recordings' ? ['#/speaking/read-aloud', '#/speaking/recordings'] : [],
+            !rail && route.name === 'recordings' ? ['#/speaking/read-aloud'] : [],
           );
           if (!rail && route.name === 'recordings') {
-            expect(row(html, i18n.t('learning.readAloud'))).toContain('href="#/speaking/read-aloud"');
-            expect(row(html, i18n.t('nav.recordings'))).toContain('href="#/speaking/recordings"');
-            expect(row(html, i18n.t('nav.recordings'))).toContain('aria-current="page"');
+            const readAloud = row(html, i18n.t('learning.readAloud'));
+            expect(readAloud).toContain('href="#/speaking/read-aloud"');
+            // The recordings page highlights the Speaking area; its one child is not the current page.
+            expect(readAloud).not.toContain('aria-current');
+            expect(html).not.toContain('href="#/speaking/recordings"');
             expect(speaking).toContain('aria-current="true"');
           }
           // The lower group's rule separates these rows from the skill destinations.

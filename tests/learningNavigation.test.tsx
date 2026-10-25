@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../src/i18n';
 import { resolveReadAloud } from '../src/services/readAloud';
+import type { Route } from '../src/utils/routes';
 import { SAMPLE_ARTICLES } from '../src/data/sampleArticles';
 import { unitOf } from './fixtures/units';
 import { failure } from './fixtures/storage';
@@ -217,7 +218,7 @@ test('learning-first sidebar has no generic Practice or study Grammar; Writing r
   }
 });
 
-test('Recordings is a Speaking child when there is room: current on its page, never drawn on the rail', () => {
+test('Recordings is not a sidebar row: Speaking highlights on its route and Read aloud is the only child', () => {
   const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({ units: [], error: null });
   const mistakes = spyOn(mistakesHook, 'useMistakes').mockReturnValue({
     rows: [],
@@ -227,21 +228,61 @@ test('Recordings is a Speaking child when there is room: current on its page, ne
   });
   try {
     for (const route of [{ name: 'speaking' }, { name: 'readAloud' }, { name: 'recordings' }] as const) {
-      // Expanded and the drawer share the tree: both children are listed under Speaking, which stays highlighted.
+      // Expanded and the drawer share the tree: Read aloud is Speaking's only child; Recordings never appears.
       const html = render(<NavTree route={route} dueCount={0} />);
       expect(html).toContain('href="#/speaking/read-aloud"');
-      expect(html).toContain('href="#/speaking/recordings"');
+      expect(html).not.toContain('href="#/speaking/recordings"');
       expect(/href="#\/speaking"[^>]*aria-current="true"/.test(html)).toBe(true);
+      const readAloud = html.match(/<a [^>]*href="#\/speaking\/read-aloud"[^>]*>/)?.[0];
+      expect(readAloud?.includes('aria-current')).toBe(route.name === 'readAloud');
       const rail = render(<NavTree route={route} dueCount={0} rail />);
       expect(rail).not.toContain('href="#/speaking/read-aloud"');
       expect(rail).not.toContain('href="#/speaking/recordings"');
       expect(/href="#\/speaking"[^>]*aria-current="page"/.test(rail)).toBe(true);
     }
+  } finally {
+    units.mockRestore();
+    mistakes.mockRestore();
+  }
+});
+
+test('no sidebar anchor to Recordings exists on any route or width, and no row claims its name', () => {
+  const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({ units: [], error: null });
+  const mistakes = spyOn(mistakesHook, 'useMistakes').mockReturnValue({
+    rows: [],
+    loading: false,
+    error: null,
+    retry: () => {},
+  });
+  try {
+    // Every area of the tree, expanded (the drawer renders the same tree) and rail.
+    for (const route of [
+      { name: 'today' },
+      { name: 'library' },
+      { name: 'words' },
+      { name: 'grammar' },
+      { name: 'practice', area: 'listening' },
+      { name: 'speaking' },
+      { name: 'readAloud' },
+      { name: 'recordings' },
+      { name: 'mistakes' },
+      { name: 'progress' },
+      { name: 'settings', section: null },
+      { name: 'about' },
+    ] as const satisfies readonly Route[]) {
+      for (const rail of [false, true]) {
+        const html = render(<NavTree route={route} dueCount={0} rail={rail} />);
+        expect(html).not.toContain('href="#/speaking/recordings"');
+        expect(html).not.toContain('>Recordings<');
+        expect(html).not.toContain('title="Recordings"');
+      }
+    }
+    // On the recordings route the only speaking hrefs are the area row and its one child.
+    const html = render(<NavTree route={{ name: 'recordings' }} dueCount={0} />);
     expect(
-      /href="#\/speaking\/recordings"[^>]*aria-current="page"/.test(
-        render(<NavTree route={{ name: 'recordings' }} dueCount={0} />),
-      ),
-    ).toBe(true);
+      [...html.matchAll(/href="([^"]+)"/g)].map((match) => match[1]).filter((href) => href.startsWith('#/speaking')),
+    ).toEqual(['#/speaking', '#/speaking/read-aloud']);
+    expect(/href="#\/speaking"[^>]*aria-current="true"/.test(html)).toBe(true);
   } finally {
     units.mockRestore();
     mistakes.mockRestore();

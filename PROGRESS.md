@@ -7,6 +7,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 ## 2026-10-25: Recordings out of the sidebar
 
 - Owner decision: Recordings is a function of Speaking, not a menu entry. Speaking's only sidebar child is Read aloud; Recordings opens from the Speaking page link and the reader's "All recordings", at the same route, and Speaking stays the highlighted area there. Tests pending (nav tests expect two Speaking children). **Unverified:** no browser.
+- Tests updated by the second worker: the four nav failures are reshaped to one Speaking child (no Recordings row anywhere, Speaking the highlighted area on the recordings route, Read aloud never current there), a new unit test pins that no sidebar anchor to `#/speaking/recordings` exists on any route or width, and e2e reaches Recordings through the Speaking-page link; 2,611 tests pass, all six checks exit 0, e2e typechecked and **not run**. **Unverified:** no browser.
 
 ## 2026-10-25: Recordings page title aligned
 
