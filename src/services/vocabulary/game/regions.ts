@@ -1,6 +1,7 @@
 /**
- * Owns the map's regions: the book's pages and the words saved from reading, each with counts read from the learner's
- * real rows. Pure: no UI, i18n, storage or clock; titles are data, so the screen translates them.
+ * Owns the map's regions: the book's pages, the words saved from reading, and the words no other region holds,
+ * each with counts read from the learner's real rows. Pure: no UI, i18n, storage or clock; titles are data, so the
+ * screen translates them.
  */
 import type { VocabularyBook, VocabularyRow } from '../../../types/vocabulary';
 import { MATURE_DAYS } from './challenge';
@@ -9,6 +10,8 @@ import { MATURE_DAYS } from './challenge';
 export const LEECH_LAPSES = 8;
 export const SAVED_REGION_ID = 'saved';
 export const SAVED_REGION_TITLE = 'Saved from reading';
+export const OTHER_REGION_ID = 'other';
+export const OTHER_REGION_TITLE = 'Other words';
 
 /** The region key of one book page; an imported deck adds its own key scheme here. */
 export const pageRegionId = (page: number) => `page-${page}`;
@@ -52,9 +55,11 @@ function countsOf(rows: readonly (VocabularyRow | undefined)[], matureDays: numb
 }
 
 /**
- * Every region of the map, in book order then the saved words. With a book, a region is one page of 250 positions and
- * its members are that page's catalogue entries; without one, only the saved words exist. Cards that are neither in
- * the book nor bookmarked belong to no region yet (imported decks will claim them).
+ * Every region of the map, in book order, then the saved words, then the words no other region holds. With a book, a
+ * region is one page of 250 entries in the book's own order; without one, the saved words and the rest exist all
+ * the same. Nothing is dropped: a scheduled word whose bookmark was removed, or a book word introduced while no
+ * book is cached, lands in "Other words" (imported decks will claim theirs from there later), so the region totals
+ * add up to the learner's rows plus the book's entries that have no row.
  */
 export function summarizeRegions(input: {
   rows: readonly VocabularyRow[];
@@ -66,16 +71,19 @@ export function summarizeRegions(input: {
   const rowsByKey = new Map(rows.map((row) => [row.key, row]));
   const pages = new Map<number, { from: number; to: number; keys: string[] }>();
   if (book)
-    for (const entry of book.entries) {
-      const page = Math.floor(entry.position / book.manifest.pageSize) + 1;
+    book.entries.forEach((entry, index) => {
+      // The transport pages follow the book's own order (`vocabularyPages` slices by index); `position` has gaps in
+      // the real book, so it only labels the region, it does not place the entry.
+      const page = Math.floor(index / book.manifest.pageSize) + 1;
       const group = pages.get(page) ?? { from: entry.position, to: entry.position, keys: [] };
       group.from = Math.min(group.from, entry.position);
       group.to = Math.max(group.to, entry.position);
       group.keys.push(entry.key);
       pages.set(page, group);
-    }
+    });
   const catalogue = new Set(book?.entries.map((entry) => entry.key) ?? []);
   const saved = rows.filter((row) => row.bookmarked && !catalogue.has(row.key));
+  const other = rows.filter((row) => !row.bookmarked && !catalogue.has(row.key));
   return [
     ...[...pages.entries()]
       .sort(([left], [right]) => left - right)
@@ -93,6 +101,11 @@ export function summarizeRegions(input: {
       id: SAVED_REGION_ID,
       title: SAVED_REGION_TITLE,
       counts: countsOf(saved, matureDays, leechLapses),
+    },
+    {
+      id: OTHER_REGION_ID,
+      title: OTHER_REGION_TITLE,
+      counts: countsOf(other, matureDays, leechLapses),
     },
   ];
 }
