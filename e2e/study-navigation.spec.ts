@@ -162,7 +162,7 @@ test('phone Recordings survives reload and Back; the drawer has About last and n
   await expect(page).toHaveURL(/#\/mistakes$/);
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Mistakes', exact: true })).toBeVisible();
-  await expect(page.getByRole('main').getByRole('link', { name: 'Shadowing', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('main').getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
   await page.goBack();
   await expect(page).toHaveURL(/#\/speaking\/recordings$/);
   await expect(back).toBeVisible();

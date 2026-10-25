@@ -125,7 +125,7 @@
     "speaking": "口语",
     "readAloud": "朗读",
     "speakingDesc": "听文章中的一句话，录下自己的朗读，也可请 AI 给出发音评估。",
-    "shadowingContext": "要保存跟读录音，请使用阅读页句子旁的麦克风。录音保存在“口语 → 跟读录音”。",
+    "shadowingContext": "要保存跟读录音，请使用阅读页句子旁的麦克风。",
     "chooseArticle": "选择文章",
     "speakingEmpty": "请先在阅读中添加文章，再练习朗读。",
     "sourceUnavailable": "所选文章或句子已不可用。请明确选择新的来源后继续。"
@@ -1377,7 +1377,7 @@
     }
   },
   "shadowingLog": {
-    "title": "跟读本",
+    "title": "跟读录音",
     "subtitle": "保存在本机的阅读跟读录音，每句保留最近三次。",
     "source": "来源",
     "allSources": "全部来源",

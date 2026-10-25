@@ -377,7 +377,7 @@ The optional game mode (Grammar → Gender "Play a round" and the vocabulary gam
 - **Do** show transient state on the control itself, at a fixed size.
 - **Do** put new fixed reader UI inside `BottomDock`, on the ink panel, and keep the current sentence clear of it.
 - **Do** check every new screen at 360px and in light, sepia and dark.
-- **Do** write plain copy: short noun titles ("Vocabulary", "Practice", "Shadowing") with one quiet line under them; empty states say what to do next in one sentence.
+- **Do** write plain copy: short noun titles ("Vocabulary", "Practice", "Recordings") with one quiet line under them; empty states say what to do next in one sentence.
 - **Do** use lucide icons at 16px in controls, one stroke weight, `aria-hidden` when decorative.
 
 ### Don't:

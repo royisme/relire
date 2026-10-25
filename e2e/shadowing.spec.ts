@@ -152,7 +152,7 @@ test('the log lists recordings in article order, opens the reader and deletes ta
     'aria-current',
     'page',
   );
-  await expect(page.getByRole('heading', { name: 'Shadowing' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Recordings' })).toBeVisible();
   const rows = page.locator('button[title="Open in the reader"]');
   await expect(rows).toHaveText([first, second]);
 

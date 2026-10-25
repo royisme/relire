@@ -59,10 +59,10 @@ Install app · Settings · About
 | --- | --- | --- |
 | Words (nav row, page title) | Words | 词汇 (also align `settings.sections.words.title` and `today.practice.words`, now 生词) |
 | Words home tab (was Today) | Overview | 概览 |
-| Speaking → Recordings (was Shadowing) | Recordings | 跟读录音 |
+| Speaking → Recordings (was Shadowing): nav row, Speaking link and the page title (`shadowingLog.title`) | Recordings | 跟读录音 |
 | Mistakes, Progress | unchanged | 错题本, 进度 |
 
-`learning.shadowingContext` becomes "…Find them under Speaking → Recordings." / "…录音保存在“口语 → 跟读录音”。".
+`learning.shadowingContext` points at the reader microphone only ("For saved shadowing takes, use the microphone beside a sentence in the reader." / "要保存跟读录音，请使用阅读页句子旁的麦克风。"); the Recordings link under it already names the place, so the sentence does not repeat it.
 
 ## Badge rules (written into `DESIGN.md` in N1; a worker must not "fix" them)
 

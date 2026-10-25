@@ -248,9 +248,15 @@ test('Recordings is a Speaking child when there is room: current on its page, ne
   }
 });
 
-test('Speaking links to Recordings with a text link and keeps exactly one filled button; the log links back', () => {
+test('Speaking renders the reader-microphone sentence once, the Recordings text link right after it and one filled button; the log links back', () => {
   const home = render(
     <SpeakingPage articles={[article]} workspace={false} onAssessed={() => {}} onMissingKey={() => {}} />,
+  );
+  const sentence = i18n.t('learning.shadowingContext');
+  expect(home.split(sentence)).toHaveLength(2);
+  // Only the paragraph close and the anchor open sit between the sentence and the link's href.
+  expect(home.slice(home.indexOf(sentence) + sentence.length, home.indexOf('href="#/speaking/recordings"'))).toMatch(
+    /^<\/p><a /,
   );
   const recordingsAnchor = home.match(/<a [^>]*href="#\/speaking\/recordings"[^>]*>/)?.[0];
   expect(recordingsAnchor).toContain('underline');
