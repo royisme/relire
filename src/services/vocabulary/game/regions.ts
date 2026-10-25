@@ -36,6 +36,7 @@ export interface VocabularyRegion {
   /** The book positions the page covers; absent where the region is not a page. */
   positions?: { from: number; to: number };
   counts: RegionCounts;
+  keys: string[];
 }
 
 /**
@@ -113,6 +114,7 @@ export function summarizeRegions(input: {
         id: pageRegionId(page),
         title: `Page ${page}`,
         positions: { from: group.from, to: group.to },
+        keys: group.keys,
         counts: countsOf(
           group.keys.map((key) => rowsByKey.get(key)),
           matureDays,
@@ -123,16 +125,19 @@ export function summarizeRegions(input: {
       id: deckRegionId(deck),
       title: deck,
       tags: [...group.tags],
+      keys: group.rows.map((row) => row.key),
       counts: countsOf(group.rows, matureDays, leechLapses),
     })),
     {
       id: SAVED_REGION_ID,
       title: SAVED_REGION_TITLE,
+      keys: saved.map((row) => row.key),
       counts: countsOf(saved, matureDays, leechLapses),
     },
     {
       id: OTHER_REGION_ID,
       title: OTHER_REGION_TITLE,
+      keys: other.map((row) => row.key),
       counts: countsOf(other, matureDays, leechLapses),
     },
   ];

@@ -51,11 +51,13 @@ test('without a book the map has the saved words, and every other row lands in O
     {
       id: 'saved',
       title: 'Saved from reading',
+      keys: ['mot', 'arbre', 'chien', 'chat'],
       counts: { total: 4, introduced: 3, learning: 1, young: 1, mature: 1, leech: 1, unseen: 1 },
     },
     {
       id: OTHER_REGION_ID,
       title: OTHER_REGION_TITLE,
+      keys: ['sel'],
       counts: { total: 1, introduced: 1, learning: 0, young: 1, mature: 0, leech: 0, unseen: 0 },
     },
   ]);
@@ -69,11 +71,13 @@ test('rows no region claims land in Other words: a removed bookmark, a book word
     {
       id: 'saved',
       title: 'Saved from reading',
+      keys: [],
       counts: { total: 0, introduced: 0, learning: 0, young: 0, mature: 0, leech: 0, unseen: 0 },
     },
     {
       id: OTHER_REGION_ID,
       title: OTHER_REGION_TITLE,
+      keys: ['mot', 'test-0'],
       counts: { total: 2, introduced: 2, learning: 0, young: 1, mature: 1, leech: 0, unseen: 0 },
     },
   ]);
@@ -94,24 +98,39 @@ test('a book of 300 entries is two page regions, and the region totals add up', 
     id: pageRegionId(1),
     title: 'Page 1',
     positions: { from: 0, to: 249 },
+    keys: book.entries.slice(0, 250).map((entry) => entry.key),
     counts: { total: 250, introduced: 2, learning: 0, young: 1, mature: 1, leech: 0, unseen: 248 },
   });
   expect(regions[1]).toEqual({
     id: pageRegionId(2),
     title: 'Page 2',
     positions: { from: 250, to: 299 },
+    keys: book.entries.slice(250).map((entry) => entry.key),
     counts: { total: 50, introduced: 1, learning: 1, young: 0, mature: 0, leech: 0, unseen: 49 },
   });
   expect(regions[2]).toEqual({
     id: 'saved',
     title: 'Saved from reading',
+    keys: ['mot'],
     counts: { total: 1, introduced: 0, learning: 0, young: 0, mature: 0, leech: 0, unseen: 1 },
   });
   expect(regions[3]).toEqual({
     id: OTHER_REGION_ID,
     title: OTHER_REGION_TITLE,
+    keys: ['sel'],
     counts: { total: 1, introduced: 1, learning: 0, young: 1, mature: 0, leech: 0, unseen: 0 },
   });
+  const members = regions.flatMap((region) => region.keys);
+  expect(new Set(members).size).toBe(members.length);
+  for (const region of regions) {
+    expect(region.keys).toHaveLength(region.counts.total);
+    expect(region.keys.filter((key) => rows.find((row) => row.key === key)?.schedule)).toHaveLength(
+      region.counts.introduced,
+    );
+    expect(region.keys.filter((key) => !rows.find((row) => row.key === key)?.schedule)).toHaveLength(
+      region.counts.unseen,
+    );
+  }
   // Rows plus the book entries without a row: 5 + (300 - 3 catalogued ones that have rows).
   expect(regions.reduce((sum, region) => sum + region.counts.total, 0)).toBe(5 + 297);
 });

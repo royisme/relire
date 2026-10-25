@@ -59,6 +59,12 @@ export function VocabularyHome({ model }: { model: VocabularyModel }) {
         >
           {t('vocab.play')}
         </Link>
+        <Link
+          to={{ name: 'wordsMap' }}
+          className="inline-flex min-h-10 items-center rounded-md border border-ink-300 bg-surface px-4 text-sm text-ink-800 hover:bg-ink-100"
+        >
+          {t('vocab.map.title')}
+        </Link>
         <VocabularyImport />
       </div>
     </div>

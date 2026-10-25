@@ -131,6 +131,13 @@ test('Grammar is separate from My study and local references/exercises survive s
   roundTrip({ name: 'wordsAll' });
   roundTrip({ name: 'wordsReview' });
   roundTrip({ name: 'wordsPlay' });
+  roundTrip({ name: 'wordsMap' });
+  expect(routeHref({ name: 'wordsMap' })).toBe('#/study/words/map');
+  expect(areaOf({ name: 'wordsMap' })).toBe('study');
+  expect(vocabularyPlaceOf({ name: 'wordsMap' })).toBe('map');
+  expect(parseRoute('#/study/words/map', false).route).toEqual({ name: 'wordsMap' });
+  for (const hash of ['#/study/words/Map', '#/study/words/map/x', '#/study/words/map?x=1'])
+    expect(parse(hash).route.name).toBe('notFound');
   expect(routeHref({ name: 'wordsPlay' })).toBe('#/study/words/play');
   expect(areaOf({ name: 'wordsPlay' })).toBe('study');
   expect(vocabularyPlaceOf({ name: 'wordsPlay' })).toBe('play');

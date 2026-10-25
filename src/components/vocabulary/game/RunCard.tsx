@@ -7,6 +7,8 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { SpeakButton } from '../../ui/speak-button';
 import { VocabularyAnswer } from '../VocabularyAnswer';
+import { bossContextOf } from '../../../services/vocabulary/game/collection';
+import { LeechContext } from './LeechContext';
 import { choiceOf, type RunCardState, type RunPhase } from './runKey';
 
 interface ChallengeCardProps {
@@ -224,6 +226,7 @@ export function RunRevealedCard({
   onListen: () => void;
 }) {
   const { t } = useTranslation();
+  const context = bossContextOf(answer.row, true);
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
@@ -247,6 +250,7 @@ export function RunRevealedCard({
         </span>
       </header>
       <VocabularyAnswer word={answer} snapshot />
+      {context && <LeechContext context={context} />}
     </div>
   );
 }

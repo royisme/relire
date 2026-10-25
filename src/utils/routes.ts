@@ -23,6 +23,7 @@ export type Route =
   | { name: 'wordsAll' }
   | { name: 'wordsReview' }
   | { name: 'wordsPlay' }
+  | { name: 'wordsMap' }
   | { name: 'grammar'; section?: GrammarSectionRoute; verb?: string; tag?: GrammarTag }
   | { name: 'grammarTopic'; topicId: string }
   | { name: 'practice'; area: LearningArea }
@@ -77,6 +78,8 @@ export function routeHref(route: Route): string {
       return '#/study/words/review';
     case 'wordsPlay':
       return '#/study/words/play';
+    case 'wordsMap':
+      return '#/study/words/map';
     case 'grammar':
       if (route.section === 'gender') return '#/grammar/gender';
       if (route.section === 'conjugation')
@@ -180,10 +183,16 @@ export function parseRoute(
       sub === 'words' &&
       parts.length === 3 &&
       !query &&
-      ['all', 'review', 'play'].includes(third)
+      ['all', 'review', 'play', 'map'].includes(third)
     )
       route =
-        third === 'all' ? { name: 'wordsAll' } : third === 'review' ? { name: 'wordsReview' } : { name: 'wordsPlay' };
+        third === 'all'
+          ? { name: 'wordsAll' }
+          : third === 'review'
+            ? { name: 'wordsReview' }
+            : third === 'play'
+              ? { name: 'wordsPlay' }
+              : { name: 'wordsMap' };
     else if (root === 'speaking' && parts.length === 1) route = { name: 'speaking' };
     else if (root === 'speaking' && sub === 'read-aloud' && parts.length <= 3)
       route = { name: 'readAloud', ...(third ? { articleId: decodeURIComponent(third) } : {}), ...focused };
@@ -240,6 +249,7 @@ export function areaOf(route: Route): Area | null {
     case 'wordsAll':
     case 'wordsReview':
     case 'wordsPlay':
+    case 'wordsMap':
     case 'study':
       return 'study';
     case 'grammar':
@@ -263,9 +273,10 @@ export function areaOf(route: Route): Area | null {
   }
 }
 
-export function vocabularyPlaceOf(route: Route): 'today' | 'all' | 'review' | 'play' {
+export function vocabularyPlaceOf(route: Route): 'today' | 'all' | 'review' | 'play' | 'map' {
   if (route.name === 'wordsAll') return 'all';
   if (route.name === 'wordsReview') return 'review';
   if (route.name === 'wordsPlay') return 'play';
+  if (route.name === 'wordsMap') return 'map';
   return 'today';
 }
