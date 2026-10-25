@@ -78,8 +78,16 @@ test('the Mistakes label stays unchanged in English and Chinese', () => {
 test('Recordings exists as a label in both locales and the My study strings are gone', () => {
   expect(en.nav.recordings).toBe('Recordings');
   expect(zh.nav.recordings).toBe('跟读录音');
-  expect(en.learning.shadowingContext).toContain('Speaking → Recordings');
-  expect(zh.learning.shadowingContext).toContain('口语 → 跟读录音');
+  expect(en.learning.shadowingContext).not.toContain('Speaking → Recordings');
+  expect(zh.learning.shadowingContext).not.toContain('口语 → 跟读录音');
+  // The sentence still points at the reader microphone; the link under it names the place.
+  expect(en.learning.shadowingContext).toContain('microphone');
+  expect(en.learning.shadowingContext).toContain('reader');
+  expect(zh.learning.shadowingContext).toContain('麦克风');
+  expect(zh.learning.shadowingContext).toContain('阅读');
+  // The page title and its nav row are the same words, so they can never drift apart.
+  expect(en.shadowingLog.title).toBe(en.nav.recordings);
+  expect(zh.shadowingLog.title).toBe(zh.nav.recordings);
   for (const locale of [en, zh]) {
     expect(locale.nav).not.toHaveProperty('vocab');
     expect(locale.study).not.toHaveProperty('label');

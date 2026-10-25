@@ -472,7 +472,6 @@ test.describe('phones', () => {
     await expect(drawer.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
     await expect(drawer.getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
     await expect(drawer.getByRole('link', { name: 'Read aloud', exact: true })).toHaveCount(0);
-    await expect(drawer.getByRole('link', { name: 'Shadowing', exact: true })).toHaveCount(0);
   });
 
   test('Settings is a list of sections, then the section, with a way back @phone', async ({ page }) => {
