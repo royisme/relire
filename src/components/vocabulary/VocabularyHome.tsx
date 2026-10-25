@@ -21,12 +21,20 @@ export function VocabularyHome({ model }: { model: VocabularyModel }) {
           </div>
         ))}
       </dl>
-      <Link
-        to={{ name: 'wordsReview' }}
-        className="inline-flex min-h-10 items-center rounded-md bg-accent-700 px-4 text-sm text-on-fill"
-      >
-        {t('vocab.continue')}
-      </Link>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link
+          to={{ name: 'wordsReview' }}
+          className="inline-flex min-h-10 items-center rounded-md bg-accent-700 px-4 text-sm text-on-fill"
+        >
+          {t('vocab.continue')}
+        </Link>
+        <Link
+          to={{ name: 'wordsPlay' }}
+          className="inline-flex min-h-10 items-center rounded-md border border-ink-300 bg-surface px-4 text-sm text-ink-800 hover:bg-ink-100"
+        >
+          {t('vocab.play')}
+        </Link>
+      </div>
     </div>
   );
 }

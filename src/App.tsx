@@ -20,7 +20,6 @@ import { OnboardingDialog } from './components/OnboardingDialog';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { AboutSection } from './components/settings/AboutSection';
 import type { KeyRequest } from './components/settings/keyRequest';
-
 import { Article, UserStats, PronunciationAssessment } from './types';
 import { useVocabulary } from './hooks/useVocabulary';
 import { useVocabularyBookmark } from './hooks/useVocabularyBookmark';
@@ -30,7 +29,14 @@ import { usePersist } from './storage/usePersist';
 import { vocabularyDue, formatDate } from './utils/srs';
 import { hasTextKey } from './utils/appSettings';
 import { firstBundledReaderId } from './services/gradedReaders/firstReader';
-import { LIBRARY, parseRoute, routeHref, worksWithoutKey, type AiPurposeRoute } from './utils/routes';
+import {
+  LIBRARY,
+  parseRoute,
+  routeHref,
+  vocabularyPlaceOf,
+  worksWithoutKey,
+  type AiPurposeRoute,
+} from './utils/routes';
 import { navigate, useRoute } from './hooks/useRoute';
 import { useBreakpoint } from './hooks/useMediaQuery';
 import { useSidebar } from './hooks/useSidebar';
@@ -78,7 +84,6 @@ export default function App() {
   );
   // The source the log opens at (set when the reader sends the learner to its recordings).
   const [logSourceId, setLogSourceId] = useState<string | null>(null);
-
   // Set while an AI feature is waiting for a key, so Settings can focus the field and offer the way back.
   const [keyRequest, setKeyRequest] = useState<KeyRequest | null>(null);
   // Articles and vocabulary commit before state changes; only stats use debounced persistence.
@@ -362,7 +367,7 @@ export default function App() {
                 </>
               ))}
 
-            {(route.name === 'study' || route.name === 'wordsAll' || route.name === 'wordsReview') && (
+            {(route.name === 'study' || route.name.startsWith('words')) && (
               <StudyView
                 tab={route.name === 'study' ? route.tab : 'words'}
                 sectionsInSidebar={expanded}
@@ -374,7 +379,7 @@ export default function App() {
                 }}
                 vocabulary={{
                   model: vocabulary,
-                  place: route.name === 'wordsAll' ? 'all' : route.name === 'wordsReview' ? 'review' : 'today',
+                  place: vocabularyPlaceOf(route),
                 }}
                 shadowing={{
                   articles,
@@ -464,19 +469,12 @@ export default function App() {
             )}
 
             {route.name === 'about' && <AboutSection />}
-
             {route.name === 'notFound' && <NotFoundView reason="page" />}
           </PageContentBoundary>
         </div>
       </div>
-
-      {/* Word Detail Floating Modal */}
       <WordDetailModal {...wordSheet} bookmark={bookmark} />
-
-      {/* Sentence breakdown drawer */}
       <SentenceDrawer {...sentenceSheet} />
-
-      {/* Article Importer / Pasting Modal */}
       {editor && (
         <ArticleEditorDialog
           key={editor.article?.id ?? 'new'}

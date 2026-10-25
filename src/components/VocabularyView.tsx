@@ -8,6 +8,7 @@ import { PageHeader } from './ui/page-header';
 import { Link } from './shell/Link';
 import { VocabularyHome } from './vocabulary/VocabularyHome';
 import { VocabularyReview } from './vocabulary/VocabularyReview';
+import { VocabularyRun } from './vocabulary/game/VocabularyRun';
 // Lazy so TanStack Table loads with Browse instead of the startup chunks.
 const VocabularyBrowser = retryableLazy(async () => ({
   default: (await import('./vocabulary/VocabularyBrowser')).VocabularyBrowser,
@@ -16,14 +17,15 @@ export function VocabularyView({
   place = 'today',
   model,
 }: {
-  place?: 'today' | 'all' | 'review';
+  place?: 'today' | 'all' | 'review' | 'play';
   model: VocabularyModel;
 }) {
   const { t } = useTranslation();
   const content = useVocabularyBook();
+  const focused = place === 'review' || place === 'play';
   return (
     <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
-      {place !== 'review' && (
+      {!focused && (
         <>
           <PageHeader title={t('vocab.title')} subtitle={t('vocab.subtitle')} />
           <nav aria-label={t('vocab.pages')} className="flex gap-4 border-b border-ink-200 text-sm">
@@ -49,6 +51,8 @@ export function VocabularyView({
       </p>
       {place === 'review' ? (
         <VocabularyReview model={model} book={content.book} />
+      ) : place === 'play' ? (
+        <VocabularyRun model={model} book={content.book} />
       ) : place === 'all' ? (
         <Suspense fallback={<div aria-busy="true" className="h-[36rem]" />}>
           <VocabularyBrowser rows={model.rows} book={content.book} />

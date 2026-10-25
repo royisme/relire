@@ -131,7 +131,8 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
               label={t(`study.${tab}`)}
               current={
                 (route.name === 'study' && route.tab === tab) ||
-                ((route.name === 'wordsAll' || route.name === 'wordsReview') && tab === 'words')
+                ((route.name === 'wordsAll' || route.name === 'wordsReview' || route.name === 'wordsPlay') &&
+                  tab === 'words')
                   ? 'page'
                   : undefined
               }
