@@ -160,7 +160,7 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | F1 | Google Fonts: legal review, then stop requesting fonts from Google (app and both marketing pages); remedy chosen from the review | no request to fonts.googleapis.com or fonts.gstatic.com anywhere; fonts work offline; OFL notices shipped; README privacy text true | built and tested (fonts bundled under `public/fonts/` with OFL texts; `tests/bundledFonts.test.ts` pins them and the e2e fixture no longer allows the Google hosts) |
 | P1 | Words Overview: one filled action whose label follows the real queue (counts from `wordsInput`; fixes the bare-allowance count; drops the duplicate Map button) | states A, B, C, C0 and loading; Overview count equals Today's; one filled control at most; fixed-height slot; en and zh | ready (B1 yes) |
 | P1b | Time estimate from the learner's own history (5b item 1 rule) | median within-session gap, at least 30 gaps, range or omitted | ready (Q4 yes) |
-| P2 | Wordbook review label from the manifest | never "reviewed" for the unreviewed state | not started |
+| P2 | Wordbook review label from the manifest | never "reviewed" for the unreviewed state | built, tests pending |
 | P3 | README factual fix (both languages) and the stale `PRODUCT.md` First run line | providers, privacy incl. content service and the font change from F1, missing areas, stale caption | not started |
 | P4 | Copy pass (about 15 strings, en and zh) | keys kept, `i18n:check`, the lead reads every zh line | ready (B2: Key) |
 | P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | built and tested (unit 2611 pass; e2e spec typechecked, never run) |

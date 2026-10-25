@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Check, X } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import type { Challenge } from '../../../services/vocabulary/game/challenge';
+import type { VocabularyBook } from '../../../types/vocabulary';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { SpeakButton } from '../../ui/speak-button';
@@ -219,11 +220,13 @@ export function RunChallengeCard({
 export function RunRevealedCard({
   word,
   answer,
+  book,
   wordHeading,
   onListen,
 }: {
   word: string;
   answer: ComponentProps<typeof VocabularyAnswer>['word'];
+  book?: VocabularyBook;
   wordHeading: RefObject<HTMLHeadingElement | null>;
   onListen: () => void;
 }) {
@@ -252,7 +255,7 @@ export function RunRevealedCard({
           />
         </span>
       </header>
-      <VocabularyAnswer word={answer} snapshot />
+      <VocabularyAnswer word={answer} snapshot book={book} />
       {context && <LeechContext context={context} />}
     </div>
   );

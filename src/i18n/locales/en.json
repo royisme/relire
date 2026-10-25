@@ -445,6 +445,8 @@
     "state": "Learning state",
     "all": "All",
     "builtIn": "Built-in",
+    "builtInUnreviewed": "Built-in · not reviewed",
+    "builtInReviewed": "Built-in · reviewed by {{name}} on {{date}}",
     "bookmarked": "Bookmarked",
     "unintroduced": "Unintroduced",
     "review": "Review",

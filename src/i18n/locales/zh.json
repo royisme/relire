@@ -445,6 +445,8 @@
     "state": "学习状态",
     "all": "全部",
     "builtIn": "内置",
+    "builtInUnreviewed": "内置 · 未经审核",
+    "builtInReviewed": "内置 · {{name}} 于 {{date}} 审核",
     "bookmarked": "已收藏",
     "unintroduced": "尚未学习",
     "review": "复习中",

@@ -1,10 +1,31 @@
 /** Attributed answer prose; caller mounts it only after a durable reveal or in an explicit detail sheet. */
 import { useTranslation } from 'react-i18next';
 import type { VocabularyJoined } from '../../services/vocabulary/queue';
-export function VocabularyAnswer({ word, snapshot = false }: { word: VocabularyJoined; snapshot?: boolean }) {
+import type { VocabularyBook } from '../../types/vocabulary';
+export function VocabularyAnswer({
+  word,
+  snapshot = false,
+  book,
+}: {
+  word: VocabularyJoined;
+  snapshot?: boolean;
+  book?: VocabularyBook;
+}) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
   const source = snapshot ? word.row?.bookSource : word.bookSource;
+  // The status of another version of the book is unknown, so it is never claimed.
+  const review = source && book?.manifest.version === source.version ? book.manifest.review : undefined;
+  const builtIn = !review
+    ? t('vocab.builtIn')
+    : 'status' in review
+      ? t('vocab.builtInUnreviewed')
+      : t('vocab.builtInReviewed', {
+          name: review.reviewedBy,
+          date: new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeZone: 'UTC' }).format(
+            new Date(review.reviewedAt),
+          ),
+        });
   return (
     <div className="space-y-8 break-words text-sm text-ink-800">
       {source && (
@@ -25,7 +46,7 @@ export function VocabularyAnswer({ word, snapshot = false }: { word: VocabularyJ
               ))}
             </div>
           ))}
-          <p className="text-xs text-ink-600">{t('vocab.builtIn')}</p>
+          <p className="text-xs text-ink-600">{builtIn}</p>
         </section>
       )}
       {word.row?.contexts.map((context) => {

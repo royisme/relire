@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Built-in word meanings now say whether the wordbook has been reviewed ("Built-in · not reviewed", or who reviewed it and when); when the status of that book version is unknown they say only "Built-in".
 - Import Anki `.apkg` packages in Words, including newer compressed collections: choose a note type and fields, keep deck names and tags, and merge notes without importing media or review history.
 - Words has a map of book pages, imported decks and saved words with real state counts, expandable word lists and a leech collection; leech cards show memory hints and examples after reveal without changing ratings or scheduling.
 - Words has an optional, device-local goal: set an exam date and a target of mature words, and the Words home shows the real days left, the mature count against the target, and the weekly series of words first reaching maturity over the last four weeks. It is opt-in, never in a backup, and nothing is extrapolated from it.
