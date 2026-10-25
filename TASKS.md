@@ -157,7 +157,7 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| F1 | Google Fonts: legal review, then stop requesting fonts from Google (app and both marketing pages); remedy chosen from the review | no request to fonts.googleapis.com or fonts.gstatic.com anywhere; fonts work offline; OFL notices shipped; README privacy text true | built, test pending (fonts bundled under `public/fonts/` with OFL texts; the e2e fixture `e2e/grammar-topic-learning.fixture.ts` still lists the Google hosts and is for the test writer) |
+| F1 | Google Fonts: legal review, then stop requesting fonts from Google (app and both marketing pages); remedy chosen from the review | no request to fonts.googleapis.com or fonts.gstatic.com anywhere; fonts work offline; OFL notices shipped; README privacy text true | built and tested (fonts bundled under `public/fonts/` with OFL texts; `tests/bundledFonts.test.ts` pins them and the e2e fixture no longer allows the Google hosts) |
 | P1 | Words Overview: one filled action whose label follows the real queue (counts from `wordsInput`; fixes the bare-allowance count; drops the duplicate Map button) | states A, B, C, C0 and loading; Overview count equals Today's; one filled control at most; fixed-height slot; en and zh | ready (B1 yes) |
 | P1b | Time estimate from the learner's own history (5b item 1 rule) | median within-session gap, at least 30 gaps, range or omitted | ready (Q4 yes) |
 | P2 | Wordbook review label from the manifest | never "reviewed" for the unreviewed state | not started |

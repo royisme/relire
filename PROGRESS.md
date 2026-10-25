@@ -6,7 +6,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 ## 2026-10-25: F1 fonts bundled
 
-- The three fonts (Source Serif 4 roman and italic, Public Sans, Fira Code) are Google's unmodified latin woff2 builds in `public/fonts/` with their SIL OFL 1.1 texts; `src/index.css` and `marketing/styles.css` declare them, the Google links and the two Google `runtimeCaching` entries are gone, the Pages workflow copies `public/fonts` to the site root, and both READMEs state the real server list. Static checks only; tests pending, nothing opened in a browser.
+- The three fonts (Source Serif 4 roman and italic, Public Sans, Fira Code) are Google's unmodified latin woff2 builds in `public/fonts/` with their SIL OFL 1.1 texts; `src/index.css` and `marketing/styles.css` declare them, the Google links and the two Google `runtimeCaching` entries are gone, the Pages workflow copies `public/fonts` to the site root, and both READMEs state the real server list. Tests committed (`tests/bundledFonts.test.ts`, and the e2e fixture no longer allows the Google hosts); nothing opened in a browser.
 
 ## 2026-10-25: Recordings out of the sidebar
 
