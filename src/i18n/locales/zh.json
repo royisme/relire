@@ -893,7 +893,7 @@
     "safariWay": "Safari（macOS 14 及以上）",
     "safariDesc": "选择「文件 → 添加到程序坞」。iPhone 和 iPad 上用「分享 → 添加到主屏幕」。",
     "noServerWhy": "可以离线使用",
-    "noServerDesc": "文章、生词和设置都保存在这个浏览器里。阅读和生词复习可以离线使用；单词和句子解析、朗读、发音反馈需要联网和你的 Gemini Key。",
+    "noServerDesc": "文章、生词和设置都保存在这个浏览器里。阅读和生词复习可以离线使用；单词和句子解析、朗读、发音反馈会直接从这个浏览器调用你选的 AI 服务商，并需要你为它填写的 Key；Ollama 和设备自带的声音不需要 Key。",
     "gotIt": "知道了"
   },
   "storage": {

@@ -900,7 +900,7 @@
     "safariWay": "Safari (macOS 14 or later)",
     "safariDesc": "Choose File → Add to Dock. On iPhone or iPad, use Share → Add to Home Screen.",
     "noServerWhy": "Works offline",
-    "noServerDesc": "Your articles, vocabulary and settings are stored in this browser. Reading and vocabulary review work offline. Word and sentence analysis, audio and pronunciation feedback need a connection and your Gemini key.",
+    "noServerDesc": "Your articles, vocabulary and settings are stored in this browser. Reading and vocabulary review work offline. Word and sentence analysis, audio and pronunciation feedback call the AI provider you chose, straight from this browser, and need your key for it. Ollama and your device's voice need no key.",
     "gotIt": "Got it"
   },
   "storage": {
