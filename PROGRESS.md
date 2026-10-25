@@ -4,6 +4,12 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: VG2 landed (the vocabulary run)
+
+- `#/study/words/play`, a "Play a run" link beside Start, `lexiconFormsOf`, and the run view in `src/components/vocabulary/game/` (challenge before the flip, "I don't know" reveals, Just flip, runs of 5, 10 or 20 ratings counted from a baseline in one hook instance, done-for-now and queue-cleared states, its own pure key function). `useVocabularyReview.ts`, `storage/vocabulary.ts`, `VocabularyReview.tsx` and the VG1 core are unchanged.
+- GLM 5.3 hit its 5-hour limit before committing; its uncommitted work was audited, completed and committed by Gemini 3.8 flash (owner allowed the fallback). Verified in the worktree (exit 0): typecheck, lint, full suite (2,499; one flaky grammar-topic test failed once and passed alone and on re-run), i18n, format, build, detector `[]`.
+- **Unverified:** no browser, phone or IME run; the write-count test drives the existing hook through a hand-built harness, not the run view. No second-model review of the diff yet.
+
 ## 2026-10-25: Debt review of LB1 to LB3 and LG1 (gpt-6-astra, verdict fail, nine findings); fixes merged
 
 - The review (`ac1d207`, read-only) found one high, five medium and three low problems: the Le ou la round's keyboard and save flow, a stale lexicon error in the word sheet, 36 px targets, stale docs and dead re-exports. The lead checked findings 2, 3 and 4 against the code before dispatching.
