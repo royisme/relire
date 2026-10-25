@@ -101,7 +101,17 @@ The Worker becomes a routed API (Hono, kept portable), requires an access key, a
 | RS1 | Worker: Hono router with our own CORS/limiter/auth middleware in today's order, `ACCESS_KEYS` fail closed, `private, no-cache` on every success, tests and fixtures, runbook, ADR and `AGENTS.md` privacy wording | the four Worker tests keep bodies/ETags/statuses and pass with the new key fixtures; Worker typecheck, full suite and checks exit 0 in the main checkout | landed (`ff3826c`); astra review fixed 2 points; all checks exit 0 (2,400 tests); the local app gets 401 until RS2 |
 | RS2 | App: `contentService` settings block (device-local, excluded from backups), `Authorization` header in `contentServiceFetch`, Settings section with Test and Enable, i18n en and zh, client tests | tests in the plan pass; the 23 call sites re-checked; detector `[]`; checks exit 0 | landed (`49846bc` merged, fixes in the following merge); astra review failed on 5 points, all fixed; all checks exit 0 (2,422 tests); the section's look is the owner's to check |
 | RS3 | Spike then wire `@cloudflare/vite-plugin` so `vite dev` serves `/v1/*` from the publishers' local D1 | the production `dist` content hash is unchanged; a synthetic publisher write is read through the dev route | landed (`296c252` merged); all six gates passed (plugin 1.63.1 pins an older workerd, so dev runs `compatibility_date` 2026-10-13 by an in-memory override); the lead re-checked: production `dist` content hash identical with and without the plugin, and a dev server answered `/v1/*` from the Worker (401 without a key) and the app elsewhere |
-| RS4 | Drizzle for D1: `docs/drizzle-plan.md` (options A none, B minimal, C full; recommends B or A); RS4a spike with gates, then RS4b wire | plan reviewed; spike gates pass or end in "do not ship" | owner chose B (2026-10-24); review 1 (fail, recommends A) applied; next: lead provisions the spike installs, then RS4a; the owner also decides the one-time reset of local D1 state before RS4b |
+| RS4 | Drizzle for D1: `docs/drizzle-plan.md` (options A none, B minimal, C full; recommends B or A); RS4a spike with gates, then RS4b wire | plan reviewed; spike gates pass or end in "do not ship" | PAUSED (2026-10-24, the lexicon leaves D1 and the service is shrinking; see `docs/lexicon-r2-plan.md`); owner chose B earlier; review 1 (fail, recommends A) applied; next: lead provisions the spike installs, then RS4a; the owner also decides the one-time reset of local D1 state before RS4b |
+
+### Next: lexicon in R2 instead of D1 (owner proposal 2026-10-24; plan `docs/lexicon-r2-plan.md`, in review)
+
+Measured: the whole lexicon is 3.09 MB raw, 0.33 MB gzip, so one object in a private R2 bucket behind the access key, downloaded once per version and answered locally. The first deployment may go out without the lexicon.
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| L1 | Server: R2 binding, `GET /v1/lexicon`, old routes and D1 tables removed, publisher writes one object with a SHA-256 read-back | Worker and publisher tests pass; CI checks exit 0; authorized read through the RS3 dev server | not started; after the review |
+| L2 | Client: bulk loader behind `lexiconForm`/`lexiconLemma`, IndexedDB by version | no caller changes; no request after the first download; real errors kept | not started |
+| L3 | Docs: `worker/README.md` (no day 2, bucket steps), ADR, architecture, development | `format:check` exits 0 | not started |
 
 ### Content (paused by the owner's priority)
 
