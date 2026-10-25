@@ -2,6 +2,7 @@
 import type { VocabularyModel } from '../../hooks/useVocabulary';
 import { vocabularyDue } from '../../utils/srs';
 import { Link } from '../shell/Link';
+import { VocabularyImport } from './VocabularyImport';
 export function VocabularyHome({ model }: { model: VocabularyModel }) {
   const { t } = useTranslation();
   const due = model.rows.filter((row) => vocabularyDue(row.schedule, model.now)).length;
@@ -34,6 +35,7 @@ export function VocabularyHome({ model }: { model: VocabularyModel }) {
         >
           {t('vocab.play')}
         </Link>
+        <VocabularyImport />
       </div>
     </div>
   );

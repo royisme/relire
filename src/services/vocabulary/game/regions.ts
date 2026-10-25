@@ -15,6 +15,7 @@ export const OTHER_REGION_TITLE = 'Other words';
 
 /** The region key of one book page; an imported deck adds its own key scheme here. */
 export const pageRegionId = (page: number) => `page-${page}`;
+export const deckRegionId = (deck: string) => `deck:${deck}`;
 
 export interface RegionCounts {
   /** Every word the region holds: catalogue entries plus the learner's own cards. */
@@ -30,6 +31,8 @@ export interface RegionCounts {
 export interface VocabularyRegion {
   id: string;
   title: string;
+  /** Imported tag labels; labels can overlap, region membership cannot. */
+  tags?: string[];
   /** The book positions the page covers; absent where the region is not a page. */
   positions?: { from: number; to: number };
   counts: RegionCounts;
@@ -58,7 +61,7 @@ function countsOf(rows: readonly (VocabularyRow | undefined)[], matureDays: numb
  * Every region of the map, in book order, then the saved words, then the words no other region holds. With a book, a
  * region is one page of 250 entries in the book's own order; without one, the saved words and the rest exist all
  * the same. Nothing is dropped: a scheduled word whose bookmark was removed, or a book word introduced while no
- * book is cached, lands in "Other words" (imported decks will claim theirs from there later), so the region totals
+ * book is cached, lands in "Other words". Imported words belong to their first deck, with tags as labels, so the region totals
  * add up to the learner's rows plus the book's entries that have no row.
  */
 export function summarizeRegions(input: {
@@ -82,8 +85,27 @@ export function summarizeRegions(input: {
       pages.set(page, group);
     });
   const catalogue = new Set(book?.entries.map((entry) => entry.key) ?? []);
-  const saved = rows.filter((row) => row.bookmarked && !catalogue.has(row.key));
-  const other = rows.filter((row) => !row.bookmarked && !catalogue.has(row.key));
+  const decks = new Map<string, { rows: VocabularyRow[]; tags: Set<string> }>();
+  const importedKeys = new Set<string>();
+  for (const row of rows) {
+    if (catalogue.has(row.key)) continue;
+    const context = row.contexts.find((context) => context.definition.kind === 'imported');
+    if (context?.source?.kind !== 'import' || context.definition.kind !== 'imported') continue;
+    const deck = context.source.title;
+    const group = decks.get(deck) ?? { rows: [], tags: new Set<string>() };
+    group.rows.push(row);
+    for (const entry of row.contexts)
+      if (
+        entry.source?.kind === 'import' &&
+        entry.source.id === context.source.id &&
+        entry.definition.kind === 'imported'
+      )
+        for (const tag of entry.definition.tags) group.tags.add(tag);
+    decks.set(deck, group);
+    importedKeys.add(row.key);
+  }
+  const saved = rows.filter((row) => row.bookmarked && !catalogue.has(row.key) && !importedKeys.has(row.key));
+  const other = rows.filter((row) => !row.bookmarked && !catalogue.has(row.key) && !importedKeys.has(row.key));
   return [
     ...[...pages.entries()]
       .sort(([left], [right]) => left - right)
@@ -97,6 +119,12 @@ export function summarizeRegions(input: {
           leechLapses,
         ),
       })),
+    ...[...decks].map(([deck, group]) => ({
+      id: deckRegionId(deck),
+      title: deck,
+      tags: [...group.tags],
+      counts: countsOf(group.rows, matureDays, leechLapses),
+    })),
     {
       id: SAVED_REGION_ID,
       title: SAVED_REGION_TITLE,

@@ -42,6 +42,7 @@ export interface ChallengePoolItem {
   /** The entry's gloss per app language; an entry without the challenge's language is never an option. */
   gloss: { en?: string; zh?: string };
   pos?: string;
+  deck?: string;
 }
 
 export interface ChallengeState {
@@ -222,14 +223,16 @@ interface CardContent {
   gloss: string;
   pos?: string;
   examples: string[];
+  deck?: string;
 }
 
 /**
  * The card's first sense in the app language, or a personal word's first context. The two languages are never mixed:
  * a card without a gloss in the requested language (an AI analysis without `translationEn`, say) gets an empty one,
- * so the choice kinds skip it. `pos` is only ever a hint.
+ * so the choice kinds skip it. Imported answers are user data, not bilingual glosses: use them in either locale.
+ * `pos` is only ever a hint.
  */
-function cardContent(card: ChallengeCard, lang: GlossLanguage): CardContent {
+export function cardContent(card: Pick<ChallengeCard, 'bookSource' | 'contexts'>, lang: GlossLanguage): CardContent {
   const sense = card.bookSource?.senses[0];
   const definition = card.contexts[0]?.definition;
   let contextGloss = '';
@@ -237,9 +240,17 @@ function cardContent(card: ChallengeCard, lang: GlossLanguage): CardContent {
   if (definition?.kind === 'ai') {
     contextGloss = lang === 'en' ? (definition.analysis.translationEn ?? '') : definition.analysis.translation;
     contextPos = definition.analysis.partOfSpeech.trim() || undefined;
-  } else if (definition) {
+  } else if (definition?.kind === 'reader') {
     contextGloss = definition.entry.gloss[lang];
     contextPos = definition.entry.pos;
+  }
+  if (definition?.kind === 'imported') {
+    const source = card.contexts[0].source;
+    return {
+      gloss: definition.back,
+      examples: definition.example ? [definition.example] : [],
+      deck: source?.kind === 'import' ? source.id : undefined,
+    };
   }
   return {
     gloss: sense?.gloss[lang] ?? contextGloss,
@@ -303,7 +314,8 @@ function buildRecognize(
     (item) => item.gloss[lang] ?? '',
   );
   if (!distractors.length) return undefined;
-  const options = shuffled([content.gloss, ...distractors], random);
+  const choices = content.deck !== undefined && distractors.length < 3 ? distractors.slice(0, 1) : distractors;
+  const options = shuffled([content.gloss, ...choices], random);
   return { kind: 'recognize', prompt: word, options, answerIndex: options.indexOf(content.gloss) };
 }
 
@@ -324,6 +336,7 @@ export function buildChallenge(input: {
   formsOf?: (lemma: string) => ReadonlySet<string> | undefined;
 }): Challenge | undefined {
   const content = cardContent(input.card, input.lang);
+  const pool = content.deck === undefined ? input.pool : input.pool.filter((item) => item.deck === content.deck);
   const located = content.examples
     .flatMap((example) => {
       const position = findSurfaceForm(example, input.card.word, input.formsOf);
@@ -334,9 +347,9 @@ export function buildChallenge(input: {
   const kind = kindFor({
     schedule: input.card.schedule,
     clozeFound: located !== undefined,
-    voiceAvailable: input.voiceAvailable,
+    voiceAvailable: content.deck === undefined && input.voiceAvailable,
   });
-  const meaning = () => buildRecognize(input.card.word, content, input.pool, input.lang, random);
+  const meaning = () => buildRecognize(input.card.word, content, pool, input.lang, random);
   if (kind === 'recognize') return meaning();
   if (kind === 'listen' || kind === 'produce') {
     if (!content.gloss) return meaning();
@@ -362,7 +375,7 @@ export function buildChallenge(input: {
   if (!content.gloss) return meaning();
   const answer = cleanHeadword(input.card.word);
   const distractors = pickDistractors(
-    input.pool,
+    pool,
     input.lang,
     { word: input.card.word, gloss: content.gloss, pos: content.pos },
     answer,
@@ -370,7 +383,8 @@ export function buildChallenge(input: {
     (item) => cleanHeadword(item.word),
   );
   if (!distractors.length) return meaning();
-  const options = shuffled([answer, ...distractors], random);
+  const choices = content.deck !== undefined && distractors.length < 3 ? distractors.slice(0, 1) : distractors;
+  const options = shuffled([answer, ...choices], random);
   return { ...blank, options, answerIndex: options.indexOf(answer) };
 }
 

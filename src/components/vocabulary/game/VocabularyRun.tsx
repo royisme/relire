@@ -16,6 +16,7 @@ import { getSpeechState, speechKey, stopSpeech } from '../../../utils/speech';
 import { lexiconFormsOf } from '../../../services/lexicon/load';
 import {
   buildChallenge,
+  cardContent,
   challengeSeed,
   cleanHeadword,
   gradeChoice,
@@ -89,27 +90,17 @@ export function posOf(card: {
   bookSource?: VocabularyBookSource;
   contexts: VocabularyRow['contexts'];
 }): string | undefined {
-  const definition = card.contexts[0]?.definition;
-  return (
-    card.bookSource?.senses[0]?.pos ??
-    (definition?.kind === 'ai' ? definition.analysis.partOfSpeech.trim() || undefined : definition?.entry.pos)
-  );
+  return cardContent(card, 'en').pos;
 }
 
 /** One distractor source: a card of the learner's own, with the glosses and POS VG1's pool reads. */
 function poolItemOf(row: VocabularyRow): ChallengePoolItem {
-  const sense = row.bookSource?.senses[0];
-  const definition = row.contexts[0]?.definition;
-  const contextGloss =
-    definition === undefined
-      ? {}
-      : definition.kind === 'ai'
-        ? { en: definition.analysis.translationEn, zh: definition.analysis.translation }
-        : { en: definition.entry.gloss.en, zh: definition.entry.gloss.zh };
+  const content = cardContent(row, 'en');
   return {
     word: row.word,
-    gloss: { en: sense?.gloss.en ?? contextGloss.en, zh: sense?.gloss.zh ?? contextGloss.zh },
-    pos: posOf(row),
+    gloss: { en: content.gloss, zh: cardContent(row, 'zh').gloss },
+    pos: content.pos,
+    ...(content.deck !== undefined ? { deck: content.deck } : {}),
   };
 }
 

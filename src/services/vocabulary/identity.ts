@@ -9,11 +9,9 @@ export const vocabularyKey = (word: string) => vocabularyText(word).replace(/'/g
 export const vocabularyId = (key: string) => `word:${key}`;
 export const vocabularyReaderSourceId = (readerId: string, bodyVersion: string) =>
   JSON.stringify([readerId, bodyVersion]);
-export interface VocabularySource {
-  kind: 'article' | 'unit' | 'reader';
-  id: string;
-  title: string;
-}
+export type VocabularySource =
+  | { kind: 'article' | 'unit' | 'reader'; id: string; title: string }
+  | { kind: 'import'; id: string; title: string; noteId: string };
 export interface VocabularyLookup {
   word: string;
   sentence: string;
@@ -23,6 +21,7 @@ export interface VocabularyLookup {
   binding?: TokenBinding;
 }
 export function vocabularyContextKey(lookup: Omit<VocabularyLookup, 'word' | 'binding'>): string {
+  if (lookup.source?.kind === 'import') return JSON.stringify(['import', lookup.source.id, lookup.source.noteId]);
   return JSON.stringify([
     lookup.source?.kind ?? null,
     lookup.source?.id ?? null,

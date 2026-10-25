@@ -13,6 +13,8 @@ import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
 import { testBook, testMatureSchedule, testRow } from './fixtures/vocabulary';
 import { vocabularyContextKey } from '../src/services/vocabulary/identity';
+import { prepareVocabularyImport } from '../src/services/vocabulary/import/prepare';
+import { parsePlainText } from '../src/services/vocabulary/import/plainText';
 import type { VocabularyRow, VocabularySchedule } from '../src/types/vocabulary';
 import {
   buildChallenge,
@@ -57,6 +59,24 @@ const render = (node: ReactNode) => {
     store.mockRestore();
   }
 };
+
+test('an imported row enters the real run pool with its answer and deck, and builds a challenge without reader fields', () => {
+  const notes = prepareVocabularyImport(
+    parsePlainText('chat\tcat\nchien\tdog'),
+    { front: 0, back: 1, example: null },
+    'TEST deck',
+    'en',
+    1,
+  ).notes;
+  const rows = notes.map((note) => ({ ...testRow(note.word), bookSource: undefined, contexts: [note.context] }));
+  expect(run.posOf(rows[0])).toBeUndefined();
+  const pool = run.runPool(rows);
+  expect(pool[0]).toEqual({ word: 'chat', gloss: { en: 'cat', zh: 'cat' }, pos: undefined, deck: 'TEST deck' });
+  expect(buildChallenge({ card: rows[0], pool, seed: 'TEST', lang: 'en', voiceAvailable: true })).toMatchObject({
+    kind: 'recognize',
+    options: expect.arrayContaining(['cat', 'dog']),
+  });
+});
 
 test('a chunk counts ratings from its baseline, Continue keeps the run, and a smaller size ends it at once', () => {
   const { RUN_SIZES, chunkRatings, chunkReached, continueChunk } = run;

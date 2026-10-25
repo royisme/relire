@@ -9,6 +9,9 @@ import zh from '../src/i18n/locales/zh.json';
 import type { ReactNode } from 'react';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import { VocabularyAnswer } from '../src/components/vocabulary/VocabularyAnswer';
+import { VocabularyImportResult } from '../src/components/vocabulary/VocabularyImport';
+import { prepareVocabularyImport } from '../src/services/vocabulary/import/prepare';
+import { parsePlainText } from '../src/services/vocabulary/import/plainText';
 import { testReaderDefinition, testReaderLookup } from './fixtures/vocabularyReader';
 import { VocabularyContextSchema } from '../src/types/vocabulary';
 import { Flashcard } from '../src/components/vocabulary/Flashcard';
@@ -97,6 +100,42 @@ test('Settings Words and waiting Review show the actual bounded reason before an
     expect(html).not.toContain('role="dialog"');
   }
 });
+test('import results reserve a live status slot in every state, and imported answers render without AI/reader assumptions', async () => {
+  for (const language of ['en', 'zh'] as const) {
+    await i18n.changeLanguage(language);
+    const note = prepareVocabularyImport(
+      parsePlainText('chat\tTEST cat'),
+      { front: 0, back: 1, example: null },
+      'TEST deck',
+      language,
+      1,
+    ).notes[0];
+    const row = { ...testRow('chat'), bookSource: undefined, contexts: [note.context] };
+    const answer = render(<VocabularyAnswer word={{ key: row.key, word: row.word, builtIn: false, row }} />);
+    expect(answer).toContain('TEST cat');
+    expect(answer).toContain('TEST deck');
+    expect(answer).not.toContain('undefined');
+    for (const state of [
+      { error: null, result: null, ready: null },
+      { error: 'TEST disk refused', result: null, ready: null },
+      {
+        error: null,
+        result: { imported: 2, merged: 1, rejected: [{ row: 7, reason: 'TEST missing column' }] },
+        ready: null,
+      },
+    ]) {
+      const html = render(<VocabularyImportResult {...state} />);
+      expect(html).toContain('role="status"');
+      expect(html).toContain('h-32');
+      if (state.error) expect(html).toContain(state.error);
+      if (state.result) {
+        expect(html).toContain('7');
+        expect(html).toContain('TEST missing column');
+      }
+    }
+  }
+});
+
 test('Today counts stay and keep no Words settings link or form', async () => {
   await i18n.changeLanguage('en');
   const html = render(<VocabularyHome model={model} />);
