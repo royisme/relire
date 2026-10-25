@@ -90,7 +90,7 @@ test('a service that never answers is cut off by the request timeout and reporte
         init?.signal?.addEventListener('abort', () => reject(init.signal?.reason));
       });
     fetchSpy.mockImplementation(hang as unknown as typeof fetch);
-    const pending = failure(contentServiceFetch('/v1/lexicon/form/vais'));
+    const pending = failure(contentServiceFetch('/v1/topics/test-only'));
     timeout.abort(new DOMException('The operation timed out.', 'TimeoutError'));
     const error = await pending;
     expect(error).toBeInstanceOf(ContentServiceNetworkError);

@@ -3,7 +3,6 @@ import type { D1Database, RateLimit } from '@cloudflare/workers-types';
 import { Hono } from 'hono';
 import { authorized } from './access';
 import { cached, error } from './http';
-import { lexiconResource } from './lexicon';
 import { readersResource } from './readers';
 import { topicsResource } from './topics';
 import { vocabularyResource } from './vocabulary';
@@ -64,7 +63,6 @@ app.use(async (c, next) => {
 app.on('GET', ['/v1/topics', '/v1/tag-index', '/v1/topics/*'], async (c) =>
   cached(c.req.raw, await topicsResource(new URL(c.req.url), c.env.DB)),
 );
-app.get('/v1/lexicon/*', async (c) => cached(c.req.raw, await lexiconResource(new URL(c.req.url), c.env.DB)));
 app.get('/v1/vocabulary/*', async (c) => cached(c.req.raw, await vocabularyResource(new URL(c.req.url), c.env.DB)));
 app.on('GET', ['/v1/readers', '/v1/readers/*'], async (c) =>
   cached(c.req.raw, await readersResource(new URL(c.req.url), c.env.DB)),

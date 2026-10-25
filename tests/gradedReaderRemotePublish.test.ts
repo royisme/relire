@@ -255,7 +255,7 @@ test('real local proxy publishes invented readers into a migrated disposable roo
   try {
     await mkdir(join(root, 'worker/migrations'), { recursive: true });
     await copyFile(new URL('../worker/wrangler.jsonc', import.meta.url), join(root, 'worker/wrangler.jsonc'));
-    for (const migration of ['0001_init.sql', '0002_lexicon.sql', '0003_vocabulary.sql', '0004_readers.sql'])
+    for (const migration of ['0001_init.sql', '0003_vocabulary.sql', '0004_readers.sql'])
       await copyFile(
         new URL(`../worker/migrations/${migration}`, import.meta.url),
         join(root, 'worker/migrations', migration),

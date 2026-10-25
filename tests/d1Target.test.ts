@@ -7,19 +7,10 @@ import { pathToFileURL } from 'node:url';
 import { d1ExecuteSpawn, platformProxyOptions, requireInteractiveTerminal } from '../scripts/content-service/d1Target';
 import { buildPublishSql, checkTopicPublication, publish } from '../scripts/grammar-topics/publish';
 import { topicContentHash } from '../scripts/grammar-pack/gate';
-import {
-  checkLexiconPublication,
-  formRows,
-  importLexicon,
-  lexiconStatements,
-  sourceVersion,
-} from '../scripts/lexicon/import';
-import { loadLexicon, parseAllowlist } from '../scripts/lexicon/lexicon';
 import { vocabularyMetadata } from '../src/services/vocabulary/book';
 import { handle, type Env } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
 import { workerRequest, WORKER_ACCESS_KEY } from './fixtures/workerDb';
-import { ALLOWLIST, writeMorphalouFixture } from './fixtures/morphalouCsv';
 import { testBook } from './fixtures/vocabulary';
 
 async function createLocalD1Root() {
@@ -27,7 +18,7 @@ async function createLocalD1Root() {
   const root = pathToFileURL(directory + '/');
   await mkdir(join(directory, 'worker/migrations'), { recursive: true });
   await copyFile(new URL('../worker/wrangler.jsonc', import.meta.url), new URL('worker/wrangler.jsonc', root));
-  for (const migration of ['0001_init.sql', '0002_lexicon.sql', '0003_vocabulary.sql', '0004_readers.sql'])
+  for (const migration of ['0001_init.sql', '0003_vocabulary.sql', '0004_readers.sql'])
     await copyFile(
       new URL(`../worker/migrations/${migration}`, import.meta.url),
       new URL(`worker/migrations/${migration}`, root),
@@ -264,17 +255,12 @@ async function writePublicationInputs(directory: string) {
   await Bun.write(new URL('data/grammar-topics/manifest.json', root), JSON.stringify(input.manifest));
   await Bun.write(new URL('data/grammar-topics/reviews.json', root), JSON.stringify(input.reviews));
   await Bun.write(new URL(`.local/grammar-topics/drafts-${topic.chapter}.json`, root), JSON.stringify(input.drafts));
-  const csv = join(directory, 'csv');
-  await writeMorphalouFixture(csv);
-  await Bun.write(new URL('data/lexicon/lemmas.txt', root), ALLOWLIST);
-  return { input, csv };
+  return { input };
 }
 
-test('topics and lexicon apply through real CLI and share the explicit proxy state; deleting each version makes the Worker unavailable', async () => {
-  const { input, csv } = await writePublicationInputs(directory);
+test('topics apply through real CLI and share the explicit proxy state; deleting the version makes the Worker unavailable', async () => {
+  const { input } = await writePublicationInputs(directory);
   await publish(['--apply-local'], root);
-  await importLexicon(['--apply-local'], { MORPHALOU_DIR: csv }, root);
-  const lexicon = await loadLexicon(csv, new Set(parseAllowlist(ALLOWLIST)));
   const { getPlatformProxy } = await import(new URL('worker/node_modules/wrangler/wrangler-dist/cli.js', root).href);
   const proxy: { env: Pick<Env, 'DB'>; dispose(): Promise<void> } = await getPlatformProxy(
     platformProxyOptions(root, false),
@@ -287,88 +273,57 @@ test('topics and lexicon apply through real CLI and share the explicit proxy sta
     expect(await db.prepare('SELECT body FROM topics').first('body')).toBe(
       JSON.stringify(buildPublishSql(input).pack.topics[0]),
     );
-    expect(await db.prepare("SELECT value FROM meta WHERE key = 'lexiconVersion'").first('value')).toBe(
-      await sourceVersion(csv),
-    );
-    expect(await db.prepare('SELECT COUNT(*) AS n FROM lexicon_entries').first('n')).toBe(lexicon.size);
-    expect(await db.prepare('SELECT COUNT(*) AS n FROM lexicon_forms').first('n')).toBe(formRows(lexicon).length);
     await db.prepare(buildPublishSql(input).sql.split('\n')[0]).run();
-    await db.prepare([...lexiconStatements(lexicon, 'TEST')][0]).run();
-    for (const path of ['/v1/topics', '/v1/lexicon/form/testmarche']) {
-      const response = await handle(workerRequest('https://content.test' + path), {
-        DB: db,
-        ALLOWED_ORIGINS: '',
-        ACCESS_KEYS: WORKER_ACCESS_KEY,
-      });
-      expect(response.status).toBe(500);
-      expect(await response.json()).toEqual({ error: 'unavailable' });
-    }
+    const response = await handle(workerRequest('https://content.test/v1/topics'), {
+      DB: db,
+      ALLOWED_ORIGINS: '',
+      ACCESS_KEYS: WORKER_ACCESS_KEY,
+    });
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: 'unavailable' });
   } finally {
     await proxy.dispose();
   }
 }, 30_000);
 
 test('read-only checks pass real local applies and reject tampered metadata without printing database output', async () => {
-  const { input, csv } = await writePublicationInputs(directory);
+  const { input } = await writePublicationInputs(directory);
   const expectedTopics = buildPublishSql(input);
-  const lexicon = await loadLexicon(csv, new Set(parseAllowlist(ALLOWLIST)));
-  const expectedLexicon = { version: await sourceVersion(csv), entries: lexicon.size, forms: formRows(lexicon).length };
   await publish(['--apply-local'], root);
-  await importLexicon(['--apply-local'], { MORPHALOU_DIR: csv }, root);
   const log = spyOn(console, 'log').mockImplementation(() => {});
   const error = spyOn(console, 'error').mockImplementation(() => {});
   try {
     await checkTopicPublication(root, false, expectedTopics);
-    await checkLexiconPublication(root, false, expectedLexicon);
     for (const tamper of [
-      { sql: "UPDATE topics SET content_hash = 'TEST-changed-hash'", kind: 'topics' },
-      { sql: 'DELETE FROM topics', kind: 'topics' },
-      { sql: 'UPDATE topics SET position = position + 1', kind: 'topics' },
-      { sql: "UPDATE topics SET body = body || ' '", kind: 'topics' },
-      { sql: "UPDATE meta SET value = 'TEST-private-version' WHERE key = 'packVersion'", kind: 'topics' },
-      { sql: "UPDATE meta SET value = 'TEST-private-version' WHERE key = 'lexiconVersion'", kind: 'lexicon' },
-      { sql: 'DELETE FROM lexicon_forms WHERE rowid IN (SELECT rowid FROM lexicon_forms LIMIT 1)', kind: 'lexicon' },
-      {
-        sql: 'DELETE FROM lexicon_entries WHERE rowid IN (SELECT rowid FROM lexicon_entries LIMIT 1)',
-        kind: 'lexicon',
-      },
+      "UPDATE topics SET content_hash = 'TEST-changed-hash'",
+      'DELETE FROM topics',
+      'UPDATE topics SET position = position + 1',
+      "UPDATE topics SET body = body || ' '",
+      "UPDATE meta SET value = 'TEST-private-version' WHERE key = 'packVersion'",
     ]) {
       const child = Bun.spawnSync({
-        ...d1ExecuteSpawn(root, false, 'd1', 'execute', 'DB', '--command', tamper.sql),
+        ...d1ExecuteSpawn(root, false, 'd1', 'execute', 'DB', '--command', tamper),
         stdin: 'ignore',
         stdout: 'pipe',
         stderr: 'pipe',
       });
       expect(child.exitCode).toBe(0);
       expect(child.stderr.toString()).toBe('');
-      const check =
-        tamper.kind === 'topics'
-          ? checkTopicPublication(root, false, expectedTopics)
-          : checkLexiconPublication(root, false, expectedLexicon);
       expect(
-        await check.then(
+        await checkTopicPublication(root, false, expectedTopics).then(
           () => 'resolved',
           (failure: Error) => failure.message,
         ),
-      ).toBe(
-        tamper.kind === 'topics' ? 'Topic publication read-only check failed' : 'Lexicon import read-only check failed',
-      );
-      const diagnostics = await Bun.file(
-        new URL(
-          tamper.kind === 'topics' ? '.pi-runs/grammar-topics/check-failure.log' : '.pi-runs/lexicon/check-failure.log',
-          root,
-        ),
-      ).text();
+      ).toBe('Topic publication read-only check failed');
+      const diagnostics = await Bun.file(new URL('.pi-runs/grammar-topics/check-failure.log', root)).text();
       expect(diagnostics).toContain('"actual":');
       expect(diagnostics).not.toContain(input.drafts[0].title.en);
       expect(diagnostics).not.toContain('TEST-private-version');
       expect(diagnostics).not.toContain('"body"');
-      expect(diagnostics).not.toContain('"data"');
       expect(log.mock.calls).toEqual([]);
       expect(error.mock.calls).toEqual([]);
-      // Restore each target independently so every corruption is the sole cause of refusal.
-      if (tamper.kind === 'topics') await publish(['--apply-local'], root);
-      if (tamper.kind === 'lexicon') await importLexicon(['--apply-local'], { MORPHALOU_DIR: csv }, root);
+      // Restore the target so every corruption is the sole cause of refusal.
+      await publish(['--apply-local'], root);
       log.mockClear();
       error.mockClear();
     }
@@ -390,7 +345,6 @@ test('real CLI failures stay in rooted private logs, never inherited stdout/stde
     );
     try {
       await proxy.env.DB.prepare('DROP TABLE topics').run();
-      await proxy.env.DB.prepare('DROP TABLE lexicon_entries').run();
     } finally {
       await proxy.dispose();
     }
@@ -400,22 +354,12 @@ test('real CLI failures stay in rooted private logs, never inherited stdout/stde
         (error: Error) => error.message,
       ),
     ).toContain('Local D1 publish failed');
-    expect(
-      await importLexicon(['--apply-local'], { MORPHALOU_DIR: join(directory, 'csv') }, root).then(
-        () => 'resolved',
-        (error: Error) => error.message,
-      ),
-    ).toContain('Local D1 import failed');
     expect(await Bun.file(new URL('.pi-runs/grammar-topics/failure.log', root)).text()).toContain(
       'no such table: topics',
-    );
-    expect(await Bun.file(new URL('.pi-runs/lexicon/failure.log', root)).text()).toContain(
-      'no such table: lexicon_entries',
     );
     expect(log.mock.calls).toEqual([]);
     expect(error.mock.calls).toEqual([
       ['Topic publication failed; private diagnostics in .pi-runs/grammar-topics/failure.log'],
-      ['Lexicon import failed; private diagnostics in .pi-runs/lexicon/failure.log'],
     ]);
   } finally {
     log.mockRestore();

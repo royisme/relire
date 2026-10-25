@@ -200,11 +200,10 @@ describe('reader routes', () => {
     expect(await limited.json()).toEqual({ error: 'rate-limited' });
   });
 
-  test('topics, tag index, lexicon and vocabulary routes are unaffected', async () => {
+  test('topics, tag index and vocabulary routes are unaffected', async () => {
     publish([readerFixture()]);
     expect(await (await request('/v1/topics')).json()).toEqual([]);
     expect(await (await request('/v1/tag-index')).json()).toEqual({});
-    expect((await request('/v1/lexicon/test-absent')).status).toBe(404);
     expect((await request('/v1/vocabulary/tcf-7000?page=0')).status).toBe(404);
     expect((await request('/v1/readers-other')).status).toBe(404);
   });

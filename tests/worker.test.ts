@@ -165,8 +165,6 @@ describe('access keys', () => {
       '/v1/topics',
       '/v1/topics/test-only',
       '/v1/tag-index',
-      '/v1/lexicon/testmarcher',
-      '/v1/lexicon/form/testmarche',
       '/v1/vocabulary/tcf-7000?page=0',
       '/v1/readers',
       `/v1/readers/test-book?version=${'a'.repeat(64)}`,

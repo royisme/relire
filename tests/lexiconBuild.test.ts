@@ -5,8 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { buildBundle, buildLexicon, CHANGES, validateBundle } from '../scripts/lexicon/build';
-import { sourceVersion } from '../scripts/lexicon/import';
-import { entryRow, loadLexicon, parseAllowlist, type Lexicon } from '../scripts/lexicon/lexicon';
+import { entryRow, loadLexicon, parseAllowlist, sourceVersion, type Lexicon } from '../scripts/lexicon/lexicon';
 import { LexiconEntrySchema, type LexiconBundle } from '../src/types/lexicon';
 import { ALLOWLIST, writeMorphalouFixture } from './fixtures/morphalouCsv';
 
