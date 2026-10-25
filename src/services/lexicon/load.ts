@@ -43,6 +43,8 @@ function indexBundle(bundle: LexiconBundle): BundledLexicon {
 }
 
 let loaded: Promise<BundledLexicon> | undefined;
+/** The form map read the other way (lemma → its forms), inverted once per session beside the bundle it came from. */
+let inverted: Promise<Map<string, ReadonlySet<string>>> | undefined;
 
 /** The whole file, fetched and validated once per session; one shared in-flight promise, and a failure does not stick. */
 function bundledLexicon(): Promise<BundledLexicon> {
@@ -63,6 +65,7 @@ function bundledLexicon(): Promise<BundledLexicon> {
 /** Only for isolated loader tests; application callers share the session's copy. */
 export function resetLexiconForTests(): void {
   loaded = undefined;
+  inverted = undefined;
 }
 
 /** The lemmas a written form belongs to; the token is folded like the pack lookup's keys. */
@@ -81,4 +84,29 @@ export async function lexiconLemma(lemma: string): Promise<LexiconLemmaResponse 
   const entries = bundle.byLemma.get(key);
   if (!entries) return undefined;
   return { lemma: key, entries, source: bundle.source };
+}
+
+/**
+ * Every written form of one lemma (the key folded like the file's own), or undefined for a lemma the lexicon does
+ * not hold. The answer the cloze finder wants (`findSurfaceForm`'s `formsOf`); the inversion is built once per
+ * session, and a load failure drops it together with the loader's own state so the next call retries both.
+ */
+export async function lexiconFormsOf(lemma: string): Promise<ReadonlySet<string> | undefined> {
+  if (!inverted) {
+    inverted = bundledLexicon().then(({ byForm }) => {
+      const formsByLemma = new Map<string, Set<string>>();
+      for (const [form, lemmas] of byForm)
+        for (const [entry] of lemmas) {
+          const forms = formsByLemma.get(entry);
+          if (forms) forms.add(form);
+          else formsByLemma.set(entry, new Set([form]));
+        }
+      return formsByLemma;
+    });
+    // A failed fetch never installs a half-built index; the next caller re-inverts after the retry.
+    void inverted.then(undefined, () => {
+      inverted = undefined;
+    });
+  }
+  return (await inverted).get(normalizeLookupToken(lemma));
 }

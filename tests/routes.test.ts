@@ -7,6 +7,7 @@ import {
   routeHref,
   SETTINGS_SECTIONS,
   STUDY_TABS,
+  vocabularyPlaceOf,
   worksWithoutKey,
   type Route,
 } from '../src/utils/routes';
@@ -129,7 +130,17 @@ test('Grammar is separate from My study and local references/exercises survive s
   for (const tab of STUDY_TABS) roundTrip({ name: 'study', tab });
   roundTrip({ name: 'wordsAll' });
   roundTrip({ name: 'wordsReview' });
+  roundTrip({ name: 'wordsPlay' });
+  expect(routeHref({ name: 'wordsPlay' })).toBe('#/study/words/play');
+  expect(areaOf({ name: 'wordsPlay' })).toBe('study');
+  expect(vocabularyPlaceOf({ name: 'wordsPlay' })).toBe('play');
+  expect(vocabularyPlaceOf({ name: 'wordsReview' })).toBe('review');
+  expect(vocabularyPlaceOf({ name: 'wordsAll' })).toBe('all');
+  expect(vocabularyPlaceOf({ name: 'study', tab: 'words' })).toBe('today');
   expect(parse('#/study').canonical).toBe('#/study/words');
+  // The run keeps its own address, and a third segment outside the four known ones is still unknown.
+  for (const hash of ['#/study/words/reviewx', '#/study/words/Play', '#/study/words/all/x'])
+    expect(parse(hash).route.name).toBe('notFound');
   roundTrip({ name: 'grammar' });
   roundTrip({ name: 'grammar', tag: 'articles' });
   expect(areaOf({ name: 'grammarTopic', topicId: 'topic' })).toBe('grammar');
