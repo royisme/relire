@@ -158,6 +158,7 @@ You are the implementer for one task in Relire, working in the git worktree <wor
 - Never write, print or commit an API key, token or credential. Do not read .env files or ~/.pi, ~/.gemini, ~/.config credentials.
 - Never invent data: no sample stats, fake scores or fallback AI answers. Empty means empty; failures show the real error.
 - Nothing has shipped: write no backward-compatibility, legacy-fallback or migration code for unreleased states, and no defensive code for cases that cannot happen. Add an abstraction only when a second real caller exists. When unsure, take the smaller change and report the question instead of building options.
+- No complexity for a speculative or very unlikely race or security edge case (extra locks, guards, capture-phase listeners, retries, sanitising of trusted data): if you think one is needed, do not add it; stop and report the concrete failure, how likely it is and what the code would cost, and let the owner decide (docs/conventions.md, Code style). Do not widen scope for theoretical robustness.
 - AI calls go through src/services/ai; prompt wording lives in template files, never in TypeScript.
 - Comments and commit messages in English; commit messages are `type(scope): summary` (feat, fix, docs, chore, refactor, test). Chinese only in zh.json and *.zh.txt prompts.
 - A change a user could notice gets one line in CHANGELOG.md (Unreleased) in the same commit.
