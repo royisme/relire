@@ -84,29 +84,32 @@ function unzipCollection(bytes: Uint8Array) {
   }
 }
 
-async function decodeCollection(bytes: Uint8Array) {
-  const { decompress } = await import('fzstd');
+export async function decodeCollection(bytes: Uint8Array, maxBytes = MAX_DATABASE_BYTES): Promise<Uint8Array> {
+  const { Decompress } = await import('fzstd');
   try {
-    // A fixed output buffer also bounds concatenated frames and a frame that lies about its content size.
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    if (view.getUint32(0, true) !== 0xfd2fb528) return decompress(bytes, new Uint8Array(0));
-    const descriptor = view.getUint8(4);
-    const single = (descriptor & 32) !== 0;
-    const flag = descriptor >> 6;
-    const sizeBytes = flag ? 1 << flag : single ? 1 : 0;
-    if (!sizeBytes) throw new ImportRefusal({ key: 'vocab.import.errors.unknownDatabaseSize' });
-    const dictionary = descriptor & 3;
-    const offset = 5 + (single ? 0 : 1) + (dictionary === 3 ? 4 : dictionary);
-    const size = Array.from({ length: sizeBytes }, (_, i) => BigInt(view.getUint8(offset + i))).reduce(
-      (total, byte, i) => total + (byte << BigInt(8 * i)),
-      flag === 1 ? 256n : 0n,
-    );
-    if (size > BigInt(MAX_DATABASE_BYTES))
-      throw new ImportRefusal({
-        key: 'vocab.import.errors.databaseTooLarge',
-        params: { size: MAX_DATABASE_BYTES / 1024 / 1024 },
-      });
-    return decompress(bytes, new Uint8Array(Number(size)));
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    const stream = new Decompress((chunk) => {
+      size += chunk.byteLength;
+      // Throw inside the synchronous callback to stop decoding before retaining any excess output.
+      if (size > maxBytes)
+        throw new ImportRefusal({
+          key: 'vocab.import.errors.databaseTooLarge',
+          params: { size: maxBytes / 1024 / 1024 },
+        });
+      chunks.push(chunk);
+    });
+    const chunkSize = 1024 * 1024;
+    for (let offset = 0; offset < bytes.byteLength; offset += chunkSize)
+      stream.push(bytes.subarray(offset, offset + chunkSize));
+    stream.push(new Uint8Array(0), true);
+    const output = new Uint8Array(size);
+    let offset = 0;
+    for (const chunk of chunks) {
+      output.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    return output;
   } catch (error) {
     if (error instanceof ImportRefusal) throw error;
     throw new Error(t('vocab.import.apkg.zstd', { reason: errorMessage(error) }));

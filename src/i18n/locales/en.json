@@ -385,7 +385,6 @@
         "textTooLarge": "The text file exceeds the {{size}} MiB limit.",
         "tooManyRows": "The text file exceeds the {{rows}} note limit.",
         "databaseTooLarge": "The expanded collection exceeds the {{size}} MiB database limit.",
-        "unknownDatabaseSize": "The Zstandard collection does not declare its expanded size. Export it again with a declared content size.",
         "separator": "Unsupported separator: {{name}}",
         "columnHeader": "Invalid column header: {{line}}",
         "unclosedQuote": "Unclosed quoted field",

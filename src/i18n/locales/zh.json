@@ -385,7 +385,6 @@
         "textTooLarge": "文本文件超过了 {{size}} MiB 的大小上限。",
         "tooManyRows": "文本文件超过了 {{rows}} 条笔记的上限。",
         "databaseTooLarge": "卡包数据库解压后超过了 {{size}} MiB 的大小上限。",
-        "unknownDatabaseSize": "此 Zstandard 数据库未标明解压后的大小。请重新导出，并包含原始内容大小。",
         "separator": "不支持此分隔符：{{name}}",
         "columnHeader": "列标头无效：{{line}}",
         "unclosedQuote": "字段的引号未闭合",

@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { MAX_DATABASE_BYTES, readApkg } from '../src/services/vocabulary/import/apkg';
+import { decodeCollection, MAX_DATABASE_BYTES, readApkg } from '../src/services/vocabulary/import/apkg';
 import {
   MAX_TEXT_BYTES,
   MAX_TEXT_ROWS,
@@ -7,8 +7,9 @@ import {
   readPlainTextFile,
 } from '../src/services/vocabulary/import/plainText';
 import { ImportRefusal } from '../src/services/vocabulary/import/refusal';
-import { fixturePackage, rawZstd } from './fixtures/apkg';
+import { rawZstd } from './fixtures/apkg';
 import { failure } from './fixtures/storage';
+import { streamingZeros } from './fixtures/streamZstd';
 
 /** Empty stored entry with a deliberately oversized declared expansion; no large allocation in the fixture. */
 function declaredZip(name: string, originalSize: number) {
@@ -42,21 +43,42 @@ test('every collection ZIP entry is refused by declared original size before inf
   }
 });
 
-test('Zstandard 4/8-byte content sizes are bounded before decoding or allocating output', async () => {
-  for (const flag of [2, 3]) {
-    const frame = new Uint8Array(16);
-    frame.set([0x28, 0xb5, 0x2f, 0xfd, (flag << 6) | 32]);
-    new DataView(frame.buffer).setBigUint64(5, BigInt(MAX_DATABASE_BYTES) + 1n, true);
-    const error = await failure(readApkg(fixturePackage(frame, 'collection.anki21b')));
-    expect(error).toBeInstanceOf(ImportRefusal);
-    expect(error).toMatchObject({
-      problem: { key: 'vocab.import.errors.databaseTooLarge' },
-    });
-  }
-  const unknown = rawZstd(new Uint8Array());
-  unknown[4] = 0;
-  expect(await failure(readApkg(fixturePackage(unknown, 'collection.anki21b')))).toMatchObject({
-    problem: { key: 'vocab.import.errors.unknownDatabaseSize' },
+test('streaming Zstandard caps actual output and stops before decoding a corrupt remainder', async () => {
+  expect(streamingZeros[4] & 0xe0).toBe(0); // No content-size flag or single-segment size.
+  expect((await decodeCollection(streamingZeros)).byteLength).toBe(8 * 1024 * 1024);
+  const maxBytes = 128 * 1024;
+  // Only two blocks are present: without the cap, decoding would continue and throw unexpected EOF.
+  const truncated = streamingZeros.subarray(0, 25);
+  expect(await failure(decodeCollection(truncated))).toMatchObject({
+    message: expect.stringContaining('unexpected EOF'),
+  });
+  const error = await failure(decodeCollection(truncated, maxBytes));
+  expect(error).toBeInstanceOf(ImportRefusal);
+  expect(error).toMatchObject({
+    problem: { key: 'vocab.import.errors.databaseTooLarge', params: { size: 0.125 } },
+  });
+  expect(await failure(decodeCollection(streamingZeros, maxBytes))).toMatchObject({
+    problem: { key: 'vocab.import.errors.databaseTooLarge' },
+  });
+});
+
+test('a Zstandard frame that understates its content size cannot bypass the output cap', async () => {
+  const frame = rawZstd(new Uint8Array(64));
+  new DataView(frame.buffer).setUint32(5, 16, true);
+  expect(await failure(decodeCollection(frame, 32))).toMatchObject({
+    problem: { key: 'vocab.import.errors.databaseTooLarge' },
+  });
+});
+
+test('Zstandard cap counts concatenated frames and allows exactly the limit across input chunks', async () => {
+  const data = new Uint8Array(128 * 1024).fill(42);
+  const frame = rawZstd(data);
+  const frames = new Uint8Array(frame.length * 9);
+  for (let offset = 0; offset < frames.length; offset += frame.length) frames.set(frame, offset);
+  const maxBytes = data.length * 9;
+  expect(await decodeCollection(frames, maxBytes)).toEqual(new Uint8Array(maxBytes).fill(42));
+  expect(await failure(decodeCollection(frames, maxBytes - 1))).toMatchObject({
+    problem: { key: 'vocab.import.errors.databaseTooLarge' },
   });
 });
 
