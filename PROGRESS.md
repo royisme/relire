@@ -4,6 +4,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+- 2026-10-25, P3 built: README.md and README.zh-CN.md now name the real providers once (text, speech, scoring), cover Today, graded readers, Words, Grammar, Mistakes, Speaking with Recordings, Listening, Writing and Progress, drop the stale word-sheet conjugation caption and the Gemini-only offline and key claims, and `PRODUCT.md` First run describes the keyless guide. Docs only; review pending. **Unverified:** the screenshots under `docs/media/` predate the current navigation and show an AI-written conjugation table (left for P6).
 - 2026-10-25, P5 built: Dialog wraps Base UI; Sheet and Drawer share initial/restored focus, Tab containment and counted scroll locking; Escape stays topmost-only. Static/build/shape checks pass, detector `[]`; built and tested (unit 2611 pass; the five static-render tests now render the dialog content without the Base UI portal; `e2e/overlay-focus.spec.ts` typechecked, never run). Browser/visual acceptance unverified.
 
 ## 2026-10-25: F1 fonts bundled
