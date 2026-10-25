@@ -163,7 +163,7 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | P2 | Wordbook review label from the manifest | never "reviewed" for the unreviewed state | not started |
 | P3 | README factual fix (both languages) and the stale `PRODUCT.md` First run line | providers, privacy incl. content service and the font change from F1, missing areas, stale caption | not started |
 | P4 | Copy pass (about 15 strings, en and zh) | keys kept, `i18n:check`, the lead reads every zh line | ready (B2: Key) |
-| P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | ready (B3 yes) |
+| P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | built and tested (unit 2611 pass; e2e spec typechecked, never run) |
 | P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | last; ready (Q1, Q2, Q9, Q10, Q12 yes; Q8 draft needs the owner's voice before the README ships) |
 
 ### Content (paused by the owner's priority)

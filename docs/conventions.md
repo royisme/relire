@@ -22,7 +22,7 @@ Technical documentation, code comments, commit messages and PR text are in Engli
 
 Use a shadcn/ui component (Base UI) first: `bunx shadcn@latest add <name>`. Generated files live in `src/components/ui/` and are edited only to fit our tokens. Write a custom component only when no library component exists. Data tables compose `ui/table` with `@tanstack/react-table` at the page that needs them, not through a shared DataTable abstraction. Existing hand-written components are not migrated by this setup. Owner decision 2026-10-18.
 
-Kept hand-written on purpose (owner decision 2026-10-22, issue #22): `overlay` (`Dialog`, `Sheet`, `Drawer`), `segmented`, `menu-button`. They work and their behaviour is pinned by the specs, so replacing them would change how they feel for no gain. A library equivalent exists for each; use it only if one of these has to be rewritten anyway. New components still follow the rule above.
+Kept hand-written on purpose: `Sheet`, `Drawer`, `segmented`, `menu-button` (owner decision 2026-10-25, B3; updates the 2026-10-22 exception in issue #22). `Dialog` now wraps the Base UI dialog for modal accessibility; Sheet and Drawer keep their hand-written panels with focus containment and scroll locking. A library equivalent exists for each remaining hand-written component; use it only if one has to be rewritten anyway. New components still follow the rule above.
 
 ## Controls never move the page
 

@@ -4,6 +4,8 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+- 2026-10-25, P5 built: Dialog wraps Base UI; Sheet and Drawer share initial/restored focus, Tab containment and counted scroll locking; Escape stays topmost-only. Static/build/shape checks pass, detector `[]`; built and tested (unit 2611 pass; the five static-render tests now render the dialog content without the Base UI portal; `e2e/overlay-focus.spec.ts` typechecked, never run). Browser/visual acceptance unverified.
+
 ## 2026-10-25: Recordings out of the sidebar
 
 - Owner decision: Recordings is a function of Speaking, not a menu entry. Speaking's only sidebar child is Read aloud; Recordings opens from the Speaking page link and the reader's "All recordings", at the same route, and Speaking stays the highlighted area there. Tests pending (nav tests expect two Speaking children). **Unverified:** no browser.

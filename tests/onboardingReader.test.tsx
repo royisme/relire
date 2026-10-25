@@ -11,6 +11,7 @@ import { OnboardingDialog } from '../src/components/OnboardingDialog';
 import * as api from '../src/services/api';
 import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
+import { dialogBody } from './fixtures/dialogBody';
 
 const syllabus = (bundledCount: number) => ({
   stages: [1, 2, 3].map((order) => ({
@@ -92,10 +93,12 @@ function renderSteps(props: Parameters<typeof OnboardingDialog>[0] = { onClose: 
     resources: { en: { translation: en }, zh: { translation: zh } },
     initAsync: false,
   });
+  // The Dialog portals on the client only, so its content is rendered without the wrapper.
+  const Body = dialogBody(OnboardingDialog, props);
   const html = () =>
     renderToStaticMarkup(
       <I18nextProvider i18n={instance}>
-        <OnboardingDialog {...props} />
+        <Body />
       </I18nextProvider>,
     );
   return { step, html, restore: () => state.mockRestore() };
