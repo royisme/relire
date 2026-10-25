@@ -113,6 +113,14 @@ Morphalou is open data (LGPL-LR; no permission needed). The selected lexicon is 
 | LB2 | Client: bundled loader behind `lexiconForm`/`lexiconLemma`, gating on the service removed, attribution always shown, PWA precache, About and CHANGELOG text | all checks exit 0; lexicon works with the service off; the owner checks first-lookup time on a phone | landed (`f4ee290` merged); the loader fetches the committed file once (10 s bound, shared promise, retry after failure), gating on the service removed, the asset precached (limit 3 to 4 MiB for the 3,092,981-byte file, listed in `sw.js`); all checks exit 0 (2,430 tests); first-lookup time on a phone and the unrun e2e edits are the owner's to check |
 | LB3 | Remove the server side: Worker route, D1 tables, `import.ts` and its tests, e2e fixtures, docs | Worker typecheck, full suite and CI checks exit 0; no reference to the lexicon routes or tables outside history | landed (`3ecaed6` merged); the removal grep over `src worker scripts tests e2e .github package.json` is empty; all checks exit 0 (2,403 tests); docs updated by the lead; the diffs of LB1 to LB3 still need a review |
 
+### Next: learning games (owner go-ahead 2026-10-24; study `docs/learning-games-plan.md`, plan `docs/le-ou-la-plan.md`)
+
+A prototype with kill criteria: does a one-card, single-key round with the miss returning help more than the eight-row gender sheet? The owner uses it for a week; no analytics. Other concepts (J'entends, Paquet de verbes, Dictée en tuiles, Trois minutes) wait for the result and for the study's six open questions (defaults taken: no FSRS writes, a set per round, Today untouched).
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| LG1 | Le ou la: pure deck, `GenderGame`, the "Play a round" entry on Grammar → Gender, `nounGender.game.*` strings, deck and round tests | all checks exit 0 in the main checkout; first answer only written; a returning card writes nothing | landed (`ac7e89b` merged by deepseek-flash, about 0.5 CNY); 2,415 tests; diff review pending; look at 360 px, themes and real keys is the owner's |
+
 ### Content (paused by the owner's priority)
 
 Stages 1 to 3 have private drafts with AI review records (not human review). Stages 4 to 12 are not written; stage 4 has an unreviewed draft. Resume after the platform: R0-7 for stages 4 to 5, R2 for 6 to 12, a human language review before any real beginner uses the readers.

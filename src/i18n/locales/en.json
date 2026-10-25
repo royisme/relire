@@ -1120,6 +1120,23 @@
     "exceptions": "Exceptions in the A1 sample:",
     "ruleLine": "{{rule}} ({{percent}}% of {{n}} dictionary nouns). A tendency, not the word’s gender.",
     "exception": "This noun is a reviewed A1 exception to that ending tendency.",
+    "game": {
+      "title": "Le ou la",
+      "play": "Play a round",
+      "endRound": "End round",
+      "le": "le",
+      "la": "la",
+      "next": "Next",
+      "right": "Right",
+      "notQuite": "Not quite",
+      "counter": "{{right}} of {{total}}",
+      "summary": "{{total}} nouns, {{right}} right on the first try",
+      "chance": "With two choices, guessing alone gets about half right.",
+      "mistakes": "Open Mistakes",
+      "playAgain": "Play again",
+      "back": "Back",
+      "saving": "Saving the round…"
+    },
     "rules": {
       "tion": "Ending -tion: usually feminine",
       "sion": "Ending -sion: usually feminine",

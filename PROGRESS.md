@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-24: LG1 landed (Le ou la, a noun-gender round prototype)
+
+- Grammar → Gender gets a "Play a round" button that swaps the page body in place for `GenderGame`: a saved twelve-noun `GENDER_CHECK` unit, one bare lemma at a time, `1`/`←` for le and `2`/`→` for la, a fixed feedback slot with the ending tendency or the exception, Next, and an end line with first-try counts and the plain note that guessing between two options gets about half right. The pure deck (`src/services/nounGender/deck.ts`) sends a miss to the end of the queue; only each card's first answer is written through `checkItem` (a returning card writes nothing, never Redo, no FSRS write, as the study recommends). Worker: deepseek-flash (`ac7e89b`, about 0.5 CNY, 12 new tests).
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,415), Worker typecheck, build, detector `[]`. **Unverified:** the look at 360 px and in the themes, real keyboard use, how a round abandoned mid-way looks in Grammar → Exercises; the diff has not been reviewed (codex quota). The owner's week of use decides whether it stays (kill criteria in `docs/le-ou-la-plan.md`).
+
 ## 2026-10-24: LB3 landed; the lexicon is fully out of the service
 
 - Removed: `worker/src/lexicon.ts` and its routes, `worker/migrations/0002_lexicon.sql` (the numbering keeps a gap, nothing is deployed), `scripts/lexicon/import.ts` and its remote-apply protocol (`sourceVersion` moved to `scripts/lexicon/lexicon.ts`), the Worker lexicon tests and the lexicon parts of the D1 target and publisher tests. The Worker holds topics, the wordbook and readers. Worker: deepseek-flash (`3ecaed6`, about 0.4 CNY). Docs updated by the lead: `worker/README.md` (no day 2; one-day first deployment), ADR amendment 5, `docs/d-remote-plan.md` note, `AGENTS.md`, `PRODUCT.md`, `docs/architecture.md`, `docs/roadmap.md`, `docs/grammar-pack.md`, `docs/development.md`.
