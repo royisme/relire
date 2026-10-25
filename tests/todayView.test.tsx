@@ -61,7 +61,7 @@ for (const language of ['en', 'zh']) {
     expect(html).toContain(i18n.t('today.steps.progress', { done: 2, total: 5 }));
     expect(rows).toHaveLength(5);
     const expected = [
-      ['#/words', i18n.t('today.words.status', { due: 2, newAvailable: 1 })],
+      ['#/words/review', i18n.t('today.words.status', { due: 2, newAvailable: 1 })],
       [`#/read/graded/test-reader?version=${version}`, i18n.t('today.read.continue', { order: 4 })],
       ['#/speaking', i18n.t('today.sound.status')],
       ['#/study/mistakes', i18n.t('today.mistakes.status', { count: 2 })],
@@ -97,7 +97,7 @@ for (const language of ['en', 'zh']) {
     const html = render({ steps: [step], allDone: false, nextIndex: 0, doneCount: 0, counts: {} });
     const action = links(items(html)[0]!)[0];
     expect(action).toContain(`>${i18n.t(`today.${step.id}.action`)}</a>`);
-    if (step.id === 'words') expect(action).toContain('href="#/words"');
+    if (step.id === 'words') expect(action).toContain('href="#/words/review"');
     expect(html).toContain(i18n.t(`today.${step.id}.why`));
   });
 
