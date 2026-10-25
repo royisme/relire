@@ -153,17 +153,18 @@ Owner-gated and not in N0 to N3: G1 (Today shows days to the exam), G2 (an exam 
 
 ### Word Atlas learnings
 
-Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Word Atlas: six slice analyses, a consolidation and an Opus review, 2026-10-25). We take presentation and process, not mechanics. Dispatch only after the owner answers the grouped decisions in that file.
+Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Word Atlas: six slice analyses, a consolidation and an Opus review, 2026-10-25). We take presentation and process, not mechanics. Owner answered 2026-10-25: all recommended defaults accepted, except B4 (Google Fonts), which became F1 below because of the legal risk of runtime requests to Google.
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| P1 | Words Overview: one filled action whose label follows the real queue (counts from `wordsInput`; fixes the bare-allowance count; drops the duplicate Map button) | states A, B, C, C0 and loading; Overview count equals Today's; one filled control at most; fixed-height slot; en and zh | waiting for the owner (B1) |
-| P1b | Time estimate from the learner's own history (5b item 1 rule) | median within-session gap, at least 30 gaps, range or omitted | waiting for the owner (Q4) |
+| F1 | Google Fonts: legal review, then stop requesting fonts from Google (app and both marketing pages); remedy chosen from the review | no request to fonts.googleapis.com or fonts.gstatic.com anywhere; fonts work offline; OFL notices shipped; README privacy text true | legal review running |
+| P1 | Words Overview: one filled action whose label follows the real queue (counts from `wordsInput`; fixes the bare-allowance count; drops the duplicate Map button) | states A, B, C, C0 and loading; Overview count equals Today's; one filled control at most; fixed-height slot; en and zh | ready (B1 yes) |
+| P1b | Time estimate from the learner's own history (5b item 1 rule) | median within-session gap, at least 30 gaps, range or omitted | ready (Q4 yes) |
 | P2 | Wordbook review label from the manifest | never "reviewed" for the unreviewed state | not started |
-| P3 | README factual fix (both languages) and the stale `PRODUCT.md` First run line | providers, privacy incl. content service and Google Fonts, missing areas, stale caption | not started |
-| P4 | Copy pass (about 15 strings, en and zh) | keys kept, `i18n:check`, the lead reads every zh line | waiting for the owner (B2) |
-| P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | waiting for the owner (B3) |
-| P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | last; waiting for the owner (Q1, Q2, Q8 to Q10, Q12) |
+| P3 | README factual fix (both languages) and the stale `PRODUCT.md` First run line | providers, privacy incl. content service and the font change from F1, missing areas, stale caption | not started |
+| P4 | Copy pass (about 15 strings, en and zh) | keys kept, `i18n:check`, the lead reads every zh line | ready (B2: Key) |
+| P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | ready (B3 yes) |
+| P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | last; ready (Q1, Q2, Q9, Q10, Q12 yes; Q8 draft needs the owner's voice before the README ships) |
 
 ### Content (paused by the owner's priority)
 
