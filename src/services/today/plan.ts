@@ -5,6 +5,8 @@ export type TodayStepId = 'words' | 'read' | 'sound' | 'mistakes' | 'grammar';
 export interface TodayWords {
   due: number;
   newAvailable: number;
+  /** The next moment a scheduled card, of any phase, becomes studyable after now; the Words Overview shows it, Today ignores it. */
+  nextDue: number | null;
   reviewsToday: number;
 }
 /** One merged-catalogue reader joined with progress; a service edition carries its version. */

@@ -1,9 +1,10 @@
-/** Owns the pure joins from stored vocabulary, reader and studied-topic data to Today's step input values, not selection, storage reads or hooks. */
+/** Owns the pure joins from stored vocabulary, reader and studied-topic data to Today's step input values (the words join also feeds the Words Overview), not selection, storage reads or hooks. */
 import { readerIdsActiveToday, reviewsToday, startOfLocalDay } from './activity';
 import { readerListStatus } from '../gradedReaders/status';
 import { nextTopicEntry } from '../grammarTopics/order';
 import type { ReaderSummary } from '../gradedReaders/catalogue';
 import { vocabularyQueue } from '../vocabulary/queue';
+import { vocabularyAvailableAt } from '../../utils/srs';
 import type { PublishedReader } from '../../types/gradedReader';
 import type { GrammarTopicList } from '../../types/grammarTopic';
 import type { ReaderProgress } from '../../types/readerProgress';
@@ -32,9 +33,17 @@ export function wordsInput(
     if (candidate.row?.schedule) due++;
     else unseen++;
   }
+  // The next moment any scheduled card, of any phase, becomes studyable (not the queue's learning-step `nextDue`).
+  let nextDue: number | null = null;
+  for (const row of rows) {
+    if (!row.schedule) continue;
+    const availableAt = vocabularyAvailableAt(row.schedule);
+    if (availableAt > now && (nextDue === null || availableAt < nextDue)) nextDue = availableAt;
+  }
   return {
     due,
     newAvailable: Math.min(unseen, Math.max(0, newPerDay - day.introducedKeys.length)),
+    nextDue,
     reviewsToday: reviewsToday(rows, now),
   };
 }

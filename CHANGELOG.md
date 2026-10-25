@@ -98,6 +98,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Changed
 - The fonts are bundled with the app and the marketing pages, so opening Relire no longer sends a request, or your IP address, to Google Fonts; the app and its fonts work offline.
+- The Words Overview has one next action that follows the real queue (Review N words, Learn N new words, or when the next word returns), counts new words by what is actually available (the same number Today shows) instead of the bare daily allowance, and no longer repeats the Map tab as a button.
 - Shadowing recordings now live at Speaking → Recordings (`#/speaking/recordings`), opened from the Speaking page and from the reader rather than the sidebar, the page is titled Recordings (跟读录音) like its link, and My study is gone; the old `#/study` addresses show not found.
 - Words is now its own sidebar entry, with the due count visible on the rail and in the phone menu; the Words home tab is now called Overview.
 - Mistakes is now its own sidebar entry, with its unresolved count visible on the rail and in the phone menu.

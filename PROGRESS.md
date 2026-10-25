@@ -10,6 +10,10 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 - The three fonts (Source Serif 4 roman and italic, Public Sans, Fira Code) are Google's unmodified latin woff2 builds in `public/fonts/` with their SIL OFL 1.1 texts; `src/index.css` and `marketing/styles.css` declare them, the Google links and the two Google `runtimeCaching` entries are gone, the Pages workflow copies `public/fonts` to the site root, and both READMEs state the real server list. Tests committed (`tests/bundledFonts.test.ts`, and the e2e fixture no longer allows the Google hosts); nothing opened in a browser.
 
+## 2026-10-25: Words Overview next action (P1)
+
+- The Overview shows `wordsInput`'s due and new counts (the bare allowance is gone), one filled action in a fixed-height slot (Review N words, Learn N new words, the time the next scheduled word of any phase returns, or a note to import a list or save words while reading; plain Review, not the run), Play a run as the outlined link and no Map link. `wordsInput` also returns `nextDue`. A wordbook or learner-data failure shows the real error with no action and dashes instead of counts. Unit tests landed and pass. **Unverified:** no browser.
+
 ## 2026-10-25: Recordings out of the sidebar
 
 - Owner decision: Recordings is a function of Speaking, not a menu entry. Speaking's only sidebar child is Read aloud; Recordings opens from the Speaking page link and the reader's "All recordings", at the same route, and Speaking stays the highlighted area there. Tests pending (nav tests expect two Speaking children). **Unverified:** no browser.

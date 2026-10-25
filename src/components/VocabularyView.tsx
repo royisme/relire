@@ -23,6 +23,8 @@ export function VocabularyView({
 }) {
   const { t } = useTranslation();
   const content = useVocabularyBook();
+  // The Overview also reports a wordbook failure, so it never reads as an empty queue.
+  const shown = place === 'home' ? (model.error ?? content.error) : model.error;
   const focused = place === 'review' || place === 'play';
   return (
     <div className="mx-auto max-w-5xl space-y-5 px-4 py-6 sm:px-6">
@@ -54,8 +56,8 @@ export function VocabularyView({
           </nav>
         </>
       )}
-      <p role={model.error ? 'alert' : 'status'} className="h-12 overflow-auto break-words text-sm text-bad-700">
-        {model.error}
+      <p role={shown ? 'alert' : 'status'} className="h-12 overflow-auto break-words text-sm text-bad-700">
+        {shown}
       </p>
       {place === 'review' ? (
         <VocabularyReview model={model} book={content.book} />
@@ -68,7 +70,12 @@ export function VocabularyView({
           <VocabularyBrowser rows={model.rows} book={content.book} />
         </Suspense>
       ) : (
-        <VocabularyHome model={model} />
+        <VocabularyHome
+          model={model}
+          book={content.book}
+          pending={(content.busy && !content.book) || !!content.error}
+          failed={!!content.error}
+        />
       )}
     </div>
   );

@@ -30,6 +30,7 @@ Object.defineProperty(globalThis, 'window', {
 const { VocabularyMap, RegionPicture } = await import('../src/components/vocabulary/game/VocabularyMap');
 const { RegionWords } = await import('../src/components/vocabulary/game/RegionWords');
 const { VocabularyHome } = await import('../src/components/vocabulary/VocabularyHome');
+const { VocabularyView } = await import('../src/components/VocabularyView');
 const { VocabularyRun } = await import('../src/components/vocabulary/game/VocabularyRun');
 const review = await import('../src/hooks/useVocabularyReview');
 if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
@@ -206,8 +207,12 @@ for (const language of ['en', 'zh'] as const) {
     expect(picture.match(/flex-grow:1/g)).toHaveLength(5);
     for (const state of ['new', 'learning', 'young', 'mature'])
       expect(picture).toContain(i18n.t('vocab.map.segment', { label: i18n.t(`vocab.map.tier.${state}`), words: 1 }));
-    const home = render(<VocabularyHome model={model} />);
-    expect(home).toContain('href="#/words/map"');
+    const home = render(<VocabularyHome model={model} book={book} pending={false} />);
+    expect(home).not.toContain('href="#/words/map"');
+    const view = render(<VocabularyView model={model} />);
+    const nav = view.match(/<nav\b[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? '';
+    expect(nav).toContain('href="#/words/map"');
+    expect(nav).toContain(`>${i18n.t('vocab.map.title')}</a>`);
   });
 
   test(`${language}: empty, loading and failures are real and retain a fixed status slot`, async () => {

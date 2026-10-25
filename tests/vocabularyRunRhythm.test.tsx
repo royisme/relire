@@ -49,7 +49,7 @@ const model: VocabularyModel = {
 for (const language of ['en', 'zh'] as const) {
   test(`${language}: home marks and count use real history, including the empty week`, async () => {
     await i18n.changeLanguage(language);
-    const empty = render(<VocabularyHome model={model} />);
+    const empty = render(<VocabularyHome model={model} book={undefined} pending={false} />);
     expect(empty).toContain(i18n.t('vocab.rhythm.count', { days: 0 }));
     expect(empty.match(/<time /g)).toHaveLength(7);
     expect(empty).not.toContain(i18n.t('vocab.rhythm.ratedDay', { date: '2026-10-25' }));
@@ -65,7 +65,7 @@ for (const language of ['en', 'zh'] as const) {
       revision: index + 1,
     }));
     row.schedule = { ...schedule, phase: 'relearning', scheduledDays: 0 };
-    const home = render(<VocabularyHome model={{ ...model, rows: [row] }} />);
+    const home = render(<VocabularyHome model={{ ...model, rows: [row] }} book={undefined} pending={false} />);
     expect(home).toContain(i18n.t('vocab.rhythm.count', { days: 4 }));
     expect(home.match(/<time /g)).toHaveLength(7);
     for (const day of [19, 21, 23, 25]) {

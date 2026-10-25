@@ -30,7 +30,12 @@ function reviewedRow(word: string, timestamps: number[]) {
 }
 
 test('an empty queue reports no due words, no new cards and no reviews', async () => {
-  expect(wordsInput([], undefined, day(), 20, now)).toEqual({ due: 0, newAvailable: 0, reviewsToday: 0 });
+  expect(wordsInput([], undefined, day(), 20, now)).toEqual({
+    due: 0,
+    newAvailable: 0,
+    nextDue: null,
+    reviewsToday: 0,
+  });
 });
 
 test('due counts scheduled candidates, excluding cards whose next review is later', () => {
@@ -38,24 +43,94 @@ test('due counts scheduled candidates, excluding cards whose next review is late
   due.schedule = testMatureSchedule(now);
   const later = testRow('test-later');
   later.schedule = { ...testMatureSchedule(now), dueAt: now + 2 * 86400_000 };
-  expect(wordsInput([due, later], undefined, day(), 20, now)).toEqual({ due: 1, newAvailable: 0, reviewsToday: 0 });
+  expect(wordsInput([due, later], undefined, day(), 20, now)).toEqual({
+    due: 1,
+    newAvailable: 0,
+    nextDue: new Date(2026, 9, 26).getTime(),
+    reviewsToday: 0,
+  });
 });
 
 test('new cards are capped by the daily allowance and by the cards actually available', async () => {
   const book = await testBook(3, 'TEST');
-  expect(wordsInput([], book, day(), 2, now)).toEqual({ due: 0, newAvailable: 2, reviewsToday: 0 });
-  expect(wordsInput([], book, day(), 5, now)).toEqual({ due: 0, newAvailable: 3, reviewsToday: 0 });
-  expect(wordsInput([], book, day(), 0, now)).toEqual({ due: 0, newAvailable: 0, reviewsToday: 0 });
+  expect(wordsInput([], book, day(), 2, now)).toEqual({ due: 0, newAvailable: 2, nextDue: null, reviewsToday: 0 });
+  expect(wordsInput([], book, day(), 5, now)).toEqual({ due: 0, newAvailable: 3, nextDue: null, reviewsToday: 0 });
+  expect(wordsInput([], book, day(), 0, now)).toEqual({ due: 0, newAvailable: 0, nextDue: null, reviewsToday: 0 });
   const introduced = book!.entries.slice(0, 2).map((entry) => entry.key);
-  expect(wordsInput([], book, day(introduced), 2, now)).toEqual({ due: 0, newAvailable: 0, reviewsToday: 0 });
+  expect(wordsInput([], book, day(introduced), 2, now)).toEqual({
+    due: 0,
+    newAvailable: 0,
+    nextDue: null,
+    reviewsToday: 0,
+  });
 });
 
 test('reviews count every history entry of the local day, boundary included', () => {
   expect(wordsInput([reviewedRow('test-review', [start - 1, start])], undefined, day(), 20, now)).toEqual({
     due: 0,
     newAvailable: 0,
+    nextDue: null,
     reviewsToday: 1,
   });
+});
+
+test('a review-phase card due tomorrow supplies nextDue even without a wordbook or new-card allowance', () => {
+  const tomorrow = new Date(2026, 9, 25, 15).getTime();
+  const row = { ...testRow(), schedule: testMatureSchedule(tomorrow) };
+  expect(wordsInput([row], undefined, day(), 0, now)).toEqual({
+    due: 0,
+    newAvailable: 0,
+    nextDue: new Date(2026, 9, 25).getTime(),
+    reviewsToday: 0,
+  });
+});
+
+test.each(['learning', 'relearning'] as const)(
+  'nextDue compares exact %s times with the start of the review due day, regardless of row order',
+  (phase) => {
+    const reviewAt = new Date(2026, 9, 25, 15).getTime();
+    for (const [learningAt, expected] of [
+      [new Date(2026, 9, 24, 12, 31).getTime(), new Date(2026, 9, 24, 12, 31).getTime()],
+      [new Date(2026, 9, 25, 10).getTime(), new Date(2026, 9, 25).getTime()],
+    ]) {
+      const learning = {
+        ...testRow('test-learning'),
+        schedule: { ...initialVocabularySchedule(now), phase, dueAt: learningAt },
+      };
+      const review = { ...testRow('test-review'), schedule: testMatureSchedule(reviewAt) };
+      for (const rows of [
+        [learning, review],
+        [review, learning],
+      ]) {
+        expect(wordsInput(rows, undefined, day(), 20, now).nextDue).toBe(expected);
+      }
+    }
+  },
+);
+
+test('due-now, overdue and unscheduled rows never supply nextDue', () => {
+  for (const phase of ['new', 'learning', 'relearning'] as const) {
+    const due = { ...testRow('test-now'), schedule: { ...initialVocabularySchedule(now), phase } };
+    const overdue = { ...testRow('test-past'), schedule: { ...due.schedule, dueAt: now - 1 } };
+    expect(wordsInput([testRow(), due, overdue], undefined, day(), 20, now).nextDue).toBeNull();
+    const future = { ...testRow('test-future'), schedule: { ...due.schedule, dueAt: now + 1 } };
+    expect(wordsInput([due, future, overdue], undefined, day(), 20, now).nextDue).toBe(now + 1);
+  }
+});
+
+test('review cards are already due from local midnight, even before dueAt, and cannot supply nextDue', () => {
+  const today = { ...testRow('test-today'), schedule: testMatureSchedule(new Date(2026, 9, 24, 15).getTime()) };
+  const overdue = { ...testRow('test-overdue'), schedule: testMatureSchedule(new Date(2026, 9, 23, 15).getTime()) };
+  const tomorrow = { ...testRow('test-tomorrow'), schedule: testMatureSchedule(new Date(2026, 9, 25, 15).getTime()) };
+  expect(wordsInput([today, overdue, testRow()], undefined, day(), 0, now)).toEqual({
+    due: 2,
+    newAvailable: 0,
+    nextDue: null,
+    reviewsToday: 0,
+  });
+  expect(wordsInput([today, tomorrow, overdue], undefined, day(), 0, now).nextDue).toBe(
+    new Date(2026, 9, 25).getTime(),
+  );
 });
 
 const base = publishedReaderFixture();

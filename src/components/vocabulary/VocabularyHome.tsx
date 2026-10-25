@@ -1,24 +1,68 @@
-/** Today: truthful introduced-card counts and the review entry. */ import { useTranslation } from 'react-i18next';
+/** Words Overview: the same queue counts Today shows, one next action, the rhythm strip and the goal. */
+import { useTranslation } from 'react-i18next';
 import type { VocabularyModel } from '../../hooks/useVocabulary';
+import type { VocabularyBook } from '../../types/vocabulary';
 import { Check } from 'lucide-react';
 import { summarizeRhythm } from '../../services/vocabulary/game/rhythm';
-import { vocabularyDue } from '../../utils/srs';
+import { wordsInput } from '../../services/today/inputs';
 import { Link } from '../shell/Link';
 import { VocabularyGoal } from './VocabularyGoal';
 import { VocabularyImport } from './VocabularyImport';
-export function VocabularyHome({ model }: { model: VocabularyModel }) {
+const actionClass = 'inline-flex min-h-10 items-center rounded-md bg-accent-700 px-4 text-sm text-on-fill';
+export function VocabularyHome({
+  model,
+  book,
+  pending,
+  failed,
+}: {
+  model: VocabularyModel;
+  /** The cached or downloaded wordbook, if any. */
+  book: VocabularyBook | undefined;
+  /** The wordbook is still being read or downloaded with nothing cached, or failed to load. */
+  pending: boolean;
+  /** The wordbook failed to load; the page status line shows the error, so the slot stays empty and not busy. */
+  failed?: boolean;
+}) {
   const { t, i18n } = useTranslation();
   const rhythm = summarizeRhythm(model.rows, model.now);
-  const due = model.rows.filter((row) => vocabularyDue(row.schedule, model.now)).length;
+  const { due, newAvailable, nextDue } = wordsInput(
+    model.rows,
+    book,
+    model.day,
+    model.preferences.newPerDay,
+    model.now,
+  );
   const learning = model.rows.filter((row) => row.schedule && row.schedule.phase !== 'review').length;
-  const remaining = Math.max(0, model.preferences.newPerDay - model.day.introducedKeys.length);
+  const waiting = pending || !model.ready;
   return (
     <div className="space-y-8">
+      <div className="flex h-12 items-center" aria-busy={waiting && !failed && !model.error ? 'true' : undefined}>
+        {waiting ? null : due > 0 ? (
+          <Link to={{ name: 'wordsReview' }} className={actionClass}>
+            {t('vocab.action.review', { count: due })}
+          </Link>
+        ) : newAvailable > 0 ? (
+          <Link to={{ name: 'wordsReview' }} className={actionClass}>
+            {t('vocab.action.learn', { count: newAvailable })}
+          </Link>
+        ) : nextDue !== null ? (
+          <p className="text-sm text-ink-700">
+            {t('vocab.action.next', {
+              time: new Intl.DateTimeFormat(i18n.resolvedLanguage, {
+                dateStyle: 'medium',
+                ...(new Date(nextDue).setHours(0, 0, 0, 0) === nextDue ? {} : { timeStyle: 'short' }),
+              }).format(nextDue),
+            })}
+          </p>
+        ) : (
+          <p className="text-sm text-ink-700">{t('vocab.action.empty')}</p>
+        )}
+      </div>
       <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
         {[
-          [t('vocab.due'), due],
-          [t('vocab.learning'), learning],
-          [t('vocab.remaining'), remaining],
+          [t('vocab.due'), waiting ? '–' : due],
+          [t('vocab.learning'), waiting ? '–' : learning],
+          [t('vocab.available'), waiting ? '–' : newAvailable],
         ].map(([label, count]) => (
           <div key={label}>
             <dt className="text-ink-600">{label}</dt>
@@ -50,22 +94,10 @@ export function VocabularyHome({ model }: { model: VocabularyModel }) {
       <VocabularyGoal rows={model.rows} now={model.now} mature={rhythm.now.mature} />
       <div className="flex flex-wrap items-center gap-3">
         <Link
-          to={{ name: 'wordsReview' }}
-          className="inline-flex min-h-10 items-center rounded-md bg-accent-700 px-4 text-sm text-on-fill"
-        >
-          {t('vocab.continue')}
-        </Link>
-        <Link
           to={{ name: 'wordsPlay' }}
           className="inline-flex min-h-10 items-center rounded-md border border-ink-300 bg-surface px-4 text-sm text-ink-800 hover:bg-ink-100"
         >
           {t('vocab.play')}
-        </Link>
-        <Link
-          to={{ name: 'wordsMap' }}
-          className="inline-flex min-h-10 items-center rounded-md border border-ink-300 bg-surface px-4 text-sm text-ink-800 hover:bg-ink-100"
-        >
-          {t('vocab.map.title')}
         </Link>
         <VocabularyImport />
       </div>
