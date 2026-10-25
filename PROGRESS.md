@@ -4,6 +4,11 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
+## 2026-10-25: CV1 landed (the owner-run check of the conjugation prompt, issue #21)
+
+- `scripts/grammar-pack/check-conjugate-providers.ts`: four cases (`parler`, `prendre`, `se lever`, `haïr`), `--repeat` (3), `--providers`, `--dry-run`; providers from the registry; keys, models and base URLs only from `RELIRE_KEY_/RELIRE_MODEL_/RELIRE_BASEURL_<PROVIDER>`; it calls the app's own `conjugateVerb` path and the engine-side verification and classifies each run (ok, network or HTTP, JSON, schema, engine disagreement); every error text and answer preview is redacted of key values and header text; the table goes to stdout, the detail to `.local/conjugate-check/`. Worker: `magpie/deepseek/deepseek-flash` (`6937e65`, the right route this time), 15 mock-only tests, a subsection in `docs/development.md`.
+- Verified (exit 0 in the main checkout): typecheck, lint, format, shape, i18n, full suite (2,459), Worker typecheck, build, and `--dry-run` with no keys set (all three providers skipped). **Unverified:** no real provider has been called; the owner runs it. The lead read where keys flow (a redact function applied to messages and previews; `process.env` is read only for the planned variables).
+
 ## 2026-10-24: Wrong deepseek route used for four worker runs (corrected)
 
 - The owner wanted pi's **magpie** route for deepseek-flash (`magpie/deepseek/deepseek-flash`); the lead dispatched `deepseek/deepseek-flash`, which pi reads as the direct `deepseek` provider, a route that `docs/agent-delegation.md` lists under "Never" (the lead did not consult that table when switching models). Affected runs: LB2, LB3, Le ou la (LG1) and VG1, about 2 CNY of the direct balance. The code from those runs was checked and merged on its own merits (all checks, a real-data measurement for VG1), and the model is the same, but the route was not the owner's. The delegation table now has the magpie row (smoke-tested, "smoke ok" in about 3 s) and the lead uses it from here.

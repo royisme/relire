@@ -32,6 +32,18 @@ Development handoff: [Built-in vocabulary and flashcards specification](vocabula
 
 - `bun test tests/nounGenderLoad.test.ts tests/nounGenderMatch.test.ts tests/nounGenderRendering.test.tsx tests/fromGender.test.ts tests/routes.test.ts tests/wordSheetPack.test.ts`: noun-pack validation/failure retry/preload, all 17 locale captions and measured figures, noun-only normalized longest-ending matching, reference and saved feedback contracts, drill sampling/metadata/grading, save-only retry with disposable fake IndexedDB, and service-independent Gender routes. No browser, real AI or content service is exercised; visual acceptance remains owner-manual.
 
+## Real-provider check of the conjugation prompt (#21)
+
+`conjugate` and its answer schema are tested with mocks only; this owner-run script asks real providers how often the schema and the engine checks refuse their answer. It is not part of CI.
+
+```sh
+RELIRE_KEY_OPENAI=... bun scripts/grammar-pack/check-conjugate-providers.ts --providers openai --repeat 3
+```
+
+- **Type the key into the shell only**, never into a chat, a file or a commit. Keys come only from `RELIRE_KEY_<PROVIDER_ID>` (uppercase, `-` as `_`); a provider without one is listed as skipped. The model comes from `RELIRE_MODEL_<PROVIDER_ID>`, else the provider's catalogue default; the endpoint from `RELIRE_BASEURL_<PROVIDER_ID>`.
+- Cases are `parler`, `prendre`, `se lever` and `haïr` (edit `CASES` in the script); `--repeat N` runs each one N times per provider (default 3). `--dry-run` prints what would run, with its model and endpoint, and makes no request and no file; `--help` lists the flags.
+- Output: a table to stdout per provider, model and verb (ok, request, json, schema, engine counts), and `.local/conjugate-check/<UTC timestamp>.json` with every run's classification and milliseconds; failures also keep the first 300 characters of the answer, redacted. The prompt and the keys are never printed or written.
+
 ## Run the content service locally
 
 **The easy way: one process.** `bun run dev` also serves the content Worker next to the app (the Cloudflare Vite plugin, dev only: `vite build` and the GitHub Pages bundle are unchanged). Only `/v1/*` reaches the Worker; everything else is the app. It uses the same local D1 the publishers write (`worker/.wrangler/state/v3`), so apply the migrations once and publish as usual:
