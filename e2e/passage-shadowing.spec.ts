@@ -24,7 +24,7 @@ test.beforeEach(async ({ page, ai }) => {
   await trackPlayback(page);
 });
 for (const phone of [false, true]) {
-  test(`passage recording saves durably, resets keep history and My study opens its source and sentence after reload ${phone ? '@phone' : ''}`, async ({
+  test(`passage recording saves durably, resets keep history and Recordings opens its source and sentence after reload ${phone ? '@phone' : ''}`, async ({
     page,
     ai,
   }) => {
@@ -57,7 +57,9 @@ for (const phone of [false, true]) {
       await resetUnit(id);
     }, unitId);
     await card(page).getByText('All recordings (1)').click();
+    await expect(page).toHaveURL(/#\/speaking\/recordings$/);
     await page.reload();
+    await expect(page).toHaveURL(/#\/speaking\/recordings$/);
     await expect(page.getByRole('heading', { name: `Compléter le passage — ${title}` })).toBeVisible();
     await page.getByRole('button', { name: 'Les oiseaux chantent dans les arbres.', exact: true }).click();
     await expect(page).toHaveURL(/#\/passage\/unit-reading-cloze\?sentence=/);
@@ -98,7 +100,7 @@ for (const phone of [false, true]) {
     expect(roundtrip.articleOwned).toBe(true);
     expect(roundtrip.removed).toBe(true);
     expect(roundtrip.version).toBe(1);
-    await page.goto('/#/study/shadowing');
+    await page.goto('/#/speaking/recordings');
     await expect(page.getByText('Source unavailable (1)', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: `Compléter le passage — ${title}` })).toBeVisible();
   });
@@ -135,7 +137,7 @@ for (const phone of [false, true]) {
       const unit = (await d.get('units', 'unit-reading-cloze'))!;
       await d.put('units', { ...unit, readingPassage: { title: 'Le texte modifié', content: 'Le jardin est fermé.' } });
     });
-    await page.goto('/#/study/shadowing');
+    await page.goto('/#/speaking/recordings');
     await page.reload();
     await expect(page.getByText('Original text changed (1)', { exact: true })).toBeVisible();
     await page.getByText('Original text changed (1)', { exact: true }).click();

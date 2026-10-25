@@ -1,4 +1,4 @@
-/** Study links have one visible home; About is independent, and filters remain keyboard-operable radios. */
+/** Speaking owns Read aloud and Recordings; About is independent, and filters remain keyboard-operable radios. */
 import { expect, overflowing, test } from './fixtures';
 import type { Locator, Page } from '@playwright/test';
 
@@ -12,26 +12,44 @@ async function touchTarget(control: Locator) {
   expect(box.height).toBeGreaterThanOrEqual(40);
 }
 
-async function studyLinks(page: Page, location: 'sidebar' | 'page', active: string) {
+async function speakingLinks(page: Page, rail = false) {
   const sidebar = page.locator('[data-sidebar]');
   const main = page.getByRole('main');
-  for (const name of ['Shadowing']) {
-    const link = page.getByRole('link', { name, exact: true });
-    await expect(link).toHaveCount(1);
+  await expect(sidebar.getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
+    'aria-current',
+    rail ? 'page' : 'true',
+  );
+  await expect(sidebar.getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
+  await expect(page.locator('a[href^="#/study"]')).toHaveCount(0);
+  await expect(sidebar.locator('a[href^="#/speaking/"]')).toHaveCount(rail ? 0 : 2);
+  for (const [name, href] of [
+    ['Read aloud', '#/speaking/read-aloud'],
+    ['Recordings', '#/speaking/recordings'],
+  ]) {
+    const link = sidebar.getByRole('link', { name, exact: true });
+    await expect(link).toHaveCount(rail ? 0 : 1);
+    if (rail) continue;
     await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute('href', `#/study/${name.toLowerCase()}`);
-    await expect((location === 'sidebar' ? sidebar : main).getByRole('link', { name, exact: true })).toBeVisible();
-    if (name === active) await expect(link).toHaveAttribute('aria-current', 'page');
+    await expect(link).toHaveAttribute('href', href);
+    if (name === 'Recordings') await expect(link).toHaveAttribute('aria-current', 'page');
     else await expect(link).not.toHaveAttribute('aria-current');
     await touchTarget(link);
   }
-  await expect(main.getByRole('radio', { name: /^(Words|Shadowing|Mistakes|Grammar)$/ })).toHaveCount(0);
+  const back = main.getByRole('link', { name: 'Speaking', exact: true });
+  await expect(back).toBeVisible();
+  await expect(back).toHaveAttribute('href', '#/speaking');
+  await touchTarget(back);
+  await expect(
+    main.getByRole('radio', { name: /^(Words|Shadowing|Mistakes|Grammar|Read aloud|Recordings)$/ }),
+  ).toHaveCount(0);
   expect(await overflowing(page.locator('body'))).toEqual([]);
 }
 
-test('expanded, collapsed and tablet study pages keep just one visible set of page links', async ({ page }) => {
-  await page.goto('/#/study/shadowing');
-  await studyLinks(page, 'sidebar', 'Shadowing');
+test('Speaking children use the expanded sidebar; Recordings keeps its back link on the rail and tablet', async ({
+  page,
+}) => {
+  await page.goto('/#/speaking/recordings');
+  await speakingLinks(page);
   const collapse = page.getByRole('button', { name: 'Collapse sidebar' });
   await touchTarget(collapse);
   await expect(collapse).toHaveAttribute('title', 'Collapse sidebar');
@@ -43,16 +61,18 @@ test('expanded, collapsed and tablet study pages keep just one visible set of pa
     .boundingBox())!;
   expect(buttonBox.y + buttonBox.height).toBeLessThanOrEqual(firstRow.y);
   await collapse.click();
-  await studyLinks(page, 'page', 'Shadowing');
+  await speakingLinks(page, true);
   await page.getByRole('link', { name: 'Mistakes', exact: true }).click();
   await expect(page).toHaveURL(/#\/mistakes$/);
   await expect(page.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
-  await page.getByRole('link', { name: 'My study', exact: true }).click();
-  await studyLinks(page, 'page', 'Shadowing');
+  await page.locator('[data-sidebar]').getByRole('link', { name: 'Speaking', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'Recordings', exact: true }).click();
+  await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+  await speakingLinks(page, true);
   await page.getByRole('button', { name: 'Expand sidebar' }).click();
-  await studyLinks(page, 'sidebar', 'Shadowing');
+  await speakingLinks(page);
   await page.setViewportSize({ width: 900, height: 800 });
-  await studyLinks(page, 'page', 'Shadowing');
+  await speakingLinks(page, true);
 });
 
 test('Grammar opens Topics and switches to its distinct Conjugation address', async ({ page }) => {
@@ -64,13 +84,17 @@ test('Grammar opens Topics and switches to its distinct Conjugation address', as
   await expect(page).toHaveURL(/#\/grammar\/conjugation$/);
   await expect(page.getByRole('heading', { name: 'Conjugation', exact: true })).toBeVisible();
   await expect(page.locator('a[href="#/study/grammar"]')).toHaveCount(0);
-  await page.getByRole('link', { name: 'My study', exact: true }).click();
-  await expect(page).toHaveURL(/#\/study\/shadowing$/);
-  await expect(page.getByRole('link', { name: 'Shadowing', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.locator('[data-sidebar]').getByRole('link', { name: 'Speaking', exact: true }).click();
+  await page.getByRole('main').getByRole('link', { name: 'Recordings', exact: true }).click();
+  await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
   await page.getByRole('link', { name: 'Grammar', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
   await page.goBack();
-  await expect(page).toHaveURL(/#\/study\/shadowing$/);
+  await expect(page).toHaveURL(/#\/speaking\/recordings$/);
 });
 
 test('About is the final footer link, not a Settings section', async ({ page }) => {
@@ -125,9 +149,14 @@ test('Library level filters have one Tab stop, all arrow keys and Home/End', asy
   await expect(group.locator(':focus')).toHaveCount(0);
 });
 
-test('phone study links stay local; the drawer has About last and no collapse control @phone', async ({ page }) => {
-  await page.goto('/#/study/shadowing');
-  await studyLinks(page, 'page', 'Shadowing');
+test('phone Recordings survives reload and Back; the drawer has About last and no collapse control @phone', async ({
+  page,
+}) => {
+  await page.goto('/#/speaking/recordings');
+  const back = page.getByRole('main').getByRole('link', { name: 'Speaking', exact: true });
+  await expect(back).toBeVisible();
+  await expect(back).toHaveAttribute('href', '#/speaking');
+  await touchTarget(back);
   await page.getByRole('button', { name: 'Menu', exact: true }).click();
   await page.getByRole('dialog', { name: 'Menu' }).getByRole('link', { name: 'Mistakes', exact: true }).click();
   await expect(page).toHaveURL(/#\/mistakes$/);
@@ -135,15 +164,26 @@ test('phone study links stay local; the drawer has About last and no collapse co
   await expect(page.getByRole('heading', { name: 'Mistakes', exact: true })).toBeVisible();
   await expect(page.getByRole('main').getByRole('link', { name: 'Shadowing', exact: true })).toHaveCount(0);
   await page.goBack();
-  await studyLinks(page, 'page', 'Shadowing');
+  await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+  await expect(back).toBeVisible();
+  await page.reload();
+  await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+  await expect(back).toBeVisible();
   await page.getByRole('button', { name: 'Menu', exact: true }).click();
   await page.getByRole('dialog', { name: 'Menu' }).getByRole('link', { name: 'Grammar', exact: true }).click();
   await expect(page).toHaveURL(/#\/grammar$/);
   await expect(page.getByRole('heading', { name: 'Topics', exact: true })).toBeVisible();
   await page.goBack();
-  await studyLinks(page, 'page', 'Shadowing');
+  await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+  await expect(back).toBeVisible();
   await page.getByRole('button', { name: 'Menu', exact: true }).click();
   const drawer = page.getByRole('dialog', { name: 'Menu', exact: true });
+  await expect(drawer.getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
+  await expect(drawer.getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(drawer.getByRole('link', { name: 'Read aloud', exact: true })).toHaveAttribute(
+    'href',
+    '#/speaking/read-aloud',
+  );
   await expect(drawer.getByRole('button', { name: /sidebar/ })).toHaveCount(0);
   await expect(drawer.getByRole('link').last()).toHaveAttribute('href', '#/about');
   await drawer.getByRole('link', { name: 'About', exact: true }).click();
@@ -166,29 +206,35 @@ test('phone Library filters retain 40px radio targets and selection @phone', asy
 });
 
 for (const [lang, names] of [
-  ['zh', ['跟读']],
-  ['en', ['Shadowing']],
+  ['zh', ['朗读', '跟读录音']],
+  ['en', ['Read aloud', 'Recordings']],
 ] as const) {
-  test(`the single study tab fits a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
+  test(`Speaking's two drawer children fit a 360px phone in ${lang === 'zh' ? 'Chinese' : 'English'} without scrolling @phone`, async ({
     page,
   }) => {
     await page.addInitScript((value) => localStorage.setItem('relire_lang', value), lang);
-    await page.goto('/#/study/shadowing');
-    const tabs = page.getByRole('main').getByRole('navigation').first();
-    for (const name of names) await expect(tabs.getByRole('link', { name, exact: true })).toBeVisible();
+    await page.goto('/#/speaking/recordings');
+    expect(await overflowing(page.locator('body'))).toEqual([]);
+    await page.getByRole('button', { name: lang === 'zh' ? '菜单' : 'Menu', exact: true }).click();
+    const drawer = page.getByRole('dialog', { name: lang === 'zh' ? '菜单' : 'Menu', exact: true });
+    for (const name of names) await expect(drawer.getByRole('link', { name, exact: true })).toBeVisible();
+    await expect(drawer.locator('a[href^="#/speaking/"]')).toHaveCount(2);
+    await expect(drawer.getByRole('link', { name: names[1], exact: true })).toHaveAttribute('aria-current', 'page');
     await page.evaluate(() => document.fonts.ready);
-    expect(await tabs.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
-    // Every tab lies inside the strip and inside the screen, none clipped at the right edge.
-    const strip = (await tabs.boundingBox())!;
+    expect(await drawer.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    // Both children lie inside the drawer and the screen, with no clipped text.
+    const strip = (await drawer.boundingBox())!;
     const boxes = await Promise.all(
-      names.map(async (name) => (await tabs.getByRole('link', { name, exact: true }).boundingBox())!),
+      names.map(async (name) => (await drawer.getByRole('link', { name, exact: true }).boundingBox())!),
     );
     for (const box of boxes) {
       expect(box.x).toBeGreaterThanOrEqual(strip.x);
       expect(box.x + box.width).toBeLessThanOrEqual(strip.x + strip.width);
       expect(box.x + box.width).toBeLessThanOrEqual(360);
       expect(box.height).toBeGreaterThanOrEqual(40);
+      expect(box.width).toBeGreaterThanOrEqual(40);
     }
+    for (const name of names) expect(await overflowing(drawer.getByRole('link', { name, exact: true }))).toEqual([]);
     expect(await overflowing(page.locator('body'))).toEqual([]);
   });
 }

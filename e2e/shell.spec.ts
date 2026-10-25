@@ -18,10 +18,11 @@ test.describe('sidebar', () => {
   test('collapses to a rail and expands again, and remembers it across reloads', async ({ page }) => {
     await page.goto('/#/read');
     await expect(sidebar(page)).toHaveAttribute('data-sidebar', 'expanded');
-    await expect(sidebar(page).getByRole('link', { name: 'My study', exact: true })).toContainText('My study');
-    await expect(sidebar(page).getByRole('link', { name: 'My study', exact: true })).toHaveAttribute(
+    await expect(sidebar(page).getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
+    await expect(sidebar(page).locator('a[href^="#/study"]')).toHaveCount(0);
+    await expect(sidebar(page).getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
       'href',
-      '#/study/shadowing',
+      '#/speaking',
     );
     await expect(sidebar(page).getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute(
       'href',
@@ -49,21 +50,32 @@ test.describe('sidebar', () => {
   });
 
   test('lists the sub-pages of the current area, indented', async ({ page }) => {
-    await page.goto('/#/study/shadowing');
+    await page.goto('/#/speaking/recordings');
     const nav = sidebar(page);
-    await expect(nav.getByRole('link', { name: 'Shadowing' })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute('aria-current', 'true');
+    await expect(nav.getByRole('link', { name: 'Read aloud', exact: true })).toHaveAttribute(
+      'href',
+      '#/speaking/read-aloud',
+    );
+    await expect(nav.getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(nav.getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute(
+      'href',
+      '#/speaking/recordings',
+    );
+    await expect(nav.locator('a[href^="#/speaking/"]')).toHaveCount(2);
     await expect(nav.getByRole('link', { name: 'Words' })).toBeVisible();
 
     await nav.getByRole('link', { name: 'Words' }).click();
     await expect(page).toHaveURL(/#\/words$/);
     await expect(nav.getByRole('link', { name: 'Words' })).toHaveAttribute('aria-current', 'page');
-    await expect(nav.getByRole('link', { name: 'Shadowing' })).toHaveCount(0);
+    await expect(nav.getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
+    await expect(nav.getByRole('link', { name: 'Read aloud', exact: true })).toHaveCount(0);
     await expect(nav.locator('a[href^="#/words/"]')).toHaveCount(0);
 
     // Another area closes them, and Settings lists its sections.
     await nav.getByRole('link', { name: 'Progress' }).click();
     await expect(nav.getByRole('link', { name: 'Words' })).toBeVisible();
-    await expect(nav.getByRole('link', { name: 'Shadowing' })).toHaveCount(0);
+    await expect(nav.getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
     await nav.getByRole('link', { name: 'Settings', exact: true }).click();
     for (const href of ['#/settings/ai/text', '#/settings/practice', '#/settings/prompts', '#/settings/data'])
       await expect(nav.locator(`a[href="${href}"]`)).toBeVisible();
@@ -119,29 +131,71 @@ test.describe('routes', () => {
   });
 
   test('resolving a default replaces the entry instead of adding one', async ({ page }) => {
-    await page.goto('/#/study');
-    await expect(page).toHaveURL(/#\/study\/shadowing$/);
+    await page.goto('/#/settings/ai');
+    await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
     await page.getByRole('link', { name: 'Progress' }).click();
     await expect(page).toHaveURL(/#\/progress$/);
 
     await page.goBack();
-    await expect(page).toHaveURL(/#\/study\/shadowing$/);
-    // One more Back leaves the app; there is no `#/study` entry in between.
+    await expect(page).toHaveURL(/#\/settings\/ai\/text$/);
+    // One more Back leaves the app; the unresolved default is not a separate entry.
     await page.goBack();
-    expect(page.url()).not.toContain('#/study');
+    expect(page.url()).not.toContain('#/settings/ai');
   });
 
-  test('the study tab lives in the address, so it survives a reload and Back from Mistakes', async ({ page }) => {
+  test('Recordings lives in the address, so it survives a reload and Back through Speaking to Mistakes', async ({
+    page,
+  }) => {
     await page.goto('/#/mistakes');
-    await page.getByRole('link', { name: 'My study', exact: true }).click();
-    await expect(page).toHaveURL(/#\/study\/shadowing$/);
+    await sidebar(page).getByRole('link', { name: 'Speaking', exact: true }).click();
+    await expect(page).toHaveURL(/#\/speaking$/);
+    const recordings = page.getByRole('main').getByRole('link', { name: 'Recordings', exact: true });
+    await expect(recordings).toHaveAttribute('href', '#/speaking/recordings');
+    await recordings.click();
+    await expect(page).toHaveURL(/#\/speaking\/recordings$/);
     await page.reload();
-    await expect(page.getByRole('link', { name: 'Shadowing', exact: true })).toHaveAttribute('aria-current', 'page');
-    expect(await stored(page, 'relire_study_tab')).toBeNull();
+    await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+    await expect(sidebar(page).getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await expect(sidebar(page).getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
+      'aria-current',
+      'true',
+    );
+    const back = page.getByRole('main').getByRole('link', { name: 'Speaking', exact: true });
+    await expect(back).toHaveAttribute('href', '#/speaking');
+    await page.goBack();
+    await expect(page).toHaveURL(/#\/speaking$/);
+    await expect(recordings).toBeVisible();
     await page.goBack();
     await expect(page).toHaveURL(/#\/mistakes$/);
-    await expect(page.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(sidebar(page).getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await page.goForward();
+    await page.goForward();
+    await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+    await back.click();
+    await expect(page).toHaveURL(/#\/speaking$/);
+    await expect(recordings).toBeVisible();
   });
+
+  for (const hash of ['#/study', '#/study/shadowing', '#/study/mistakes']) {
+    test(`${hash} is gone, with no redirect`, async ({ page }) => {
+      await page.goto('/' + hash);
+      await expect(page.getByRole('heading', { name: 'This page is not here' })).toBeVisible();
+      expect(new URL(page.url()).hash).toBe(hash);
+      await expect(sidebar(page).getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
+      await expect(sidebar(page).locator('a[href^="#/study"]')).toHaveCount(0);
+      await page.reload();
+      await expect(page.getByRole('heading', { name: 'This page is not here' })).toBeVisible();
+      expect(new URL(page.url()).hash).toBe(hash);
+      await page.getByRole('link', { name: 'Go to the library' }).click();
+      await expect(page).toHaveURL(/#\/read$/);
+    });
+  }
 
   test('a settings section can be opened by its address and survives a reload', async ({ page }) => {
     await page.goto('/#/settings/prompts');
@@ -298,7 +352,7 @@ test.describe('layout', () => {
   const routes = [
     '#/read',
     '#/words',
-    '#/study/shadowing',
+    '#/speaking/recordings',
     '#/mistakes',
     '#/grammar',
     '#/grammar/exercises',
@@ -323,7 +377,7 @@ test.describe('layout', () => {
       expect(first.width, route).toBeLessThanOrEqual(page.viewportSize()!.width);
       await page.waitForTimeout(300);
       expect(await layout(page, 'main'), `${route} moved after loading`).toEqual(first);
-      // Mistakes is available on every route, not just while My study is current.
+      // Mistakes remains a top-level destination on every route.
       const phone = page.viewportSize()!.width < 768;
       if (phone) await page.getByRole('button', { name: 'Menu', exact: true }).click();
       const nav = phone ? page.getByRole('dialog', { name: 'Menu', exact: true }) : sidebar(page);
@@ -377,15 +431,15 @@ test.describe('between md and lg', () => {
 
 test.describe('phones', () => {
   test('the menu button opens a drawer with the same tree @phone', async ({ page }) => {
-    await page.goto('/#/study/shadowing');
+    await page.goto('/#/speaking');
     await expect(page.locator('[data-sidebar]')).toHaveCount(0);
     await page.getByRole('button', { name: 'Menu' }).click();
     const drawer = page.getByRole('dialog', { name: 'Menu' });
     for (const name of [
       'Reading',
-      'My study',
       'Words',
-      'Shadowing',
+      'Read aloud',
+      'Recordings',
       'Mistakes',
       'Grammar',
       'Listening',
@@ -395,13 +449,29 @@ test.describe('phones', () => {
       'About',
     ])
       await expect(drawer.getByRole('link', { name, exact: true })).toBeVisible();
+    await expect(drawer.getByRole('link', { name: 'My study', exact: true })).toHaveCount(0);
+    await expect(drawer.locator('a[href^="#/study"]')).toHaveCount(0);
+    await expect(drawer.getByRole('link', { name: 'Words', exact: true })).toHaveAttribute('href', '#/words');
     await expect(drawer.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('href', '#/mistakes');
+    await expect(drawer.locator('a[href^="#/speaking/"]')).toHaveCount(2);
+    await drawer.getByRole('link', { name: 'Recordings', exact: true }).click();
+    await expect(drawer).toBeHidden();
+    await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+    await expect(page.getByRole('main').getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
+      'href',
+      '#/speaking',
+    );
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    await expect(drawer.getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute('aria-current', 'true');
+    await expect(drawer.getByRole('link', { name: 'Recordings', exact: true })).toHaveAttribute('aria-current', 'page');
     await drawer.getByRole('link', { name: 'Mistakes', exact: true }).click();
     await expect(drawer).toBeHidden();
     await expect(page).toHaveURL(/#\/mistakes$/);
     await expect(page.getByRole('heading', { name: 'Mistakes', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Menu', exact: true }).click();
     await expect(drawer.getByRole('link', { name: 'Mistakes', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(drawer.getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
+    await expect(drawer.getByRole('link', { name: 'Read aloud', exact: true })).toHaveCount(0);
     await expect(drawer.getByRole('link', { name: 'Shadowing', exact: true })).toHaveCount(0);
   });
 
