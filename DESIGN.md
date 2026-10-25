@@ -365,6 +365,9 @@ When an AI feature needs a key, the app opens AI services on the purpose that ne
 ### Motion
 Use motion purposefully, not a blanket ban: it should clarify a state change, spatial relationship or response to input without distracting from reading. Default to 160–200ms with `ease-out` (`cubic-bezier(0.22, 1, 0.36, 1)`): sheets slide 24px (up on phones, from the right on md+), dialogs and floating controls fade. The Words card uses a functional 180ms two-sided rotation with the same easing; its shown face determines natural height. Bounce or pulse needs a clear interaction purpose, not decoration. Respect `prefers-reduced-motion`: the card switches faces immediately without rotation or transition, preserving the same controls and feedback.
 
+### Game surface (owner exception, 2026-10-24)
+The optional game mode (Grammar → Gender "Play a round" and the vocabulary game that follows it) is the one place where the calm rules above are relaxed, so that a game can feel like a game. The rest of the app, Today included, is unchanged. Allowed on the game surface only: (1) **motion** beyond 160–200ms, with overshoot or elastic easing for a "pop", feedback layered within about 100ms of an action and scaled to the event's importance (a routine right answer small, a word graduating medium, a finished run or mastered page large), always returning to rest; (2) **short sound cues** (no music; the device voice stays the only French speech; each cue can be muted, and how the cues are produced without a new dependency is decided in the vocabulary game's design); (3) **number pops** that show figures computed from the learner's real activity. Still required there: `prefers-reduced-motion` means no motion, plus a visible sound on/off and a reduce-effects setting; nothing flashes more than three times a second; feedback never blocks input and never moves the page; every number is real (no invented scores or XP); the layout rules, 360px and the three themes still hold; one filled button per view. Not granted: confetti, streak flames, mascots, gradients, glass, blur and emoji icons stay under Don't.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -378,7 +381,7 @@ Use motion purposefully, not a blanket ban: it should clarify a state change, sp
 
 ### Don't:
 - **Don't** use gradients, glass or blur, glowing cards, hero-metric tiles, emoji as icons or rainbow icon sets.
-- **Don't** add streak flames, confetti, mascots or invented scores; empty means empty.
+- **Don't** add streak flames, confetti, mascots or invented scores; empty means empty. (The game surface's motion, sound cues and number pops are the one exception, above.)
 - **Don't** nest cards or use tinted boxes for structure; use headings and rules.
 - **Don't** let a control insert or remove a row in the page flow.
 - **Don't** use uppercase or letter-spaced eyebrow labels, bold headings or text below 12px.

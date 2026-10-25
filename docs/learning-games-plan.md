@@ -6,6 +6,8 @@ Status: proposal, written 2026-10-24. Nothing here is built or scheduled. It is 
 
 - Le ou la works but "has no game feel": the owner wants real games, not the simple one-card interaction this study produced. The constraints below that exclude points, streaks, timers and sound were this study's own choices (from the anti-slop and no-invented-data rules), not the owner's requirements; they are relaxed case by case in the next study, except **no invented data** (every number comes from the learner's real activity).
 - **Games are an optional learning mode inside Relire. `PRODUCT.md`'s tone (a quiet reading room) does not change.** The app's purpose is that learners acquire knowledge better: a game mechanic stays only if it serves retention.
+- **`DESIGN.md` exception granted (owner, 2026-10-24):** on the game surface only, expressive motion, short sound cues and number pops from real activity are allowed (section "Game surface" of `DESIGN.md`). Confetti, streak flames, mascots and invented scores stay out.
+- **Scheduler seam (advisor):** FSRS receives only the learner's own Forgot/Fuzzy/Remembered rating through the existing review command; a game challenge may come before the reveal but never picks the rating (`PRODUCT.md`).
 - **Next focus: vocabulary**, on an Anki-style spaced-repetition base (the existing FSRS flashcards, the wordbook, personal words, and an Anki file import), designed as a game. Research input: `.pi-runs/vocab-game-research/report.md` (local). Le ou la stays as the prototype it is; the other concepts below wait.
 
 ## 1. What the gamedev skills offer us

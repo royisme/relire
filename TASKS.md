@@ -123,7 +123,7 @@ A prototype with kill criteria: does a one-card, single-key round with the miss 
 
 ### Next: vocabulary as a game, on an Anki-style base (owner direction 2026-10-24)
 
-An optional learning mode, not a new product tone; spaced repetition stays the foundation (FSRS flashcards, wordbook, personal words); the game layer must serve retention and use only real activity for numbers. Steps: V-G0 research (Gemini 3.8, running), V-G1 design study (model chosen after the research and the quota reset), V-G2 plan and review, then small build steps. An Anki file import (plain text first, `.apkg` needs new dependencies and the owner's approval) is part of the base.
+An optional learning mode, not a new product tone; spaced repetition stays the foundation (FSRS flashcards, wordbook, personal words); the game layer must serve retention and use only real activity for numbers. Steps: V-G0 research (Gemini 3.8, running), V-G1 design study (model chosen after the research and the quota reset), V-G2 plan and review, then small build steps. `DESIGN.md` has a scoped game-surface exception (motion, sound cues, number pops; owner 2026-10-24); the advisor's seam: the learner's own rating is the only FSRS input. Debt first: the astra review of LB1 to LB3 and LG1 once codex resets (00:53). An Anki file import (plain text first, `.apkg` needs new dependencies and the owner's approval) is part of the base.
 
 ### Content (paused by the owner's priority)
 
