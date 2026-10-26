@@ -32,7 +32,7 @@ Every dispatch: `magpie quota` first. Code and tests come from different models 
 - **B1** the filled Overview action is plain Review, not the game run (keeps the kill criterion unbiased); changes `PRODUCT.md` (Overview) and `DESIGN.md` (Words Overview).
 - **Q1** README.md stays English, README.zh-CN.md at full parity. **Q2** no banner, no badges. **Q3** no palette now. **Q8** AI disclosure in the owner's voice (the Opus draft is in the local report). **Q9** no per-word art or hero. **Q12** no Star call-to-action.
 - **Q10** screenshots only from committed public content (the sample articles, bundled readers, reviewed verbs, gender pack), personal words saved from it and real cached AI answers, restored from an owner backup kept in `.local/`; never wordbook entries or unpublished reader or topic text; phone shots allowed.
-- **B2** the Chinese term for the API key: 密钥 (19 lines) or Key (32 lines); recommended Key.
+- **B2** the Chinese term for the API key: 密钥 (19 lines) or Key (32 lines); recommended Key. Decided: Key (zh.json sweep done).
 - **B3** overlay accessibility: hand-written fix for Sheet and Drawer, move Dialog onto the shadcn Base UI dialog.
 - **B4** (replaced by F1 after the legal review of 2026-10-25) was to disclose Google Fonts in the README; the fonts are now bundled instead, so there is nothing to disclose.
 

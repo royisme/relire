@@ -78,9 +78,9 @@
       "start": "开始第 {{order}} 本分级读物",
       "continue": "继续第 {{order}} 本分级读物",
       "doneToday": "今天已读完第 {{order}} 本分级读物",
-      "startNoKey": "从这里开始：第 {{order}} 本读物无需密钥。",
+      "startNoKey": "从这里开始：第 {{order}} 本读物无需 Key。",
       "action": "打开",
-      "why": "读一篇分级短文，点击任意词即可查看词义，无需密钥。"
+      "why": "读一篇分级短文，点击任意词即可查看词义，无需 Key。"
     },
     "sound": {
       "title": "近音辨听",
@@ -206,7 +206,7 @@
       "savedReader": "已保存，安装应用后可离线阅读。",
       "saveError": "离线保存失败：{{msg}}"
     },
-    "reviewNotice": "经 AI 审阅，未经人工审阅。无需密钥。",
+    "reviewNotice": "经 AI 审阅，未经人工审阅。无需 Key。",
     "loading": "正在打开读物…",
     "loadError": "读物加载失败：{{msg}}",
     "openError": "此版本打开失败：{{msg}}",
@@ -560,7 +560,7 @@
     "makeConjugationDrills": "动词变位练习",
     "importWorksheetDesc": "前往导入页，核对图片、PDF 或文本中的练习。",
     "makeFromArticleDesc": "从文章库选一篇文章，由你的 AI 出题。",
-    "makeConjugationDrillsDesc": "选择已审核的动词和时态，无需 AI 密钥。",
+    "makeConjugationDrillsDesc": "选择已审核的动词和时态，无需 AI Key。",
     "drillItems": "每个时态的题数",
     "start": "开始练习",
     "continue": "继续练习",
@@ -689,7 +689,7 @@
     "testFailed": "测试失败：{{msg}}",
     "keySet": "Key 已保存在此浏览器",
     "keyMissing": "尚未设置 Key",
-    "keyNotNeeded": "无需密钥",
+    "keyNotNeeded": "无需 Key",
     "keyPrivacy": "Key 只保存在这个浏览器里，只有在你使用 AI 功能时才会发给 {{provider}}。没有应用服务器。",
     "getKey": "到 {{provider}} 获取 Key",
     "providerDocs": "{{provider}} 文档",
@@ -697,7 +697,7 @@
       "text": "请先填写 API Key，才能使用单词和句子解析、朗读和发音反馈。",
       "ocr": "请先填写 API Key，才能读取图片和 PDF。",
       "speech": "请先填写 API Key，才能把法语朗读出来。",
-      "assessment": "请填写 Azure Speech 密钥和资源区域，以便连接音频评测服务。"
+      "assessment": "请填写 Azure Speech Key 和资源区域，以便连接音频评测服务。"
     },
     "storageProtected": "已受保护，浏览器不会自动清理",
     "storageNotProtected": "空间不足或长期不使用时，浏览器可能会清掉这些数据",
@@ -717,7 +717,7 @@
     "providerLabel": "提供方",
     "modelLabel": "模型",
     "keyLabel": "{{provider}} API Key",
-    "keyLabelOptional": "{{provider}} API 密钥（可选）",
+    "keyLabelOptional": "{{provider}} API Key（可选）",
     "promptsDesc": "发给 AI 的指令，是纯文本。修改它们就能改变回答的写法；任何一条都可以恢复默认。已经保存在这台设备上的解析不会变，改过的提示词会得到新的解析。",
     "promptTask": "提示词",
     "promptLanguage": "提示词语言",
@@ -747,7 +747,7 @@
     "sections": {
       "ai": {
         "title": "AI 服务",
-        "desc": "你自己的提供方密钥，以及每项 AI 任务的设置。"
+        "desc": "你自己的提供方 Key，以及每项 AI 任务的设置。"
       },
       "practice": {
         "title": "练习",
@@ -775,7 +775,7 @@
       "desc": "Relire Plus 是什么，数据去了哪里。",
       "what": "Relire Plus 是为准备 TCF Canada 的法语学习者做的精读助手：读真实的法语文章，点开任何单词或句子查看解析，并开口练习发音。",
       "privacy": "没有账号，也没有应用服务器。文章、生词和录音都保存在这个浏览器里。使用 AI 功能时，文本或录音会用你自己的 Key 从这个浏览器直接发给你选择的提供方。",
-      "servicePrivacy": "此版本可从内容服务读取语法主题、完整的分页词书和更多分级读物。请求只包含主题编号、词书编号、页码和版本，或已发布读物的编号和版本，以及网络请求的 IP 地址。文章、语境、答案、自评、复习计划和录音都不会发给它，也永远不会收到 AI 提供商的密钥；它收到的唯一密钥，是你为它设置的访问密钥。客户端可以下载整本已发布词书。",
+      "servicePrivacy": "此版本可从内容服务读取语法主题、完整的分页词书和更多分级读物。请求只包含主题编号、词书编号、页码和版本，或已发布读物的编号和版本，以及网络请求的 IP 地址。文章、语境、答案、自评、复习计划和录音都不会发给它，也永远不会收到 AI 提供商的 Key；它收到的唯一 Key，是你为它设置的访问 Key。客户端可以下载整本已发布词书。",
       "scope": "Relire Plus 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
       "source": "在 GitHub 查看源代码",
       "lexicon": "单词页中的动词形式和时态来自 {{name}}（由 {{maintainer}} 维护，许可证为 {{licence}}）：这部词典随应用一起分发，不依赖内容服务。",
@@ -801,18 +801,18 @@
     "urlHelp": "发给你的内容服务所在的地址。不用内容服务就留空。",
     "urlInvalid": "这个地址无法使用：必须是 http(s) 地址，不能带登录信息、查询串或锚点。",
     "urlNotValid": "服务地址无法保存，请先改正。",
-    "keyLabel": "访问密钥",
-    "keyHelp": "服务所有者发给你的访问密钥。它只保存在这个浏览器里，只发送给这个服务，永远不会进入备份。",
+    "keyLabel": "访问 Key",
+    "keyHelp": "服务所有者发给你的访问 Key。它只保存在这个浏览器里，只发送给这个服务，永远不会进入备份。",
     "testBtn": "测试",
     "testingBtn": "测试中…",
     "testSuccess": "已连接。服务返回了它的主题列表。",
-    "testRejected": "服务拒绝了这把密钥。{{msg}}",
+    "testRejected": "服务拒绝了这个 Key。{{msg}}",
     "testLimited": "服务正在限制请求，稍后再试。{{msg}}",
     "testStatus": "服务的回应：{{msg}}",
     "testNetwork": "无法连接服务：它没有在运行、地址写错了，或者服务不允许本站点访问（CORS）。{{msg}}",
     "testInvalidBody": "服务有回应，但不是主题列表：{{msg}}",
     "enableLabel": "使用这个内容服务",
-    "enableNote": "只有上面的地址和密钥测试通过后才能打开；改动其中任何一个都会自动关掉。保存与测试是两回事。"
+    "enableNote": "只有上面的地址和 Key 测试通过后才能打开；改动其中任何一个都会自动关掉。保存与测试是两回事。"
   },
   "aiSettings": {
     "purposesLabel": "AI 任务",
@@ -861,14 +861,14 @@
     "ocrNote": "图片和 PDF 使用这里的设置；粘贴的文字使用文字 AI。",
     "unknownOcr": "这个模型能否读图尚未确认，导入可能会返回提供方自己的错误。",
     "savedNote": "保存只会保留你的选择，不会测试它们。",
-    "deviceNote": "用设备自带的声音朗读：不需要密钥，不产生费用，也不会保存音频。听起来是否自然，取决于设备上安装的法语语音。"
+    "deviceNote": "用设备自带的声音朗读：不需要 Key，不产生费用，也不会保存音频。听起来是否自然，取决于设备上安装的法语语音。"
   },
   "azureAssessment": {
     "regionLabel": "Azure 资源区域（必填）",
     "regionHelp": "填写 Azure Speech 资源显示的区域，只用字母、数字和连字符。区域只保存在本浏览器，不含在备份中。无需模型，连接检查使用法国法语（fr-FR）。",
     "invalidRegion": "请填写 Azure 资源区域，只用字母、数字和连字符。应用不会自动选择区域。",
     "check": "检查连接",
-    "checkHelp": "检查会用你的密钥和区域，直接向 Azure 发送 100 毫秒的静音音频，可能消耗配额。本标签页内的请求逐个执行，不限制其他标签页或设备。",
+    "checkHelp": "检查会用你的 Key 和区域，直接向 Azure 发送 100 毫秒的静音音频，可能消耗配额。本标签页内的请求逐个执行，不限制其他标签页或设备。",
     "checkSuccess": "Azure 已完成识别请求。这只验证连接，不代表发音质量。",
     "checkTimeout": "Azure 未在 15 秒内完成连接检查。",
     "emptyInput": "发音评测需要录音和参考文本。",
@@ -992,7 +992,7 @@
     },
     "drill": {
       "title": "近音辨听",
-      "description": "用已审核的词对创建辨听练习。创建和判题无需 AI 或密钥，保存后可在“听力”中找到题组。",
+      "description": "用已审核的词对创建辨听练习。创建和判题无需 AI 或 Key，保存后可在“听力”中找到题组。",
       "instruction": "听单词，选出你听到的词。重音符号也算拼写的一部分。",
       "contrasts": "对比音组",
       "sound": "/{{symbol}}/ · {{word}}",
@@ -1311,7 +1311,7 @@
     },
     "drill": {
       "title": "名词阴阳性练习",
-      "description": "从已审核的 A1 名词中抽题，包含例外。无需密钥或内容服务。",
+      "description": "从已审核的 A1 名词中抽题，包含例外。无需 Key 或内容服务。",
       "instruction": "选择各名词的阴阳性：M 表示阳性，F 表示阴性。检查后会显示词尾倾向。",
       "make": "生成练习",
       "making": "正在保存…",
@@ -1563,7 +1563,7 @@
     "unsupported": "此模型无法读取图片。请先在设置中选择支持图片的模型。",
     "working": "处理中…",
     "pastedText": "粘贴文字",
-    "missingKey": "尚未设置 API 密钥。输入已保留；打开设置会放弃当前内容，请确认后再离开。",
+    "missingKey": "尚未设置 API Key。输入已保留；打开设置会放弃当前内容，请确认后再离开。",
     "failed": "请求失败：{{msg}}",
     "saving": "保存中…",
     "restart": "重新开始",
