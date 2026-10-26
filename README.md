@@ -1,26 +1,14 @@
-# Relire Plus — French Reading, Pronunciation & Exercise Practice
+# Relire Plus
 
-**Open-source French close reading, shadowing, pronunciation and exercise practice for TCF Canada.**
+**Open-source French close reading, pronunciation and exercise practice for TCF Canada learners.**
+
+Reading French with a dictionary open breaks your flow, and reading without one leaves the details vague. Practising pronunciation on your own gives you no feedback on rhythm, liaisons or single sounds. Relire Plus puts close reading, shadowing and exercises in one browser app: you read real French, check each word and sentence in context, and get feedback on how you sound.
 
 [Try Relire Plus online](https://royisme.github.io/relire/) · **English** · [简体中文](README.zh-CN.md)
 
-Read real French → tap a word or sentence → understand it in context → shadow the sentence → get AI pronunciation feedback → practise with exercises and review your mistakes.
+[![Relire Plus overview: Today, a graded reader, a reviewed conjugation table and the noun-gender list](docs/media/overview.en.jpg)](docs/media/overview.en.mp4)
 
-Relire Plus runs entirely in your browser. There is no application server and no account. AI is optional: bring your own provider and its key (Ollama needs none) for explanations and feedback, keep your learning data on your device, and install it as a PWA on desktop or mobile.
-
-**Why Relire Plus**
-
-- Context-aware word explanations with IPA and verb tense, plus a Conjugation page with reviewed tables and rule-checked forms.
-- Sentence translation, grammar breakdown, collocations and shadowing guidance.
-- Pronunciation feedback: Azure Speech scores your recording, Gemini can assess it, and other text AI providers give transcript-based guidance only where a transcript is available.
-- 11 exercise types, including number dictation, generated from your material or imported from worksheets; an AI judges open answers in words, not with a score.
-- Material import from images, PDFs or text, with a mistake notebook and progress counted from real practice.
-- Spaced-repetition vocabulary review with FSRS-6.
-- Today, graded readers, vocabulary review, reviewed conjugation and the noun-gender reference work without an AI key.
-- Local-first storage and cached audio/AI results.
-- English and Simplified Chinese interfaces.
-
-> Relire Plus covers reading, pronunciation and exercise practice. It is not a TCF mock-exam platform, its AI scores are estimates rather than official results, and it is not affiliated with France Éducation international or IRCC.
+_A 30-second recording of the real app. Select the image to play it._
 
 ## A look inside
 
@@ -49,23 +37,53 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 
 </details>
 
-## What you can do
+## What works without a key
 
-- **Start on Today.** The app opens on Today: a short list of steps taken from your own activity (words to review, a graded reader, sound pairs, mistakes to redo, and a grammar topic when topics are available) and links to Words, Reading, Speaking and Grammar. It needs no key.
-- **Read graded readers.** An ordered starter list with authored word meanings, sentence translations you reveal, saved words, listening through your device voice and local checkpoints. They need no key or service. They are AI-reviewed, not human-reviewed.
-- **Keep a library of articles.** Three B1 to C1 samples are included. Paste your own or import one from images or a PDF (read by your AI) or from text, then search, filter by level, sort, edit or delete them from a simple list. Choose text size and theme, and slow the audio down to 0.5×.
-- **Tap any word.** You get the lemma, meaning in context, IPA, the verb tense and example sentences. For a verb in the reviewed list the word sheet shows its conjugation table, with no AI; any other verb links to the Conjugation page. Save the word to your vocabulary in one click.
-- **Break down a hard sentence.** Translation, syntax segments, grammar points, common collocations and a shadowing guide (rhythm groups, liaisons, intonation).
-- **Shadow and get feedback.** Record yourself reading a sentence and receive an overall score. With Azure Speech you also get accuracy, fluency and word-level results; with Gemini hearing the recording you get feedback on individual sounds, liaisons and intonation; other text AI providers give transcript-based guidance only where a transcript is available. The takes you keep are in Recordings, under Speaking, where you can compare them with the reference.
-- **Look up any French sound.** Speaking has a chart of the sounds of French in IPA, each with an example word you can tap to hear, and Sound pairs drills.
-- **Build vocabulary in Words.** Save words while you read or import a list (`.txt`, `.tsv`, `.csv` or Anki `.apkg`). An FSRS-6 schedule decides what is due; you rate each word Forgot, Fuzzy or Remembered. Play offers retrieval questions before answers are revealed, and Map groups downloaded wordbook pages, imported decks and saved words; the wordbook comes from the optional content service.
-- **Practise grammar.** Conjugation shows the supported tenses of a verb: a verb in the reviewed list is answered from it with no AI, and any other verb is asked of the AI and compared with the app's own rules, so a result says whether it matches the rule, never that it is verified. Gender lists 17 noun-ending tendencies with examples and exceptions, and both can make exercises without another AI call. Grammar topics come from the optional content service.
-- **Exercises in four areas.** Reading, Grammar, Listening and Writing each list their exercise sets. Make fill-in-the-blank, multiple-choice, word-form, open and other questions from any article or import a worksheet, answer them on one sheet with hints, explanations and a French character bar, and read a sentence aloud for a pronunciation score. Listening has number dictation; Writing appears once you have saved a writing exercise.
-- **Redo your mistakes.** Mistakes keeps the latest wrong answer for each exercise item, grouped by grammar area, and marks it resolved after a later correct attempt.
-- **See your progress.** Progress shows words saved, your average pronunciation score, shadowing sessions and grammar accuracy as real correct and total counts.
-- **Choose your AI.** Text, image reading, speech and pronunciation scoring each have their own provider, with a model where one applies (Azure and the device voice have none), and one key per provider serves every purpose that names it. Text and image reading: Google Gemini, an OpenAI-compatible service (a Base URL also covers DeepSeek, Qwen or a gateway of your own), Anthropic Claude, or Ollama on your own machine with no key. Speech: Gemini, Fish Audio or your device's voice, which needs no key. Pronunciation scoring: Microsoft Azure Speech with your key and region, or the text AI when Azure is not set up; only Gemini hears the recording, and other text providers give transcript-based guidance only where a transcript is available.
-- **Edit the prompts.** The instructions sent to the AI are plain-text templates you can view, change and reset in Settings.
-- **Use it in English or Chinese.** The interface and the explanations switch between the two.
+- **Start on Today**: The app opens on Today with a queue drawn from your own activity: words to review, a graded reader, sound pairs, mistakes to redo, and the next grammar topic when available.
+- **Read graded readers**: An ordered starter collection for zero-basis learners with authored word meanings, revealable sentence translations, saved vocabulary, device-voice audio, and local checkpoints.
+- **Vocabulary review in Words**: Spaced-repetition review scheduled with FSRS-6. You rate each word Forgot, Fuzzy, or Remembered. Play offers retrieval challenges before answers are revealed, and Map displays saved words, imported lists, and downloaded wordbook pages.
+- **Reviewed conjugation**: Complete conjugation tables for 19 reviewed French verbs answered directly from local data without AI, plus conjugation practice sets generated without an AI call.
+- **Noun-gender reference**: 17 noun-ending tendencies with examples and exceptions, plus standalone gender-check drills.
+- **French sounds and Sound pairs**: A complete chart of French sounds in IPA with tap-to-hear audio via device speech, and Sound pairs listening drills under Speaking.
+- **Mistake notebook and progress tracking**: Mistakes keeps your latest wrong answer for each exercise item and marks it resolved after a later correct attempt. Progress tracks real counts for saved words, shadowing sessions, pronunciation scores, and grammar accuracy.
+- **Article library and reading tools**: Browse the three included sample articles or paste text, with adjustable font size, light and dark themes, and playback speed down to 0.5×.
+- **Import vocabulary lists**: Import words from `.txt`, `.tsv`, `.csv`, or Anki `.apkg` files into your vocabulary deck.
+- **Bilingual interface and prompt editing**: English and Simplified Chinese interfaces, and plain-text prompt templates you can inspect, edit, or reset in Settings.
+- **Local-first offline storage**: Articles, saved words, exercise history, mistake records, and cached audio stay on your device in IndexedDB and work offline.
+
+## What needs a key or a service
+
+- **Context-aware word and sentence lookups**: Tap any word in an imported article for its meaning in context, lemma, IPA, and verb tense. Expand sentences for syntax breakdowns, grammar points, collocations, and shadowing guidance. (Requires a text AI key, or local Ollama with no key).
+- **Pronunciation assessment**: Record yourself reading a sentence aloud. Azure Speech evaluates accuracy, fluency, and individual words; Gemini assesses the audio directly for phonemes, liaisons, and intonation; other text AI providers give transcript-based guidance where a transcript is available.
+- **Exercise generation and AI grading**: Generate exercise sets (fill-in-the-blank, multiple choice, word transformation, reading passages, dialogue ordering, and more) from your articles, or import worksheets from images or PDFs. Open answers are evaluated by an AI in words rather than a score.
+- **Article and worksheet OCR**: Import articles or exercises from up to five photos or PDF pages read by your selected vision model.
+- **AI speech synthesis**: Listen to articles and sentences with Gemini or Fish Audio (device speech needs no key).
+- **Unreviewed verb conjugation**: For verbs outside the 19 reviewed verbs, an AI generates the conjugation, which is checked against the app's grammar rules and labelled accordingly.
+- **Optional content service**: Connect an optional read-only service with your own access key to download grammar topics and wordbook pages. The service never receives your AI key, answers, articles, or audio.
+
+## In numbers
+
+You can reproduce each count with `bun scripts/readme-numbers.ts` or the one-line commands below:
+
+| Item | Count | Source / Command |
+| --- | ---: | --- |
+| Bundled graded readers | 3 | `bun -e 'console.log((await Bun.file("src/data/graded-readers/starter.json").json()).readers.length)'` |
+| Sample articles | 3 | `grep -c 'id: ' src/data/sampleArticles.ts` |
+| Reviewed verbs in conjugation pack | 19 | `bun -e 'console.log(Object.keys((await Bun.file("src/data/grammar-pack/pack.json").json()).verbs).length)'` |
+| Noun-ending tendencies | 17 | `bun -e 'console.log((await Bun.file("src/data/noun-gender/pack.json").json()).rules.length)'` |
+| Exercise types | 11 | `grep -cE "^\s+'[A-Z_]+'," src/types/exercises.ts` |
+| UI languages | 2 | `ls src/i18n/locales/*.json \| wc -l \| tr -d ' '` |
+
+## How it is made and what to trust
+
+- **Who reviewed what**: The data files record the maintainer as the reviewer of the 19 reviewed verbs and the noun-gender pack (17 ending tendencies and 337 example nouns). The bundled graded readers and the letter-sound patterns were reviewed by a second AI model, not by a human teacher; each reader says so on its page.
+- **AI scores are estimates**: Pronunciation scores and open-question feedback from AI models are estimates, not official exam marks.
+- **No official affiliation**: Relire Plus is an independent open-source practice tool. It is not a TCF mock-exam platform, and it is not affiliated with France Éducation international or Immigration, Refugees and Citizenship Canada (IRCC).
+- **Words ratings reflect self-reported recall**: FSRS-6 review scheduling relies entirely on your own rating (Forgot, Fuzzy, or Remembered), not automated tests. In Words Play mode, answering a retrieval challenge before reveal never changes the review schedule.
+- **Gender practice counts first tries**: In the noun-gender practice game, only your first attempt on each card counts toward history; returning cards that you missed write nothing.
+
+<!-- DRAFT Q8: needs the owner's wording before release -->
+I built Relire Plus with AI coding agents under my direction. They wrote the code and drafted most of the content. Automated checks cover the code, the data shapes and the conjugation tables against reference data. The French in the graded readers was reviewed by another AI model, and no human teacher has reviewed it yet. A human language review is the release gate for beginners.
 
 ## Try it online
 
