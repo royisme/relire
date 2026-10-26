@@ -181,6 +181,12 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | I2 | Import dialog: show the note-type picker only for an `.apkg` (a permanently disabled control looks broken; owner 2026-10-25) | picker absent for .txt/.tsv/.csv and before a file is chosen; present with a focused picker for .apkg; no layout jump | built and tested (unit tests pass; e2e not run; browser unverified) |
 | P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | text and recordings built, reviewed, merged; screenshots (#24) and the Q8 wording still owner-gated |
 | PH1 | Local speech through Ollama (Phonon): `speech` on the `ollama` provider, `pcm` wrapped into a WAV with correct sizes, a Settings hint for the model, Apple Silicon and the CC BY-NC licence | `POST /v1/audio/speech` called from the browser with the learner's own server; no key; real errors shown | built and tested (unit 2761 pass; no real Ollama run: the owner tests French voices, numbers and liaisons by ear) |
+| HQ1 | Reader checkpoints hide the quoted sentence until the learner asks or answers | the box does not change size; reader data untouched | built, tests pending |
+| TR1 | Sentence transformation, spike: per kind, how many bundled reader sentences apply and the computed answer (`docs/sentence-transformation-plan.md`) | a table and examples for the owner; no code in `src/` | planned, owner review of the plan first |
+| TR2 | Pure kinds and verifiers (negation, number, passé composé) and a unit built from a reader, no AI | table tests for every rule and exception | planned |
+| TR3 | Reader entry "Practise this pattern", saved to Practice, provenance line | owner tries it | planned |
+| TR4 | The AI path (`transform.*.txt`), checked kinds, the dropped count | verifier rejects wrong proposals with a mocked AI | planned, owner-gated |
+| RM1 | README: say the maintainer tried `phonon:40m-fr` locally and it sounded fine; ask whether it becomes the default Ollama speech model | one factual sentence in both languages | waiting for the owner ("update the README later", 2026-10-26) |
 
 ### Content (paused by the owner's priority)
 
