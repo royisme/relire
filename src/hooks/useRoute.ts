@@ -1,7 +1,7 @@
 /**
  * The browser side of hash routing: the current Route as React state, and `navigate`.
  * Parsing and building addresses is utils/routes.ts. User navigation pushes a history entry;
- * resolving a default (an empty hash, `#/study`) replaces the current one, so Back never lands
+ * resolving a default (an empty hash) replaces the current one, so Back never lands
  * on an address the learner did not choose.
  */
 import { useEffect, useMemo, useSyncExternalStore } from 'react';

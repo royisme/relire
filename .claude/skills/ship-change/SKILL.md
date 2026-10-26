@@ -25,10 +25,12 @@ Workers run no browsers/servers unless explicitly authorized. Any authorized bro
 - New strings in both locale files? Keys you stopped using removed?
 - Anything a user could notice gets a line in `CHANGELOG.md` under Unreleased (Added / Changed / Fixed / Removed), in the same commit, saying what the user gets, not which files moved.
 - If you moved responsibilities between modules, update `docs/architecture.md`; if you changed an area rule, update the matching `.claude/rules/*.md`.
+- Update `TASKS.md` (the step that landed leaves the queue, the next one is named) and `PROGRESS.md` (what is done, what broke, what is still unverified). `docs/HANDOFF.md` is local only; sync it with the handoff skill, never commit it.
 
 ## 3. Commit and push
 - Work on the designated feature branch. If its PR was already merged, restart the branch from the latest `main` and keep only unmerged commits.
-- One commit per coherent change, with a message that explains why. End it with the attribution lines the session asks for.
+- One commit per coherent change, with a message that explains why. The title is `type(scope): summary` (feat, fix, docs, chore, refactor, test; `docs/conventions.md`, "Git names"). End it with the attribution lines the session asks for.
+- A new branch has at most three hyphenated words and no slash or type prefix; PR titles use the same `type(scope): summary` form.
 - `git push -u origin <branch>`; retry network failures with backoff.
 - Do not open a PR, merge, or force-push someone else's branch unless the user asks.
 

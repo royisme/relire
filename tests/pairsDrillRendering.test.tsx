@@ -12,6 +12,7 @@ import { loadMinimalPairsPack } from '../src/services/minimalPairs/load';
 import { preparePairsDrills } from '../src/services/exercises/fromPairs';
 import { emptyItems } from '../src/hooks/exerciseUnit/model';
 import { ItemNotes } from '../src/components/practice/ItemNotes';
+import { dialogBody } from './fixtures/dialogBody';
 
 const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
 Object.defineProperty(globalThis, 'window', {
@@ -55,18 +56,21 @@ for (const language of ['en', 'zh']) {
 
   test(`${language}: add choices expose Sound pairs in Grammar beside Gender, and directly in Listening only`, async () => {
     await i18n.changeLanguage(language);
-    const render = (area: 'grammar' | 'listening' | 'reading' | 'writing') =>
-      renderToStaticMarkup(
+    // The Dialog portals on the client only, so its content is rendered without the wrapper.
+    const render = (area: 'grammar' | 'listening' | 'reading' | 'writing') => {
+      const Body = dialogBody(AddExercisesDialog, {
+        area,
+        articles: [],
+        initialChoice: null,
+        onMissingKey: () => {},
+        onClose: () => {},
+      });
+      return renderToStaticMarkup(
         <I18nextProvider i18n={i18n}>
-          <AddExercisesDialog
-            area={area}
-            articles={[]}
-            initialChoice={null}
-            onMissingKey={() => {}}
-            onClose={() => {}}
-          />
+          <Body />
         </I18nextProvider>,
       );
+    };
     expect(render('grammar')).toContain(i18n.t('nounGender.drill.title'));
     for (const area of ['grammar', 'listening'] as const)
       expect(render(area)).toContain(i18n.t('minimalPairs.drill.title'));

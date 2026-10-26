@@ -1,0 +1,103 @@
+import type { RefObject } from 'react';
+import { useTranslation } from 'react-i18next';
+import { summarizeRhythm } from '../../../services/vocabulary/game/rhythm';
+import type { VocabularyRow } from '../../../types/vocabulary';
+import { formatAvailableAt } from '../../../utils/srs';
+import { Button } from '../../ui/button';
+import { Link } from '../../shell/Link';
+
+/** The line a finished state shows: when the next card really comes back, or that nothing waits. */
+export function RunNextDueLine({ due }: { due: number | null }) {
+  const { t, i18n } = useTranslation();
+  return (
+    <p className="tnum break-words text-sm text-ink-600">
+      {due === null
+        ? t('vocab.game.nothingWaiting')
+        : t('vocab.game.nextDue', { time: formatAvailableAt(due, i18n.resolvedLanguage) })}
+    </p>
+  );
+}
+
+/** The end of a chunk: the real counts, the real next due time, Continue and the way back to Words. */
+export function RunDone({
+  ratings,
+  rows,
+  now,
+  due,
+  remaining,
+  nextDue,
+  onContinue,
+  heading,
+}: {
+  ratings: number;
+  rows: readonly VocabularyRow[];
+  now: number;
+  due: number;
+  remaining: number;
+  nextDue: number | null;
+  onContinue: () => void;
+  heading: RefObject<HTMLHeadingElement | null>;
+}) {
+  const { t } = useTranslation();
+  const rhythm = summarizeRhythm(rows, now);
+  return (
+    <section className="space-y-3 border-y border-ink-200 py-10">
+      <h1 ref={heading} tabIndex={-1} className="font-serif text-2xl font-semibold">
+        {t('vocab.game.doneTitle')}
+      </h1>
+      <p role="status" className="tnum break-words text-sm text-ink-800">
+        {t('vocab.game.doneCounts', { ratings, due })}
+      </p>
+      <dl className="space-y-3 text-sm">
+        <div>
+          <dt className="text-ink-600">{t('vocab.game.now')}</dt>
+          <dd className="tnum break-words">{t('vocab.game.keptNow', rhythm.now)}</dd>
+        </div>
+        <div>
+          <dt className="text-ink-600">{t('vocab.game.gainedThisWeek')}</dt>
+          <dd className="tnum break-words">{t('vocab.game.firstMature', { words: rhythm.gainedThisWeek })}</dd>
+        </div>
+      </dl>
+      {due === 0 && remaining === 0 ? <RunNextDueLine due={nextDue} /> : null}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="button" onClick={onContinue}>
+          {t('vocab.game.continueRun')}
+        </Button>
+        <Link
+          to={{ name: 'words' }}
+          className="inline-flex min-h-10 items-center rounded-md border border-ink-300 bg-surface px-4 text-sm text-ink-800 hover:bg-ink-100"
+        >
+          {t('vocab.back')}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/** Snapshot loading and failure are not queue completion. */
+export function RunWaiting({ error }: { error: string | null }) {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="status"
+      aria-busy={!error}
+      className="mx-auto h-[42rem] w-full max-w-[25rem] overflow-auto py-10 text-sm text-ink-600"
+    >
+      {error ?? t('vocab.game.loadingCard')}
+    </div>
+  );
+}
+
+/** The queue with nothing left to play right now: what really comes back next, and the way back to Words. */
+export function RunCleared({ nextDue }: { nextDue: number | null }) {
+  const { t } = useTranslation();
+  return (
+    <section className="space-y-3 border-y border-ink-200 py-10">
+      <h1 className="font-serif text-2xl font-semibold">{t('vocab.game.queueCleared')}</h1>
+      <RunNextDueLine due={nextDue} />
+      <Link to={{ name: 'words' }} className="inline-flex min-h-10 items-center text-accent-900 underline">
+        {t('vocab.back')}
+      </Link>
+    </section>
+  );
+}

@@ -1,8 +1,12 @@
 /** Row-owned vocabulary transactions, invalidation tokens and durable-first change notifications. */
 import type { IDBPTransaction } from 'idb';
-import type { WordAnalysis } from '../types';
+import { TokenBindingSchema } from '../types/gradedReader';
+import { readerWords } from '../utils/readerTokens';
 import {
   VocabularyRowSchema,
+  VocabularyDefinitionSchema,
+  VocabularyContextSchema,
+  type VocabularyDefinition,
   VocabularyPreferencesSchema,
   VocabularyDaySchema,
   type VocabularyRow,
@@ -20,6 +24,7 @@ import {
 } from '../services/vocabulary/identity';
 import { formatDate, initialVocabularySchedule, nextVocabularySchedule } from '../utils/srs';
 import { db, type RelireDB } from './db';
+import type { ImportedNote } from '../services/vocabulary/import/prepare';
 
 const listeners = new Set<() => void | Promise<void>>();
 export const subscribeVocabulary = (listener: () => void | Promise<void>) => {
@@ -129,13 +134,35 @@ export async function saveVocabularyPreferences(input: VocabularyPreferences) {
 }
 export async function saveVocabularyBookmark(
   lookup: VocabularyLookup,
-  analysis: WordAnalysis,
+  input: VocabularyDefinition,
   bookSource?: VocabularyCandidate['bookSource'],
   now = Date.now(),
 ) {
   const key = vocabularyKey(lookup.word);
-  if (vocabularyKey(analysis.word) !== key)
-    throw new Error(`Analysis word mismatch: ${analysis.word} / ${lookup.word}`);
+  const definition = VocabularyDefinitionSchema.parse(input);
+  if (definition.kind === 'ai') {
+    if (vocabularyKey(definition.analysis.word) !== key)
+      throw new Error(`Analysis word mismatch: ${definition.analysis.word} / ${lookup.word}`);
+  }
+  if (definition.kind === 'reader') {
+    const binding = TokenBindingSchema.safeParse(lookup.binding);
+    const token = binding.success ? readerWords(lookup.sentence)[binding.data.ordinal] : undefined;
+    const bound =
+      binding.success &&
+      binding.data.entryIds.includes(definition.entry.id) &&
+      token &&
+      [token.text, token.lookup, token.prefix].some((part) => vocabularyKey(part) === key);
+    if (!definition.entry.forms.some((form) => vocabularyKey(form) === key) && !bound)
+      throw new Error(`Reader entry does not cover clicked form: ${lookup.word}`);
+  }
+  const context = VocabularyContextSchema.parse({
+    id: vocabularyContextKey(lookup),
+    sentence: lookup.sentence,
+    savedAt: now,
+    requestLanguage: lookup.requestLanguage,
+    ...(lookup.source ? { source: lookup.source } : {}),
+    definition,
+  });
   return write(async (tx) => {
     const store = tx.objectStore('vocab');
     const candidate = {
@@ -144,27 +171,45 @@ export async function saveVocabularyBookmark(
       ...(bookSource ? { bookSource } : {}),
     };
     let row = attach((await store.get(vocabularyId(key))) ?? materialize(candidate, now), candidate);
-    const id = vocabularyContextKey(lookup);
+    const id = context.id;
     row = {
       ...row,
       bookmarked: true,
       bookmarkedAt: row.bookmarkedAt ?? now,
-      contexts: row.contexts.some((context) => context.id === id)
-        ? row.contexts
-        : [
-            ...row.contexts,
-            {
-              id,
-              sentence: lookup.sentence,
-              savedAt: now,
-              requestLanguage: lookup.requestLanguage,
-              ...(lookup.source ? { source: lookup.source } : {}),
-              analysis,
-            },
-          ],
+      contexts: row.contexts.some((context) => context.id === id) ? row.contexts : [...row.contexts, context],
     };
     await store.put(VocabularyRowSchema.parse(row));
     return row;
+  });
+}
+/** One atomic batch. Import adds content/bookmarks, never introductions, schedule resets or review observations. */
+export async function importVocabularyNotes(notes: readonly ImportedNote[], now: number) {
+  return write(async (tx) => {
+    const store = tx.objectStore('vocab');
+    const existing = await store.getAll();
+    const rows = new Map(existing.map((row) => [row.key, VocabularyRowSchema.parse(row)]));
+    const firstBookmark = existing.reduce((time, row) => Math.max(time, (row.bookmarkedAt ?? -1) + 1), now);
+    let imported = 0;
+    let merged = 0;
+    for (const [index, note] of notes.entries()) {
+      const key = vocabularyKey(note.word);
+      const prior = rows.get(key);
+      if (prior) merged += 1;
+      if (!prior) imported += 1;
+      const row = prior ?? materialize({ key, word: note.word }, now);
+      const contexts = row.contexts.some((context) => context.id === note.context.id)
+        ? row.contexts.map((context) => (context.id === note.context.id ? note.context : context))
+        : [...row.contexts, note.context];
+      const updated = VocabularyRowSchema.parse({
+        ...row,
+        bookmarked: true,
+        bookmarkedAt: row.bookmarkedAt ?? firstBookmark + index,
+        contexts,
+      });
+      rows.set(key, updated);
+      await store.put(updated);
+    }
+    return { imported, merged };
   });
 }
 export async function removeVocabularyBookmark(key: string) {

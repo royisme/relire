@@ -131,10 +131,7 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
       }}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <Link
-          to={{ name: 'study', tab: 'words' }}
-          className="inline-flex min-h-10 items-center text-accent-900 underline"
-        >
+        <Link to={{ name: 'words' }} className="inline-flex min-h-10 items-center text-accent-900 underline">
           {t('vocab.back')}
         </Link>
         <span className="tnum">
@@ -150,6 +147,7 @@ export function VocabularyReview({ model, book }: { model: VocabularyModel; book
             key={key}
             word={active.candidate.word}
             answer={revealed ? { ...active.candidate, row: active.row } : null}
+            book={book}
             face={back ? 'back' : 'front'}
             busy={busy}
             onFlip={() => void flip()}

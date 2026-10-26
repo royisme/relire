@@ -13,11 +13,22 @@ interface Props {
   /** Recording is under way elsewhere; practising another sentence must wait. */
   practiseBlocked: boolean;
   onExplain: () => void;
-  onPractise: () => void;
+  onPractise?: () => void;
+  explainLabel?: string;
   onDismiss: () => void;
+  /** Speaks with the device's own voice instead of the selected engine (the graded reader's keyless Listen). */
+  playbackEngine?: 'device';
 }
 
-export function SentenceBar({ text, practiseBlocked, onExplain, onPractise, onDismiss }: Props) {
+export function SentenceBar({
+  text,
+  practiseBlocked,
+  onExplain,
+  onPractise,
+  onDismiss,
+  playbackEngine,
+  explainLabel,
+}: Props) {
   const { t } = useTranslation();
   const practiseLabel = practiseBlocked ? t('practiceCard.finishFirst') : t('practiceCard.open');
   return (
@@ -29,8 +40,9 @@ export function SentenceBar({ text, practiseBlocked, onExplain, onPractise, onDi
       <p className="min-w-0 flex-1 truncate font-serif text-base">{text}</p>
       <SpeakButton
         text={text}
-        label={t('reader.playSentence')}
+        label={t(playbackEngine === 'device' ? 'gradedReader.deviceVoice' : 'reader.playSentence')}
         stopLabel={t('reader.stop')}
+        engine={playbackEngine}
         variant="ghost"
         size="icon"
         className={panelGhost}
@@ -40,23 +52,25 @@ export function SentenceBar({ text, practiseBlocked, onExplain, onPractise, onDi
         size="icon"
         className={panelGhost}
         onClick={onExplain}
-        aria-label={t('reader.analyzeSentence')}
-        title={t('reader.analyzeSentence')}
+        aria-label={explainLabel ?? t('reader.analyzeSentence')}
+        title={explainLabel ?? t('reader.analyzeSentence')}
       >
         <TextSearch className="w-4 h-4" aria-hidden="true" />
       </Button>
-      <Button
-        data-practice-entry
-        variant="ghost"
-        size="icon"
-        className={panelGhost}
-        onClick={onPractise}
-        disabled={practiseBlocked}
-        aria-label={practiseLabel}
-        title={practiseLabel}
-      >
-        <Mic className="w-4 h-4" aria-hidden="true" />
-      </Button>
+      {onPractise && (
+        <Button
+          data-practice-entry
+          variant="ghost"
+          size="icon"
+          className={panelGhost}
+          onClick={onPractise}
+          disabled={practiseBlocked}
+          aria-label={practiseLabel}
+          title={practiseLabel}
+        >
+          <Mic className="w-4 h-4" aria-hidden="true" />
+        </Button>
+      )}
       <div className="w-px h-5 bg-panel-line" aria-hidden="true" />
       <Button
         variant="ghost"

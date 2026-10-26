@@ -1,6 +1,7 @@
 /**
- * Read-only queries over the `attempts` store: recent attempts, accuracy per
- * grammar tag, saved sound contrast and the mistake notebook. Only real attempts count; an empty
+ * Read-only queries over the `attempts` store: recent attempts, today's
+ * attempts with the items wrong before today, accuracy per grammar tag, saved
+ * sound contrast and the mistake notebook. Only real attempts count; an empty
  * store gives empty answers, never placeholders. Writing attempts belongs to
  * `exercises.ts` (an attempt exists only together with the item state it
  * checked). Does not group tags into areas; the UI does that with `grammarAreaOf`.
@@ -37,6 +38,26 @@ export async function listAttempts(query: AttemptQuery = {}): Promise<ExerciseAt
     cursor = await cursor.continue();
   }
   return out;
+}
+
+/**
+ * Attempts from `start` on, plus the items that already had an incorrect
+ * attempt before it: "redo a mistake" counts only a retry of an item that was
+ * wrong before today, so a first wrong answer on a new item is not one.
+ */
+export async function listAttemptsSince(
+  start: number,
+): Promise<{ today: ExerciseAttempt[]; wrongBefore: Set<string> }> {
+  const today: ExerciseAttempt[] = [];
+  const wrongBefore = new Set<string>();
+  let cursor = await (await db()).transaction('attempts').store.index('timestamp').openCursor();
+  while (cursor) {
+    const attempt = ExerciseAttemptSchema.parse(cursor.value);
+    if (attempt.timestamp >= start) today.push(attempt);
+    else if (!attempt.correct) wrongBefore.add(itemStateId(attempt.unitId, attempt.itemId));
+    cursor = await cursor.continue();
+  }
+  return { today, wrongBefore };
 }
 
 export interface TagAccuracy {

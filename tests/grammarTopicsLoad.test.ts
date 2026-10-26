@@ -5,28 +5,28 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { loadGrammarTopic, loadGrammarTopics } from '../src/services/grammarTopics/load';
 import { loadGrammarTagIndex } from '../src/services/grammarTopics/tagIndex';
 import { resetContentRequests } from '../src/services/grammarTopics/request';
-import { GrammarTopicSchema, GrammarTopicSummarySchema } from '../src/types/grammarTopic';
+import { GrammarTopicListEntrySchema, GrammarTopicListSchema, GrammarTopicSchema } from '../src/types/grammarTopic';
 import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { useGrammarTopics } from '../src/hooks/useGrammarTopics';
 import { useGrammarTagIndex } from '../src/hooks/useGrammarTagIndex';
 import { cacheCounts, getCached, putCached } from '../src/storage/cache';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOff, serviceOn } from './fixtures/contentServiceSettings';
 import { failure, freshDb } from './fixtures/storage';
 import { topicFixture } from './fixtures/grammarTopics';
 
 const origin = 'http://content.test';
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 let fetchSpy: ReturnType<typeof spyOn<typeof globalThis, 'fetch'>>;
 beforeEach(async () => {
   resetContentRequests();
   await freshDb();
-  process.env.VITE_CONTENT_SERVICE_URL = origin;
+  freshSettingsStorage();
+  serviceOn(origin);
   fetchSpy = spyOn(globalThis, 'fetch');
 });
 afterEach(() => {
   resetContentRequests();
   fetchSpy.mockRestore();
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 
 const loaders = [
@@ -34,8 +34,8 @@ const loaders = [
     name: 'summaries',
     path: '/v1/topics',
     load: loadGrammarTopics,
-    data: () => [GrammarTopicSummarySchema.parse(topicFixture())],
-    parse: (data: unknown) => GrammarTopicSummarySchema.array().parse(data),
+    data: () => [GrammarTopicListEntrySchema.parse({ ...topicFixture(), position: 1 })],
+    parse: (data: unknown) => GrammarTopicListSchema.parse(data),
   },
   {
     name: 'one topic',
@@ -61,7 +61,11 @@ for (const { name, path, load, data, parse } of loaders) {
     resetContentRequests();
     expect(await load()).toEqual(data());
     expect(fetchSpy).toHaveBeenCalledTimes(2);
-    expect(fetchSpy).toHaveBeenCalledWith(`${origin}${path}`, { credentials: 'omit', signal: expect.any(AbortSignal) });
+    expect(fetchSpy).toHaveBeenCalledWith(`${origin}${path}`, {
+      credentials: 'omit',
+      headers: { Authorization: 'Bearer TEST-access-key' },
+      signal: expect.any(AbortSignal),
+    });
     expect((await cacheCounts()).content).toBe(1);
   });
 
@@ -93,13 +97,13 @@ for (const { name, path, load, data, parse } of loaders) {
     resetContentRequests();
     fetchSpy.mockRejectedValue(new TypeError('TEST ONLY offline'));
     expect(await load()).toEqual(data());
-    process.env.VITE_CONTENT_SERVICE_URL = 'http://other-content.test';
+    serviceOn('http://other-content.test');
     expect(((await failure(load())) as Error).message).toBe('TEST ONLY offline');
   });
 
-  test(`${name}: an unconfigured build never fetches or uses a stored response`, async () => {
+  test(`${name}: an unconfigured service never fetches or uses a stored response`, async () => {
     await putCached('content', `${origin}${path}`, data());
-    delete process.env.VITE_CONTENT_SERVICE_URL;
+    serviceOff();
     expect(((await failure(load())) as Error).message).toBe('Content service is not configured');
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -136,7 +140,7 @@ test('offline cache is request-scoped, validated on read, and expires after 365 
 
 test('tag-index requests share in-flight work without parsing topics, then a later mount after reset fetches again', async () => {
   const topicParse = spyOn(GrammarTopicSchema, 'parse');
-  const summaryParse = spyOn(GrammarTopicSummarySchema, 'parse');
+  const listParse = spyOn(GrammarTopicListSchema, 'parse');
   fetchSpy.mockImplementation(Object.assign(async () => Response.json({}), { preconnect: () => {} }));
   try {
     const first = loadGrammarTagIndex();
@@ -147,19 +151,19 @@ test('tag-index requests share in-flight work without parsing topics, then a lat
     await loadGrammarTagIndex();
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     expect(topicParse).not.toHaveBeenCalled();
-    expect(summaryParse).not.toHaveBeenCalled();
+    expect(listParse).not.toHaveBeenCalled();
   } finally {
     topicParse.mockRestore();
-    summaryParse.mockRestore();
+    listParse.mockRestore();
   }
 });
 
-test('hooks begin loading and an unconfigured tag hook is ready without a request', () => {
+test('hooks begin loading and a tag hook without the service is ready without a request', () => {
   const topics = () => createElement((): string => useGrammarTopics().status);
   const tags = () => createElement((): string => useGrammarTagIndex().status);
   expect(renderToStaticMarkup(topics())).toBe('loading');
   expect(renderToStaticMarkup(tags())).toBe('loading');
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  serviceOff();
   expect(renderToStaticMarkup(tags())).toBe('ready');
   expect(fetchSpy).not.toHaveBeenCalled();
 });

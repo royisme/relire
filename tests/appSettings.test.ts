@@ -100,6 +100,17 @@ describe('appSettings BYOK configuration', () => {
     expect(getAppSettings().speechVoice).toBe('Kore');
   });
 
+  test('a speech provider with no voice list keeps any non-blank voice, trimmed, and drops nothing else', () => {
+    // Ollama names voices per model, so storage cannot prove a typed name wrong: it keeps the trimmed one.
+    saveAppSettings({ speechProvider: 'ollama', speechModel: 'phonon:40m-multilingual', speechVoice: ' Zoey ' });
+    expect(getAppSettings().speechVoice).toBe('Zoey');
+    // A blank or non-string voice is not a voice: the engine's own default (none) stays in place.
+    for (const invalid of ['', '   ', 7, null]) {
+      storage.set('relire_app_settings_v1', JSON.stringify({ speechProvider: 'ollama', speechVoice: invalid }));
+      expect(getAppSettings().speechVoice).toBe('');
+    }
+  });
+
   test('the device engine stores neither a model nor a voice, and hand-written ones do not survive', () => {
     saveAppSettings({ speechProvider: 'device' });
     expect([getAppSettings().speechProvider, getAppSettings().speechModel, getAppSettings().speechVoice]).toEqual([

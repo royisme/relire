@@ -3,7 +3,7 @@ import { expect, test } from './fixtures';
 
 // `ai` onboards the app with a test key; nothing here calls the AI.
 test.beforeEach(async ({ page, ai }) => {
-  await page.goto('/');
+  await page.goto('/#/read');
   expect(ai.calls.tts).toBe(0);
 });
 

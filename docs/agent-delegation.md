@@ -38,7 +38,7 @@ Use this loop only when a mistake would surface late: work that spans several fi
 3. **Cited research on `agy` runs with `PI_THINKING=high`** (the script's default), with concrete questions. At `medium` it has produced claims without sources.
 4. **Never `gemini-3.1-pro`.** Unverified, and hard tasks belong to `pi` or Sonnet anyway.
 5. **If `pi` is rate-limited, wait for it or give the task to Sonnet. Never downgrade a hard task to `agy`.** Simple tasks are already on `agy` and are unaffected.
-6. **No multi-file code implementation on `agy`.** There is no evidence it does that well.
+6. **Code implementation on `agy` (`antigravity/gemini-3.8-flash` through `pi`) is allowed (owner decision 2026-10-25: use Gemini 3.8 and pi to speed up implementation).** Give it a bounded, well-specified task in its own worktree, keep the code/tests split (another model writes the tests), and review it as you would any worker; a multi-file or design-heavy step still gets the stricter review. This replaces the earlier "no multi-file code on agy" rule.
 7. **`agy` is not sandboxed** (section 8). Give it a throwaway directory or a worktree, never the lead's checkout, and never secrets.
 
 Rules for `agy` output:
@@ -84,8 +84,9 @@ The owner's rules, reconciled with `pi --list-models` on 2026-10-18 (pi 1.3.0, a
 | Previous recorded choice | `openai-codex/gpt-5.6-sol` | yes | Still listed; use it if gpt-6.1-sol is unavailable |
 | Second choice | `zai/glm-5.3` | yes | |
 | Usable, not preferred | `minimax-cn/MiniMax-M3`, `minimax-cn/MiniMax-M2.7` | yes | |
+| Simple, well-specified implementation (owner decision 2026-10-24, to spare Claude, GPT and GLM quota) | `magpie/group/deepseek-flash` | yes | The provider is `magpie` and the id is `group/deepseek-flash` (two slashes); pi routes it through the magpie gateway. Owner decision 2026-10-25: use `group/deepseek-flash` from now on; the earlier `magpie/deepseek/deepseek-flash` route still exists in `pi --list-models` but is no longer the default. Smoke-tested 2026-10-24 through `scripts/pi-dispatch.sh`: answered "smoke ok" in about 3 s. **Not** `deepseek/deepseek-flash`, which is the direct `deepseek` provider named in the Never row below. Check `magpie quota deepseek` (prepaid balance) before a run |
 | Simple / research work | `antigravity/gemini-3.8-flash` | yes | Only through `scripts/pi-dispatch.sh` (it loads the agy-lean extension) |
-| Never | anything `deepseek/*`; `commandcode/*` | deepseek yes, commandcode no | commandcode had no balance and is no longer listed |
+| Never | anything `deepseek/*` as a *provider* (the direct `deepseek` API; the magpie route above is the allowed one); `commandcode/*` | deepseek yes, commandcode no | commandcode had no balance and is no longer listed |
 | Never | `gemini-3.1-pro` | only as `google/gemini-3.1-pro-preview` | |
 | Review gate, quota-gated | `antigravity/gemini-4-argon` | yes | Read-only second opinion; check `agy -p "/usage"` first (section 2) |
 | Never route | `antigravity/claude-*`, `antigravity/gpt-oss-*` | yes | Their shared agy quota was at 1% weekly (section 2) |
@@ -108,7 +109,7 @@ Run from the checkout to be reviewed. `--tools read,grep,find,ls` restricts pi's
 ```bash
 task=<short-name>
 mkdir -p .pi-runs/$task
-git worktree add -b pi/$task ../relire-wt/$task HEAD
+git worktree add -b $task ../relire-wt/$task HEAD   # branch = the task name: at most three hyphenated words, no slash or prefix
 git -C ../relire-wt/$task log -1   # must be the commit you expect
 ln -s "$PWD/node_modules" ../relire-wt/$task/node_modules
 # write the prompt to .pi-runs/$task/prompt.md (template in section 6)
@@ -119,7 +120,7 @@ nohup scripts/pi-dispatch.sh ../relire-wt/$task openai-codex/gpt-6.1-sol \
 
 What the script does: runs `pi -p -ne --no-session --model <id> --thinking ${PI_THINKING:-high}` inside the worktree under `timeout` (default 5400 s). If no process in pi's tree holds an established TCP connection within 48 s it kills and retries, at most 5 times (exit 124 when it gives up). It refuses an empty prompt file and a model without `<provider>/`. For `antigravity/*` it adds `-e ~/.pi/agent/extensions/agy-lean.ts`. `PI_EXT=1` allows extensions; only use it on a task you can afford to see hijacked.
 
-Clean up after merging or discarding: `git worktree remove ../relire-wt/$task && git branch -D pi/$task`.
+Clean up after merging or discarding: `git worktree remove ../relire-wt/$task && git branch -D $task` (older worker branches are still named `pi/<task>`).
 
 ## 5. How results come back, and the merge gate
 
@@ -136,6 +137,7 @@ bun run typecheck && bun run lint && bun run test && bun run i18n:check && bun r
 Browser automation is exceptional for necessary critical frontend/backend, browser-persistence or backup/restore risks not covered by unit tests. Prefer an existing focused spec; add coverage only for a necessary uncovered risk, not for UI changes alone. Owner-manual visual acceptance is separate, without automated theme/viewport/focus/animation/screenshot matrices. Full E2E requires an explicit owner request or a separately justified broad integration need, never a default merge/batch gate. Any authorized run follows section 7.
 
   Then read the full diff against the plan: does it match the plan, did docs and `CHANGELOG.md` change with the behaviour, is a rule met in letter but broken in spirit, did the scope grow, is claimed evidence real evidence. For a behavioral regression, prefer a focused unit test that demonstrates the broken behavior; do not stash user work or require browser red proof for UI-only changes.
+- **Code and tests come from different models (owner rule, 2026-10-25).** One model that writes both can bend the tests to pass. The implementer leaves existing assertions alone except what keeps `typecheck` green; new or changed unit tests and all e2e are written by a second worker on another model (e2e: `openai-codex/gpt-6.1-sol`) from the plan's acceptance lines, not from the implementer's reasoning. A pure refactor writes no test and edits none: the lead rejects a test diff in it. The lead reads every test diff for weakened or fitted assertions.
 - **Two review rounds, then escalate.** If implementer and reviewer have not converged after two rounds, stop and give the user both sides verbatim plus your own judgment. A dispute that does not converge usually means the plan is ambiguous, and changing the plan is the user's decision.
 - `agy` reports are leads, not findings. Verify every claim against the source before using it.
 
@@ -144,10 +146,10 @@ Browser automation is exceptional for necessary critical frontend/backend, brows
 pi loads relire's `AGENTS.md` (context-file discovery covers `AGENTS.md` and `CLAUDE.md`; `CLAUDE.md` only imports `AGENTS.md`), but **not** `.claude/rules/*.md`, which only Claude Code auto-loads. agy-lean is told to read repo rules, but does not inherit them. Name the rule files in the prompt. In the template, `<worktree>` is the absolute path of the task's worktree and `<lead-checkout>` the absolute path of the lead's own checkout; fill both in before dispatching.
 
 ```markdown
-You are the implementer for one task in Relire, working in the git worktree <worktree> on branch pi/<task>.
+You are the implementer for one task in Relire, working in the git worktree <worktree> on branch <task>.
 
 ## Read first
-- CLAUDE.md, then: <docs/merge-plan.md §N, docs/architecture.md section, ...>
+- CLAUDE.md, then docs/conventions.md ("Code style" and "Git names"), then: <docs/merge-plan.md §N, docs/architecture.md section, ...>
 - Area rules for the files you touch: .claude/rules/<ui|ai-layer|storage|speech|i18n|typescript>.md
 - The plan: <path>. Do exactly these steps: <steps>. Scope: only <files/dirs>.
 
@@ -156,8 +158,9 @@ You are the implementer for one task in Relire, working in the git worktree <wor
 - Never write, print or commit an API key, token or credential. Do not read .env files or ~/.pi, ~/.gemini, ~/.config credentials.
 - Never invent data: no sample stats, fake scores or fallback AI answers. Empty means empty; failures show the real error.
 - Nothing has shipped: write no backward-compatibility, legacy-fallback or migration code for unreleased states, and no defensive code for cases that cannot happen. Add an abstraction only when a second real caller exists. When unsure, take the smaller change and report the question instead of building options.
+- No complexity for a speculative or very unlikely race or security edge case (extra locks, guards, capture-phase listeners, retries, sanitising of trusted data): if you think one is needed, do not add it; stop and report the concrete failure, how likely it is and what the code would cost, and let the owner decide (docs/conventions.md, Code style). Do not widen scope for theoretical robustness.
 - AI calls go through src/services/ai; prompt wording lives in template files, never in TypeScript.
-- Comments and commit messages in English. Chinese only in zh.json and *.zh.txt prompts.
+- Comments and commit messages in English; commit messages are `type(scope): summary` (feat, fix, docs, chore, refactor, test). Chinese only in zh.json and *.zh.txt prompts.
 - A change a user could notice gets one line in CHANGELOG.md (Unreleased) in the same commit.
 - Bun only. Do not run bun install / bun add; node_modules is a symlink to the main checkout. A new dependency needs the user: stop and report.
 - Commit on this branch only, staging files by name (never git add -A or git add .). Do not push, open a PR or merge. This overrides the ship-change skill's push step.

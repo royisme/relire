@@ -24,7 +24,7 @@ Non-goals:
 | Record, stop, play back, one mic owner | `src/utils/speech/recorder.ts` (capture lock, MediaRecorder: webm/opus, mp4 or ogg), `src/hooks/useShadowingRecorder.ts`, `src/hooks/usePracticeCard.ts` |
 | Read-aloud UI with optional AI check | `src/components/shadowing/ShadowingRecorder.tsx`, `AssessmentResult.tsx`; used by `SentenceDrawer.tsx` and `practice/OralPractice.tsx` (the "Read aloud" section of Practice) |
 | AI assessment | `api.assessPronunciation` (`src/services/api.ts:168`) to `tasks.assessPronunciation` (`src/services/ai/tasks.ts:68`), prompts `pronunciation-audio.*.txt` / `pronunciation-text.*.txt`. Audio is sent only when the text provider has `supportsAudioInput` (Gemini only today). Never cached |
-| Kept recordings, compare with reference | `src/storage/shadowing.ts` (3 takes per sentence, article or passage owner), My study → Shadowing log |
+| Kept recordings, compare with reference | `src/storage/shadowing.ts` (3 takes per sentence, article or passage owner), Speaking → Recordings (the shadowing log) |
 | Reference audio | `clips.loadSpeech` through `getAiAccess().synthesize`, stored in IndexedDB `audio`; or the device voice |
 | French sound inventory with tap-to-hear examples | `src/data/frenchIpa.ts`, the IPA chart in Progress (`AnalyticsDashboard.tsx`) |
 | Drills with attempts, Mistakes and accuracy | `ExerciseUnit` / `saveUnits` / `checkItem` (`src/storage/exercises.ts`), tag `listening-dictation` (`src/types/grammar.ts`), NUMBER_DICTATION's Listen control |

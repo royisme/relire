@@ -136,6 +136,21 @@ test('a voice id the speech provider refuses never saves silently', () => {
   }
 });
 
+test('a speech engine with no voice list saves a typed voice instead of refusing it', () => {
+  saveAppSettings({});
+  // Ollama has no voice list and names voices per model, so Save accepts the trimmed typed name.
+  const saved = saveSlice(
+    draftOf(getAppSettings(), {
+      speechProvider: 'ollama',
+      speechModel: 'phonon:40m-multilingual',
+      speechVoice: ' Zoey ',
+    }),
+    'ai',
+  );
+  expect(saved.speechVoice).toBe('Zoey');
+  expect(getAppSettings().speechVoice).toBe('Zoey');
+});
+
 test('each speech engine comes back with its own model and voice after a save and a reload', () => {
   saveAppSettings({});
   const voice = '0123456789abcdef0123456789abcdef';

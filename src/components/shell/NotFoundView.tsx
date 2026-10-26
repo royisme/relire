@@ -8,7 +8,7 @@ export function NotFoundView({
   reason,
   area,
 }: {
-  reason: 'page' | 'article' | 'unit' | 'set' | 'passage' | 'grammarTopic';
+  reason: 'page' | 'article' | 'unit' | 'set' | 'passage' | 'grammarTopic' | 'gradedReader';
   area?: LearningArea;
 }) {
   const { t } = useTranslation();

@@ -24,6 +24,7 @@ import type { KeyRequest } from './keyRequest';
 import { PracticeSection } from './PracticeSection';
 import { PromptsSection } from './PromptsSection';
 import { SectionList } from './SectionList';
+import { ServiceSection } from './ServiceSection';
 import { sliceOf, withSlice, type SettingsSlice } from './slices';
 import { useModelCatalogue } from './useModelCatalogue';
 import { WordsSection, draftAfterSave } from './WordsSection';
@@ -168,6 +169,14 @@ export function SettingsPage({
             />
           )}
           {active === 'data' && <DataSection />}
+          {active === 'service' && (
+            <ServiceSection
+              draft={draft}
+              saved={saved}
+              onChange={setDraft}
+              onSaved={(next) => commit(next, 'service')}
+            />
+          )}
         </div>
       </div>
       {guard.leaving && (

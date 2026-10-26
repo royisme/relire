@@ -2,6 +2,7 @@
 import type { WordAnalysis } from '../../src/types';
 import type {
   VocabularyCandidate,
+  VocabularyDefinition,
   VocabularyEntry,
   VocabularyRow,
   VocabularySchedule,
@@ -17,6 +18,10 @@ export const testAnalysis = (word = 'test-mot'): WordAnalysis => ({
   phoneticsGuide: 'TEST guide',
   translation: 'TEST meaning',
   usageExamples: [{ fr: 'Une phrase TEST.', zh: '\u6d4b\u8bd5', en: 'A TEST sentence.' }],
+});
+export const testDefinition = (word = 'test-mot'): Extract<VocabularyDefinition, { kind: 'ai' }> => ({
+  kind: 'ai',
+  analysis: testAnalysis(word),
 });
 export const testLookup = (word = 'test-mot') => ({
   word,
@@ -34,7 +39,6 @@ export async function testBook(count = 1, label = 'TEST') {
   const metadata = {
     bookId: 'tcf-7000' as const,
     title: { en: label, zh: '\u6d4b\u8bd5' },
-    attribution: 'Invented TEST only',
   };
   const entries = Array.from({ length: count }, (_, index) => testEntry(`test-${index}`, index));
   const contentHash = await vocabularyHash({ metadata, entries });

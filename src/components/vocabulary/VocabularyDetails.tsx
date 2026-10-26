@@ -4,8 +4,17 @@ import type { VocabularyJoined } from '../../services/vocabulary/queue';
 import { useVocabularyCardActions } from '../../hooks/useVocabularyCardActions';
 import { Button } from '../ui/button';
 import { Sheet, Dialog, OverlayHeader } from '../ui/overlay';
+import type { VocabularyBook } from '../../types/vocabulary';
 import { VocabularyAnswer } from './VocabularyAnswer';
-export function VocabularyDetails({ word, onClose }: { word: VocabularyJoined; onClose: () => void }) {
+export function VocabularyDetails({
+  word,
+  book,
+  onClose,
+}: {
+  word: VocabularyJoined;
+  book?: VocabularyBook;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
   const actions = useVocabularyCardActions(word.key, onClose);
   return (
@@ -13,7 +22,7 @@ export function VocabularyDetails({ word, onClose }: { word: VocabularyJoined; o
       <Sheet label={word.word} onClose={onClose}>
         <OverlayHeader title={word.word} closeLabel={t('common.close')} onClose={onClose} />
         <div className="space-y-6 overflow-y-auto p-5">
-          <VocabularyAnswer word={word} />
+          <VocabularyAnswer word={word} book={book} />
           {word.row && (
             <div className="flex flex-wrap gap-2 border-t border-ink-200 pt-4">
               <Button variant="outline" disabled={!word.row.schedule} onClick={() => void actions.prepare('reset')}>

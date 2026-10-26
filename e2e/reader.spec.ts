@@ -92,7 +92,7 @@ test('a word lookup that fails after Back neither reopens the sheet nor leaves t
 });
 
 test('library has no horizontal overflow @phone', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/#/read');
   await expect(page.getByText('Le Petit Prince').first()).toBeVisible();
   expect(await overflowing(page.locator('body'))).toEqual([]);
 });

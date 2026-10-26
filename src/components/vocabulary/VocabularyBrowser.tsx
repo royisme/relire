@@ -27,8 +27,19 @@ export function VocabularyBrowser({ rows, book }: { rows: VocabularyRow[]; book?
     const text = [
       word.word,
       ...(word.bookSource?.senses.flatMap((s) => [s.gloss.en, s.gloss.zh]) ?? []),
-      ...(word.row?.contexts.flatMap((c) => [c.sentence, c.analysis.translation, c.analysis.translationEn ?? '']) ??
-        []),
+      ...(word.row?.contexts.flatMap((c) =>
+        c.definition.kind === 'ai'
+          ? [c.sentence, c.definition.analysis.translation, c.definition.analysis.translationEn ?? '']
+          : c.definition.kind === 'imported'
+            ? [c.sentence, c.definition.back, ...c.definition.tags, c.source?.title ?? '']
+            : [
+                c.sentence,
+                c.definition.entry.gloss.en,
+                c.definition.entry.gloss.zh,
+                c.definition.sentenceTranslation.en,
+                c.definition.sentenceTranslation.zh,
+              ],
+      ) ?? []),
     ].join(' ');
     return text.toLocaleLowerCase().includes(search.toLocaleLowerCase());
   });
@@ -141,7 +152,7 @@ export function VocabularyBrowser({ rows, book }: { rows: VocabularyRow[]; book?
           {t('vocab.next')}
         </Button>
       </div>
-      {detail && <VocabularyDetails key={detail.key} word={detail} onClose={() => setSelected(null)} />}
+      {detail && <VocabularyDetails key={detail.key} word={detail} book={book} onClose={() => setSelected(null)} />}
     </div>
   );
 }

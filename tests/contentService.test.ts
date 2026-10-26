@@ -7,15 +7,17 @@ import {
   ContentServiceNetworkError,
 } from '../src/services/grammarTopics/service';
 import { contentRequest, resetContentRequests } from '../src/services/grammarTopics/request';
+import { saveAppSettings } from '../src/utils/appSettings';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOff, serviceOn } from './fixtures/contentServiceSettings';
 import { failure, freshDb } from './fixtures/storage';
 
 let fetchSpy: ReturnType<typeof spyOn<typeof globalThis, 'fetch'>>;
 let clockSpy: ReturnType<typeof spyOn<typeof Date, 'now'>> | undefined;
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 beforeEach(async () => {
   resetContentRequests();
   await freshDb();
-  process.env.VITE_CONTENT_SERVICE_URL = 'http://content.test/';
+  freshSettingsStorage();
+  serviceOn('http://content.test/');
   fetchSpy = spyOn(globalThis, 'fetch');
 });
 afterEach(() => {
@@ -23,28 +25,43 @@ afterEach(() => {
   clockSpy?.mockRestore();
   clockSpy = undefined;
   fetchSpy.mockRestore();
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 
-test('build-time URL trims one trailing slash; GET omits credentials and custom headers', async () => {
+test('the stored URL is normalized; GET omits credentials and sends the saved key as its bearer header', async () => {
   expect(contentServiceUrl()).toBe('http://content.test');
   fetchSpy.mockResolvedValue(Response.json([]));
   expect(await contentServiceFetch('/v1/topics')).toEqual([]);
   expect(fetchSpy).toHaveBeenCalledWith('http://content.test/v1/topics', {
     credentials: 'omit',
+    headers: { Authorization: 'Bearer TEST-access-key' },
     signal: expect.any(AbortSignal),
   });
 });
 
+test('the service is an address only while it is enabled with both a URL and a key', () => {
+  const on = { enabled: true, url: 'http://content.test', key: 'TEST-access-key' };
+  for (const block of [
+    { ...on, enabled: false },
+    { ...on, url: '' },
+    { ...on, key: '' },
+  ]) {
+    saveAppSettings({ contentService: block });
+    expect(contentServiceUrl()).toBeUndefined();
+  }
+  saveAppSettings({ contentService: on });
+  expect(contentServiceUrl()).toBe('http://content.test');
+});
+
 test('unconfigured service makes no request', async () => {
-  delete process.env.VITE_CONTENT_SERVICE_URL;
+  serviceOff();
   expect(contentServiceUrl()).toBeUndefined();
   expect(await failure(contentServiceFetch('/v1/topics'))).toEqual(new Error('Content service is not configured'));
   expect(fetchSpy).not.toHaveBeenCalled();
 });
 
 for (const [status, code] of [
+  [401, 'unauthorized'],
   [404, 'not-found'],
   [500, 'unavailable'],
 ] as const) {
@@ -73,7 +90,7 @@ test('a service that never answers is cut off by the request timeout and reporte
         init?.signal?.addEventListener('abort', () => reject(init.signal?.reason));
       });
     fetchSpy.mockImplementation(hang as unknown as typeof fetch);
-    const pending = failure(contentServiceFetch('/v1/lexicon/form/vais'));
+    const pending = failure(contentServiceFetch('/v1/topics/test-only'));
     timeout.abort(new DOMException('The operation timed out.', 'TimeoutError'));
     const error = await pending;
     expect(error).toBeInstanceOf(ContentServiceNetworkError);
@@ -129,7 +146,7 @@ test('different content paths and service origins do not share requests', async 
   fetchSpy.mockImplementation(Object.assign(async () => Response.json([]), { preconnect: () => {} }));
   await contentRequest('/v1/topics', (data) => data);
   await contentRequest('/v1/tag-index', (data) => data);
-  process.env.VITE_CONTENT_SERVICE_URL = 'http://other-content.test';
+  serviceOn('http://other-content.test');
   await contentRequest('/v1/topics', (data) => data);
   expect(fetchSpy.mock.calls.map(([url]) => url)).toEqual([
     'http://content.test/v1/topics',

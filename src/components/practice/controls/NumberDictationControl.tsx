@@ -5,7 +5,8 @@
  * what was heard. With "Speak after checking" on, the item is spoken again
  * once its check lands (not on every reload of an already-checked one): with
  * the selected engine once the Practice opt-in allows remote synthesis, and
- * with the device's voice otherwise.
+ * with the device's voice otherwise. An explicit device item always uses the
+ * device voice for Listen and replay; the replay master switch still applies.
  */
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,7 @@ export function NumberDictationControl({
   const { t } = useTranslation();
   // A dictation item that reached the sheet without its own text to read: speak the reference.
   const audio = item.audioText?.trim() || expectedAnswerText(item);
+  const device = item.meta?.playbackEngine === 'device';
   const wasChecked = useRef(Boolean(checked));
 
   useEffect(() => {
@@ -44,18 +46,19 @@ export function NumberDictationControl({
     // Without the remote opt-in the replay uses the device voice: it costs nothing and synthesizes nothing.
     void speakFrench(audio, {
       rate: settings.practiceDictationSpeed,
-      ...(source === 'device' ? { engine: 'device' as const } : {}),
+      ...(device || source === 'device' ? { engine: 'device' as const } : {}),
     });
-  }, [checked, audio]);
+  }, [checked, audio, device]);
 
   return (
     <div className="space-y-2">
       <p className="break-words font-serif text-lg text-ink-900">
-        <InlineMarkup text={item.prompt} onWord={onWord} />
+        <InlineMarkup text={item.prompt} onWord={item.meta?.source === 'reader-dictation' ? undefined : onWord} />
       </p>
       <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
         <SpeakButton
           text={audio}
+          engine={device ? 'device' : undefined}
           rate={getAppSettings().practiceDictationSpeed}
           label={t('practice.listen')}
           stopLabel={t('reader.stop')}

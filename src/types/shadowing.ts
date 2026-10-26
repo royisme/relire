@@ -11,10 +11,11 @@ export interface ShadowingTake {
   blob: Blob;
 }
 
-/** Who owns a recording: an article's prose, or a unit's reading passage. */
+/** Who owns a recording: an article's prose, a unit's reading passage, or a graded-reader edition. */
 type ShadowingOwner =
-  | { articleId: string; passage?: undefined }
-  | { articleId?: undefined; passage: { unitId: string } };
+  | { articleId: string; passage?: undefined; graded?: undefined }
+  | { articleId?: undefined; passage: { unitId: string }; graded?: undefined }
+  | { articleId?: undefined; passage?: undefined; graded: { readerId: string; version: string } };
 
 /** One sentence of one source, keyed by normalized text so edits elsewhere do not move it. */
 export type ShadowingSentence = ShadowingOwner & {

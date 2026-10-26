@@ -1,5 +1,5 @@
 /** Synthetic schema probes only, never teaching content, generated output or an owner attestation. Never shipped. */
-import type { GrammarTopic, GrammarTopicsPack } from '../../src/types/grammarTopic';
+import type { GrammarTopic, GrammarTopicList, GrammarTopicsPack } from '../../src/types/grammarTopic';
 
 const bilingual = () => ({ en: 'TEST ONLY', zh: '\u6d4b\u8bd5' });
 export const topicFixture = (): GrammarTopic => ({
@@ -39,6 +39,32 @@ export const topicFixture = (): GrammarTopic => ({
   reviewedBy: 'TEST ONLY, not an attestation',
   reviewedAt: '2026-10-18',
 });
+
+// Alphabetical chapter input, with the first chapter's topics deliberately reversed.
+export const bookList: GrammarTopicList = [
+  {
+    ...topicFixture(),
+    id: 'test-eight',
+    chapter: 'chapter-eight',
+    position: 8,
+    title: { en: 'TEST eight', zh: 'TEST zh eight' },
+  },
+  {
+    ...topicFixture(),
+    id: 'test-two',
+    chapter: 'chapter-one',
+    position: 2,
+    tags: ['gender-number'],
+    title: { en: 'TEST two', zh: 'TEST zh two' },
+  },
+  {
+    ...topicFixture(),
+    id: 'test-one',
+    chapter: 'chapter-one',
+    position: 1,
+    title: { en: 'TEST one', zh: 'TEST zh one' },
+  },
+];
 
 export const topicsFixture = (): GrammarTopicsPack => ({
   schemaVersion: 1,

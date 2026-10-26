@@ -1,8 +1,5 @@
 /** TEST data typed by hand to the lexicon contract: regular French forms for probing the app, never rows from Morphalou. */
-import type { LexiconFormResponse, LexiconLemmaResponse, VerbData } from '../../src/types/lexicon';
-
-/** TEST source block; the real one names Morphalou, this one says so is not it. */
-export const testSource = { name: 'TEST lexicon', maintainer: 'TEST', licence: 'TEST', url: 'http://lexicon.test/' };
+import type { VerbData } from '../../src/types/lexicon';
 
 const cells = <K extends string>(keys: readonly K[], forms: string[]) =>
   Object.fromEntries(keys.map((key, index) => [key, [forms[index]]])) as Record<K, string[]>;
@@ -37,16 +34,4 @@ export const amuserData = (): VerbData => ({
     imperatif: cells(IMPERATIVE, ['amuse', 'amusons', 'amusez']),
   },
   participles: { present: ['amusant'], past: { ms: ['amusé'] } },
-});
-
-export const chanterLemma = (): LexiconLemmaResponse => ({
-  lemma: 'chanter',
-  entries: [{ pos: 'verb', data: chanterData() }],
-  source: testSource,
-});
-
-export const formOf = (form: string, ...lemmas: LexiconFormResponse['lemmas']): LexiconFormResponse => ({
-  form,
-  lemmas,
-  source: testSource,
 });

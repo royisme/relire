@@ -1,20 +1,19 @@
 /** Owns private SQL publication, public metadata checks and publish-to-Worker round trips using TEST fixtures only. */
 import { expect, spyOn, test } from 'bun:test';
 import { createHash } from 'node:crypto';
-import { mkdtemp, readdir, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { z } from 'zod';
-import { buildPublishSql, checkTopicMetadata, publish } from '../scripts/grammar-topics/publish';
+import { buildPublishSql, checkTopicMetadata, parseArgs, publish } from '../scripts/grammar-topics/publish';
 import { buildTopics, type TopicBuildInputs } from '../scripts/grammar-pack/topics';
 import { topicContentHash } from '../scripts/grammar-pack/gate';
-import { GrammarTopicSchema, GrammarTopicSummarySchema, type GrammarTopic } from '../src/types/grammarTopic';
+import { GrammarTopicListSchema, GrammarTopicSchema, type GrammarTopic } from '../src/types/grammarTopic';
 import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { handle } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
 import { learningFixture } from './fixtures/grammarLearning';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 
 function inputs(topics: GrammarTopic[] = [topicFixture()]): TopicBuildInputs {
   return {
@@ -67,13 +66,13 @@ test('SQL quotes every value and round trips titles, examples, JSON tags and can
   const input = quotingInput();
   const { sql, version } = buildPublishSql(input);
   expect(sql).toContain("''single''");
-  expect(sql.startsWith('DELETE FROM topics;\n')).toBe(true);
+  expect(sql.startsWith("DELETE FROM meta WHERE key = 'packVersion';\nDELETE FROM topics;\n")).toBe(true);
   expect(sql.trimEnd().endsWith(`VALUES ('packVersion', '${version}');`)).toBe(true);
   const { db } = await createWorkerDb();
   try {
     db.exec(sql);
     const topic = buildTopics(input).pack.topics[0];
-    const row = db.query('SELECT * FROM topics').get() as Record<string, string>;
+    const row = db.query('SELECT * FROM topics').get() as Record<string, string | number>;
     expect(row).toEqual({
       id: topic.id,
       chapter: topic.chapter,
@@ -83,31 +82,56 @@ test('SQL quotes every value and round trips titles, examples, JSON tags and can
       tags: JSON.stringify(topic.tags),
       body: JSON.stringify(topic),
       content_hash: topicContentHash(topic),
+      position: 1,
     });
-    expect(GrammarTopicSchema.parse(JSON.parse(row.body))).toEqual(topic);
-    expect(JSON.parse(row.body)).not.toHaveProperty('uncertain');
-    expect(JSON.parse(row.body)).not.toHaveProperty('warnings');
+    const body = row.body as string;
+    expect(GrammarTopicSchema.parse(JSON.parse(body))).toEqual(topic);
+    expect(JSON.parse(body)).not.toHaveProperty('uncertain');
+    expect(JSON.parse(body)).not.toHaveProperty('warnings');
   } finally {
     db.close();
   }
 });
 
-test('SQL is byte-deterministic and id-sorted regardless of manifest, draft or review order', () => {
+test('SQL is id-sorted and byte-deterministic for reordered drafts and reviews; the manifest order owns positions', () => {
   const input = inputs([
     { ...topicFixture(), id: 'test-z' },
     { ...topicFixture(), id: 'test-a' },
   ]);
   const first = buildPublishSql(input);
-  input.manifest.topics.reverse();
   input.drafts.reverse();
   input.reviews.records.reverse();
   expect(buildPublishSql(input).sql).toBe(first.sql);
-  expect(first.sql.indexOf("VALUES ('test-a'")).toBeLessThan(first.sql.indexOf("VALUES ('test-z'"));
+  expect(buildPublishSql(input).version).toBe(first.version);
+  input.manifest.topics.reverse();
+  const reordered = buildPublishSql(input);
+  expect(reordered.sql).not.toBe(first.sql);
+  expect(reordered.version).not.toBe(first.version);
+  expect(reordered.sql.indexOf("VALUES ('test-a'")).toBeLessThan(reordered.sql.indexOf("VALUES ('test-z'"));
   const lines = [...input.drafts]
     .sort((a, b) => a.id.localeCompare(b.id))
-    .map((topic) => `${topic.id}:${topicContentHash(topic)}`)
+    .map((topic, i) => `${topic.id}:${i + 1}:${topicContentHash(topic)}`)
     .join('\n');
-  expect(first.version).toBe(`0.1.0+${createHash('sha256').update(lines).digest('hex').slice(0, 8)}`);
+  expect(reordered.version).toBe(`0.1.0+${createHash('sha256').update(lines).digest('hex').slice(0, 8)}`);
+});
+
+test('positions follow manifest array order, not alphabetical id order', async () => {
+  const input = inputs([
+    { ...topicFixture(), id: 'test-b' },
+    { ...topicFixture(), id: 'test-a' },
+    { ...topicFixture(), id: 'test-c' },
+  ]);
+  const { db } = await createWorkerDb();
+  try {
+    db.exec(buildPublishSql(input).sql);
+    expect(db.query('SELECT id, position FROM topics ORDER BY position').all()).toEqual([
+      { id: 'test-b', position: 1 },
+      { id: 'test-a', position: 2 },
+      { id: 'test-c', position: 3 },
+    ]);
+  } finally {
+    db.close();
+  }
 });
 
 test('version changes with reviewed content, membership or manifest version, not input ordering or review metadata', () => {
@@ -147,12 +171,12 @@ test('zero topics replaces prior content, emits only delete and version, and lis
     const empty = buildPublishSql(input);
     expect(empty.report).toEqual(['test-only: excluded; skipped']);
     expect(empty.sql).toBe(
-      "DELETE FROM topics;\nINSERT OR REPLACE INTO meta (key, value) VALUES ('packVersion', '0.1.0+e3b0c442');\n",
+      "DELETE FROM meta WHERE key = 'packVersion';\nDELETE FROM topics;\nINSERT OR REPLACE INTO meta (key, value) VALUES ('packVersion', '0.1.0+e3b0c442');\n",
     );
     expect(buildPublishSql(inputs([])).sql).toBe(empty.sql);
     db.exec(empty.sql);
-    expect(await (await handle(new Request('https://content.test/v1/topics'), env)).json()).toEqual([]);
-    expect(await (await handle(new Request('https://content.test/v1/tag-index'), env)).json()).toEqual({});
+    expect(await (await handle(workerRequest('https://content.test/v1/topics'), env)).json()).toEqual([]);
+    expect(await (await handle(workerRequest('https://content.test/v1/tag-index'), env)).json()).toEqual({});
     expect(db.query("SELECT value FROM meta WHERE key = 'packVersion'").get()).toEqual({ value: empty.version });
   } finally {
     db.close();
@@ -203,13 +227,18 @@ test('private file publish through the real migration and Worker matches the app
     ]);
     db.exec(bytes);
     db.exec(bytes); // Reapplying replaces, never appends.
-    const request = (path: string) => handle(new Request(`https://content.test${path}`), env);
+    const request = (path: string) => handle(workerRequest(`https://content.test${path}`), env);
     const list = await request('/v1/topics');
     expect(list.status).toBe(200);
-    expect(z.array(GrammarTopicSummarySchema).parse(await list.json())).toEqual(
-      [...expected.pack.topics]
-        .sort((a, b) => a.id.localeCompare(b.id))
-        .map(({ id, chapter, level, tags, title }) => ({ id, chapter, level, tags, title })),
+    expect(GrammarTopicListSchema.parse(await list.json())).toEqual(
+      expected.pack.topics.map(({ id, chapter, level, tags, title }, i) => ({
+        id,
+        chapter,
+        level,
+        tags,
+        title,
+        position: i + 1,
+      })),
     );
     for (const topic of expected.pack.topics) {
       const response = await request(`/v1/topics/${topic.id}`);
@@ -296,6 +325,79 @@ test('publish output contains only counts, skipped ids and the path, never fixtu
     expect(JSON.stringify(log.mock.calls)).not.toContain(input.drafts[0].title.en);
   } finally {
     log.mockRestore();
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('pure argument parsing accepts preparation/check and explicit apply modes only', () => {
+  for (const args of [[], ['--check'], ['--apply-local'], ['--apply-remote']]) expect(parseArgs(args)).toBe(args[0]);
+  for (const args of [
+    ['--remote'],
+    ['--unknown'],
+    ['--apply-remote', '--remote'],
+    ['--apply-remote', '--apply-local'],
+    ['--apply-remote', '--check'],
+    ['--apply-remote', '--apply-remote'],
+    ['--check', '--apply-local'],
+    ['--check', '--check'],
+  ])
+    expect(() => parseArgs(args)).toThrow('Usage');
+});
+
+test.each([
+  { args: ['--bogus'], allowRemote: true, message: 'Usage: publish.ts [--apply-local | --apply-remote | --check]' },
+  ...[undefined, false].map((allowRemote) => ({
+    args: ['--apply-remote'],
+    allowRemote,
+    message: 'Remote publication requires owner CLI authorization',
+  })),
+  { args: ['--apply-remote'], allowRemote: true, message: 'Remote publication requires TTY stdin and stdout' },
+])('early refusal prints $message exactly once without creating files', async ({ args, allowRemote, message }) => {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-topic-failure-'));
+  const log = spyOn(console, 'log').mockImplementation(() => {});
+  const error = spyOn(console, 'error').mockImplementation(() => {});
+  const stdinIsTTY = process.stdin.isTTY;
+  process.stdin.isTTY = false;
+  try {
+    expect(
+      await publish([...args], pathToFileURL(directory + '/'), { allowRemote }).then(
+        () => 'resolved',
+        (error: Error) => error.message,
+      ),
+    ).toBe(message);
+    expect(await readdir(directory)).toEqual([]);
+    expect(log.mock.calls).toEqual([]);
+    expect(error.mock.calls).toEqual([[message]]);
+  } finally {
+    process.stdin.isTTY = stdinIsTTY;
+    log.mockRestore();
+    error.mockRestore();
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('remote CLI refuses non-TTY streams before inputs, output, logs or Wrangler access', async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'relire-TEST-topic-terminal-'));
+  try {
+    const script = 'scripts/grammar-topics/publish.ts';
+    await Bun.write(join(directory, script), Bun.file(new URL('../' + script, import.meta.url)));
+    for (const dependency of ['scripts/grammar-pack', 'scripts/content-service', 'src', 'node_modules']) {
+      await mkdir(join(directory, dependency, '..'), { recursive: true });
+      await symlink(new URL('../' + dependency, import.meta.url).pathname, join(directory, dependency));
+    }
+    const child = Bun.spawnSync({
+      cmd: [process.execPath, '--no-env-file', join(directory, script), '--apply-remote'],
+      cwd: directory,
+      stdin: 'ignore',
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    expect(child.exitCode).toBe(1);
+    expect(child.stdout.toString()).toBe('');
+    expect(child.stderr.toString()).toBe('Remote publication requires TTY stdin and stdout\n');
+    expect((await readdir(directory)).sort()).toEqual(['node_modules', 'scripts', 'src']);
+    expect(await Bun.file(join(directory, '.local/grammar-topics/publish.sql')).exists()).toBe(false);
+  } finally {
     await rm(directory, { recursive: true, force: true });
   }
 });

@@ -17,10 +17,8 @@ export function supportsListening(unit: {
     unit.items.length > 0 &&
     unit.items.every((item) => {
       const type = item.type ?? unit.type;
-      return (
-        !!item.audioText?.trim() &&
-        (type === 'NUMBER_DICTATION' || (type === 'CHOICE_SELECT' && item.meta?.source === 'minimal-pairs'))
-      );
+      const packBacked = item.meta?.source === 'minimal-pairs' || item.meta?.source === 'spelling-sounds';
+      return !!item.audioText?.trim() && (type === 'NUMBER_DICTATION' || (type === 'CHOICE_SELECT' && packBacked));
     })
   );
 }

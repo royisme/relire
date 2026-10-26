@@ -20,7 +20,7 @@ test('Words review commits introduction before answers, flips without writes, an
   ai,
 }) => {
   await seed(page, 'en', 'light', 3);
-  await page.getByRole('link', { name: 'Start / continue review' }).click();
+  await page.getByRole('link', { name: 'Learn 3 new words', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();
   const backFace = page.locator('[data-vocabulary-face="back"]');
   const flip = page.locator('[data-vocabulary-face="front"] h1');
@@ -59,7 +59,7 @@ test('Words review commits introduction before answers, flips without writes, an
   await page.getByRole('button', { name: 'Remembered', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'test-c', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Skip for now', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Done for now / waiting' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Nothing more for now' })).toBeVisible();
   const rows = await stored(page);
   expect(rows.map((row) => row.history.map((record) => record.outcome))).toEqual([['forgot'], ['remembered'], []]);
   expect(rows[2].introducedAt).toBeNull();
@@ -89,7 +89,7 @@ test('commit failure keeps front hidden; rating failure keeps answer/decision an
   ai,
 }) => {
   await seed(page);
-  await page.goto('/#/study/words/review');
+  await page.goto('/#/words/review');
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   const status = page.locator('[data-vocabulary-status]');
   const reason = 'TEST vocabulary disk refused. ' + 'Long TEST storage reason. '.repeat(80);
@@ -123,7 +123,7 @@ test('commit failure keeps front hidden; rating failure keeps answer/decision an
 });
 test('quota race and restore epoch never expose a stale answer or accept an old rating', async ({ page }) => {
   await seed(page);
-  await page.goto('/#/study/words/review');
+  await page.goto('/#/words/review');
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
@@ -132,8 +132,8 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
   await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).not.toContainText('TEST meaning');
   expect((await stored(page)).every((row) => row.introducedAt === null)).toBe(true);
-  await expect(page.locator('[data-vocabulary-status]')).toContainText('Daily introduction allowance reached');
-  await expect(page.getByText('Due now: 0 · New remaining today: 0', { exact: true })).toBeVisible();
+  await expect(page.locator('[data-vocabulary-status]')).toContainText('You have reached today’s limit of new words');
+  await expect(page.getByText('Ready to review: 0 · New words left today: 0', { exact: true })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     await storage.saveVocabularyPreferences({ newPerDay: 20, retentionPercent: 90 });
@@ -223,7 +223,7 @@ for (const failure of ['partial', 'rate', 'hash', 'storage'] as const) {
         await page.keyboard.press('Escape');
         await cacheFault(page, false);
         if (attempt === 0) {
-          await page.goto('/#/study/words/all');
+          await page.goto('/#/words/all');
           await expect(page.getByRole('button', { name: 'test-0', exact: true })).toBeVisible();
           await expect(page.getByRole('row')).toHaveCount(2);
           await page.reload();
@@ -273,7 +273,7 @@ test('explicit Listen uses the selected device engine and session speech stops o
       speechVoice: '',
     });
   });
-  await page.getByRole('link', { name: 'Start / continue review' }).click();
+  await page.getByRole('link', { name: 'Learn 2 new words', exact: true }).click();
   await page.getByRole('button', { name: 'Listen', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeVisible();
   expect(await page.evaluate(() => window.deviceSpeechTest.spoken)).toEqual(['test-a']);
@@ -308,7 +308,7 @@ test('7000 synthetic entries paginate at50; unseen fronts create no row and no-k
   await page.getByRole('searchbox').fill('test-6999');
   await expect(page.getByRole('row')).toHaveCount(2);
   expect(await stored(page)).toEqual([]);
-  await page.getByRole('link', { name: 'Review due words' }).click();
+  await page.getByRole('link', { name: 'Review words that are ready' }).click();
   await expect(page.getByRole('heading', { name: 'test-0', exact: true })).toBeVisible();
   expect(await stored(page)).toEqual([]);
   await page.getByRole('button', { name: 'Skip for now' }).click();
@@ -319,7 +319,8 @@ test('7000 synthetic entries paginate at50; unseen fronts create no row and no-k
   expect((await stored(page))[0].key).toBe('test-1');
   await page.getByRole('link', { name: 'Back to Words' }).click();
   await page.context().setOffline(true);
-  await page.getByRole('link', { name: 'Start / continue review' }).click();
+  // test-1 was introduced but not rated: its New schedule is already due.
+  await page.getByRole('link', { name: 'Review 1 word', exact: true }).click();
   await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).toContainText('TEST meaning test-1');
   await page.evaluate(async () => {

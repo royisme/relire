@@ -208,8 +208,8 @@ test('Redo waits disabled until an item is checked, clears that item alone and k
   expect(attempts).toHaveLength(1);
   expect(itemStates.map((state: { itemId: string }) => state.itemId)).not.toContain('fb-2');
 
-  // The notebook counts it as unresolved, on the My study → Mistakes row.
-  await page.goto('/#/study/words');
+  // The notebook counts it as unresolved, on the top-level Mistakes row.
+  await page.goto('/#/mistakes');
   const mistakes = page.getByRole('link', { name: /^Mistakes/ });
   await expect(mistakes).toContainText('1');
   await mistakes.click();

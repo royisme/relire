@@ -1,145 +1,97 @@
-/** Lexicon loaders and the word sheet's two questions: a fetch spy restored in afterEach, no module mocks, no live service. */
+/**
+ * The bundled lexicon's two loaders and the word sheet's two questions, over the committed data file (one retry
+ * case answers the hand fixture bundle instead): only `fetch` is replaced, so the lookups, the folding and the
+ * response shapes are the app's own.
+ */
 import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useLexiconVerb } from '../src/hooks/useLexiconVerb';
-import { lexiconForm, lexiconLemma } from '../src/services/lexicon/load';
-import { resetContentRequests } from '../src/services/grammarTopics/request';
+import { lexiconForm, lexiconLemma, resetLexiconForTests } from '../src/services/lexicon/load';
 import { lexiconVerb, lexiconVerbLines } from '../src/services/lexicon/verbs';
-import { getCached } from '../src/storage/cache';
 import { LexiconFormResponseSchema, LexiconLemmaResponseSchema } from '../src/types/lexicon';
-import { failure, freshDb } from './fixtures/storage';
-import { chanterData, chanterLemma, formOf, testSource } from './fixtures/lexicon';
+import { chanterData } from './fixtures/lexicon';
+import { failure } from './fixtures/storage';
 
-const origin = 'http://content.test';
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
+/** The committed data file, at the URL the loader resolves. */
+const BUNDLE_URL = new URL('../data/lexicon/lexicon.json', import.meta.url);
 let fetchSpy: ReturnType<typeof spyOn<typeof globalThis, 'fetch'>>;
-beforeEach(async () => {
-  resetContentRequests();
-  await freshDb();
-  process.env.VITE_CONTENT_SERVICE_URL = origin;
+
+beforeEach(() => {
+  resetLexiconForTests();
   fetchSpy = spyOn(globalThis, 'fetch');
 });
 afterEach(() => {
-  resetContentRequests();
   fetchSpy.mockRestore();
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  resetLexiconForTests();
 });
 
-const pathOf = (input: string | URL | Request) =>
-  (typeof input === 'string' ? input : input instanceof URL ? input.href : input.url).slice(origin.length);
-
-/** Answers each known path with its body and every other path with the service's 404. */
-function serve(routes: Record<string, unknown>) {
+/** The only seam: the real file answered the way the browser's own fetch would. */
+const answerWithFile = () =>
   fetchSpy.mockImplementation(
-    Object.assign(
-      async (input: string | URL | Request) => {
-        const path = pathOf(input);
-        return path in routes ? Response.json(routes[path]) : Response.json({ error: 'not-found' }, { status: 404 });
-      },
-      { preconnect: () => {} },
-    ),
+    Object.assign(() => Promise.resolve(new Response(Bun.file(BUNDLE_URL))), { preconnect: () => {} }),
   );
-}
-const asked = () => fetchSpy.mock.calls.map(([input]) => pathOf(input));
+const answerWith = (response: () => Promise<Response>) =>
+  fetchSpy.mockImplementation(Object.assign(response, { preconnect: () => {} }));
 
-test('a lemma and a form are validated, cached and asked by their encoded, folded name', async () => {
-  serve({
-    '/v1/lexicon/chanter': chanterLemma(),
-    "/v1/lexicon/form/s'appelle": formOf("s'appelle", { lemma: "s'appeler", pos: 'verb' }),
-  });
-  expect(await lexiconLemma('chanter')).toEqual(LexiconLemmaResponseSchema.parse(chanterLemma()));
-  expect(await lexiconForm('S’Appelle ')).toEqual(
-    LexiconFormResponseSchema.parse(formOf("s'appelle", { lemma: "s'appeler", pos: 'verb' })),
-  );
-  expect(asked()).toEqual(['/v1/lexicon/chanter', "/v1/lexicon/form/s'appelle"]);
-  expect(fetchSpy).toHaveBeenCalledWith(`${origin}/v1/lexicon/chanter`, {
-    credentials: 'omit',
-    signal: expect.any(AbortSignal),
-  });
-  expect(await getCached('content', `${origin}/v1/lexicon/chanter`)).toEqual(chanterLemma());
+test('concurrent first lookups share one fetch of the data file, and every later lookup is free', async () => {
+  answerWithFile();
+  const [lemma, form] = await Promise.all([lexiconLemma('être'), lexiconForm('sommes')]);
+  expect(fetchSpy).toHaveBeenCalledTimes(1);
+  expect(fetchSpy.mock.calls[0][0]).toEqual(BUNDLE_URL);
+  expect(lemma?.lemma).toBe('être');
+  expect(lemma?.entries.map((entry) => entry.pos)).toEqual(['noun', 'verb']);
+  expect(form?.form).toBe('sommes');
+  expect(form?.lemmas).toEqual([
+    { lemma: 'somme', pos: 'noun' },
+    { lemma: 'être', pos: 'verb' },
+  ]);
+  expect((await lexiconForm('chantons'))?.lemmas).toEqual([{ lemma: 'chanter', pos: 'verb' }]);
+  expect(fetchSpy).toHaveBeenCalledTimes(1);
 });
 
-test('an accent and a hyphen are sent percent-encoded and kept', async () => {
-  serve({});
-  expect(await lexiconForm('Lève-toi')).toBeUndefined();
-  expect(asked()).toEqual(['/v1/lexicon/form/l%C3%A8ve-toi']);
+test('the token and the lemma are folded like the pack lookup: case, curly apostrophe, hyphen, spacing', async () => {
+  answerWithFile();
+  expect((await lexiconForm('Chef-D’Oeuvre  '))?.form).toBe("chef-d'oeuvre");
+  expect((await lexiconForm('BEAU-FRÈRE'))?.form).toBe('beau-frère');
+  expect((await lexiconLemma('ÊTRE'))?.lemma).toBe('être');
 });
 
-test('a 404 is no entry and is not kept', async () => {
-  serve({});
-  expect(await lexiconLemma('rareverb')).toBeUndefined();
-  expect(await lexiconForm('rareverb')).toBeUndefined();
-  expect(await getCached('content', `${origin}/v1/lexicon/rareverb`)).toBeUndefined();
+test('a word the file does not hold is undefined, not an error', async () => {
+  answerWithFile();
+  expect(await lexiconForm('xyzzy')).toBeUndefined();
+  expect(await lexiconLemma('xyzzy')).toBeUndefined();
 });
 
-test('a response of the wrong shape keeps the real schema error', async () => {
-  serve({ '/v1/lexicon/chanter': { lemma: 'chanter', source: testSource } });
-  const error = (await failure(lexiconLemma('chanter'))) as Error;
-  expect(error.message).toContain('entries');
+test('the response carries the four-field source of the file, not its change notices', async () => {
+  answerWithFile();
+  const lemma = await lexiconLemma('être');
+  expect(lemma?.source.name).toBe('Morphalou 3.1');
+  expect(Object.keys(lemma!.source).sort()).toEqual(['licence', 'maintainer', 'name', 'url']);
+  expect(LexiconLemmaResponseSchema.safeParse(lemma).success).toBe(true);
+  expect(LexiconFormResponseSchema.safeParse(await lexiconForm('chantons')).success).toBe(true);
 });
 
-test('an HTTP 500 keeps its status and service code, and a cached copy is not used for it', async () => {
-  serve({ '/v1/lexicon/chanter': chanterLemma() });
-  await lexiconLemma('chanter');
-  resetContentRequests();
-  fetchSpy.mockResolvedValue(Response.json({ error: 'unavailable' }, { status: 500 }));
-  expect(((await failure(lexiconLemma('chanter'))) as Error).message).toBe('HTTP 500: unavailable');
+test('a failed fetch keeps its real error, and the next call retries the whole load', async () => {
+  answerWith(() => Promise.reject(new TypeError('TEST ONLY offline')));
+  expect(((await failure(lexiconForm('chanter'))) as Error).message).toBe('TEST ONLY offline');
+  answerWithFile();
+  expect((await lexiconForm('chantons'))?.form).toBe('chantons');
+  expect(fetchSpy).toHaveBeenCalledTimes(2);
 });
 
-test('a network failure uses the last good copy of that request, and without one shows its reason', async () => {
-  serve({ '/v1/lexicon/chanter': chanterLemma() });
-  await lexiconLemma('chanter');
-  resetContentRequests();
-  fetchSpy.mockRejectedValue(new TypeError('TEST ONLY offline'));
-  expect(await lexiconLemma('chanter')).toEqual(chanterLemma());
-  expect(((await failure(lexiconLemma('other'))) as Error).message).toBe('TEST ONLY offline');
+test('an HTTP failure says which status the data file answered', async () => {
+  answerWith(() => Promise.resolve(new Response('not found', { status: 404 })));
+  expect(((await failure(lexiconLemma('être'))) as Error).message).toBe('The lexicon data file answered HTTP 404');
 });
 
-test('without a content service nothing is asked and nothing is found', async () => {
-  delete process.env.VITE_CONTENT_SERVICE_URL;
-  expect(await lexiconLemma('chanter')).toBeUndefined();
-  expect(await lexiconForm('chantons')).toBeUndefined();
-  expect(await lexiconVerb('chanter')).toBeUndefined();
-  expect(await lexiconVerbLines('chantons')).toEqual({ lines: [] });
-  expect(fetchSpy).not.toHaveBeenCalled();
+test('a data file of the wrong shape is an error that names the field', async () => {
+  answerWith(() => Promise.resolve(Response.json({ source: {}, entries: [], forms: {} })));
+  expect(((await failure(lexiconLemma('être'))) as Error).message).toContain('source');
 });
 
-test('a lemma the AI named is tried as written, then without a pronoun, with curly apostrophes folded', async () => {
-  serve({ '/v1/lexicon/laver': { ...chanterLemma(), lemma: 'laver' } });
-  expect(await lexiconVerb('se laver')).toEqual(chanterData());
-  expect(asked()).toEqual(['/v1/lexicon/se%20laver', '/v1/lexicon/laver']);
-  fetchSpy.mockClear();
-  serve({ "/v1/lexicon/s'appeler": chanterLemma() });
-  await lexiconVerb('S’appeler');
-  expect(asked()).toEqual(["/v1/lexicon/s'appeler"]);
-});
-
-test('a plain lemma is asked once; a lemma that is only a noun or unknown is no verb', async () => {
-  serve({
-    '/v1/lexicon/chant': {
-      lemma: 'chant',
-      entries: [{ pos: 'noun', gender: 'masculine', data: {} }],
-      source: testSource,
-    },
-  });
-  expect(await lexiconVerb('chant')).toBeUndefined();
-  expect(await lexiconVerb('inconnu')).toBeUndefined();
-  expect(asked()).toEqual(['/v1/lexicon/chant', '/v1/lexicon/inconnu']);
-});
-
-test('verb lines name the lexicon verb, skip the pack verbs and the nouns, and draw nothing for an infinitive', async () => {
-  serve({
-    '/v1/lexicon/form/chantons': formOf(
-      'chantons',
-      { lemma: 'chanter', pos: 'verb' },
-      { lemma: 'chanton', pos: 'noun' },
-    ),
-    '/v1/lexicon/chanter': chanterLemma(),
-    '/v1/lexicon/form/vais': formOf('vais', { lemma: 'aller', pos: 'verb' }),
-    '/v1/lexicon/form/chanter': formOf('chanter', { lemma: 'chanter', pos: 'verb' }),
-  });
+test('the sheet names the lexicon verb of a tapped form, and skips what the pack already names', async () => {
+  answerWithFile();
   expect(await lexiconVerbLines('chantons')).toEqual({
     lines: [
       {
@@ -154,25 +106,57 @@ test('verb lines name the lexicon verb, skip the pack verbs and the nouns, and d
       },
     ],
   });
-  expect(asked()).toEqual(['/v1/lexicon/form/chantons', '/v1/lexicon/chanter']);
-  fetchSpy.mockClear();
-  // aller is a pack verb: the pack names it, so the lexicon neither asks for its entry nor repeats it.
-  expect(await lexiconVerbLines('vais')).toEqual({ lines: [] });
-  expect(asked()).toEqual(['/v1/lexicon/form/vais']);
+  // être is a pack verb (the pack names it for `sommes`), a tapped infinitive writes no cell, and an unknown word is no line.
+  expect(await lexiconVerbLines('sommes')).toEqual({ lines: [] });
   expect(await lexiconVerbLines('chanter')).toEqual({ lines: [] });
-  expect(await lexiconVerbLines('inconnu')).toEqual({ lines: [] });
+  expect(await lexiconVerbLines('xyzzy')).toEqual({ lines: [] });
 });
 
-test('a lexicon failure leaves no lines and carries its real text', async () => {
-  fetchSpy.mockResolvedValue(Response.json({ error: 'unavailable' }, { status: 500 }));
-  expect(await lexiconVerbLines('chantons')).toEqual({ lines: [], error: 'HTTP 500: unavailable' });
+test("a settled verb-line failure does not stick: the section's re-ask through the same seam draws its lines", async () => {
+  answerWith(() => Promise.reject(new TypeError('TEST ONLY offline')));
+  expect(await lexiconVerbLines('chantons')).toEqual({ lines: [], error: 'TEST ONLY offline' });
+  answerWith(() =>
+    Promise.resolve(
+      Response.json({
+        source: {
+          name: 'TEST lexicon',
+          maintainer: 'Relire tests',
+          licence: 'test-only',
+          url: 'https://example.test/lexicon.json',
+          sourceVersion: 'test',
+          changes: 'Invented test data',
+          modified: '2026-01-01',
+        },
+        entries: [{ lemma: 'chanter', pos: 'verb', data: chanterData() }],
+        forms: { chantons: [['chanter', 'verb']] },
+      }),
+    ),
+  );
+  expect(await lexiconVerbLines('chantons')).toEqual({
+    lines: [
+      {
+        infinitive: 'chanter',
+        match: {
+          tenses: [
+            { tense: 'present', persons: ['1pl'] },
+            { tense: 'imperatif', persons: ['1pl'] },
+          ],
+          participles: [],
+        },
+      },
+    ],
+  });
 });
 
-test('the conjugation slot starts ready with no entry and asks nothing when no service is configured', () => {
+test('a lemma the AI named is tried as written, then without its pronoun; a non-verb is no verb data', async () => {
+  answerWithFile();
+  expect((await lexiconVerb('se laver'))?.tenses?.present?.['1pl']).toEqual(['lavons']);
+  expect(await lexiconVerb('chant')).toBeUndefined();
+  expect(await lexiconVerb('xyzzy')).toBeUndefined();
+});
+
+test('the conjugation slot starts loading: no content-service gate is left', () => {
   const status = () => createElement((): string => useLexiconVerb('chanter').status);
-  delete process.env.VITE_CONTENT_SERVICE_URL;
-  expect(renderToStaticMarkup(status())).toBe('ready');
-  process.env.VITE_CONTENT_SERVICE_URL = origin;
   expect(renderToStaticMarkup(status())).toBe('loading');
   expect(fetchSpy).not.toHaveBeenCalled();
 });

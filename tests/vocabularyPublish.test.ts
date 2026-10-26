@@ -1,10 +1,10 @@
 /** Synthetic preparation, actual command entrypoints and ordered immutable publication failures on disposable SQLite. */
-import { expect, test } from 'bun:test';
+import { expect, spyOn, test } from 'bun:test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { testBook } from './fixtures/vocabulary';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 import { failure } from './fixtures/storage';
 import {
   prepareVocabulary,
@@ -13,7 +13,7 @@ import {
 } from '../scripts/vocabulary/prepareBook';
 import { prepare } from '../scripts/vocabulary/prepare';
 import { review } from '../scripts/vocabulary/review';
-import { publish } from '../scripts/vocabulary/publish';
+import { parseArgs, publish } from '../scripts/vocabulary/publish';
 import {
   assembleVocabularyBook,
   publishVocabularyBook,
@@ -23,10 +23,47 @@ import {
 import { vocabularyHash, vocabularyMetadata, canonicalVocabularyJson } from '../src/services/vocabulary/book';
 import { VocabularyEntrySchema } from '../src/types/vocabulary';
 import { handle } from '../worker/src/index';
+test('pure argument parsing accepts preparation, check, local modes and remote unreviewed only', () => {
+  const flags = ['--check', '--apply-local', '--apply-local-unreviewed', '--apply-remote-unreviewed'];
+  expect(parseArgs([])).toBeUndefined();
+  for (const flag of flags) expect(parseArgs([flag])).toBe(flag);
+  const usage = 'Usage: publish.ts [--check | --apply-local | --apply-local-unreviewed | --apply-remote-unreviewed]';
+  for (const flag of ['--remote', '--apply-remote', '--unknown']) expect(() => parseArgs([flag])).toThrow(usage);
+  for (const first of [...flags, '--remote', '--apply-remote'])
+    for (const second of [...flags, '--remote', '--apply-remote'])
+      expect(() => parseArgs([first, second])).toThrow(usage);
+});
+
+test.each([undefined, false])(
+  'remote permission=%s refuses remote flags with rooted private diagnostics',
+  async (allowRemote) => {
+    const directory = await mkdtemp(`${tmpdir()}/relire-TEST-vocabulary-failure-`);
+    const log = spyOn(console, 'log').mockImplementation(() => {});
+    const error = spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      expect(
+        await failure(
+          publish(['--apply-remote-unreviewed'], pathToFileURL(directory + '/'), undefined, { allowRemote }),
+        ),
+      ).toMatchObject({ message: 'Remote publication requires owner CLI authorization' });
+      expect(await Bun.file(directory + '/.pi-runs/vocabulary/failure.log').text()).toContain(
+        'Remote publication requires owner CLI authorization',
+      );
+      expect(log.mock.calls).toEqual([]);
+      expect(error.mock.calls).toEqual([
+        ['Vocabulary publication failed; private diagnostics in .pi-runs/vocabulary/failure.log'],
+      ]);
+    } finally {
+      log.mockRestore();
+      error.mockRestore();
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
+
 const metadata = {
   bookId: 'tcf-7000',
   title: { en: 'TEST book', zh: '\u6d4b\u8bd5' },
-  attribution: 'Invented TEST only',
 };
 const sources = [
   {
@@ -142,7 +179,7 @@ test('real prepare/review/publish commands work on disposable invented metadata,
       value: string;
     };
     expect(current.value).toHaveLength(64);
-    const response = await handle(new Request('https://content.test/v1/vocabulary/tcf-7000?page=0'), env);
+    const response = await handle(workerRequest('https://content.test/v1/vocabulary/tcf-7000?page=0'), env);
     expect(response.status).toBe(200);
     const served = await response.text();
     expect(JSON.parse(served).entries).toHaveLength(1);

@@ -1,6 +1,6 @@
 /**
  * Deterministic answer checking for the 11 exercise types, ported from
- * FrenchLab with its accent and punctuation semantics unchanged. Pure: no
+ * FrenchLab with item-level accent and sentence-punctuation policies. Pure: no
  * React, storage or AI. Free-text answers that do not match a reference are
  * reported as needing an AI grader instead of being guessed at here.
  * Does not own the AI call, persistence or what the sheet shows.
@@ -90,10 +90,14 @@ export function gradeItem(
   if (countBlanks(item.prompt) > 1 || Array.isArray(expected))
     return graded(gradeSlots(answer.multiAnswers, toList(expected), strictAccents));
 
-  const given = normalizeFrench(answer.singleAnswer, strictAccents);
+  const normalize = (value: string) =>
+    normalizeFrench(
+      item.meta?.ignoreSentencePunctuation === true ? value.replace(/[.,;:!?…«»()]/g, ' ') : value,
+      strictAccents,
+    );
+  const given = normalize(answer.singleAnswer);
   const matches =
-    given === normalizeFrench(String(expected), strictAccents) ||
-    (item.acceptableAnswers?.some((alt) => normalizeFrench(alt, strictAccents) === given) ?? false);
+    given === normalize(String(expected)) || (item.acceptableAnswers?.some((alt) => normalize(alt) === given) ?? false);
   if (matches) return graded(true);
   if (AI_GRADED_TYPES.includes(type) && answer.singleAnswer.trim().length >= MIN_AI_GRADED_LENGTH)
     return { status: 'needs-ai', recordedAnswer };

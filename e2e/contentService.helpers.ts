@@ -2,7 +2,6 @@
 import type { Page } from '@playwright/test';
 import type { GrammarTopicsPack } from '../src/types/grammarTopic';
 import type { GrammarTagIndex } from '../src/types/grammarTagIndex';
-import type { LexiconFormResponse, LexiconLemmaResponse } from '../src/types/lexicon';
 import { topicsFixture } from '../tests/fixtures/grammarTopics';
 import { testBook } from '../tests/fixtures/vocabulary';
 import { vocabularyPages } from '../scripts/vocabulary/publication';
@@ -17,7 +16,14 @@ export async function mockTopics(page: Page, pack = emptyTopics()) {
     const path = new URL(route.request().url()).pathname;
     if (path === '/v1/topics') {
       return route.fulfill({
-        json: pack.topics.map(({ id, chapter, level, tags, title }) => ({ id, chapter, level, tags, title })),
+        json: pack.topics.map(({ id, chapter, level, tags, title }, i) => ({
+          id,
+          chapter,
+          level,
+          tags,
+          title,
+          position: i + 1,
+        })),
       });
     }
     const topic = pack.topics.find((entry) => path === `/v1/topics/${entry.id}`);
@@ -43,37 +49,4 @@ export async function mockVocabulary(page: Page) {
     const body = pages[Number(query.get('page'))];
     return route.fulfill({ status: body ? 200 : 404, json: body ?? { error: 'page-not-found' } });
   });
-}
-
-export const LEXICON_REQUEST = `${CONTENT_ORIGIN}/v1/lexicon/**`;
-
-/** What the fake lexicon answers, changeable while a test runs; every path it does not know is the service's 404. */
-export interface LexiconMock {
-  forms: Record<string, LexiconFormResponse>;
-  lemmas: Record<string, LexiconLemmaResponse>;
-  /** `error` answers every request 500, `offline` aborts it like a lost connection. */
-  mode: 'ok' | 'error' | 'offline';
-  /** A promise held per request (its decoded path and how many times it was asked): the answer waits for it, so a test decides when the lexicon arrives. */
-  hold?: (path: string, nth: number) => Promise<void> | undefined;
-  /** The decoded paths asked so far. */
-  paths: string[];
-}
-
-/** Fake lexicon routes with TEST data only (tests/fixtures/lexicon.ts); the base `page` fixture installs an empty one. */
-export async function mockLexicon(page: Page, data: Partial<Pick<LexiconMock, 'forms' | 'lemmas'>> = {}) {
-  const mock: LexiconMock = { forms: {}, lemmas: {}, ...data, mode: 'ok', paths: [] };
-  await page.route(LEXICON_REQUEST, async (route) => {
-    const path = decodeURIComponent(new URL(route.request().url()).pathname);
-    mock.paths.push(path);
-    const nth = mock.paths.filter((asked) => asked === path).length;
-    if (mock.mode === 'offline') return route.abort('failed');
-    const form = path.startsWith('/v1/lexicon/form/');
-    await mock.hold?.(path, nth);
-    if (mock.mode === 'error') return route.fulfill({ status: 500, json: { error: 'unavailable' } });
-    const found = form
-      ? mock.forms[path.slice('/v1/lexicon/form/'.length)]
-      : mock.lemmas[path.slice('/v1/lexicon/'.length)];
-    return route.fulfill({ status: found ? 200 : 404, json: found ?? { error: 'not-found' } });
-  });
-  return mock;
 }

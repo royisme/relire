@@ -2,9 +2,11 @@
 
 The one file of project instructions for every agent. `CLAUDE.md` only imports it, so Claude Code, pi and other tools read the same text; edit this file, never `CLAUDE.md`.
 
-Relire is a static, browser-only PWA for French close reading and pronunciation practice for TCF Canada learners (no mock exams or official scores); it is becoming **Relire Plus** (`docs/merge-plan.md`). Stack: React 19, Vite, Tailwind v4, i18next, IndexedDB, the user's own AI key called from the browser; no server of its own: the only backend is an optional read-only content service for grammar, lexicon and wordbook content (`docs/adr-hosted-content-service.md`), which never sees a key, an answer, an article or a recording (it receives only a topic id, tapped word or book id/page/version) and is never required. Bun is the only package manager.
+Relire is a static, browser-only PWA for French close reading and pronunciation practice for TCF Canada learners (no mock exams or official scores); it is becoming **Relire Plus** (`docs/merge-plan.md`). Stack: React 19, Vite, Tailwind v4, i18next, IndexedDB, the user's own AI key called from the browser; no server of its own: the only backend is an optional read-only content service for grammar topics, the wordbook and graded readers (`docs/adr-hosted-content-service.md`; the verb-form dictionary is a data file shipped with the app, `docs/lexicon-bundle-plan.md`), which never sees an AI key, an answer, an article or a recording (it receives only the service access key the learner set for it, and a topic id, book id/page/version or reader id/version) and is never required. Bun is the only package manager.
 
 ## Hard rules
+
+The never-do list and working agreements are in `RULES.md`.
 
 - Every user-visible string goes through `t()` with keys in both `en.json` and `zh.json`.
 - Never commit API keys; backups never contain them.
@@ -15,6 +17,8 @@ Relire is a static, browser-only PWA for French close reading and pronunciation 
 - Use a shadcn/ui (Base UI) component first via `bunx shadcn@latest add <name>`; write a custom component only when none exists, and compose data tables from `ui/table` and `@tanstack/react-table`.
 - Controls never move the page: transient states show on the control itself or in an overlay.
 - Docs, comments, commit messages and PR text are in English; Chinese only where `docs/conventions.md` allows.
+- Names: a new branch is at most three words joined by hyphens, with no slash and no type prefix (`today-v2`, `fix-scroll-state`); commits and PR titles are `type(scope): summary` with type one of feat, fix, docs, chore, refactor, test.
+- Code style (`docs/conventions.md`, "Code style"): validate once at the boundary that owns the value, inline single-use helpers, no `any`, no aliased or star imports in new code, `const` and early returns instead of `else`, no speculative race or security handling without the owner's buy-in.
 - A user-noticeable change gets a `CHANGELOG.md` (Unreleased) line in the same commit.
 
 ## How to work here
@@ -25,19 +29,33 @@ Relire is a static, browser-only PWA for French close reading and pronunciation 
 - Before dispatching a worker, or ruling a model out, run `magpie quota` (read-only, instant): availability changes, so never trust a reset time written in a note or an old error. Details in `docs/agent-delegation.md`.
 - Develop on the designated branch. No PRs, merges or force-push unless asked, except the lead's local merge in `docs/agent-delegation.md`. Finish with `ship-change`.
 
-## Where to look
+## The document set
+
+AGENTS.md is the glue: it is loaded every session and points to the rest. One file per role, each with one owner of its content. Where a role already had a file with a tool-bound or widely referenced name, that file stays (renaming `PRODUCT.md` or `DESIGN.md` breaks the design tooling; `docs/architecture.md` is linked from many docs).
+
+| Role | File | Read it when | Updated when |
+| --- | --- | --- | --- |
+| What we build and for whom (PRD) | `PRODUCT.md` | scope, audience, claims to avoid | scope or audience changes |
+| Stack, folders, data flow, storage | `docs/architecture.md` | touching module boundaries or data | responsibilities move |
+| Colors, type, components, tokens, overlays | `DESIGN.md`, skill `verify-ui` | any UI work | tokens or components change |
+| Rules: never-do list, working agreements | `RULES.md` (hard rules above; long form `docs/conventions.md`; area rules `.claude/rules/*.md`, auto-loaded) | before your first change | a rule is added or reversed |
+| Small steps, one at a time | `TASKS.md` | choosing what to do next | a step starts, lands or is replaced |
+| Done, broken, unverified | `PROGRESS.md` (history: `docs/merge-progress.md`, `CHANGELOG.md`) | catching up | a step lands or something breaks |
+| Direction: done, next, later, deferred | `docs/roadmap.md` | planning | priorities change |
+| Live session state | `docs/HANDOFF.md` (**local only**, never committed; history in `.handoffs/`) | start of a session after a reset | end of a session |
+
+Session protocol: read this file, `RULES.md`, then `TASKS.md` and `PROGRESS.md`; work one step; run the checks and read their exit codes; update `TASKS.md`, `PROGRESS.md`, the `CHANGELOG.md` line and any doc the change touches in the same commit; end with the skill `ship-change`.
+
+## Where to look (by task)
 
 | Your task | Read |
 | --- | --- |
 | Commands, checks, ports, e2e | `docs/development.md` |
 | What the hard rules mean in practice | `docs/conventions.md` |
-| Files in an area (UI, AI, storage, speech, i18n, marketing, TS) | `.claude/rules/*.md`, auto-loaded |
-| Product intent, audience, claims to avoid | `PRODUCT.md` |
-| UI work: tokens, type, spacing, overlays | `DESIGN.md`, skill `verify-ui` |
-| Module ownership, data flow, storage | `docs/architecture.md` |
-| What is done, next, later and deferred | `docs/roadmap.md` |
 | Merging FrenchLab AI | `docs/merge-plan.md`, then `docs/merge-progress.md` |
 | Grammar pack: Part 1 verified conjugation data, Part 2 grammar topics, Part 3 framework-first conjugation (any verb, AI-filled and engine-checked), Part 4 noun-gender tendencies | `docs/grammar-pack.md` |
+| Graded readers: plan, then authoring pipeline, gates G0 to G5, review flow | `docs/graded-readers-plan.md`, then `docs/graded-readers.md` |
+| Hosted content service | `docs/adr-hosted-content-service.md`, `worker/README.md` |
 | Adding an AI provider | skill `add-ai-provider` |
 | Finishing a change | skill `ship-change` |
 | Delegating to pi, agy, subagents | `docs/agent-delegation.md` |

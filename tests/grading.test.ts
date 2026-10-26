@@ -1,3 +1,4 @@
+/** Deterministic exercise grading, comparison policies, answer helpers and attempt snapshots; no AI calls. */
 import { describe, expect, test } from 'bun:test';
 import {
   choiceGroups,
@@ -156,6 +157,67 @@ describe('every type graded right and wrong', () => {
       const wrong = grade(type, { singleAnswer: 'réponse inattendue', selectedOdd: 'zzz', matchSelection: 'z' });
       expect(wrong.status === 'needs-ai').toBe(type === 'OPEN_QA' || type === 'SENTENCE_BUILD');
     }
+  });
+});
+
+describe('sentence punctuation flag in scalar grading', () => {
+  const dictation = (expectedAnswer: string): ExerciseItem => ({
+    ...ITEMS.NUMBER_DICTATION,
+    expectedAnswer,
+    acceptableAnswers: undefined,
+    meta: { strictAccents: true, ignoreSentencePunctuation: true },
+  });
+  const check = (expected: string, given: string) =>
+    grade('NUMBER_DICTATION', { singleAnswer: given }, lenient, dictation(expected));
+
+  test('terminal punctuation is optional and the recorded answer stays as typed', () => {
+    expect(check('Il est petit.', 'Il est petit')).toEqual({
+      status: 'graded',
+      correct: true,
+      recordedAnswer: 'Il est petit',
+    });
+    expect(verdict(check('Il est petit.', 'Il est petit.'))).toBe(true);
+    expect(verdict(check('Il est petit', 'Il est petit.'))).toBe(true);
+    expect(verdict(check('Oui, tu as raison.', 'Oui,tu as raison'))).toBe(true);
+  });
+
+  test('each ignored punctuation mark becomes a space on either side and in acceptable answers', () => {
+    for (const mark of ['.', ',', ';', ':', '!', '?', '…', '«', '»', '(', ')']) {
+      expect(verdict(check(`Oui${mark}tu as raison.`, 'Oui tu as raison'))).toBe(true);
+      expect(verdict(check('Oui tu as raison.', `Oui${mark}tu as raison`))).toBe(true);
+      const item = { ...dictation('Il est petit.'), acceptableAnswers: [`Oui${mark}tu as raison.`] };
+      expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Oui tu as raison' }, lenient, item))).toBe(true);
+    }
+  });
+
+  test('hyphens, apostrophes, strict accents and words remain significant', () => {
+    expect(verdict(check('Est-ce un livre ?', 'Est ce un livre'))).toBe(false);
+    expect(verdict(check('Est-ce un livre ?', 'Est-ce un livre'))).toBe(true);
+    expect(verdict(check('J’ai un livre.', "J'ai un livre"))).toBe(true);
+    expect(verdict(check('J’ai un livre.', 'Jai un livre'))).toBe(false);
+    expect(verdict(check('Il est à Paris.', 'Il est a Paris'))).toBe(false);
+    expect(verdict(check('Il est petit.', 'Il est grand'))).toBe(false);
+    const item = { ...dictation('Il est à Paris.'), meta: { ignoreSentencePunctuation: true } };
+    expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Il est a Paris' }, lenient, item))).toBe(true);
+    expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Il est a Paris' }, strict, item))).toBe(false);
+  });
+
+  test('without the boolean flag a missing full stop still fails', () => {
+    for (const meta of [undefined, {}, { ignoreSentencePunctuation: false }, { ignoreSentencePunctuation: 'true' }]) {
+      const item = { ...dictation('Il est petit.'), meta };
+      expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Il est petit' }, strict, item))).toBe(false);
+      expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Il est petit.' }, strict, item))).toBe(true);
+    }
+  });
+
+  test('the flag does not change slot, choice or match grading', () => {
+    const meta = { ignoreSentencePunctuation: true };
+    const slots = { ...ITEMS.FILL_BLANKS_MULTI, expectedAnswer: ['Oui.', 'Non.'], meta };
+    expect(verdict(grade('FILL_BLANKS', { multiAnswers: ['Oui', 'Non'] }, strict, slots))).toBe(false);
+    const choices = { ...ITEMS.CHOICE_SELECT, prompt: '{Oui.|Non.}', expectedAnswer: 'Oui.', meta };
+    expect(verdict(grade('CHOICE_SELECT', { choiceSelections: ['Oui'] }, strict, choices))).toBe(false);
+    const match = { ...ITEMS.MATCH_PAIRS, expectedAnswer: 'b.', meta };
+    expect(verdict(grade('MATCH_PAIRS', { matchSelection: 'b' }, strict, match))).toBe(false);
   });
 });
 

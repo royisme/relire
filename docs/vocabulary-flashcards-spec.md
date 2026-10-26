@@ -41,6 +41,8 @@ The input contains `id`, `word`, `pos`, `gloss`, `gloss_en`, `raw`, `tags` and o
 
 The adjacent README names a third-party shared deck and says no distribution licence was stated. Personal access is not proof of public redistribution permission. **Code and synthetic fixtures can be implemented without distributing the corpus.** The owner must approve the corrected private artifact and distribution rights before any public content publication. Do not turn this into an automatic network/legal research or publishing task.
 
+**Owner decision 2026-10-24:** the owner states the book is their own work and they have the right to publish it, so the distribution-rights gate is closed and the book may be deployed with the content service. The manifest `attribution` field, which wrongly named a third-party AnkiWeb deck, was removed from the schema, the manifest and the scripts at the owner's instruction; the book carries no attribution line. The local D1 must be re-published to serve the new manifest.
+
 Recommended delivery is an extension of the existing optional read-only content Worker/D1, not a front-end bundle or a personal-import-only product. This intentionally extends the [hosted-content ADR](adr-hosted-content-service.md) from topics/lexicon to the built-in wordbook; update that scope and the privacy text with implementation. The complete-book download deliberately lets any client read the whole book in roughly 30 paged requests at the observed pre-review count; derive the actual count after omissions. The existing 60-per-minute limit is shared with other requests and can still produce 429, so it is not a download-success guarantee. The ADR's "no endpoint returns all text at once" only raised scraping cost for topics; its update must state this whole-book-download trade-off (section 14). No new backend service, account, key or learner-write endpoint is needed. Without a configured service, personal bookmarks and saved learning cards continue to work. A previously completed book cache can still be browsed/studied offline; its entry says updates are unavailable. With neither service nor complete book cache, the entry explains that the built-in content is unavailable rather than showing an empty book.
 
 ## 3. Word identity, senses and bookmark semantics
@@ -102,7 +104,7 @@ All shapes in this section are **new contracts**, not existing APIs. Add the row
 
 ### 4.1 Content contracts
 
-- **Book manifest:** `bookId` (`tcf-7000`), bilingual title, 64-hex served-artifact hash `version` (section 8.1), normalized `entryCount`, `pageCount`, `pageSize` (250), source attribution and review provenance: either the actual strict `{ bookId, contentHash, reviewedBy, reviewedAt }` record or the distinct strict `{ bookId: 'tcf-7000', contentHash, status: 'unreviewed' }` local-waiver state. No null/default/mixed status is accepted. Actual review records/public `reviews.json` accept only the reviewed shape. Reviewed publication remains the default; only the explicit local mode permits the waiver.
+- **Book manifest:** `bookId` (`tcf-7000`), bilingual title, 64-hex served-artifact hash `version` (section 8.1), normalized `entryCount`, `pageCount`, `pageSize` (250) and review provenance: either the actual strict `{ bookId, contentHash, reviewedBy, reviewedAt }` record or the distinct strict `{ bookId: 'tcf-7000', contentHash, status: 'unreviewed' }` local-waiver state. No null/default/mixed status is accepted. Actual review records/public `reviews.json` accept only the reviewed shape. Reviewed publication remains the default; only the explicit local mode permits the waiver.
 - **Book entry:** canonical `key`, display `word`, nonnegative source-order `position`, source note ids as strings, and one or more senses.
 - **Built-in sense:** optional nonblank POS, nonblank English and Chinese glosses, zero or more `{ fr, en, zh }` examples. Missing POS is omitted; missing example is omitted. Partial examples are rejected, not completed at runtime.
 - **Personal context:** context identity from section 3.3, original French sentence when supplied, actual save timestamp, frozen request language, optional actual source descriptor, and the `WordAnalysis` snapshot for that same canonical word. The generic `analysis.translation` is in the request language (the English template explicitly says so); do not relabel every saved translation as Chinese or use the current UI language as its provenance. Optional `translationEn`/example translations are used only when actually present.
@@ -273,7 +275,7 @@ With no complete book, first-use failure is unavailable, not zero words. Saved l
 
 ## 9. Routes, screens and visual contract
 
-Keep Words under My study; no new top-level navigation. Define real routes for places, not a component-local page switch:
+**Superseded 2026-10-25 by `docs/navigation-plan.md`:** Words is a top-level sidebar row at `#/words` (`/all`, `/review`, `/play`, `/map`), the home tab is called Overview, and `#/study/words…` no longer exists; read the routes below with that mapping. Define real routes for places, not a component-local page switch:
 
 | Route | Purpose |
 | --- | --- |
@@ -283,11 +285,11 @@ Keep Words under My study; no new top-level navigation. Define real routes for p
 
 Extend `Route`, `routeHref`, `parseRoute`, `areaOf`, `NavTree`, shell current-area logic and `StudyView`; preserve Back/reload. Use new route variants for the deeper Words places, not Grammar's `section: 'conjugation'`. All three routes keep My study/Words active in expanded sidebar, rail and compact study navigation. No current word/source is sent over the network; transient filters/reveal need no routes.
 
-Today and Browse share two real page links, Today and All words, above their content, with `aria-current="page"` on the matching destination; these are not Segmented radios. Today's Start/Continue links to Review; Browse has an outline Review due words link to that same review route (it does not bypass queue/quota). Review's Back to Words always targets Today. Do not add a second sidebar or label Review as the All words destination.
+Today and Browse share two real page links, Today and All words, above their content, with `aria-current="page"` on the matching destination; these are not Segmented radios. The Words Overview has one next action that follows the real queue and links to Review; Browse has an outline Review words that are ready link to that same review route (it does not bypass queue/quota). Review's Back to Words always targets Today. Do not add a second sidebar or label Review as the All words destination.
 
 ### Today and browser
 
-Today shows real pending review count, learning/relearning count and remaining new introduction allowance, then Start/continue. It holds neither the book controls nor the limit form; Settings → Words solely owns them. Unavailable book data is not a fake zero-word catalogue.
+The Words Overview shows the due, learning/relearning and available-new counts from `wordsInput` (the same numbers the Today page shows, with an en dash while the data is loading or failed) and one filled next action that follows the real queue: Review N words, else Learn N new words, else the time the next scheduled word becomes studyable, else a calm sentence about importing words. It holds neither the book controls nor the limit form; Settings → Words solely owns them. Unavailable book data is not a fake zero-word catalogue.
 
 Settings → Words (`#/settings/words`) owns the new-per-day limit and the built-in wordbook's download/update state, count, progress and failure/restart. Daily-new accepts integer0..100, default20; target retention accepts integer80..95%, default90. Both save together through the one ready `useVocabulary` model into vocabulary preferences, not AppSettings. The page holds both nullable text drafts across section switches and an older save cannot clear newer input. Save waits for the initial read; saving/errors keep a fixed control/status slot. Retention is a scheduling target, not measured memory; higher targets mean more reviews. Brief settings-only copy clarifies pre-flip Fuzzy versus post-reveal recognition.
 
@@ -297,7 +299,7 @@ Browse composes existing `ui/table` with TanStack Table. Search word and actuall
 
 ```text
 Back to Words                         Session ratings / introductions
-Due now: n    New remaining today: n
+Ready to review: n    New words left today: n
 +----------------------------------------------------+
 | Front: French word, explicit Listen                |
 |         < click either face for two-way flip >     |
@@ -466,7 +468,7 @@ Checked by the lead against source on 2026-10-19: every named existing file, `Vo
 | S7: download status layout | Fixed. Today's download/update/failure now uses its control and a reserved status slot (8.3, 12). |
 | S8: source descriptor | Fixed. Ids come from `ReaderSource`; a passage is always kind `'unit'`. Joint review clarified that equal source ids do not force equal context text across views; only an equal full context key merges (3.3, 15). |
 | O1: C1 selection method | Content gate, not a synthetic-code blocker. Owner chooses/accepts the omission-review method and any external evidence source; frequency alone is not CEFR. Resolve target-relevant Canadian usage before marking the real artifact reviewed; do not silently omit personal data (2, 15). |
-| O2: whole-book scraping | Public-delivery gate. Owner must accept that an authorized/public client can download the full served book and confirm distribution rights before real public availability. Local synthetic endpoint tests do not require this decision. Access control remains the precondition for selling (ADR section 6). |
+| O2: whole-book scraping | Public-delivery gate. Owner accepts that a client can download the full served book; distribution rights are confirmed by the owner (2026-10-24). Local synthetic endpoint tests do not require this decision. Access control remains the precondition for selling (ADR section 6). |
 
 ## 15. Joint readiness feedback and kickoff boundary
 

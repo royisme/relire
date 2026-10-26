@@ -15,6 +15,11 @@ import type { ExerciseAttempt, ExerciseItemState, ExerciseUnit } from '../types/
 import { exercisesChanged } from './exerciseEvents';
 import { parseExerciseBackup, restoreExerciseRows } from './exerciseBackup';
 import { deleteUnitRows } from './exerciseRows';
+import { ReaderProgressSchema, type ReaderProgress, type ReaderQuestionGrader } from '../types/readerProgress';
+import { parseGradedReaderBackup, restoreGradedReaderRows } from './gradedReaderBackup';
+import { readersChanged } from './gradedReaders';
+import { TopicStudiedArraySchema, type TopicStudied } from '../types/topicStudied';
+import { exportTopicStudied, restoreTopicStudied, topicStudiedChanged } from './topicStudied';
 
 /**
  * User data lives in IndexedDB: no 5 MB cap, async, and one record per article
@@ -71,6 +76,8 @@ export interface AppData {
 /** Everything a backup carries from IndexedDB: the app data plus the exercise stores. */
 export interface BackupData extends AppData {
   vocabularyMeta: VocabularyMetaBackup;
+  gradedReaders: ReaderProgress[];
+  topicStudied: TopicStudied[];
   units: ExerciseUnit[];
   itemStates: ExerciseItemState[];
   attempts: ExerciseAttempt[];
@@ -270,6 +277,10 @@ export async function exportData(): Promise<BackupData> {
     units,
     itemStates,
     attempts,
+    topicStudied: exportTopicStudied(meta),
+    gradedReaders: keys
+      .filter((key) => key.startsWith('readerProgress:'))
+      .map((key) => ReaderProgressSchema.parse(meta.get(key))),
     vocabularyMeta: {
       schedulerPolicy: VOCABULARY_SCHEDULER_POLICY,
       preferences: VocabularyPreferencesSchema.parse(
@@ -284,6 +295,8 @@ export async function exportData(): Promise<BackupData> {
 export interface RestoreInput extends Partial<Omit<AppData, 'vocab'>> {
   vocab?: unknown;
   vocabularyMeta?: unknown;
+  gradedReaders?: unknown;
+  topicStudied?: unknown;
   /** Validated by the caller (`parseShadowingBackup`). */
   shadowing?: ShadowingSentence[];
   units?: unknown;
@@ -299,7 +312,9 @@ export interface RestoreInput extends Partial<Omit<AppData, 'vocab'>> {
  * full, before the transaction opens: a malformed payload throws
  * `ExerciseBackupError` and nothing is written; an absent key keeps the stored rows.
  */
-export async function importData(data: RestoreInput) {
+export async function importData(data: RestoreInput, gradeReaderQuestion?: ReaderQuestionGrader) {
+  const topicStudied = data.topicStudied === undefined ? undefined : TopicStudiedArraySchema.parse(data.topicStudied);
+  const readers = await parseGradedReaderBackup(data, gradeReaderQuestion);
   const vocabulary = parseVocabularyBackup(data);
   const exercises = parseExerciseBackup(data);
   const touchesExercises = Boolean(exercises.units || exercises.itemStates || exercises.attempts);
@@ -318,6 +333,8 @@ export async function importData(data: RestoreInput) {
       await store.clear();
       for (const sentence of data.shadowing) await store.put(sentence);
     }
+    if (readers) await restoreGradedReaderRows(tx.objectStore('meta'), readers);
+    if (topicStudied) await restoreTopicStudied(tx.objectStore('meta'), topicStudied);
     if (data.stats) await tx.objectStore('meta').put({ ...EMPTY_STATS, ...data.stats }, 'stats');
     await tx.objectStore('meta').put(true, 'started');
     if (touchesExercises) {
@@ -341,6 +358,8 @@ export async function importData(data: RestoreInput) {
     throw err;
   }
   await tx.done;
+  if (readers) await readersChanged();
+  if (topicStudied) await topicStudiedChanged();
   if (vocabulary) await vocabularyChanged();
   if (touchesExercises) exercisesChanged();
 }

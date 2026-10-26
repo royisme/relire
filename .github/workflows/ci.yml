@@ -31,8 +31,16 @@ jobs:
         run: bun scripts/noun-gender/build.ts --check
       - name: Minimal pairs
         run: bun scripts/minimal-pairs/build.ts --check
+      - name: Letter sounds
+        run: bun scripts/spelling-sounds/build.ts --check
+      - name: Lexicon data
+        run: bun scripts/lexicon/build.ts --check
       - name: Grammar topics
         run: bun scripts/grammar-topics/publish.ts --check
+      - name: Graded readers
+        run: bun scripts/graded-readers/assemble.ts --check
+      - name: Graded readers starter
+        run: bun scripts/graded-readers/publish.ts --check
       - name: Translations
         run: bun run i18n:check
       - name: Code shape

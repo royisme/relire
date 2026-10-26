@@ -8,16 +8,16 @@ import { validateVocabularyBook } from '../src/services/vocabulary/book';
 import { ContentServiceHttpError } from '../src/services/grammarTopics/service';
 import { getVocabularyBook, putVocabularyBook } from '../src/storage/vocabularyBook';
 import { db } from '../src/storage/db';
+import { freshSettingsStorage, restoreSettingsStorage, serviceOn } from './fixtures/contentServiceSettings';
 const originalFetch = globalThis.fetch;
-const originalUrl = process.env.VITE_CONTENT_SERVICE_URL;
 beforeEach(async () => {
   await freshDb();
-  process.env.VITE_CONTENT_SERVICE_URL = 'https://content.test';
+  freshSettingsStorage();
+  serviceOn('https://content.test');
 });
 afterEach(() => {
   globalThis.fetch = originalFetch;
-  if (originalUrl === undefined) delete process.env.VITE_CONTENT_SERVICE_URL;
-  else process.env.VITE_CONTENT_SERVICE_URL = originalUrl;
+  restoreSettingsStorage();
 });
 test('pinned pages accumulate only in memory; one validated committed cache, no learner information in requests', async () => {
   const book = await testBook(251),

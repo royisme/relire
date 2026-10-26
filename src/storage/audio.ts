@@ -27,7 +27,8 @@ async function vocabularyTexts(): Promise<Set<string>> {
     texts.add(normalizeText(w.word));
     for (const context of w.contexts) {
       if (context.sentence) texts.add(normalizeText(context.sentence));
-      for (const ex of context.analysis.usageExamples ?? []) texts.add(normalizeText(ex.fr));
+      if (context.definition.kind === 'ai')
+        for (const ex of context.definition.analysis.usageExamples ?? []) texts.add(normalizeText(ex.fr));
     }
   }
   return texts;

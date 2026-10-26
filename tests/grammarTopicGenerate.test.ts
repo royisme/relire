@@ -15,7 +15,7 @@ import { buildPublishSql } from '../scripts/grammar-topics/publish';
 import { pathToFileURL } from 'node:url';
 import { GrammarTopicSchema } from '../src/types/grammarTopic';
 import { learningFixture, testBilingual } from './fixtures/grammarLearning';
-import { createWorkerDb } from './fixtures/workerDb';
+import { createWorkerDb, workerRequest } from './fixtures/workerDb';
 import { handle } from '../worker/src/index';
 import { topicFixture } from './fixtures/grammarTopics';
 
@@ -323,7 +323,7 @@ test('complete TEST learning survives generation, sheet, hash review, assembly, 
   const { db, env: worker } = await createWorkerDb();
   try {
     db.exec(buildPublishSql(input).sql);
-    const response = await handle(new Request('https://content.test/v1/topics/test-a'), worker);
+    const response = await handle(workerRequest('https://content.test/v1/topics/test-a'), worker);
     expect(response.status).toBe(200);
     expect(GrammarTopicSchema.parse(await response.json())).toEqual(assembled);
   } finally {
@@ -418,6 +418,17 @@ test('actual CLIs use the private path, report errors on stderr and exit 1 on a 
     join(repositoryRoot, 'src/services/exercises/normalizeFrench.ts'),
     join(repo, 'src/services/exercises/normalizeFrench.ts'),
   );
+  // Exercise metadata also validates reader and spelling-sound provenance, so the copied contracts need their pure dependencies.
+  for (const file of [
+    'services/grammarPack/lookup.ts',
+    'utils/readerTokens.ts',
+    'utils/sentences.ts',
+    'data/frenchIpa.ts',
+  ]) {
+    const destination = join(repo, 'src', file);
+    await mkdir(join(destination, '..'), { recursive: true });
+    await cp(join(repositoryRoot, 'src', file), destination);
+  }
   await symlink(join(repositoryRoot, 'node_modules'), join(repo, 'node_modules'));
   const cli = async (file: string, args: string[]) => {
     const child = Bun.spawn(['bun', file, ...args], {

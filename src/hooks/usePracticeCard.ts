@@ -46,7 +46,13 @@ const MIN_TAKE_MS = 500;
 const MAX_TAKE_MS = 60_000;
 export const takeKey = (take: ShadowingTake) => `take:${take.id}`;
 
-export function usePracticeCard(onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void) {
+/** `playbackEngine: 'device'` speaks the reference (and compare's first step) with the device's own voice
+ * instead of the selected engine: nothing is synthesized, stored or fetched. The learner's own recordings
+ * always play through `playRecording`. */
+export function usePracticeCard(
+  onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void,
+  playbackEngine?: 'device',
+) {
   const [phase, setPhase] = useState<CardPhase>('closed');
   const [target, setTarget] = useState<PracticeTarget | null>(null);
   const [latest, setLatest] = useState<ShadowingTake | null>(null);
@@ -340,7 +346,7 @@ export function usePracticeCard(onAssessed?: (assessment: PronunciationAssessmen
     if (!of || phaseRef.current !== 'ready') return;
     endsListening();
     owned.current.add(speechKey(of.text));
-    void speakFrench(of.text);
+    void speakFrench(of.text, { engine: playbackEngine });
   };
   const playLatest = () => {
     if (!latest || phaseRef.current !== 'ready') return;
@@ -357,6 +363,7 @@ export function usePracticeCard(onAssessed?: (assessment: PronunciationAssessmen
     owned.current.add(speechKey(of.text)).add(takeKey(mine));
     const card = session.current;
     void speakFrench(of.text, {
+      engine: playbackEngine,
       onSettled: (outcome) => {
         if (outcome === 'ended' && card === session.current && targetRef.current === of)
           void playRecording(mine.blob, takeKey(mine));

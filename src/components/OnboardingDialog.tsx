@@ -11,13 +11,13 @@ interface OnboardingDialogProps {
   /** Called when the guide ends, whether finished or skipped. */
   onClose: () => void;
   onKeySaved: () => void;
-  /** Open the first article in the library; undefined when the library is empty. */
-  onOpenSample?: () => void;
+  /** Open the first bundled graded reader; undefined while no reader is bundled. */
+  onOpenReader?: () => void;
 }
 
 const STEPS = 3;
 
-export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onKeySaved, onOpenSample }) => {
+export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onKeySaved, onOpenReader }) => {
   const { t } = useTranslation();
   const providerId = getAppSettings().textProvider;
   const providerName = t(`providers.${providerId}`, { defaultValue: providerId });
@@ -67,6 +67,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
             <p className="text-xs text-ink-500 tnum">{t('onboarding.stepOf', { n: 1, total: STEPS })}</p>
             <h2 className="font-serif text-2xl font-semibold text-ink-900">{t('onboarding.welcomeTitle')}</h2>
             <p className="text-sm text-ink-700 leading-relaxed">{t('onboarding.welcomeBody')}</p>
+            <p className="text-sm text-ink-700 leading-relaxed">{t('onboarding.welcomeNoKey')}</p>
             <p className="text-sm text-ink-700 leading-relaxed">
               {t('onboarding.welcomeNeed', { provider: providerName })}
             </p>
@@ -83,6 +84,7 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
             <h2 className="font-serif text-2xl font-semibold text-ink-900">
               {t('onboarding.keyTitle', { provider: providerName })}
             </h2>
+            <p className="text-sm text-ink-700 leading-relaxed">{t('onboarding.keyOptional')}</p>
             <ol className="space-y-4 text-sm text-ink-700">
               <li className="space-y-2">
                 <p>{t('onboarding.keyStep1', { provider: providerName })}</p>
@@ -118,12 +120,15 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
                 <p className="text-xs text-ink-500">{t('settings.keyPrivacy', { provider: providerName })}</p>
               </li>
             </ol>
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
               {skip}
-              <Button onClick={verifyAndSave} disabled={!key.trim() || checking}>
-                {checking && <Loader2 className="w-4 h-4 animate-spin" />}
-                {checking ? t('onboarding.checking') : t('onboarding.checkSave')}
-              </Button>
+              <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
+                <Button onClick={() => setStep(2)}>{t('onboarding.continueWithoutKey')}</Button>
+                <Button variant="outline" onClick={verifyAndSave} disabled={!key.trim() || checking}>
+                  {checking && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {checking ? t('onboarding.checking') : t('onboarding.checkSave')}
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -143,18 +148,18 @@ export const OnboardingDialog: React.FC<OnboardingDialogProps> = ({ onClose, onK
               <li>{t('onboarding.tipSentence')}</li>
               <li>{t('onboarding.tipSpeak')}</li>
             </ul>
-            <div className="flex items-center justify-end gap-2 pt-2">
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
               <Button variant="ghost" onClick={onClose}>
-                {t('onboarding.toLibrary')}
+                {t('onboarding.toToday')}
               </Button>
-              {onOpenSample && (
+              {onOpenReader && (
                 <Button
                   onClick={() => {
-                    onOpenSample();
+                    onOpenReader();
                     onClose();
                   }}
                 >
-                  {t('onboarding.openSample')}
+                  {t('onboarding.openReader')}
                 </Button>
               )}
             </div>

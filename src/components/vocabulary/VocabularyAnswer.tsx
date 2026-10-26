@@ -1,10 +1,31 @@
 /** Attributed answer prose; caller mounts it only after a durable reveal or in an explicit detail sheet. */
 import { useTranslation } from 'react-i18next';
 import type { VocabularyJoined } from '../../services/vocabulary/queue';
-export function VocabularyAnswer({ word, snapshot = false }: { word: VocabularyJoined; snapshot?: boolean }) {
+import type { VocabularyBook } from '../../types/vocabulary';
+export function VocabularyAnswer({
+  word,
+  snapshot = false,
+  book,
+}: {
+  word: VocabularyJoined;
+  snapshot?: boolean;
+  book?: VocabularyBook;
+}) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
   const source = snapshot ? word.row?.bookSource : word.bookSource;
+  // The status of another version of the book is unknown, so it is never claimed.
+  const review = source && book?.manifest.version === source.version ? book.manifest.review : undefined;
+  const builtIn = !review
+    ? t('vocab.builtIn')
+    : 'status' in review
+      ? t('vocab.builtInUnreviewed')
+      : t('vocab.builtInReviewed', {
+          name: review.reviewedBy,
+          date: new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeZone: 'UTC' }).format(
+            new Date(review.reviewedAt),
+          ),
+        });
   return (
     <div className="space-y-8 break-words text-sm text-ink-800">
       {source && (
@@ -25,39 +46,60 @@ export function VocabularyAnswer({ word, snapshot = false }: { word: VocabularyJ
               ))}
             </div>
           ))}
-          <p className="text-xs text-ink-600">{t('vocab.builtIn')}</p>
+          <p className="text-xs text-ink-600">{builtIn}</p>
         </section>
       )}
-      {word.row?.contexts.map((context) => (
-        <section key={context.id} className="space-y-4 border-t border-ink-200 pt-6">
-          <div className="space-y-1 text-xs text-ink-600">
-            <p>{t('vocab.savedContext')}</p>
-            <p>{t('vocab.savedLanguage', { language: t(`vocab.language.${context.requestLanguage}`) })}</p>
-            {context.source && <p>{context.source.title}</p>}
-          </div>
-          <div className="space-y-1">
-            <p className="text-2xl leading-snug text-ink-900">
-              {language === 'en' && context.analysis.translationEn
-                ? context.analysis.translationEn
-                : context.analysis.translation}
-            </p>
-            {context.analysis.partOfSpeech && <p className="text-xs text-ink-600">{context.analysis.partOfSpeech}</p>}
-          </div>
-          {context.sentence && (
-            <p lang="fr" className="font-serif text-lg">
-              {context.sentence}
-            </p>
-          )}
-          {context.analysis.usageExamples?.map((example, index) => (
-            <div key={index} className="space-y-1">
-              <p lang="fr" className="font-serif text-lg">
-                {example.fr}
-              </p>
-              <p className="text-ink-600">{language === 'en' && example.en ? example.en : example.zh}</p>
+      {word.row?.contexts.map((context) => {
+        const definition = context.definition;
+        return (
+          <section key={context.id} className="space-y-4 border-t border-ink-200 pt-6">
+            <div className="space-y-1 text-xs text-ink-600">
+              <p>{t(definition.kind === 'imported' ? 'vocab.import.saved' : 'vocab.savedContext')}</p>
+              {definition.kind === 'ai' && (
+                <p>{t('vocab.savedLanguage', { language: t(`vocab.language.${context.requestLanguage}`) })}</p>
+              )}
+              {context.source && <p>{context.source.title}</p>}
+              {definition.kind === 'imported' && definition.tags.length > 0 && <p>{definition.tags.join(' · ')}</p>}
             </div>
-          ))}
-        </section>
-      ))}
+            <div className="space-y-1">
+              <p className="text-2xl leading-snug text-ink-900">
+                {definition.kind === 'imported'
+                  ? definition.back
+                  : definition.kind === 'reader'
+                    ? definition.entry.gloss[language]
+                    : language === 'en' && definition.analysis.translationEn
+                      ? definition.analysis.translationEn
+                      : definition.analysis.translation}
+              </p>
+              {definition.kind === 'ai' && definition.analysis.partOfSpeech && (
+                <p className="text-xs text-ink-600">{definition.analysis.partOfSpeech}</p>
+              )}
+              {definition.kind === 'reader' && definition.entry.gender && (
+                <p className="text-xs text-ink-600">
+                  {definition.entry.gender === 'masculine'
+                    ? t('practice.genderMasculine')
+                    : t('practice.genderFeminine')}
+                </p>
+              )}
+            </div>
+            {context.sentence && (
+              <p lang="fr" className="font-serif text-lg">
+                {context.sentence}
+              </p>
+            )}
+            {definition.kind === 'reader' && <p className="text-ink-600">{definition.sentenceTranslation[language]}</p>}
+            {definition.kind === 'ai' &&
+              definition.analysis.usageExamples?.map((example, index) => (
+                <div key={index} className="space-y-1">
+                  <p lang="fr" className="font-serif text-lg">
+                    {example.fr}
+                  </p>
+                  <p className="text-ink-600">{language === 'en' && example.en ? example.en : example.zh}</p>
+                </div>
+              ))}
+          </section>
+        );
+      })}
     </div>
   );
 }

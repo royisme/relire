@@ -3,7 +3,7 @@ import { expect, test } from 'bun:test';
 import { z } from 'zod';
 import { DraftOutputSchema, PrivateDraftSchema } from '../scripts/grammar-topics/drafts';
 import { learningFixture } from './fixtures/grammarLearning';
-import { GrammarTopicSchema, GrammarTopicsPackSchema } from '../src/types/grammarTopic';
+import { GrammarTopicListSchema, GrammarTopicSchema, GrammarTopicsPackSchema } from '../src/types/grammarTopic';
 import { GrammarTagIndexSchema } from '../src/types/grammarTagIndex';
 import { topicFixture, topicsFixture } from './fixtures/grammarTopics';
 
@@ -41,6 +41,18 @@ test('Grammar section names cannot be topic ids', () => {
   for (const id of ['conjugation', 'gender']) {
     expect(GrammarTopicSchema.safeParse({ ...topicFixture(), id }).success).toBe(false);
   }
+});
+
+test('the list needs unique positive positions; full topics and packs strip an extra position key', () => {
+  const entry = (position: number) => ({ ...topicFixture(), position });
+  expect(GrammarTopicListSchema.safeParse([entry(1), entry(2)]).success).toBe(true);
+  for (const list of [[entry(1), entry(1)], [entry(0)], [entry(-1)], [topicFixture()]])
+    expect(GrammarTopicListSchema.safeParse(list).success).toBe(false);
+  // Strip-mode contracts: a stray position key is dropped, not rejected, so drafts and packs stay unchanged.
+  expect(GrammarTopicSchema.parse(entry(1))).toEqual(topicFixture());
+  expect(GrammarTopicsPackSchema.parse({ ...topicsFixture(), topics: [entry(1)] }).topics).toEqual(
+    topicsFixture().topics,
+  );
 });
 
 test('drafts are valid authoring rows, but never valid published topics', () => {

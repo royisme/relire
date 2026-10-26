@@ -138,7 +138,14 @@ for (const destination of ['', '/topics/test-only']) {
       await route.fulfill({
         json: destination
           ? topics[0]
-          : topics.map(({ id, chapter, level, tags, title }) => ({ id, chapter, level, tags, title })),
+          : topics.map(({ id, chapter, level, tags, title }, i) => ({
+              id,
+              chapter,
+              level,
+              tags,
+              title,
+              position: i + 1,
+            })),
       });
     });
     await page.goto(`${LIST}${destination}`);
