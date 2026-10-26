@@ -24,6 +24,7 @@ export function RunDone({
   rows,
   now,
   due,
+  remaining,
   nextDue,
   onContinue,
   heading,
@@ -32,6 +33,7 @@ export function RunDone({
   rows: readonly VocabularyRow[];
   now: number;
   due: number;
+  remaining: number;
   nextDue: number | null;
   onContinue: () => void;
   heading: RefObject<HTMLHeadingElement | null>;
@@ -56,7 +58,7 @@ export function RunDone({
           <dd className="tnum break-words">{t('vocab.game.firstMature', { words: rhythm.gainedThisWeek })}</dd>
         </div>
       </dl>
-      {due === 0 ? <RunNextDueLine due={nextDue} /> : null}
+      {due === 0 && remaining === 0 ? <RunNextDueLine due={nextDue} /> : null}
       <div className="flex flex-wrap items-center gap-3">
         <Button type="button" onClick={onContinue}>
           {t('vocab.game.continueRun')}
