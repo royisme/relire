@@ -96,7 +96,7 @@ function reviewHarness(model: VocabularyModel, book?: VocabularyBook) {
 }
 test('a quota-losing reveal keeps the answer unmounted and still selects an available due card without retry', async () => {
   const now = Date.now();
-  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
+  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90, studyBook: 'mine' });
   const harness = reviewHarness(await reviewModel(['test-a', 'test-b'], now));
   try {
     let session = await harness.settled();
@@ -181,6 +181,8 @@ test('a backward clock clears the invalid pending observation and permits a fres
   );
   const one = await storage.rateVocabularyCard('test-a', first.tokens, 'prior-1', 'remembered', now - 20 * 86400_000);
   await storage.rateVocabularyCard('test-a', one.tokens, 'prior-2', 'remembered', now - 19 * 86400_000);
+  // A catalogue card alone is not in My words; saving it from reading puts this card in the studied wordbook.
+  await saveVocabularyBookmark(testLookup('test-a'), testDefinition('test-a'), undefined, now - 19 * 86400_000);
   const harness = reviewHarness(await reviewModel([], now));
   const rate = storage.rateVocabularyCard;
   const attempts: string[] = [];
@@ -239,7 +241,8 @@ test('the counter equals wordsInput for the same rows, book, day and now, not th
     epoch: 0,
     ready: true,
     error: null,
-    preferences: { newPerDay: 20, retentionPercent: 90 },
+    // These rows are built-in wordbook words, so the book that holds them is the studied one.
+    preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'builtin' },
     day,
     async refresh() {},
     savePreferences: saveVocabularyPreferences,
@@ -247,7 +250,7 @@ test('the counter equals wordsInput for the same rows, book, day and now, not th
   const harness = reviewHarness(model, book);
   try {
     const session = harness.render();
-    const input = wordsInput(rows, book, day, 20, now);
+    const input = wordsInput(rows, book, day, 20, now, 'builtin');
     // Hand-derived: two due cards and one new word left, min(1 unseen, 20 − 2 introduced) = 1, not the 18 spare allowance.
     expect(input).toEqual({ due: 2, newAvailable: 1, nextDue: null, reviewsToday: 0 });
     expect(session.due).toBe(input.due);

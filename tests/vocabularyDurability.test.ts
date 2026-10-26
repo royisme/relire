@@ -10,6 +10,7 @@ import {
   testRow,
   testMatureSchedule,
 } from './fixtures/vocabulary';
+import { vocabularyContextKey } from '../src/services/vocabulary/identity';
 import { db, exportData, importData } from '../src/storage/db';
 import { testReaderDefinition, testReaderLookup } from './fixtures/vocabularyReader';
 import {
@@ -21,8 +22,9 @@ import {
 } from '../src/storage/vocabulary';
 import { protectedTexts, exportProtectedAudio, audioKey, normalizeText } from '../src/storage/audio';
 import { joinVocabulary, vocabularyQueue } from '../src/services/vocabulary/queue';
+import { BUILTIN_WORDS, MY_WORDS } from '../src/services/vocabulary/wordbooks';
 import { initialVocabularySchedule } from '../src/utils/srs';
-import { VocabularyRowSchema } from '../src/types/vocabulary';
+import { VocabularyRowSchema, type VocabularyRow } from '../src/types/vocabulary';
 import { areaOf, parseRoute, routeHref } from '../src/utils/routes';
 const zero = { epoch: 0, resetToken: 0, revision: 0 },
   now = new Date(2026, 9, 20, 12).getTime();
@@ -65,7 +67,7 @@ test('whole restore late exercise failure rolls vocabulary pair, epoch, articles
         vocab: [],
         vocabularyMeta: {
           schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
-          preferences: { newPerDay: 0, retentionPercent: 90 },
+          preferences: { newPerDay: 0, retentionPercent: 90, studyBook: 'mine' },
           days: [],
         },
         itemStates: [
@@ -100,7 +102,7 @@ test('raw invalid row/metadata fields reject instead of stripping; retained dele
     vocab: [row],
     vocabularyMeta: {
       schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
-      preferences: { newPerDay: 20, retentionPercent: 90 },
+      preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
       days: [{ date: '2026-10-19', introducedKeys: ['deleted-test'] }],
     },
   };
@@ -124,7 +126,7 @@ test('raw invalid row/metadata fields reject instead of stripping; retained dele
           ...paired,
           vocabularyMeta: {
             schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
-            preferences: { newPerDay: 20, retentionPercent: 90 },
+            preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
             days,
           },
         }),
@@ -282,32 +284,49 @@ test('only bookmarked or scheduled vocabulary protects/exports word, personal se
 });
 test('queue uses minute/review/personal/book order, excludes visits and waits for the true minute; zero still allows ledgered recreation', async () => {
   const book = await testBook(2);
-  const minute = { ...testRow('minute-test'), schedule: initialVocabularySchedule(now - 10), introducedAt: now - 10 };
+  // One wordbook is studied, so the personal rows are saved from reading (My words) and the catalogue
+  // fronts are queued only when the built-in book is the studied one.
+  const owned = (word: string): VocabularyRow => {
+    const { bookSource: _book, ...base } = testRow(word);
+    const lookup = { word, sentence: `Une phrase ${word}.`, requestLanguage: 'en' as const };
+    return {
+      ...base,
+      contexts: [
+        {
+          id: vocabularyContextKey(lookup),
+          sentence: lookup.sentence,
+          savedAt: 1,
+          requestLanguage: 'en',
+          definition: testDefinition(word),
+        },
+      ],
+    };
+  };
+  const minute = { ...owned('minute-test'), schedule: initialVocabularySchedule(now - 10), introducedAt: now - 10 };
   const review = {
-    ...testRow('review-test'),
+    ...owned('review-test'),
     schedule: testMatureSchedule(now - 86400_000),
     introducedAt: now - 20,
   };
-  const personal = { ...testRow('personal-test'), bookmarked: true, bookmarkedAt: 1 };
+  const personal = { ...owned('personal-test'), bookmarked: true, bookmarkedAt: 1 };
   const day = { date: '2026-10-20', introducedKeys: [] };
-  const queue = vocabularyQueue([review, minute, personal], book, day, 20, now, new Set());
-  expect(queue.candidates.map((word) => word.key)).toEqual([
-    'minute-test',
-    'review-test',
-    'personal-test',
-    'test-0',
-    'test-1',
-  ]);
+  const queue = vocabularyQueue([review, minute, personal], book, day, 20, now, new Set(), MY_WORDS);
+  expect(queue.candidates.map((word) => word.key)).toEqual(['minute-test', 'review-test', 'personal-test']);
+  expect(
+    vocabularyQueue([review, minute, personal], book, day, 20, now, new Set(), BUILTIN_WORDS).candidates.map(
+      (word) => word.key,
+    ),
+  ).toEqual(['test-0', 'test-1']);
   const future = {
     ...minute,
     schedule: { ...testMatureSchedule(now), phase: 'relearning' as const, dueAt: now + 60_000 },
   };
-  expect(vocabularyQueue([future], undefined, day, 0, now, new Set())).toEqual({
+  expect(vocabularyQueue([future], undefined, day, 0, now, new Set(), MY_WORDS)).toEqual({
     candidates: [],
     nextDue: now + 60_000,
   });
   expect(
-    vocabularyQueue([], book, { ...day, introducedKeys: ['test-1'] }, 0, now, new Set()).candidates.map(
+    vocabularyQueue([], book, { ...day, introducedKeys: ['test-1'] }, 0, now, new Set(), BUILTIN_WORDS).candidates.map(
       (word) => word.key,
     ),
   ).toEqual(['test-1']);
@@ -318,8 +337,15 @@ test('queue uses minute/review/personal/book order, excludes visits and waits fo
 });
 test('a joined unseen book front materializes only learner fields on reveal and never persists catalogue UI state', async () => {
   const book = await testBook();
-  const candidate = vocabularyQueue([], book, { date: '2026-10-20', introducedKeys: [] }, 20, now, new Set())
-    .candidates[0];
+  const candidate = vocabularyQueue(
+    [],
+    book,
+    { date: '2026-10-20', introducedKeys: [] },
+    20,
+    now,
+    new Set(),
+    BUILTIN_WORDS,
+  ).candidates[0];
   expect((await exportData()).vocab).toEqual([]);
   const introduced = await introduceVocabularyCard(candidate, zero, now);
   expect(introduced.row.key).toBe(book.entries[0].key);

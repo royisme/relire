@@ -97,7 +97,7 @@ test('vocabulary-only paired replacement preserves accepted topic snapshots, res
     vocab: [],
     vocabularyMeta: {
       schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
-      preferences: { newPerDay: 0, retentionPercent: 90 },
+      preferences: { newPerDay: 0, retentionPercent: 90, studyBook: 'mine' },
       days: [],
     },
   });
