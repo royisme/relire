@@ -168,6 +168,8 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | P3b | Provider-neutral copy: `src/i18n/locales/en.json:897` `noServerDesc` (and its zh twin) and `PRODUCT.md` "What it is" still say Gemini only ("your Gemini key", "from Gemini", "(Gemini today)") | the strings and the paragraph name no single provider and stay true to the registry; `i18n:check` | built, tests pending (strings and `PRODUCT.md` only; a test that pinned the old string is fixed by another model) |
 | P4 | Copy pass (about 15 strings, en and zh) | keys kept, `i18n:check`, the lead reads every zh line | built and tested (unit tests pass; e2e typechecked, never run) |
 | P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | built and tested (unit 2611 pass; e2e spec typechecked, never run) |
+| I1 | Import dialog sizes to its content | dialog sizes to its content without inner scroll windows | built and tested (unit tests pass; e2e spec typechecked, never run; browser unverified) |
+| I2 | Import dialog: show the note-type picker only for an `.apkg` (a permanently disabled control looks broken; owner 2026-10-25) | picker absent for .txt/.tsv/.csv and before a file is chosen; present with a focused picker for .apkg; no layout jump | not started |
 | P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | last; ready (Q1, Q2, Q9, Q10, Q12 yes; Q8 draft needs the owner's voice before the README ships) |
 
 ### Content (paused by the owner's priority)

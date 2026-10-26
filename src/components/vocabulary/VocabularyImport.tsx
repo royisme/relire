@@ -186,7 +186,7 @@ export function VocabularyImport() {
           </div>
           <section aria-label={t('vocab.import.preview')} className="space-y-2">
             <h4 className="text-sm font-semibold">{t('vocab.import.preview')}</h4>
-            <div className="h-40 overflow-auto rounded-lg border border-ink-200">
+            <div className="overflow-x-auto rounded-lg border border-ink-200">
               <Table>
                 <TableHeader>
                   {table.getHeaderGroups().map((group) => (
@@ -269,7 +269,7 @@ export function VocabularyImportNoteTypes({
       }),
     })) ?? [];
   return (
-    <div className="h-32 space-y-1 overflow-auto text-sm">
+    <div className="space-y-1 text-sm">
       <span id="import-notetype">{t('vocab.import.apkg.noteType')}</span>
       <Select
         items={items}
@@ -310,12 +310,7 @@ export function VocabularyImportResult({
   const { t } = useTranslation();
   const reasonText = (reason: ImportReason) => (typeof reason === 'string' ? reason : t(reason.key, reason.params));
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-      className="h-32 overflow-auto break-words text-sm text-ink-700"
-    >
+    <div role="status" aria-live="polite" aria-atomic="true" className="min-h-12 break-words text-sm text-ink-700">
       {error ? (
         t('vocab.import.failed', { reason: reasonText(error) })
       ) : result ? (
@@ -327,7 +322,7 @@ export function VocabularyImportResult({
               rejected: result.rejected.length,
             })}
           </p>
-          <ul>
+          <ul className="max-h-40 overflow-auto">
             {result.rejected.map((note) => (
               <li key={note.row}>
                 {t('vocab.import.rejectedRow', { row: note.row, reason: reasonText(note.reason) })}
