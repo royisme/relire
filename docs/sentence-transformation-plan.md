@@ -1,6 +1,6 @@
 # Sentence transformation: reasoning questions from the readers
 
-Plan of record, written 2026-10-26 by the lead after the owner's request ("start with sentence transformation, write the plan"). Nothing here is built. Owner decisions are marked **Open** until answered.
+Plan of record, written 2026-10-26 by the lead after the owner's request ("start with sentence transformation, write the plan"). Nothing here is built. Owner decisions are listed at the end.
 
 ## Why
 
@@ -24,11 +24,11 @@ A wrong expected answer teaches wrong French (`docs/graded-readers-plan.md`: wro
 | --- | --- | --- | --- |
 | `negation` | rewrites the sentence with ne…pas (n' before a vowel or mute h) | computed | the verb token's entry; the article after the negation turns `un/une/des/du/de la/de l'` into `de` or `d'` except after être; the answer is built by rule |
 | `number` | singular to plural, or plural to singular | computed | each noun's entry (gender, forms), the article and adjective agreement, the verb form from the grammar pack |
-| `passe-compose` | present to passé composé | computed | the conjugation engine (`src/services/conjugation`) for the auxiliary and the participle, with être agreement |
+| `passe-compose` | present to passé composé | computed | the conjugation engine (`src/services/conjugation`) for the auxiliary and the participle, with être agreement; **later**: the bundled stages 1 to 3 teach être, avoir and articles, not the passé composé |
 | `question` | makes it a question (est-ce que, inversion) | checked | required structure only; several correct forms |
 | `pronoun` | replaces the object with le, la, les, y or en | checked | harder; later |
 
-Version 1 is `negation`, `number` and `passe-compose`: all three are computed, so no AI answer can be wrong on screen. `question` and `pronoun` and the combination kinds (joining two sentences with qui or parce que) wait until a spike shows a verifier that is honest about its limits.
+Version 1 is `negation` and `number`, both computed, and **built with no AI and no key** (owner, 2026-10-26: "not AI first"). `number` in version 1 changes only the noun phrase right after the verb (determiner and noun); subject agreement (verb, adjective) and `c'est` to `ce sont` are out of version 1, and a sentence a rule cannot cover is skipped. `question` and `pronoun` and the combination kinds (joining two sentences with qui or parce que) wait until a spike shows a verifier that is honest about its limits.
 
 ## What the AI is for
 
@@ -52,17 +52,21 @@ A hard question has to be answered before building more: **if the verifier can c
 - **Rule exceptions.** Negation after être, with quantity words and with "il y a" differ; v1 either handles a case with a stated rule or skips the sentence. A skipped sentence is not an error.
 - **Evidence is not proof** for `checked` kinds, stated on screen.
 
+## TR1 measurement (lead, 2026-10-26, on `src/data/graded-readers/starter.json`)
+
+The three bundled readers hold 11 sentences in all (3, 3 and 5) with the verbs être, avoir, aimer and regarder, in the present tense only. `negation` applies to all 11 (for example `J'ai un cahier.` gives `Je n'ai pas de cahier.`, `C'est une table.` gives `Ce n'est pas une table.`, `Il y a un salon dans cet appartement.` gives `Il n'y a pas de salon dans cet appartement.`). `number` on the noun phrase after the verb applies to about 7 (`Mes frères ont des stylos.` gives `Mes frères ont un stylo.`); the subject-plus-adjective sentences and `C'est une table.` are skipped. The supply is small, so each reader offers at most a handful of items, and the passé composé does not match what stages 1 to 3 teach.
+
 ## Steps (one at a time; code and tests by different models)
 
 | # | Step | Acceptance |
 | --- | --- | --- |
-| TR1 | Spike: a read-only script over the bundled readers that, per kind, counts the sentences the kind applies to and the computed answer it would give; prints a table and a few examples for the owner to read | the numbers per kind; no code in `src/` |
-| TR2 | Pure kinds and verifiers (`negation`, `number`, `passe-compose`) in `src/services/exercises/transform/`, schema branch for `meta`, `fromReaderTransform` building units from a reader | table tests for every rule and exception, a mutation per rule; no AI, no key |
+| TR1 | Measurement over the bundled readers (done by hand, see above) | the numbers per kind |
+| TR2 | Pure kinds (`negation`, `number`) in `src/services/exercises/transform/`, schema branch for `meta`, `fromReaderTransform` building units from a reader | table tests for every rule and exception, a mutation per rule; no AI, no key |
 | TR3 | Reader entry: "Practise this pattern", the unit saved to Practice, the provenance line, the empty state when a reader has no applicable sentence | static and unit checks; the owner tries it |
 | TR4 | The AI path: `transform.*.txt`, the task, the dropped count, the `checked` kinds (starting with `question`) | the verifier rejects wrong proposals in tests with a mocked AI; owner-gated before any wider use |
 
-## Open decisions for the owner
+## Decisions
 
-1. **Version 1 kinds:** `negation`, `number`, `passe-compose` (recommended), or fewer.
-2. **Keyless first:** build the computed kinds as code with no AI and no key (recommended; the AI joins in TR4), or require the AI from the start.
-3. **Where it lives:** an action after a reader's checkpoints (recommended), or only a Practice set the learner makes from a reader.
+1. **Version 1 kinds:** `negation` and `number` (passé composé waits for later stages). Taken as the default on 2026-10-26.
+2. **Keyless first:** no AI and no key in version 1. **Decided by the owner, 2026-10-26.**
+3. **Where it lives:** an action after a reader's checkpoints. Taken as the default on 2026-10-26.
