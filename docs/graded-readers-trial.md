@@ -21,7 +21,7 @@ What the owner checks, because a machine cannot: appearance, feel, real devices,
 
 ## 3. Reading one reader
 
-- The header shows a short honest label ("AI-written and AI-reviewed, not human-reviewed"), not a long record.
+- The header shows a short honest label ("AI-written, reviewed by AI (Gemini 4 Argon, Gemini 3.8 Flash), not human-reviewed"), not a long record.
 - Tap a word: a sheet opens at once with the clicked spelling, its meaning in the interface language, the part of speech, the gender for nouns, and the sentence with its translation. Tap the same spelling in another sentence: the right occurrence, not the first one. Nothing asks for a key and Settings never opens by itself.
 - Tap a sentence: an action called **Translation** (not Analyze) opens the sentence sheet; the translation is hidden until you press Show translation, and the sheet does not change height when it appears.
 - Save word, Save this context, Remove bookmark: each does what its label says and the footer never jumps. Find the word in **My study → Words**; it shows the authored meaning and the sentence.

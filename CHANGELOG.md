@@ -100,6 +100,8 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Repository basics: MIT licence, English and Chinese README, PRODUCT, DESIGN and CLAUDE guides, CI that type-checks, checks translations and builds.
 
 ### Changed
+
+- A graded reader's header now names the AI models that reviewed it ("AI-written, reviewed by AI (Gemini 4 Argon, Gemini 3.8 Flash), not human-reviewed"), in English and Chinese. The label is fixed text, so it must be edited when a reader is reviewed by other models.
 - The "Import Anki notes" dialog shows the package note-type picker only after reading an Anki package, leaving it hidden for text files and before a file is chosen.
 - The "Import Anki notes" dialog sizes to its content without inner scroll windows on the web.
 - The install guide and the product description no longer say the AI needs a Gemini key: they say your chosen AI provider is called from your browser with your key, and that Ollama and your device's voice need no key.
