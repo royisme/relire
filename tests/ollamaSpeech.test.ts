@@ -38,6 +38,10 @@ const sent = () => {
 };
 
 describe('Ollama Phonon speech', () => {
+  test('any voice name is accepted: the names belong to the local model, not to the provider', () => {
+    expect(ollamaSpeech.acceptsVoice?.('anything')).toBe(true);
+  });
+
   test('asks the local server for raw PCM of the chosen model, with no voice when none is chosen', async () => {
     fetchMock.mockResolvedValueOnce(rawPcm());
     const clip = await speak();
@@ -157,9 +161,12 @@ describe('Ollama Phonon speech', () => {
     // A real deadline aborts the fetch, which rejects with an AbortError; the deadline is what explains it.
     const deadline = AbortSignal.abort();
     const timeout = spyOn(AbortSignal, 'timeout').mockReturnValue(deadline);
-    fetchMock.mockRejectedValueOnce(new DOMException('The request timed out.', 'TimeoutError'));
-    expect(((await failure(speak())) as Error).message).toBe(i18n.t('errors.speechTimeout'));
-    timeout.mockRestore();
+    try {
+      fetchMock.mockRejectedValueOnce(new DOMException('The request timed out.', 'TimeoutError'));
+      expect(((await failure(speak())) as Error).message).toBe(i18n.t('errors.speechTimeout'));
+    } finally {
+      timeout.mockRestore();
+    }
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
