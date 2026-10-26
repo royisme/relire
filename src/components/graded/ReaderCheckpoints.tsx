@@ -59,11 +59,14 @@ export function ReaderCheckpoints({
   const [selected, setSelected] = useState(0);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [bound, setBound] = useState<TextInputElement | null>(null);
+  const [hinted, setHinted] = useState<ReadonlySet<string>>(new Set());
   const field = useRef<TextInputElement | null>(null);
   const registerInput = useCallback((_slot: number, element: TextInputElement | null) => {
     field.current = element;
   }, []);
   const heading = useRef<HTMLHeadingElement>(null);
+  const quote = useRef<HTMLParagraphElement>(null);
+  const revealing = useRef(false);
   const navigating = useRef(false);
   const entries: Entry[] = learning.checkpoints.flatMap((checkpoint) =>
     checkpoint.questions.map((question) => ({ checkpoint, question })),
@@ -76,6 +79,13 @@ export function ReaderCheckpoints({
   const Control = type === 'CHOICE_SELECT' ? ChoiceSelectControl : FillBlanksControl;
   const view = answers[id] ?? { answer: emptyAnswer(item), checked: null };
   const checked = view.checked;
+  // The quoted sentence gives the answer away, so it stays hidden until the learner asks for
+  // it or a committed verdict makes it the evidence. The hint is never stored, logged or scored.
+  const sentenceShown = checked !== null || hinted.has(id);
+  const showQuote = () => {
+    revealing.current = true;
+    setHinted((shown) => new Set(shown).add(id));
+  };
   const busy = pending !== null;
   const submitted = recordedAnswerText(type, item, view.answer);
   const feedback = checked ? resolveTopicFeedback(entry.question.question.feedback, submitted, checked.correct) : null;
@@ -101,6 +111,12 @@ export function ReaderCheckpoints({
     if (rect && (rect.top < 56 || rect.bottom > window.innerHeight))
       heading.current?.scrollIntoView({ block: 'nearest', behavior: 'instant' });
   }, [at]);
+  // The reveal button unmounts while it holds focus, so the revealed sentence takes it over.
+  useEffect(() => {
+    if (!revealing.current) return;
+    revealing.current = false;
+    quote.current?.focus({ preventScroll: true });
+  }, [hinted]);
 
   return (
     <section aria-labelledby="reader-checkpoints" className="min-w-0 space-y-4 break-words text-sm leading-relaxed">
@@ -146,9 +162,22 @@ export function ReaderCheckpoints({
         <p id="reader-question">{entry.question.question.instruction[language]}</p>
         <div className="min-w-0 space-y-1">
           <p className="text-xs text-ink-500">{t('gradedReader.checkpoints.quotedSentence')}</p>
-          <p lang="fr" className="font-serif text-base text-ink-700">
-            {entry.question.evidence.quote}
-          </p>
+          {/* The invisible sentence holds the space; the button sits over it, so the reveal never moves the page. */}
+          <div className="relative min-h-10 min-w-0">
+            <p
+              ref={quote}
+              lang="fr"
+              tabIndex={-1}
+              className={cn('font-serif text-base text-ink-700 outline-none', !sentenceShown && 'invisible')}
+            >
+              {entry.question.evidence.quote}
+            </p>
+            {!sentenceShown && (
+              <Button variant="ghost" className="absolute inset-0 h-auto px-2 text-ink-500" onClick={showQuote}>
+                {t('gradedReader.checkpoints.showQuotedSentence')}
+              </Button>
+            )}
+          </div>
         </div>
         <div
           role="group"

@@ -103,6 +103,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Changed
 
+- A graded reader's checkpoint no longer shows the quoted sentence above the question (it gave the answer away): it appears when you press "Show the quoted sentence" or once your answer is checked, in the same space without moving the page, and looking early is your choice alone (nothing is recorded or scored).
 - A graded reader's header now names the AI models that reviewed it ("AI-written, reviewed by AI (Gemini 4 Argon, Gemini 3.8 Flash), not human-reviewed"), in English and Chinese. The label is fixed text, so it must be edited when a reader is reviewed by other models.
 - The "Import Anki notes" dialog shows the package note-type picker only after reading an Anki package, leaving it hidden for text files and before a file is chosen.
 - The "Import Anki notes" dialog sizes to its content without inner scroll windows on the web.

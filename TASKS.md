@@ -26,6 +26,12 @@ Plan and decisions: `docs/graded-readers-plan.md` (epic #65; phases #62, #63, #6
 
 Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), R1-6a (authored word and sentence components), R1-7 (checkpoints component), R1-8 (authored saved-word definitions), R1-9 (device-voice plumbing), R1-10 (recording ownership), R1-11. Integrated pages have landed (visual and device checks are the owner's). R1-2b wires the optional service catalogue and local-only staged publisher. No service configured still means bundle only.
 
+### Next: hide the checkpoint's quoted sentence (owner decision 2026-10-26)
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| HQ1 | Hide the quoted sentence behind a ghost "Show the quoted sentence" button; it appears after the button or once the question is checked | no reader data, schema or prompt change; the hint is component state only and never logged or scored; the layout does not move when the sentence appears (stable at 320 px); focus lands on the revealed sentence | built, tests pending |
+
 ### Landed: Today checklist (`docs/today-plan.md`)
 
 | # | Step | Acceptance | State |
