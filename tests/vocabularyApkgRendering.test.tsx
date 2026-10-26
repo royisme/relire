@@ -25,7 +25,11 @@ for (const language of ['en', 'zh'] as const) {
           <VocabularyImportNoteTypes {...state} busy={false} separator="TEST separator" onSelect={() => {}} />
         </I18nextProvider>,
       );
-      expect(html).toContain('h-32');
+      const wrapper = html.match(/<div\b[^>]*>/)![0];
+      expect(wrapper).toContain('space-y-1');
+      expect(wrapper).not.toContain('h-32');
+      expect(wrapper).not.toContain('h-40');
+      expect(wrapper).not.toContain('overflow-auto');
       expect(html).toContain('aria-labelledby="import-notetype"');
       expect(html).not.toContain('vocab.import.');
       if (state.types) {
@@ -64,7 +68,13 @@ for (const language of ['en', 'zh'] as const) {
     );
     expect(html).toContain('role="status"');
     expect(html).toContain('aria-live="polite"');
-    expect(html).toContain('h-32');
+    const slot = html.match(/<div\b[^>]*role="status"[^>]*>/)![0];
+    expect(slot).toContain('min-h-12');
+    expect(slot).not.toContain('h-32');
+    expect(slot).not.toContain('h-40');
+    expect(slot).not.toContain('overflow-auto');
+    expect(html.match(/<ul\b[^>]*>/)![0]).toContain('max-h-40 overflow-auto');
+    expect(html.match(/overflow-auto/g)).toHaveLength(1);
     const reason = instance.t('vocab.import.errors.unsupportedEntity', { entity: '&unknown;' });
     expect(html).toContain(reason.replace('&unknown;', '&amp;unknown;'));
     expect(html).toContain(instance.t('vocab.import.result', { imported: 1, merged: 0, rejected: 1 }));

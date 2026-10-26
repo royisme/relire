@@ -180,6 +180,7 @@ test('import results reserve a live status slot in every state, and imported ans
     expect(answer).not.toContain('undefined');
     for (const state of [
       { error: null, result: null, ready: null },
+      { error: null, result: null, ready: { rows: 3, accepted: 2, rejected: 1 } },
       { error: 'TEST disk refused', result: null, ready: null },
       {
         error: null,
@@ -189,11 +190,20 @@ test('import results reserve a live status slot in every state, and imported ans
     ]) {
       const html = render(<VocabularyImportResult {...state} />);
       expect(html).toContain('role="status"');
-      expect(html).toContain('h-32');
+      expect(html).toContain('aria-live="polite"');
+      expect(html).toContain('aria-atomic="true"');
+      const slot = html.match(/<div\b[^>]*role="status"[^>]*>/)![0];
+      expect(slot).toContain('min-h-12');
+      expect(slot).not.toContain('h-32');
+      expect(slot).not.toContain('h-40');
+      expect(slot).not.toContain('overflow-auto');
+      if (state.ready) expect(html).toContain(i18n.t('vocab.import.ready', { accepted: 2, rejected: 1 }));
       if (state.error) expect(html).toContain(state.error);
       if (state.result) {
         expect(html).toContain('7');
         expect(html).toContain('TEST missing column');
+        expect(html.match(/<ul\b[^>]*>/)![0]).toContain('max-h-40 overflow-auto');
+        expect(html.match(/overflow-auto/g)).toHaveLength(1);
       }
     }
   }
