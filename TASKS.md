@@ -138,6 +138,14 @@ An optional learning mode, not a new product tone. The goal the owner set: **sti
 
 Vocabulary review follow-up (branch `vocab-fixes`): all eight source-verified findings addressed; expanded imports bounded, queue loading separated from completion, game speech device-only, partial runs logged, closed-class meanings retained, card slots fixed, refusals localized, and test imports corrected. Static/unit/build checks pass (2,579 tests); lead diff review and owner-manual mobile/IME/device/real-export checks remain. Plain-mode run logging is out of scope.
 
+### Next: wordbooks in Settings → Words (owner decisions 2026-10-26)
+
+Anki treats each imported deck as a book: Relire lists wordbooks (My words, the built-in book, imported decks), takes a one-wordbook study choice and deletes decks, all inside Settings → Words.
+
+| # | Step | Acceptance | State |
+| --- | --- | --- | --- |
+| WB1 | Wordbooks block: list with real counts, radio study choice saved at once (`studyBook` preference; `effectiveStudyBook` shared with `vocabularyQueue`), deck delete in one transaction behind a confirm | only the chosen book's words reach Review, Play, Today's words step and the Overview; delete drops deck contexts, deletes emptied rows with their progress, bumps touched rows' reset tokens and resets a choice pointing at the deck; checks exit 0 | built, tests pending |
+
 ### Navigation: a flat tree with Words at the top level
 
 Plan of record: `docs/navigation-plan.md` (owner decision 2026-10-25: flat tree, no "My" area, `App.tsx` may be split). Words and Mistakes become top-level rows with their own badges, Shadowing becomes Speaking → Recordings, My study goes away. One step at a time, each with the full check chain and a second-model read-only review.

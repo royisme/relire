@@ -47,7 +47,7 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 - **French sounds and Sound pairs**: A complete chart of French sounds in IPA with tap-to-hear audio via device speech, and Sound pairs listening drills under Speaking.
 - **Mistake notebook and progress tracking**: Mistakes keeps your latest wrong answer for each exercise item and marks it resolved after a later correct attempt. Progress tracks real counts for saved words, shadowing sessions, pronunciation scores, and grammar accuracy.
 - **Article library and reading tools**: Browse the three included sample articles or paste text, with adjustable font size, light and dark themes, and playback speed down to 0.5×.
-- **Import vocabulary lists**: Import words from `.txt`, `.tsv`, `.csv`, or Anki `.apkg` files into your vocabulary deck. Recognized trailing part-of-speech tags (such as `n.m.` or `v.pr.`) move to the start of the back, leaving only the word on the front and for read-aloud.
+- **Import vocabulary lists**: Import words from `.txt`, `.tsv`, `.csv`, or Anki `.apkg` files into your vocabulary deck. Recognized trailing part-of-speech tags (such as `n.m.` or `v.pr.`) move to the start of the back, leaving only the word on the front and for read-aloud. Imported decks are listed in Settings → Words, where you choose the one wordbook to study or delete a deck.
 - **Bilingual interface and prompt editing**: English and Simplified Chinese interfaces, and plain-text prompt templates you can inspect, edit, or reset in Settings.
 - **Local-first offline storage**: Articles, saved words, exercise history, mistake records, and cached audio stay on your device in IndexedDB and work offline.
 

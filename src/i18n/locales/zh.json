@@ -426,6 +426,22 @@
       "rejectedRow": "第 {{row}} 行：{{reason}}",
       "saved": "导入的笔记"
     },
+    "wordbooks": {
+      "title": "词书",
+      "help": "选择要学习的词书，只有它里面的词会进入复习。",
+      "study": "要学习的词书",
+      "mine": "我的生词",
+      "words_one": "{{count}} 个词",
+      "words_other": "{{count}} 个词",
+      "mineEmpty": "阅读时收藏的词会保存在这里。",
+      "deleteLabel": "删除 {{name}}",
+      "confirmTitle": "删除这个牌组？",
+      "confirmBody": "「{{name}}」共有 {{words}} 个词，其中 {{history}} 个有复习记录。删除牌组会连同它们的进度一起删除。",
+      "confirmShared": "同时属于其他词书、或在阅读时收藏过的词会保留进度，只移除这个牌组里的条目。",
+      "confirmDelete": "删除牌组",
+      "deleteFailed": "无法删除牌组：{{reason}}",
+      "saving": "保存中…"
+    },
     "book": "内置词书",
     "bookCount_one": "{{count}} 个词可离线使用",
     "bookCount_other": "{{count}} 个词可离线使用",

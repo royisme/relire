@@ -7,6 +7,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- Settings → Words has a Wordbooks block: My words, the built-in wordbook (once downloaded) and every imported deck are listed with their word counts; choose the one wordbook to study — the choice saves at once, My words is the default and always present, and only that wordbook's words enter review, the run and Today — and delete an imported deck after a plain confirmation that says how many words and review histories go with it and that a word living in another wordbook keeps its progress.
 - Speak French with a local Ollama Phonon model, without a key, using the server, model and optional voice you choose in Settings. Requires Ollama 0.40.9+ on Apple Silicon; the learner pulls the CC BY-NC 4.0 noncommercial 40M model separately.
 - The README opens with the problem, then what works without a key, real counts with the commands that reproduce them, and a plain statement of what is and is not checked. Both languages carry a 30-second recording of the real app (`docs/media/overview.*.mp4`) and an AI-disclosure paragraph marked as a draft until the maintainer words it.
 - The Words Overview shows, beside Review or Learn, about how long it takes at your own pace ("About 4–6 min at your usual pace"), worked out from the gaps between your own ratings and left out until there is enough of your history.

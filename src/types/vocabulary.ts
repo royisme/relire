@@ -33,7 +33,12 @@ export const VocabularyOutcomeSchema = z.enum(['forgot', 'fuzzy', 'remembered'])
 export type VocabularyOutcome = z.infer<typeof VocabularyOutcomeSchema>;
 export const VocabularyRetentionSchema = z.number().int().min(80).max(95);
 export const VocabularyTimestampSchema = z.number().int().min(0).max(8_640_000_000_000_000);
-export const DEFAULT_VOCABULARY_PREFERENCES = { newPerDay: 20, retentionPercent: 90 } as const;
+export const DEFAULT_VOCABULARY_PREFERENCES = {
+  newPerDay: 20,
+  retentionPercent: 90,
+  // 'mine' (My words), 'builtin' (the downloaded book) or 'deck:' + deck id; wordbooks.ts owns the rule.
+  studyBook: 'mine',
+} as const;
 export const VocabularySenseSchema = z.strictObject({
   pos: text.optional(),
   gloss: z.strictObject({ en: english, zh: chinese }),
@@ -269,6 +274,7 @@ export const VocabularyRowSchema = z
 export const VocabularyPreferencesSchema = z.strictObject({
   newPerDay: z.number().int().min(0).max(100),
   retentionPercent: VocabularyRetentionSchema,
+  studyBook: text,
 });
 export const VocabularyDaySchema = z
   .strictObject({ date: VocabularyDateSchema, introducedKeys: z.array(text) })
