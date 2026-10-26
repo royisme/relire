@@ -57,7 +57,7 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 - **Pronunciation assessment**: Record yourself reading a sentence aloud. Azure Speech evaluates accuracy, fluency, and individual words; Gemini assesses the audio directly for phonemes, liaisons, and intonation; other text AI providers give transcript-based guidance where a transcript is available.
 - **Exercise generation and AI grading**: Generate exercise sets (fill-in-the-blank, multiple choice, word transformation, reading passages, dialogue ordering, and more) from your articles, or import worksheets from images or PDFs. Open answers are evaluated by an AI in words rather than a score.
 - **Article and worksheet OCR**: Import articles or exercises from up to five photos or PDF pages read by your selected vision model.
-- **AI speech synthesis**: Listen to articles and sentences with Gemini or Fish Audio (device speech needs no key).
+- **AI speech synthesis**: Listen to articles and sentences with Gemini, Fish Audio or a local Ollama Phonon model (Ollama and device speech need no key). Phonon needs Ollama 0.40.9+ on Apple Silicon; the 40M models are licensed CC BY-NC 4.0 for noncommercial use and are pulled by the learner, not shipped with the app.
 - **Unreviewed verb conjugation**: For verbs outside the 19 reviewed verbs, an AI generates the conjugation, which is checked against the app's grammar rules and labelled accordingly.
 - **Optional content service**: Connect an optional read-only service with your own access key to download grammar topics and wordbook pages. The service never receives your AI key, answers, articles, or audio.
 

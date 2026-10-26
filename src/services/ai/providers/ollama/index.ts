@@ -1,6 +1,7 @@
 import type { Provider } from '../../types';
 import { ollamaText } from './client';
 import { OLLAMA_DEFAULT_BASE_URL, OLLAMA_DEFAULT_MODEL, OLLAMA_TEXT_MODELS, ollamaCatalogue } from './models';
+import { ollamaSpeech } from './tts';
 
 /** Ollama answers from the learner's own machine: no key, no cost, and no text leaving the device. */
 export const ollama: Provider = {
@@ -12,7 +13,14 @@ export const ollama: Provider = {
     defaultBaseUrl: OLLAMA_DEFAULT_BASE_URL,
     requiresKey: false,
     text: { models: OLLAMA_TEXT_MODELS, defaultModel: OLLAMA_DEFAULT_MODEL },
+    speech: {
+      models: ['phonon:40m-multilingual', 'phonon:40m-fr'],
+      defaultModel: 'phonon:40m-multilingual',
+      voices: [],
+      defaultVoice: '',
+    },
   },
   catalogue: ollamaCatalogue,
   text: ollamaText,
+  speech: ollamaSpeech,
 };

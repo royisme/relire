@@ -838,10 +838,11 @@
     "invalidBaseUrl": "请填写 http 或 https 地址，不要包含 Key、查询参数或片段，最多 2048 个字符。",
     "baseUrlNotValid": "有一个 Base URL 不是可用的地址，请修改后再保存。",
     "voiceLabel": "音色 ID",
-    "voiceHelp": "可选：粘贴 Fish Audio 的音色 ID；留空则使用模型默认音色。",
+    "voiceHelp": "可选：填写此模型的音色 ID；留空则使用模型默认音色。",
     "invalidVoice": "请填写 Fish Audio 的音色 ID，或留空使用默认音色。",
     "voiceNotValid": "该音色 ID 不被此服务商接受，请修改后再保存。",
-    "keylessHelp": "无需密钥：请求只发送到你在本机运行的服务器。Ollama 需要允许本页面的来源，请启动时把 OLLAMA_ORIGINS 设为本页面地址（OLLAMA_ORIGINS=* 表示全部允许）。",
+    "keylessHelp": "无需 Key：请求只发送到你在本机运行的服务器。Ollama 需要允许本页面的来源，请启动时把 OLLAMA_ORIGINS 设为本页面地址（OLLAMA_ORIGINS=* 表示全部允许）。",
+    "ollamaSpeechHelp": "需要 Ollama 0.40.9 及以上版本和 Phonon 语音模型：运行 ollama pull phonon:40m-multilingual。仅支持 Apple Silicon。40M 模型采用 CC BY-NC 4.0 许可，仅限非商业用途。",
     "fetch": "获取模型列表",
     "fetching": "获取中…",
     "refresh": "刷新模型列表",
@@ -1082,7 +1083,7 @@
     "speechOutputUnsupported": "模型 {{model}} 无法合成语音，请选择语音模型。",
     "invalidVoice": "这不是 Fish Audio 的音色 ID。留空即可使用模型默认音色。",
     "invalidSpeechText": "仅支持不超过 {{max}} 个字符、不含标记或链接的纯文本。",
-    "invalidAudio": "语音服务未返回可播放的 MP3 音频。",
+    "invalidAudio": "语音服务未返回可播放的音频。",
     "speechAudioTooLarge": "合成的音频过大，已拒绝接收。",
     "speechTimeout": "语音服务未及时响应，请重试。",
     "deviceVoiceUnavailable": "这个浏览器无法用设备自带的声音朗读。",
@@ -1090,6 +1091,12 @@
     "deviceVoiceFailed": "本机声音未能播放，请检查系统的语音设置。"
   },
   "models": {
+    "phonon:40m-multilingual": {
+      "name": "Phonon 40M 多语言"
+    },
+    "phonon:40m-fr": {
+      "name": "Phonon 40M 法语"
+    },
     "gemini-2_5-flash": {
       "name": "Gemini 2.5 Flash（推荐）"
     },

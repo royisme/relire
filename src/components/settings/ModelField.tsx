@@ -78,6 +78,9 @@ export function ModelField({
       <p id="ai-model-help" className={`text-xs leading-relaxed ${valid ? 'text-ink-600' : 'text-bad-700'}`}>
         {t(valid ? 'aiSettings.modelHelp' : 'aiSettings.invalidModel')}
       </p>
+      {purpose === 'speech' && provider.info.id === 'ollama' && (
+        <p className="text-xs text-ink-500 leading-relaxed">{t('aiSettings.ollamaSpeechHelp')}</p>
+      )}
       <Button
         type="button"
         variant="outline"
