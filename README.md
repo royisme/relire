@@ -8,7 +8,7 @@ Reading French with a dictionary open breaks your flow, and reading without one 
 
 [![Relire Plus overview: Today, a graded reader, a reviewed conjugation table and the noun-gender list](docs/media/overview.en.jpg)](docs/media/overview.en.mp4)
 
-_A 30-second recording of the real app with no AI key saved. Select the image to play it._
+_A 30-second recording of the real app. Select the image to play it._
 
 ## A look inside
 
@@ -76,14 +76,14 @@ You can reproduce each count with `bun scripts/readme-numbers.ts` or the one-lin
 
 ## How it is made and what to trust
 
-- **AI-assisted content**: The bundled graded readers and reviewed lists (conjugation, noun gender, and letter sounds) were produced with AI assistance and reviewed by AI models. They have not been reviewed or certified by a human teacher.
+- **Who reviewed what**: The data files record the maintainer as the reviewer of the 19 reviewed verbs and the noun-gender pack (17 ending tendencies and 337 example nouns). The bundled graded readers and the letter-sound patterns were reviewed by a second AI model, not by a human teacher; each reader says so on its page.
 - **AI scores are estimates**: Pronunciation scores and open-question feedback from AI models are estimates, not official exam marks.
 - **No official affiliation**: Relire Plus is an independent open-source practice tool. It is not a TCF mock-exam platform, and it is not affiliated with France Éducation international or Immigration, Refugees and Citizenship Canada (IRCC).
 - **Words ratings reflect self-reported recall**: FSRS-6 review scheduling relies entirely on your own rating (Forgot, Fuzzy, or Remembered), not automated tests. In Words Play mode, answering a retrieval challenge before reveal never changes the review schedule.
 - **Gender practice counts first tries**: In the noun-gender practice game, only your first attempt on each card counts toward history; returning cards that you missed write nothing.
 
 <!-- DRAFT Q8: needs the owner's wording before release -->
-I built Relire Plus with AI coding agents. They wrote the code, the interface copy and the bundled French content; I set the direction, write the specifications and run the checks. The checks cover code and data shapes, not French: the bundled readers were reviewed by another AI model and no human teacher has reviewed them yet. A human language review is the release gate for beginners.
+I built Relire Plus with AI coding agents under my direction. They wrote the code and drafted most of the content. Automated checks cover the code, the data shapes and the conjugation tables against reference data. The French in the graded readers was reviewed by another AI model, and no human teacher has reviewed it yet. A human language review is the release gate for beginners.
 
 ## Try it online
 

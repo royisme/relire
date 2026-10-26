@@ -1,3 +1,4 @@
+import { readdirSync } from 'node:fs';
 import { SAMPLE_ARTICLES } from '../src/data/sampleArticles';
 import { ExerciseTypeSchema } from '../src/types/exercises';
 
@@ -15,7 +16,11 @@ const rows = [
   },
   { item: 'Noun-ending tendencies', value: nounGender.rules.length, file: 'src/data/noun-gender/pack.json' },
   { item: 'Exercise types', value: ExerciseTypeSchema.options.length, file: 'src/types/exercises.ts' },
-  { item: 'UI languages', value: 2, file: 'src/i18n/locales/{en,zh}.json' },
+  {
+    item: 'UI languages',
+    value: readdirSync('src/i18n/locales').filter((f) => f.endsWith('.json')).length,
+    file: 'src/i18n/locales/',
+  },
 ];
 
 for (const row of rows) {
