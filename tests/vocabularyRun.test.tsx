@@ -1,7 +1,8 @@
 /**
  * The vocabulary run as the app builds it: the chunk counter, the challenge-to-view mapping, the closed-class
- * and pool rules, the key guard, and the card/end-screen contracts as static markup. No browser, no real
- * keyboard, no visual acceptance: the look at 360 px, the three themes, IME and a phone stay owner-manual.
+ * and pool rules, the key guard, and the card contracts as static markup (the end screens: vocabularyRunEnd).
+ * No browser, no real keyboard, no visual acceptance: the look at 360 px, the three themes, IME and a phone
+ * stay owner-manual.
  */
 import { expect, spyOn, test } from 'bun:test';
 import type { ReactNode } from 'react';
@@ -399,49 +400,6 @@ for (const language of ['en', 'zh'] as const) {
     expect(plain).toContain(i18n.t('vocab.flip'));
   });
 }
-
-test('the done-for-now screen states the real counts, the real next due time, Continue and the way back', async () => {
-  await i18n.changeLanguage('en');
-  const due = new Date(2026, 9, 24, 12, 30).getTime();
-  const html = render(
-    <run.RunDone
-      ratings={6}
-      rows={[]}
-      now={due}
-      due={4}
-      nextDue={due}
-      onContinue={() => {}}
-      heading={{ current: null }}
-    />,
-  );
-  expect(html).toContain(i18n.t('vocab.game.doneTitle'));
-  expect(html).toContain(i18n.t('vocab.game.doneCounts', { ratings: 6, due: 4 }));
-  expect(html).toContain(i18n.t('vocab.game.nextDue', { time: new Date(due).toLocaleString() }));
-  expect(html).toContain(i18n.t('vocab.game.continueRun'));
-  expect(html).toContain('href="#/words"');
-  expect(html.match(/role="status"/g)).toHaveLength(1);
-  const nothing = render(
-    <run.RunDone
-      ratings={6}
-      rows={[]}
-      now={due}
-      due={0}
-      nextDue={null}
-      onContinue={() => {}}
-      heading={{ current: null }}
-    />,
-  );
-  expect(nothing).toContain(i18n.t('vocab.game.nothingWaiting'));
-});
-
-test('the queue-cleared screen says so and shows the same real next due time', async () => {
-  await i18n.changeLanguage('en');
-  const due = new Date(2026, 9, 25, 9, 5).getTime();
-  const html = render(<run.RunCleared nextDue={due} />);
-  expect(html).toContain(i18n.t('vocab.game.queueCleared'));
-  expect(html).toContain(i18n.t('vocab.game.nextDue', { time: new Date(due).toLocaleString() }));
-  expect(html).toContain('href="#/words"');
-});
 
 test('fewer than 3 saved words never throws, drops options to 2 or falls back to plain flip', () => {
   const { runPool, choiceOf, runPhase } = run;

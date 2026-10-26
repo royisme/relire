@@ -291,6 +291,7 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
           rows={model.rows}
           now={session.now}
           due={session.due}
+          remaining={session.remaining}
           nextDue={nextDue}
           heading={doneHeading}
           onContinue={() => setChunk(continueChunk(chunk, session.ratings))}

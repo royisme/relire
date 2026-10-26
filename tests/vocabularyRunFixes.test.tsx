@@ -211,13 +211,15 @@ test('the revealed game card explicitly requests device speech regardless of the
   }
 });
 
-test('both locales finish with ready at the formatted time, through the real finished line', async () => {
+test('both locales finish with ready at the shared formatted time, through the real finished line', async () => {
   const due = new Date(2026, 9, 26, 15).getTime();
-  for (const [language, line] of [
-    ['en', `The next card is ready at ${new Date(due).toLocaleString()}.`],
-    ['zh', `下一张卡片将在 ${new Date(due).toLocaleString()} 可以复习。`],
-  ] as const) {
+  for (const language of ['en', 'zh'] as const) {
     await i18n.changeLanguage(language);
+    // Hand-derived from formatAvailableAt's rule: 15:00 is not local midnight, so date and short time.
+    const time = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(due);
+    expect(time).toContain(new Intl.DateTimeFormat(language, { dateStyle: 'medium' }).format(due));
+    const line = i18n.t('vocab.game.nextDue', { time });
+    expect(line).not.toContain(new Date(due).toLocaleString(language));
     expect(
       renderToStaticMarkup(
         <I18nextProvider i18n={i18n}>
