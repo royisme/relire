@@ -259,7 +259,8 @@
     },
     "checkpoints": {
       "title": "Checkpoints",
-      "quotedSentence": "From the sentence"
+      "quotedSentence": "From the sentence",
+      "showQuotedSentence": "Show the quoted sentence"
     },
     "ai": {
       "askWord": "Ask AI about this word",

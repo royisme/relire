@@ -259,7 +259,8 @@
     },
     "checkpoints": {
       "title": "检查点",
-      "quotedSentence": "出自句子"
+      "quotedSentence": "出自句子",
+      "showQuotedSentence": "显示引用的句子"
     },
     "ai": {
       "askWord": "就这个词询问 AI",
