@@ -171,6 +171,7 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | I1 | Import dialog sizes to its content | dialog sizes to its content without inner scroll windows | built and tested (unit tests pass; e2e spec typechecked, never run; browser unverified) |
 | I2 | Import dialog: show the note-type picker only for an `.apkg` (a permanently disabled control looks broken; owner 2026-10-25) | picker absent for .txt/.tsv/.csv and before a file is chosen; present with a focused picker for .apkg; no layout jump | built and tested (unit tests pass; e2e not run; browser unverified) |
 | P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | text and recordings built, reviewed, merged; screenshots (#24) and the Q8 wording still owner-gated |
+| PH1 | Local speech through Ollama (Phonon): `speech` on the `ollama` provider, `pcm` wrapped into a WAV with correct sizes, a Settings hint for the model, Apple Silicon and the CC BY-NC licence | `POST /v1/audio/speech` called from the browser with the learner's own server; no key; real errors shown | dispatched to GPT (code), tests by another model, review by Opus; the owner then tests French voices, numbers and liaisons by ear |
 
 ### Content (paused by the owner's priority)
 
