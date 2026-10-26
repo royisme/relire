@@ -22,6 +22,7 @@ import {
   vocabularyKey,
   type VocabularyLookup,
 } from '../services/vocabulary/identity';
+import { deckStudyBook } from '../services/vocabulary/wordbooks';
 import { formatDate, initialVocabularySchedule, nextVocabularySchedule } from '../utils/srs';
 import { db, type RelireDB } from './db';
 import type { ImportedNote } from '../services/vocabulary/import/prepare';
@@ -315,5 +316,47 @@ export async function deleteVocabularyCard(key: string, expected: VocabularyToke
     if (!row || row.revision !== expected.revision) throw new StaleVocabularyError();
     await store.delete(row.id);
     await tx.objectStore('meta').put(expected.resetToken + 1, tokenKey(key));
+  });
+}
+/**
+ * One transaction per deck delete: each row loses this deck's import contexts; a row with no content left
+ * (no contexts, no bookSource) is deleted with its schedule and history, a row that lives in another wordbook
+ * keeps everything. Every touched row's reset token is bumped, so an open review on it fails safely. When
+ * the deck was the study book, the choice falls back to My words in the same transaction.
+ */
+export async function deleteVocabularyDeck(deckId: string) {
+  return write(async (tx) => {
+    const store = tx.objectStore('vocab');
+    const meta = tx.objectStore('meta');
+    let deleted = 0;
+    let kept = 0;
+    for (const stored of await store.getAll()) {
+      const row = VocabularyRowSchema.parse(stored);
+      const inDeck = (context: VocabularyRow['contexts'][number]) =>
+        context.source?.kind === 'import' && context.source.id === deckId;
+      if (!row.contexts.some(inDeck)) continue;
+      const contexts = row.contexts.filter((context) => !inDeck(context));
+      await meta.put((((await meta.get(tokenKey(row.key))) as number | undefined) ?? 0) + 1, tokenKey(row.key));
+      if (!contexts.length && !row.bookSource) {
+        await store.delete(row.id);
+        deleted += 1;
+      } else {
+        await store.put(
+          VocabularyRowSchema.parse({
+            ...row,
+            contexts,
+            // The import bookmarked the word; with no context left, the bookmark goes with it.
+            ...(contexts.length ? {} : { bookmarked: false, bookmarkedAt: null }),
+          }),
+        );
+        kept += 1;
+      }
+    }
+    const preferences = VocabularyPreferencesSchema.parse(
+      (await meta.get('vocabularyPreferences')) ?? DEFAULT_VOCABULARY_PREFERENCES,
+    );
+    if (preferences.studyBook === deckStudyBook(deckId))
+      await meta.put(VocabularyPreferencesSchema.parse({ ...preferences, studyBook: 'mine' }), 'vocabularyPreferences');
+    return { deleted, kept };
   });
 }

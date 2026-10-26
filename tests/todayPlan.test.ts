@@ -19,6 +19,7 @@ import { testRow } from './fixtures/vocabulary';
 const midnight = new Date(2026, 9, 24, 0, 0, 0, 0).getTime();
 const now = new Date(2026, 9, 24, 12, 30).getTime();
 const tomorrow = new Date(2026, 9, 25, 0, 0).getTime();
+const preferences = { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' };
 
 function reviewedRow(word: string, timestamps: number[]) {
   const row = testRow(word);
@@ -26,7 +27,7 @@ function reviewedRow(word: string, timestamps: number[]) {
   row.introducedAt = midnight - 2;
   row.history = timestamps.map((reviewedAt, index) => {
     const prior = row.schedule!;
-    const next = nextVocabularySchedule(prior, 'remembered', reviewedAt, { newPerDay: 20, retentionPercent: 90 });
+    const next = nextVocabularySchedule(prior, 'remembered', reviewedAt, preferences);
     row.schedule = next;
     row.revision = index + 1;
     return {

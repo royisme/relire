@@ -133,7 +133,7 @@ test('replacing the articles leaves units, their states and attempts untouched',
     vocab: [],
     vocabularyMeta: {
       schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
-      preferences: { newPerDay: 20, retentionPercent: 90 },
+      preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
       days: [],
     },
     stats: { ...EMPTY_STATS },

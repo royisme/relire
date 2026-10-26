@@ -204,7 +204,7 @@ test('a rating against a card that changed underneath refreshes and advances wit
 
 test('a quota-losing reveal keeps the card unmounted and reports the allowance without rating anything', async () => {
   const now = Date.now();
-  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
+  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90, studyBook: 'mine' });
   const harness = reviewHarness(await reviewModel(['test-a', 'test-b'], now));
   const rated = spyOn(storage, 'rateVocabularyCard');
   try {

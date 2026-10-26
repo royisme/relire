@@ -426,6 +426,22 @@
       "rejectedRow": "Row {{row}}: {{reason}}",
       "saved": "Imported note"
     },
+    "wordbooks": {
+      "title": "Wordbooks",
+      "help": "Choose the wordbook to study. Only its words enter your reviews.",
+      "study": "Wordbook to study",
+      "mine": "My words",
+      "words_one": "{{count}} word",
+      "words_other": "{{count}} words",
+      "mineEmpty": "Words you save while reading land here.",
+      "deleteLabel": "Delete {{name}}",
+      "confirmTitle": "Delete this deck?",
+      "confirmBody": "“{{name}}” holds {{words}} words, {{history}} of them with review history. Deleting the deck deletes their progress with them.",
+      "confirmShared": "A word that also belongs to another wordbook, or that you saved while reading, keeps its progress. Only this deck’s entry is removed.",
+      "confirmDelete": "Delete deck",
+      "deleteFailed": "Could not delete the deck: {{reason}}",
+      "saving": "Saving…"
+    },
     "book": "Built-in wordbook",
     "bookCount_one": "{{count}} word available offline",
     "bookCount_other": "{{count}} words available offline",

@@ -14,7 +14,9 @@ import { freshSettingsStorage, restoreSettingsStorage, serviceOn } from './fixtu
 import { publishedReaderFixture } from './fixtures/gradedReaders';
 import { readerAnswer } from './fixtures/readerProgress';
 import { bookList } from './fixtures/grammarTopics';
-import { testMatureSchedule, testRow } from './fixtures/vocabulary';
+import { testDefinition, testLookup, testMatureSchedule, testRow } from './fixtures/vocabulary';
+import { vocabularyContextKey } from '../src/services/vocabulary/identity';
+import type { VocabularyRow } from '../src/types/vocabulary';
 import { ITEMS, unitOf } from './fixtures/units';
 import { db } from '../src/storage/db';
 import { saveUnits } from '../src/storage/exercises';
@@ -36,7 +38,7 @@ const reader = publishedReaderFixture();
 const model = (changes: Partial<VocabularyModel> = {}) =>
   ({
     rows: [],
-    preferences: { newPerDay: 20, retentionPercent: 90 },
+    preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
     day: { date: '2026-10-24', introducedKeys: [] },
     now,
     ready: true,
@@ -176,8 +178,22 @@ test('a book read failure is the words step error', async () => {
 });
 
 test('a due word shows the words step with its real count', async () => {
-  const row = testRow('test-due');
-  row.schedule = testMatureSchedule(now);
+  // A row saved from reading: it belongs to My words, the default study book.
+  const { bookSource: _book, ...base } = testRow('test-due');
+  const lookup = testLookup('test-due');
+  const row: VocabularyRow = {
+    ...base,
+    contexts: [
+      {
+        id: vocabularyContextKey(lookup),
+        sentence: lookup.sentence,
+        savedAt: 1,
+        requestLanguage: 'en',
+        definition: testDefinition('test-due'),
+      },
+    ],
+    schedule: testMatureSchedule(now),
+  };
   const state = await drive(model({ rows: [row] }), (s) => s.status === 'ready');
   expect(stepOf(state, 'words')).toEqual({ id: 'words', done: false, due: 1, newAvailable: 0 });
 });

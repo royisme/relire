@@ -141,7 +141,7 @@ test('book-first and bookmark-first both keep one card, first context/snapshot a
 });
 
 test('same-key introductions serialize once; quota race inserts nothing for losing key; midnight uses reveal day', async () => {
-  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
+  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90, studyBook: 'mine' });
   const candidate = testCandidate();
   const rows = await Promise.all([
     introduceVocabularyCard(candidate, zero, now),
@@ -159,7 +159,7 @@ test('same-key introductions serialize once; quota race inserts nothing for losi
   expect((await readVocabulary(tomorrow)).day.introducedKeys).toEqual(['test-other']);
 });
 test('actual two-key quota race has one winner and no unseen front row', async () => {
-  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
+  await saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90, studyBook: 'mine' });
   const results = await Promise.allSettled(
     ['test-a', 'test-b'].map((word) => introduceVocabularyCard(testCandidate(word), zero, now)),
   );
@@ -170,7 +170,7 @@ test('replay returns current schedule, enforces same rating, and reset invalidat
   const first = await introduceVocabularyCard(testCandidate(), zero, now);
   const one = await rateVocabularyCard(first.row.key, first.tokens, 'op-1', 'remembered', now);
   const two = await rateVocabularyCard(first.row.key, one.tokens, 'op-2', 'remembered', now + 1);
-  await saveVocabularyPreferences({ newPerDay: 20, retentionPercent: 95 });
+  await saveVocabularyPreferences({ newPerDay: 20, retentionPercent: 95, studyBook: 'mine' });
   expect((await rateVocabularyCard(first.row.key, first.tokens, 'op-1', 'remembered', now)).row).toEqual(two.row);
   expect(one.row.history[0].retentionPercent).toBe(90);
   expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'op-1', 'forgot', now))).toBeInstanceOf(Error);
@@ -230,7 +230,7 @@ test('consecutive resets of unrated and reviewed memory retain content, history,
   expect((await exportData()).vocab).toEqual(backup.vocab);
 });
 test('word A reset/delete leaves B valid; delete/recreate retains token and exhausted-day eligibility', async () => {
-  await saveVocabularyPreferences({ newPerDay: 2, retentionPercent: 90 });
+  await saveVocabularyPreferences({ newPerDay: 2, retentionPercent: 90, studyBook: 'mine' });
   const a = await introduceVocabularyCard(testCandidate('test-a'), zero, now);
   const b = await introduceVocabularyCard(testCandidate('test-b'), zero, now);
   await resetVocabularySchedule(a.row.key, a.tokens, now + 1);
@@ -250,7 +250,7 @@ test('word A reset/delete leaves B valid; delete/recreate retains token and exha
 });
 test('reviews use transaction-time preferences; failed attempts may retry with new retention, while committed operations stay unchanged', async () => {
   const first = await introduceVocabularyCard(testCandidate(), zero, now);
-  await saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 80 });
+  await saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 80, studyBook: 'mine' });
   // oxlint-disable-next-line typescript/unbound-method -- Inject one aborted native write and restore its receiver-bound delegate.
   const put = IDBObjectStore.prototype.put;
   IDBObjectStore.prototype.put = function (value, key) {
@@ -266,16 +266,16 @@ test('reviews use transaction-time preferences; failed attempts may retry with n
     IDBObjectStore.prototype.put = put;
   }
   expect((await getVocabularySnapshot(first.row.key)).row).toEqual(first.row);
-  await saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 95 });
+  await saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 95, studyBook: 'mine' });
   const committed = await rateVocabularyCard(first.row.key, first.tokens, 'retry-config', 'remembered', now);
   expect(committed.row.history[0]).toMatchObject({
     reviewedAt: now,
     outcome: 'remembered',
     retentionPercent: 95,
   });
-  await saveVocabularyPreferences({ newPerDay: 100, retentionPercent: 80 });
+  await saveVocabularyPreferences({ newPerDay: 100, retentionPercent: 80, studyBook: 'mine' });
   // A committed operation must not even re-read preferences, including a malformed stored row.
-  await (await db()).put('meta', { newPerDay: 100, retentionPercent: 0 }, 'vocabularyPreferences');
+  await (await db()).put('meta', { newPerDay: 100, retentionPercent: 0, studyBook: 'mine' }, 'vocabularyPreferences');
   const replayed = await rateVocabularyCard(first.row.key, first.tokens, 'retry-config', 'remembered', now);
   expect(replayed.row).toEqual(committed.row);
   expect(await failure(rateVocabularyCard(first.row.key, first.tokens, 'new-stale', 'forgot', now))).toBeInstanceOf(
@@ -306,15 +306,15 @@ test('clock errors write nothing; a corrected fresh observation works, including
 test('the full preferences interface rejects invalid retention and daily-new values without clamping', async () => {
   for (const newPerDay of [0, 100])
     for (const retentionPercent of [80, 90, 95]) {
-      await saveVocabularyPreferences({ newPerDay, retentionPercent });
-      expect((await readVocabulary(now)).preferences).toEqual({ newPerDay, retentionPercent });
+      await saveVocabularyPreferences({ newPerDay, retentionPercent, studyBook: 'mine' });
+      expect((await readVocabulary(now)).preferences).toEqual({ newPerDay, retentionPercent, studyBook: 'mine' });
     }
   for (const preferences of [
-    { newPerDay: -1, retentionPercent: 90 },
-    { newPerDay: 101, retentionPercent: 90 },
-    { newPerDay: 20, retentionPercent: 79 },
-    { newPerDay: 20, retentionPercent: 96 },
-    { newPerDay: 20, retentionPercent: 90.5 },
+    { newPerDay: -1, retentionPercent: 90, studyBook: 'mine' },
+    { newPerDay: 101, retentionPercent: 90, studyBook: 'mine' },
+    { newPerDay: 20, retentionPercent: 79, studyBook: 'mine' },
+    { newPerDay: 20, retentionPercent: 96, studyBook: 'mine' },
+    { newPerDay: 20, retentionPercent: 90.5, studyBook: 'mine' },
   ])
     expect(await failure(saveVocabularyPreferences(preferences))).toBeInstanceOf(Error);
 });
@@ -336,7 +336,7 @@ test('paired backup preserves unrelated Grammar metadata/tokens, retains deleted
       vocab: [],
       vocabularyMeta: {
         schedulerPolicy: 'fsrs6/ts-fsrs@5.4.2/policy1',
-        preferences: { newPerDay: 0, retentionPercent: 90 },
+        preferences: { newPerDay: 0, retentionPercent: 90, studyBook: 'mine' },
         days: [],
       },
     });

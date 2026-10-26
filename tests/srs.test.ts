@@ -22,7 +22,7 @@ import {
 } from '../src/utils/srs';
 import { testMatureSchedule } from './fixtures/vocabulary';
 const now = new Date('2026-10-20T12:00:00.123Z').getTime();
-const preferences = { newPerDay: 20, retentionPercent: 90 };
+const preferences = { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' };
 const outcomes = ['forgot', 'fuzzy', 'remembered'] as const;
 const grades = { forgot: Rating.Again, fuzzy: Rating.Hard, remembered: Rating.Good } as const;
 const phases = ['new', 'learning', 'review', 'relearning'] as const;

@@ -65,7 +65,7 @@ const render = (node: ReactNode) => {
 };
 const model: VocabularyModel = {
   rows: [],
-  preferences: { newPerDay: 20, retentionPercent: 90 },
+  preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
   ready: true,
   day: { date: '2026-10-20', introducedKeys: [] },
   epoch: 0,

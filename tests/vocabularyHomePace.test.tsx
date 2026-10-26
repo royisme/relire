@@ -70,7 +70,7 @@ const model = (rows: VocabularyRow[], ready = true): VocabularyModel => ({
   epoch: 0,
   ready,
   error: null,
-  preferences: { newPerDay: 20, retentionPercent: 90 },
+  preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'builtin' },
   day: { date: '2026-10-25', introducedKeys: [] },
   refresh: async () => {},
   savePreferences: async () => {},
@@ -89,6 +89,8 @@ const states: {
   {
     name: 'range beside Review with 30 gaps',
     model: model(dueBeside(rangeGaps)),
+    // The rows are built-in wordbook words, so the book that holds them must be loaded to be studied.
+    book,
     filled: 1,
     estimate: {
       en: 'About 2\u20134 min at your usual pace',
@@ -98,6 +100,7 @@ const states: {
   {
     name: '29 gaps beside Review is not enough',
     model: model(dueBeside(rangeGaps.slice(0, 29))),
+    book,
     filled: 1,
   },
   {
