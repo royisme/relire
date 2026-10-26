@@ -4,7 +4,7 @@ What is done, what broke, what is next, newest first. Short and factual; the nex
 
 "Verified" means a check ran and its exit code was read. Anything that needs a browser, a device, a microphone, a real key or a deployed service is **unverified** until the owner has tried it.
 
-- 2026-10-25, Import dialog note-type picker (I2): the note-type picker renders only when an Anki package is read (and focuses the trigger on appearance), the separator sentence renders only for chosen text files, and neither renders before a file is chosen; unused locale key vocab.import.none removed. State: built, tests pending. **Unverified:** no browser.
+- 2026-10-25, Import dialog note-type picker (I2): the note-type picker renders only when an Anki package is read (and focuses the trigger on appearance), the separator sentence renders only for chosen text files, and neither renders before a file is chosen; unused locale key vocab.import.none removed. State: built, tests landed (deepseek-flash). **Unverified:** no browser.
 
 - 2026-10-25, P1e built: `RunDone` renders the next-card line only when nothing is available now (`due === 0 && remaining === 0`), and `formatAvailableAt` formats the return time in the UI language (date only at local midnight, else date and short time) for both `RunNextDueLine` and `VocabularyHome`. Tests landed (deepseek-flash), including a mutation-checked wiring test for `remaining`. **Unverified:** no browser.
 

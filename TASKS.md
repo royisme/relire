@@ -169,7 +169,7 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | P4 | Copy pass (about 15 strings, en and zh) | keys kept, `i18n:check`, the lead reads every zh line | built and tested (unit tests pass; e2e typechecked, never run) |
 | P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | built and tested (unit 2611 pass; e2e spec typechecked, never run) |
 | I1 | Import dialog sizes to its content | dialog sizes to its content without inner scroll windows | built and tested (unit tests pass; e2e spec typechecked, never run; browser unverified) |
-| I2 | Import dialog: show the note-type picker only for an `.apkg` (a permanently disabled control looks broken; owner 2026-10-25) | picker absent for .txt/.tsv/.csv and before a file is chosen; present with a focused picker for .apkg; no layout jump | built, tests pending |
+| I2 | Import dialog: show the note-type picker only for an `.apkg` (a permanently disabled control looks broken; owner 2026-10-25) | picker absent for .txt/.tsv/.csv and before a file is chosen; present with a focused picker for .apkg; no layout jump | built and tested (unit tests pass; e2e not run; browser unverified) |
 | P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | last; ready (Q1, Q2, Q9, Q10, Q12 yes; Q8 draft needs the owner's voice before the README ships) |
 
 ### Content (paused by the owner's priority)
