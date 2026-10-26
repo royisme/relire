@@ -23,6 +23,7 @@ test('the Import dialog previews five rows in an open wrapper, without inner scr
   await expect(status).toBeVisible();
   await expect(status).toHaveClass(/min-h-12/);
   await expect(status).not.toHaveClass(/h-32|h-40|overflow-auto/);
-  const picker = dialog.locator('#import-notetype').locator('..');
-  await expect(picker).not.toHaveClass(/h-32|h-40|overflow-auto/);
+  // A text file never shows the package note-type picker; that row's own sizing is pinned in the unit test.
+  await expect(dialog.locator('#import-notetype')).toHaveCount(0);
+  await expect(dialog).not.toContainText('Package note type');
 });

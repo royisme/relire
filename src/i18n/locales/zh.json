@@ -410,7 +410,6 @@
       },
       "separator": "分隔符：{{separator}}",
       "separators": { "tab": "制表符", "comma": "逗号", "semicolon": "分号", "space": "空格", "pipe": "竖线" },
-      "none": "尚未选择文件",
       "deck": "牌组名称（文件中有牌组列时，以该列为准）",
       "front": "法语词语",
       "back": "释义",
