@@ -15,7 +15,7 @@ for (const future of [false, true]) {
     await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();
     await page.evaluate(async (future) => {
       const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
-      await storage.saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
+      await storage.saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90, studyBook: 'mine' });
       const snapshot = await storage.getVocabularySnapshot('test-b');
       const result = await storage.introduceVocabularyCard(
         { key: 'test-b', word: 'test-b' },
@@ -55,7 +55,7 @@ test('quota waiting wakes at local midnight, and a later external limit change w
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
     const database: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    await storage.saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90 });
+    await storage.saveVocabularyPreferences({ newPerDay: 1, retentionPercent: 90, studyBook: 'mine' });
     // A deleted word still honestly consumed this day's allowance in the other tab.
     const date = new Date(Date.now());
     const label = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -74,13 +74,15 @@ test('quota waiting wakes at local midnight, and a later external limit change w
   // Lose another reveal to a changed limit, then change it without a same-tab notification.
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
-    await storage.saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 90 });
+    await storage.saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 90, studyBook: 'mine' });
   });
   await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.getByRole('heading', { name: 'Nothing more for now' })).toBeVisible();
   await page.evaluate(async () => {
     const database: Db = await import(/* @vite-ignore */ '/src/storage/db.ts' as string);
-    await (await database.db()).put('meta', { newPerDay: 1, retentionPercent: 90 }, 'vocabularyPreferences');
+    await (
+      await database.db()
+    ).put('meta', { newPerDay: 1, retentionPercent: 90, studyBook: 'mine' }, 'vocabularyPreferences');
     window.dispatchEvent(new Event('focus'));
   });
   await expect(page.getByRole('heading', { name: 'test-a', exact: true })).toBeVisible();

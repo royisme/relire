@@ -127,7 +127,7 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
-    await storage.saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 90 });
+    await storage.saveVocabularyPreferences({ newPerDay: 0, retentionPercent: 90, studyBook: 'mine' });
   });
   await page.locator('[data-vocabulary-face="front"] h1').click();
   await expect(page.locator('main')).not.toContainText('TEST meaning');
@@ -136,7 +136,7 @@ test('quota race and restore epoch never expose a stale answer or accept an old 
   await expect(page.getByText('Ready to review: 0 · New words left today: 0', { exact: true })).toBeVisible();
   await page.evaluate(async () => {
     const storage: Storage = await import(/* @vite-ignore */ '/src/storage/vocabulary.ts' as string);
-    await storage.saveVocabularyPreferences({ newPerDay: 20, retentionPercent: 90 });
+    await storage.saveVocabularyPreferences({ newPerDay: 20, retentionPercent: 90, studyBook: 'mine' });
   });
   await expect(page.getByRole('heading', { name: 'test-a' })).toBeVisible();
   await page.locator('[data-vocabulary-face="front"] h1').click();
