@@ -76,14 +76,14 @@ You can reproduce each count with `bun scripts/readme-numbers.ts` or the one-lin
 
 ## How it is made and what to trust
 
-- **Who reviewed what**: The data files record the maintainer as the reviewer of the 19 reviewed verbs and the noun-gender pack (17 ending tendencies and 337 example nouns). The bundled graded readers and the letter-sound patterns were reviewed by a second AI model, not by a human teacher; each reader says so on its page.
+- **Who reviewed what**: The data files record the maintainer as the reviewer of the 19 reviewed verbs and the noun-gender pack (17 ending tendencies and 337 example nouns). The bundled graded readers were reviewed by Gemini 3.8 Flash (two passes) and the letter-sound patterns by GPT 6.1 sol, each independent of the model that wrote them; neither was reviewed by a human teacher, and each reader says so on its page.
 - **AI scores are estimates**: Pronunciation scores and open-question feedback from AI models are estimates, not official exam marks.
 - **No official affiliation**: Relire Plus is an independent open-source practice tool. It is not a TCF mock-exam platform, and it is not affiliated with France Éducation international or Immigration, Refugees and Citizenship Canada (IRCC).
 - **Words ratings reflect self-reported recall**: FSRS-6 review scheduling relies entirely on your own rating (Forgot, Fuzzy, or Remembered), not automated tests. In Words Play mode, answering a retrieval challenge before reveal never changes the review schedule.
 - **Gender practice counts first tries**: In the noun-gender practice game, only your first attempt on each card counts toward history; returning cards that you missed write nothing.
 
 <!-- DRAFT Q8: needs the owner's wording before release -->
-I built Relire Plus with AI coding agents under my direction. They wrote the code and drafted most of the content. Automated checks cover the code, the data shapes and the conjugation tables against reference data. The French in the graded readers was reviewed by another AI model, and no human teacher has reviewed it yet. A human language review is the release gate for beginners.
+I built Relire Plus with AI coding agents under my direction. They wrote the code and drafted most of the content. Automated checks cover the code, the data shapes and the conjugation tables against reference data. The French in the graded readers was reviewed by Gemini 3.8 Flash, an AI model, and no human teacher has reviewed it yet. A human language review is the release gate for beginners.
 
 ## Try it online
 
