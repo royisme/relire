@@ -410,7 +410,6 @@
       },
       "separator": "Separator: {{separator}}",
       "separators": { "tab": "Tab", "comma": "Comma", "semicolon": "Semicolon", "space": "Space", "pipe": "Pipe" },
-      "none": "No file selected",
       "deck": "Deck name (the file's deck column takes precedence)",
       "front": "French word",
       "back": "Answer",

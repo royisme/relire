@@ -134,18 +134,24 @@ export function VocabularyImport() {
               }}
             />
           </label>
-          <VocabularyImportNoteTypes
-            types={noteTypes}
-            value={noteTypeId}
-            busy={busy}
-            separator={parsed ? t(`vocab.import.separators.${parsed.separator}`) : t('vocab.import.none')}
-            onSelect={(type) => {
-              setNoteTypeId(String(type.id));
-              setParsed(type.parsed);
-              setColumns({ front: 0, back: 1, example: null });
-              setResult(null);
-            }}
-          />
+          {noteTypes && (
+            <VocabularyImportNoteTypes
+              types={noteTypes}
+              value={noteTypeId}
+              busy={busy}
+              onSelect={(type) => {
+                setNoteTypeId(String(type.id));
+                setParsed(type.parsed);
+                setColumns({ front: 0, back: 1, example: null });
+                setResult(null);
+              }}
+            />
+          )}
+          {!noteTypes && parsed && (
+            <p className="break-words text-sm text-ink-600">
+              {t('vocab.import.separator', { separator: t(`vocab.import.separators.${parsed.separator}`) })}
+            </p>
+          )}
           <label className="block space-y-1 text-sm">
             <span>{t('vocab.import.deck')}</span>
             <Input
@@ -245,13 +251,12 @@ export function VocabularyImportNoteTypes({
   types,
   value,
   busy,
-  separator,
   onSelect,
 }: {
   types: ApkgNoteType[] | null;
   value: string | null;
   busy: boolean;
-  separator: string;
+  separator?: string;
   onSelect: (type: ApkgNoteType) => void;
 }) {
   const { t } = useTranslation();
@@ -259,24 +264,24 @@ export function VocabularyImportNoteTypes({
   useEffect(() => {
     if (types) control.current?.focus();
   }, [types]);
-  const items =
-    types?.map((type) => ({
-      value: String(type.id),
-      label: t('vocab.import.apkg.typeOption', {
-        name: type.name,
-        notes: type.noteCount,
-        fields: type.fieldNames.join(', '),
-      }),
-    })) ?? [];
+  if (!types) return null;
+  const items = types.map((type) => ({
+    value: String(type.id),
+    label: t('vocab.import.apkg.typeOption', {
+      name: type.name,
+      notes: type.noteCount,
+      fields: type.fieldNames.join(', '),
+    }),
+  }));
   return (
     <div className="space-y-1 text-sm">
       <span id="import-notetype">{t('vocab.import.apkg.noteType')}</span>
       <Select
         items={items}
         value={value}
-        disabled={!types || busy}
+        disabled={busy}
         onValueChange={(value) => {
-          const type = types?.find((type) => String(type.id) === value);
+          const type = types.find((type) => String(type.id) === value);
           if (type) onSelect(type);
         }}
       >
@@ -291,9 +296,7 @@ export function VocabularyImportNoteTypes({
           ))}
         </SelectContent>
       </Select>
-      <p className="break-words text-ink-600">
-        {types ? t('vocab.import.apkg.contentOnly') : t('vocab.import.separator', { separator })}
-      </p>
+      <p className="break-words text-ink-600">{t('vocab.import.apkg.contentOnly')}</p>
     </div>
   );
 }
