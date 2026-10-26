@@ -156,6 +156,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Imported cards move recognized trailing part-of-speech tags to the back, keeping them off the front and reading aloud only the word.
 - The vocabulary run summary omits the next-card line while any card or new word is still available, and formats the next return time with the interface language and date-only midnight rules used across Words.
 - The Review page counter and the run summary's next-card time now agree with the Overview and Today: new words left are bounded by the cards really available, and a review card is ready from the start of its due day.
 - Dialogs, lookup sheets and the phone menu keep keyboard focus inside, return it to the opener when closed and prevent the page behind them from scrolling, including when overlays are stacked.
