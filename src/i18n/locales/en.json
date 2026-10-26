@@ -845,10 +845,11 @@
     "invalidBaseUrl": "Enter an http or https address without a key, a query or a fragment, at most 2048 characters.",
     "baseUrlNotValid": "A Base URL is not a usable address. Fix it, then save again.",
     "voiceLabel": "Voice ID",
-    "voiceHelp": "Optional: paste a voice ID from Fish Audio. Leave it empty to use the model's default voice.",
+    "voiceHelp": "Optional: enter a voice ID for this model. Leave it empty to use the model's default voice.",
     "invalidVoice": "Enter a Fish Audio voice ID, or leave it empty for the default voice.",
     "voiceNotValid": "The voice ID is not one this provider accepts. Fix it, then save again.",
     "keylessHelp": "No key is needed: the request goes to the server you run. Ollama must allow this page's origin, so start it with OLLAMA_ORIGINS set to this address (OLLAMA_ORIGINS=* allows any).",
+    "ollamaSpeechHelp": "Needs Ollama 0.40.9+ and a Phonon speech model: run ollama pull phonon:40m-multilingual. Apple Silicon only. The 40M models use the CC BY-NC 4.0 licence, for noncommercial use.",
     "fetch": "Fetch models",
     "fetching": "Fetching…",
     "refresh": "Refresh models",
@@ -1090,7 +1091,7 @@
     "speechOutputUnsupported": "The model {{model}} cannot synthesize speech. Choose a speech model.",
     "invalidVoice": "This is not a Fish Audio voice ID. Leave the voice empty to use the model's default voice.",
     "invalidSpeechText": "Plain text only, up to {{max}} characters, without markup or links.",
-    "invalidAudio": "The speech provider did not return playable MP3 audio.",
+    "invalidAudio": "The speech provider did not return playable audio.",
     "speechAudioTooLarge": "The synthesized audio was too large to keep.",
     "speechTimeout": "The speech provider did not answer in time. Try again.",
     "deviceVoiceUnavailable": "This browser cannot speak with the device’s voice.",
@@ -1098,6 +1099,12 @@
     "deviceVoiceFailed": "The device voice could not play. Check the system speech settings."
   },
   "models": {
+    "phonon:40m-multilingual": {
+      "name": "Phonon 40M multilingual"
+    },
+    "phonon:40m-fr": {
+      "name": "Phonon 40M French"
+    },
     "gemini-2_5-flash": {
       "name": "Gemini 2.5 Flash (recommended)"
     },

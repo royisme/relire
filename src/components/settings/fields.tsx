@@ -15,7 +15,7 @@ export function useProviderNames() {
   const { t } = useTranslation();
   return {
     providerName: (id: string) => t(`providers.${id}`, { defaultValue: id }),
-    modelName: (id: string) => t(`models.${id.replace(/\./g, '_')}.name`, { defaultValue: id }),
+    modelName: (id: string) => t(`models.${id.replace(/\./g, '_')}.name`, { defaultValue: id, nsSeparator: false }),
   };
 }
 

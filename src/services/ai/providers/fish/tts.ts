@@ -36,8 +36,8 @@ export function speechText(text: string): string {
   return clean;
 }
 
-/** Reads MP3 bytes under the cap, refusing a declared or actual size over it rather than buffering it. */
-async function readAudio(response: Response): Promise<Uint8Array<ArrayBuffer>> {
+/** Reads audio bytes under the cap, refusing a declared or actual size over it rather than buffering it. */
+export async function readAudio(response: Response): Promise<Uint8Array<ArrayBuffer>> {
   const declared = Number(response.headers.get('content-length'));
   if (Number.isFinite(declared) && declared > SPEECH_AUDIO_MAX_BYTES)
     throw new Error(i18n.t('errors.speechAudioTooLarge'));
