@@ -77,6 +77,7 @@ for (const language of ['en', 'zh'] as const) {
         rows={[row]}
         now={now}
         due={0}
+        remaining={0}
         nextDue={null}
         onContinue={() => {}}
         heading={{ current: null }}
@@ -94,6 +95,7 @@ for (const language of ['en', 'zh'] as const) {
 test('a reached chunk logs once across effect replay, clock ticks and size changes; Continue logs the next chunk', () => {
   freshSettingsStorage();
   let ratings = 19;
+  let remaining = 20;
   let chunk: RunChunk = { size: 20, baseline: 0 };
   let clock = now;
   const session = spyOn(review, 'useVocabularyReview').mockImplementation(() => ({
@@ -108,7 +110,7 @@ test('a reached chunk logs once across effect replay, clock ticks and size chang
     now: clock,
     nextDue: null,
     due: 0,
-    remaining: 20,
+    remaining,
     reveal: async () => true,
     recall: async () => {},
     skip: () => {},
@@ -145,7 +147,12 @@ test('a reached chunk logs once across effect replay, clock ticks and size chang
     expect(getAppSettings().vocabularyRunLog).toEqual([]);
     ratings = 20;
     // The summary must win even while the hook clears active between cards, including the last card.
-    expect(paint()).toContain(i18n.t('vocab.game.doneTitle'));
+    const ended = paint();
+    expect(ended).toContain(i18n.t('vocab.game.doneTitle'));
+    // Nothing is due and the mocked session still has new words left, so the summary shows no next-time line:
+    // the run hands the hook's own `remaining` to `RunDone` instead of assuming none are left.
+    expect(ended).not.toContain(i18n.t('vocab.game.nothingWaiting'));
+    expect(ended).not.toContain(i18n.t('vocab.game.nextDue', { time: '\u0000' }).split('\u0000')[0]);
     expect(getAppSettings().vocabularyRunLog).toEqual([
       { date: '2026-10-25', mode: 'game', chunkSize: 20, ratings: 20 },
     ]);
@@ -167,6 +174,9 @@ test('a reached chunk logs once across effect replay, clock ticks and size chang
       chunkSize: 20,
       ratings: 20,
     });
+    // With no new word left the very same summary does state what comes next, so the count comes from the hook.
+    remaining = 0;
+    expect(paint()).toContain(i18n.t('vocab.game.nothingWaiting'));
     expect(model.rows).toEqual([]);
   } finally {
     effect.mockRestore();

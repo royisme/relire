@@ -1,7 +1,8 @@
 /**
  * The vocabulary run as the app builds it: the chunk counter, the challenge-to-view mapping, the closed-class
- * and pool rules, the key guard, and the card/end-screen contracts as static markup. No browser, no real
- * keyboard, no visual acceptance: the look at 360 px, the three themes, IME and a phone stay owner-manual.
+ * and pool rules, the key guard, and the card contracts as static markup (the end screens: vocabularyRunEnd).
+ * No browser, no real keyboard, no visual acceptance: the look at 360 px, the three themes, IME and a phone
+ * stay owner-manual.
  */
 import { expect, spyOn, test } from 'bun:test';
 import type { ReactNode } from 'react';
@@ -13,7 +14,6 @@ import zh from '../src/i18n/locales/zh.json';
 import { testBook, testMatureSchedule, testRow } from './fixtures/vocabulary';
 import { vocabularyContextKey } from '../src/services/vocabulary/identity';
 import { nextAvailableAt } from '../src/services/today/inputs';
-import { formatAvailableAt } from '../src/utils/srs';
 import type { VocabularyRow } from '../src/types/vocabulary';
 import {
   buildChallenge,
@@ -400,47 +400,6 @@ for (const language of ['en', 'zh'] as const) {
     expect(plain).toContain(i18n.t('vocab.flip'));
   });
 }
-
-test('the done-for-now screen states the real counts, the next time only with nothing due, Continue and the way back', async () => {
-  await i18n.changeLanguage('en');
-  const now = new Date(2026, 9, 24, 12, 30).getTime();
-  const next = new Date(2026, 9, 25, 15).getTime();
-  const end = { ratings: 6, rows: [], now, onContinue: () => {}, heading: { current: null } };
-  const done = (due: number, nextDue: number | null) => render(<run.RunDone {...end} due={due} nextDue={nextDue} />);
-  const html = done(0, next);
-  expect(html).toContain(i18n.t('vocab.game.doneTitle'));
-  expect(html).toContain(i18n.t('vocab.game.doneCounts', { ratings: 6, due: 0 }));
-  expect(html).toContain(i18n.t('vocab.game.nextDue', { time: formatAvailableAt(next, 'en') }));
-  expect(html).toContain(i18n.t('vocab.game.continueRun'));
-  expect(html).toContain('href="#/words"');
-  expect(html.match(/role="status"/g)).toHaveLength(1);
-  expect(done(0, null)).toContain(i18n.t('vocab.game.nothingWaiting'));
-  // Cards still due: no next-time line and no "nothing waits" claim, but Continue and the way back stay.
-  const stillDue = done(4, next);
-  expect(stillDue).toContain(i18n.t('vocab.game.doneCounts', { ratings: 6, due: 4 }));
-  // Every rendering of that instant carries the line's own wording, so none of it may appear.
-  expect(stillDue).not.toContain(i18n.t('vocab.game.nextDue', { time: '\u0000' }).split('\u0000')[0]);
-  const shortTime = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(next);
-  expect(stillDue).not.toContain(shortTime);
-  expect(stillDue).not.toContain(i18n.t('vocab.game.nothingWaiting'));
-  expect(stillDue).toContain(i18n.t('vocab.game.continueRun'));
-  expect(stillDue).toContain('href="#/words"');
-});
-
-test('the queue-cleared screen always states the next time, date alone at local midnight, or that nothing waits', async () => {
-  await i18n.changeLanguage('en');
-  const due = new Date(2026, 9, 25, 9, 5).getTime();
-  const html = render(<run.RunCleared nextDue={due} />);
-  expect(html).toContain(i18n.t('vocab.game.queueCleared'));
-  expect(html).toContain(i18n.t('vocab.game.nextDue', { time: formatAvailableAt(due, 'en') }));
-  expect(html).toContain('href="#/words"');
-  // A review card returns from local midnight, so its line carries no time part.
-  const midnight = new Date(2026, 9, 26).getTime();
-  const dateOnly = render(<run.RunCleared nextDue={midnight} />);
-  expect(dateOnly).toContain(new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(midnight));
-  expect(dateOnly).not.toMatch(/\d:\d\d/);
-  expect(render(<run.RunCleared nextDue={null} />)).toContain(i18n.t('vocab.game.nothingWaiting'));
-});
 
 test('fewer than 3 saved words never throws, drops options to 2 or falls back to plain flip', () => {
   const { runPool, choiceOf, runPhase } = run;
