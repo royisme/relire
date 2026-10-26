@@ -30,7 +30,7 @@ Landed in R1: R1-1, R1-2a (Worker routes), R1-3, R1-4a (routes and navigation), 
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| HQ1 | Hide the quoted sentence behind a ghost "Show the quoted sentence" button; it appears after the button or once the question is checked | no reader data, schema or prompt change; the hint is component state only and never logged or scored; the layout does not move when the sentence appears (stable at 320 px); focus lands on the revealed sentence | built, tests pending |
+| HQ1 | Hide the quoted sentence behind a ghost "Show the quoted sentence" button; it appears after the button or once the question is checked | no reader data, schema or prompt change; the hint is component state only and never logged or scored; the layout does not move when the sentence appears (stable at 320 px); focus lands on the revealed sentence | landed (tests by deepseek-flash, element-tree only: Bun has no DOM; 2,788 pass on the merged tree; the 320 px layout is unverified in a browser) |
 
 ### Landed: Today checklist (`docs/today-plan.md`)
 
@@ -187,7 +187,6 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | I2 | Import dialog: show the note-type picker only for an `.apkg` (a permanently disabled control looks broken; owner 2026-10-25) | picker absent for .txt/.tsv/.csv and before a file is chosen; present with a focused picker for .apkg; no layout jump | built and tested (unit tests pass; e2e not run; browser unverified) |
 | P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | text and recordings built, reviewed, merged; screenshots (#24) and the Q8 wording still owner-gated |
 | PH1 | Local speech through Ollama (Phonon): `speech` on the `ollama` provider, `pcm` wrapped into a WAV with correct sizes, a Settings hint for the model, Apple Silicon and the CC BY-NC licence | `POST /v1/audio/speech` called from the browser with the learner's own server; no key; real errors shown | built and tested (unit 2761 pass; no real Ollama run: the owner tests French voices, numbers and liaisons by ear) |
-| HQ1 | Reader checkpoints hide the quoted sentence until the learner asks or answers | the box does not change size; reader data untouched | built, tests pending |
 | TR1 | Sentence transformation, spike: per kind, how many bundled reader sentences apply and the computed answer (`docs/sentence-transformation-plan.md`) | a table and examples for the owner; no code in `src/` | planned, owner review of the plan first |
 | TR2 | Pure kinds and verifiers (negation, number, passé composé) and a unit built from a reader, no AI | table tests for every rule and exception | planned |
 | TR3 | Reader entry "Practise this pattern", saved to Practice, provenance line | owner tries it | planned |
