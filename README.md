@@ -2,14 +2,13 @@
 
 **Open-source French close reading, pronunciation and exercise practice for TCF Canada learners.**
 
-Preparing for TCF Canada requires moving from passive recognition to active mastery of French syntax, pronunciation and grammar.
-Learners often grasp the overall idea of an article, but miss verb forms, liaisons and sentence structure.
-Memorizing isolated word lists or taking practice tests alone does not provide the immediate feedback needed to correct these habits.
-Close reading sentence by sentence, combined with pronunciation feedback and targeted exercises, helps you understand real texts and speak accurately.
+Reading French with a dictionary open breaks your flow, and reading without one leaves the details vague. Practising pronunciation on your own gives you no feedback on rhythm, liaisons or single sounds. Relire Plus puts close reading, shadowing and exercises in one browser app: you read real French, check each word and sentence in context, and get feedback on how you sound.
 
 [Try Relire Plus online](https://royisme.github.io/relire/) · **English** · [简体中文](README.zh-CN.md)
 
-<!-- media: video -->
+[![Relire Plus overview: Today, a graded reader, a reviewed conjugation table and the noun-gender list](docs/media/overview.en.jpg)](docs/media/overview.en.mp4)
+
+_A 30-second recording of the real app with no AI key saved. Select the image to play it._
 
 ## A look inside
 
@@ -84,7 +83,7 @@ You can reproduce each count with `bun scripts/readme-numbers.ts` or the one-lin
 - **Gender practice counts first tries**: In the noun-gender practice game, only your first attempt on each card counts toward history; returning cards that you missed write nothing.
 
 <!-- DRAFT Q8: needs the owner's wording before release -->
-I developed Relire Plus by directing and reviewing AI coding agents to write the code, copy, and learning content. I design the architecture, establish the verification rules, and inspect code diffs and test suites myself. Automated tests and machine gates enforce technical constraints, and independent AI models filter the drafted content. However, the French texts, graded readers, and grammar explanations have not been reviewed by a human French teacher.
+I built Relire Plus with AI coding agents. They wrote the code, the interface copy and the bundled French content; I set the direction, write the specifications and run the checks. The checks cover code and data shapes, not French: the bundled readers were reviewed by another AI model and no human teacher has reviewed them yet. A human language review is the release gate for beginners.
 
 ## Try it online
 

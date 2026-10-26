@@ -170,7 +170,7 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | P5 | Overlay accessibility (Dialog focus and trap; Sheet and Drawer trap and scroll lock) | existing specs keep passing | built and tested (unit 2611 pass; e2e spec typechecked, never run) |
 | I1 | Import dialog sizes to its content | dialog sizes to its content without inner scroll windows | built and tested (unit tests pass; e2e spec typechecked, never run; browser unverified) |
 | I2 | Import dialog: show the note-type picker only for an `.apkg` (a permanently disabled control looks broken; owner 2026-10-25) | picker absent for .txt/.tsv/.csv and before a file is chosen; present with a focused picker for .apkg; no layout jump | built and tested (unit tests pass; e2e not run; browser unverified) |
-| P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | text drafted, media pending |
+| P6 | README restructure, screenshots and the screenshot skill (#24) | real committed data only; refuses non-real data | text and recordings built, review pending; screenshots (#24) and the Q8 wording still owner-gated |
 
 ### Content (paused by the owner's priority)
 
