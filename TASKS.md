@@ -144,7 +144,7 @@ Anki treats each imported deck as a book: Relire lists wordbooks (My words, the 
 
 | # | Step | Acceptance | State |
 | --- | --- | --- | --- |
-| WB1 | Wordbooks block: list with real counts, radio study choice saved at once (`studyBook` preference; `effectiveStudyBook` shared with `vocabularyQueue`), deck delete in one transaction behind a confirm | only the chosen book's words reach Review, Play, Today's words step and the Overview; delete drops deck contexts, deletes emptied rows with their progress, bumps touched rows' reset tokens and resets a choice pointing at the deck; checks exit 0 | built, tests pending |
+| WB1 | Wordbooks block: list with real counts, radio study choice saved at once (`studyBook` preference; `effectiveStudyBook` shared with `vocabularyQueue`), deck delete in one transaction behind a confirm | only the chosen book's words reach Review, Play, Today's words step and the Overview; delete drops deck contexts, deletes emptied rows with their progress, bumps touched rows' reset tokens and resets a choice pointing at the deck; checks exit 0 | landed (tests by deepseek-flash; 2,783 pass on the merged tree) |
 
 ### Navigation: a flat tree with Words at the top level
 
