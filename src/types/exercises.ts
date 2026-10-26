@@ -10,6 +10,7 @@ import { LearningAreaSchema, supportsListening, type LearningArea } from './lear
 import { GrammarTagSchema, type GrammarTag } from './grammar';
 import { NounGenderDrillMetaSchema } from './nounGenderDrill';
 import { ReaderDictationMetaSchema } from './readerDictation';
+import { ReaderTransformMetaSchema } from './readerTransform';
 import { SpellingDrillMetaSchema } from './spellingDrill';
 import {
   CheckpointQuestionSchema,
@@ -84,6 +85,13 @@ export function refineExerciseItem(
       for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
     if (type !== 'NUMBER_DICTATION' || !item.audioText?.trim())
       issue('meta', 'Reader-dictation metadata requires number dictation with nonblank audio text');
+  }
+  if (item.meta?.source === 'reader-transform') {
+    const parsed = ReaderTransformMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'WORD_TRANSFORM' || typeof answer !== 'string' || !answer.trim())
+      issue('meta', 'Reader-transform metadata requires word transform with a nonblank answer');
   }
   if (item.meta?.source === 'spelling-sounds') {
     const parsed = SpellingDrillMetaSchema.safeParse(item.meta);

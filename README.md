@@ -40,7 +40,7 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 ## What works without a key
 
 - **Start on Today**: The app opens on Today with a queue drawn from your own activity: words to review, a graded reader, sound pairs, mistakes to redo, and the next grammar topic when available.
-- **Read graded readers**: An ordered starter collection for zero-basis learners with authored word meanings, revealable sentence translations, saved vocabulary, device-voice audio, and local checkpoints.
+- **Read graded readers**: An ordered starter collection for zero-basis learners with authored word meanings, revealable sentence translations, saved vocabulary, device-voice audio, and local checkpoints; each reader can also turn its own sentences into a negation or singular/plural practice set, computed by rule with no AI and no key.
 - **Vocabulary review in Words**: Spaced-repetition review scheduled with FSRS-6. You rate each word Forgot, Fuzzy, or Remembered. Play offers retrieval challenges before answers are revealed, and Map displays saved words, imported lists, and downloaded wordbook pages.
 - **Reviewed conjugation**: Complete conjugation tables for 19 reviewed French verbs answered directly from local data without AI, plus conjugation practice sets generated without an AI call.
 - **Noun-gender reference**: 17 noun-ending tendencies with examples and exceptions, plus standalone gender-check drills.

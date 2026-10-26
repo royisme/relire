@@ -266,6 +266,12 @@
       "askWord": "就这个词询问 AI",
       "askSentence": "让 AI 分析这个句子",
       "answer": "AI 回答，未经审校"
+    },
+    "transform": {
+      "title": "练习这个句型",
+      "description": "用一条语法规则改写这本读物里的句子。答案由应用按规则从读物自己的句子算出，不用 AI，也不需要 Key。",
+      "negation": "做否定句练习",
+      "number": "做单复数练习"
     }
   },
   "sentenceDrawer": {
@@ -410,7 +416,13 @@
         "invalidFields": "以下字段不能为空，也不能包含 HTML 标记：{{fields}}"
       },
       "separator": "分隔符：{{separator}}",
-      "separators": { "tab": "制表符", "comma": "逗号", "semicolon": "分号", "space": "空格", "pipe": "竖线" },
+      "separators": {
+        "tab": "制表符",
+        "comma": "逗号",
+        "semicolon": "分号",
+        "space": "空格",
+        "pipe": "竖线"
+      },
       "deck": "牌组名称（文件中有牌组列时，以该列为准）",
       "front": "法语词语",
       "back": "释义",
@@ -1888,6 +1900,18 @@
       "noVerbs": "动词库里还没有动词。",
       "verbs": "动词",
       "tenses": "时态"
+    }
+  },
+  "readerTransform": {
+    "negation": {
+      "title": "否定句",
+      "instruction": "用 ne…pas 改写这个句子。",
+      "explanation": "把 ne 放在动词前，pas 放在动词后。"
+    },
+    "number": {
+      "title": "单数与复数",
+      "instruction": "把动词后面的名词短语换成另一种数。",
+      "explanation": "改冠词，名词加上或去掉表示复数的 s。"
     }
   }
 }

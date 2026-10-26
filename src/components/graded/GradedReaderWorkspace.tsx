@@ -6,12 +6,14 @@ import type { VocabularyModel } from '../../hooks/useVocabulary';
 import { useReaderWorkspace } from '../../hooks/useReaderWorkspace';
 import type { OpenedReader } from '../../services/gradedReaders/session';
 import { readerOccurrence } from '../../services/gradedReaders/occurrence';
+import { coveredKinds } from '../../services/exercises/transform';
 import { gradedDocument, gradedText } from '../../types/readerSource';
 import { errorMessage } from '../../services/ai/errors';
 import { navigate } from '../../hooks/useRoute';
 import { ReaderView } from '../ReaderView';
 import { ReaderCheckpoints } from './ReaderCheckpoints';
 import { ReaderDictationSection } from './ReaderDictationSection';
+import { ReaderTransformSection } from './ReaderTransformSection';
 import { ReaderAuthoredSheets, type AuthoredSelection } from './ReaderAuthoredSheets';
 import { Button } from '../ui/button';
 
@@ -35,6 +37,7 @@ export function GradedReaderWorkspace({
   const reader = opened.row.snapshot;
   const [selection, setSelection] = useState<AuthoredSelection | null>(null);
   const sentenceIds = useMemo(() => reader.body.sentences.map((sentence) => sentence.id), [reader]);
+  const transformKinds = useMemo(() => coveredKinds(reader), [reader]);
   return (
     <>
       <ReaderView
@@ -81,6 +84,7 @@ export function GradedReaderWorkspace({
               onRetry={progress.retry}
             />
             <ReaderDictationSection reader={reader} />
+            {transformKinds.length > 0 && <ReaderTransformSection reader={reader} kinds={transformKinds} />}
             <section aria-label={t('gradedReader.completion')} className="space-y-2 border-t border-ink-200 pt-4">
               <Button
                 variant="outline"
