@@ -274,7 +274,7 @@ export const VocabularyRowSchema = z
 export const VocabularyPreferencesSchema = z.strictObject({
   newPerDay: z.number().int().min(0).max(100),
   retentionPercent: VocabularyRetentionSchema,
-  studyBook: text,
+  studyBook: text.default('mine'),
 });
 export const VocabularyDaySchema = z
   .strictObject({ date: VocabularyDateSchema, introducedKeys: z.array(text) })
