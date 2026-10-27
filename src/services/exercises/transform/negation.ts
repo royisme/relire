@@ -4,7 +4,16 @@
  * No AI, no key, no IO.
  */
 import type { ReaderGlossaryEntry, Sentence } from '../../../types/gradedReader';
-import { cliticOf, determinerOf, elides, firstNounAfter, replacePhrase, verbOf, type VerbWord } from './words';
+import {
+  cliticOf,
+  determinerOf,
+  elides,
+  entriesOf,
+  firstNounAfter,
+  replacePhrase,
+  verbOf,
+  type VerbWord,
+} from './words';
 
 /** The indefinite and partitive articles that become `de` after the negation. */
 const TURNS_TO_DE = ['un', 'une', 'des', 'du', 'de la', 'de l’'];
@@ -12,6 +21,16 @@ const TURNS_TO_DE = ['un', 'une', 'des', 'du', 'de la', 'de l’'];
 export function transformNegation(sentence: Sentence, glossary: ReaderGlossaryEntry[]): { answer: string } | null {
   const verb = verbOf(sentence, glossary);
   if (!verb) return null;
+  // A sentence that already holds a negation is not negated twice (an elided `n’est` keeps it in the prefix).
+  const alreadyNegated = verb.words.some(
+    (word) => word.text.toLowerCase() === 'ne' || word.prefix.toLowerCase() === 'n’',
+  );
+  if (alreadyNegated) return null;
+  // An object pronoun before the verb takes `ne` before itself, which this rule does not build;
+  // subject, existential (`y`) and neutral (`ce`) clitics are the ones it leaves in place correctly.
+  const before = verb.words[verb.index - 1];
+  const cliticEntry = before && entriesOf(sentence, glossary, before.ordinal).find((entry) => entry.pos === 'function');
+  if (cliticEntry && !['subject', 'existential', 'neutral'].includes(cliticEntry.sense)) return null;
   // `il y a` negates on `y`, not on `a`: Il n’y a pas …
   const existential =
     verb.index >= 2 &&

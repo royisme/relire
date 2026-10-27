@@ -1,11 +1,11 @@
 /**
  * `number`: the noun phrase right after the finite verb put into the other number, computed by rule.
  * Only that phrase changes: determiner and noun.
- * Subject agreement and `c’est` → `ce sont` are out of version 1, so those sentences are skipped.
+ * Subject agreement after `être` and `c’est` → `ce sont` are out of version 1, so every être sentence is skipped.
  * No AI, no key, no IO.
  */
 import type { ReaderGlossaryEntry, Sentence } from '../../../types/gradedReader';
-import { cliticOf, determinerOf, elides, firstNounAfter, replacePhrase, verbOf } from './words';
+import { determinerOf, elides, firstNounAfter, replacePhrase, verbOf } from './words';
 
 /** Noun lemmas whose plural is irregular (s, x, z, al, ail, au, eu) are out of version 1. */
 const IRREGULAR_PLURAL = /(?:s|x|z|al|ail|au|eu)$/;
@@ -13,8 +13,8 @@ const IRREGULAR_PLURAL = /(?:s|x|z|al|ail|au|eu)$/;
 export function transformNumber(sentence: Sentence, glossary: ReaderGlossaryEntry[]): { answer: string } | null {
   const verb = verbOf(sentence, glossary);
   if (!verb) return null;
-  // `C’est une table.` would need `ce sont`, which version 1 does not build.
-  if (verb.word.prefix && cliticOf(sentence, glossary, verb.word)?.text.toLowerCase() === 'ce') return null;
+  // The phrase after être must agree with the subject, and `c’est` would need `ce sont`.
+  if (verb.entry.lemma === 'être') return null;
   const noun = firstNounAfter(sentence, glossary, verb.words, verb.index);
   if (!noun || IRREGULAR_PLURAL.test(noun.entry.lemma)) return null;
   const plural = `${noun.entry.lemma}s`;
