@@ -206,6 +206,130 @@ test('choosing another radio saves that choice and keeps the other preferences',
   expect(saves).toHaveLength(1);
 });
 
+/** The text of the block's own fixed-height status slot: empty when nothing is saving and nothing failed. */
+const statusText = (elements: El[]) => {
+  const slot = elements.find((element) => element.type === 'p' && element.props.role === 'status');
+  return render(<>{slot?.props.children}</>).replace(/<[^>]*>/g, '');
+};
+const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+/**
+ * No DOM, so nothing re-renders by itself: a state setter writes a slot and the next `view` reads it back.
+ * Only the block's three null-initialized states (pending choice, error, confirming deck) are intercepted;
+ * every other hook keeps the real server dispatcher.
+ */
+function stateful() {
+  const slots: unknown[] = [];
+  let cursor = 0;
+  const original = React.useState;
+  const state = spyOn(React, 'useState').mockImplementation(((initial: unknown) => {
+    if (initial !== null) return original(initial);
+    const slot = cursor++;
+    if (!(slot in slots)) slots[slot] = initial;
+    const set = (next: unknown) => {
+      slots[slot] = typeof next === 'function' ? (next as (current: unknown) => unknown)(slots[slot]) : next;
+    };
+    return [slots[slot], set];
+  }) as unknown as typeof React.useState);
+  const view = (current: VocabularyModel, library: typeof book | undefined = book) => {
+    cursor = 0;
+    const seen: Seen = { elements: [], body: [] };
+    inspect(seen, () => {
+      seen.elements = expand(WordbooksBlock({ model: current, book: library }));
+      return null;
+    });
+    const inputs = seen.elements.filter(
+      (element) => element.type === 'input' && element.props.name === 'vocabulary-study-book',
+    );
+    return {
+      elements: seen.elements,
+      radios: inputs,
+      disabled: inputs.map((radio) => radio.props.disabled as boolean),
+      status: statusText(seen.elements),
+    };
+  };
+  return { view, restore: () => state.mockRestore() };
+}
+
+test('a resolved save clears the saving state: the radios unlock and the status slot empties', async () => {
+  await i18n.changeLanguage('en');
+  let release = () => {};
+  const saved = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const saves: VocabularyModel['preferences'][] = [];
+  const saving: VocabularyModel = {
+    ...withDecks,
+    savePreferences: async (next) => {
+      saves.push(next);
+      await saved;
+    },
+  };
+  const harness = stateful();
+  try {
+    const before = harness.view(saving);
+    expect(before.disabled).toEqual([false, false, false, false]);
+    expect(before.status).toBe('');
+    // The deck radio is the learner's own control; drive it the way a click would.
+    (before.radios[2].props.onChange as () => void)();
+    const during = harness.view(saving);
+    expect(saves).toEqual([{ newPerDay: 20, retentionPercent: 90, studyBook: `deck:${ALPHA}` }]);
+    expect(during.disabled).toEqual([true, true, true, true]);
+    expect(during.status).toBe(i18n.t('vocab.wordbooks.saving'));
+    release();
+    await flush();
+    // The save resolved and the committed preferences hold the choice: nothing is pending any more.
+    const after = harness.view({ ...saving, preferences: { ...saving.preferences, studyBook: `deck:${ALPHA}` } });
+    expect(after.disabled).toEqual([false, false, false, false]);
+    expect(after.status).toBe('');
+    expect(after.radios.map((radio) => radio.props.checked as boolean)).toEqual([false, false, true, false]);
+  } finally {
+    harness.restore();
+  }
+});
+
+test('after a save the deck can disappear: the radios stay unlocked and the status slot stays empty', async () => {
+  await i18n.changeLanguage('en');
+  const harness = stateful();
+  try {
+    const saving: VocabularyModel = { ...withDecks, savePreferences: async () => {} };
+    (harness.view(saving).radios[2].props.onChange as () => void)();
+    await flush();
+    expect(
+      harness.view({ ...saving, preferences: { ...saving.preferences, studyBook: `deck:${ALPHA}` } }).disabled,
+    ).toEqual([false, false, false, false]);
+    // The saved deck is deleted before the model reloaded it, so the stored choice falls back to My words.
+    const gone = harness.view({ ...saving, rows: [mine] });
+    expect(gone.radios).toHaveLength(2);
+    expect(gone.disabled).toEqual([false, false]);
+    expect(gone.radios[0].props.checked).toBe(true);
+    expect(gone.status).toBe('');
+  } finally {
+    harness.restore();
+  }
+});
+
+test('a rejected save shows the real error and unlocks the radios', async () => {
+  await i18n.changeLanguage('en');
+  const harness = stateful();
+  try {
+    const failing: VocabularyModel = {
+      ...withDecks,
+      savePreferences: async () => {
+        throw new Error('TEST save failed');
+      },
+    };
+    (harness.view(failing).radios[2].props.onChange as () => void)();
+    await flush();
+    const after = harness.view(failing);
+    expect(after.disabled).toEqual([false, false, false, false]);
+    expect(after.status).toContain('TEST save failed');
+    expect(after.status).not.toBe(i18n.t('vocab.wordbooks.saving'));
+  } finally {
+    harness.restore();
+  }
+});
+
 test('only imported decks carry a delete button', async () => {
   for (const language of ['en', 'zh'] as const) {
     await i18n.changeLanguage(language);

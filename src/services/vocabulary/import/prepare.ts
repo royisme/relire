@@ -112,7 +112,7 @@ export function prepareVocabularyImport(
         definition: {
           kind: 'imported',
           front,
-          back: pos ? `${pos} ${back}` : back,
+          back: pos && back ? `${pos} ${back}` : back,
           ...(example !== undefined ? { example } : {}),
           tags:
             parsed.headers.tagsColumn === undefined

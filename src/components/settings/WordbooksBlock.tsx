@@ -4,7 +4,7 @@
  * choice (saved at once, with its own fixed-height status slot) and deck deletion
  * behind a confirmation dialog that says what progress goes.
  */
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2, Trash2 } from 'lucide-react';
 import type { VocabularyModel } from '../../hooks/useVocabulary';
@@ -88,25 +88,30 @@ export function WordbooksBlock({ model, book }: { model: VocabularyModel; book: 
   const decks = deckSummaries(model.rows);
   const mine = model.rows.filter(inMyWords).length;
   const selected = effectiveStudyBook(model.preferences.studyBook, book, model.rows);
-  // The choice being saved stays marked until the committed model holds it (or the save failed),
-  // so the radio never flickers back while the storage change event reloads.
+  // The choice being saved stays marked until its own save settles (a newer choice supersedes it);
+  // success resolves only after the model reloaded, so the radio never flickers back.
+  const latest = useRef(0);
   const [pending, setPending] = useState<{ value: string; failed: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<DeckSummary | null>(null);
   const pendingValue = pending && !pending.failed ? pending.value : null;
-  const saving = pendingValue !== null && model.preferences.studyBook !== pendingValue;
+  const saving = pendingValue !== null;
   const shown = saving ? pendingValue : selected;
   // A save before the preferences load would write the defaults over the learner's limits.
   const locked = saving || !model.ready || !!model.error;
   const choose = async (studyBook: string) => {
     if (saving || studyBook === model.preferences.studyBook) return;
+    const request = ++latest.current;
     setPending({ value: studyBook, failed: false });
     setError(null);
     try {
       await model.savePreferences({ ...model.preferences, studyBook });
+      if (latest.current === request) setPending(null);
     } catch (cause) {
-      setPending({ value: studyBook, failed: true });
-      setError(errorMessage(cause));
+      if (latest.current === request) {
+        setPending({ value: studyBook, failed: true });
+        setError(errorMessage(cause));
+      }
     }
   };
   return (
