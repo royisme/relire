@@ -65,6 +65,20 @@ const glossary: ReaderGlossaryEntry[] = [
   nounEntry('t-etudiant', 'étudiant', 'masculine'),
   nounEntry('t-frere', 'frère', 'masculine'),
   functionEntry('t-mon', 'mon', ['mon'], 'possessive'),
+  functionEntry('t-nimporte', 'n’importe', ['n’importe'], 'indefinite'),
+  functionEntry('t-qui', 'qui', ['qui'], 'relative'),
+  functionEntry('t-quoi', 'quoi', ['quoi'], 'interrogative'),
+  verbEntry('t-pouvoir', 'pouvoir', ['peut']),
+  verbEntry('t-aller', 'aller', ['vais']),
+  // `venir` is bound as a phrase, so `N’importe qui peut venir` holds exactly one finite verb and reaches the guard.
+  ReaderGlossaryEntrySchema.parse({
+    id: 't-venir',
+    lemma: 'venir',
+    pos: 'phrase',
+    sense: 'action',
+    forms: ['venir'],
+    gloss: { en: gloss('venir'), zh: '测试：venir' },
+  }),
 ];
 
 const sentence = (id: string, fr: string, bindings: string[][]): Sentence =>
@@ -94,6 +108,25 @@ const CASES: { sentence: Sentence; negation?: string | null; number?: string | n
     sentence: sentence('n5', 'Il y a un livre.', [['t-il'], ['t-y'], ['t-avoir'], ['t-un'], ['t-livre']]),
     negation: 'Il n’y a pas de livre.',
   },
+  // `n’importe` after the verb is not a negation, so the sentence negates normally.
+  {
+    sentence: sentence('n6', 'Il mange n’importe quoi.', [['t-il'], ['t-manger'], ['t-nimporte'], ['t-quoi']]),
+    negation: 'Il ne mange pas n’importe quoi.',
+  },
+  // The `n’` sits on the verb itself (elided `ne`), or on the word right before it: already negated.
+  {
+    sentence: sentence('n7', 'Il n’est pas ici.', [['t-il'], ['t-etre'], ['t-pas'], ['t-ici']]),
+    negation: null,
+  },
+  {
+    sentence: sentence('n8', 'N’importe qui peut venir.', [['t-nimporte'], ['t-qui'], ['t-pouvoir'], ['t-venir']]),
+    negation: null,
+  },
+  // `y` is existential only in `il y …`; the adverbial `y` of `J’y vais` would take `ne` before it, so it is skipped.
+  { sentence: sentence('n9', 'J’y vais.', [['t-y'], ['t-aller']]), negation: null },
+  // `J’y` carries two clitics at once: the subject `je` first and the adverbial `y` second. The subject does not
+  // excuse the `y`, so the sentence is still skipped.
+  { sentence: sentence('n10', 'J’y vais.', [['t-je', 't-y'], ['t-aller']]), negation: null },
   // Every être sentence is skipped for `number`: the phrase after it must agree with the subject.
   {
     sentence: sentence('b1', 'Mon frère est un étudiant.', [
@@ -132,6 +165,19 @@ test('an object clitic before the verb is skipped while subject and existential 
   expect(TRANSFORMERS.negation(caseOf('n3').sentence, glossary)).toBeNull();
   for (const id of ['n4', 'n5'])
     expect(TRANSFORMERS.negation(caseOf(id).sentence, glossary)).toEqual({ answer: caseOf(id).negation! });
+});
+
+test('an n’ after the verb is n’importe, not a negation, so the sentence still negates', () => {
+  expect(TRANSFORMERS.negation(caseOf('n6').sentence, glossary)).toEqual({ answer: caseOf('n6').negation! });
+});
+
+test('an n’ on the verb or on the word before it is an elided ne and the sentence is skipped', () => {
+  for (const id of ['n7', 'n8']) expect(TRANSFORMERS.negation(caseOf(id).sentence, glossary)).toBeNull();
+});
+
+test('y is existential only in il y, so J’y vais is skipped while Il y a still negates on y', () => {
+  for (const id of ['n9', 'n10']) expect(TRANSFORMERS.negation(caseOf(id).sentence, glossary)).toBeNull();
+  expect(TRANSFORMERS.negation(caseOf('n5').sentence, glossary)).toEqual({ answer: caseOf('n5').negation! });
 });
 
 test('number skips every être sentence, with a noun after it or with c’est', () => {
