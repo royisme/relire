@@ -22,20 +22,26 @@ export function transformNegation(sentence: Sentence, glossary: ReaderGlossaryEn
   const verb = verbOf(sentence, glossary);
   if (!verb) return null;
   // A sentence that already holds a negation is not negated twice (an elided `n’est` keeps it in the prefix).
-  const alreadyNegated = verb.words.some(
-    (word) => word.text.toLowerCase() === 'ne' || word.prefix.toLowerCase() === 'n’',
-  );
+  // An `n’` counts only up to the verb: after it, `n’importe` (`Il mange n’importe quoi`) is not a negation.
+  const alreadyNegated =
+    verb.words.some((word) => word.text.toLowerCase() === 'ne') ||
+    verb.words.slice(0, verb.index + 1).some((word) => word.prefix.toLowerCase() === 'n’');
   if (alreadyNegated) return null;
-  // An object pronoun before the verb takes `ne` before itself, which this rule does not build;
-  // subject, existential (`y`) and neutral (`ce`) clitics are the ones it leaves in place correctly.
-  const before = verb.words[verb.index - 1];
-  const cliticEntry = before && entriesOf(sentence, glossary, before.ordinal).find((entry) => entry.pos === 'function');
-  if (cliticEntry && !['subject', 'existential', 'neutral'].includes(cliticEntry.sense)) return null;
   // `il y a` negates on `y`, not on `a`: Il n’y a pas …
   const existential =
     verb.index >= 2 &&
     verb.words[verb.index - 1].text.toLowerCase() === 'y' &&
     verb.words[verb.index - 2].text.toLowerCase() === 'il';
+  // An object pronoun before the verb takes `ne` before itself, which this rule does not build; the clitics it
+  // leaves in place are subject and neutral (`ce`), and existential (`y`) only in a true `il y …`: the `y` of
+  // `J’y vais` is an object-like adverbial clitic, so that sentence is skipped. One token can carry two clitics
+  // (`J’y` binds both `je` and `y`), so every function entry of the word is checked, not only the first.
+  const before = verb.words[verb.index - 1];
+  const clitics = before
+    ? entriesOf(sentence, glossary, before.ordinal).filter((entry) => entry.pos === 'function')
+    : [];
+  const leftInPlace = existential ? ['subject', 'existential', 'neutral'] : ['subject', 'neutral'];
+  if (clitics.some((entry) => !leftInPlace.includes(entry.sense))) return null;
   const negated = existential ? verb.words[verb.index - 1] : verb.word;
   const start = negated.start + negated.prefix.length;
   const clitic = verb.word.prefix && !existential ? cliticOf(sentence, glossary, verb.word) : { text: '', start };
