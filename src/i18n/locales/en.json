@@ -878,7 +878,7 @@
     "invalidVoice": "Enter a Fish Audio voice ID, or leave it empty for the default voice.",
     "voiceNotValid": "The voice ID is not one this provider accepts. Fix it, then save again.",
     "keylessHelp": "No key is needed: the request goes to the server you run. Ollama must allow this page's origin, so start it with OLLAMA_ORIGINS set to this address (OLLAMA_ORIGINS=* allows any).",
-    "ollamaSpeechHelp": "Needs Ollama 0.40.9+ and a Phonon speech model: run ollama pull phonon:40m-multilingual. Apple Silicon only. The 40M models use the CC BY-NC 4.0 licence, for noncommercial use.",
+    "ollamaSpeechHelp": "Needs Ollama 0.40.9+ and a Phonon speech model: run ollama pull phonon:40m-fr. Apple Silicon only. The 40M models use the CC BY-NC 4.0 licence, for noncommercial use.",
     "fetch": "Fetch models",
     "fetching": "Fetching…",
     "refresh": "Refresh models",

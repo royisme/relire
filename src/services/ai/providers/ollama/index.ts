@@ -14,8 +14,8 @@ export const ollama: Provider = {
     requiresKey: false,
     text: { models: OLLAMA_TEXT_MODELS, defaultModel: OLLAMA_DEFAULT_MODEL },
     speech: {
-      models: ['phonon:40m-multilingual', 'phonon:40m-fr'],
-      defaultModel: 'phonon:40m-multilingual',
+      models: ['phonon:40m-fr', 'phonon:40m-multilingual'],
+      defaultModel: 'phonon:40m-fr',
       voices: [],
       defaultVoice: '',
     },
