@@ -6,7 +6,9 @@ import { I18nextProvider } from 'react-i18next';
 import i18next from 'i18next';
 import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
-import { testMatureSchedule, testRow } from './fixtures/vocabulary';
+import { testDefinition, testLookup, testMatureSchedule, testRow } from './fixtures/vocabulary';
+import { vocabularyContextKey } from '../src/services/vocabulary/identity';
+import type { VocabularyRow } from '../src/types/vocabulary';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
 import type { RunChunk } from '../src/components/vocabulary/game/VocabularyRun';
 import { getAppSettings } from '../src/utils/appSettings';
@@ -40,7 +42,7 @@ const model: VocabularyModel = {
   epoch: 0,
   ready: true,
   error: null,
-  preferences: { newPerDay: 20, retentionPercent: 90 },
+  preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
   day: { date: '2026-10-25', introducedKeys: [] },
   refresh: async () => {},
   savePreferences: async () => {},
@@ -135,7 +137,22 @@ test('a reached chunk logs once across effect replay, clock ticks and size chang
   const paint = () => {
     index = 0;
     effects.length = 0;
-    const waiting = { ...testRow('TEST waiting'), bookmarked: true, bookmarkedAt: 1 };
+    // A word saved from reading, so the studied wordbook (My words) still holds a word.
+    const lookup = testLookup('TEST waiting');
+    const waiting: VocabularyRow = {
+      ...testRow('TEST waiting'),
+      bookmarked: true,
+      bookmarkedAt: 1,
+      contexts: [
+        {
+          id: vocabularyContextKey(lookup),
+          sentence: lookup.sentence,
+          savedAt: 1,
+          requestLanguage: 'en',
+          definition: testDefinition('TEST waiting'),
+        },
+      ],
+    };
     const html = render(<run.VocabularyRun model={{ ...model, rows: [waiting] }} />);
     expect(effects).toHaveLength(1);
     effects[0]();

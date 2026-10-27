@@ -35,6 +35,7 @@ import zh from '../src/i18n/locales/zh.json';
 const restoreWindow = readerTestWindow();
 const navigation = await import('../src/hooks/useRoute');
 const { ReaderDictationSection } = await import('../src/components/graded/ReaderDictationSection');
+const { ReaderTransformSection } = await import('../src/components/graded/ReaderTransformSection');
 const { GradedReaderPage, ReaderEditionGate } = await import('../src/components/graded/GradedReaderPage');
 const { GradedReaderWorkspace } = await import('../src/components/graded/GradedReaderWorkspace');
 const { ReaderAuthoredSheets } = await import('../src/components/graded/ReaderAuthoredSheets');
@@ -203,10 +204,18 @@ test('dictation uses the opened snapshot and sits between checkpoints and comple
   const view = element<React.ComponentProps<typeof ReaderView>>(tree, ReaderView);
   const afterText = view.props.afterText as React.ReactElement<{ children: React.ReactNode }>;
   const sections = React.Children.toArray(afterText.props.children) as React.ReactElement[];
-  expect(sections.map((section) => section.type)).toEqual([ReaderCheckpoints, ReaderDictationSection, 'section']);
+  expect(sections.map((section) => section.type)).toEqual([
+    ReaderCheckpoints,
+    ReaderDictationSection,
+    ReaderTransformSection,
+    'section',
+  ]);
   expect(
     element<React.ComponentProps<typeof ReaderDictationSection>>(afterText, ReaderDictationSection).props.reader,
   ).toBe(opened.row.snapshot);
+  const transform = element<React.ComponentProps<typeof ReaderTransformSection>>(afterText, ReaderTransformSection);
+  expect(transform.props.reader).toBe(opened.row.snapshot);
+  expect(transform.props.kinds).toEqual(['negation']);
 });
 
 test('the authored footer passes clicked spelling and the reader definition to durable bookmark storage', async () => {

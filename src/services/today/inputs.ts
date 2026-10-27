@@ -35,8 +35,9 @@ export function wordsInput(
   day: VocabularyDay,
   newPerDay: number,
   now: number,
+  studyBook: string,
 ): TodayWords {
-  const { candidates } = vocabularyQueue(rows, book, day, newPerDay, now, new Set());
+  const { candidates } = vocabularyQueue(rows, book, day, newPerDay, now, new Set(), studyBook);
   let due = 0;
   let unseen = 0;
   for (const candidate of candidates) {

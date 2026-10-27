@@ -259,12 +259,19 @@
     },
     "checkpoints": {
       "title": "检查点",
-      "quotedSentence": "出自句子"
+      "quotedSentence": "出自句子",
+      "showQuotedSentence": "显示引用的句子"
     },
     "ai": {
       "askWord": "就这个词询问 AI",
       "askSentence": "让 AI 分析这个句子",
       "answer": "AI 回答，未经审校"
+    },
+    "transform": {
+      "title": "练习这个句型",
+      "description": "用一条语法规则改写这本读物里的句子。答案由应用按规则从读物自己的句子算出，不用 AI，也不需要 Key。",
+      "negation": "做否定句练习",
+      "number": "做单复数练习"
     }
   },
   "sentenceDrawer": {
@@ -409,7 +416,13 @@
         "invalidFields": "以下字段不能为空，也不能包含 HTML 标记：{{fields}}"
       },
       "separator": "分隔符：{{separator}}",
-      "separators": { "tab": "制表符", "comma": "逗号", "semicolon": "分号", "space": "空格", "pipe": "竖线" },
+      "separators": {
+        "tab": "制表符",
+        "comma": "逗号",
+        "semicolon": "分号",
+        "space": "空格",
+        "pipe": "竖线"
+      },
       "deck": "牌组名称（文件中有牌组列时，以该列为准）",
       "front": "法语词语",
       "back": "释义",
@@ -425,6 +438,22 @@
       "result": "新增 {{imported}} 条，合并 {{merged}} 条，拒绝 {{rejected}} 条。",
       "rejectedRow": "第 {{row}} 行：{{reason}}",
       "saved": "导入的笔记"
+    },
+    "wordbooks": {
+      "title": "词书",
+      "help": "选择要学习的词书，只有它里面的词会进入复习。",
+      "study": "要学习的词书",
+      "mine": "我的生词",
+      "words_one": "{{count}} 个词",
+      "words_other": "{{count}} 个词",
+      "mineEmpty": "阅读时收藏的词会保存在这里。",
+      "deleteLabel": "删除 {{name}}",
+      "confirmTitle": "删除这个牌组？",
+      "confirmBody": "「{{name}}」共有 {{words}} 个词，其中 {{history}} 个有复习记录。删除牌组会连同它们的进度一起删除。",
+      "confirmShared": "同时属于其他词书、或在阅读时收藏过的词会保留进度，只移除这个牌组里的条目。",
+      "confirmDelete": "删除牌组",
+      "deleteFailed": "无法删除牌组：{{reason}}",
+      "saving": "保存中…"
     },
     "book": "内置词书",
     "bookCount_one": "{{count}} 个词可离线使用",
@@ -842,7 +871,7 @@
     "invalidVoice": "请填写 Fish Audio 的音色 ID，或留空使用默认音色。",
     "voiceNotValid": "该音色 ID 不被此服务商接受，请修改后再保存。",
     "keylessHelp": "无需 Key：请求只发送到你在本机运行的服务器。Ollama 需要允许本页面的来源，请启动时把 OLLAMA_ORIGINS 设为本页面地址（OLLAMA_ORIGINS=* 表示全部允许）。",
-    "ollamaSpeechHelp": "需要 Ollama 0.40.9 及以上版本和 Phonon 语音模型：运行 ollama pull phonon:40m-multilingual。仅支持 Apple Silicon。40M 模型采用 CC BY-NC 4.0 许可，仅限非商业用途。",
+    "ollamaSpeechHelp": "需要 Ollama 0.40.9 及以上版本和 Phonon 语音模型：运行 ollama pull phonon:40m-fr。仅支持 Apple Silicon。40M 模型采用 CC BY-NC 4.0 许可，仅限非商业用途。",
     "fetch": "获取模型列表",
     "fetching": "获取中…",
     "refresh": "刷新模型列表",
@@ -1871,6 +1900,18 @@
       "noVerbs": "动词库里还没有动词。",
       "verbs": "动词",
       "tenses": "时态"
+    }
+  },
+  "readerTransform": {
+    "negation": {
+      "title": "否定句",
+      "instruction": "用 ne…pas 改写这个句子。",
+      "explanation": "把 ne 放在动词前，pas 放在动词后。"
+    },
+    "number": {
+      "title": "单数与复数",
+      "instruction": "把动词后面的名词短语换成另一种数。",
+      "explanation": "改冠词，名词加上或去掉表示复数的 s。"
     }
   }
 }

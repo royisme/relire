@@ -40,14 +40,14 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 ## What works without a key
 
 - **Start on Today**: The app opens on Today with a queue drawn from your own activity: words to review, a graded reader, sound pairs, mistakes to redo, and the next grammar topic when available.
-- **Read graded readers**: An ordered starter collection for zero-basis learners with authored word meanings, revealable sentence translations, saved vocabulary, device-voice audio, and local checkpoints.
+- **Read graded readers**: An ordered starter collection for zero-basis learners with authored word meanings, revealable sentence translations, saved vocabulary, device-voice audio, and local checkpoints; each reader can also turn its own sentences into a negation or singular/plural practice set, computed by rule with no AI and no key.
 - **Vocabulary review in Words**: Spaced-repetition review scheduled with FSRS-6. You rate each word Forgot, Fuzzy, or Remembered. Play offers retrieval challenges before answers are revealed, and Map displays saved words, imported lists, and downloaded wordbook pages.
 - **Reviewed conjugation**: Complete conjugation tables for 19 reviewed French verbs answered directly from local data without AI, plus conjugation practice sets generated without an AI call.
 - **Noun-gender reference**: 17 noun-ending tendencies with examples and exceptions, plus standalone gender-check drills.
 - **French sounds and Sound pairs**: A complete chart of French sounds in IPA with tap-to-hear audio via device speech, and Sound pairs listening drills under Speaking.
 - **Mistake notebook and progress tracking**: Mistakes keeps your latest wrong answer for each exercise item and marks it resolved after a later correct attempt. Progress tracks real counts for saved words, shadowing sessions, pronunciation scores, and grammar accuracy.
 - **Article library and reading tools**: Browse the three included sample articles or paste text, with adjustable font size, light and dark themes, and playback speed down to 0.5×.
-- **Import vocabulary lists**: Import words from `.txt`, `.tsv`, `.csv`, or Anki `.apkg` files into your vocabulary deck.
+- **Import vocabulary lists**: Import words from `.txt`, `.tsv`, `.csv`, or Anki `.apkg` files into your vocabulary deck. Recognized trailing part-of-speech tags (such as `n.m.` or `v.pr.`) move to the start of the back, leaving only the word on the front and for read-aloud. Imported decks are listed in Settings → Words, where you choose the one wordbook to study or delete a deck.
 - **Bilingual interface and prompt editing**: English and Simplified Chinese interfaces, and plain-text prompt templates you can inspect, edit, or reset in Settings.
 - **Local-first offline storage**: Articles, saved words, exercise history, mistake records, and cached audio stay on your device in IndexedDB and work offline.
 
@@ -57,7 +57,7 @@ Follow the sentence translation and shadowing guide, and adjust playback speed a
 - **Pronunciation assessment**: Record yourself reading a sentence aloud. Azure Speech evaluates accuracy, fluency, and individual words; Gemini assesses the audio directly for phonemes, liaisons, and intonation; other text AI providers give transcript-based guidance where a transcript is available.
 - **Exercise generation and AI grading**: Generate exercise sets (fill-in-the-blank, multiple choice, word transformation, reading passages, dialogue ordering, and more) from your articles, or import worksheets from images or PDFs. Open answers are evaluated by an AI in words rather than a score.
 - **Article and worksheet OCR**: Import articles or exercises from up to five photos or PDF pages read by your selected vision model.
-- **AI speech synthesis**: Listen to articles and sentences with Gemini, Fish Audio or a local Ollama Phonon model (Ollama and device speech need no key). Phonon needs Ollama 0.40.9+ on Apple Silicon; the 40M models are licensed CC BY-NC 4.0 for noncommercial use and are pulled by the learner, not shipped with the app.
+- **AI speech synthesis**: Listen to articles and sentences with Gemini, Fish Audio or a local Ollama Phonon model (`phonon:40m-fr` or `phonon:40m-multilingual`), the lightest local setup: pull one model, with no key and no account (Ollama and device speech need no key). Phonon needs Ollama 0.40.9+ on Apple Silicon; the 40M models are licensed CC BY-NC 4.0 for noncommercial use and are pulled by the learner, not shipped with the app.
 - **Unreviewed verb conjugation**: For verbs outside the 19 reviewed verbs, an AI generates the conjugation, which is checked against the app's grammar rules and labelled accordingly.
 - **Optional content service**: Connect an optional read-only service with your own access key to download grammar topics and wordbook pages. The service never receives your AI key, answers, articles, or audio.
 
@@ -119,7 +119,7 @@ Your articles, vocabulary and stats are stored in this browser's IndexedDB, and 
 
 ## How it is built
 
-React 19, Vite, Tailwind CSS 4, i18next, and AI providers called directly from the browser (Gemini through `@google/genai`, Azure through its Speech SDK, OpenAI-compatible, Anthropic, Ollama and Fish Audio over `fetch`). `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, `docs/architecture.md` is a map of the code, and `CLAUDE.md` plus `.claude/` hold the guidance for AI coding agents.
+React 19, Vite, Tailwind CSS 4, i18next, and AI providers called directly from the browser (Gemini through `@google/genai`, Azure through its Speech SDK, OpenAI-compatible, Anthropic, Ollama and Fish Audio over `fetch`). `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, and `AGENTS.md` holds the repository rules for contributors and AI coding agents.
 
 ```
 src/services/ai/         providers, prompt templates and tasks; the UI calls src/services/api.ts

@@ -45,7 +45,16 @@ export function useToday(
       try {
         const book = await getVocabularyBook();
         if (!live || request !== sequence) return;
-        setWords({ value: wordsInput(vocabulary.rows, book, vocabulary.day, vocabulary.preferences.newPerDay, now) });
+        setWords({
+          value: wordsInput(
+            vocabulary.rows,
+            book,
+            vocabulary.day,
+            vocabulary.preferences.newPerDay,
+            now,
+            vocabulary.preferences.studyBook,
+          ),
+        });
       } catch (err) {
         if (live && request === sequence) setWords({ error: errorMessage(err) });
       }

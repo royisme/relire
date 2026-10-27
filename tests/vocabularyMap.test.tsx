@@ -62,7 +62,7 @@ const model: VocabularyModel = {
   epoch: 0,
   ready: true,
   error: null,
-  preferences: { newPerDay: 20, retentionPercent: 90 },
+  preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
   day: { date: '2026-10-25', introducedKeys: [] },
   refresh: async () => {},
   savePreferences: async () => {},

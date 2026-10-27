@@ -7,6 +7,8 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- After a graded reader's checkpoints, "Practise this pattern" makes a grammar set from that reader's own sentences: negation (ne … pas, with `de` for the article) and singular/plural on the noun phrase after the verb. The answers are computed by plain code, so it needs no AI and no key; a sentence a rule cannot cover is skipped, and the saved set opens in Practice like any other.
+- Settings → Words has a Wordbooks block: My words, the built-in wordbook (once downloaded) and every imported deck are listed with their word counts; choose the one wordbook to study — the choice saves at once, My words is the default and always present, and only that wordbook's words enter review, the run and Today — and delete an imported deck after a plain confirmation that says how many words and review histories go with it and that a word living in another wordbook keeps its progress.
 - Speak French with a local Ollama Phonon model, without a key, using the server, model and optional voice you choose in Settings. Requires Ollama 0.40.9+ on Apple Silicon; the learner pulls the CC BY-NC 4.0 noncommercial 40M model separately.
 - The README opens with the problem, then what works without a key, real counts with the commands that reproduce them, and a plain statement of what is and is not checked. Both languages carry a 30-second recording of the real app (`docs/media/overview.*.mp4`) and an AI-disclosure paragraph marked as a draft until the maintainer words it.
 - The Words Overview shows, beside Review or Learn, about how long it takes at your own pace ("About 4–6 min at your usual pace"), worked out from the gaps between your own ratings and left out until there is enough of your history.
@@ -86,7 +88,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - **Themes: light, sepia and dark**, plus "Match system", which follows the device and switches live. Pick one from the new theme icon in the header; the choice is remembered and applied before the page draws, so it never flashes. The whole app follows the theme, not only the article, and every text colour meets WCAG AA contrast in each theme.
 - **Marketing site on GitHub Pages.** The Pages root is now an English and 简体中文 landing page (positioning, screenshots, FAQ, CTAs) with the live app unchanged under `/relire/app/`; a one-time root service worker retires the old root-scoped cache so returning visitors move over cleanly, and the app page asks search engines not to index it in favour of the landing pages.
 - **Search and sharing metadata.** The app page now carries a proper title, description, canonical URL, robots directives, social-share images and Schema.org structured data, plus `robots.txt` and `sitemap.xml`, so search engines and shared links describe Relire correctly.
-- **Live demo on GitHub Pages.** Pushing to main deploys https://royisme.github.io/relire/ (after the type, translation and build checks pass); the READMEs now lead with the demo and what Relire does, and a launch checklist with copy for communities lives in `docs/LAUNCH.md`.
+- **Live demo on GitHub Pages.** Pushing to main deploys https://royisme.github.io/relire/ (after the type, translation and build checks pass); the READMEs now lead with the demo and what Relire does.
 - **Separate AI for explanations and for speech.** Settings has a provider, model and key for each, so they can differ; Gemini is the only provider today and the app is structured so others are added by implementing one interface and registering it. Each provider keeps its own key; unknown or invalid saved choices fall back to defaults.
 - **Editable prompts.** Every prompt is now a plain-text template (English and Chinese) with variables and simple conditions. Settings shows them, previews them with sample values, warns about unknown variables, and resets any prompt to the original; edits are included in backups. Cached answers are keyed by the prompt in use, so an edited prompt gets fresh answers and resetting brings the old ones back.
 - **Saved pronunciation audio.** Every synthesized clip is stored on the device and played from there, so it is generated once and works offline. Already acquired audio for bookmarked or introduced learner rows (word, personal sentences and personal usage-example French) is protected; unseen book words and built-in examples are not. Other clips are trimmed least-recently-used past 200 MiB. Settings shows the amount and can clear the rest. Backups can optionally include the vocabulary's audio; if some clips cannot be saved while restoring, Settings says how many.
@@ -102,6 +104,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Changed
 
+- A graded reader's checkpoint no longer shows the quoted sentence above the question (it gave the answer away): it appears when you press "Show the quoted sentence" or once your answer is checked, in the same space without moving the page, and looking early is your choice alone (nothing is recorded or scored).
 - A graded reader's header now names the AI models that reviewed it ("AI-written, reviewed by AI (Gemini 4 Argon, Gemini 3.8 Flash), not human-reviewed"), in English and Chinese. The label is fixed text, so it must be edited when a reader is reviewed by other models.
 - The "Import Anki notes" dialog shows the package note-type picker only after reading an Anki package, leaving it hidden for text files and before a file is chosen.
 - The "Import Anki notes" dialog sizes to its content without inner scroll windows on the web.
@@ -156,6 +159,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- Imported cards move recognized trailing part-of-speech tags to the back, keeping them off the front and reading aloud only the word.
 - The vocabulary run summary omits the next-card line while any card or new word is still available, and formats the next return time with the interface language and date-only midnight rules used across Words.
 - The Review page counter and the run summary's next-card time now agree with the Overview and Today: new words left are bounded by the cards really available, and a review card is ready from the start of its due day.
 - Dialogs, lookup sheets and the phone menu keep keyboard focus inside, return it to the opener when closed and prevent the page behind them from scrolling, including when overlays are stacked.

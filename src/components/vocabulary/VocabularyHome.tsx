@@ -33,6 +33,7 @@ export function VocabularyHome({
     model.day,
     model.preferences.newPerDay,
     model.now,
+    model.preferences.studyBook,
   );
   const learning = model.rows.filter((row) => row.schedule && row.schedule.phase !== 'review').length;
   const waiting = pending || !model.ready;

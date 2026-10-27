@@ -40,7 +40,7 @@ const model: VocabularyModel = {
   epoch: 0,
   ready: true,
   error: null,
-  preferences: { newPerDay: 20, retentionPercent: 90 },
+  preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'builtin' },
   day: { date: '2026-10-25', introducedKeys: [] },
   refresh: async () => {},
   savePreferences: async () => {},
@@ -253,7 +253,7 @@ for (const language of ['en', 'zh'] as const) {
       schedule: index === 0 ? initialVocabularySchedule(now) : testMatureSchedule(tomorrow),
     }));
     const current = { ...model, rows, day: { ...model.day, introducedKeys: rows.map((row) => row.key) } };
-    const input = wordsInput(rows, book, current.day, 20, now);
+    const input = wordsInput(rows, book, current.day, 20, now, 'builtin');
     expect(input).toEqual({ due: 1, newAvailable: 1, nextDue: tomorrowMidnight, reviewsToday: 0 });
     const html = render(<VocabularyHome model={current} book={book} pending={false} />);
     const stats = [...html.matchAll(/<dt\b[^>]*>(.*?)<\/dt><dd\b[^>]*>(\d+)<\/dd>/g)];
@@ -277,7 +277,7 @@ for (const language of ['en', 'zh'] as const) {
       schedule: testMatureSchedule(tomorrow),
     }));
     const current = { ...model, rows, day: { ...model.day, introducedKeys: rows.map((row) => row.key) } };
-    expect(wordsInput(rows, book, current.day, 20, now)).toEqual({
+    expect(wordsInput(rows, book, current.day, 20, now, 'builtin')).toEqual({
       due: 0,
       newAvailable: 1,
       nextDue: tomorrowMidnight,

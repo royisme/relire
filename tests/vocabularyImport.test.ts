@@ -10,6 +10,7 @@ import { vocabularyContextKey } from '../src/services/vocabulary/identity';
 import { buildChallenge, cardContent } from '../src/services/vocabulary/game/challenge';
 import { deckRegionId, summarizeRegions } from '../src/services/vocabulary/game/regions';
 import { vocabularyQueue } from '../src/services/vocabulary/queue';
+import { BUILTIN_WORDS, MY_WORDS, deckStudyBook } from '../src/services/vocabulary/wordbooks';
 import { VocabularyRowSchema } from '../src/types/vocabulary';
 import { exportData, importData } from '../src/storage/db';
 import {
@@ -247,18 +248,19 @@ test('new bookmarks increase in file order even under one clock and append after
   expect(times).toEqual([now + 10, now + 11, now + 12, now + 13]);
 });
 
-test('imported personal cards precede unseen book words and share their daily-new allowance at the durable introduction boundary', async () => {
+test('an imported deck is its own wordbook and still shares the one daily-new allowance', async () => {
   const book = await testBook(2);
-  await saveVocabularyPreferences({ newPerDay: 2, retentionPercent: 90 });
+  await saveVocabularyPreferences({ newPerDay: 2, retentionPercent: 90, studyBook: 'mine' });
   await importVocabularyNotes(prepare('zebre\tzebra\narbre\ttree').notes, now);
   const backup = await exportData();
   const day = { date: '2026-10-25', introducedKeys: [] as string[] };
-  expect(vocabularyQueue(backup.vocab, book, day, 2, now, new Set()).candidates.map((c) => c.key)).toEqual([
-    'zebre',
-    'arbre',
-    'test-0',
-    'test-1',
-  ]);
+  const queue = (rows: typeof backup.vocab, studyBook: string) =>
+    vocabularyQueue(rows, book, day, 2, now, new Set(), studyBook).candidates.map((c) => c.key);
+  // An imported deck is not My words: the deck's own entry is studied on its own.
+  expect(queue(backup.vocab, MY_WORDS)).toEqual([]);
+  expect(queue(backup.vocab, deckStudyBook('TEST deck'))).toEqual(['zebre', 'arbre']);
+  expect(queue(backup.vocab, BUILTIN_WORDS)).toEqual(['test-0', 'test-1']);
+  // The allowance is durable and shared: one deck card and one book front use up the two new words a day.
   const first = await introduceVocabularyCard(
     backup.vocab.find((row) => row.key === 'zebre')!,
     { epoch: 0, resetToken: 0, revision: 0 },
@@ -290,7 +292,7 @@ test('imported personal cards precede unseen book words and share their daily-ne
   const after = await exportData();
   expect(after.vocabularyMeta.days[0].introducedKeys).toEqual([first.row.key, 'test-0']);
   expect(
-    vocabularyQueue(after.vocab, book, after.vocabularyMeta.days[0], 2, now + 2, new Set()).candidates.map(
+    vocabularyQueue(after.vocab, book, after.vocabularyMeta.days[0], 2, now + 2, new Set(), MY_WORDS).candidates.map(
       (c) => c.key,
     ),
   ).not.toContain('arbre');

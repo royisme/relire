@@ -259,12 +259,19 @@
     },
     "checkpoints": {
       "title": "Checkpoints",
-      "quotedSentence": "From the sentence"
+      "quotedSentence": "From the sentence",
+      "showQuotedSentence": "Show the quoted sentence"
     },
     "ai": {
       "askWord": "Ask AI about this word",
       "askSentence": "Ask AI to analyse this sentence",
       "answer": "AI answer, not reviewed"
+    },
+    "transform": {
+      "title": "Practise this pattern",
+      "description": "Change sentences from this reader by a grammar rule. The app builds the answers by rule from the reader's own sentences: no AI and no key.",
+      "negation": "Make negation practice",
+      "number": "Make plural and singular practice"
     }
   },
   "sentenceDrawer": {
@@ -409,7 +416,13 @@
         "invalidFields": "Use nonblank text without HTML in these fields: {{fields}}"
       },
       "separator": "Separator: {{separator}}",
-      "separators": { "tab": "Tab", "comma": "Comma", "semicolon": "Semicolon", "space": "Space", "pipe": "Pipe" },
+      "separators": {
+        "tab": "Tab",
+        "comma": "Comma",
+        "semicolon": "Semicolon",
+        "space": "Space",
+        "pipe": "Pipe"
+      },
       "deck": "Deck name (the file's deck column takes precedence)",
       "front": "French word",
       "back": "Answer",
@@ -425,6 +438,22 @@
       "result": "{{imported}} imported, {{merged}} merged, {{rejected}} rejected.",
       "rejectedRow": "Row {{row}}: {{reason}}",
       "saved": "Imported note"
+    },
+    "wordbooks": {
+      "title": "Wordbooks",
+      "help": "Choose the wordbook to study. Only its words enter your reviews.",
+      "study": "Wordbook to study",
+      "mine": "My words",
+      "words_one": "{{count}} word",
+      "words_other": "{{count}} words",
+      "mineEmpty": "Words you save while reading land here.",
+      "deleteLabel": "Delete {{name}}",
+      "confirmTitle": "Delete this deck?",
+      "confirmBody": "“{{name}}” holds {{words}} words, {{history}} of them with review history. Deleting the deck deletes their progress with them.",
+      "confirmShared": "A word that also belongs to another wordbook, or that you saved while reading, keeps its progress. Only this deck’s entry is removed.",
+      "confirmDelete": "Delete deck",
+      "deleteFailed": "Could not delete the deck: {{reason}}",
+      "saving": "Saving…"
     },
     "book": "Built-in wordbook",
     "bookCount_one": "{{count}} word available offline",
@@ -849,7 +878,7 @@
     "invalidVoice": "Enter a Fish Audio voice ID, or leave it empty for the default voice.",
     "voiceNotValid": "The voice ID is not one this provider accepts. Fix it, then save again.",
     "keylessHelp": "No key is needed: the request goes to the server you run. Ollama must allow this page's origin, so start it with OLLAMA_ORIGINS set to this address (OLLAMA_ORIGINS=* allows any).",
-    "ollamaSpeechHelp": "Needs Ollama 0.40.9+ and a Phonon speech model: run ollama pull phonon:40m-multilingual. Apple Silicon only. The 40M models use the CC BY-NC 4.0 licence, for noncommercial use.",
+    "ollamaSpeechHelp": "Needs Ollama 0.40.9+ and a Phonon speech model: run ollama pull phonon:40m-fr. Apple Silicon only. The 40M models use the CC BY-NC 4.0 licence, for noncommercial use.",
     "fetch": "Fetch models",
     "fetching": "Fetching…",
     "refresh": "Refresh models",
@@ -1880,6 +1909,18 @@
       "noVerbs": "No verbs are in the pack yet.",
       "verbs": "Verbs",
       "tenses": "Tenses"
+    }
+  },
+  "readerTransform": {
+    "negation": {
+      "title": "Negation",
+      "instruction": "Rewrite the sentence with ne … pas.",
+      "explanation": "Put ne before the verb and pas after it."
+    },
+    "number": {
+      "title": "Singular and plural",
+      "instruction": "Put the noun phrase after the verb into the other number.",
+      "explanation": "Change the article and add or drop the plural s on the noun."
     }
   }
 }

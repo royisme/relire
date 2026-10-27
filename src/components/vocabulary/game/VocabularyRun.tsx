@@ -245,8 +245,15 @@ export function VocabularyRun({ model, book }: { model: VocabularyModel; book?: 
     !active &&
     !session.busy &&
     !message &&
-    vocabularyQueue(model.rows, book, model.day, model.preferences.newPerDay, session.now, new Set()).candidates
-      .length === 0;
+    vocabularyQueue(
+      model.rows,
+      book,
+      model.day,
+      model.preferences.newPerDay,
+      session.now,
+      new Set(),
+      model.preferences.studyBook,
+    ).candidates.length === 0;
   useRunLog(chunk, session.ratings, session.now, queueEmpty);
 
   const nextDue = nextAvailableAt(model.rows, session.now);

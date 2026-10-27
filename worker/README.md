@@ -122,7 +122,7 @@ The app requests catalogue metadata and published reader id/artifact version onl
 
 ## Lexicon (moved out of the service)
 
-The verb-form dictionary is not served here. It is the committed data file `data/lexicon/lexicon.json`, built from Morphalou 3.1 (LGPL-LR) by `bun scripts/lexicon/build.ts` and read by the app; the notice, the licence text and the rebuild steps are in `data/lexicon/NOTICE.md` and `data/lexicon/LGPL-LR.txt`, and the plan is `docs/lexicon-bundle-plan.md`. `bun scripts/lexicon/select.ts` still writes the allowlist `data/lexicon/lemmas.txt` offline (see its header for `LEXIQUE_FILE` and `MORPHALOU_DIR`).
+The verb-form dictionary is not served here. It is the committed data file `data/lexicon/lexicon.json`, built from Morphalou 3.1 (LGPL-LR) by `bun scripts/lexicon/build.ts` and read by the app; the notice, the licence text and the rebuild steps are in `data/lexicon/NOTICE.md` and `data/lexicon/LGPL-LR.txt`. `bun scripts/lexicon/select.ts` still writes the allowlist `data/lexicon/lemmas.txt` offline (see its header for `LEXIQUE_FILE` and `MORPHALOU_DIR`).
 
 ## Cloudflare limits (read 2026-10-24)
 

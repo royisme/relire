@@ -5,8 +5,10 @@ import i18next from 'i18next';
 import en from '../src/i18n/locales/en.json';
 import zh from '../src/i18n/locales/zh.json';
 import type { VocabularyModel } from '../src/hooks/useVocabulary';
-import { testDefinition, testMatureSchedule, testRow } from './fixtures/vocabulary';
+import { testDefinition, testLookup, testMatureSchedule, testRow } from './fixtures/vocabulary';
 import { buildRunChallenge } from '../src/components/vocabulary/game/runModel';
+import { vocabularyContextKey } from '../src/services/vocabulary/identity';
+import type { VocabularyRow } from '../src/types/vocabulary';
 import { RunChallengeCard, RunRevealedCard } from '../src/components/vocabulary/game/RunCard';
 import type { Challenge } from '../src/services/vocabulary/game/challenge';
 
@@ -33,7 +35,7 @@ const model: VocabularyModel = {
   epoch: 0,
   ready: true,
   error: null,
-  preferences: { newPerDay: 20, retentionPercent: 90 },
+  preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
   day: { date: '2026-10-25', introducedKeys: [] },
   refresh: async () => {},
   savePreferences: async () => {},
@@ -59,7 +61,22 @@ const session: ReturnType<typeof review.useVocabularyReview> = {
 
 test('between snapshots only a genuinely empty ready queue shows completion; failures show their real error', () => {
   const hook = spyOn(review, 'useVocabularyReview').mockReturnValue(session);
-  const candidate = { ...testRow('TEST'), bookmarked: true, bookmarkedAt: 1 };
+  // A word saved from reading, so it is in My words, the default study book this run is filtered by.
+  const lookup = testLookup('TEST');
+  const candidate: VocabularyRow = {
+    ...testRow('TEST'),
+    bookmarked: true,
+    bookmarkedAt: 1,
+    contexts: [
+      {
+        id: vocabularyContextKey(lookup),
+        sentence: lookup.sentence,
+        savedAt: 1,
+        requestLanguage: 'en',
+        definition: testDefinition('TEST'),
+      },
+    ],
+  };
   const render = (nextModel: VocabularyModel) =>
     renderToStaticMarkup(
       <I18nextProvider i18n={i18n}>

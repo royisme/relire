@@ -63,11 +63,11 @@ test('an older save completing after a newer edit leaves the newer edit as the d
 test('real Words fields follow late saved values, protect both page-owned drafts across remount/save completion, and block premature saves', async () => {
   let limit: string | null = null,
     retention: string | null = null;
-  const saves: { newPerDay: number; retentionPercent: number }[] = [];
+  const saves: VocabularyModel['preferences'][] = [];
   let finish!: () => void;
   const model: VocabularyModel = {
     rows: [],
-    preferences: { newPerDay: 20, retentionPercent: 90 },
+    preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
     ready: false,
     day: { date: '', introducedKeys: [] },
     epoch: 0,
@@ -131,7 +131,7 @@ test('real Words fields follow late saved values, protect both page-owned drafts
     expect(fields().save.disabled).toBe(true);
     (fields().save.onClick as () => void)();
     expect(saves).toEqual([]);
-    model.preferences = { newPerDay: 0, retentionPercent: 95 };
+    model.preferences = { newPerDay: 0, retentionPercent: 95, studyBook: 'mine' };
     model.ready = true;
     expect(fields().limit.value).toBe('0');
     expect(fields().retention.value).toBe('95');
@@ -139,7 +139,7 @@ test('real Words fields follow late saved values, protect both page-owned drafts
     retention = '80';
     const submitted = fields();
     (submitted.save.onClick as () => void)();
-    expect(saves).toEqual([{ newPerDay: 100, retentionPercent: 80 }]);
+    expect(saves).toEqual([{ newPerDay: 100, retentionPercent: 80, studyBook: 'mine' }]);
     // A section switch remounts Words; page drafts still hold newer edits while the older save finishes.
     limit = '0';
     retention = '94';
@@ -154,7 +154,7 @@ test('real Words fields follow late saved values, protect both page-owned drafts
     await Bun.sleep(0);
     expect(limit).toBeNull();
     expect(retention).toBeNull();
-    expect(saves[1]).toEqual({ newPerDay: 0, retentionPercent: 94 });
+    expect(saves[1]).toEqual({ newPerDay: 0, retentionPercent: 94, studyBook: 'mine' });
     model.error = 'TEST saved-preference read refused';
     expect(fields().save.disabled).toBe(true);
   } finally {

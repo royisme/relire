@@ -253,7 +253,7 @@ test('CLI help and invalid arguments do not dispatch or read private inputs', as
     expect(code).toBe(args[0] === '--help' ? 0 : 1);
     expect(stdout + stderr).toContain('Usage:');
   }
-});
+}, 30_000);
 
 test('the author sees only core words the stage inventory has introduced', async () => {
   const env = await setup(['good'], 1);

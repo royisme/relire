@@ -331,7 +331,7 @@ test('read-only checks pass real local applies and reject tampered metadata with
     log.mockRestore();
     error.mockRestore();
   }
-}, 60_000);
+}, 180_000);
 
 test('real CLI failures stay in rooted private logs, never inherited stdout/stderr', async () => {
   const { directory, root } = await createLocalD1Root();

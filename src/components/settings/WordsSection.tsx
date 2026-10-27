@@ -1,6 +1,6 @@
 /**
- * Settings → Words: two learning preferences and the built-in wordbook's download/update state.
- * The page owns both unsaved values, so switching sections keeps them.
+ * Settings → Words: wordbooks (list, study choice, deck delete), two learning preferences and the built-in
+ * wordbook's download/update state. The page owns the unsaved values, so switching sections keeps them.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { useVocabularyBook } from '../../hooks/useVocabularyBook';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Sheet, OverlayHeader } from '../ui/overlay';
+import { WordbooksBlock } from './WordbooksBlock';
 
 /** The limit the text means (a whole number from 0 to 100), or null when it is not one. */
 export function parseNewPerDay(value: string): number | null {
@@ -65,7 +66,8 @@ export function WordsSection({ model, draft }: WordsSectionProps) {
     setSaving(true);
     setStatus(null);
     try {
-      await model.savePreferences({ newPerDay: next, retentionPercent });
+      // The study-book choice is saved on its own; this save must keep it.
+      await model.savePreferences({ ...model.preferences, newPerDay: next, retentionPercent });
       // A newer edit stays unsaved on screen; only the page can tell, since this section may have remounted.
       draft.onSaved(submitted);
       setStatus(t('vocab.saved'));
@@ -124,6 +126,7 @@ export function WordsSection({ model, draft }: WordsSectionProps) {
           ) : null}
         </div>
       </section>
+      <WordbooksBlock model={model} book={content.book} />
       <section className="space-y-3 border-t border-ink-200 pt-6">
         <label htmlFor="vocabulary-limit" className="block text-sm">
           {t('vocab.newLimit')}

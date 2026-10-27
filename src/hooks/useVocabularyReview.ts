@@ -42,8 +42,16 @@ export function useVocabularyReview(model: VocabularyModel, book?: VocabularyBoo
     setError(null);
     setQuotaReached(false);
   }
-  const queue = vocabularyQueue(model.rows, book, model.day, model.preferences.newPerDay, now, excluded);
-  const counts = wordsInput(model.rows, book, model.day, model.preferences.newPerDay, now);
+  const queue = vocabularyQueue(
+    model.rows,
+    book,
+    model.day,
+    model.preferences.newPerDay,
+    now,
+    excluded,
+    model.preferences.studyBook,
+  );
+  const counts = wordsInput(model.rows, book, model.day, model.preferences.newPerDay, now, model.preferences.studyBook);
   useEffect(() => {
     alive.current = true;
     const wake = () => {

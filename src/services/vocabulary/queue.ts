@@ -1,6 +1,7 @@
-/** Canonical catalogue/learner join and deterministic review selection; unseen fronts never persist rows. */
+/** Canonical catalogue/learner join and deterministic review selection; unseen fronts never persist rows; only the chosen wordbook's words are selected. */
 import type { VocabularyBook, VocabularyCandidate, VocabularyDay, VocabularyRow } from '../../types/vocabulary';
 import { formatDate, vocabularyDue } from '../../utils/srs';
+import { effectiveStudyBook, inStudyBook } from './wordbooks';
 export interface VocabularyJoined extends VocabularyCandidate {
   row?: VocabularyRow;
   builtIn: boolean;
@@ -34,8 +35,11 @@ export function vocabularyQueue(
   newPerDay: number,
   now: number,
   excluded: ReadonlySet<string>,
+  studyBook: string,
 ) {
-  const joined = joinVocabulary(rows, book).filter((word) => !excluded.has(word.key));
+  // One resolution rule shared with Settings, so the list and the queue never disagree.
+  const effective = effectiveStudyBook(studyBook, book, rows);
+  const joined = joinVocabulary(rows, book).filter((word) => !excluded.has(word.key) && inStudyBook(word, effective));
   const compareKey = (a: VocabularyJoined, b: VocabularyJoined) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
   const minute = joined
     .filter(

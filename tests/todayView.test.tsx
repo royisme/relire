@@ -272,7 +272,7 @@ for (const language of ['en', 'zh']) {
     await i18n.changeLanguage(language);
     const vocabulary: VocabularyModel = {
       rows: [],
-      preferences: { newPerDay: 20, retentionPercent: 90 },
+      preferences: { newPerDay: 20, retentionPercent: 90, studyBook: 'mine' },
       day: { date: '', introducedKeys: [] },
       epoch: 0,
       now,
