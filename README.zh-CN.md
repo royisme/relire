@@ -119,7 +119,7 @@ bun run preview    # 在本地预览
 
 ## 技术栈
 
-React 19、Vite、Tailwind CSS 4、i18next，以及在浏览器里直接调用的 AI 提供方（Gemini 通过 `@google/genai`，Azure 通过其 Speech SDK，OpenAI 兼容、Anthropic、Ollama 和 Fish Audio 用 `fetch`）。`PRODUCT.md` 说明产品面向谁以及设计原则，`DESIGN.md` 是视觉规范，`docs/architecture.md` 是代码地图，`CLAUDE.md` 和 `.claude/` 是给 AI 编码助手的指引。
+React 19、Vite、Tailwind CSS 4、i18next，以及在浏览器里直接调用的 AI 提供方（Gemini 通过 `@google/genai`，Azure 通过其 Speech SDK，OpenAI 兼容、Anthropic、Ollama 和 Fish Audio 用 `fetch`）。`PRODUCT.md` 说明产品面向谁以及设计原则，`DESIGN.md` 是视觉规范，`AGENTS.md` 是给贡献者和 AI 编码助手的仓库规则。
 
 ```
 src/services/ai/         提供方、提示词模板和任务；界面调用 src/services/api.ts

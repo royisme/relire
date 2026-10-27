@@ -2,7 +2,6 @@
  * The reader's practice card: one sentence at a time, record → save → listen
  * back. Owns the capture claim, the microphone stream, the running take, the
  * save and every late-result guard; the card component only draws this state.
- * See docs/shadowing-log-design.md (Recording flow).
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { readerIdentity, type ReaderSource } from '../types/readerSource';

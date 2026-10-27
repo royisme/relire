@@ -1,6 +1,6 @@
 /**
- * One reader sentence per item rewritten into a Practice unit by rule, with no AI and no key
- * (docs/sentence-transformation-plan.md). Items follow the reader's sentence order and carry the edition
+ * One reader sentence per item rewritten into a Practice unit by rule, with no AI and no key.
+ * Items follow the reader's sentence order and carry the edition
  * provenance, so a saved set needs no reader or service. Does not own the kinds (`transform/`) or saving.
  */
 import type { TFunction } from 'i18next';
