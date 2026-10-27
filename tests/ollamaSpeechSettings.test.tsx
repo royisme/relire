@@ -56,8 +56,8 @@ test('the registry offers Phonon as a keyless speech engine with its two local m
   const ollama = speechProviders().find((provider) => provider.info.id === 'ollama');
   expect(ollama).toBeDefined();
   expect(ollama!.speech).toBe(ollamaSpeech);
-  expect(ollama!.info.speech?.models).toEqual(['phonon:40m-multilingual', 'phonon:40m-fr']);
-  expect(ollama!.info.speech?.defaultModel).toBe('phonon:40m-multilingual');
+  expect(ollama!.info.speech?.models).toEqual(['phonon:40m-fr', 'phonon:40m-multilingual']);
+  expect(ollama!.info.speech?.defaultModel).toBe('phonon:40m-fr');
   expect(ollama!.info.speech?.voices).toEqual([]);
   expect(ollama!.info.speech?.defaultVoice).toBe('');
   expect(providerRequiresKey('ollama')).toBe(false);
@@ -96,6 +96,8 @@ for (const language of ['en', 'zh'] as const) {
 
   test(`${language}: both locales carry the Phonon help and model names`, () => {
     expect(locale.aiSettings.ollamaSpeechHelp.trim()).not.toBe('');
+    expect(locale.aiSettings.ollamaSpeechHelp).toContain('ollama pull phonon:40m-fr');
+    expect(locale.aiSettings.ollamaSpeechHelp).not.toContain('phonon:40m-multilingual');
     for (const id of ['phonon:40m-multilingual', 'phonon:40m-fr'] as const)
       expect(locale.models[id].name.trim()).not.toBe('');
   });
