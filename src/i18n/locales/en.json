@@ -266,6 +266,12 @@
       "askWord": "Ask AI about this word",
       "askSentence": "Ask AI to analyse this sentence",
       "answer": "AI answer, not reviewed"
+    },
+    "transform": {
+      "title": "Practise this pattern",
+      "description": "Change sentences from this reader by a grammar rule. The app builds the answers by rule from the reader's own sentences: no AI and no key.",
+      "negation": "Make negation practice",
+      "number": "Make plural and singular practice"
     }
   },
   "sentenceDrawer": {
@@ -410,7 +416,13 @@
         "invalidFields": "Use nonblank text without HTML in these fields: {{fields}}"
       },
       "separator": "Separator: {{separator}}",
-      "separators": { "tab": "Tab", "comma": "Comma", "semicolon": "Semicolon", "space": "Space", "pipe": "Pipe" },
+      "separators": {
+        "tab": "Tab",
+        "comma": "Comma",
+        "semicolon": "Semicolon",
+        "space": "Space",
+        "pipe": "Pipe"
+      },
       "deck": "Deck name (the file's deck column takes precedence)",
       "front": "French word",
       "back": "Answer",
@@ -1897,6 +1909,18 @@
       "noVerbs": "No verbs are in the pack yet.",
       "verbs": "Verbs",
       "tenses": "Tenses"
+    }
+  },
+  "readerTransform": {
+    "negation": {
+      "title": "Negation",
+      "instruction": "Rewrite the sentence with ne … pas.",
+      "explanation": "Put ne before the verb and pas after it."
+    },
+    "number": {
+      "title": "Singular and plural",
+      "instruction": "Put the noun phrase after the verb into the other number.",
+      "explanation": "Change the article and add or drop the plural s on the noun."
     }
   }
 }
