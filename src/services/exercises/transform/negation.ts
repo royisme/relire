@@ -1,5 +1,5 @@
 /**
- * `negation`: the reader sentence rewritten with ne … pas, computed by rule (docs/sentence-transformation-plan.md).
+ * `negation`: the reader sentence rewritten with ne … pas, computed by rule.
  * Null means the rule does not cover this sentence; a skipped sentence is not an error.
  * No AI, no key, no IO.
  */

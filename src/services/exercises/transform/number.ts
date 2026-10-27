@@ -1,6 +1,6 @@
 /**
- * `number`: the noun phrase right after the finite verb put into the other number, computed by rule
- * (docs/sentence-transformation-plan.md). Only that phrase changes: determiner and noun.
+ * `number`: the noun phrase right after the finite verb put into the other number, computed by rule.
+ * Only that phrase changes: determiner and noun.
  * Subject agreement and `c’est` → `ce sont` are out of version 1, so those sentences are skipped.
  * No AI, no key, no IO.
  */
