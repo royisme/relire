@@ -191,7 +191,6 @@ Plan of record: `docs/word-atlas-plan.md` (study of the open-source IELTS app Wo
 | TR2 | Pure kinds (negation, number) and a unit built from a reader, no AI | table tests for every rule and exception | landed (code deepseek-flash, tests GLM 5.3; 2,804 tests, the CLI-help test is the known 5 s flake under load and passes alone; the browser, the zh wording and the phone layout are unverified) |
 | TR3 | Reader entry "Practise this pattern", saved to Practice, provenance line | owner tries it | landed (code deepseek-flash, tests GLM 5.3; 2,804 tests, the CLI-help test is the known 5 s flake under load and passes alone; the browser, the zh wording and the phone layout are unverified) |
 | TR4 | The AI path (`transform.*.txt`), checked kinds, the dropped count | verifier rejects wrong proposals with a mocked AI | planned, owner-gated |
-| RM1 | README: say the maintainer tried `phonon:40m-fr` locally and it sounded fine; ask whether it becomes the default Ollama speech model | one factual sentence in both languages | waiting for the owner ("update the README later", 2026-10-26) |
 
 ### Content (paused by the owner's priority)
 
