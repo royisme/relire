@@ -17,7 +17,8 @@
     "clean": "rm -rf dist dev-dist",
     "i18n:check": "bun scripts/check-i18n.ts",
     "shape:check": "bun scripts/check-code-shape.ts",
-    "test": "bun test",
+    "test": "bun test --path-ignore-patterns '**/d1Target.test.ts' --path-ignore-patterns '**/gradedReaderRemotePublish.test.ts'",
+    "test:d1": "bun test tests/d1Target.test.ts tests/gradedReaderRemotePublish.test.ts",
     "e2e": "playwright test"
   },
   "dependencies": {
