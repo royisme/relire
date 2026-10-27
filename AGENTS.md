@@ -11,6 +11,7 @@ Read `README.md` for what the app does, `PRODUCT.md` for who it is for and what 
 - `bun install`, `bun run dev` (Vite), `bun run build`.
 - Checks: `bun run typecheck`, `bun run lint`, `bun run test`, `bun run i18n:check`, `bun run format:check`, `bun run shape:check` (500 lines per file at most).
 - `bun run e2e` runs the Playwright specs; it is not part of the routine checks.
+- `bun run test:d1` runs the two slow tests that start a local wrangler D1 (content publishing); they are not part of `bun run test` or CI.
 
 ## Hard rules
 
