@@ -115,3 +115,22 @@ test('two rows with the same headword and different tags both import', () => {
   expect(batch.notes.map((note) => imported(note).back)).toEqual(['n.m. 书', 'n.f. 书']);
   expect(new Set(batch.notes.map((note) => note.context.id)).size).toBe(2);
 });
+
+test('an empty back stays empty: the tag is not left alone on the back and the row is refused', () => {
+  const batch = prepare(["appeler(s') v.pr.\t"]);
+  // The tag only leads a real back; with no back the row is refused rather than imported as `v.pr.`.
+  expect(batch.notes).toEqual([]);
+  expect(batch.rejected).toEqual([
+    { row: 1, reason: { key: 'vocab.import.errors.invalidFields', params: { fields: 'definition.back' } } },
+  ]);
+});
+
+test('a row whose back exists still gets the tag in front of it', () => {
+  const batch = prepare(["appeler(s') v.pr.\t名叫", "appeler(s') v.pr.\t"]);
+  expect(batch.rejected).toEqual([
+    { row: 2, reason: { key: 'vocab.import.errors.invalidFields', params: { fields: 'definition.back' } } },
+  ]);
+  expect(batch.notes).toHaveLength(1);
+  expect(imported(batch.notes[0]).front).toBe('appeler(s’)');
+  expect(imported(batch.notes[0]).back).toBe('v.pr. 名叫');
+});
