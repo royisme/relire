@@ -215,7 +215,7 @@ test('dictation uses the opened snapshot and sits between checkpoints and comple
   ).toBe(opened.row.snapshot);
   const transform = element<React.ComponentProps<typeof ReaderTransformSection>>(afterText, ReaderTransformSection);
   expect(transform.props.reader).toBe(opened.row.snapshot);
-  expect(transform.props.kinds).toEqual(['negation']);
+  expect(transform.props.kinds).toEqual(['negation', 'question']);
 });
 
 test('the authored footer passes clicked spelling and the reader definition to durable bookmark storage', async () => {
