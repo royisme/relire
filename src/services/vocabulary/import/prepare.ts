@@ -51,13 +51,20 @@ export function normalizeImportText(value: string): string {
 
 const partOfSpeechTag = '(?:(?:n|m|f|v|t|i|pr|dir|adj|adv|prép|conj|interj|loc|pron|pers|dém|interr|poss|inv)\\.)+';
 const trailingPartOfSpeech = new RegExp(`(?:^|\\s+)(${partOfSpeechTag}(?: / ${partOfSpeechTag})*)$`);
+const trailingNote = /\s+(\[[^\]]+\])$/;
 
-export function splitPartOfSpeech(front: string): { word: string; pos?: string } {
-  const match = trailingPartOfSpeech.exec(front);
-  if (!match) return { word: front };
-  const word = front.slice(0, match.index).trim();
+export function splitFront(front: string): { word: string; note?: string; pos?: string } {
+  const posMatch = trailingPartOfSpeech.exec(front);
+  const withoutPos = posMatch ? front.slice(0, posMatch.index).trim() : front;
+  if (!withoutPos) return { word: front };
+  const noteMatch = trailingNote.exec(withoutPos);
+  const word = noteMatch ? withoutPos.slice(0, noteMatch.index).trim() : withoutPos;
   if (!word) return { word: front };
-  return { word, pos: match[1] };
+  return {
+    word,
+    ...(noteMatch ? { note: noteMatch[1] } : {}),
+    ...(posMatch ? { pos: posMatch[1] } : {}),
+  };
 }
 
 export function defaultImportColumns(parsed: PlainTextImport): ImportColumns {
@@ -99,8 +106,9 @@ export function prepareVocabularyImport(
       const deck =
         parsed.headers.deckColumn === undefined ? normalizeImportText(fallbackDeck) : read(parsed.headers.deckColumn);
       const noteId = parsed.headers.guidColumn === undefined ? String(row.row) : read(parsed.headers.guidColumn);
-      const { word: front, pos } = splitPartOfSpeech(read(columns.front));
+      const { word: front, note, pos } = splitFront(read(columns.front));
       const back = read(columns.back);
+      const prefix = [note, pos].filter((part) => part !== undefined).join(' ');
       const example = columns.example === null ? undefined : read(columns.example);
       const source = { kind: 'import' as const, id: deck, title: deck, noteId };
       const context = VocabularyContextSchema.safeParse({
@@ -112,7 +120,7 @@ export function prepareVocabularyImport(
         definition: {
           kind: 'imported',
           front,
-          back: pos && back ? `${pos} ${back}` : back,
+          back: prefix && back ? `${prefix} ${back}` : back,
           ...(example !== undefined ? { example } : {}),
           tags:
             parsed.headers.tagsColumn === undefined

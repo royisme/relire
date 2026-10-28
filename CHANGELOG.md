@@ -159,6 +159,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- An imported card’s front no longer shows a trailing bracketed note such as the pronunciation; the note moves to the back, ahead of the part of speech.
 - Deleting the deck chosen for study no longer leaves the wordbook radios locked on “Saving…”: each save now clears its own state once it settles.
 - Imported cards move recognized trailing part-of-speech tags to the back, keeping them off the front and reading aloud only the word.
 - The vocabulary run summary omits the next-card line while any card or new word is still available, and formats the next return time with the interface language and date-only midnight rules used across Words.
