@@ -9,7 +9,7 @@ import {
   type ReaderGlossaryEntry,
   type Sentence,
 } from '../src/types/gradedReader';
-import { READER_TRANSFORM_KINDS } from '../src/types/readerTransform';
+import { READER_TRANSFORM_KINDS, type ReaderTransformKind } from '../src/types/readerTransform';
 
 const readers = starterJson.readers.map((reader) => PublishedReaderSchema.parse(reader));
 const bundledSentences = readers.flatMap((reader) => reader.body.sentences.map((sentence) => ({ reader, sentence })));
@@ -58,8 +58,17 @@ test('number covers the seven noun-phrase sentences and skips subject and c’es
   }
 });
 
-test('every bundled reader offers both kinds', () => {
-  for (const reader of readers) expect(coveredKinds(reader)).toEqual(READER_TRANSFORM_KINDS);
+/** Pinned per bundled reader from its actual sentences: a1-01 has no definite object, so it lacks `pronoun`. */
+const COVERED: Record<string, ReaderTransformKind[]> = {
+  'a1-01': ['negation', 'number', 'question'],
+  'a1-02': ['negation', 'number', 'question', 'pronoun'],
+  'a1-03': ['negation', 'number', 'question', 'pronoun'],
+};
+
+test('each bundled reader offers exactly the kinds its sentences cover, and every kind is covered', () => {
+  expect(new Set(Object.keys(COVERED))).toEqual(new Set(readers.map((reader) => reader.body.id)));
+  for (const reader of readers) expect(coveredKinds(reader)).toEqual(COVERED[reader.body.id]);
+  expect(new Set(readers.flatMap(coveredKinds))).toEqual(new Set(READER_TRANSFORM_KINDS));
 });
 
 // Invented TEST entries and sentences only; the schema needs every word bound to local glossary entries.
@@ -144,7 +153,13 @@ const sentence = (id: string, fr: string, bindings: string[][]): Sentence =>
   });
 
 /** Rows assert only the kinds named; `null` pins a skip, a missing kind is not asserted. */
-const CASES: { sentence: Sentence; negation?: string | null; number?: string | null; question?: string | null }[] = [
+const CASES: {
+  sentence: Sentence;
+  negation?: string | null;
+  number?: string | null;
+  question?: string | null;
+  pronoun?: string | null;
+}[] = [
   {
     sentence: sentence('a1', 'J’ai un ami.', [['t-je', 't-avoir'], ['t-un'], ['t-ami']]),
     negation: 'Je n’ai pas d’ami.',
