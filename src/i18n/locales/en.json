@@ -271,7 +271,8 @@
       "title": "Practise this pattern",
       "description": "Change sentences from this reader by a grammar rule. The app builds the answers by rule from the reader's own sentences: no AI and no key.",
       "negation": "Make negation practice",
-      "number": "Make plural and singular practice"
+      "number": "Make plural and singular practice",
+      "question": "Make est-ce que practice"
     }
   },
   "sentenceDrawer": {
@@ -1921,6 +1922,11 @@
       "title": "Singular and plural",
       "instruction": "Put the noun phrase after the verb into the other number.",
       "explanation": "Change the article and add or drop the plural s on the noun."
+    },
+    "question": {
+      "title": "Questions",
+      "instruction": "Turn the sentence into a question with est-ce que.",
+      "explanation": "Inversion is also French, but this exercise asks for est-ce que."
     }
   }
 }

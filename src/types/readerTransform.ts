@@ -2,8 +2,8 @@
 import { z } from 'zod';
 import { PublishedReaderSchema, ReaderBodySchema, SentenceSchema } from './gradedReader';
 
-/** The kinds version 1 computes by rule; both are keyless and skip a sentence they cannot cover. */
-export const ReaderTransformKindSchema = z.enum(['negation', 'number']);
+/** The kinds version 1 computes by rule; each is keyless and skips a sentence it cannot cover. */
+export const ReaderTransformKindSchema = z.enum(['negation', 'number', 'question']);
 export type ReaderTransformKind = z.infer<typeof ReaderTransformKindSchema>;
 export const READER_TRANSFORM_KINDS = ReaderTransformKindSchema.options;
 

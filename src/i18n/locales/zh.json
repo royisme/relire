@@ -271,7 +271,8 @@
       "title": "练习这个句型",
       "description": "用一条语法规则改写这本读物里的句子。答案由应用按规则从读物自己的句子算出，不用 AI，也不需要 Key。",
       "negation": "做否定句练习",
-      "number": "做单复数练习"
+      "number": "做单复数练习",
+      "question": "做 est-ce que 疑问句练习"
     }
   },
   "sentenceDrawer": {
@@ -1912,6 +1913,11 @@
       "title": "单数与复数",
       "instruction": "把动词后面的名词短语换成另一种数。",
       "explanation": "改冠词，名词加上或去掉表示复数的 s。"
+    },
+    "question": {
+      "title": "疑问句",
+      "instruction": "用 est-ce que 把这个句子改成疑问句。",
+      "explanation": "倒装也是法语里的问法，但这个练习要求用 est-ce que。"
     }
   }
 }

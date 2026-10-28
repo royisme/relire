@@ -94,7 +94,7 @@ for (const language of ['en', 'zh'] as const) {
     const tree = draw(READER_TRANSFORM_KINDS);
     expect(renderToStaticMarkup(tree)).toContain('<h2 id="reader-transform"');
     const pressed = buttons(tree);
-    expect(pressed).toHaveLength(2);
+    expect(pressed).toHaveLength(READER_TRANSFORM_KINDS.length);
     pressed.forEach((button, index) => {
       expect(button.props['aria-label']).toBe(i18n.t(`gradedReader.transform.${READER_TRANSFORM_KINDS[index]}`));
       expect(button.props.disabled).toBe(false);
@@ -109,11 +109,12 @@ test('a reader no kind covers offers no button', () => {
 
 test('the workspace shows the section with exactly the covered kinds, and none for a verbless reader', async () => {
   const opened = await openReaderEdition(reader);
-  expect(coveredKinds(opened.row.snapshot)).toEqual(['negation']);
+  // Every fixture sentence holds one verb and none is negated, so `question` is covered beside `negation`.
+  expect(coveredKinds(opened.row.snapshot)).toEqual(['negation', 'question']);
   const afterText = afterTextOf(opened);
   const section = find<React.ComponentProps<typeof ReaderTransformSection>>(afterText, ReaderTransformSection);
   expect(section?.props.reader).toBe(opened.row.snapshot);
-  expect(section?.props.kinds).toEqual(['negation']);
+  expect(section?.props.kinds).toEqual(['negation', 'question']);
 
   const verbless = gradedReaderFixture();
   // `est` keeps a binding as a plain function word, so no sentence has a verb token and no kind is covered.

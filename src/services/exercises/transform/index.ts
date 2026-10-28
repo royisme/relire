@@ -7,11 +7,13 @@ import type { PublishedReader, ReaderGlossaryEntry, Sentence } from '../../../ty
 import { READER_TRANSFORM_KINDS, type ReaderTransformKind } from '../../../types/readerTransform';
 import { transformNegation } from './negation';
 import { transformNumber } from './number';
+import { transformQuestion } from './question';
 
-/** Both tags exist in the tag list: negation is its own tag, number rides on gender-number. */
+/** Each tag exists in the tag list: negation and questions are their own tags, number rides on gender-number. */
 export const TRANSFORM_TAGS: Record<ReaderTransformKind, GrammarTag> = {
   negation: 'negation',
   number: 'gender-number',
+  question: 'questions',
 };
 
 /** Null means the rule does not cover the sentence; the caller skips it instead of guessing. */
@@ -21,6 +23,7 @@ export const TRANSFORMERS: Record<
 > = {
   negation: transformNegation,
   number: transformNumber,
+  question: transformQuestion,
 };
 
 /** The kinds that cover at least one sentence of this reader; an empty list means the entry stays hidden. */
