@@ -1924,5 +1924,136 @@
       "instruction": "把宾语换成 le、la、l’ 或 les。",
       "explanation": "代词紧挨着放在动词前面；元音前用 l’。"
     }
+  },
+  "themes": {
+    "personal": {
+      "name": "个人、家庭与人际关系",
+      "subtopics": {
+        "family-life": "家庭生活",
+        "friendship-social-ties": "友谊与社交关系",
+        "invitations-celebrations": "邀请与聚会",
+        "living-alone-loneliness": "独居与孤独",
+        "pets-companionship": "宠物与陪伴",
+        "kindness-daily-solidarity": "善意与日常互助"
+      }
+    },
+    "housing": {
+      "name": "住房与社区",
+      "subtopics": {
+        "renting-accommodation": "租房与房源",
+        "moving-settling-in": "搬家与安置",
+        "flatsharing-roommates": "合租生活",
+        "housing-maintenance": "房屋维护与报修",
+        "neighbourhood-community": "邻里与社区生活",
+        "property-ownership": "购房与置业"
+      }
+    },
+    "work": {
+      "name": "工作与职业",
+      "subtopics": {
+        "job-search-hiring": "求职与招聘",
+        "workplace-relationships": "职场人际与同事关系",
+        "ways-of-working": "工作模式与组织形式",
+        "career-development": "职业发展与转型",
+        "work-life-balance": "工作与生活平衡",
+        "employment-demographics": "代际职场与就业群体"
+      }
+    },
+    "education": {
+      "name": "学习与教育",
+      "subtopics": {
+        "schooling-systems": "学校体系与办学模式",
+        "higher-education": "高等教育与大学生活",
+        "diplomas-vs-experience": "学历与实践经验",
+        "children-education": "家庭教育与儿童成长",
+        "language-learning": "语言学习与应用"
+      }
+    },
+    "immigration": {
+      "name": "移民与融入",
+      "subtopics": {
+        "moving-abroad": "移居国外与落地安置",
+        "culture-shock-adaptation": "文化冲击与适应",
+        "social-integration": "结交新友与融入社区",
+        "language-and-integration": "语言与融入",
+        "integration-policies": "移民与融入政策"
+      }
+    },
+    "travel": {
+      "name": "旅行与交通",
+      "subtopics": {
+        "holiday-planning": "度假规划与行程准备",
+        "tourist-accommodation": "旅游住宿",
+        "tourist-information": "旅游问询与景点游览",
+        "vehicle-rental": "车辆与单车租赁",
+        "daily-getting-around": "日常出行方式",
+        "travel-styles-impact": "旅行方式与体验"
+      }
+    },
+    "shopping": {
+      "name": "购物、饮食与日常服务",
+      "subtopics": {
+        "dining-out": "外出就餐",
+        "retail-and-sales": "实体店购物与促销",
+        "e-commerce-deliveries": "网购与快递配送",
+        "second-hand-goods": "二手交易与闲置买卖",
+        "consumer-eating-habits": "饮食消费与习惯",
+        "customer-service-claims": "客户服务与售后维权"
+      }
+    },
+    "leisure": {
+      "name": "休闲、文化与娱乐",
+      "subtopics": {
+        "leisure-classes-workshops": "兴趣课程与工作坊",
+        "cultural-events-festivals": "文化节庆与演出活动",
+        "cinema-screen-media": "影视与电视娱乐",
+        "reading-and-libraries": "阅读与图书馆生活",
+        "hobby-sports": "业余体育与运动休闲"
+      }
+    },
+    "health": {
+      "name": "健康与生活方式",
+      "subtopics": {
+        "medical-consultations": "就医与医疗服务",
+        "physical-fitness-health": "运动健身与身体健康",
+        "nutrition-dietary-health": "均衡饮食与健康营养",
+        "mental-health-stress": "压力管理与心理健康",
+        "aging-body-image": "保持年轻与外貌压力",
+        "trust-in-healthcare": "医疗信任与替代疗法"
+      }
+    },
+    "technology": {
+      "name": "科技与媒体",
+      "subtopics": {
+        "smartphones-screen-time": "智能手机与屏幕依赖",
+        "social-networks-privacy": "社交网络与隐私安全",
+        "video-games-gaming": "电子游戏与数字娱乐",
+        "digital-work-tools": "远程办公与协作软件",
+        "advertising-and-algorithms": "网络广告与算法推送",
+        "artificial-intelligence": "人工智能与日常应用"
+      }
+    },
+    "environment": {
+      "name": "环境与城市",
+      "subtopics": {
+        "urban-transport-mobility": "城市交通与无车化",
+        "city-vs-countryside": "城乡生活与居住选择",
+        "waste-pollution-reduction": "垃圾分类与减污环保",
+        "overtourism-impact": "过度旅游与生态保护",
+        "animal-welfare-zoos": "动物保护与动物园争议",
+        "energy-transition": "能源转型与气候行动"
+      }
+    },
+    "society": {
+      "name": "社会与公民参与",
+      "subtopics": {
+        "volunteering-action": "志愿服务与非政府组织",
+        "helping-the-poor": "扶贫济困与弱势救助",
+        "public-services": "公共服务与便民设施",
+        "civic-participation": "公民参与与政治投票",
+        "freedom-of-speech": "言论自由与公众表达",
+        "social-welfare-ethics": "社会福利与伦理议题"
+      }
+    }
   }
 }

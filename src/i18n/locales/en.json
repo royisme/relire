@@ -1933,5 +1933,136 @@
       "instruction": "Replace the object with le, la, l’ or les.",
       "explanation": "The pronoun goes right before the verb; l’ before a vowel."
     }
+  },
+  "themes": {
+    "personal": {
+      "name": "Personal Life and Relationships",
+      "subtopics": {
+        "family-life": "Family Life",
+        "friendship-social-ties": "Friendship and Social Ties",
+        "invitations-celebrations": "Invitations and Celebrations",
+        "living-alone-loneliness": "Living Alone and Loneliness",
+        "pets-companionship": "Pets and Companionship",
+        "kindness-daily-solidarity": "Kindness and Daily Solidarity"
+      }
+    },
+    "housing": {
+      "name": "Housing and Community",
+      "subtopics": {
+        "renting-accommodation": "Renting Accommodation",
+        "moving-settling-in": "Moving and Settling In",
+        "flatsharing-roommates": "Flatsharing and Roommates",
+        "housing-maintenance": "Housing Maintenance",
+        "neighbourhood-community": "Neighbourhood and Community",
+        "property-ownership": "Property Ownership"
+      }
+    },
+    "work": {
+      "name": "Work and Career",
+      "subtopics": {
+        "job-search-hiring": "Job Search and Hiring",
+        "workplace-relationships": "Workplace Relationships",
+        "ways-of-working": "Ways of Working",
+        "career-development": "Career Development and Change",
+        "work-life-balance": "Work-Life Balance",
+        "employment-demographics": "Generations in the Workplace"
+      }
+    },
+    "education": {
+      "name": "Education and Learning",
+      "subtopics": {
+        "schooling-systems": "Schooling Systems",
+        "higher-education": "Higher Education",
+        "diplomas-vs-experience": "Diplomas vs Experience",
+        "children-education": "Children's Education",
+        "language-learning": "Language Learning"
+      }
+    },
+    "immigration": {
+      "name": "Immigration and Integration",
+      "subtopics": {
+        "moving-abroad": "Moving Abroad",
+        "culture-shock-adaptation": "Culture Shock and Adaptation",
+        "social-integration": "Social Integration",
+        "language-and-integration": "Language and Integration",
+        "integration-policies": "Integration Policies"
+      }
+    },
+    "travel": {
+      "name": "Travel and Transportation",
+      "subtopics": {
+        "holiday-planning": "Holiday Planning",
+        "tourist-accommodation": "Tourist Accommodation",
+        "tourist-information": "Tourist Information",
+        "vehicle-rental": "Vehicle Rental",
+        "daily-getting-around": "Daily Getting Around",
+        "travel-styles-impact": "Travel Styles and Impact"
+      }
+    },
+    "shopping": {
+      "name": "Shopping, Food, and Everyday Services",
+      "subtopics": {
+        "dining-out": "Dining Out",
+        "retail-and-sales": "Retail Shopping and Sales",
+        "e-commerce-deliveries": "E-Commerce and Deliveries",
+        "second-hand-goods": "Second-Hand Goods",
+        "consumer-eating-habits": "Consumer Eating Habits",
+        "customer-service-claims": "Customer Service and Claims"
+      }
+    },
+    "leisure": {
+      "name": "Leisure, Culture, and Entertainment",
+      "subtopics": {
+        "leisure-classes-workshops": "Leisure Classes and Workshops",
+        "cultural-events-festivals": "Cultural Events and Festivals",
+        "cinema-screen-media": "Cinema and Screen Entertainment",
+        "reading-and-libraries": "Reading and Libraries",
+        "hobby-sports": "Recreational Sports"
+      }
+    },
+    "health": {
+      "name": "Health and Lifestyle",
+      "subtopics": {
+        "medical-consultations": "Medical Consultations",
+        "physical-fitness-health": "Physical Fitness for Health",
+        "nutrition-dietary-health": "Nutrition and Dietary Health",
+        "mental-health-stress": "Stress Management and Mental Health",
+        "aging-body-image": "Body Image and Aging",
+        "trust-in-healthcare": "Trust in Healthcare"
+      }
+    },
+    "technology": {
+      "name": "Technology and Media",
+      "subtopics": {
+        "smartphones-screen-time": "Smartphones and Screen Time",
+        "social-networks-privacy": "Social Networks and Privacy",
+        "video-games-gaming": "Video Games and Digital Entertainment",
+        "digital-work-tools": "Digital Work Tools",
+        "advertising-and-algorithms": "Online Advertising and Media",
+        "artificial-intelligence": "Artificial Intelligence in Daily Life"
+      }
+    },
+    "environment": {
+      "name": "Environment and Cities",
+      "subtopics": {
+        "urban-transport-mobility": "Urban Mobility and Car-Free Cities",
+        "city-vs-countryside": "City vs Countryside",
+        "waste-pollution-reduction": "Waste Management and Pollution",
+        "overtourism-impact": "Overtourism and Natural Spaces",
+        "animal-welfare-zoos": "Animal Welfare and Zoos",
+        "energy-transition": "Energy Transition and Climate"
+      }
+    },
+    "society": {
+      "name": "Society and Civic Engagement",
+      "subtopics": {
+        "volunteering-action": "Volunteering and Community Action",
+        "helping-the-poor": "Helping the Underprivileged",
+        "public-services": "Public Services and Civic Access",
+        "civic-participation": "Civic and Political Participation",
+        "freedom-of-speech": "Freedom of Speech",
+        "social-welfare-ethics": "Social Welfare and Ethics"
+      }
+    }
   }
 }
