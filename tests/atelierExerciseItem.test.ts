@@ -3,7 +3,7 @@ import { expect, test } from 'bun:test';
 import { joinBricks } from '../src/services/atelier/join';
 import { toExerciseItem } from '../src/services/atelier/toExerciseItem';
 import { emptyAnswer } from '../src/services/exercises/answer';
-import { DEFAULT_GRADING, gradeItem } from '../src/services/exercises/grading';
+import { DEFAULT_GRADING, effectiveStrictAccents, gradeItem } from '../src/services/exercises/grading';
 import { AtelierMetaSchema, type AtelierItem } from '../src/types/atelier';
 import { ExerciseUnitSchema } from '../src/types/exercises';
 import { beach, cinema, coffee, negative } from './fixtures/atelier';
@@ -86,6 +86,7 @@ for (const { source, expected, variants, options } of CASES) {
         frame: source.frame,
         explanation: source.explanation,
         modify: source.modify,
+        strictAccents: true,
       });
     });
   }
@@ -105,6 +106,60 @@ for (const { source, expected, variants, options } of CASES) {
       status: 'graded',
       correct: true,
       recordedAnswer: expected,
+    });
+  });
+}
+
+test('atelier metadata requires strictAccents to be literal true', () => {
+  const meta = {
+    source: 'atelier',
+    themeId: context.themeId,
+    subtopicId: context.subtopicId,
+    taskId: context.taskId,
+    level: context.level,
+    bricks: beach.bricks,
+    distractors: beach.distractors,
+    frame: beach.frame,
+    explanation: beach.explanation,
+    strictAccents: true,
+  } as const;
+  expect(AtelierMetaSchema.parse(meta)).toEqual(meta);
+  expect(AtelierMetaSchema.safeParse({ ...meta, strictAccents: false }).success).toBe(false);
+  expect(AtelierMetaSchema.safeParse({ ...meta, strictAccents: 'true' }).success).toBe(false);
+  const missing: Record<string, unknown> = { ...meta };
+  delete missing.strictAccents;
+  expect(AtelierMetaSchema.safeParse(missing).success).toBe(false);
+});
+
+for (const { source, unaccented, variant } of [
+  { source: beach, unaccented: 'Nous allons a la plage.', variant: 'À la plage nous allons.' },
+  { source: cinema, unaccented: 'Je vais au cinema.', variant: 'Au cinéma je vais.' },
+]) {
+  test(`${source.sentence} keeps strict accents with the learner preference off`, () => {
+    const item = toExerciseItem(structuredClone(source), context);
+    expect(DEFAULT_GRADING.strictAccents).toBe(false);
+    expect(item.meta?.strictAccents).toBe(true);
+    expect(effectiveStrictAccents(item, DEFAULT_GRADING)).toBe(true);
+  });
+
+  test(`${unaccented} needs AI rather than being graded correct`, () => {
+    const item = toExerciseItem(structuredClone(source), context);
+    const answer = { ...emptyAnswer(item), singleAnswer: unaccented };
+    expect(gradeItem('SENTENCE_BUILD', item, answer, DEFAULT_GRADING)).toEqual({
+      status: 'needs-ai',
+      recordedAnswer: unaccented,
+    });
+  });
+
+  test(`${variant} is correct with accents preserved`, () => {
+    const sourceWithVariant = structuredClone(source);
+    sourceWithVariant.variants = [variant];
+    const item = toExerciseItem(sourceWithVariant, context);
+    const answer = { ...emptyAnswer(item), singleAnswer: variant };
+    expect(gradeItem('SENTENCE_BUILD', item, answer, DEFAULT_GRADING)).toEqual({
+      status: 'graded',
+      correct: true,
+      recordedAnswer: variant,
     });
   });
 }
