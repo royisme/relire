@@ -2055,5 +2055,84 @@
         "social-welfare-ethics": "社会福利与伦理议题"
       }
     }
+  },
+  "atelier": {
+    "title": "造句工坊",
+    "subtitle": "把积木按顺序摆好，拼出一句法语。",
+    "back": "返回",
+    "needsKey": "造句工坊需要 AI 密钥。",
+    "needsKeyBody": "它用你在设置里选的 AI 服务来出句子并检查你的答案。",
+    "addKey": "添加 AI 密钥",
+    "pick": {
+      "theme": "主题",
+      "subtopic": "子主题",
+      "task": "任务",
+      "level": "等级",
+      "any": "随机",
+      "start": "开始",
+      "loadFailed": "这一轮没能加载：{{msg}}",
+      "noneUsable_other": "没有可用的句子。有 {{count}} 句因为自相矛盾被跳过。"
+    },
+    "tasks": {
+      "oral-1": "口语 1：介绍自己",
+      "oral-2": "口语 2：获取信息",
+      "oral-3": "口语 3：表达观点",
+      "written-1": "写作 1：写一条信息",
+      "written-2": "写作 2：讲述经历",
+      "written-3": "写作 3：比较两种观点"
+    },
+    "roles": {
+      "subject": "主语",
+      "verb": "动词",
+      "auxiliary": "助动词",
+      "noun": "名词",
+      "determiner": "限定词",
+      "preposition": "介词",
+      "contraction": "缩合词",
+      "adjective": "形容词",
+      "adverb": "副词",
+      "negation": "否定词",
+      "conjunction": "连词",
+      "pronoun": "代词",
+      "expression": "固定搭配",
+      "punctuation": "标点"
+    },
+    "round": {
+      "counter": "第 {{current}} 句，共 {{total}} 句",
+      "again": "再试一次",
+      "skipped_other": "有 {{count}} 句因为自相矛盾被跳过。",
+      "endRound": "结束本轮",
+      "sound": "声音",
+      "effects": "动效",
+      "langZh": "中文",
+      "langEn": "英文",
+      "row": "你的句子",
+      "rowEmpty": "点一块积木开始拼句子。",
+      "tray": "积木",
+      "place": "放上 {{text}}",
+      "take": "取回 {{text}}",
+      "check": "检查",
+      "next": "下一句",
+      "results": "查看结果",
+      "listen": "听",
+      "stop": "停止",
+      "right": "正确",
+      "fused": "{{a}} 和 {{b}} 合成 {{fused}}。",
+      "flagged": "请取下标出的积木，再试一次。",
+      "notQuite": "还不对。改一改再检查。",
+      "gradeFailed": "这句话没能检查：{{msg}}"
+    },
+    "breakdown": {
+      "analysis": "AI 分析",
+      "frame": "这个动词带",
+      "nothing": "这里的动词不需要别的成分。"
+    },
+    "summary": {
+      "title": "本轮完成",
+      "count_other": "{{count}} 句，{{right}} 句一次就对",
+      "none": "没有完成任何一句。",
+      "again": "再来一轮",
+      "themes": "选择主题"
+    }
   }
 }

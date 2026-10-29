@@ -2064,5 +2064,87 @@
         "social-welfare-ethics": "Social Welfare and Ethics"
       }
     }
+  },
+  "atelier": {
+    "title": "Sentence workshop",
+    "subtitle": "Put the bricks in order to build a French sentence.",
+    "back": "Back",
+    "needsKey": "The sentence workshop needs an AI key.",
+    "needsKeyBody": "It writes the sentences and checks your answers with the AI provider you chose in Settings.",
+    "addKey": "Add an AI key",
+    "pick": {
+      "theme": "Theme",
+      "subtopic": "Subtopic",
+      "task": "Task",
+      "level": "Level",
+      "any": "Any",
+      "start": "Start",
+      "loadFailed": "The round could not be loaded: {{msg}}",
+      "noneUsable_one": "No sentence was usable. {{count}} was skipped because it did not add up.",
+      "noneUsable_other": "No sentence was usable. {{count}} were skipped because they did not add up."
+    },
+    "tasks": {
+      "oral-1": "Speaking 1: about yourself",
+      "oral-2": "Speaking 2: ask for information",
+      "oral-3": "Speaking 3: give an opinion",
+      "written-1": "Writing 1: a message",
+      "written-2": "Writing 2: an experience",
+      "written-3": "Writing 3: two views"
+    },
+    "roles": {
+      "subject": "subject",
+      "verb": "verb",
+      "auxiliary": "auxiliary",
+      "noun": "noun",
+      "determiner": "determiner",
+      "preposition": "preposition",
+      "contraction": "contraction",
+      "adjective": "adjective",
+      "adverb": "adverb",
+      "negation": "negation",
+      "conjunction": "conjunction",
+      "pronoun": "pronoun",
+      "expression": "expression",
+      "punctuation": "punctuation"
+    },
+    "round": {
+      "counter": "Sentence {{current}} of {{total}}",
+      "again": "Second try",
+      "skipped_one": "{{count}} sentence was skipped because it did not add up.",
+      "skipped_other": "{{count}} sentences were skipped because they did not add up.",
+      "endRound": "End round",
+      "sound": "Sound",
+      "effects": "Effects",
+      "langZh": "Chinese",
+      "langEn": "English",
+      "row": "Your sentence",
+      "rowEmpty": "Tap a brick to start the sentence.",
+      "tray": "Bricks",
+      "place": "Place {{text}}",
+      "take": "Take back {{text}}",
+      "check": "Check",
+      "next": "Next",
+      "results": "Results",
+      "listen": "Listen",
+      "stop": "Stop",
+      "right": "Right",
+      "fused": "{{a}} and {{b}} make {{fused}}.",
+      "flagged": "Take out the marked brick and try again.",
+      "notQuite": "Not quite. Change the sentence and check again.",
+      "gradeFailed": "The sentence could not be checked: {{msg}}"
+    },
+    "breakdown": {
+      "analysis": "AI analysis",
+      "frame": "The verb takes",
+      "nothing": "This verb needs nothing else here."
+    },
+    "summary": {
+      "title": "Round done",
+      "count_one": "{{count}} sentence, {{right}} right first time",
+      "count_other": "{{count}} sentences, {{right}} right first time",
+      "none": "No sentence was finished.",
+      "again": "Play again",
+      "themes": "Choose a theme"
+    }
   }
 }
