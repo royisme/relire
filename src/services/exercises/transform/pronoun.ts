@@ -29,6 +29,15 @@ export function transformPronoun(sentence: Sentence, glossary: ReaderGlossaryEnt
   if (clitics.some((entry) => entry.sense !== 'subject')) return null;
   const noun = firstNounAfter(sentence, glossary, verb.words, verb.index);
   if (!noun) return null;
+  // A post-nominal de-complement or adjective belongs to the object (`le salon bleu`), not the verb.
+  const after = verb.words[noun.index + 1];
+  if (
+    after &&
+    (['de', 'du', 'des'].includes(after.text.toLowerCase()) ||
+      after.prefix.toLowerCase() === 'd’' ||
+      entriesOf(sentence, glossary, after.ordinal).some((entry) => entry.pos === 'adjective'))
+  )
+    return null;
   // No visible article (an adjective before the noun) is skipped; so is anything but le, la, l’ or les.
   const determiner = determinerOf(sentence, glossary, verb.words, noun.index);
   if (!determiner || !DEFINITE.includes(determiner.text)) return null;

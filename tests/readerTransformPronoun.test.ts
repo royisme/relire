@@ -48,12 +48,21 @@ const verbEntry = (id: string, lemma: string, forms: string[]): ReaderGlossaryEn
     forms,
     gloss: { en: gloss(lemma), zh: `测试：${lemma}` },
   });
-const adjectiveEntry = (id: string, lemma: string): ReaderGlossaryEntry =>
+const adjectiveEntry = (id: string, lemma: string, sense = 'size'): ReaderGlossaryEntry =>
   ReaderGlossaryEntrySchema.parse({
     id,
     lemma,
     pos: 'adjective',
-    sense: 'size',
+    sense,
+    forms: [lemma],
+    gloss: { en: gloss(lemma), zh: `测试：${lemma}` },
+  });
+const properEntry = (id: string, lemma: string): ReaderGlossaryEntry =>
+  ReaderGlossaryEntrySchema.parse({
+    id,
+    lemma,
+    pos: 'proper',
+    sense: 'name',
     forms: [lemma],
     gloss: { en: gloss(lemma), zh: `测试：${lemma}` },
   });
@@ -79,6 +88,7 @@ const glossary: ReaderGlossaryEntry[] = [
   functionEntry('t-les', 'les', ['les'], 'article'),
   functionEntry('t-un', 'un', ['un'], 'article'),
   functionEntry('t-de', 'de', ['de'], 'article'),
+  functionEntry('t-du', 'du', ['du'], 'article'),
   functionEntry('t-a', 'à', ['à'], 'preposition'),
   functionEntry('t-avec', 'avec', ['avec'], 'preposition'),
   functionEntry('t-ma', 'ma', ['ma'], 'possessive'),
@@ -97,7 +107,11 @@ const glossary: ReaderGlossaryEntry[] = [
   nounEntry('t-ecole', 'école', 'feminine'),
   nounEntry('t-soupe', 'soupe', 'feminine'),
   nounEntry('t-chat', 'chat', 'masculine'),
+  nounEntry('t-voisin', 'voisin', 'masculine'),
   adjectiveEntry('t-petit', 'petit'),
+  adjectiveEntry('t-bleu', 'bleu', 'color'),
+  properEntry('t-marie', 'Marie'),
+  properEntry('t-anne', 'Anne'),
 ];
 
 const sentence = (id: string, fr: string, bindings: string[][]): Sentence =>
@@ -177,6 +191,47 @@ test('the phrase must follow the verb directly and start with the article, so a 
   const cases: Sentence[] = [
     sentence('s6', 'Elle parle à la mère.', [['t-elle'], ['t-parler'], ['t-a'], ['t-la'], ['t-mere']]),
     sentence('s7', 'Elle regarde le petit chat.', [['t-elle'], ['t-regarder'], ['t-le'], ['t-petit'], ['t-chat']]),
+  ];
+  for (const one of cases) expect(pronoun(one)).toBeNull();
+});
+
+test('a noun followed by a post-nominal modifier is not this replacement', () => {
+  const cases: Sentence[] = [
+    sentence('s11', 'Ma mère regarde le salon bleu.', [
+      ['t-ma'],
+      ['t-mere'],
+      ['t-regarder'],
+      ['t-le'],
+      ['t-salon'],
+      ['t-bleu'],
+    ]),
+    sentence('s12', 'Ma mère aime les cahiers de Marie.', [
+      ['t-ma'],
+      ['t-mere'],
+      ['t-aimer'],
+      ['t-les'],
+      ['t-cahier'],
+      ['t-de'],
+      ['t-marie'],
+    ]),
+    sentence('s13', 'Ma mère aime les cahiers du voisin.', [
+      ['t-ma'],
+      ['t-mere'],
+      ['t-aimer'],
+      ['t-les'],
+      ['t-cahier'],
+      ['t-du'],
+      ['t-voisin'],
+    ]),
+    // `d’Anne` is one token: the elided `de` bound with the proper noun it introduces, as `J’ai` binds both parts.
+    sentence('s14', 'Ma mère aime les cahiers d’Anne.', [
+      ['t-ma'],
+      ['t-mere'],
+      ['t-aimer'],
+      ['t-les'],
+      ['t-cahier'],
+      ['t-de', 't-anne'],
+    ]),
   ];
   for (const one of cases) expect(pronoun(one)).toBeNull();
 });
