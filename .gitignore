@@ -45,5 +45,6 @@ worker/wrangler.deploy.jsonc
 .works/
 .pi/
 .pi-runs/
-# Local impeccable critique output (design.json stays tracked)
+# Local impeccable critique output and config (design.json stays tracked)
 .impeccable/critique/
+.impeccable/config.json
