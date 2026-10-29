@@ -8,6 +8,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Changed
 
+- The line under a graded reader's title now says "AI-written, reviewed by AI, not human-reviewed" without naming models, so it can no longer disagree with the reader's review record.
 - The README is rewritten around reading, tapping and saying a sentence, with new screenshots and a short loop; the privacy paragraph moved to PRIVACY.md.
 - **The app is called Relire again.** The tab title, install prompt, landing pages and the app's About text use the short name; nothing about your data or settings changes.
 - The "add your API key" banner no longer shows on Grammar → Gender and Conjugation, which work without a key; AI features on those pages still ask for one where they need it.

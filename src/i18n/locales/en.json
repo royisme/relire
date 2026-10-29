@@ -221,7 +221,7 @@
     "word": "Word",
     "translation": "Translation",
     "deviceVoice": "Device voice",
-    "sourceAi": "AI-written, reviewed by AI (Gemini 4 Argon, Gemini 3.8 Flash), not human-reviewed",
+    "sourceAi": "AI-written, reviewed by AI, not human-reviewed",
     "sourceHuman": "Human-reviewed",
     "sourceUnknown": "Review status not recorded",
     "dictation": {
