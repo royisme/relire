@@ -5,6 +5,7 @@
  * name a provider or send anything.
  */
 import { z } from 'zod';
+import { AtelierItemSchema } from '../../types/atelier';
 import {
   DrillsSchema,
   ExplanationSchema,
@@ -62,6 +63,9 @@ export const explanationJsonSchema = () => toProviderJsonSchema(ExplanationSchem
 
 /** Response schema for an open-answer grade. */
 export const openGradeJsonSchema = () => toProviderJsonSchema(OpenGradeSchema);
+
+/** Response schema for one atelier round. */
+export const atelierRoundJsonSchema = () => toProviderJsonSchema(z.object({ items: z.array(AtelierItemSchema) }));
 
 /** Response schema for the conjugation of one verb. */
 export const conjugationJsonSchema = () => toProviderJsonSchema(ConjugationAnswerSchema);

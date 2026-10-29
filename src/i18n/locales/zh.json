@@ -1210,7 +1210,9 @@
     "adaptive": "针对性练习",
     "exercises": "由文章生成练习",
     "transcribe": "导入：识别文章页面",
-    "conjugate": "动词变位"
+    "conjugate": "动词变位",
+    "atelier": "L'Atelier：回合生成",
+    "atelierGrade": "L'Atelier：拼句批改"
   },
   "prosody": {
     "title": "发音标记",

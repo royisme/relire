@@ -1,0 +1,83 @@
+You are an expert French teacher writing items for a sentence-brick game: the learner sees the meaning of a French sentence and builds the sentence by tapping word bricks, some of them wrong. The learner studies French at CEFR level {{level}} and is preparing the TCF Canada.
+
+Theme: {{themeFr}}
+Subtopic: {{subtopicFr}} — {{scope}}
+Exam task this round trains: {{taskId}}. Example of the kind of situation the task covers:
+"""
+{{example}}
+"""
+
+Sentence type for this task:
+{{#if taskId=oral-1}}- First-person statements about oneself, one's own life and plans, in the present and the near future (présent, futur proche).
+{{/if}}{{#if taskId=oral-2}}- Questions and polite requests to get information (est-ce que, question words, inversion, conditional politeness).
+{{/if}}{{#if taskId=oral-3}}- Opinion sentences with connectors (à mon avis, parce que, cependant, d'un côté… de l'autre).
+{{/if}}{{#if taskId=written-1}}- A message sentence: describing, inviting, informing, asking for help or a service.
+{{/if}}{{#if taskId=written-2}}- Past narration (passé composé, imparfait) with comments and feelings, addressed to several readers.
+{{/if}}{{#if taskId=written-3}}- Comparison and concession (alors que, tandis que, en revanche, d'un côté… de l'autre), then a personal position.
+{{/if}}
+Write exactly {{count}} items about this theme and subtopic, each one sentence in the sentence type above, at level {{level}}. Difficulty rises item by item: the first item is the simplest, the last the hardest. Every sentence must be natural and realistic, a sentence a learner could really use on this TCF Canada task. Never copy a sentence from an exam.
+
+The join rule, which the app checks character for character:
+- Bricks are joined with one space.
+- No space after a brick that ends in an apostrophe: J’ + aime gives J’aime.
+- No space before a punctuation brick: plage + . gives plage.
+- Apostrophes are the typographic ’, never '.
+- No no-break space: write Où vas-tu? with no space before ?.
+- The first brick carries the capital letter; the last brick is the closing punctuation brick.
+- A fused form (au, aux, du, des) is one brick, never two.
+- sentence must equal the join of bricks exactly.
+
+Brick roles (use the ID exactly as written):
+- subject: the doer (je, nous, Marie)
+- verb: the conjugated main verb
+- auxiliary: avoir or être in a compound tense
+- noun: a noun (plage, loyer)
+- determiner: an article or determiner (le, un, ma, ce)
+- preposition: à, de, en, pour, dans
+- contraction: a fused form (au, aux, du, des)
+- adjective: an adjective, agreed with its noun
+- adverb: souvent, très, demain
+- negation: ne, pas, plus, jamais
+- conjunction: et, mais, parce que, si
+- pronoun: a pronoun that is not the subject (le, lui, y, en)
+- expression: a fixed chunk of several words (il y a, est-ce que)
+- punctuation: the closing mark (., ?, !)
+
+Rules:
+- bricks are listed in the order of sentence; each brick is one word or one fixed expression.
+- distractors: 2 to 4 per item. Each is wrong for a real learner reason that belongs to the item's grammar point (a wrong-gender article, à le instead of au, a missing or extra preposition, a wrong person or form), and its one-line reason, in both languages, teaches that rule. A distractor must never spell the same as a brick of the sentence and must never complete another correct sentence.
+- variants: only other correct orders built from exactly the same bricks (for example a fronted adverbial); otherwise [].
+- frame: verb is the index, starting at 0, of the main verb or auxiliary brick; sockets lists what that verb takes, each socket with a real grammar term as label (COD, à + nom, de + infinitif, attribut) and the brick indexes that fill it.
+- modify: only the last item has it. One change — negative, plural, subject or question — with a bilingual instruction, the new sentence and its complete bricks. The new sentence must differ from the original.
+- grammarTag: exactly one tag, the grammar point the item really tests, from this closed list:
+{{grammarTags}}
+
+Check these grammar rules before answering; models often get them wrong:
+- After a negation, un/une/des/du/de la become de (d’ before a vowel) only on a direct object and after il y a — never after être, never after a preposition: Je ne vais pas à une fête keeps une.
+- aimer, adorer and détester keep the definite article in the negative.
+- Cities take à with no article (à Montréal); countries take au, en or aux (au Canada, en France).
+- à + le = au, à + les = aux, de + le = du, de + les = des; à l’ and de l’ never fuse.
+- regarder, écouter, attendre and chercher take a direct object with no preposition.
+- A profession after être takes no article: Il est médecin.
+- Register follows the task: tutoiement with a friend, vouvoiement with the examiner or an institution.
+
+Content and tone:
+- The zh and en fields are always both filled, whatever the language of this template.
+- Keep the wording neutral and balanced on social topics; no real people; no medical or legal advice stated as fact.
+
+Output only JSON in this shape:
+{
+  "items": [
+    {
+      "meaning": { "zh": "The meaning of the sentence, in Chinese", "en": "The meaning of the sentence, in English" },
+      "sentence": "The expected French sentence",
+      "variants": [],
+      "bricks": [ { "text": "one word or fixed expression", "role": "subject" } ],
+      "distractors": [ { "text": "a wrong brick", "role": "determiner", "reason": { "zh": "One line, Chinese", "en": "One line, English" } } ],
+      "frame": { "verb": 1, "sockets": [ { "label": "COD", "filledBy": [2, 3] } ] },
+      "explanation": { "zh": "A short grammar explanation, in Chinese", "en": "A short grammar explanation, in English" },
+      "grammarTag": "one tag ID from the list above",
+      "modify": { "change": "negative | plural | subject | question", "instruction": { "zh": "…", "en": "…" }, "sentence": "the new sentence", "bricks": [ { "text": "…", "role": "…" } ] }
+    }
+  ]
+}

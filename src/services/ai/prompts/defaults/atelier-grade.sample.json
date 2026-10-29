@@ -1,0 +1,38 @@
+{
+  "meaning": { "zh": "我想在市中心租一套小公寓。", "en": "I want to rent a small apartment in the city centre." },
+  "sentence": "Je cherche un appartement au centre-ville.",
+  "variants": [],
+  "bricks": [
+    { "text": "Je", "role": "subject" },
+    { "text": "cherche", "role": "verb" },
+    { "text": "un", "role": "determiner" },
+    { "text": "appartement", "role": "noun" },
+    { "text": "au", "role": "contraction" },
+    { "text": "centre-ville", "role": "noun" },
+    { "text": ".", "role": "punctuation" }
+  ],
+  "distractors": [
+    {
+      "text": "à le",
+      "role": "preposition",
+      "reason": { "zh": "à 遇到 le 必须缩合为 au。", "en": "à + le contracts to au." }
+    },
+    {
+      "text": "une",
+      "role": "determiner",
+      "reason": { "zh": "appartement 是阳性名词，要用 un。", "en": "appartement is masculine: use un." }
+    }
+  ],
+  "frame": {
+    "verb": 1,
+    "sockets": [
+      { "label": "COD", "filledBy": [2, 3] },
+      { "label": "à + lieu", "filledBy": [4, 5] }
+    ]
+  },
+  "explanation": {
+    "zh": "chercher 直接接宾语；à + le 缩合为 au。",
+    "en": "chercher takes a direct object; à + le contracts to au."
+  },
+  "grammarTag": "prepositions"
+}

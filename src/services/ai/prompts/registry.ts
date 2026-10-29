@@ -1,4 +1,5 @@
 import type { Lang } from '../types';
+import { GRAMMAR_TAGS } from '../../../types/grammar';
 import wordEn from './defaults/word.en.txt?raw';
 import wordZh from './defaults/word.zh.txt?raw';
 import sentenceEn from './defaults/sentence.en.txt?raw';
@@ -26,6 +27,11 @@ import exercisesEn from './defaults/exercises.en.txt?raw';
 import exercisesZh from './defaults/exercises.zh.txt?raw';
 import conjugateEn from './defaults/conjugate.en.txt?raw';
 import conjugateZh from './defaults/conjugate.zh.txt?raw';
+import atelierEn from './defaults/atelier.en.txt?raw';
+import atelierZh from './defaults/atelier.zh.txt?raw';
+import atelierGradeEn from './defaults/atelier-grade.en.txt?raw';
+import atelierGradeZh from './defaults/atelier-grade.zh.txt?raw';
+import atelierGradeSample from './defaults/atelier-grade.sample.json?raw';
 
 /** The prompts the app sends. Defaults ship as text files in ./defaults and can be overridden by the user. */
 export type PromptId =
@@ -41,7 +47,9 @@ export type PromptId =
   | 'grade'
   | 'adaptive'
   | 'exercises'
-  | 'conjugate';
+  | 'conjugate'
+  | 'atelier'
+  | 'atelierGrade';
 
 export interface PromptDefinition {
   id: PromptId;
@@ -178,6 +186,34 @@ export const PROMPTS: PromptDefinition[] = [
     variables: ['infinitive'],
     defaults: { en: conjugateEn, zh: conjugateZh },
     sample: { infinitive: 'se lever' },
+  },
+  {
+    id: 'atelier',
+    variables: ['themeFr', 'subtopicFr', 'scope', 'taskId', 'example', 'level', 'count', 'grammarTags'],
+    defaults: { en: atelierEn, zh: atelierZh },
+    sample: {
+      themeFr: 'Logement et quartier',
+      subtopicFr: 'Location immobilière',
+      scope:
+        'Covers searching for rental apartments, negotiating lease terms, inquiring about rent prices, and landlord relations.',
+      taskId: 'oral-2',
+      example:
+        'Vous avez vu une annonce pour un appartement à louer : téléphonez au propriétaire pour lui demander le montant du loyer, la superficie, l’étage et les commerces à proximité.',
+      level: 'B1',
+      count: '5',
+      grammarTags: GRAMMAR_TAGS.join(', '),
+    },
+  },
+  {
+    id: 'atelierGrade',
+    variables: ['item', 'userAnswer', 'expectedAnswer'],
+    defaults: { en: atelierGradeEn, zh: atelierGradeZh },
+    sample: {
+      // The sample item is data, not wording: it lives beside the templates so the Chinese fields stay out of TypeScript (i18n:check).
+      item: atelierGradeSample.trim(),
+      userAnswer: 'Je cherche un appartement à le centre-ville.',
+      expectedAnswer: 'Je cherche un appartement au centre-ville.',
+    },
   },
 ];
 

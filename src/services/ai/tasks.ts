@@ -1,5 +1,7 @@
 import { ConjugationAnswerSchema, foldAnswerApostrophes, type ConjugationAnswer } from '../../types/conjugationAnswer';
+import type { AtelierItem, AtelierLevel } from '../../types/atelier';
 import type { PronunciationAssessment, SentenceAnalysis, WordAnalysis } from '../../types';
+import { GRAMMAR_TAGS } from '../../types/grammar';
 import i18n from '../../i18n';
 import {
   DrillsSchema,
@@ -16,8 +18,13 @@ import {
 } from '../../types/exerciseAi';
 import { parseImportDraft, type ImportDraft } from '../exercises/importDraft';
 import { keepAnswerable } from '../exercises/answerability';
+import { joinBricks } from '../atelier/join';
+import { parseRound, type ParsedRound } from '../atelier/parse';
+import type { RoundSpec } from '../atelier/spec';
 import {
   adaptiveRequest,
+  atelierGradeRequest,
+  atelierRequest,
   conjugateRequest,
   exerciseArticleText,
   exercisesRequest,
@@ -201,4 +208,60 @@ export async function generateExercises(
 export async function conjugateVerb(input: { infinitive: string }, ctx: TextContext): Promise<ConjugationAnswer> {
   const value = await ctx.execution.generateJson<unknown>(conjugateRequest(input, ctx.lang));
   return parseAnswer('the conjugation', ConjugationAnswerSchema, foldAnswerApostrophes(value));
+}
+
+/* ------------------------------- atelier tasks ------------------------------- */
+
+/** Items one atelier round may ask for; five is the game's default. */
+export const MAX_ATELIER_ITEMS = 10;
+
+/** One round of sentence-brick items; dropped items are counted, not fatal, until none is left. */
+export async function generateAtelierRound(
+  input: { spec: RoundSpec; level: AtelierLevel; count: number },
+  ctx: TextContext,
+): Promise<ParsedRound> {
+  if (!Number.isInteger(input.count) || input.count < 1 || input.count > MAX_ATELIER_ITEMS)
+    throw new RangeError(`The number of items must be a whole number from 1 to ${MAX_ATELIER_ITEMS}.`);
+
+  const { spec } = input;
+  const value = await ctx.execution.generateJson<unknown>(
+    atelierRequest(
+      {
+        themeFr: spec.theme.fr,
+        subtopicFr: spec.subtopic.fr,
+        scope: spec.subtopic.scope,
+        taskId: spec.taskId,
+        exampleFr: spec.example.fr,
+        level: input.level,
+        count: input.count,
+        grammarTags: GRAMMAR_TAGS.join(', '),
+      },
+      ctx.lang,
+    ),
+  );
+  const round = parseRound(value);
+  if (!round.items.length)
+    throw new InvalidAnswerError(
+      'the round',
+      round.dropped.map((drop) => `item ${drop.index} was dropped: ${drop.reason}`),
+    );
+  return round;
+}
+
+/** Judges a brick arrangement that matched neither the reference nor a variant. */
+export async function gradeAtelierBuild(
+  input: { item: AtelierItem; userAnswer: string },
+  ctx: TextContext,
+): Promise<OpenGrade> {
+  const value = await ctx.execution.generateJson<unknown>(
+    atelierGradeRequest(
+      {
+        item: JSON.stringify(input.item),
+        userAnswer: input.userAnswer,
+        expectedAnswer: joinBricks(input.item.bricks),
+      },
+      ctx.lang,
+    ),
+  );
+  return parseAnswer('the grade', OpenGradeSchema, value);
 }

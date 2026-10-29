@@ -71,7 +71,7 @@ export function parseRound(raw: unknown): ParsedRound {
   const holder = typeof raw === 'object' && raw !== null ? (raw as { items?: unknown }) : null;
   if (!holder || !Array.isArray(holder.items)) {
     const what = !holder
-      ? `a value of type ${typeof raw} instead of an object`
+      ? `${raw === null ? 'null' : `a value of type ${typeof raw}`} instead of an object`
       : holder.items === undefined
         ? 'an object without items'
         : `an object whose items is a ${typeof holder.items} instead of an array`;
