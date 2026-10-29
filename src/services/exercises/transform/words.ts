@@ -41,8 +41,9 @@ export function verbOf(sentence: Sentence, glossary: ReaderGlossaryEntry[]): Ver
 /**
  * The first noun after the finite verb: the phrase a version 1 rule may change, or undefined when there is none.
  * A preposition between the verb and the noun (`à la plage`, `dans cet appartement`) makes it an indirect
- * object, not the phrase these rules change. The `de la`, `de l’`, `du` and `au`/`aux` of a partitive or a
- * contracted article are not prepositions here: they open the determiner `determinerOf` already reports.
+ * object, not the phrase these rules change. The partitives `du`, `de la` and `de l’` are not prepositions here:
+ * `de` opens the determiner `determinerOf` already reports, so `je mange du pain` keeps a direct object. `au`
+ * and `aux` do count as prepositions: the `à` is fused into the article, so `au cinéma` is always indirect.
  */
 export function firstNounAfter(
   sentence: Sentence,
@@ -56,15 +57,18 @@ export function firstNounAfter(
   })[0];
   if (!noun) return undefined;
   const determiner = determinerOf(sentence, glossary, words, noun.index);
-  const indirect = words.some(
-    (word, index) =>
-      index > verbIndex &&
-      index < noun.index &&
-      determiner?.start !== word.start &&
-      entriesOf(sentence, glossary, word.ordinal).some(
-        (entry) => entry.pos === 'function' && entry.sense === 'preposition',
-      ),
-  );
+  const indirect =
+    determiner?.text === 'au' ||
+    determiner?.text === 'aux' ||
+    words.some(
+      (word, index) =>
+        index > verbIndex &&
+        index < noun.index &&
+        determiner?.start !== word.start &&
+        entriesOf(sentence, glossary, word.ordinal).some(
+          (entry) => entry.pos === 'function' && entry.sense === 'preposition',
+        ),
+    );
   return indirect ? undefined : noun;
 }
 
