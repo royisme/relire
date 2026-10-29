@@ -176,7 +176,7 @@ test('import results reserve a live status slot in every state, and imported ans
     const row = { ...testRow('chat'), bookSource: undefined, contexts: [note.context] };
     const answer = render(<VocabularyAnswer word={{ key: row.key, word: row.word, builtIn: false, row }} />);
     expect(answer).toContain('TEST cat');
-    expect(answer).toContain('TEST deck');
+    expect(answer).not.toContain('TEST deck');
     expect(answer).not.toContain('undefined');
     for (const state of [
       { error: null, result: null, ready: null },

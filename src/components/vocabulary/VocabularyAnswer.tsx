@@ -53,14 +53,19 @@ export function VocabularyAnswer({
         const definition = context.definition;
         return (
           <section key={context.id} className="space-y-4 border-t border-ink-200 pt-6">
-            <div className="space-y-1 text-xs text-ink-600">
-              <p>{t(definition.kind === 'imported' ? 'vocab.import.saved' : 'vocab.savedContext')}</p>
-              {definition.kind === 'ai' && (
-                <p>{t('vocab.savedLanguage', { language: t(`vocab.language.${context.requestLanguage}`) })}</p>
-              )}
-              {context.source && <p>{context.source.title}</p>}
-              {definition.kind === 'imported' && definition.tags.length > 0 && <p>{definition.tags.join(' · ')}</p>}
-            </div>
+            {definition.kind === 'imported' ? (
+              definition.tags.length > 0 && (
+                <div className="space-y-1 text-xs text-ink-600">{definition.tags.join(' · ')}</div>
+              )
+            ) : (
+              <div className="space-y-1 text-xs text-ink-600">
+                <p>{t('vocab.savedContext')}</p>
+                {definition.kind === 'ai' && (
+                  <p>{t('vocab.savedLanguage', { language: t(`vocab.language.${context.requestLanguage}`) })}</p>
+                )}
+                {context.source && <p>{context.source.title}</p>}
+              </div>
+            )}
             <div className="space-y-1">
               <p className="text-2xl leading-snug text-ink-900">
                 {definition.kind === 'imported'
