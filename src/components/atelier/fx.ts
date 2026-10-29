@@ -12,19 +12,26 @@ const POP = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
 const SETTLE = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
 const EFFECTS: Record<Fx, { frames: Keyframe[]; options: KeyframeAnimationOptions }> = {
-  // A brick pressed into the row: squashed on arrival, springs back past rest.
+  // A brick pressed into the row: squashed on arrival, holds a beat, springs back past rest.
+  // Easing sits on each keyframe (it shapes the segment that starts there), so the squash is seen.
   snap: {
     frames: [
-      { transform: 'scale(1.14, 0.84)' },
-      { transform: 'scale(0.97, 1.05)', offset: 0.55 },
+      { transform: 'scale(1.16, 0.82)', easing: 'ease-out' },
+      { transform: 'scale(1.1, 0.88)', offset: 0.25, easing: 'ease-out' },
+      { transform: 'scale(0.96, 1.07)', offset: 0.6, easing: POP },
       { transform: 'none' },
     ],
-    options: { duration: 200, easing: POP },
+    options: { duration: 240 },
   },
-  // Two bricks becoming one: the new brick starts as wide as both and squeezes to its size.
+  // Two bricks becoming one: the new brick starts as wide as both, holds, then squeezes to its size.
   fuse: {
-    frames: [{ transform: 'scale(1.7, 0.78)' }, { transform: 'scale(0.9, 1.12)', offset: 0.5 }, { transform: 'none' }],
-    options: { duration: 380, easing: POP },
+    frames: [
+      { transform: 'scale(1.45, 0.8)', easing: 'ease-out' },
+      { transform: 'scale(1.4, 0.82)', offset: 0.3, easing: 'ease-out' },
+      { transform: 'scale(0.9, 1.12)', offset: 0.62, easing: POP },
+      { transform: 'none' },
+    ],
+    options: { duration: 440 },
   },
   shake: {
     frames: [
