@@ -33,13 +33,13 @@
 ## 没有 Key？从这里开始
 
 - [分级读物](https://royisme.github.io/relire/app/#/read/graded)：三本入门读物，配编写好的词义、可展开的句子译文、设备语音朗读和阅读检查题（作答记录保存在本机）。
-- [名词阴阳性](https://royisme.github.io/relire/app/#/grammar/gender)：17 条词尾倾向，附已审校例词和例外，另有判断该用 le 还是 la 的练习。这些倾向对照词典做过统计，结果记录在 `src/data/noun-gender/pack.json`（可用 `bun scripts/readme-numbers.ts` 复现）：-tion 结尾 3,794 个名词里 3,780 个是阴性；-age 3,105 个里 3,091 个是阳性；-ure 1,216 个里 902 个是阴性；337 个例词经过审校。
-- [动词变位](https://royisme.github.io/relire/app/#/grammar/conjugation)：19 个已审校动词的完整变位表，直接从本地数据给出，不调用 AI，另有否定句和疑问句句式。
+- [名词阴阳性](https://royisme.github.io/relire/app/#/grammar/gender)：17 条词尾倾向，附已审校例词和部分例外，另有判断该用 le 还是 la 的练习。这些倾向依据 Morphalou 3.1 统计，统计结果记录在 `src/data/noun-gender/pack.json`（可用 `bun scripts/readme-numbers.ts` 复现）：-tion 结尾 3,794 个名词里 3,780 个是阴性；-age 3,105 个里 3,091 个是阳性；-ure 1,216 个里 902 个是阴性；337 个例词经过审校。
+- [动词变位](https://royisme.github.io/relire/app/#/grammar/conjugation)：19 个已审校动词在应用所支持时态下的变位表，直接从本地数据给出，不调用 AI，另有否定句和疑问句句式。
 - [法语音标与近音辨听](https://royisme.github.io/relire/app/#/speaking)：音标表和近音辨听练习。声音通过你所选的语音提供方播放；在设置里选“设备语音”，就能不加 Key 听。
 
 <table>
 <tr>
-<td width="50%"><img src="docs/media/gender.zh-CN.desktop.jpg" alt="名词阴阳性参考：按阴阳性分组的词尾倾向，各附已审校例词和例外"></td>
+<td width="50%"><img src="docs/media/gender.zh-CN.desktop.jpg" alt="名词阴阳性参考：按阴阳性分组的词尾倾向，附已审校例词和部分例外"></td>
 <td><img src="docs/media/conjugation.zh-CN.desktop.jpg" alt="已审校动词的变位页：各个时态的变位表，来自本地数据"></td>
 </tr>
 </table>

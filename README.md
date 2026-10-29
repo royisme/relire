@@ -33,13 +33,13 @@ Graded readers, reviewed conjugation and the noun-gender reference work with no 
 ## No key? Start here
 
 - [Graded readers](https://royisme.github.io/relire/app/#/read/graded): three starter readers with authored word meanings, revealable sentence translations, device-voice audio and local checkpoints.
-- [Noun gender](https://royisme.github.io/relire/app/#/grammar/gender): 17 ending tendencies with reviewed examples and exceptions, a le/la round and drills. The tendencies were measured against the dictionary in `src/data/noun-gender/pack.json` (reproduce with `bun scripts/readme-numbers.ts`): -tion is feminine in 3,780 of 3,794 nouns, -age is masculine in 3,091 of 3,105, -ure is feminine in 902 of 1,216; 337 example nouns are reviewed.
-- [Conjugation](https://royisme.github.io/relire/app/#/grammar/conjugation): complete tables for 19 reviewed verbs, answered from local data with no AI call, plus negation and question patterns.
+- [Noun gender](https://royisme.github.io/relire/app/#/grammar/gender): 17 ending tendencies with reviewed examples and selected exceptions, a le/la round and drills. The tendencies were measured against Morphalou 3.1, with the counts recorded in `src/data/noun-gender/pack.json` (reproduce with `bun scripts/readme-numbers.ts`): -tion is feminine in 3,780 of 3,794 nouns, -age is masculine in 3,091 of 3,105, -ure is feminine in 902 of 1,216; 337 example nouns are reviewed.
+- [Conjugation](https://royisme.github.io/relire/app/#/grammar/conjugation): the supported tenses for 19 reviewed verbs, answered from local data with no AI call, plus negation and question patterns.
 - [French sounds and Sound pairs](https://royisme.github.io/relire/app/#/speaking): the IPA chart and sound-pair listening drills. Audio plays through the speech provider you selected; choose Device voice in Settings to hear it without a key.
 
 <table>
 <tr>
-<td width="50%"><img src="docs/media/gender.en.desktop.jpg" alt="The Gender reference: ending tendencies grouped by gender, each with reviewed examples and exceptions"></td>
+<td width="50%"><img src="docs/media/gender.en.desktop.jpg" alt="The Gender reference: ending tendencies grouped by gender, with reviewed examples and selected exceptions"></td>
 <td><img src="docs/media/conjugation.en.desktop.jpg" alt="The Conjugation page for a reviewed verb: its tense tables, answered from local data"></td>
 </tr>
 </table>

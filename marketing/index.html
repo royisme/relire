@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Relire — French Reading, Pronunciation & Exercise Practice for TCF Canada</title>
-  <meta name="description" content="Practice French reading, pronunciation and exercises for TCF Canada with real or imported texts, contextual explanations, shadowing, AI pronunciation feedback, a mistake notebook and spaced repetition. Free and open source." />
+  <title>Relire — Read French closely. Then say it out loud.</title>
+  <meta name="description" content="Open-source French close reading for TCF Canada learners. Graded readers, reviewed conjugation and noun gender need no key; AI lookups, pronunciation feedback and exercises use your own key. No account." />
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
   <link rel="canonical" href="https://royisme.github.io/relire/" />
   <link rel="alternate" hreflang="en" href="https://royisme.github.io/relire/" />
   <link rel="alternate" hreflang="zh-CN" href="https://royisme.github.io/relire/zh/" />
   <link rel="alternate" hreflang="x-default" href="https://royisme.github.io/relire/" />
-  <meta property="og:title" content="Relire — Learn French from real text" />
-  <meta property="og:description" content="Read, understand, shadow, practise and improve. An open-source French reading, pronunciation and exercise practice app for TCF Canada learners." />
+  <meta property="og:title" content="Relire — Read French closely. Then say it out loud." />
+  <meta property="og:description" content="An open-source French close-reading app for TCF Canada learners: tap a word for its meaning and the sentence it came from, then say the sentence out loud. No account; AI features use your own key." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://royisme.github.io/relire/" />
   <meta property="og:site_name" content="Relire" />
   <meta property="og:image" content="https://royisme.github.io/relire/app/card.png" />
-  <meta property="og:image:alt" content="Relire French close-reading interface" />
+  <meta property="og:image:alt" content="Relire: read French closely, then say it out loud. The right side shows a word's meaning and its original sentence from a graded reader" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Relire — French Reading, Pronunciation & Exercise Practice" />
-  <meta name="twitter:description" content="Open-source close reading, shadowing, pronunciation and exercise practice for TCF Canada." />
+  <meta name="twitter:title" content="Relire — Read French closely. Then say it out loud." />
+  <meta name="twitter:description" content="Open-source French close reading for TCF Canada learners. No account; learning data stays in your browser; AI features use your own key." />
   <meta name="twitter:image" content="https://royisme.github.io/relire/app/card.png" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
@@ -36,16 +36,19 @@
         "downloadUrl":"https://github.com/royisme/relire",
         "license":"https://opensource.org/license/mit/",
         "isAccessibleForFree":true,
-        "description":"Open-source French reading, pronunciation and exercise practice for TCF Canada with contextual explanations, IPA, shadowing, AI pronunciation feedback, generated exercises, a mistake notebook and spaced repetition.",
-        "inLanguage":["en","zh-CN","fr"],
+        "description":"Open-source French close reading and pronunciation practice for TCF Canada learners. Three graded readers, conjugation for 19 reviewed verbs and a 17-tendency noun-gender reference need no key; article lookups, pronunciation feedback and generated exercises use the learner's own key for the provider they choose. No account; learning data stays in the browser.",
+        "inLanguage":["en","zh-CN"],
         "author":{"@type":"Person","name":"Roy Zhu","url":"https://github.com/royisme","sameAs":["https://github.com/royisme","https://x.com/royzhu655858"]}
       },
       {
         "@type":"FAQPage",
         "mainEntity":[
-          {"@type":"Question","name":"Is Relire free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Relire is open source under the MIT License. AI features use your own Gemini API key."}},
-          {"@type":"Question","name":"Does Relire store my learning data on a server?","acceptedAnswer":{"@type":"Answer","text":"No application server is required. Articles, vocabulary and progress are stored in your browser. AI requests go directly from your browser to the configured provider."}},
-          {"@type":"Question","name":"Is Relire an official TCF Canada preparation product?","acceptedAnswer":{"@type":"Answer","text":"No. Relire is an independent learning tool for French reading, pronunciation and exercise practice. It is not affiliated with France Éducation international or IRCC."}}
+          {"@type":"Question","name":"Is Relire free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Relire is open source under the MIT License. AI features use your own key for the provider you choose (Gemini, an OpenAI-compatible service or Claude); local Ollama needs none."}},
+          {"@type":"Question","name":"Do I need an account?","acceptedAnswer":{"@type":"Answer","text":"No. Relire has no account and no app server of its own; articles, words, recordings and settings stay in your browser. The only backend is an optional read-only content service, which never receives your AI key, answers, articles or recordings."}},
+          {"@type":"Question","name":"What works without a key?","acceptedAnswer":{"@type":"Answer","text":"The three graded readers, the noun-gender reference and the conjugation of the 19 reviewed verbs. The sound chart and sound pairs play through the speech provider you selected; choose Device voice to hear them without a key."}},
+          {"@type":"Question","name":"Who reviewed the content?","acceptedAnswer":{"@type":"Answer","text":"The maintainer reviewed the 19 conjugation verbs and the noun-gender pack (17 ending tendencies, 337 example nouns). The graded readers were written and reviewed by AI models, not by a teacher, and each reader says so on its page."}},
+          {"@type":"Question","name":"Is Relire an official TCF Canada preparation product?","acceptedAnswer":{"@type":"Answer","text":"No. Relire is an independent practice tool, not a mock-exam platform, and is not affiliated with France Éducation international or IRCC. AI pronunciation scores are estimates, not official exam marks."}},
+          {"@type":"Question","name":"Can I inspect the source or report a problem?","acceptedAnswer":{"@type":"Answer","text":"Yes. The complete project is on GitHub, including its issue tracker."}}
         ]
       }
     ]
@@ -71,41 +74,41 @@
     <section class="hero">
       <div class="container hero-grid">
         <div>
-          <div class="eyebrow">French learning · TCF Canada · Open source</div>
-          <h1>Learn French from real text.</h1>
-          <p class="lede">Read an article, tap unfamiliar words, understand difficult sentences, shadow the audio, get pronunciation feedback and practise with generated exercises — without breaking your reading flow.</p>
+          <div class="eyebrow">French reading · TCF Canada · Open source</div>
+          <h1>Read French closely. Then say it out loud.</h1>
+          <p class="lede">I am learning French for TCF Canada, so I built the reading tool I wanted. Tap a word for its meaning and the sentence it came from; reviewed conjugation and the noun-gender reference need no key, and every sentence can be heard and recorded.</p>
           <div class="hero-actions">
-            <a class="button primary" href="./app/">Start practicing</a>
+            <a class="button primary" href="./app/">Open Relire</a>
             <a class="button" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">★ Star on GitHub</a>
           </div>
-          <p class="micro">Browser-only · No account · Local-first · Bring your own Gemini API key</p>
+          <p class="micro">Free and open source · No account · AI features use your own key (local Ollama needs none)</p>
         </div>
         <div class="hero-shot">
-          <img src="./assets/reader.jpg" alt="Relire reader showing a French article for close reading practice" />
+          <img src="./assets/hero.en.webp" alt="Relire: a graded reader; tapping a word opens a sheet with its meaning and an example from the text; then the Conjugation page for a reviewed verb; then the Gender page" />
         </div>
       </div>
     </section>
 
     <section class="trust-strip">
       <div class="container trust-list">
-        <div class="trust-item"><strong>Open source</strong><span>MIT licensed on GitHub</span></div>
-        <div class="trust-item"><strong>Local-first</strong><span>Learning data stays in your browser</span></div>
-        <div class="trust-item"><strong>No account</strong><span>Open the app and start reading</span></div>
-        <div class="trust-item"><strong>BYOK AI</strong><span>Use your own Gemini API key</span></div>
+        <div class="trust-item"><strong>Open source</strong><span>MIT License, code on GitHub</span></div>
+        <div class="trust-item"><strong>Data stays in your browser</strong><span>AI features send what you ask about to the provider you pick</span></div>
+        <div class="trust-item"><strong>No account</strong><span>Open the app and start with a reader</span></div>
+        <div class="trust-item"><strong>Your own key for AI</strong><span>Gemini, an OpenAI-compatible service or Claude; local Ollama needs none</span></div>
       </div>
     </section>
 
     <section class="section" id="how">
       <div class="container">
         <div class="section-head">
-          <h2>One continuous study loop.</h2>
-          <p>Relire is designed around close reading: stay inside one text while vocabulary, grammar, pronunciation, exercises and review connect to each other.</p>
+          <h2>Read, tap, say it back, review.</h2>
+          <p>Everything starts from the text in front of you: the word you tap, the sentence you play back and the cards you review all come from what you are reading.</p>
         </div>
         <div class="steps">
-          <article class="card"><div class="step-no">01 · READ</div><h3>Read real French</h3><p>Paste your own article or start with a CEFR-tagged sample and read at your own pace.</p></article>
-          <article class="card"><div class="step-no">02 · UNDERSTAND</div><h3>Tap what blocks you</h3><p>Inspect a word in context or break a difficult sentence into grammar, patterns and collocations.</p></article>
-          <article class="card"><div class="step-no">03 · SHADOW</div><h3>Say it out loud</h3><p>Follow phrasing, liaison and intonation guidance, then record your own reading.</p></article>
-          <article class="card"><div class="step-no">04 · RETAIN</div><h3>Review what matters</h3><p>Save useful vocabulary and bring it back on an SM-2 spaced-repetition schedule.</p></article>
+          <article class="card"><div class="step-no">01 · READ</div><h3>Start reading</h3><p>Open one of three graded starter readers, or paste or import your own article.</p></article>
+          <article class="card"><div class="step-no">02 · TAP</div><h3>Tap a word</h3><p>See its meaning and the sentence it came from.</p></article>
+          <article class="card"><div class="step-no">03 · SAY IT</div><h3>Say it out loud</h3><p>Select a sentence to listen or record yourself; the last three takes of each sentence stay on your device. Recording needs no key. Graded readers use Device voice; select it in Settings for keyless playback elsewhere.</p></article>
+          <article class="card"><div class="step-no">04 · REVIEW</div><h3>Keep what you read</h3><p>Save words and review them with FSRS-6 spaced repetition; reviewed conjugation for 19 verbs and noun-gender endings to practise.</p></article>
         </div>
       </div>
     </section>
@@ -113,50 +116,50 @@
     <section class="section" id="features">
       <div class="container">
         <div class="section-head">
-          <h2>Built for reading and pronunciation.</h2>
-          <p>Instead of trying to replace a complete French course, Relire goes deep on the activities that happen together when you work through authentic text.</p>
+          <h2>What works with no key, and with yours.</h2>
+          <p>The reference cards ship inside the app and need no key; the AI cards use your own key for the provider you choose (local Ollama needs none).</p>
         </div>
         <div class="showcase">
           <figure class="shot-card">
-            <img src="./assets/word-analysis.jpg" alt="Contextual French word analysis with IPA and conjugation in Relire" />
-            <figcaption class="shot-copy"><h3>Vocabulary in context</h3><p>See the meaning used in this sentence, IPA, pronunciation guidance, tense and conjugation without leaving the article.</p></figcaption>
+            <img src="./assets/word.en.desktop.jpg" alt="A tapped verb in a graded reader: its meaning and an example from the text" />
+            <figcaption class="shot-copy"><h3>A word, in its sentence</h3><p>In a graded reader, tapping a word shows its meaning and an example from the text, with no key.</p></figcaption>
           </figure>
           <figure class="shot-card">
-            <img src="./assets/sentence-syntax.jpg" alt="French sentence syntax and grammar breakdown in Relire" />
-            <figcaption class="shot-copy"><h3>Sentence-level understanding</h3><p>Break long sentences into grammatical roles, useful patterns and natural chunks for shadowing.</p></figcaption>
+            <img src="./assets/gender.en.desktop.jpg" alt="The Gender reference: ending tendencies grouped by gender, with reviewed examples and selected exceptions" />
+            <figcaption class="shot-copy"><h3>Noun gender, ending by ending</h3><p>17 ending tendencies grouped by gender, with reviewed examples and selected exceptions, plus a le/la round.</p></figcaption>
           </figure>
         </div>
 
         <div class="features" style="margin-top:24px">
-          <article class="card feature"><div class="feature-kicker">Pronunciation</div><h3>Shadowing feedback</h3><p>Record a sentence and get feedback on sounds, liaisons, intonation and overall delivery.</p></article>
-          <article class="card feature"><div class="feature-kicker">Vocabulary</div><h3>Spaced repetition</h3><p>Turn words you actually encounter into a personal review deck scheduled with SM-2.</p></article>
-          <article class="card feature"><div class="feature-kicker">Reference</div><h3>French IPA chart</h3><p>Review French sounds with IPA and playable example words when a pronunciation pattern is unclear.</p></article>
-          <article class="card feature"><div class="feature-kicker">Practice</div><h3>Generated exercises</h3><p>Build exercise sets from the material you are studying, including dictation and AI-graded open answers.</p></article>
-          <article class="card feature"><div class="feature-kicker">Privacy</div><h3>Browser-first storage</h3><p>Your articles, vocabulary and progress live locally. Back them up when you want to move devices.</p></article>
-          <article class="card feature"><div class="feature-kicker">Control</div><h3>Editable AI prompts</h3><p>Inspect and change the instructions used for explanations instead of treating the AI layer as a black box.</p></article>
+          <article class="card feature"><div class="feature-kicker">No key</div><h3>Graded readers</h3><p>Three starter readers with authored word meanings, revealable sentence translations and device-voice audio.</p></article>
+          <article class="card feature"><div class="feature-kicker">No key</div><h3>Noun gender</h3><p>17 ending tendencies with reviewed examples and selected exceptions, plus a le/la round; measured against Morphalou 3.1, with the counts recorded in the repo.</p></article>
+          <article class="card feature"><div class="feature-kicker">No key</div><h3>Reviewed conjugation</h3><p>All supported tenses for 19 reviewed verbs, from local data without an AI call, plus negation and question patterns.</p></article>
+          <article class="card feature"><div class="feature-kicker">With your key</div><h3>Article lookups</h3><p>Word and sentence analysis in articles you paste or import: meaning in context, IPA, verb forms and grammar points.</p></article>
+          <article class="card feature"><div class="feature-kicker">With your key</div><h3>Pronunciation feedback</h3><p>Azure scores accuracy, fluency and single words; Gemini listens for phonemes, liaisons and intonation. Estimates, not exam marks.</p></article>
+          <article class="card feature"><div class="feature-kicker">With your key</div><h3>Generated exercises</h3><p>Fill-in-the-blank, multiple choice, word transformation, reading passages, dialogue ordering and more, from your articles; open answers get written feedback, not scores.</p></article>
         </div>
+        <p class="note" style="margin-top:24px">French sounds and Sound pairs play through the speech provider you selected; choose Device voice to hear them without a key.</p>
       </div>
     </section>
 
     <section class="section">
       <div class="container split">
         <div>
-          <div class="eyebrow">TCF Canada workflow</div>
+          <div class="eyebrow">TCF Canada</div>
           <h2>Useful between lessons and mock tests.</h2>
-          <p class="lede">Relire is not a mock-exam platform. It is the daily practice layer for turning unfamiliar French into language you can understand, pronounce and use.</p>
+          <p class="lede">Relire is not a mock-exam platform. It is the daily practice in between: real French, read closely, then said out loud.</p>
           <div class="checks">
-            <div class="check">Build reading fluency with authentic or imported French texts.</div>
-            <div class="check">Notice grammar and collocations inside real context.</div>
-            <div class="check">Connect written French to spoken rhythm and liaison.</div>
-            <div class="check">Practise listening and writing with generated exercises.</div>
-            <div class="check">Keep mistakes in a notebook and drill the weak areas.</div>
-            <div class="check">Keep useful vocabulary in a review loop.</div>
+            <div class="check">Reading practice with graded readers or your own articles.</div>
+            <div class="check">Grammar and conjugation in context while you read.</div>
+            <div class="check">Listen to any sentence and record yourself; the takes stay on your device. Recording needs no key; graded readers use Device voice, and you can select it in Settings elsewhere.</div>
+            <div class="check">Wrong answers enter the mistake notebook; use AI to generate drills for weak grammar areas.</div>
+            <div class="check">Saved words come back on an FSRS-6 review schedule.</div>
           </div>
           <p class="note">Relire is independent and is not affiliated with or endorsed by France Éducation international or IRCC. AI pronunciation scores are estimates, not official TCF results.</p>
         </div>
         <div class="shot-card">
-          <img src="./assets/sentence-shadowing.jpg" alt="French shadowing guide with translation, phrasing and playback controls" />
-          <div class="shot-copy"><h3>Turn comprehension into speech</h3><p>Once a sentence makes sense, practise its rhythm and pronunciation while the original context remains visible.</p></div>
+          <img src="./assets/conjugation.en.desktop.jpg" alt="The Conjugation page for a reviewed verb: its tense tables, answered from local data" />
+          <div class="shot-copy"><h3>Reviewed conjugation</h3><p>The conjugations shown for the tenses listed on the page come from the app's own reviewed data.</p></div>
         </div>
       </div>
     </section>
@@ -166,23 +169,24 @@
         <div>
           <div class="eyebrow">Questions</div>
           <h2>Before you start.</h2>
-          <p class="lede">Relire is intentionally lightweight: a browser, your own AI key for AI-powered features, and the French material you want to learn from.</p>
+          <p class="lede">A browser, the French you want to read, and, for the AI features, your own key.</p>
         </div>
         <div class="faq">
-          <details><summary>Is Relire free?</summary><p>Yes. The project is open source under the MIT License. AI features use your own Gemini API key, so any provider usage is tied to your own account and quota.</p></details>
-          <details><summary>Do I need an account?</summary><p>No Relire account is required. Your articles, vocabulary and progress are stored in your browser.</p></details>
-          <details><summary>What works without an API key?</summary><p>You can open the app, read sample or imported texts and use locally stored study data. AI explanations, generated speech and pronunciation assessment require a configured provider key.</p></details>
-          <details><summary>Is this an official TCF Canada preparation tool?</summary><p>No. Relire is an independent learning tool for reading, pronunciation and exercise practice. Pair it with official exam information, mock tests and teaching when preparing for TCF Canada.</p></details>
-          <details><summary>Can I inspect the source or report a problem?</summary><p>Yes. The complete project is on GitHub, including its architecture and issue tracker.</p></details>
+          <details><summary>Is Relire free?</summary><p>Yes. Relire is open source under the MIT License. AI features use your own key for the provider you choose (Gemini, an OpenAI-compatible service or Claude); local Ollama needs none.</p></details>
+          <details><summary>Do I need an account?</summary><p>No. Relire has no account and no app server of its own; articles, words, recordings and settings stay in your browser. The only backend is an optional read-only content service, which never receives your AI key, answers, articles or recordings.</p></details>
+          <details><summary>What works without a key?</summary><p>The three graded readers, the noun-gender reference and the conjugation of the 19 reviewed verbs. The sound chart and sound pairs play through the speech provider you selected; choose Device voice in Settings to hear them without a key.</p></details>
+          <details><summary>Who reviewed the content?</summary><p>The maintainer reviewed the 19 conjugation verbs and the noun-gender pack (17 ending tendencies, 337 example nouns). The graded readers were written and reviewed by AI models — a different model reviewed each text than the one that wrote it — not by a teacher, and each reader says so on its page.</p></details>
+          <details><summary>Is this an official TCF Canada preparation tool?</summary><p>No. Relire is an independent practice tool, not a mock-exam platform, and is not affiliated with France Éducation international or IRCC. AI pronunciation scores are estimates, not official exam marks.</p></details>
+          <details><summary>Can I inspect the source or report a problem?</summary><p>Yes. The complete project is on GitHub, including its issue tracker.</p></details>
         </div>
       </div>
     </section>
 
     <section class="cta">
       <div class="container">
-        <div class="eyebrow">Read · Understand · Shadow · Improve</div>
-        <h2>Use the French you are already reading.</h2>
-        <p>Open Relire in your browser, try a sample article, and decide whether this close-reading workflow fits the way you learn.</p>
+        <div class="eyebrow">Read · Tap · Say it back</div>
+        <h2>Start with one reader.</h2>
+        <p>Open Relire in your browser: the graded readers, noun gender and reviewed conjugation work right away, with no key.</p>
         <div class="hero-actions">
           <a class="button primary" href="./app/">Open Relire</a>
           <a class="button" href="https://github.com/royisme/relire" target="_blank" rel="noreferrer">View source on GitHub</a>
