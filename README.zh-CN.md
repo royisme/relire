@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://royisme.github.io/relire/"><img src="docs/media/hero.zh-CN.webp" alt="Relire：一本分级读物；点一个词，弹出释义和来自原文的例句；然后是已审校动词的变位页；最后是名词阴阳性页" width="100%"></a>
+<a href="https://royisme.github.io/relire/app/"><img src="docs/media/hero.zh-CN.webp" alt="Relire：一本分级读物；点一个词，弹出释义和来自原文的例句；然后是已审校动词的变位页；最后是名词阴阳性页" width="100%"></a>
 
 # Relire
 
@@ -8,7 +8,7 @@
 
 我在备考 TCF Canada，这是我为自己的法语精读做的工具。它在浏览器里运行，无需注册。学习记录保存在你的设备上；用到 AI 功能时，你问的内容会直接发给你选择的服务商。
 
-[**打开 Relire →**](https://royisme.github.io/relire/) · [English](README.md)
+[**打开 Relire →**](https://royisme.github.io/relire/app/) · [English](README.md)
 
 <sub>文章里的词语和句子解析、发音反馈和 AI 语音，使用你所选提供方的 Key（本地 Ollama 不需要）。
 分级读物、已审校的动词变位和名词阴阳性参考不需要 Key。</sub>
@@ -32,10 +32,10 @@
 
 ## 没有 Key？从这里开始
 
-- [分级读物](https://royisme.github.io/relire/#/read/graded)：三本入门读物，配编写好的词义、可展开的句子译文、设备语音朗读和阅读检查题（作答记录保存在本机）。
-- [名词阴阳性](https://royisme.github.io/relire/#/grammar/gender)：17 条词尾倾向，附已审校例词和例外，另有判断该用 le 还是 la 的练习。这些倾向对照词典做过统计，结果记录在 `src/data/noun-gender/pack.json`（可用 `bun scripts/readme-numbers.ts` 复现）：-tion 结尾 3,794 个名词里 3,780 个是阴性；-age 3,105 个里 3,091 个是阳性；-ure 1,216 个里 902 个是阴性；337 个例词经过审校。
-- [动词变位](https://royisme.github.io/relire/#/grammar/conjugation)：19 个已审校动词的完整变位表，直接从本地数据给出，不调用 AI，另有否定句和疑问句句式。
-- [法语音标与近音辨听](https://royisme.github.io/relire/#/speaking)：音标表和近音辨听练习。声音通过你所选的语音提供方播放；在设置里选“设备语音”，就能不加 Key 听。
+- [分级读物](https://royisme.github.io/relire/app/#/read/graded)：三本入门读物，配编写好的词义、可展开的句子译文、设备语音朗读和阅读检查题（作答记录保存在本机）。
+- [名词阴阳性](https://royisme.github.io/relire/app/#/grammar/gender)：17 条词尾倾向，附已审校例词和例外，另有判断该用 le 还是 la 的练习。这些倾向对照词典做过统计，结果记录在 `src/data/noun-gender/pack.json`（可用 `bun scripts/readme-numbers.ts` 复现）：-tion 结尾 3,794 个名词里 3,780 个是阴性；-age 3,105 个里 3,091 个是阳性；-ure 1,216 个里 902 个是阴性；337 个例词经过审校。
+- [动词变位](https://royisme.github.io/relire/app/#/grammar/conjugation)：19 个已审校动词的完整变位表，直接从本地数据给出，不调用 AI，另有否定句和疑问句句式。
+- [法语音标与近音辨听](https://royisme.github.io/relire/app/#/speaking)：音标表和近音辨听练习。声音通过你所选的语音提供方播放；在设置里选“设备语音”，就能不加 Key 听。
 
 <table>
 <tr>
@@ -102,7 +102,7 @@ ls src/i18n/locales/*.json | wc -l | tr -d ' '
 
 ## 在线体验
 
-打开 **https://royisme.github.io/relire/**。“今天”页、分级读物、名词阴阳性和已审校动词的变位都不需要 Key。AI 解析、AI 语音和发音评分需要你所选提供方的 Key，Ollama 和设备语音除外。
+打开 **https://royisme.github.io/relire/app/**。“今天”页、分级读物、名词阴阳性和已审校动词的变位都不需要 Key。AI 解析、AI 语音和发音评分需要你所选提供方的 Key，Ollama 和设备语音除外。
 
 ## 快速开始
 

@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://royisme.github.io/relire/"><img src="docs/media/hero.en.webp" alt="Relire: a graded reader; tapping a word opens a sheet with its meaning and an example from the text; then the Conjugation page for a reviewed verb; then the Gender page" width="100%"></a>
+<a href="https://royisme.github.io/relire/app/"><img src="docs/media/hero.en.webp" alt="Relire: a graded reader; tapping a word opens a sheet with its meaning and an example from the text; then the Conjugation page for a reviewed verb; then the Gender page" width="100%"></a>
 
 # Relire
 
@@ -8,7 +8,7 @@
 
 I am learning French for TCF Canada, so I built the reading tool I wanted. It runs in your browser with no account. Your learning data is stored on your device; when you use an AI feature, what you ask about goes straight to the provider you pick.
 
-[**Open Relire →**](https://royisme.github.io/relire/) · [简体中文](README.zh-CN.md)
+[**Open Relire →**](https://royisme.github.io/relire/app/) · [简体中文](README.zh-CN.md)
 
 <sub>Word and sentence lookups in articles, pronunciation feedback and AI speech use your own key for the provider you pick (local Ollama needs none).
 Graded readers, reviewed conjugation and the noun-gender reference work with no key.</sub>
@@ -32,10 +32,10 @@ Graded readers, reviewed conjugation and the noun-gender reference work with no 
 
 ## No key? Start here
 
-- [Graded readers](https://royisme.github.io/relire/#/read/graded): three starter readers with authored word meanings, revealable sentence translations, device-voice audio and local checkpoints.
-- [Noun gender](https://royisme.github.io/relire/#/grammar/gender): 17 ending tendencies with reviewed examples and exceptions, a le/la round and drills. The tendencies were measured against the dictionary in `src/data/noun-gender/pack.json` (reproduce with `bun scripts/readme-numbers.ts`): -tion is feminine in 3,780 of 3,794 nouns, -age is masculine in 3,091 of 3,105, -ure is feminine in 902 of 1,216; 337 example nouns are reviewed.
-- [Conjugation](https://royisme.github.io/relire/#/grammar/conjugation): complete tables for 19 reviewed verbs, answered from local data with no AI call, plus negation and question patterns.
-- [French sounds and Sound pairs](https://royisme.github.io/relire/#/speaking): the IPA chart and sound-pair listening drills. Audio plays through the speech provider you selected; choose Device voice in Settings to hear it without a key.
+- [Graded readers](https://royisme.github.io/relire/app/#/read/graded): three starter readers with authored word meanings, revealable sentence translations, device-voice audio and local checkpoints.
+- [Noun gender](https://royisme.github.io/relire/app/#/grammar/gender): 17 ending tendencies with reviewed examples and exceptions, a le/la round and drills. The tendencies were measured against the dictionary in `src/data/noun-gender/pack.json` (reproduce with `bun scripts/readme-numbers.ts`): -tion is feminine in 3,780 of 3,794 nouns, -age is masculine in 3,091 of 3,105, -ure is feminine in 902 of 1,216; 337 example nouns are reviewed.
+- [Conjugation](https://royisme.github.io/relire/app/#/grammar/conjugation): complete tables for 19 reviewed verbs, answered from local data with no AI call, plus negation and question patterns.
+- [French sounds and Sound pairs](https://royisme.github.io/relire/app/#/speaking): the IPA chart and sound-pair listening drills. Audio plays through the speech provider you selected; choose Device voice in Settings to hear it without a key.
 
 <table>
 <tr>
@@ -102,7 +102,7 @@ ls src/i18n/locales/*.json | wc -l | tr -d ' '
 
 ## Try it
 
-Open **https://royisme.github.io/relire/**. Today, the graded readers, noun gender and conjugation of the reviewed verbs work without a key. AI lookups, AI speech and pronunciation feedback need a key for the provider you choose, except Ollama and the device voice.
+Open **https://royisme.github.io/relire/app/**. Today, the graded readers, noun gender and conjugation of the reviewed verbs work without a key. AI lookups, AI speech and pronunciation feedback need a key for the provider you choose, except Ollama and the device voice.
 
 ## Quick start
 
