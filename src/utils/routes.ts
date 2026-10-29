@@ -7,7 +7,7 @@ export const SETTINGS_SECTIONS = ['ai', 'practice', 'words', 'prompts', 'data', 
 export const AI_PURPOSES = ['text', 'ocr', 'speech', 'assessment'] as const;
 export type AiPurposeRoute = (typeof AI_PURPOSES)[number];
 export type SettingsSection = (typeof SETTINGS_SECTIONS)[number];
-export type GrammarSectionRoute = 'conjugation' | 'gender';
+export type GrammarSectionRoute = 'conjugation' | 'gender' | 'atelier';
 export type Route =
   | { name: 'today' }
   | { name: 'library' }
@@ -84,6 +84,7 @@ export function routeHref(route: Route): string {
       return '#/mistakes';
     case 'grammar':
       if (route.section === 'gender') return '#/grammar/gender';
+      if (route.section === 'atelier') return '#/grammar/atelier';
       if (route.section === 'conjugation')
         return `#/grammar/conjugation${route.verb ? `?verb=${encodeURIComponent(route.verb)}` : ''}`;
       return `#/grammar${route.tag ? `?tag=${encodeURIComponent(route.tag)}` : ''}`;
@@ -171,11 +172,11 @@ export function parseRoute(
       route = hasContentService
         ? { name: 'grammar', ...(GRAMMAR_TAGS.includes(tag) ? { tag } : {}) }
         : { name: 'grammar', section: 'conjugation' };
-    } else if (root === 'grammar' && parts.length === 2 && ['conjugation', 'gender'].includes(sub)) {
+    } else if (root === 'grammar' && parts.length === 2 && ['conjugation', 'gender', 'atelier'].includes(sub)) {
       const verb = params.get('verb')?.trim();
       route =
-        sub === 'gender'
-          ? { name: 'grammar', section: 'gender' }
+        sub === 'gender' || sub === 'atelier'
+          ? { name: 'grammar', section: sub }
           : { name: 'grammar', section: 'conjugation', ...(verb ? { verb } : {}) };
     } else if (root === 'grammar' && sub === 'topics' && parts.length === 3 && hasContentService)
       route = { name: 'grammarTopic', topicId: decodeURIComponent(third) };

@@ -6,6 +6,10 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Added
+
+- Grammar → Sentence workshop: build French sentences from bricks by tapping them into a row, with fusing brick pairs (à + le → au), a breakdown of the verb's sockets and sound cues you can mute. It is behind the AI key and shows in development builds only for now.
+
 ### Changed
 
 - The English and Chinese landing pages now match the README: what works with no key (graded readers, noun gender, the supported conjugation tenses), FSRS-6 word review, the new screenshots, and honest notes on keys, device voice, Morphalou-measured gender tendencies, who reviewed what, and score estimates.

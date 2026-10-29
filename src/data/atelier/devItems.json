@@ -1,0 +1,200 @@
+[
+  {
+    "meaning": {
+      "zh": "我们去海滩。",
+      "en": "We are going to the beach."
+    },
+    "sentence": "Nous allons à la plage.",
+    "variants": [],
+    "bricks": [
+      {
+        "text": "Nous",
+        "role": "subject"
+      },
+      {
+        "text": "allons",
+        "role": "verb"
+      },
+      {
+        "text": "à",
+        "role": "preposition"
+      },
+      {
+        "text": "la",
+        "role": "determiner"
+      },
+      {
+        "text": "plage",
+        "role": "noun"
+      },
+      {
+        "text": ".",
+        "role": "punctuation"
+      }
+    ],
+    "distractors": [
+      {
+        "text": "au",
+        "role": "contraction",
+        "reason": {
+          "zh": "au 是 à + le，而 plage 是阴性词，要用 à la。",
+          "en": "au is à + le, and plage is feminine, so it takes à la."
+        }
+      },
+      {
+        "text": "vont",
+        "role": "verb",
+        "reason": {
+          "zh": "vont 配 ils 或 elles；nous 配 allons。",
+          "en": "vont goes with ils or elles; nous takes allons."
+        }
+      }
+    ],
+    "frame": {
+      "verb": 1,
+      "sockets": [
+        {
+          "label": "à + nom",
+          "filledBy": [2, 3, 4]
+        }
+      ]
+    },
+    "explanation": {
+      "zh": "aller 表示去某处，后面用 à 加地点名词。plage 是阴性，所以 à 后面接 la。",
+      "en": "Aller says where you go, with à and a place noun. Plage is feminine, so à is followed by la."
+    },
+    "grammarTag": "prepositions"
+  },
+  {
+    "meaning": {
+      "zh": "我去看电影。",
+      "en": "I am going to the cinema."
+    },
+    "sentence": "Je vais au cinéma.",
+    "variants": [],
+    "bricks": [
+      {
+        "text": "Je",
+        "role": "subject"
+      },
+      {
+        "text": "vais",
+        "role": "verb"
+      },
+      {
+        "text": "au",
+        "role": "contraction"
+      },
+      {
+        "text": "cinéma",
+        "role": "noun"
+      },
+      {
+        "text": ".",
+        "role": "punctuation"
+      }
+    ],
+    "distractors": [
+      {
+        "text": "à",
+        "role": "preposition",
+        "reason": {
+          "zh": "à 遇到 le 要合成 au。",
+          "en": "à meets le and the two become au."
+        }
+      },
+      {
+        "text": "le",
+        "role": "determiner",
+        "reason": {
+          "zh": "à + le 合成 au，不能分开写。",
+          "en": "à + le is written as one word, au."
+        }
+      }
+    ],
+    "frame": {
+      "verb": 1,
+      "sockets": [
+        {
+          "label": "à + nom",
+          "filledBy": [2, 3]
+        }
+      ]
+    },
+    "explanation": {
+      "zh": "à 加阳性名词前的 le 时，两者合成 au：je vais au cinéma。",
+      "en": "When à meets le before a masculine noun, the two fuse into au: je vais au cinéma."
+    },
+    "grammarTag": "prepositions"
+  },
+  {
+    "meaning": {
+      "zh": "她不吃面包。",
+      "en": "She does not eat bread."
+    },
+    "sentence": "Elle ne mange pas de pain.",
+    "variants": [],
+    "bricks": [
+      {
+        "text": "Elle",
+        "role": "subject"
+      },
+      {
+        "text": "ne",
+        "role": "negation"
+      },
+      {
+        "text": "mange",
+        "role": "verb"
+      },
+      {
+        "text": "pas",
+        "role": "negation"
+      },
+      {
+        "text": "de",
+        "role": "determiner"
+      },
+      {
+        "text": "pain",
+        "role": "noun"
+      },
+      {
+        "text": ".",
+        "role": "punctuation"
+      }
+    ],
+    "distractors": [
+      {
+        "text": "du",
+        "role": "determiner",
+        "reason": {
+          "zh": "否定句里，直接宾语前的 du 变成 de。",
+          "en": "In a negative sentence, du before a direct object becomes de."
+        }
+      },
+      {
+        "text": "des",
+        "role": "determiner",
+        "reason": {
+          "zh": "pain 是单数，des 是复数冠词。",
+          "en": "Pain is singular, and des is a plural article."
+        }
+      }
+    ],
+    "frame": {
+      "verb": 2,
+      "sockets": [
+        {
+          "label": "COD",
+          "filledBy": [4, 5]
+        }
+      ]
+    },
+    "explanation": {
+      "zh": "否定句里，直接宾语（COD）前的 du、de la、des 变成 de：elle ne mange pas de pain。",
+      "en": "In a negative sentence, du, de la and des before a direct object (COD) become de: elle ne mange pas de pain."
+    },
+    "grammarTag": "negation"
+  }
+]
