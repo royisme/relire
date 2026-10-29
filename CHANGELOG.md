@@ -8,6 +8,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Changed
 
+- The English and Chinese landing pages now match the README: what works with no key (graded readers, noun gender, the supported conjugation tenses), FSRS-6 word review, the new screenshots, and honest notes on keys, device voice, Morphalou-measured gender tendencies, who reviewed what, and score estimates.
 - README links and the shared link card now point at the app (`/relire/app/`) instead of the landing page.
 - The line under a graded reader's title now says "AI-written, reviewed by AI, not human-reviewed" without naming models, so it can no longer disagree with the reader's review record.
 - The README is rewritten around reading, tapping and saying a sentence, with new screenshots and a short loop; the privacy paragraph moved to PRIVACY.md.
