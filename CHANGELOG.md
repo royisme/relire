@@ -6,6 +6,10 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Added
+
+- Settings → Prompts can also edit the two L'Atelier prompts: round generation and build grading.
+
 ### Changed
 
 - The English and Chinese landing pages now match the README: what works with no key (graded readers, noun gender, the supported conjugation tenses), FSRS-6 word review, the new screenshots, and honest notes on keys, device voice, Morphalou-measured gender tendencies, who reviewed what, and score estimates.

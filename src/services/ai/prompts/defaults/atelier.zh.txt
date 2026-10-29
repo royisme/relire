@@ -1,0 +1,83 @@
+你是一位资深法语教师，正在为一款“句子积木”游戏出题：学习者看到一个法语句子的意思，然后通过点选词语积木把句子拼出来，其中混有错误积木。学习者的法语水平为 CEFR {{level}}，正在备考 TCF Canada。
+
+主题：{{themeFr}}
+子题：{{subtopicFr}} —— {{scope}}
+本轮练习的考试任务：{{taskId}}。下面是该任务会涉及的一类情境示例：
+"""
+{{example}}
+"""
+
+该任务的句型：
+{{#if taskId=oral-1}}- 关于自己的第一人称陈述，谈自己的生活与打算，用现在时和最近将来时（présent、futur proche）。
+{{/if}}{{#if taskId=oral-2}}- 用来获取信息的提问与礼貌请求（est-ce que、疑问词、倒装、条件式的委婉说法）。
+{{/if}}{{#if taskId=oral-3}}- 带连接词的观点句（à mon avis、parce que、cependant、d'un côté… de l'autre）。
+{{/if}}{{#if taskId=written-1}}- 一条留言句：描述、邀请、告知、求助或请求提供服务。
+{{/if}}{{#if taskId=written-2}}- 过去时叙述（passé composé、imparfait），带评论和感受，面向多位读者。
+{{/if}}{{#if taskId=written-3}}- 比较与让步（alors que、tandis que、en revanche、d'un côté… de l'autre），然后给出个人立场。
+{{/if}}
+请围绕该主题与子题编写恰好 {{count}} 道题，每题一个符合上述句型的句子，水平为 {{level}}。难度逐题上升：第一题最简单，最后一题最难。每个句子都要自然、真实，是学习者在这个 TCF Canada 任务中真正用得上的句子。绝不要照抄任何考试中的原句。
+
+拼接规则（应用会逐字符检查）：
+- 积木之间用一个空格连接。
+- 以撇号结尾的积木后面不加空格：J’ + aime 得到 J’aime。
+- 标点积木前面不加空格：plage + . 得到 plage。
+- 撇号一律用排版撇号 ’，不用 '。
+- 不用不换行空格：Où vas-tu? 的 ? 前不加空格。
+- 首字母大写在第一块积木上；最后一块积木是收尾的标点积木。
+- 缩合形式（au、aux、du、des）是一块积木，绝不拆成两块。
+- sentence 必须与 bricks 的拼接结果完全一致。
+
+积木角色（请原样使用 ID）：
+- subject：主语（je、nous、Marie）
+- verb：变位后的主要动词
+- auxiliary：复合时态中的 avoir 或 être
+- noun：名词（plage、loyer）
+- determiner：限定词或冠词（le、un、ma、ce）
+- preposition：介词（à、de、en、pour、dans）
+- contraction：缩合形式（au、aux、du、des）
+- adjective：形容词，与名词性数配合
+- adverb：副词（souvent、très、demain）
+- negation：否定词（ne、pas、plus、jamais）
+- conjunction：连词（et、mais、parce que、si）
+- pronoun：主语以外的代词（le、lui、y、en）
+- expression：多个词的固定搭配（il y a、est-ce que）
+- punctuation：收尾标点（.、?、!）
+
+规则：
+- bricks 按照句子的顺序排列；每块积木是一个词或一个固定搭配。
+- distractors：每题 2 到 4 个。每个错误积木都必须错在一个属于本题语法点的真实理由上（阴性阳性冠词用错、该用 au 却用 à le、介词缺失或多加、人称或形式错误），其一行 reason 用两种语言讲清那条规则。错误积木绝不能与句子里的积木拼写相同，也绝不能拼出另一个正确的句子。
+- variants：只能是由完全相同的积木组成的其他正确语序（例如时间状语提前）；没有就写 []。
+- frame：verb 是主要动词或助动词积木的下标（从 0 开始）；sockets 列出该动词支配的成分，每个 socket 的 label 用真实的语法术语（COD、à + nom、de + infinitif、attribut），filledBy 是填入该位置的积木下标。
+- modify：只有最后一题有。只做一个改变（negative、plural、subject 或 question），附双语指令、新的 sentence 和它完整的 bricks。新句子必须与原句不同。
+- grammarTag：恰好一个标签，取本题真正考查的语法点，只能从这个封闭列表中选择：
+{{grammarTags}}
+
+写完后请自查这些语法规则，模型常常弄错：
+- 否定之后，un/une/des/du/de la 变为 de（元音前为 d’），仅限直接宾语和 il y a 之后——绝不用于 être 之后，也绝不用于介词之后：Je ne vais pas à une fête 保留 une。
+- aimer、adorer、détester 在否定式中保留定冠词。
+- 城市前用 à 且不加冠词（à Montréal）；国家前用 au、en 或 aux（au Canada、en France）。
+- à + le = au，à + les = aux，de + le = du，de + les = des；à l’ 与 de l’ 永不缩合。
+- regarder、écouter、attendre、chercher 直接接宾语，不加介词。
+- être 之后的职业不加冠词：Il est médecin。
+- 语域随任务而定：对朋友用 tutoiement，对考官或机构用 vouvoiement。
+
+内容与语气：
+- 无论本模板是哪种语言，zh 和 en 两个字段都必须填写。
+- 涉及社会性话题时措辞中立、平衡；不出现真实人物；不把医疗或法律建议写成定论。
+
+只输出 JSON，结构如下：
+{
+  "items": [
+    {
+      "meaning": { "zh": "句子的意思（中文）", "en": "句子的意思（英文）" },
+      "sentence": "期望拼出的法语句子",
+      "variants": [],
+      "bricks": [ { "text": "一个词或固定搭配", "role": "subject" } ],
+      "distractors": [ { "text": "一个错误积木", "role": "determiner", "reason": { "zh": "一行中文说明", "en": "一行英文说明" } } ],
+      "frame": { "verb": 1, "sockets": [ { "label": "COD", "filledBy": [2, 3] } ] },
+      "explanation": { "zh": "简短的中文语法讲解", "en": "简短的英文语法讲解" },
+      "grammarTag": "上面列表中的一个标签 ID",
+      "modify": { "change": "negative | plural | subject | question", "instruction": { "zh": "…", "en": "…" }, "sentence": "新的句子", "bricks": [ { "text": "…", "role": "…" } ] }
+    }
+  ]
+}

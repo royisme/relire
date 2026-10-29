@@ -1218,7 +1218,9 @@
     "adaptive": "Adaptive drills",
     "exercises": "Exercises from an article",
     "transcribe": "Import: read article pages",
-    "conjugate": "Verb conjugation"
+    "conjugate": "Verb conjugation",
+    "atelier": "L'Atelier: round generation",
+    "atelierGrade": "L'Atelier: build grading"
   },
   "prosody": {
     "title": "Pronunciation markers",
