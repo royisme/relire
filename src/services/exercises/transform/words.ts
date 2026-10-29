@@ -38,17 +38,34 @@ export function verbOf(sentence: Sentence, glossary: ReaderGlossaryEntry[]): Ver
   return verbs.length === 1 ? { ...verbs[0], words } : null;
 }
 
-/** The first noun after the finite verb: the phrase a version 1 rule may change, or undefined when there is none. */
+/**
+ * The first noun after the finite verb: the phrase a version 1 rule may change, or undefined when there is none.
+ * A preposition between the verb and the noun (`à la plage`, `dans cet appartement`) makes it an indirect
+ * object, not the phrase these rules change. The `de la`, `de l’`, `du` and `au`/`aux` of a partitive or a
+ * contracted article are not prepositions here: they open the determiner `determinerOf` already reports.
+ */
 export function firstNounAfter(
   sentence: Sentence,
   glossary: ReaderGlossaryEntry[],
   words: ReaderWordToken[],
   verbIndex: number,
 ) {
-  return words.flatMap((word, index) => {
+  const noun = words.flatMap((word, index) => {
     const entry = index > verbIndex ? nounEntryOf(sentence, glossary, word.ordinal) : undefined;
     return entry ? [{ word, index, entry }] : [];
   })[0];
+  if (!noun) return undefined;
+  const determiner = determinerOf(sentence, glossary, words, noun.index);
+  const indirect = words.some(
+    (word, index) =>
+      index > verbIndex &&
+      index < noun.index &&
+      determiner?.start !== word.start &&
+      entriesOf(sentence, glossary, word.ordinal).some(
+        (entry) => entry.pos === 'function' && entry.sense === 'preposition',
+      ),
+  );
+  return indirect ? undefined : noun;
 }
 
 /**
