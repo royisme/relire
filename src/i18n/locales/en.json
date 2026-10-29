@@ -438,8 +438,7 @@
       "empty": "No notes to import.",
       "failed": "Import failed: {{reason}}",
       "result": "{{imported}} imported, {{merged}} merged, {{rejected}} rejected.",
-      "rejectedRow": "Row {{row}}: {{reason}}",
-      "saved": "Imported note"
+      "rejectedRow": "Row {{row}}: {{reason}}"
     },
     "wordbooks": {
       "title": "Wordbooks",

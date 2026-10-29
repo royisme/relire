@@ -6,6 +6,10 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Changed
+
+- Imported word cards no longer show the “Imported note” label or the deck name; the wordbook’s example sentences, when the word is in the book, are unchanged.
+
 ## [0.1.0] - 2026-10-29
 
 First tagged version. From here on, a stored data shape, route or key that changes needs a migration.

@@ -438,8 +438,7 @@
       "empty": "没有可导入的笔记。",
       "failed": "导入失败：{{reason}}",
       "result": "新增 {{imported}} 条，合并 {{merged}} 条，拒绝 {{rejected}} 条。",
-      "rejectedRow": "第 {{row}} 行：{{reason}}",
-      "saved": "导入的笔记"
+      "rejectedRow": "第 {{row}} 行：{{reason}}"
     },
     "wordbooks": {
       "title": "词书",
