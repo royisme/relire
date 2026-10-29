@@ -7,6 +7,8 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 ## [Unreleased]
 
 ### Added
+- The reader practice also offers replacing the object with le, la, l’ or les.
+- The reader practice also offers turning a sentence into an est-ce que question.
 - After a graded reader's checkpoints, "Practise this pattern" makes a grammar set from that reader's own sentences: negation (ne … pas, with `de` for the article) and singular/plural on the noun phrase after the verb. The answers are computed by plain code, so it needs no AI and no key; a sentence a rule cannot cover is skipped, and the saved set opens in Practice like any other.
 - Settings → Words has a Wordbooks block: My words, the built-in wordbook (once downloaded) and every imported deck are listed with their word counts; choose the one wordbook to study — the choice saves at once, My words is the default and always present, and only that wordbook's words enter review, the run and Today — and delete an imported deck after a plain confirmation that says how many words and review histories go with it and that a word living in another wordbook keeps its progress.
 - Speak French with a local Ollama Phonon model, without a key, using the server, model and optional voice you choose in Settings. Requires Ollama 0.40.9+ on Apple Silicon; the learner pulls the CC BY-NC 4.0 noncommercial 40M model separately.
@@ -159,6 +161,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 - Model, voice and level names, service errors and remaining labels moved into the locale files; Chinese copy tidied (no French parentheticals, no "Mac" wording); page title and `lang` follow the language.
 
 ### Fixed
+- An imported card’s front no longer shows a trailing bracketed note such as the pronunciation; the note moves to the back, ahead of the part of speech.
 - Deleting the deck chosen for study no longer leaves the wordbook radios locked on “Saving…”: each save now clears its own state once it settles.
 - Imported cards move recognized trailing part-of-speech tags to the back, keeping them off the front and reading aloud only the word.
 - The vocabulary run summary omits the next-card line while any card or new word is still available, and formats the next return time with the interface language and date-only midnight rules used across Words.

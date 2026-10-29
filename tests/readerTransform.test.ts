@@ -9,7 +9,7 @@ import {
   type ReaderGlossaryEntry,
   type Sentence,
 } from '../src/types/gradedReader';
-import { READER_TRANSFORM_KINDS } from '../src/types/readerTransform';
+import { READER_TRANSFORM_KINDS, type ReaderTransformKind } from '../src/types/readerTransform';
 
 const readers = starterJson.readers.map((reader) => PublishedReaderSchema.parse(reader));
 const bundledSentences = readers.flatMap((reader) => reader.body.sentences.map((sentence) => ({ reader, sentence })));
@@ -58,8 +58,17 @@ test('number covers the seven noun-phrase sentences and skips subject and c’es
   }
 });
 
-test('every bundled reader offers both kinds', () => {
-  for (const reader of readers) expect(coveredKinds(reader)).toEqual(READER_TRANSFORM_KINDS);
+/** Pinned per bundled reader from its actual sentences: a1-01 has no definite object, so it lacks `pronoun`. */
+const COVERED: Record<string, ReaderTransformKind[]> = {
+  'a1-01': ['negation', 'number', 'question'],
+  'a1-02': ['negation', 'number', 'question', 'pronoun'],
+  'a1-03': ['negation', 'number', 'question', 'pronoun'],
+};
+
+test('each bundled reader offers exactly the kinds its sentences cover, and every kind is covered', () => {
+  expect(new Set(Object.keys(COVERED))).toEqual(new Set(readers.map((reader) => reader.body.id)));
+  for (const reader of readers) expect(coveredKinds(reader)).toEqual(COVERED[reader.body.id]);
+  expect(new Set(readers.flatMap(coveredKinds))).toEqual(new Set(READER_TRANSFORM_KINDS));
 });
 
 // Invented TEST entries and sentences only; the schema needs every word bound to local glossary entries.
@@ -144,41 +153,81 @@ const sentence = (id: string, fr: string, bindings: string[][]): Sentence =>
   });
 
 /** Rows assert only the kinds named; `null` pins a skip, a missing kind is not asserted. */
-const CASES: { sentence: Sentence; negation?: string | null; number?: string | null }[] = [
+const CASES: {
+  sentence: Sentence;
+  negation?: string | null;
+  number?: string | null;
+  question?: string | null;
+  pronoun?: string | null;
+}[] = [
   {
     sentence: sentence('a1', 'J’ai un ami.', [['t-je', 't-avoir'], ['t-un'], ['t-ami']]),
     negation: 'Je n’ai pas d’ami.',
     number: 'J’ai des amis.',
+    question: 'Est-ce que j’ai un ami ?',
   },
   {
     sentence: sentence('a2', 'Elle a des amis.', [['t-elle'], ['t-avoir'], ['t-des'], ['t-ami']]),
     number: 'Elle a un ami.',
+    question: 'Est-ce qu’elle a des amis ?',
   },
   {
     sentence: sentence('a3', 'Elle aime l’école.', [['t-elle'], ['t-aimer'], ['t-ecole']]),
     negation: 'Elle n’aime pas l’école.',
     number: 'Elle aime les écoles.',
+    question: 'Est-ce qu’elle aime l’école ?',
   },
   {
     sentence: sentence('a4', 'Il y a des chambres.', [['t-il'], ['t-y'], ['t-avoir'], ['t-des'], ['t-chambre']]),
     number: 'Il y a une chambre.',
+    question: 'Est-ce qu’il y a des chambres ?',
   },
-  { sentence: sentence('e1', 'J’ai un bras.', [['t-je', 't-avoir'], ['t-un'], ['t-bras']]), number: null },
-  { sentence: sentence('e2', 'J’ai un prix.', [['t-je', 't-avoir'], ['t-un'], ['t-prix']]), number: null },
-  { sentence: sentence('e3', 'J’ai un nez.', [['t-je', 't-avoir'], ['t-un'], ['t-nez']]), number: null },
-  { sentence: sentence('e4', 'J’ai un cheval.', [['t-je', 't-avoir'], ['t-un'], ['t-cheval']]), number: null },
-  { sentence: sentence('e5', 'J’ai un travail.', [['t-je', 't-avoir'], ['t-un'], ['t-travail']]), number: null },
-  { sentence: sentence('e6', 'J’ai un bateau.', [['t-je', 't-avoir'], ['t-un'], ['t-bateau']]), number: null },
-  { sentence: sentence('e7', 'J’ai un feu.', [['t-je', 't-avoir'], ['t-un'], ['t-feu']]), number: null },
+  {
+    sentence: sentence('e1', 'J’ai un bras.', [['t-je', 't-avoir'], ['t-un'], ['t-bras']]),
+    number: null,
+    question: 'Est-ce que j’ai un bras ?',
+  },
+  {
+    sentence: sentence('e2', 'J’ai un prix.', [['t-je', 't-avoir'], ['t-un'], ['t-prix']]),
+    number: null,
+    question: 'Est-ce que j’ai un prix ?',
+  },
+  {
+    sentence: sentence('e3', 'J’ai un nez.', [['t-je', 't-avoir'], ['t-un'], ['t-nez']]),
+    number: null,
+    question: 'Est-ce que j’ai un nez ?',
+  },
+  {
+    sentence: sentence('e4', 'J’ai un cheval.', [['t-je', 't-avoir'], ['t-un'], ['t-cheval']]),
+    number: null,
+    question: 'Est-ce que j’ai un cheval ?',
+  },
+  {
+    sentence: sentence('e5', 'J’ai un travail.', [['t-je', 't-avoir'], ['t-un'], ['t-travail']]),
+    number: null,
+    question: 'Est-ce que j’ai un travail ?',
+  },
+  {
+    sentence: sentence('e6', 'J’ai un bateau.', [['t-je', 't-avoir'], ['t-un'], ['t-bateau']]),
+    number: null,
+    question: 'Est-ce que j’ai un bateau ?',
+  },
+  {
+    sentence: sentence('e7', 'J’ai un feu.', [['t-je', 't-avoir'], ['t-un'], ['t-feu']]),
+    number: null,
+    question: 'Est-ce que j’ai un feu ?',
+  },
   {
     sentence: sentence('v1', 'Le livre rouge.', [['t-le'], ['t-livre'], ['t-rouge']]),
     negation: null,
     number: null,
+    question: null,
   },
   {
     sentence: sentence('v2', 'Marie chante et danse.', [['t-marie'], ['t-chanter'], ['t-et'], ['t-danser']]),
     negation: null,
     number: null,
+    question: null,
   },
 ];
 

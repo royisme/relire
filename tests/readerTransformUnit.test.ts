@@ -154,7 +154,7 @@ test('strict provenance rejects every missing/extra field and invalid marker, id
   }
   for (const [key, value] of [
     ['source', 'reader-dictation'],
-    ['kind', 'question'],
+    ['kind', 'interrogative'],
     ['ignoreSentencePunctuation', false],
     ['readerId', 'Bad slug'],
     ['sentenceId', 'bad_slug'],

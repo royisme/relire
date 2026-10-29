@@ -1,8 +1,8 @@
-/** Owner decision: a trailing part-of-speech tag leaves the imported front and leads the back. */
+/** Owner decision: a trailing part-of-speech tag and bracketed note leave the imported front and lead the back. */
 import { expect, test } from 'bun:test';
 import { parsePlainText } from '../src/services/vocabulary/import/plainText';
 import type { ImportColumns, ImportedNote } from '../src/services/vocabulary/import/prepare';
-import { prepareVocabularyImport, splitPartOfSpeech } from '../src/services/vocabulary/import/prepare';
+import { prepareVocabularyImport, splitFront } from '../src/services/vocabulary/import/prepare';
 import { vocabularyKey } from '../src/services/vocabulary/identity';
 
 const now = new Date(2026, 9, 25, 12).getTime();
@@ -31,8 +31,8 @@ test('a trailing tag group splits off the front, dot groups and " / " groups kep
     'adj. / n. / n.m.',
     'v.i. / v.t.dir.',
   ])
-    expect(splitPartOfSpeech(`femme ${pos}`)).toEqual({ word: 'femme', pos });
-  expect(splitPartOfSpeech('femme n.f.')).toEqual({ word: 'femme', pos: 'n.f.' });
+    expect(splitFront(`femme ${pos}`)).toEqual({ word: 'femme', pos });
+  expect(splitFront('femme n.f.')).toEqual({ word: 'femme', pos: 'n.f.' });
 });
 
 test('every member of the closed tag set splits alone', () => {
@@ -58,14 +58,27 @@ test('every member of the closed tag set splits alone', () => {
     'poss',
     'inv',
   ])
-    expect(splitPartOfSpeech(`mot ${member}.`)).toEqual({ word: 'mot', pos: `${member}.` });
+    expect(splitFront(`mot ${member}.`)).toEqual({ word: 'mot', pos: `${member}.` });
 });
 
 test('a bare tag, a middle tag, a foreign part, a missing dot, capitals and no space stay on the front', () => {
   for (const front of ['n.m.', 'chat n.m. suite', 'chat n.x.', 'chat n.m', 'chat N.M.', 'xn.m.'])
-    expect(splitPartOfSpeech(front)).toEqual({ word: front });
-  // Bracketed pronunciation is not parsed, so only the tag moves.
-  expect(splitPartOfSpeech('club [klœb] n.m.')).toEqual({ word: 'club [klœb]', pos: 'n.m.' });
+    expect(splitFront(front)).toEqual({ word: front });
+  // A trailing bracketed note splits off the front together with the tag.
+  expect(splitFront('club [klœb] n.m.')).toEqual({ word: 'club', note: '[klœb]', pos: 'n.m.' });
+});
+
+test('the five bracketed fronts of the owner file give a clean word, the note and the part of speech', () => {
+  expect(splitFront('club [klœb] n.m.')).toEqual({ word: 'club', note: '[klœb]', pos: 'n.m.' });
+  expect(splitFront('badge [badʒ] n.m.')).toEqual({ word: 'badge', note: '[badʒ]', pos: 'n.m.' });
+  expect(splitFront('fils [fis] n.m.')).toEqual({ word: 'fils', note: '[fis]', pos: 'n.m.' });
+  expect(splitFront('nounours [nunurs] n.m.')).toEqual({ word: 'nounours', note: '[nunurs]', pos: 'n.m.' });
+  expect(splitFront('Montréal [mɔ̃real]')).toEqual({ word: 'Montréal', note: '[mɔ̃real]' });
+});
+
+test('a front without a bracket is unchanged and a front that is only a bracket stays whole', () => {
+  expect(splitFront('bonjour')).toEqual({ word: 'bonjour' });
+  expect(splitFront('[klœb]')).toEqual({ word: '[klœb]' });
 });
 
 test('the owner file imports with each tag moved to the back and every word still matching its key', () => {
@@ -78,18 +91,45 @@ test('the owner file imports with each tag moved to the back and every word stil
     'bonjour\t你好\tL1',
   ]);
   expect(batch.rejected).toEqual([]);
-  const words = ['appeler(s’)', 'bienvenue', 'français(e)', 'club [klœb]', 'bonjour'];
+  const words = ['appeler(s’)', 'bienvenue', 'français(e)', 'club', 'bonjour'];
   expect(batch.notes.map((note) => note.word)).toEqual(words);
   expect(batch.notes.map((note) => imported(note).front)).toEqual(words);
   expect(batch.notes.map((note) => imported(note).back)).toEqual([
     'v.pr. 名叫',
     'n.f. 欢迎',
     'adj. / n. / n.m. 法国的；法国人；法语',
-    'n.m. 〈英〉俱乐部，会，社',
+    '[klœb] n.m. 〈英〉俱乐部，会，社',
     '你好',
   ]);
   for (const note of batch.notes) expect(vocabularyKey(imported(note).front)).toBe(vocabularyKey(note.word));
   expect(batch.notes[4].context.id).toBe(JSON.stringify(['import', 'TEST deck', '6']));
+});
+
+test('a bracketed front imports with the note and the tag leading the back and a clean word key', () => {
+  const batch = prepare(['club [klœb] n.m.\t〈英〉俱乐部，会，社']);
+  expect(batch.rejected).toEqual([]);
+  const note = batch.notes[0];
+  expect(note.word).toBe('club');
+  expect(imported(note).front).toBe('club');
+  expect(imported(note).back).toBe('[klœb] n.m. 〈英〉俱乐部，会，社');
+  expect(vocabularyKey(note.word)).toBe(vocabularyKey('club'));
+});
+
+test('an empty back stays empty even with a note and a tag', () => {
+  const batch = prepare(['club [klœb] n.m.\t']);
+  expect(batch.notes).toEqual([]);
+  expect(batch.rejected).toEqual([
+    { row: 1, reason: { key: 'vocab.import.errors.invalidFields', params: { fields: 'definition.back' } } },
+  ]);
+});
+
+test('a bracket on the back stays on the back untouched', () => {
+  const batch = prepare(['de prép.\t[表示所属、所有]']);
+  expect(batch.rejected).toEqual([]);
+  const note = batch.notes[0];
+  expect(note.word).toBe('de');
+  expect(imported(note).front).toBe('de');
+  expect(imported(note).back).toBe('prép. [表示所属、所有]');
 });
 
 test('an example column is untouched by the split', () => {
