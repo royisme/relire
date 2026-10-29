@@ -3,7 +3,7 @@
   "description": "French reading and pronunciation practice with AI feedback, for learners preparing for TCF Canada.",
   "license": "MIT",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

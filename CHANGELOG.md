@@ -1,10 +1,16 @@
 # Changelog
 
-What changed in Relire and why, newest first. Format follows [Keep a Changelog](https://keepachangelog.com); the project is not released yet, so everything sits under **Unreleased** until the first tagged version.
+What changed in Relire and why, newest first. Format follows [Keep a Changelog](https://keepachangelog.com); the first tagged version is 0.1.0; changes after it sit under **Unreleased**.
 
 **How to use this file:** every change a user could notice (a feature, a behaviour change, a removal, a fix) gets a line under Unreleased in the same commit that makes it. Group by *Added / Changed / Fixed / Removed*. Say what the user gets, not which files moved. When a version is tagged, rename Unreleased to the version and date and start a new Unreleased.
 
 ## [Unreleased]
+
+## [0.1.0] - 2026-10-29
+
+First tagged version. From here on, a stored data shape, route or key that changes needs a migration.
+
+Known gaps: the beginner graded readers are AI-reviewed, not yet reviewed by a person (#67); the app has not been checked on real phones or with a real Ollama run; the content service is not deployed.
 
 ### Added
 - The reader practice also offers replacing the object with le, la, l’ or les.
