@@ -1,12 +1,12 @@
 /** The guide reaches a graded reader without any key: the bundled first reader, the free step flow, and the
- * banner that stays off the graded routes. TEST content only. */
+ * banner that stays off the routes that work without a key. TEST content only. */
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import i18n from 'i18next';
 import { I18nextProvider } from 'react-i18next';
 import { firstBundledReaderId } from '../src/services/gradedReaders/firstReader';
-import { parseRoute, worksWithoutKey } from '../src/utils/routes';
+import { parseRoute, routeHref, worksWithoutKey } from '../src/utils/routes';
 import { OnboardingDialog } from '../src/components/OnboardingDialog';
 import * as api from '../src/services/api';
 import en from '../src/i18n/locales/en.json';
@@ -49,14 +49,24 @@ describe('first bundled reader', () => {
   });
 });
 
-describe('the key banner leaves the graded routes alone', () => {
+describe('the key banner leaves the keyless routes alone', () => {
   test('the graded list and one reader work without a key', () => {
     expect(worksWithoutKey(parseRoute('#/read/graded').route)).toBe(true);
     expect(worksWithoutKey(parseRoute('#/read/graded/a1-01').route)).toBe(true);
   });
 
+  test('Grammar gender and conjugation work without a key', () => {
+    for (const hash of ['#/grammar', '#/grammar/gender', '#/grammar/conjugation', '#/grammar/conjugation?verb=aller'])
+      expect(worksWithoutKey(parseRoute(hash).route)).toBe(true);
+    // A topic page is a content-service address and still needs a key; so does Speaking.
+    const topic = parseRoute(routeHref({ name: 'grammarTopic', topicId: 'test-only' }), true).route;
+    expect(topic.name).toBe('grammarTopic');
+    expect(worksWithoutKey(topic)).toBe(false);
+    expect(worksWithoutKey(parseRoute('#/speaking').route)).toBe(false);
+  });
+
   test('every other place keeps the banner', () => {
-    for (const hash of ['#/read', '#/read/test-article', '#/words', '#/speaking', '#/grammar'])
+    for (const hash of ['#/read', '#/read/test-article', '#/words', '#/speaking'])
       expect(worksWithoutKey(parseRoute(hash).route)).toBe(false);
   });
 });
