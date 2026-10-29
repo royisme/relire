@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Relire Plus",
+    "appName": "Relire",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
@@ -8,7 +8,7 @@
     "retry": "Retry",
     "success": "Success",
     "error": "Error",
-    "documentTitle": "Relire Plus - French close reading",
+    "documentTitle": "Relire - French close reading",
     "done": "Done",
     "listSeparator": "; "
   },
@@ -221,7 +221,7 @@
     "word": "Word",
     "translation": "Translation",
     "deviceVoice": "Device voice",
-    "sourceAi": "AI-written, reviewed by AI (Gemini 4 Argon, Gemini 3.8 Flash), not human-reviewed",
+    "sourceAi": "AI-written, reviewed by AI, not human-reviewed",
     "sourceHuman": "Human-reviewed",
     "sourceUnknown": "Review status not recorded",
     "dictation": {
@@ -809,11 +809,11 @@
     },
     "about": {
       "title": "About",
-      "desc": "What Relire Plus is and where your data goes.",
-      "what": "Relire Plus is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
+      "desc": "What Relire is and where your data goes.",
+      "what": "Relire is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
       "servicePrivacy": "This version can read grammar topics, a complete paged wordbook and additional graded readers from a content service. Requests carry a topic id, book id/page/version, or published reader id/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules or recordings, and never an AI provider key: the only key it receives is the access key you set for it. Wordbook download exposes the whole published book to clients.",
-      "scope": "Relire Plus is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
+      "scope": "Relire is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
       "source": "Source code on GitHub",
       "lexicon": "The word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}: a dictionary that ships with the app and needs no service.",
       "lexiconSource": "{{name}} source",
@@ -926,7 +926,7 @@
   "pwa": {
     "title": "Install as an app",
     "chromeWay": "Chrome or Edge",
-    "chromeDesc": "Click the install icon in the address bar, or open the browser menu and choose Install Relire Plus.",
+    "chromeDesc": "Click the install icon in the address bar, or open the browser menu and choose Install Relire.",
     "safariWay": "Safari (macOS 14 or later)",
     "safariDesc": "Choose File → Add to Dock. On iPhone or iPad, use Share → Add to Home Screen.",
     "noServerWhy": "Works offline",
@@ -1554,7 +1554,7 @@
     "gradedReader": "This graded reader is not published or is no longer available. Return to the graded readers list to choose another.",
     "passage": "This passage is no longer available. Return to the library to choose another source.",
     "title": "This page is not here",
-    "page": "This address does not match a page in Relire Plus.",
+    "page": "This address does not match a page in Relire.",
     "article": "That article is not in your library. It may have been deleted, or the link comes from another browser.",
     "toLibrary": "Go to the library",
     "unit": "That exercise is not here. It may have been deleted, or the link comes from another browser.",

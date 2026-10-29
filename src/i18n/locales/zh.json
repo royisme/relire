@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Relire Plus",
+    "appName": "Relire",
     "save": "保存",
     "cancel": "取消",
     "close": "关闭",
@@ -8,7 +8,7 @@
     "retry": "重试",
     "success": "成功",
     "error": "错误",
-    "documentTitle": "Relire Plus - 法语精读",
+    "documentTitle": "Relire - 法语精读",
     "done": "完成",
     "listSeparator": "；"
   },
@@ -221,7 +221,7 @@
     "word": "词语",
     "translation": "译文",
     "deviceVoice": "设备语音",
-    "sourceAi": "AI 撰写，由 AI（Gemini 4 Argon、Gemini 3.8 Flash）审核，非人工审核",
+    "sourceAi": "AI 撰写，由 AI 审核，非人工审核",
     "sourceHuman": "人工审核",
     "sourceUnknown": "未记录审核状态",
     "dictation": {
@@ -802,11 +802,11 @@
     },
     "about": {
       "title": "关于",
-      "desc": "Relire Plus 是什么，数据去了哪里。",
-      "what": "Relire Plus 是为准备 TCF Canada 的法语学习者做的精读助手：读真实的法语文章，点开任何单词或句子查看解析，并开口练习发音。",
+      "desc": "Relire 是什么，数据去了哪里。",
+      "what": "Relire 是为准备 TCF Canada 的法语学习者做的精读助手：读真实的法语文章，点开任何单词或句子查看解析，并开口练习发音。",
       "privacy": "没有账号，也没有应用服务器。文章、生词和录音都保存在这个浏览器里。使用 AI 功能时，文本或录音会用你自己的 Key 从这个浏览器直接发给你选择的提供方。",
       "servicePrivacy": "此版本可从内容服务读取语法主题、完整的分页词书和更多分级读物。请求只包含主题编号、词书编号、页码和版本，或已发布读物的编号和版本，以及网络请求的 IP 地址。文章、语境、答案、自评、复习计划和录音都不会发给它，也永远不会收到 AI 提供商的 Key；它收到的唯一 Key，是你为它设置的访问 Key。客户端可以下载整本已发布词书。",
-      "scope": "Relire Plus 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
+      "scope": "Relire 是学习辅助工具：没有模拟考试，也不给官方成绩，AI 的反馈只是估计。",
       "source": "在 GitHub 查看源代码",
       "lexicon": "单词页中的动词形式和时态来自 {{name}}（由 {{maintainer}} 维护，许可证为 {{licence}}）：这部词典随应用一起分发，不依赖内容服务。",
       "lexiconSource": "{{name}} 数据来源",
@@ -919,7 +919,7 @@
   "pwa": {
     "title": "安装为应用",
     "chromeWay": "Chrome 或 Edge",
-    "chromeDesc": "点击地址栏里的安装图标，或打开浏览器菜单选择「安装 Relire Plus」。",
+    "chromeDesc": "点击地址栏里的安装图标，或打开浏览器菜单选择「安装 Relire」。",
     "safariWay": "Safari（macOS 14 及以上）",
     "safariDesc": "选择「文件 → 添加到程序坞」。iPhone 和 iPad 上用「分享 → 添加到主屏幕」。",
     "noServerWhy": "可以离线使用",
@@ -1546,7 +1546,7 @@
     "gradedReader": "这本分级读物未发布或已不可用。请返回分级读物列表选择其他读物。",
     "passage": "这篇短文已不可用。请返回文章库选择其他内容。",
     "title": "找不到这个页面",
-    "page": "这个地址在 Relire Plus 里没有对应的页面。",
+    "page": "这个地址在 Relire 里没有对应的页面。",
     "article": "文章库里没有这篇文章。它可能已被删除，或者链接来自另一个浏览器。",
     "toLibrary": "回到文章库",
     "unit": "找不到这组练习。它可能已被删除，或者链接来自另一个浏览器。",
