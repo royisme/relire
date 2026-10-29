@@ -220,9 +220,9 @@ export function parseRoute(
   return { route, canonical: href === hash ? null : href };
 }
 
-/** Today needs no AI; graded readers use authored text and the device voice. */
+/** Today, graded readers and the Grammar gender and conjugation pages need no AI key. */
 export const worksWithoutKey = (route: Route) =>
-  route.name === 'today' || route.name === 'gradedReaders' || route.name === 'gradedReader';
+  route.name === 'today' || route.name === 'gradedReaders' || route.name === 'gradedReader' || route.name === 'grammar';
 
 export type Area =
   | 'today'
