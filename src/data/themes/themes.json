@@ -1,0 +1,800 @@
+[
+  {
+    "id": "personal",
+    "fr": "Vie personnelle et relations",
+    "subtopics": [
+      {
+        "id": "family-life",
+        "fr": "Vie de famille",
+        "scope": "Covers family relationships, parenting decisions, spending time with relatives, and balancing family commitments.",
+        "tasks": ["oral-1", "oral-3", "written-1", "written-2"]
+      },
+      {
+        "id": "friendship-social-ties",
+        "fr": "Amitié et liens sociaux",
+        "scope": "Covers forming and maintaining friendships, staying in touch, and helping or relying on friends.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "invitations-celebrations",
+        "fr": "Invitations et fêtes",
+        "scope": "Covers inviting people and answering invitations: birthdays, weddings, neighbours' parties, family dinners, housewarmings and outings with friends.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "living-alone-loneliness",
+        "fr": "Vivre seul et solitude",
+        "scope": "Covers living alone by choice or circumstance, emotional coping with isolation, and individual independence.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "pets-companionship",
+        "fr": "Animaux de compagnie",
+        "scope": "Covers adopting and caring for domestic pets, finding pet-sitters, and the role of animals in emotional well-being.",
+        "tasks": ["oral-1", "oral-2", "oral-3", "written-1", "written-2"]
+      },
+      {
+        "id": "kindness-daily-solidarity",
+        "fr": "Bienveillance et entraide",
+        "scope": "Covers spontaneous acts of interpersonal kindness, informal neighborhood mutual support, and civic politeness.",
+        "tasks": ["oral-3", "written-1", "written-2", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Présentez-vous et parlez des relations que vous entretenez avec les membres de votre famille proche ou vos amis.",
+        "zh": "请作自我介绍，并谈谈你与亲近的家人或朋友之间的关系。"
+      },
+      "oral-2": {
+        "fr": "Vous cherchez une personne pour garder votre chien pendant vos vacances : posez des questions au gardien sur ses tarifs, son expérience et les conditions d'accueil.",
+        "zh": "你想在度假期间找人寄养宠物狗：向宠物看护人员询问收费标准、看护经验以及寄养条件。"
+      },
+      "oral-3": {
+        "fr": "Pensez-vous que vivre seul soit aujourd'hui un choix d'émancipation épanouissant ou une cause d'isolement social ?",
+        "zh": "你认为如今独居是一种让人充实的独立选择，还是导致社会孤立的诱因？"
+      },
+      "written-1": {
+        "fr": "Écrivez un courriel à un ami pour l'inviter à fêter votre anniversaire le week-end prochain, en lui précisant le lieu, l'heure et le déroulement de la soirée.",
+        "zh": "给朋友写一封电子邮件，邀请他参加下周末你的生日聚会，并说明聚会地点、时间和具体安排。"
+      },
+      "written-2": {
+        "fr": "Sur votre blog personnel, racontez une réunion de famille mémorable ou une fête entre amis, en décrivant ce qui s'est passé, vos émotions et ce que cet événement vous a apporté.",
+        "zh": "在个人博客上讲述一次难忘的家庭聚会或朋友派对，描述当天的经历、你的感受以及这次聚会带给你的收获。"
+      },
+      "written-3": {
+        "fr": "Deux documents présentent des visions divergentes du rôle de la famille dans la société moderne : l'un valorise le modèle familial traditionnel comme pilier de stabilité, l'autre défend l'autonomie individuelle et les formes de parenté choisies. Comparez ces deux points de vue et donnez votre avis personnel.",
+        "zh": "两份材料对现代社会中家庭的作用提出了不同看法：一份将传统家庭模式视为稳定的支柱，另一份则倡导个人自主与自主选择的亲属关系。比较这两种观点并阐明你自己的看法。"
+      }
+    }
+  },
+  {
+    "id": "housing",
+    "fr": "Logement et quartier",
+    "subtopics": [
+      {
+        "id": "renting-accommodation",
+        "fr": "Location immobilière",
+        "scope": "Covers searching for rental apartments, negotiating lease terms, inquiring about rent prices, and landlord relations.",
+        "tasks": ["oral-2", "written-1", "oral-3"]
+      },
+      {
+        "id": "moving-settling-in",
+        "fr": "Déménagement et emménagement",
+        "scope": "Covers planning a home relocation, hiring movers, furnishing a new home, and interior decoration.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "flatsharing-roommates",
+        "fr": "Colocation",
+        "scope": "Covers finding flatmates, drafting house rules, splitting household costs, and resolving shared living disputes.",
+        "tasks": ["oral-2", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "housing-maintenance",
+        "fr": "Entretien et réparations",
+        "scope": "Covers reporting household utility breakdowns, booking maintenance contractors, and scheduling urgent home repairs.",
+        "tasks": ["oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "neighbourhood-community",
+        "fr": "Voisinage et vie de quartier",
+        "scope": "Covers interactions with neighbours, organizing building gatherings, addressing noise nuisance, and local district life.",
+        "tasks": ["oral-1", "oral-2", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "property-ownership",
+        "fr": "Achat immobilier",
+        "scope": "Covers acquiring real estate, securing mortgage loans, and evaluating whether to buy or rent a primary home.",
+        "tasks": ["oral-2", "oral-3", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Présentez votre logement actuel, son quartier et expliquez ce qui vous plaît ou vous déplaît dans cet endroit.",
+        "zh": "请介绍你目前的住所及所在社区，并谈谈你对这里的居住环境有哪些满意或不满意之处。"
+      },
+      "oral-2": {
+        "fr": "Vous avez vu une annonce pour un appartement à louer : téléphonez au propriétaire pour lui demander le montant du loyer, la superficie, l'étage et les commerces à proximité.",
+        "zh": "你看到了一则租房广告：致电房东询问房租金额、房屋面积、所在楼层以及附近的商铺配套。"
+      },
+      "oral-3": {
+        "fr": "Selon vous, la vie en colocation est-elle une formule idéale pour les jeunes adultes ou une source inévitable de conflits quotidiens ?",
+        "zh": "在你看来，合租对年轻人而言是一种理想的居住方式，还是不可避免会产生日常冲突？"
+      },
+      "written-1": {
+        "fr": "Envoyez un courriel à votre propriétaire pour l'informer d'une fuite d'eau sous l'évier de la cuisine et convenir de la visite d'un plombier cette semaine.",
+        "zh": "给房东发送一封电子邮件，告知厨房水槽漏水的情况，并商定本周水管工上门维修的时间。"
+      },
+      "written-2": {
+        "fr": "Dans le journal de votre quartier, racontez votre emménagement récent dans l'immeuble, vos premières impressions sur le voisinage et proposez d'organiser un pot d'accueil entre voisins.",
+        "zh": "在社区公报上讲述你最近搬入这栋居民楼的经历，分享对邻里环境的第一印象，并提议组织一次邻里迎新茶话会。"
+      },
+      "written-3": {
+        "fr": "Deux documents confrontent deux modes de vie résidentiels : l'un vante les attraits des appartements en hypercentre urbain pour leur accessibilité, l'autre défend l'achat d'un pavillon en périphérie pour l'espace et le calme. Comparez ces deux options et donnez votre opinion.",
+        "zh": "两份材料对比了两种居住方式：一份赞美市中心公寓出行的便利性，另一份则倡导在郊区购房以享受宽敞与宁静。比较这两种选择并阐明你的观点。"
+      }
+    }
+  },
+  {
+    "id": "work",
+    "fr": "Travail et carrière",
+    "subtopics": [
+      {
+        "id": "job-search-hiring",
+        "fr": "Recherche d'emploi",
+        "scope": "Covers applying for job vacancies, writing CVs, passing employment interviews, and negotiating compensation.",
+        "tasks": ["oral-1", "oral-2", "oral-3", "written-1"]
+      },
+      {
+        "id": "workplace-relationships",
+        "fr": "Relations entre collègues",
+        "scope": "Covers collaborating with colleagues, welcoming new team members, team dynamics, and conflict management at work.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "ways-of-working",
+        "fr": "Organisation du travail",
+        "scope": "Covers four-day workweeks, flexible working schedules, workplace naps, coworking, and organizational innovation.",
+        "tasks": ["oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "career-development",
+        "fr": "Reconversion professionnelle",
+        "scope": "Covers choosing a career path, mid-career professional retraining, acquiring new job skills, and promotions.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "work-life-balance",
+        "fr": "Équilibre entre vie professionnelle et vie privée",
+        "scope": "Covers managing working hours, enforcing the right to disconnect, preventing job burnout, and protecting personal time.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "employment-demographics",
+        "fr": "Emploi et générations",
+        "scope": "Covers employment barriers facing young graduates and senior workers, age-based discrimination, and intergenerational knowledge transfer.",
+        "tasks": ["oral-3", "written-2", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de votre profession actuelle ou de votre métier de rêve, de vos responsabilités quotidiennes et de ce qui vous motive dans votre travail.",
+        "zh": "谈谈你目前的职业或理想的工作、日常主要职责以及你在工作中获得的动力。"
+      },
+      "oral-2": {
+        "fr": "Vous postulez à une offre d'emploi : interrogez le responsable des ressources humaines sur les missions confiées, les horaires de travail et la politique de télétravail.",
+        "zh": "你正在应聘一个职位：向人力资源主管询问具体工作任务、上下班时间以及远程办公政策。"
+      },
+      "oral-3": {
+        "fr": "Pensez-vous que la mise en place de la semaine de travail de quatre jours soit bénéfique à la fois pour les salariés et pour les entreprises ?",
+        "zh": "你认为推行四天工作制对员工和企业双方而言是否都有利？"
+      },
+      "written-1": {
+        "fr": "Écrivez un courriel à un collègue pour lui expliquer que vous devez vous absenter deux jours, lui transmettre les dossiers urgents en cours et lui demander de vous remplacer.",
+        "zh": "给一位同事写一封电子邮件，告知你需要请假两天，交代目前手头的紧急事项并请对方协助代班。"
+      },
+      "written-2": {
+        "fr": "Dans un article pour le magazine interne de votre entreprise, racontez votre expérience de reconversion professionnelle, les difficultés surmontées et donnez des conseils à ceux qui hésitent à changer de voie.",
+        "zh": "在公司内刊上发表一篇文章，讲述你职业转型的亲身经历与克服的困难，并向犹豫是否转行的人提供建议。"
+      },
+      "written-3": {
+        "fr": "Deux textes débattent de la déconnexion numérique après les heures de bureau : l'un affirme que la flexibilité permanente améliore la réactivité, l'autre soutient qu'un droit strict à la déconnexion est indispensable pour préserver la santé mentale. Comparez ces deux points de vue et exprimez votre opinion.",
+        "zh": "两篇文章探讨了下班后数字断联的话题：一篇认为随时保持沟通能够提升响应效率，另一篇则主张严格的断联权对保护心理健康必不可少。比较这两种观点并发表你的看法。"
+      }
+    }
+  },
+  {
+    "id": "education",
+    "fr": "Éducation et formation",
+    "subtopics": [
+      {
+        "id": "schooling-systems",
+        "fr": "Systèmes scolaires",
+        "scope": "Covers public versus private education, homeschooling, compulsory school uniforms, and campus video surveillance policies.",
+        "tasks": ["oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "higher-education",
+        "fr": "Enseignement supérieur",
+        "scope": "Covers university programs, choosing academic majors, campus academic life, and student exchange exchanges.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "diplomas-vs-experience",
+        "fr": "Diplôme et expérience",
+        "scope": "Covers comparing formal academic degrees with practical field experience in achieving professional success.",
+        "tasks": ["oral-3", "written-3"]
+      },
+      {
+        "id": "children-education",
+        "fr": "Éducation des enfants",
+        "scope": "Covers primary school homework debates, parental educational choices, tutoring support, and children's study routines.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "language-learning",
+        "fr": "Apprentissage des langues",
+        "scope": "Covers language learning methodologies, immersion experiences, foreign language classes, and multilingualism in daily life.",
+        "tasks": ["oral-1", "oral-2", "oral-3", "written-1", "written-2", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de vos souvenirs d'école ou d'université, des matières que vous préfériez étudier et de votre méthode pour apprendre de nouvelles compétences.",
+        "zh": "谈谈你的中小学或大学求学回忆、你过去最喜欢的科目以及你学习新技能的方法。"
+      },
+      "oral-2": {
+        "fr": "Vous souhaitez vous inscrire à un cours du soir de français : demandez au secrétariat de l'école des détails sur le test de niveau, les horaires, les tarifs et la taille des groupes.",
+        "zh": "你想报名参加法语晚间辅导班：向学校行政处询问分班测试、上课时间、学费标准以及班级人数。"
+      },
+      "oral-3": {
+        "fr": "Estimez-vous que les diplômes universitaires restent aujourd'hui le facteur déterminant pour réussir sa vie professionnelle, par rapport à l'expérience de terrain ?",
+        "zh": "你认为相比于实际工作经验，大学文凭如今是否依然是决定职业成功的首要因素？"
+      },
+      "written-1": {
+        "fr": "Envoyez un message à un camarade de classe pour lui expliquer pourquoi vous avez manqué le cours d'hier, lui demander les notes prises et convenir d'une séance de révision.",
+        "zh": "给一位同学发消息，解释你昨天缺课的原因，索要课堂笔记并商定一起复习的时间。"
+      },
+      "written-2": {
+        "fr": "Sur un forum d'étudiants, racontez votre expérience d'un séjour linguistique à l'étranger, les méthodes qui vous ont permis de progresser et vos conseils pour surmonter la timidité à l'oral.",
+        "zh": "在留学生论坛上分享你在国外游学进修语言的经历、帮助你快速进步的学习方法以及克服开口怯场的建议。"
+      },
+      "written-3": {
+        "fr": "Deux documents s'opposent sur l'utilité des devoirs à la maison à l'école primaire : l'un affirme qu'ils renforcent la discipline et consolident les acquis, l'autre dénonce une surcharge inutile qui creuse les inégalités sociales. Comparez ces deux avis et donnez votre position.",
+        "zh": "两份文献就小学课外作业的必要性各执己见：一份认为做作业能锻炼自律并巩固知识，另一份则批评这带来了不必要的负担并加剧了家庭不平等。比较两种看法并阐述你的立场。"
+      }
+    }
+  },
+  {
+    "id": "immigration",
+    "fr": "Immigration et intégration",
+    "subtopics": [
+      {
+        "id": "moving-abroad",
+        "fr": "Installation à l'étranger",
+        "scope": "Covers relocation procedures, administrative formalities upon arrival, first impressions of a host country, and settlement challenges.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "culture-shock-adaptation",
+        "fr": "Choc culturel et adaptation",
+        "scope": "Covers understanding social customs, adapting to local codes, bridging cultural differences, and maintaining personal identity.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "social-integration",
+        "fr": "Création de liens sociaux",
+        "scope": "Covers building social circles in a new society, connecting across cultural divides, and avoiding diaspora isolation.",
+        "tasks": ["oral-1", "oral-2", "oral-3", "written-1", "written-2"]
+      },
+      {
+        "id": "language-and-integration",
+        "fr": "Langue et intégration",
+        "scope": "Covers the critical role of mastering the host language in social integration, machine translation limits, and linguistic barriers.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "integration-policies",
+        "fr": "Politiques d'intégration",
+        "scope": "Covers settlement assistance programs, recognition of foreign professional credentials, civic training, and immigration regulations.",
+        "tasks": ["oral-3", "written-2", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de votre projet d'immigration au Canada, des raisons de votre choix et de la manière dont vous vous préparez à cette nouvelle vie.",
+        "zh": "谈谈你移民加拿大的规划、选择该国的原因以及你目前为适应新生活所做的准备。"
+      },
+      "oral-2": {
+        "fr": "Vous venez d'arriver dans une nouvelle ville et vous rendez dans un centre d'aide aux nouveaux arrivants : posez des questions sur les ateliers d'insertion, les cours de français et l'accompagnement à l'emploi.",
+        "zh": "你刚抵达一座新城市并前往新移民服务中心：向工作人员咨询融入工作坊、法语课程以及就业辅导服务。"
+      },
+      "oral-3": {
+        "fr": "Pensez-vous que la maîtrise de la langue du pays d'accueil suffise à elle seule pour s'intégrer pleinement dans une nouvelle société ?",
+        "zh": "你认为仅凭掌握移居国的语言，是否就足以完全融入一个新的社会？"
+      },
+      "written-1": {
+        "fr": "Écrivez un courriel à un ami resté dans votre pays d'origine pour lui raconter vos premiers jours dans votre nouveau pays, décrire votre logement temporaire et lui faire part de vos impressions.",
+        "zh": "给国内的一位朋友写一封电子邮件，讲述你在新国家最初几天的生活，描述临时住处并分享你的初体验。"
+      },
+      "written-2": {
+        "fr": "Dans un article pour un site communautaire d'expatriés, racontez les étapes de votre adaptation culturelle au cours de votre première année à l'étranger, les surprises vécues et vos conseils pour se faire des amis locaux.",
+        "zh": "为一家外籍移民社区网站撰写文章，讲述你出国第一年经历的文化适应过程、意料之外的挑战以及结识本地朋友的建议。"
+      },
+      "written-3": {
+        "fr": "Deux documents analysent les modèles d'intégration des personnes immigrées : l'un préconise une assimilation poussée aux coutumes locales, l'autre soutient que la diversité culturelle et le multiculturalisme enrichissent durablement la nation hôte. Comparez ces deux visions et présentez votre opinion argumentée.",
+        "zh": "两份文献分析了移民融入社会的不同模式：一份主张全面同化于当地习俗，另一份则认为文化多元与多元文化主义能为东道国带来持久繁荣。比较这两种观点并提出你的论述。"
+      }
+    }
+  },
+  {
+    "id": "travel",
+    "fr": "Voyages et mobilité",
+    "subtopics": [
+      {
+        "id": "holiday-planning",
+        "fr": "Préparation des vacances",
+        "scope": "Covers selecting vacation spots, budgeting for holidays, booking tickets, and inviting travel companions.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "tourist-accommodation",
+        "fr": "Hébergement touristique",
+        "scope": "Covers booking hotels, guesthouses, and holiday cottages, checking room amenities, and handling reservation issues.",
+        "tasks": ["oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "tourist-information",
+        "fr": "Informations touristiques",
+        "scope": "Covers asking visitor bureaus for excursion advice, museum operating hours, guided tour bookings, and city passes.",
+        "tasks": ["oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "vehicle-rental",
+        "fr": "Location de véhicules",
+        "scope": "Covers renting cars, camper vans, or bicycles, checking deposit terms, insurance coverage, and return requirements.",
+        "tasks": ["oral-2", "written-1"]
+      },
+      {
+        "id": "daily-getting-around",
+        "fr": "Déplacements du quotidien",
+        "scope": "Covers daily commuting modes, public transit navigation, cycling to work, carpooling, and transit passes.",
+        "tasks": ["oral-1", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "travel-styles-impact",
+        "fr": "Manières de voyager",
+        "scope": "Covers solo travel versus group tours, slow travel philosophies, budget backpacking, and authentic local discovery.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de vos voyages préférés, de votre façon habituelle de préparer vos vacances et du type de destination qui vous attire le plus.",
+        "zh": "谈谈你最喜欢的旅行经历、平时准备假期的习惯以及最吸引你的旅游目的地类型。"
+      },
+      "oral-2": {
+        "fr": "Vous prévoyez de visiter une région en vélo : interrogez l'employé d'une agence de location sur les modèles disponibles, les forfaits journaliers, le matériel de sécurité et les itinéraires balisés.",
+        "zh": "你打算骑自行车游览一个地区：向租车店员工询问可选车型、单日费用标准、随车安全装备以及推荐的骑行路线。"
+      },
+      "oral-3": {
+        "fr": "Pensez-vous que voyager seul soit la meilleure manière de découvrir une culture et de développer son autonomie, ou cela présente-t-il trop d'inconvénients ?",
+        "zh": "你认为独自旅行是深入体验当地文化并锻炼独立能力的最佳方式，还是存在太多不便与风险？"
+      },
+      "written-1": {
+        "fr": "Envoyez une carte postale ou un courriel à un ami depuis votre lieu de vacances pour décrire les paysages découverts, raconter vos activités et lui donner rendez-vous à votre retour.",
+        "zh": "在度假地给朋友寄一张明信片或写一封电子邮件，描述当地的风光、讲述你的游览活动并相约回国后碰面。"
+      },
+      "written-2": {
+        "fr": "Sur un carnet de voyage en ligne, relatez une mésaventure survenue lors d'un déplacement (train annulé, bagage égaré), la manière dont vous avez résolu le problème et ce que cette aventure vous a appris.",
+        "zh": "在在线旅行日记中讲述一次旅途中的意外波折（如列车取消、行李丢失），说明你如何解决问题以及这次经历给你带来的感悟。"
+      },
+      "written-3": {
+        "fr": "Deux articles traitent du tourisme de masse : le premier met en valeur les retombées économiques et les emplois générés pour les régions d'accueil, tandis que le second dénonce la détérioration des sites historiques et la hausse du coût de la vie pour les habitants. Comparez ces deux points de vue et prenez position.",
+        "zh": "两篇文章探讨了大众旅游的影响：第一篇强调其为旅游目的地带来的可观经济效益与就业机会，第二篇则痛陈景点遭到破坏以及原住民生活成本上涨的问题。对比这两种看法并阐述你的立场。"
+      }
+    }
+  },
+  {
+    "id": "shopping",
+    "fr": "Consommation et services",
+    "subtopics": [
+      {
+        "id": "dining-out",
+        "fr": "Sorties au restaurant",
+        "scope": "Covers booking restaurant tables, asking about menu ingredients, catering options, and sharing culinary dining reviews.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "retail-and-sales",
+        "fr": "Magasins et soldes",
+        "scope": "Covers in-person store shopping, asking sales assistants for advice, product returns, and hunting seasonal bargains.",
+        "tasks": ["oral-2", "written-1"]
+      },
+      {
+        "id": "e-commerce-deliveries",
+        "fr": "Achats en ligne et livraisons",
+        "scope": "Covers buying products on web platforms, parcel tracking, postal services, and handling missing or damaged deliveries.",
+        "tasks": ["oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "second-hand-goods",
+        "fr": "Objets d'occasion",
+        "scope": "Covers buying and selling used items, thrift shopping, yard sales, and circular consumer habits.",
+        "tasks": ["oral-2", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "consumer-eating-habits",
+        "fr": "Habitudes alimentaires",
+        "scope": "Covers household food grocery budgets, open-air markets, processed food consumption, and consumer dining choices.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "customer-service-claims",
+        "fr": "Service client et réclamations",
+        "scope": "Covers lodging product defect complaints, requesting commercial refunds, warranty coverage, and customer relations.",
+        "tasks": ["oral-2", "written-1", "written-2"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de vos habitudes d'achat quotidiennes, de vos commerces de proximité préférés et de la fréquence à laquelle vous mangez au restaurant.",
+        "zh": "谈谈你平时的日常购物习惯、最常去的生活街区小店以及在餐馆就餐的频率。"
+      },
+      "oral-2": {
+        "fr": "Vous organisez un repas d'anniversaire pour un groupe de dix personnes : appelez un restaurant pour vous renseigner sur les formules de groupe, la réservation d'un espace privé et les options végétariennes.",
+        "zh": "你正在为十人组织一场生日聚餐：致电一家餐馆了解团体套餐价格、包间预订要求以及素食菜品供应。"
+      },
+      "oral-3": {
+        "fr": "Pensez-vous que l'essor rapide du commerce en ligne et des livraisons express constitue une menace irréversible pour le commerce de proximité ?",
+        "zh": "你认为电子商务和即时配送的迅速普及是否对传统社区实体小店构成了不可逆的生存威胁？"
+      },
+      "written-1": {
+        "fr": "Écrivez au service après-vente d'une boutique en ligne pour signaler que le colis reçu hier contenait un appareil endommagé et demander un échange rapide ou un remboursement.",
+        "zh": "给一家网店的售后客服写信，告知昨天收到的包裹中商品存在破损，并要求尽快换货或全额退款。"
+      },
+      "written-2": {
+        "fr": "Sur un forum de consommateurs, racontez votre expérience d'achat et de vente de vêtements et de meubles d'occasion, évaluez les économies réalisées et partagez vos conseils pour éviter les arnaques.",
+        "zh": "在消费者交流论坛上分享你买卖二手服装和家具的经历，评估节省的开销，并分享防坑避雷的实用建议。"
+      },
+      "written-3": {
+        "fr": "Deux textes confrontent des opinions divergentes sur la consommation de produits biologiques : le premier affirme qu'ils sont indispensables à une alimentation saine et respectueuse de la terre, le second estime qu'il s'agit d'un argument marketing coûteux sans bienfait nutritionnel prouvé. Comparez ces points de vue et donnez votre avis.",
+        "zh": "两篇文章就购买有机食品的必要性展开辩论：第一篇主张有机食品对健康与土地生态至关重要，第二篇则认为这属于高价营销噱头且缺乏营养优势。对比两方观点并表明你的立场。"
+      }
+    }
+  },
+  {
+    "id": "leisure",
+    "fr": "Loisirs, culture et divertissement",
+    "subtopics": [
+      {
+        "id": "leisure-classes-workshops",
+        "fr": "Cours de loisirs et ateliers",
+        "scope": "Covers signing up for dance, cooking, pottery, or music classes, comparing instructional workshops, and learning hobby skills.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "cultural-events-festivals",
+        "fr": "Événements et festivals",
+        "scope": "Covers attending live concerts, art festivals, street fairs, buying tickets, and organizing cultural outings.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "cinema-screen-media",
+        "fr": "Cinéma et séries",
+        "scope": "Covers movie theatre outings, streaming television series, cinema club discussions, and film critiques.",
+        "tasks": ["oral-1", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "reading-and-libraries",
+        "fr": "Lecture et bibliothèques",
+        "scope": "Covers reading preferences, public library memberships, book club meetings, literary events, and digital reading.",
+        "tasks": ["oral-1", "oral-2", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "hobby-sports",
+        "fr": "Sports de loisir",
+        "scope": "Covers playing recreational team sports, outdoor hiking, amateur athletics clubs, and non-competitive sports hobbies.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2", "oral-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de vos passe-temps favoris, des activités culturelles ou sportives que vous pratiquez pendant vos week-ends et de ce qu'elles vous apportent.",
+        "zh": "谈谈你最喜欢的业余爱好、周末常做的文化或体育活动以及这些爱好带给你的放松与收获。"
+      },
+      "oral-2": {
+        "fr": "Vous souhaitez vous inscrire à un atelier hebdomadaire de cuisine ou de poterie : interrogez l'animateur du centre de quartier sur le calendrier des séances, le matériel requis et les tarifs.",
+        "zh": "你想报名参加社区每周的烹饪或陶艺工作坊：向负责人了解活动日程、自备材料要求以及报名费用。"
+      },
+      "oral-3": {
+        "fr": "Pensez-vous que la multiplication des plateformes de streaming en ligne annonce la disparition prochaine des salles de cinéma traditionnelles ?",
+        "zh": "你认为流媒体点播平台的普及是否预示着传统电影院即将在不久的将来走向消亡？"
+      },
+      "written-1": {
+        "fr": "Écrivez à un groupe d'amis pour leur proposer d'aller voir un spectacle de théâtre ou un concert ce samedi, en leur détaillant le programme, le prix des places et l'heure du rendez-vous.",
+        "zh": "给几位朋友写信，提议本周六一起去看一场话剧演出或音乐会，并说明演出内容、票价及集合时间。"
+      },
+      "written-2": {
+        "fr": "Dans le journal d'une association de quartier, racontez votre participation à un festival culturel local, décrivez l'ambiance, les animations qui vous ont marqué et invitez les habitants à y participer l'an prochain.",
+        "zh": "在社区协会刊物上发表文章，讲述你参与当地文化艺术节的经历，描绘现场氛围与精彩节目，并呼吁居民明年踊跃参与。"
+      },
+      "written-3": {
+        "fr": "Deux documents analysent l'évolution des pratiques de lecture : l'un affirme que les livres numériques et audio rendent la littérature plus accessible à tous, l'autre soutient que le livre papier demeure irremplaçable pour la concentration et le plaisir esthétique. Comparez ces deux opinions et exprimez votre point de vue.",
+        "zh": "两份材料探讨了阅读方式的变迁：一份指出电子书和有声书让文学阅读变得更加普惠便捷，另一份则认为纸质书籍在专注度和审美愉悦感上不可替代。对比两种观点并陈述你的主张。"
+      }
+    }
+  },
+  {
+    "id": "health",
+    "fr": "Santé et bien-être",
+    "subtopics": [
+      {
+        "id": "medical-consultations",
+        "fr": "Consultations médicales",
+        "scope": "Covers booking appointments with doctors and specialists, describing symptoms, pharmacy inquiries, and health coverage.",
+        "tasks": ["oral-2", "written-1"]
+      },
+      {
+        "id": "physical-fitness-health",
+        "fr": "Activité physique et santé",
+        "scope": "Covers exercising to maintain physical fitness, preventing sedentary illness, gym workouts, and daily fitness routines.",
+        "tasks": ["oral-1", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "nutrition-dietary-health",
+        "fr": "Nutrition et équilibre alimentaire",
+        "scope": "Covers dietary choices for health, balanced nutrition, weight management, and minimizing unhealthy ultra-processed foods.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "mental-health-stress",
+        "fr": "Gestion du stress et santé mentale",
+        "scope": "Covers dealing with daily work stress, mental burnout symptoms, relaxation practices, and seeking psychological support.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "aging-body-image",
+        "fr": "Image corporelle et vieillissement",
+        "scope": "Covers social pressures to maintain youthful appearance, cosmetic standards, and healthy psychological perspectives on aging.",
+        "tasks": ["oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "trust-in-healthcare",
+        "fr": "Confiance dans la médecine",
+        "scope": "Covers public attitudes towards conventional medicine, alternative therapies, vaccination debates, and medical information reliability.",
+        "tasks": ["oral-3", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de ce que vous faites au quotidien pour prendre soin de votre santé physique et mentale, de votre alimentation et de votre pratique sportive.",
+        "zh": "谈谈你日常保持身心健康的做法、你的饮食调理习惯以及体育锻炼方式。"
+      },
+      "oral-2": {
+        "fr": "Vous devez prendre rendez-vous chez un médecin spécialiste : téléphonez au secrétariat du cabinet pour demander les disponibilités, les tarifs pratiqués et les documents médicaux à apporter.",
+        "zh": "你需要预约一位专科医生：致电诊所前台询问可预约日期、诊疗费用以及初诊需携带的病历资料。"
+      },
+      "oral-3": {
+        "fr": "Pensez-vous que les pouvoirs publics devraient taxer plus lourdement les boissons sucrées et les aliments ultra-transformés pour lutter contre les problèmes d'obésité ?",
+        "zh": "你认为政府是否应该对含糖饮料和超加工食品征收更高的健康税，以应对日益严重的肥胖问题？"
+      },
+      "written-1": {
+        "fr": "Écrivez un message à votre entraîneur sportif ou kinésithérapeute pour lui expliquer une douleur persistante au genou après l'entraînement et lui demander d'adapter votre programme d'exercices.",
+        "zh": "给健身教练或理疗师发消息，说明训练后膝盖持续疼痛的情况，并请对方调整后续的运动锻炼方案。"
+      },
+      "written-2": {
+        "fr": "Dans un article pour un magazine de santé communautaire, racontez comment vous avez réussi à réduire votre niveau de stress au travail grâce à la méditation et au sommeil, et donnez des conseils pratiques.",
+        "zh": "为社区健康杂志写一篇文章，讲述你如何通过冥想与规律作息有效减轻职场压力，并分享可行的实用建议。"
+      },
+      "written-3": {
+        "fr": "Deux textes débattent de la place des médecines alternatives complémentaires : l'un met en avant leur approche globale et naturelle du bien-être, l'autre alerte sur les risques de dérives et le manque de fondement scientifique rigoureux. Comparez ces deux opinions et prenez position.",
+        "zh": "两篇文献就替代疗法的地位展开辩论：一篇强调其崇尚自然、注重身心整体平衡的优势，另一篇则警示其缺乏严谨科学依据并可能延误正规治疗。对比双方观点并阐述你的立场。"
+      }
+    }
+  },
+  {
+    "id": "technology",
+    "fr": "Technologies et médias",
+    "subtopics": [
+      {
+        "id": "smartphones-screen-time",
+        "fr": "Smartphones et dépendance aux écrans",
+        "scope": "Covers smartphone reliance, digital detox practices, screen time regulation for children and adults, and connectivity habits.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "social-networks-privacy",
+        "fr": "Réseaux sociaux et vie privée",
+        "scope": "Covers online social media communication, safeguarding personal digital data, digital footprints, and cyber harassment.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "video-games-gaming",
+        "fr": "Jeux vidéo et divertissement numérique",
+        "scope": "Covers video gaming habits, cognitive and social benefits of gaming, concerns regarding addiction, and esports culture.",
+        "tasks": ["oral-1", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "digital-work-tools",
+        "fr": "Outils numériques de travail",
+        "scope": "Covers video-conferencing software, collaborative workplace applications, cloud document sharing, and technical remote support.",
+        "tasks": ["oral-2", "written-1", "written-2", "oral-3", "written-3"]
+      },
+      {
+        "id": "advertising-and-algorithms",
+        "fr": "Publicité en ligne et algorithmes",
+        "scope": "Covers targeted advertising, social media influencer marketing, news feed algorithms, and media literacy.",
+        "tasks": ["oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "artificial-intelligence",
+        "fr": "Intelligence artificielle",
+        "scope": "Covers automated AI tools in everyday tasks, smart home devices, translation apps, and the ethical dilemmas of machine automation.",
+        "tasks": ["oral-2", "oral-3", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de l'utilisation que vous faites de votre téléphone portable et d'Internet au quotidien, et des applications dont vous ne pourriez plus vous passer.",
+        "zh": "谈谈你在日常生活中对智能手机和互联网的使用情况，以及哪些手机应用程序是你不可或缺的。"
+      },
+      "oral-2": {
+        "fr": "Vous souhaitez souscrire un abonnement à un logiciel collaboratif de travail en ligne : interrogez le conseiller technique sur les fonctionnalités de sécurité, les tarifs par utilisateur et l'espace de stockage disponible.",
+        "zh": "你想为团队订阅一款在线协同办公软件：向技术顾问咨询安全防护功能、每用户收费标准以及云端存储空间。"
+      },
+      "oral-3": {
+        "fr": "Estimez-vous que la présence permanente des notifications et des écrans nuit gravement à notre capacité d'attention et à la qualité de nos échanges réels ?",
+        "zh": "你认为手机通知与屏幕的无休止侵扰是否严重削弱了人们的专注力与面对面现实交往的质量？"
+      },
+      "written-1": {
+        "fr": "Écrivez un message au service informatique de votre entreprise pour signaler qu'une application de visioconférence bloque sur votre poste et demander une intervention rapide avant une réunion importante.",
+        "zh": "给公司IT技术支持部门发信息，反映视频会议软件在电脑上反复卡死的问题，并请求在重要会议开始前协助修复。"
+      },
+      "written-2": {
+        "fr": "Sur un blog consacré aux technologies, publiez un récit narrant votre expérience d'une semaine de déconnexion totale sans réseaux sociaux, les effets ressentis sur votre quotidien et vos recommandations aux lecteurs.",
+        "zh": "在科技博客上发表一篇文章，讲述你度过整整一周不碰社交网络的数字断联体验、对日常生活的影响以及给读者的中肯建议。"
+      },
+      "written-3": {
+        "fr": "Deux documents analysent le développement de l'intelligence artificielle générative : le premier salue des gains d'efficacité spectaculaires pour la création et la recherche, tandis que le second met en garde contre les suppressions d'emplois et les risques de désinformation massive. Comparez ces deux points de vue et prenez position.",
+        "zh": "两份文献探讨了生成式人工智能的快速发展：第一份盛赞其在创意生产与学术科研中带来的显著效率飞跃，第二份则警示大量岗位流失与虚假信息泛滥的重大风险。比较这两种观点并发表你的看法。"
+      }
+    }
+  },
+  {
+    "id": "environment",
+    "fr": "Environnement et cadre de vie",
+    "subtopics": [
+      {
+        "id": "urban-transport-mobility",
+        "fr": "Mobilité urbaine et villes sans voiture",
+        "scope": "Covers pedestrianizing city centers, expanding bicycle path networks, free public transit schemes, and urban traffic reduction.",
+        "tasks": ["oral-2", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "city-vs-countryside",
+        "fr": "Ville ou campagne",
+        "scope": "Covers contrasting urban metropolis life with rural countryside living, quality of life, green spaces, and urban migration.",
+        "tasks": ["oral-1", "oral-3", "written-1", "written-2", "written-3"]
+      },
+      {
+        "id": "waste-pollution-reduction",
+        "fr": "Tri des déchets et réduction des pollutions",
+        "scope": "Covers residential recycling programs, eliminating single-use plastics, composting waste, and local air and water cleanliness.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2", "oral-3"]
+      },
+      {
+        "id": "overtourism-impact",
+        "fr": "Surtourisme et espaces naturels",
+        "scope": "Covers mitigating mass tourism damage in delicate ecosystems, visitor quotas, eco-taxation, and protecting heritage destinations.",
+        "tasks": ["oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "animal-welfare-zoos",
+        "fr": "Condition animale et zoos",
+        "scope": "Covers preserving endangered species, ethical controversies surrounding zoological parks, and transitioning to plant-based diets.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "energy-transition",
+        "fr": "Transition énergétique",
+        "scope": "Covers renewable versus nuclear energy, residential energy saving, combating global climate change, and individual carbon footprints.",
+        "tasks": ["oral-3", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez des gestes écologiques que vous adoptez au quotidien, comme le tri des déchets, l'économie d'eau ou vos choix de transport.",
+        "zh": "谈谈你在日常生活中采取的环保行动，例如垃圾分类、节约用水或绿色出行方式。"
+      },
+      "oral-2": {
+        "fr": "Votre municipalité met en place un programme de compostage collectif : posez des questions à l'agent de l'environnement sur la distribution des bacs, les déchets acceptés et les lieux de collecte.",
+        "zh": "所在市政部门正在推广社区集中堆肥项目：向环保专员询问堆肥桶领取流程、允许投放的垃圾种类以及投放点设置。"
+      },
+      "oral-3": {
+        "fr": "Selon vous, les centres-villes devraient-ils devenir totalement piétons et fermés aux voitures individuelles pour réduire la pollution de l'air ?",
+        "zh": "在你看来，市中心是否应当全面实行步行化并禁行私家车，以改善城市空气质量？"
+      },
+      "written-1": {
+        "fr": "Écrivez au gestionnaire de votre immeuble pour signaler que les bacs de recyclage débordent constamment et demander l'installation de conteneurs supplémentaires.",
+        "zh": "给物业管理处写信，反映楼下的可回收垃圾桶经常溢出满地的问题，并请求加装更多的分类垃圾箱。"
+      },
+      "written-2": {
+        "fr": "Dans le bulletin d'une association de quartier, racontez une journée citoyenne de nettoyage d'un parc local à laquelle vous avez participé, décrivez les déchets ramassés et encouragez les résidents à s'engager.",
+        "zh": "在社区协会简报中讲述你参与清理本地公园公益活动的经历，说明清理出的垃圾情况，并号召居民共同维护环境。"
+      },
+      "written-3": {
+        "fr": "Deux documents s'opposent sur l'existence des zoos modernes : l'un affirme qu'ils jouent un rôle indispensable dans la recherche et la sauvegarde des espèces menacées, l'autre soutient que maintenir des animaux sauvages en captivité pour le loisir humain est moralement inacceptable. Comparez ces deux avis et justifiez votre position.",
+        "zh": "两份文献就现代动物园的存废各持己见：一份认为动物园在科研及濒危物种繁育保护中发挥着不可替代的作用，另一份则坚称出于人类娱乐目的圈养野生动物在伦理上不可接受。对比双方观点并阐明你的立场。"
+      }
+    }
+  },
+  {
+    "id": "society",
+    "fr": "Société et engagement citoyen",
+    "subtopics": [
+      {
+        "id": "volunteering-action",
+        "fr": "Bénévolat et vie associative",
+        "scope": "Covers volunteering in non-profit charity associations, organizing community initiatives, and community service work.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2", "oral-3"]
+      },
+      {
+        "id": "helping-the-poor",
+        "fr": "Lutte contre la précarité",
+        "scope": "Covers food banks, emergency housing shelters, community pantries, and initiatives combating social inequality.",
+        "tasks": ["oral-2", "written-1", "written-2", "oral-3", "written-3"]
+      },
+      {
+        "id": "public-services",
+        "fr": "Services publics",
+        "scope": "Covers accessing local administrative offices, public library resources, postal branches, and neighborhood community centers.",
+        "tasks": ["oral-1", "oral-2", "written-1", "written-2"]
+      },
+      {
+        "id": "civic-participation",
+        "fr": "Participation citoyenne et vote",
+        "scope": "Covers electoral voting, town hall consultations, youth civic engagement, public petition signing, and civic responsibility.",
+        "tasks": ["oral-1", "oral-3", "written-2", "written-3"]
+      },
+      {
+        "id": "freedom-of-speech",
+        "fr": "Liberté d'expression",
+        "scope": "Covers freedom of public expression, the boundary between free debate and hate speech, press independence, and media discourse.",
+        "tasks": ["oral-3", "written-3"]
+      },
+      {
+        "id": "social-welfare-ethics",
+        "fr": "Politiques sociales et éthique",
+        "scope": "Covers debates on state welfare protections, public lottery and gambling regulations, and privacy rights of public figures.",
+        "tasks": ["oral-3", "written-3"]
+      }
+    ],
+    "examples": {
+      "oral-1": {
+        "fr": "Parlez de votre implication dans la vie citoyenne ou associative, d'une cause solidaire qui vous tient à cœur et des actions que vous menez pour aider les autres.",
+        "zh": "谈谈你参与社区公民事务或公益协会的经历、你所关注的社会公益议题以及你帮助他人的具体做法。"
+      },
+      "oral-2": {
+        "fr": "Vous souhaitez devenir bénévole dans une banque alimentaire locale : demandez au coordinateur les créneaux disponibles, les missions de distribution et les démarches d'inscription.",
+        "zh": "你想成为当地食物银行的一名志愿者：向协调负责人询问可供参与的时间段、具体的食物分发任务以及报名流程。"
+      },
+      "oral-3": {
+        "fr": "Pensez-vous que la participation aux élections démocratiques devrait être rendue légalement obligatoire afin de combattre l'abstention croissante ?",
+        "zh": "你认为是否有必要通过法律手段强制公民在民主选举中投票，以扭转日益严重的投票弃权现象？"
+      },
+      "written-1": {
+        "fr": "Écrivez un mot à l'attention des résidents de votre immeuble pour leur proposer d'installer une boîte à partage solidaire (livres et denrées) dans le hall et leur demander leur accord.",
+        "zh": "给居民楼邻居们写一封便签，建议在大堂设立一个爱心互助角（供分享书籍与非易腐食品），并征询大家的意见。"
+      },
+      "written-2": {
+        "fr": "Dans une lettre ouverte adressée aux membres d'un journal associatif, relatez votre engagement bénévole dans un refuge hivernal d'urgence, décrivez les rencontres humaines vécues et lancez un appel aux dons.",
+        "zh": "在一家公益协会刊物上发表一封公开信，讲述你在冬季紧急庇护所做志愿者的难忘经历与人际触动，并号召大家捐款捐物。"
+      },
+      "written-3": {
+        "fr": "Deux articles confrontent deux visions sur la vie privée des personnalités publiques : le premier affirme que chaque individu a droit à une intimité totale, le second soutient que l'intérêt général et la transparence justifient que les médias scrutent les actes des personnalités influentes. Comparez ces deux positions et donnez votre avis personnel.",
+        "zh": "两篇文章就公众人物的隐私权展开争论：第一篇主张任何人都有权享有不容侵犯的个人隐私，第二篇则认为出于公共利益与监督透明度，媒体有权对公众人物进行舆论监督。比较这两种观点并阐述你的个人见解。"
+      }
+    }
+  }
+]
