@@ -139,39 +139,22 @@ describe('bundled fonts', () => {
     expect(fixture).toContain('fonts\\/');
   });
 
+  test('PRIVACY.md qualifies privacy claims and mentions bundled fonts', () => {
+    const privacy = text('PRIVACY.md').match(/^#{1,6}[ \t]+Privacy[ \t]*\r?\n+([\s\S]*?)(?=\n[ \t]*\n|(?![\s\S]))/m);
+    expect(privacy).not.toBeNull();
+    expect(privacy![1]).toMatch(/fonts?[^.!?\n]*(?:bundl|self.host)/i);
+    expect(privacy![1]).toMatch(/AI provider[^.!?\n]*\byou\s+choose\b/i);
+    expect(privacy![1]).toMatch(/\bhost(?:ing)?\b/i);
+    expect(privacy![1]).toMatch(/optional[^.!?\n]*content service/i);
+    expect(privacy![1]).not.toMatch(/Gemini/i);
+  });
+
   test.each([
-    {
-      path: 'README.md',
-      heading: 'Privacy',
-      provider: /AI provider[^.!?\n]*\byou\s+choose\b/i,
-      bundled: /fonts?[^.!?\n]*(?:bundl|self.host)/i,
-      host: /\bhost(?:ing)?\b/i,
-      service: /optional[^.!?\n]*content service/i,
-      unqualified: /nothing goes through any other server/i,
-    },
-    {
-      path: 'README.zh-CN.md',
-      heading: '\u9690\u79c1',
-      provider: /\u4f60\u9009\u62e9\u7684\s*AI\s*(?:\u670d\u52a1\u5546|\u63d0\u4f9b\u65b9)/,
-      bundled: /\u5b57\u4f53[^\u3002\n]*(?:\u6253\u5305|\u5185\u7f6e)/,
-      host: /\u4e3b\u673a|\u6258\u7ba1/,
-      service: /\u53ef\u9009[^\u3002\n]*\u5185\u5bb9\u670d\u52a1/,
-      unqualified: /\u4e0d\u7ecf\u8fc7\u4efb\u4f55\u5176\u4ed6\u670d\u52a1\u5668/,
-    },
-  ])(
-    '$path qualifies privacy claims and mentions bundled fonts',
-    ({ path, heading, provider, bundled, host, service, unqualified }) => {
-      const readme = text(path);
-      const privacy = readme.match(
-        new RegExp(`^#{1,6}[ \\t]+${heading}[ \\t]*\\r?\\n+([\\s\\S]*?)(?=\\n[ \\t]*\\n|(?![\\s\\S]))`, 'm'),
-      );
-      expect(privacy).not.toBeNull();
-      expect(privacy![1]).toMatch(bundled);
-      expect(privacy![1]).toMatch(provider);
-      expect(privacy![1]).toMatch(host);
-      expect(privacy![1]).toMatch(service);
-      expect(privacy![1]).not.toMatch(/Gemini/i);
-      expect(readme).not.toMatch(unqualified);
-    },
-  );
+    ['README.md', /nothing goes through any other server/i],
+    ['README.zh-CN.md', /\u4e0d\u7ecf\u8fc7\u4efb\u4f55\u5176\u4ed6\u670d\u52a1\u5668/],
+  ])('%s links to PRIVACY.md and makes no unqualified claim', (path, unqualified) => {
+    const readme = text(path);
+    expect(readme).not.toMatch(unqualified);
+    expect(readme).toContain('](PRIVACY.md)');
+  });
 });

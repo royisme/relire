@@ -8,6 +8,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Changed
 
+- The README is rewritten around reading, tapping and saying a sentence, with new screenshots and a short loop; the privacy paragraph moved to PRIVACY.md.
 - **The app is called Relire again.** The tab title, install prompt, landing pages and the app's About text use the short name; nothing about your data or settings changes.
 - The "add your API key" banner no longer shows on Grammar → Gender and Conjugation, which work without a key; AI features on those pages still ask for one where they need it.
 - Imported word cards no longer show the “Imported note” label or the deck name; the wordbook’s example sentences, when the word is in the book, are unchanged.
