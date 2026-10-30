@@ -2069,6 +2069,7 @@
       "theme": "主题",
       "level": "等级",
       "start": "开始",
+      "building": "正在搭建题目…",
       "loadFailed": "这一轮没能加载：{{msg}}",
       "noneUsable_other": "没有可用的句子。有 {{count}} 句因为自相矛盾被跳过。"
     },

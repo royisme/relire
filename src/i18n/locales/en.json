@@ -2078,6 +2078,7 @@
       "theme": "Theme",
       "level": "Level",
       "start": "Start",
+      "building": "Building your round…",
       "loadFailed": "The round could not be loaded: {{msg}}",
       "noneUsable_one": "No sentence was usable. {{count}} was skipped because it did not add up.",
       "noneUsable_other": "No sentence was usable. {{count}} were skipped because they did not add up."

@@ -4,7 +4,6 @@
  * practice from the theme, and loading the round is the caller's.
  */
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { RoundChoice } from '../../services/atelier/source';
 import { AtelierLevelSchema, type AtelierLevel } from '../../types/atelier';
@@ -117,8 +116,18 @@ export function ThemePicker({ themes, loading, error, initial, onStart, onLeave 
             onStart({ themeId, level });
           }}
         >
-          {loading && <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />}
-          {t('atelier.pick.start')}
+          {loading ? (
+            <>
+              <span className="game-loading" aria-hidden="true">
+                {[0, 1, 2, 3, 4].map((n) => (
+                  <i key={n} style={{ animationDelay: `${n * 0.28}s` }} />
+                ))}
+              </span>
+              {t('atelier.pick.building')}
+            </>
+          ) : (
+            t('atelier.pick.start')
+          )}
         </Button>
       </footer>
     </div>

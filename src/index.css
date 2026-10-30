@@ -830,6 +830,38 @@
     transform 70ms var(--ease-out),
     box-shadow 70ms var(--ease-out);
 }
+/* Five studs light one after another while the round is being written; the AI gives no progress, so it loops. */
+.game-loading {
+  display: inline-flex;
+  gap: 5px;
+}
+.game-loading i {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.25;
+  animation: game-stud 1.4s ease-in-out infinite;
+}
+@keyframes game-stud {
+  0%,
+  45%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-loading i {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
 .game-cta:active:not(:disabled) {
   transform: translateY(4px);
   box-shadow: 0 1px 0 var(--cta-shade);
