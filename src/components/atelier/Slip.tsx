@@ -6,12 +6,13 @@
 import { Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Turn } from '../../services/atelier/roundState';
+import { InlineMarkup } from '../practice/InlineMarkup';
 
 function Message({ turn, language, total }: { turn: Turn; language: 'zh' | 'en'; total: number }) {
   const { t } = useTranslation();
   const reasonOf = (id: string) => (
     <p key={id} className="break-words">
-      {turn.pieces.find((piece) => piece.id === id)!.reason![language]}
+      <InlineMarkup text={turn.pieces.find((piece) => piece.id === id)!.reason![language]} />
     </p>
   );
   const { note } = turn;
@@ -59,7 +60,9 @@ function Message({ turn, language, total }: { turn: Turn; language: 'zh' | 'en';
         {note.kind === 'distractor' ? (
           reasonOf(note.pieceId)
         ) : note.feedback ? (
-          <p className="break-words">{note.feedback}</p>
+          <p className="break-words">
+            <InlineMarkup text={note.feedback} />
+          </p>
         ) : flagged.length > 0 ? (
           <>
             <p>{t('atelier.round.flagged')}</p>
