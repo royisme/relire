@@ -6,7 +6,6 @@ import { enumeratedReaderWords } from '../../../utils/readerTokens';
 import { prosodySchema } from '../prosodySchema';
 import type { AtelierLevel } from '../../../types/atelier';
 import type { GrammarTag } from '../../../types/grammar';
-import type { TaskId } from '../../../types/themes';
 import type { ImportMode } from '../../../types/exercises';
 import type { LearningArea, ArticleExerciseArea } from '../../../types/learningArea';
 import {
@@ -260,11 +259,8 @@ export function conjugateRequest(input: { infinitive: string }, lang: Lang): Jso
 
 export interface AtelierRoundInput {
   themeFr: string;
-  subtopicFr: string;
-  scope: string;
-  taskId: TaskId;
-  /** The theme's French example for the task. */
-  exampleFr: string;
+  /** The theme's subtopic names, so the model knows what the category covers. */
+  themeTopics: string;
   level: AtelierLevel;
   count: number;
   /** The closed grammar-tag list rendered into the prompt. */
@@ -275,10 +271,7 @@ export function atelierRequest(input: AtelierRoundInput, lang: Lang): JsonReques
   return {
     prompt: render('atelier', lang, {
       themeFr: input.themeFr,
-      subtopicFr: input.subtopicFr,
-      scope: input.scope,
-      taskId: input.taskId,
-      example: input.exampleFr,
+      themeTopics: input.themeTopics,
       level: input.level,
       count: String(input.count),
       grammarTags: input.grammarTags,

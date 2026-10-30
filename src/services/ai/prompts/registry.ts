@@ -189,16 +189,12 @@ export const PROMPTS: PromptDefinition[] = [
   },
   {
     id: 'atelier',
-    variables: ['themeFr', 'subtopicFr', 'scope', 'taskId', 'example', 'level', 'count', 'grammarTags'],
+    variables: ['themeFr', 'themeTopics', 'level', 'count', 'grammarTags'],
     defaults: { en: atelierEn, zh: atelierZh },
     sample: {
       themeFr: 'Logement et quartier',
-      subtopicFr: 'Location immobilière',
-      scope:
-        'Covers searching for rental apartments, negotiating lease terms, inquiring about rent prices, and landlord relations.',
-      taskId: 'oral-2',
-      example:
-        'Vous avez vu une annonce pour un appartement à louer : téléphonez au propriétaire pour lui demander le montant du loyer, la superficie, l’étage et les commerces à proximité.',
+      themeTopics:
+        'Location immobilière, Déménagement et emménagement, Colocation, Entretien et réparations, Voisinage et vie de quartier, Achat immobilier',
       level: 'B1',
       count: '5',
       grammarTags: GRAMMAR_TAGS.join(', '),

@@ -6,7 +6,7 @@
  */
 import type { AtelierItem, AtelierLevel } from '../../types/atelier';
 import { ExerciseItemSchema, type ExerciseItem } from '../../types/exercises';
-import type { TaskId, ThemeId } from '../../types/themes';
+import type { ThemeId } from '../../types/themes';
 import { joinBricks, normalizeSentence } from './join';
 
 /** What one item needs from its round to be stored and replayed. */
@@ -14,8 +14,6 @@ interface AtelierItemContext {
   id: string;
   itemNumber: number;
   themeId: ThemeId;
-  subtopicId: string;
-  taskId: TaskId;
   level: AtelierLevel;
   /** The learner's language, for the prompt and the explanation. */
   language: 'zh' | 'en';
@@ -46,8 +44,6 @@ export function toExerciseItem(item: AtelierItem, context: AtelierItemContext): 
     meta: {
       source: 'atelier',
       themeId: context.themeId,
-      subtopicId: context.subtopicId,
-      taskId: context.taskId,
       level: context.level,
       bricks: item.bricks,
       distractors: item.distractors,
