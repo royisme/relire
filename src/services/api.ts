@@ -37,8 +37,10 @@ import {
   type Hint,
   type OpenGrade,
 } from '../types/exerciseAi';
+import type { AtelierItem, AtelierLevel } from '../types/atelier';
 import { ConjugationAnswerSchema, type ConjugationAnswer } from '../types/conjugationAnswer';
 import type { ArticleExerciseArea } from '../types/learningArea';
+import type { Theme } from '../types/themes';
 import type { ImportDraft } from './exercises/importDraft';
 import { engineInfinitive } from './conjugation/infinitive';
 import type { Transcription } from '../types/transcription';
@@ -50,6 +52,7 @@ import {
 import { hasGraphemeSupport } from '../utils/readerTokens';
 import { validatePronunciationMarkers } from '../utils/pronunciationMarkers';
 import { decodeTakeToPcm16k } from '../utils/speech/pcm';
+import type { ParsedRound } from './atelier/parse';
 
 /**
  * What the UI calls: reads the user's settings and language, decides what is
@@ -295,6 +298,20 @@ export function generateExercises(
     fresh,
     (value) => validateGeneratedArea(GeneratedSetSchema.parse(value), input.learningArea),
   );
+}
+
+/** Not cached: every atelier round is a fresh draw from the theme, paid for with the learner's own key. */
+export function generateAtelierRound(input: {
+  theme: Theme;
+  level: AtelierLevel;
+  count: number;
+}): Promise<ParsedRound> {
+  return ai.generateAtelierRound(input, context());
+}
+
+/** Not cached: the verdict must reflect this one arrangement of this one item. */
+export function gradeAtelierBuild(input: { item: AtelierItem; userAnswer: string }): Promise<OpenGrade> {
+  return ai.gradeAtelierBuild(input, context());
 }
 
 /** Checks a pasted key against the text provider before it is saved. Defaults to the stored provider and model. */

@@ -8,7 +8,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Added
 
-- Grammar → Sentence workshop: build French sentences from bricks by tapping them into a row, with fusing brick pairs (à + le → au), a breakdown of the verb's sockets and sound cues you can mute. It is behind the AI key and shows in development builds only for now.
+- Grammar → Sentence workshop: build French sentences from bricks by tapping them into a row, with fusing brick pairs (à + le → au), a breakdown of the verb's sockets and sound cues you can mute. It runs on your own AI key — no key, no rounds — and is no longer development-only.
 - Settings → Prompts can also edit the two L'Atelier prompts: round generation and build grading.
 
 ### Changed
