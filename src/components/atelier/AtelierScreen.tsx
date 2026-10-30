@@ -1,8 +1,8 @@
 /**
  * The sentence workshop's flow: theme picker, then a round, then its summary.
- * Owns the full-bleed stage, the way out, the one round load, the unit each
- * round saves and the one record an item gets; the brick game is `RoundView`,
- * the AI (or the dev fixture) is the `source` prop.
+ * Owns the full-bleed stage, the way out, the round load (with the next round prefetched from the
+ * second-to-last turn), the unit each round saves and the one record an item gets; the brick game is
+ * `RoundView`, the AI (or the dev fixture) is the `source` prop.
  */
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +29,9 @@ interface Round {
   id: number;
 }
 
+/** A round as a source hands it over. */
+type LoadedRound = { items: AtelierItem[]; dropped: number };
+
 /** What a played round records against: its saved unit, the unit's reset token, and which items already have their one record. */
 interface Records {
   unit: ExerciseUnit;
@@ -50,10 +53,29 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
   const [recordError, setRecordError] = useState<string | null>(null);
   const nextId = useRef(1);
   const records = useRef<Records | null>(null);
+  /** The next round for the choice on screen, loading in the background since the second-to-last turn. */
+  const prefetched = useRef<{ choice: RoundChoice; round: Promise<LoadedRound> } | null>(null);
 
   useEffect(() => {
     loadThemes().then(setThemes, (reason: unknown) => setThemesError(errorMessage(reason)));
   }, []);
+
+  /**
+   * The round a choice plays next: the prefetched one when it is still for that choice — ready or not, it is
+   * waited for — and a fresh load when the prefetch failed or the choice moved on to another theme or level.
+   */
+  const nextRound = async (choice: RoundChoice): Promise<LoadedRound> => {
+    const kept = prefetched.current;
+    prefetched.current = null;
+    if (kept && kept.choice.themeId === choice.themeId && kept.choice.level === choice.level) {
+      try {
+        return await kept.round;
+      } catch {
+        // The background round failed; the fresh load below shows its own real error, if it fails too.
+      }
+    }
+    return source.loadRound(choice);
+  };
 
   const start = async (choice: RoundChoice) => {
     setPicked(choice);
@@ -63,7 +85,7 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
     // A failed save keeps its batch in the saver; a later round must never save that stale unit.
     drop();
     try {
-      const { items, dropped } = await source.loadRound(choice);
+      const { items, dropped } = await nextRound(choice);
       if (items.length === 0) {
         setError(t('atelier.pick.noneUsable', { count: dropped }));
         return;
@@ -83,6 +105,18 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
       setLoading(false);
     }
   };
+
+  /** Loads the next round of the same choice in the background; one prefetch per round, dropped when the game is left. */
+  const prefetch = useCallback(
+    (choice: RoundChoice) => {
+      if (prefetched.current) return;
+      const pending = source.loadRound(choice);
+      // The rejection is dealt with when the round is taken; without a handler here it would be unhandled.
+      void pending.catch(() => undefined);
+      prefetched.current = { choice, round: pending };
+    },
+    [source],
+  );
 
   /**
    * The one record an item gets: its first check's verdict, or — for an item revealed with no check behind
@@ -125,6 +159,7 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
         choice={round.choice}
         dropped={round.dropped}
         source={source}
+        onPrefetch={prefetch}
         onAgain={() => {
           setRound(null);
           void start(picked);

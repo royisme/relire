@@ -41,6 +41,8 @@ interface RoundViewProps {
   /** Items the boundary check dropped, said once at the top of the round. */
   dropped: number;
   source: AtelierSource;
+  /** Starts the next round of `choice` in the background, called once the second-to-last turn is reached. */
+  onPrefetch: (choice: RoundChoice) => void;
   /** Persists the one record an item gets: every verdict, and a reveal counted wrong. */
   onRecord: (itemIndex: number, answer: string, correct: boolean) => void;
   onAgain: () => void;
@@ -60,7 +62,17 @@ const CUE_OF_EVENT: Record<string, Cue | undefined> = {
 /** The cue lands with the brick: after the flight, or after the halves of a fusion meet. */
 const CUE_DELAY: Record<string, number | undefined> = { snap: 160, reject: 130, fuse: 250 };
 
-export function RoundView({ items, choice, dropped, source, onRecord, onAgain, onThemes, onLeave }: RoundViewProps) {
+export function RoundView({
+  items,
+  choice,
+  dropped,
+  source,
+  onPrefetch,
+  onRecord,
+  onAgain,
+  onThemes,
+  onLeave,
+}: RoundViewProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
   const [state, dispatch] = useReducer(roundReducer, items, startRound);
@@ -101,6 +113,13 @@ export function RoundView({ items, choice, dropped, source, onRecord, onAgain, o
     // Only the turn changing moves focus here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.current]);
+
+  // The second-to-last turn starts the next round in the background, so "Play again" never waits for it.
+  // `state` itself is not a dependency: every dispatch makes a new one, and only these two numbers matter.
+  useEffect(() => {
+    if (state.current === state.turns.length - 2) onPrefetch(choice);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.current, state.turns.length, choice, onPrefetch]);
 
   // A brick that left the bin took the focus with it; the next one (or the taken-back one) receives it.
   useEffect(() => {
