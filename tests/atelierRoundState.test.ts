@@ -68,7 +68,7 @@ test('first unassisted right check alone earns first and the real summary count'
   expect(turnOutcome(currentTurn(state))).toBe('first');
   expect(state.results).toEqual([{ itemIndex: 0, finalAnswer: 'Nous allons à la plage.', rightFirstTime: true }]);
   expect(summaryOf(state)).toEqual({ total: 1, rightFirstTime: 1 });
-  expect(state.turns).toHaveLength(3);
+  expect(state.turns).toHaveLength(4);
 });
 
 test('a removed distractor still disqualifies a right first check', async () => {
@@ -131,6 +131,7 @@ test('reveal fills the row but never invents a learner finalAnswer', () => {
     [0, false],
     [1, false],
     [2, false],
+    [3, false],
     [0, true],
   ]);
 });
@@ -149,9 +150,10 @@ for (const reason of ['wrong check', 'distractor', 'fusion', 'reveal'] as const)
       [0, false],
       [1, false],
       [2, false],
+      [3, false],
       [0, true],
     ]);
-    for (const index of [1, 2]) {
+    for (const index of [1, 2, 3]) {
       state = roundReducer(state, { type: 'next' });
       expect(currentTurn(state).itemIndex).toBe(index);
       state = await check(build(state));
@@ -163,10 +165,10 @@ for (const reason of ['wrong check', 'distractor', 'fusion', 'reveal'] as const)
     state = await check(place(state, 'b0'));
     state = reason === 'reveal' ? roundReducer(state, { type: 'reveal' }) : await check(build(clear(state)));
     expect(turnOutcome(currentTurn(state))).toBe('retried');
-    expect(state.turns).toHaveLength(4);
-    expect(state.results.map((result) => result.rightFirstTime)).toEqual([false, true, true]);
-    expect(summaryOf(state)).toEqual({ total: 3, rightFirstTime: 2 });
-    expect(state.turns.map(turnOutcome)).toEqual(['missed', 'first', 'first', 'retried']);
+    expect(state.turns).toHaveLength(5);
+    expect(state.results.map((result) => result.rightFirstTime)).toEqual([false, true, true, true]);
+    expect(summaryOf(state)).toEqual({ total: 4, rightFirstTime: 3 });
+    expect(state.turns.map(turnOutcome)).toEqual(['missed', 'first', 'first', 'first', 'retried']);
     state = roundReducer(state, { type: 'next' });
     expect(isOver(state)).toBe(true);
     expect(state.event?.kind).toBe('finish');

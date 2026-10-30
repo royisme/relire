@@ -12,9 +12,9 @@ import { contextOf, fakeProvider } from './fixtures/fakeProvider';
 const theme = ThemesSchema.parse(bundledThemes).find((entry) => entry.id === 'work')!;
 const input = { theme, level: 'B1' as const, count: 3 };
 const badJoin = { ...beach, sentence: 'Nous allons à la piscine.' };
-const badFrame = { ...coffee, frame: { verb: 8, sockets: [] } };
+const badLink = { ...coffee, links: [{ ...coffee.links[0], head: 8 }] };
 const joinReason = 'the bricks join to “Nous allons à la plage.” but the sentence reads “Nous allons à la piscine.”';
-const frameReason = 'the frame verb index 8 is out of range';
+const linkReason = 'the link “sujet” names head index 8, out of range';
 
 describe('generateAtelierRound', () => {
   for (const lang of ['en', 'zh'] as const)
@@ -39,12 +39,12 @@ describe('generateAtelierRound', () => {
   });
 
   test('when every item is bad, InvalidAnswerError includes every drop reason', async () => {
-    const provider = fakeProvider({ items: [badJoin, badFrame] });
+    const provider = fakeProvider({ items: [badJoin, badLink] });
     const err = await rejection(generateAtelierRound(input, contextOf(provider)));
     expect(err).toBeInstanceOf(InvalidAnswerError);
     expect(err.message).toStartWith('The AI answer for the round was not usable:');
     expect(err.message).toContain(`item 0 was dropped: ${joinReason}`);
-    expect(err.message).toContain(`item 1 was dropped: ${frameReason}`);
+    expect(err.message).toContain(`item 1 was dropped: ${linkReason}`);
   });
 
   test('an empty model round is not returned as a substitute playable round', async () => {

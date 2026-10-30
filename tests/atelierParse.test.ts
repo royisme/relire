@@ -1,7 +1,6 @@
 /** Boundary rejection cases start from a deep clone of a good, hand-written item. */
 import { expect, test } from 'bun:test';
 import { parseRound } from '../src/services/atelier/parse';
-import type { AtelierItem } from '../src/types/atelier';
 import { beach, cinema, coffee, negative } from './fixtures/atelier';
 
 function expectDrop(item: unknown, ...offending: string[]) {
@@ -34,10 +33,11 @@ test('schema failure names a blank brick text', () => {
   expectDrop(bad, 'bricks.0.text');
 });
 
-test('schema failure names the missing frame', () => {
+test.each(['missing', 'empty'])('schema failure names %s links', (kind) => {
   const bad = structuredClone(beach);
-  Reflect.deleteProperty(bad, 'frame');
-  expectDrop(bad, 'frame');
+  if (kind === 'missing') Reflect.deleteProperty(bad, 'links');
+  if (kind === 'empty') bad.links = [];
+  expectDrop(bad, 'links');
 });
 
 test('schema failure names zero distractors', () => {
@@ -105,58 +105,50 @@ test('a distractor spelling a brick with a straight rather than typographic apos
   expectDrop(bad, 'distractor', "J'");
 });
 
-test('a frame verb index out of range is dropped', () => {
-  const bad = structuredClone(beach);
-  bad.frame.verb = 6;
-  expectDrop(bad, 'frame verb index 6', 'out of range');
+for (const target of ['item', 'modify'] as const) {
+  for (const defect of ['head range', 'dependent range', 'self', 'duplicate'] as const) {
+    test(`${target}: link ${defect} is dropped with the link's name`, () => {
+      const bad = structuredClone(beach);
+      const holder = target === 'item' ? bad : bad.modify!;
+      const link = holder.links[0];
+      if (defect === 'head range') link.head = holder.bricks.length;
+      if (defect === 'dependent range') link.dependents = [holder.bricks.length];
+      if (defect === 'self') link.dependents = [link.head];
+      if (defect === 'duplicate') link.dependents = [0, 0];
+      expectDrop(
+        bad,
+        'link',
+        link.label,
+        defect.includes('range') ? 'out of range' : defect === 'self' ? 'depend on itself' : 'same dependent twice',
+      );
+    });
+  }
+}
+
+test('modify links use modify.bricks, not the shorter original list', () => {
+  const good = structuredClone(beach);
+  expect(good.modify!.links.some((link) => link.head >= good.bricks.length)).toBe(true);
+  expect(parseRound({ items: [good] })).toEqual({ items: [good], dropped: [] });
 });
 
-test('a frame verb pointing at a noun is dropped', () => {
-  const bad = structuredClone(beach);
-  // Keep the noun outside the socket so the verb-role check is the only violation.
-  bad.frame.sockets[0].filledBy = [2, 3];
-  expect(parseRound({ items: [bad] }).dropped).toEqual([]);
-  bad.frame.verb = 4;
-  expectDrop(bad, 'frame verb index 4', 'plage', 'noun');
-});
-
-test('a frame verb pointing at an auxiliary is kept', () => {
-  const good: AtelierItem = {
-    ...structuredClone(beach),
-    meaning: { zh: '我们去了海滩。', en: 'We went to the beach.' },
-    sentence: 'Nous sommes allés à la plage.',
-    variants: [],
-    bricks: [
-      { text: 'Nous', role: 'subject' },
-      { text: 'sommes', role: 'auxiliary' },
-      { text: 'allés', role: 'verb' },
-      { text: 'à', role: 'preposition' },
-      { text: 'la', role: 'determiner' },
-      { text: 'plage', role: 'noun' },
-      { text: '.', role: 'punctuation' },
-    ],
-    frame: { verb: 1, sockets: [{ label: 'à + nom', filledBy: [3, 4, 5] }] },
-    explanation: { zh: 'aller 的复合过去时用 être。', en: 'Aller uses être in the passé composé.' },
+test('an imperative needs no subject link', () => {
+  const good = {
+    ...structuredClone(coffee),
+    meaning: { en: 'Like coffee.', zh: '喜欢咖啡吧。' },
+    sentence: 'Aime le café.',
+    bricks: coffee.bricks.slice(1).map((brick, i) => (i === 0 ? { ...brick, text: 'Aime' } : brick)),
+    links: coffee.links
+      .filter((link) => link.relation !== 'subject')
+      .map((link) => ({ ...link, head: link.head - 1, dependents: link.dependents.map((index) => index - 1) })),
   };
   expect(parseRound({ items: [good] })).toEqual({ items: [good], dropped: [] });
 });
 
-test('a filledBy index out of range is dropped', () => {
+test.each(['missing', 'empty'])('modify also requires %s links', (kind) => {
   const bad = structuredClone(beach);
-  bad.frame.sockets[0].filledBy = [2, 3, 6];
-  expectDrop(bad, 'socket', 'à + nom', 'index 6', 'out of range');
-});
-
-test('a socket containing the frame verb index is dropped', () => {
-  const bad = structuredClone(beach);
-  bad.frame.sockets[0].filledBy = [1, 2, 3, 4];
-  expectDrop(bad, 'socket', 'à + nom', 'verb brick');
-});
-
-test('a duplicate index inside one socket is dropped', () => {
-  const bad = structuredClone(beach);
-  bad.frame.sockets[0].filledBy = [2, 3, 4, 4];
-  expectDrop(bad, 'socket', 'à + nom', 'same brick twice');
+  if (kind === 'missing') Reflect.deleteProperty(bad.modify!, 'links');
+  if (kind === 'empty') bad.modify!.links = [];
+  expectDrop(bad, 'modify.links');
 });
 
 test('a modify whose bricks do not join to its sentence is dropped', () => {
@@ -178,24 +170,24 @@ test('a valid elided negative modify is kept', () => {
   expect(good.modify).toEqual(negative);
 });
 
-test('join failure takes precedence over frame failure', () => {
+test('join failure takes precedence over link failure', () => {
   const bad = structuredClone(beach);
   bad.sentence = 'Nous allons à la piscine.';
-  bad.frame.verb = 6;
+  bad.links[0].head = 6;
   expectDrop(bad, 'join', 'Nous allons à la plage.', 'Nous allons à la piscine.');
-  expect(parseRound({ items: [bad] }).dropped[0].reason).not.toContain('frame');
+  expect(parseRound({ items: [bad] }).dropped[0].reason).not.toContain('link');
 });
 
 test('a mixed round keeps good items in order and reports original bad indexes', () => {
   const badJoin = structuredClone(beach);
   badJoin.sentence = 'Nous allons à la piscine.';
-  const badFrame = structuredClone(coffee);
-  badFrame.frame.verb = 5;
-  const result = parseRound({ items: [structuredClone(beach), badJoin, structuredClone(cinema), badFrame] });
+  const badLink = structuredClone(coffee);
+  badLink.links[0].head = 5;
+  const result = parseRound({ items: [structuredClone(beach), badJoin, structuredClone(cinema), badLink] });
   expect(result.items).toEqual([beach, cinema]);
   expect(result.dropped).toEqual([
     { index: 1, reason: expect.stringContaining('Nous allons à la piscine.') },
-    { index: 3, reason: expect.stringContaining('frame verb index 5') },
+    { index: 3, reason: expect.stringContaining('head index 5') },
   ]);
 });
 

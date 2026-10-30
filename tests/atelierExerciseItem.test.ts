@@ -23,7 +23,7 @@ const negativeItem: AtelierItem = {
   sentence: 'Nous n’allons pas à la plage.',
   variants: [],
   bricks: negative.bricks,
-  frame: { verb: 2, sockets: [{ label: 'à + nom', filledBy: [4, 5, 6] }] },
+  links: negative.links,
   explanation: { zh: 'ne 在元音前省音为 n’。', en: 'Ne elides to n’ before a vowel.' },
   grammarTag: 'negation',
   modify: undefined,
@@ -79,7 +79,7 @@ for (const { source, expected, variants, options } of CASES) {
         level: 'A2',
         bricks: source.bricks,
         distractors: source.distractors,
-        frame: source.frame,
+        links: source.links,
         explanation: source.explanation,
         modify: source.modify,
         strictAccents: true,
@@ -113,7 +113,7 @@ test('atelier metadata requires strictAccents to be literal true', () => {
     level: context.level,
     bricks: beach.bricks,
     distractors: beach.distractors,
-    frame: beach.frame,
+    links: beach.links,
     explanation: beach.explanation,
     strictAccents: true,
   } as const;
@@ -125,7 +125,7 @@ test('atelier metadata requires strictAccents to be literal true', () => {
   expect(AtelierMetaSchema.safeParse(missing).success).toBe(false);
 });
 
-test.each(['subtopicId', 'taskId'])('atelier metadata rejects the removed %s field', (key) => {
+test.each(['subtopicId', 'taskId', 'frame'])('atelier metadata rejects the removed %s field', (key) => {
   const item = toExerciseItem(structuredClone(beach), context);
   expect(AtelierMetaSchema.safeParse(item.meta).success).toBe(true);
   const result = AtelierMetaSchema.safeParse({

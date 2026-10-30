@@ -130,6 +130,29 @@ for (const lang of ['en', 'zh'] as const) {
     for (const rule of rules) expect(prompt).toContain(rule);
   });
 
+  test(`atelierRequest.${lang}: complete links, eight relations and modify's own links`, () => {
+    const { prompt } = atelierRequest(input, lang);
+    expect(prompt).not.toMatch(/frame/i);
+    for (const relation of [
+      'subject',
+      'object',
+      'complement',
+      'article',
+      'agreement',
+      'negation',
+      'modifier',
+      'pronoun',
+    ])
+      expect(prompt).toMatch(new RegExp(`  - ${relation}[:：]`));
+    expect(prompt).toContain(lang === 'en' ? 'List every connection' : '必须列出所有连接');
+    expect(prompt).toContain(lang === 'en' ? 'an imperative has none' : '祈使句没有主语');
+    expect(prompt).toContain(lang === 'en' ? 'its own links over them' : '它自己的 links');
+    const sample = JSON.parse(prompt.slice(prompt.indexOf('{\n')));
+    expect(sample.items[0].links[0]).toMatchObject({ head: 1, dependents: [0], relation: 'subject', label: 'sujet' });
+    expect(sample.items[0].modify.links).toHaveLength(1);
+    expect(Object.keys(sample.items[0].links[0].note).sort()).toEqual(['en', 'zh']);
+  });
+
   test(`atelierGradeRequest.${lang}: item, learner answer, reference and open-grade schema`, () => {
     const item = JSON.stringify(coffee);
     const request = atelierGradeRequest(
@@ -137,6 +160,10 @@ for (const lang of ['en', 'zh'] as const) {
       lang,
     );
     for (const value of [item, 'J’aime du café.', 'J’aime le café.']) expect(request.prompt).toContain(value);
+    expect(request.prompt).not.toMatch(/frame/i);
+    expect(request.prompt).toContain(
+      lang === 'en' ? 'the brick and the connection that does not hold' : '哪块积木、哪条连接不成立',
+    );
     expect(request.jsonSchema).toEqual(openGradeJsonSchema());
     expect(request.jsonSchema).toMatchObject({
       type: 'object',

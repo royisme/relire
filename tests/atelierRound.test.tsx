@@ -105,6 +105,8 @@ function round() {
           choice: atelierChoice,
           dropped: 0,
           source,
+          onPrefetch: noop,
+          onRecord: noop,
           onAgain: noop,
           onThemes: noop,
           onLeave: noop,
@@ -144,9 +146,9 @@ afterEach(() => {
   restoreWindow();
 });
 
-test('the three-item dev round passes the boundary and renders the real row, bin, ticket and Check', () => {
+test('the four-item dev round passes the boundary and renders the real row, bin, ticket and Check', () => {
   expect(devRound.dropped).toEqual([]);
-  expect(devRound.items).toHaveLength(3);
+  expect(devRound.items).toHaveLength(4);
   const game = round();
   const html = game.view().html;
   expect(html).toContain('We are going to the beach.');
@@ -186,7 +188,8 @@ test('sockets and grammar terms are absent from the bin, present on the row verb
     />,
   );
   expect(booklet).toContain('role="dialog"');
-  expect(booklet).toContain('brick-socket');
+  expect(booklet).toContain('<ol');
+  expect(game.view().html).not.toContain('role="dialog"');
   expect(booklet).toContain('à + nom');
   expect(booklet).toContain(devRound.items[0].explanation.en);
   expect(game.grade).not.toHaveBeenCalled();
@@ -281,20 +284,20 @@ for (const language of ['en', 'zh'] as const) {
     const game = round();
     game.place('d0');
     propsOf<ComponentProps<typeof Baseplate>>(game.view().tree, Baseplate).onRemove('d0');
-    for (const expected of ['missed', 'first', 'first', 'retried'] as const) {
+    for (const expected of ['missed', 'first', 'first', 'first', 'retried'] as const) {
       game.build();
       click(game.primary());
       expect(turnOutcome(currentTurn(game.state()))).toBe(expected);
       click(game.primary());
       if (expected === 'missed') {
         const pips = propsOf<ComponentProps<typeof Hud>>(game.view().tree, Hud).pips;
-        expect(pips).toEqual(['missed', 'current', 'todo', 'todo']);
+        expect(pips).toEqual(['missed', 'current', 'todo', 'todo', 'todo']);
       }
     }
-    expect(summaryOf(game.state())).toEqual({ total: 3, rightFirstTime: 2 });
+    expect(summaryOf(game.state())).toEqual({ total: 4, rightFirstTime: 3 });
     const html = game.view().html;
-    expect(html).toContain(t('atelier.summary.count', { count: 3, right: 2 }));
-    expect(html.match(/data-hue="green"/g)).toHaveLength(2);
+    expect(html).toContain(t('atelier.summary.count', { count: 4, right: 3 }));
+    expect(html.match(/data-hue="green"/g)).toHaveLength(3);
     expect(html.match(/data-hue="red"/g)).toHaveLength(1);
     expect(html.match(/data-hue="yellow"/g)).toHaveLength(1);
     for (const outcome of ['first', 'missed', 'retried']) expect(html).toContain(t(`atelier.summary.${outcome}`));
