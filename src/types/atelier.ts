@@ -101,5 +101,6 @@ export const AtelierMetaSchema = z.strictObject({
   frame: FrameSchema,
   explanation: BilingualTextSchema,
   modify: ModifySchema.optional(),
+  strictAccents: z.literal(true),
 });
 export type AtelierMeta = z.infer<typeof AtelierMetaSchema>;

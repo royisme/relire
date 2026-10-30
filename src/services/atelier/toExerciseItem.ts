@@ -55,6 +55,7 @@ export function toExerciseItem(item: AtelierItem, context: AtelierItemContext): 
       // Both languages, so a replayed item never depends on the round's language.
       explanation: item.explanation,
       modify: item.modify,
+      strictAccents: true,
     },
   });
 }
