@@ -2143,6 +2143,9 @@
       "first": "一次就对",
       "missed": "没答对",
       "retried": "第二次"
+    },
+    "drill": {
+      "instruction": "把词块按顺序排好，拼出每个句子。"
     }
   }
 }

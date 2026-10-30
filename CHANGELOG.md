@@ -8,8 +8,10 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Added
 
-- Grammar → Sentence workshop: build French sentences from bricks by tapping them into a row, with fusing brick pairs (à + le → au), a breakdown of the verb's sockets and sound cues you can mute. It is behind the AI key and shows in development builds only for now.
+- Grammar → Sentence workshop: build French sentences from bricks by tapping them into a row, with fusing brick pairs (à + le → au), a breakdown of the verb's sockets and sound cues you can mute. It runs on your own AI key — no key, no rounds — and is no longer development-only.
 - Settings → Prompts can also edit the two L'Atelier prompts: round generation and build grading.
+- Each sentence-workshop round is saved as an ordinary sentence-building exercise set, named after its theme: a sentence's first check — or giving up and revealing it — is recorded once, so misses reach Mistakes and hits count in Practice accuracy. Nothing enters word review.
+- In the sentence workshop, the next round starts loading while you are on the second-to-last sentence, so Play again continues at once; if that background round failed, a fresh one is loaded and its real error shown if it fails too.
 
 ### Changed
 

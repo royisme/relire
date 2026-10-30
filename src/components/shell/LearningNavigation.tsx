@@ -17,9 +17,7 @@ export function LearningNavigation({ area, current }: { area: 'read' | 'grammar'
           ...(contentServiceUrl() ? [{ to: { name: 'grammar' } as Route, label: t('grammarTopics.title') }] : []),
           { to: { name: 'grammar', section: 'conjugation' }, label: t('conjugation.page.title') },
           { to: { name: 'grammar', section: 'gender' }, label: t('nounGender.title') },
-          ...(import.meta.env.DEV
-            ? [{ to: { name: 'grammar', section: 'atelier' } as Route, label: t('atelier.title') }]
-            : []),
+          { to: { name: 'grammar', section: 'atelier' }, label: t('atelier.title') },
           { to: { name: 'practice', area: 'grammar' }, label: t('learning.exercises') },
         ];
   return (
