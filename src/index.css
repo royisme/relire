@@ -630,20 +630,9 @@
 .brick[data-shape='mark'] {
   --b-radius: 6px;
 }
-/* A fused brick is two bricks welded: double width, four studs and a seam down the middle. */
+/* A fused brick is two bricks welded: double width and four studs. */
 .brick[data-fused] {
   min-width: 7rem;
-}
-.brick[data-fused]::after {
-  content: '';
-  position: absolute;
-  top: 18%;
-  bottom: 18%;
-  left: 50%;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--b-shade);
-  opacity: 0.55;
 }
 .brick[data-half] .brick-role {
   display: none;
