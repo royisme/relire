@@ -7,7 +7,7 @@
  * as a `checked` action. Does not own grading rules (`gradeItem`), the join
  * rule (`joinBricks`) or the sounds and motion that follow an `event`.
  */
-import type { AtelierItem, Brick } from '../../types/atelier';
+import type { AtelierItem, Brick, Link } from '../../types/atelier';
 import { emptyAnswer } from '../exercises/answer';
 import { gradeItem } from '../exercises/grading';
 import { joinBricks } from './join';
@@ -23,7 +23,7 @@ export interface Piece {
   /** Index into the item's bricks; null for a distractor. */
   origin: number | null;
   /** The labels of the links that say what the verb takes, on the verb brick only. */
-  sockets?: string[];
+  sockets?: { relation: Link['relation']; label: string }[];
 }
 
 /** The line shown in the status slot; the screen turns it into words. */
@@ -123,7 +123,7 @@ function makeTurn(item: AtelierItem, itemIndex: number, retry: boolean): Turn {
   const verb = item.bricks.findIndex((brick) => brick.role === 'verb' || brick.role === 'auxiliary');
   const sockets = item.links
     .filter((link) => link.head === verb && (link.relation === 'object' || link.relation === 'complement'))
-    .map((link) => link.label);
+    .map(({ relation, label }) => ({ relation, label }));
   const pieces: Piece[] = [
     ...item.bricks.map((brick, index) => ({
       id: `b${index}`,

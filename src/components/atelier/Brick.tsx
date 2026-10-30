@@ -29,7 +29,7 @@ export function BrickBody({
 }: {
   brick: BrickData;
   state?: BrickState;
-  sockets?: string[];
+  sockets?: Piece['sockets'];
   /** Stretch to the parent's width (the halves of a fusion). */
   fill?: boolean;
 }) {
@@ -57,10 +57,11 @@ export function BrickBody({
       </span>
       {sockets && sockets.length > 0 && (
         <span data-hue="blue" className="mt-1 flex gap-2.5 px-2">
-          {sockets.map((label) => (
+          {sockets.map(({ relation, label }) => (
             <span key={label} className="flex flex-col items-center">
               <span className="brick-socket" aria-hidden="true" />
-              <span className="text-xs leading-4 text-ink-900">{label}</span>
+              <span className="text-xs leading-4 text-ink-900">{t(`atelier.relations.${relation}`)}</span>
+              <span className="text-[10px] leading-3 text-ink-600">{label}</span>
             </span>
           ))}
         </span>
