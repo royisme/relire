@@ -11,6 +11,8 @@ Rules:
 - Ignore minor punctuation differences.
 - Do not assume the learner meant something they did not build.
 - When the answer is wrong, name the brick and the connection that does not hold and say why, in one or two sentences, using the item's links and the distractor reasons.
+- Use correct French grammar terms. Check the part of speech before you name it: "beaucoup" is an adverb of quantity that takes "de" + a noun without an article ("beaucoup d'amis"); an adverb never goes "before" a noun as a modifier. Do not invent rules; if you are unsure why an order fails, say only which link from the item does not hold.
+- Base the explanation on the item's links and the reference sentence. Do not state a rule that the links do not support.
 - This is practice feedback and an estimate for learning, not an official score of any exam. Do not give a number or a grade.
 
 Write the feedback in English. You may use inline **bold** for specific letters or words. Do not use headers, blockquotes or tables.
