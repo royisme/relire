@@ -13,20 +13,17 @@ import { Button } from '../ui/button';
 export type Pip = 'first' | 'missed' | 'retried' | 'current' | 'todo';
 
 const PIP: Record<Pip, string> = {
-  first: 'bg-(--pip-first)',
-  missed: 'bg-(--pip-missed)',
-  retried: 'bg-(--pip-retried)',
-  current: 'bg-ink-900',
-  todo: 'bg-ink-300',
+  first: 'text-ok-600',
+  missed: 'text-bad-600',
+  retried: 'text-(--brick-yellow)',
+  current: 'text-accent-700',
+  todo: 'text-ink-300',
 };
 
 function Switch({ on, label, onToggle }: { on: boolean; label: string; onToggle: () => void }) {
   return (
     <Button variant="outline" size="sm" aria-pressed={on} onClick={onToggle} className="gap-1.5 px-2.5">
-      <span
-        aria-hidden="true"
-        className={cn('size-2.5 rounded-full', on ? 'bg-(--pip-first)' : 'border-2 border-ink-500')}
-      />
+      <span aria-hidden="true" className={cn('size-2.5 rounded-full', on ? 'bg-ok-600' : 'border-2 border-ink-500')} />
       {label}
     </Button>
   );
@@ -57,7 +54,10 @@ export function Hud({
         {pips?.map((pip, index) => (
           <span
             key={index}
-            className={cn('h-3 max-w-7 flex-1 rounded-[4px] shadow-[0_2px_0_rgb(0_0_0/0.4)]', PIP[pip])}
+            className={cn(
+              'h-3 max-w-7 flex-1 rounded-[4px] bg-current shadow-[0_2px_0_color-mix(in_oklab,currentColor_65%,var(--color-scrim))]',
+              PIP[pip],
+            )}
           />
         ))}
       </div>

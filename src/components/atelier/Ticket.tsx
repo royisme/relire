@@ -25,7 +25,7 @@ export function Ticket({ meaning, language, showOther, onToggleOther }: TicketPr
       <span aria-hidden="true" className="absolute top-1/2 -right-2 size-4 -translate-y-1/2 rounded-full bg-ink-50" />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-[color:var(--ticket-muted)]">{t('atelier.round.order')}</p>
+          <p className="text-xs text-ink-600">{t('atelier.round.order')}</p>
           <div className="mt-0.5 grid">
             {(['en', 'zh'] as const).map((lang) => (
               <p
@@ -47,7 +47,7 @@ export function Ticket({ meaning, language, showOther, onToggleOther }: TicketPr
           size="sm"
           aria-pressed={showOther}
           onClick={onToggleOther}
-          className="-mr-2 shrink-0 px-2 text-[color:var(--ticket-muted)] hover:bg-black/10 hover:text-[color:var(--ticket-ink)]"
+          className="-mr-2 shrink-0 px-2 "
         >
           <Languages className="h-4 w-4" aria-hidden="true" />
           {t(other === 'zh' ? 'atelier.round.langZh' : 'atelier.round.langEn')}

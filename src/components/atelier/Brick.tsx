@@ -60,7 +60,7 @@ export function BrickBody({
           {sockets.map((label) => (
             <span key={label} className="flex flex-col items-center">
               <span className="brick-socket" aria-hidden="true" />
-              <span className="text-xs leading-4 text-[color:var(--ticket-ink)]">{label}</span>
+              <span className="text-xs leading-4 text-ink-900">{label}</span>
             </span>
           ))}
         </span>

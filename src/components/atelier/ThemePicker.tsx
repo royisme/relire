@@ -13,7 +13,7 @@ import { Button } from '../ui/button';
 import { Hud } from './Hud';
 import type { Hue } from './roles';
 
-const HUES: Hue[] = ['yellow', 'blue', 'red', 'green', 'purple', 'white'];
+const HUES: Hue[] = ['yellow', 'blue', 'red', 'green', 'purple', 'grey'];
 
 interface ThemePickerProps {
   themes: Theme[];
@@ -84,7 +84,7 @@ export function ThemePicker({ themes, loading, error, initial, onStart, onLeave 
                 className="brick-btn flex-1 disabled:opacity-60"
               >
                 <span
-                  data-hue="white"
+                  data-hue="grey"
                   data-shape="mark"
                   data-state={value === level ? 'picked' : undefined}
                   className="brick min-h-11! w-full"

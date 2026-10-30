@@ -65,9 +65,9 @@ export function Booklet({ item, turn, language, lastTurn, onClose, onNext }: Boo
             <BrickBody brick={bricks(verb)} sockets={sockets.map((socket) => socket.label)} />
           </div>
           {sockets.length === 0 ? (
-            <p className="mt-3 text-sm text-[color:var(--ticket-muted)]">{t('atelier.breakdown.nothing')}</p>
+            <p className="mt-3 text-sm text-ink-600">{t('atelier.breakdown.nothing')}</p>
           ) : (
-            <dl className="mt-3 divide-y divide-dashed divide-[color:var(--ticket-muted)] border-y border-dashed border-[color:var(--ticket-muted)]">
+            <dl className="mt-3 divide-y divide-dashed divide-ink-400 border-y border-dashed border-ink-400">
               {sockets.map((socket) => (
                 <div key={socket.label} className="flex flex-wrap items-center gap-x-4 gap-y-3 py-3">
                   <dt className="min-w-20 break-words text-sm font-semibold">{socket.label}</dt>
@@ -80,7 +80,7 @@ export function Booklet({ item, turn, language, lastTurn, onClose, onNext }: Boo
               ))}
             </dl>
           )}
-          <h4 className="mt-4 text-xs text-[color:var(--ticket-muted)]">{t('atelier.breakdown.analysis')}</h4>
+          <h4 className="mt-4 text-xs text-ink-600">{t('atelier.breakdown.analysis')}</h4>
           <p className="mt-1 break-words text-sm">{item.explanation[language]}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2 px-4 pt-1 pb-4">
