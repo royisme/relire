@@ -2083,20 +2083,20 @@
       "noneUsable_other": "No sentence was usable. {{count}} were skipped because they did not add up."
     },
     "roles": {
-      "subject": "subject",
+      "subject": "subj.",
       "verb": "verb",
-      "auxiliary": "auxiliary",
+      "auxiliary": "aux.",
       "noun": "noun",
-      "determiner": "determiner",
-      "preposition": "preposition",
-      "contraction": "contraction",
-      "adjective": "adjective",
-      "adverb": "adverb",
-      "negation": "negation",
-      "conjunction": "conjunction",
-      "pronoun": "pronoun",
-      "expression": "expression",
-      "punctuation": "punctuation"
+      "determiner": "det.",
+      "preposition": "prep.",
+      "contraction": "contr.",
+      "adjective": "adj.",
+      "adverb": "adv.",
+      "negation": "neg.",
+      "conjunction": "conj.",
+      "pronoun": "pron.",
+      "expression": "expr.",
+      "punctuation": "punct."
     },
     "round": {
       "counter": "Sentence {{current}} of {{total}}",
@@ -2131,10 +2131,19 @@
       "breakdown": "Breakdown",
       "placed": "{{count}} of {{total}} bricks placed"
     },
+    "relations": {
+      "subject": "Subject",
+      "object": "Object",
+      "complement": "Complement",
+      "article": "Article",
+      "agreement": "Agreement",
+      "negation": "Negation",
+      "modifier": "Modifier",
+      "pronoun": "Pronoun"
+    },
     "breakdown": {
       "analysis": "AI analysis",
-      "frame": "The verb takes",
-      "nothing": "This verb needs nothing else here."
+      "frame": "How the words connect"
     },
     "summary": {
       "title": "Round done",

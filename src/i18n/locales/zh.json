@@ -2075,17 +2075,17 @@
     "roles": {
       "subject": "主语",
       "verb": "动词",
-      "auxiliary": "助动词",
+      "auxiliary": "助动",
       "noun": "名词",
-      "determiner": "限定词",
+      "determiner": "限定",
       "preposition": "介词",
-      "contraction": "缩合词",
-      "adjective": "形容词",
+      "contraction": "缩合",
+      "adjective": "形容",
       "adverb": "副词",
-      "negation": "否定词",
+      "negation": "否定",
       "conjunction": "连词",
       "pronoun": "代词",
-      "expression": "固定搭配",
+      "expression": "搭配",
       "punctuation": "标点"
     },
     "round": {
@@ -2120,10 +2120,19 @@
       "breakdown": "拆解",
       "placed": "已放 {{count}} / {{total}} 块"
     },
+    "relations": {
+      "subject": "主语",
+      "object": "宾语",
+      "complement": "补语",
+      "article": "冠词",
+      "agreement": "一致",
+      "negation": "否定",
+      "modifier": "修饰",
+      "pronoun": "代词"
+    },
     "breakdown": {
       "analysis": "AI 分析",
-      "frame": "这个动词带",
-      "nothing": "这里的动词不需要别的成分。"
+      "frame": "词语怎样连接"
     },
     "summary": {
       "title": "本轮完成",
