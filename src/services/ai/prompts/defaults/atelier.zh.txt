@@ -37,8 +37,17 @@
 - bricks 按照句子的顺序排列；每块积木是一个词或一个固定搭配。
 - distractors：每题 2 到 4 个。每个错误积木都必须错在一个属于本题语法点的真实理由上（阴性阳性冠词用错、该用 au 却用 à le、介词缺失或多加、人称或形式错误），其一行 reason 用两种语言讲清那条规则。错误积木绝不能与句子里的积木拼写相同，也绝不能拼出另一个正确的句子。
 - variants：只能是由完全相同的积木组成的其他正确语序（例如时间状语提前）；没有就写 []。
-- frame：verb 是主要动词或助动词积木的下标（从 0 开始）；sockets 列出该动词支配的成分，每个 socket 的 label 用真实的语法术语（COD、à + nom、de + infinitif、attribut），filledBy 是填入该位置的积木下标。
-- modify：只有最后一题有。只做一个改变（negative、plural、subject 或 question），附双语指令、新的 sentence 和它完整的 bricks。新句子必须与原句不同。
+- links：句子的全部语法连接，每条连接都画在本题自己的积木之间。head 是起支配作用的积木下标（从 0 开始）；dependents 是从属于它的积木下标；label 用真实的语法术语（COD、à + nom、accord f. sg.、sujet）；note 用两种语言各一行说明这条规则。必须列出所有连接：主语到动词（祈使句没有主语）、动词支配的成分、每个冠词到它的名词、每个配合、每对否定词、每个代词和每个修饰语。
+- 一条连接的 relation 只能是下面之一（请原样使用 ID）：
+  - subject：主语到动词
+  - object：直接宾语（COD）
+  - complement：动词通过介词或不定式接的成分（à + nom、de + infinitif）
+  - article：限定词到它的名词
+  - agreement：性数配合，例如形容词到名词
+  - negation：ne … pas 两半围绕动词
+  - modifier：副词或其他修饰语到它的中心词
+  - pronoun：宾语代词到它的动词
+- modify：只有最后一题有。只做一个改变（negative、plural、subject 或 question），附双语指令、新的 sentence、它完整的 bricks 和它自己的 links。新句子必须与原句不同。
 - grammarTag：恰好一个标签，取本题真正考查的语法点，只能从这个封闭列表中选择：
 {{grammarTags}}
 
@@ -64,10 +73,10 @@
       "variants": [],
       "bricks": [ { "text": "一个词或固定搭配", "role": "subject" } ],
       "distractors": [ { "text": "一个错误积木", "role": "determiner", "reason": { "zh": "一行中文说明", "en": "一行英文说明" } } ],
-      "frame": { "verb": 1, "sockets": [ { "label": "COD", "filledBy": [2, 3] } ] },
+      "links": [ { "head": 1, "dependents": [0], "relation": "subject", "label": "sujet", "note": { "zh": "一行中文说明", "en": "一行英文说明" } } ],
       "explanation": { "zh": "简短的中文语法讲解", "en": "简短的英文语法讲解" },
       "grammarTag": "上面列表中的一个标签 ID",
-      "modify": { "change": "negative | plural | subject | question", "instruction": { "zh": "…", "en": "…" }, "sentence": "新的句子", "bricks": [ { "text": "…", "role": "…" } ] }
+      "modify": { "change": "negative | plural | subject | question", "instruction": { "zh": "…", "en": "…" }, "sentence": "新的句子", "bricks": [ { "text": "…", "role": "…" } ], "links": [ { "head": 1, "dependents": [0], "relation": "subject", "label": "sujet", "note": { "zh": "…", "en": "…" } } ] }
     }
   ]
 }

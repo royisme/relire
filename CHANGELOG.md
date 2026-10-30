@@ -13,6 +13,8 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Changed
 
+- The sentence workshop now records every grammatical connection between a sentence's bricks — the subject, what the verb takes, each article to its noun, each agreement, negation pair, pronoun and modifier, each with its real term and a one-line rule — instead of only the verb's sockets; the breakdown and the round prompt follow the same connections.
+
 - The English and Chinese landing pages now match the README: what works with no key (graded readers, noun gender, the supported conjugation tenses), FSRS-6 word review, the new screenshots, and honest notes on keys, device voice, Morphalou-measured gender tendencies, who reviewed what, and score estimates.
 - README links and the shared link card now point at the app (`/relire/app/`) instead of the landing page.
 - The line under a graded reader's title now says "AI-written, reviewed by AI, not human-reviewed" without naming models, so it can no longer disagree with the reader's review record.

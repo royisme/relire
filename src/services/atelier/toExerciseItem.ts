@@ -47,7 +47,7 @@ export function toExerciseItem(item: AtelierItem, context: AtelierItemContext): 
       level: context.level,
       bricks: item.bricks,
       distractors: item.distractors,
-      frame: item.frame,
+      links: item.links,
       // Both languages, so a replayed item never depends on the round's language.
       explanation: item.explanation,
       modify: item.modify,

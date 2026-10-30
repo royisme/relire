@@ -22,7 +22,7 @@ export interface Piece {
   reason?: { zh: string; en: string };
   /** Index into the item's bricks; null for a distractor. */
   origin: number | null;
-  /** The real grammar terms of the sockets, on the frame's verb brick only. */
+  /** The labels of the links that say what the verb takes, on the verb brick only. */
   sockets?: string[];
 }
 
@@ -119,12 +119,17 @@ function shuffled<T>(list: readonly T[], seed: string): T[] {
 }
 
 function makeTurn(item: AtelierItem, itemIndex: number, retry: boolean): Turn {
+  // The verb brick is the first verb or auxiliary; its ports are the links that say what it takes.
+  const verb = item.bricks.findIndex((brick) => brick.role === 'verb' || brick.role === 'auxiliary');
+  const sockets = item.links
+    .filter((link) => link.head === verb && (link.relation === 'object' || link.relation === 'complement'))
+    .map((link) => link.label);
   const pieces: Piece[] = [
     ...item.bricks.map((brick, index) => ({
       id: `b${index}`,
       brick,
       origin: index,
-      ...(index === item.frame.verb ? { sockets: item.frame.sockets.map((socket) => socket.label) } : {}),
+      ...(index === verb ? { sockets } : {}),
     })),
     ...item.distractors.map(({ reason, ...brick }, index) => ({ id: `d${index}`, brick, reason, origin: null })),
   ];

@@ -5,12 +5,26 @@
  * all throws, because then there is nothing to show. This never judges whether
  * the French is correct — it only confirms an item matches its own bricks.
  */
-import { AtelierItemSchema, type AtelierItem } from '../../types/atelier';
+import { AtelierItemSchema, type AtelierItem, type Brick, type Link } from '../../types/atelier';
 import { joinBricks, normalizeSentence, tokensOf } from './join';
 
 export interface ParsedRound {
   items: AtelierItem[];
   dropped: { index: number; reason: string }[];
+}
+
+/** Confirms every link agrees with its own brick list; the first reason, naming the link, or null. */
+function checkLinks(bricks: Brick[], links: Link[]): string | null {
+  for (const link of links) {
+    if (!bricks[link.head]) return `the link “${link.label}” names head index ${link.head}, out of range`;
+    for (const dependent of link.dependents) {
+      if (!bricks[dependent]) return `the link “${link.label}” names dependent index ${dependent}, out of range`;
+      if (dependent === link.head) return `the link “${link.label}” makes brick ${dependent} depend on itself`;
+    }
+    if (new Set(link.dependents).size !== link.dependents.length)
+      return `the link “${link.label}” names the same dependent twice`;
+  }
+  return null;
 }
 
 /** Returns the parsed item, or the first reason (in check order) it fails. */
@@ -43,19 +57,8 @@ function checkItem(entry: unknown): AtelierItem | string {
       return `the distractor “${distractor.text}” spells a brick of the sentence`;
   }
 
-  const { verb, sockets } = item.frame;
-  const verbBrick = item.bricks[verb];
-  if (!verbBrick) return `the frame verb index ${verb} is out of range`;
-  if (verbBrick.role !== 'verb' && verbBrick.role !== 'auxiliary')
-    return `the frame verb index ${verb} is “${verbBrick.text}”, a ${verbBrick.role}`;
-  for (const socket of sockets) {
-    for (const filled of socket.filledBy) {
-      if (!item.bricks[filled]) return `the socket “${socket.label}” names brick index ${filled}, out of range`;
-      if (filled === verb) return `the socket “${socket.label}” cannot fill the verb brick itself`;
-    }
-    if (new Set(socket.filledBy).size !== socket.filledBy.length)
-      return `the socket “${socket.label}” fills the same brick twice`;
-  }
+  const linkReason = checkLinks(item.bricks, item.links);
+  if (linkReason) return linkReason;
 
   if (item.modify) {
     const modifyJoined = joinBricks(item.modify.bricks);
@@ -63,6 +66,8 @@ function checkItem(entry: unknown): AtelierItem | string {
     if (modifyJoined !== modifySentence)
       return `the modify bricks join to “${modifyJoined}” but the modify sentence reads “${modifySentence}”`;
     if (modifySentence === sentence) return `the modify sentence “${modifySentence}” changes nothing`;
+    const modifyLinkReason = checkLinks(item.modify.bricks, item.modify.links);
+    if (modifyLinkReason) return modifyLinkReason;
   }
   return item;
 }
