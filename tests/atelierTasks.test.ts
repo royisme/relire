@@ -4,18 +4,13 @@ import { InvalidAnswerError } from '../src/services/ai/errors';
 import { generateAtelierRound, gradeAtelierBuild } from '../src/services/ai/tasks';
 import { joinBricks } from '../src/services/atelier/join';
 import { parseRound } from '../src/services/atelier/parse';
-import { pickRoundSpec } from '../src/services/atelier/spec';
 import { ThemesSchema } from '../src/types/themes';
 import { rejection } from './fixtures/aiTaskAssertions';
 import { beach, cinema, coffee } from './fixtures/atelier';
 import { contextOf, fakeProvider } from './fixtures/fakeProvider';
 
-const spec = pickRoundSpec(
-  ThemesSchema.parse(bundledThemes),
-  { themeId: 'work', subtopicId: 'job-search-hiring', taskId: 'oral-2' },
-  () => 0,
-);
-const input = { spec, level: 'B1' as const, count: 3 };
+const theme = ThemesSchema.parse(bundledThemes).find((entry) => entry.id === 'work')!;
+const input = { theme, level: 'B1' as const, count: 3 };
 const badJoin = { ...beach, sentence: 'Nous allons à la piscine.' };
 const badFrame = { ...coffee, frame: { verb: 8, sockets: [] } };
 const joinReason = 'the bricks join to “Nous allons à la plage.” but the sentence reads “Nous allons à la piscine.”';
@@ -23,17 +18,14 @@ const frameReason = 'the frame verb index 8 is out of range';
 
 describe('generateAtelierRound', () => {
   for (const lang of ['en', 'zh'] as const)
-    test(`returns a good round and passes ${lang} through with the spec and task guide`, async () => {
+    test(`returns a good round and passes ${lang} through with the theme and topics`, async () => {
       const items = structuredClone([coffee, cinema, beach]);
       const provider = fakeProvider({ items });
       expect(await generateAtelierRound(input, contextOf(provider, 'vision', lang))).toEqual({ items, dropped: [] });
       expect(provider.requests).toHaveLength(1);
       const request = provider.requests[0];
-      for (const text of [spec.theme.fr, spec.subtopic.fr, spec.subtopic.scope, spec.example.fr, 'oral-2'])
-        expect(request.prompt).toContain(text);
-      expect(request.prompt).toContain(
-        lang === 'en' ? 'Questions and polite requests to get information' : '用来获取信息的提问与礼貌请求',
-      );
+      expect(request.prompt).toContain(theme.fr);
+      expect(request.prompt).toContain(theme.subtopics.map((subtopic) => subtopic.fr).join(', '));
       expect(request.prompt).toContain(lang === 'en' ? 'exactly 3 items' : '恰好 3 道题');
       expect(request.jsonSchema).toMatchObject({ type: 'object', properties: { items: { type: 'array' } } });
     });

@@ -13,8 +13,6 @@ const context = {
   id: 'TEST-atelier-1',
   itemNumber: 1,
   themeId: 'leisure',
-  subtopicId: 'cinema-screen-media',
-  taskId: 'oral-1',
   level: 'A2',
   language: 'en',
 } as const;
@@ -78,8 +76,6 @@ for (const { source, expected, variants, options } of CASES) {
       expect(AtelierMetaSchema.parse(item.meta)).toEqual({
         source: 'atelier',
         themeId: 'leisure',
-        subtopicId: 'cinema-screen-media',
-        taskId: 'oral-1',
         level: 'A2',
         bricks: source.bricks,
         distractors: source.distractors,
@@ -114,8 +110,6 @@ test('atelier metadata requires strictAccents to be literal true', () => {
   const meta = {
     source: 'atelier',
     themeId: context.themeId,
-    subtopicId: context.subtopicId,
-    taskId: context.taskId,
     level: context.level,
     bricks: beach.bricks,
     distractors: beach.distractors,
@@ -129,6 +123,17 @@ test('atelier metadata requires strictAccents to be literal true', () => {
   const missing: Record<string, unknown> = { ...meta };
   delete missing.strictAccents;
   expect(AtelierMetaSchema.safeParse(missing).success).toBe(false);
+});
+
+test.each(['subtopicId', 'taskId'])('atelier metadata rejects the removed %s field', (key) => {
+  const item = toExerciseItem(structuredClone(beach), context);
+  expect(AtelierMetaSchema.safeParse(item.meta).success).toBe(true);
+  const result = AtelierMetaSchema.safeParse({
+    ...item.meta,
+    [key]: key === 'taskId' ? 'oral-1' : 'cinema-screen-media',
+  });
+  expect(result.success).toBe(false);
+  expect(result.error!.issues).toContainEqual(expect.objectContaining({ code: 'unrecognized_keys', keys: [key] }));
 });
 
 for (const { source, unaccented, variant } of [

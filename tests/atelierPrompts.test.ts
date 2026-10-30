@@ -4,35 +4,34 @@ import { renderTemplate, usedVariables } from '../src/services/ai/prompts/engine
 import { PROMPTS } from '../src/services/ai/prompts/registry';
 import { openGradeJsonSchema } from '../src/services/exercises/jsonSchema';
 import { GRAMMAR_TAGS } from '../src/types/grammar';
-import type { TaskId } from '../src/types/themes';
+import bundledThemes from '../src/data/themes/themes.json';
+import { ThemesSchema } from '../src/types/themes';
 import { coffee } from './fixtures/atelier';
 
+const theme = ThemesSchema.parse(bundledThemes).find((entry) => entry.id === 'housing')!;
 const input = {
-  themeFr: 'Logement et quartier',
-  subtopicFr: 'Location immobilière',
-  scope: 'Searching for rentals and asking about the lease.',
-  taskId: 'oral-2' as const,
-  exampleFr: 'Demandez au propriétaire si le chauffage est inclus.',
+  themeFr: theme.fr,
+  themeTopics: theme.subtopics.map((subtopic) => subtopic.fr).join(', '),
   level: 'B1' as const,
   count: 7,
   grammarTags: GRAMMAR_TAGS.join(', '),
-};
-
-const guides: Record<TaskId, { en: string; zh: string }> = {
-  'oral-1': { en: 'First-person statements about oneself', zh: '关于自己的第一人称陈述' },
-  'oral-2': { en: 'Questions and polite requests to get information', zh: '用来获取信息的提问与礼貌请求' },
-  'oral-3': { en: 'Opinion sentences with connectors', zh: '带连接词的观点句' },
-  'written-1': { en: 'A message sentence', zh: '一条留言句' },
-  'written-2': { en: 'Past narration', zh: '过去时叙述' },
-  'written-3': { en: 'Comparison and concession', zh: '比较与让步' },
 };
 
 for (const id of ['atelier', 'atelierGrade'] as const) {
   test(`${id}: registered with exactly the variables both templates use`, () => {
     const def = PROMPTS.find((entry) => entry.id === id);
     expect(def).toBeDefined();
-    for (const lang of ['en', 'zh'] as const)
-      expect(usedVariables(def!.defaults[lang]).sort()).toEqual([...def!.variables].sort());
+    expect([...def!.variables].sort()).toEqual(
+      (id === 'atelier'
+        ? ['themeFr', 'themeTopics', 'level', 'count', 'grammarTags']
+        : ['item', 'userAnswer', 'expectedAnswer']
+      ).sort(),
+    );
+    for (const lang of ['en', 'zh'] as const) {
+      const used = usedVariables(def!.defaults[lang]);
+      expect(used.sort()).toEqual([...def!.variables].sort());
+      expect(used.some((name) => /taskId|subtopic|scope|example/i.test(name))).toBe(false);
+    }
     expect(Object.keys(def!.sample).sort()).toEqual([...def!.variables].sort());
   });
 
@@ -50,19 +49,9 @@ for (const id of ['atelier', 'atelierGrade'] as const) {
 }
 
 for (const lang of ['en', 'zh'] as const) {
-  for (const taskId of Object.keys(guides) as TaskId[])
-    test(`atelierRequest.${lang}.${taskId}: exactly one task guide`, () => {
-      const { prompt } = atelierRequest({ ...input, taskId }, lang);
-      expect(prompt.split(guides[taskId][lang])).toHaveLength(2);
-      for (const other of Object.keys(guides) as TaskId[])
-        if (other !== taskId) expect(prompt).not.toContain(guides[other][lang]);
-      expect(prompt).not.toContain('{{');
-    });
-
   test(`atelierRequest.${lang}: fixed context, count, closed tags and round schema`, () => {
     const request = atelierRequest(input, lang);
-    for (const value of [input.themeFr, input.subtopicFr, input.scope, input.level, input.exampleFr, input.taskId])
-      expect(request.prompt).toContain(value);
+    for (const value of [input.themeFr, input.themeTopics, input.level]) expect(request.prompt).toContain(value);
     expect(request.prompt).toContain(lang === 'en' ? 'exactly 7 items' : '恰好 7 道题');
     expect(request.prompt).toContain(GRAMMAR_TAGS.join(', '));
     expect(request.prompt).toContain(lang === 'en' ? 'from this closed list' : '只能从这个封闭列表中选择');
@@ -100,7 +89,23 @@ for (const lang of ['en', 'zh'] as const) {
     for (const rule of rules) expect(prompt).toContain(rule);
   });
 
-  test(`atelierRequest.${lang}: five French grammar reminders`, () => {
+  test(`atelierRequest.${lang}: varied situations and one differing grammar point per item`, () => {
+    const { prompt } = atelierRequest(input, lang);
+    for (const rule of lang === 'en'
+      ? [
+          'Vary the situation across the items: different people, places and purposes',
+          'Each item teaches exactly one grammar point',
+          'the points differ across the round',
+        ]
+      : [
+          '各题情境要有所变化：人物、地点、目的各不相同',
+          '每道题只教下面封闭标签列表中的一个语法点',
+          '整轮各题的语法点互不相同',
+        ])
+      expect(prompt).toContain(rule);
+  });
+
+  test(`atelierRequest.${lang}: French grammar reminders`, () => {
     const { prompt } = atelierRequest(input, lang);
     const rules =
       lang === 'en'
@@ -110,6 +115,8 @@ for (const lang of ['en', 'zh'] as const) {
             'Cities take à with no article (à Montréal); countries take au, en or aux (au Canada, en France).',
             'à + le = au, à + les = aux, de + le = du, de + les = des; à l’ and de l’ never fuse.',
             'regarder, écouter, attendre and chercher take a direct object with no preposition.',
+            'A profession after être takes no article: Il est médecin.',
+            'Register follows the situation: tutoiement with a friend, vouvoiement with an examiner or an institution.',
           ]
         : [
             'un/une/des/du/de la 变为 de（元音前为 d’），仅限直接宾语和 il y a 之后——绝不用于 être 之后，也绝不用于介词之后：Je ne vais pas à une fête 保留 une。',
@@ -117,6 +124,8 @@ for (const lang of ['en', 'zh'] as const) {
             '城市前用 à 且不加冠词（à Montréal）；国家前用 au、en 或 aux（au Canada、en France）。',
             'à + le = au，à + les = aux，de + le = du，de + les = des；à l’ 与 de l’ 永不缩合。',
             'regarder、écouter、attendre、chercher 直接接宾语，不加介词。',
+            'être 之后的职业不加冠词：Il est médecin。',
+            '语域随情境而定：对朋友用 tutoiement，对考官或机构用 vouvoiement。',
           ];
     for (const rule of rules) expect(prompt).toContain(rule);
   });
@@ -156,11 +165,11 @@ test('user overrides replace both defaults in both languages', () => {
   Object.defineProperty(globalThis, 'window', { configurable: true, value: new EventTarget() });
   try {
     savePromptOverrides({
-      atelier: { en: 'Custom round {{themeFr}}', zh: 'Custom round {{subtopicFr}}' },
+      atelier: { en: 'Custom round {{themeFr}}', zh: 'Custom round {{themeTopics}}' },
       atelierGrade: { en: 'Custom grade {{userAnswer}}', zh: 'Custom grade {{expectedAnswer}}' },
     });
-    expect(atelierRequest(input, 'en').prompt).toBe('Custom round Logement et quartier');
-    expect(atelierRequest(input, 'zh').prompt).toBe('Custom round Location immobilière');
+    expect(atelierRequest(input, 'en').prompt).toBe(`Custom round ${theme.fr}`);
+    expect(atelierRequest(input, 'zh').prompt).toBe(`Custom round ${input.themeTopics}`);
     const gradeInput = { item: '{}', userAnswer: 'Mon essai.', expectedAnswer: 'Ma référence.' };
     expect(atelierGradeRequest(gradeInput, 'en').prompt).toBe('Custom grade Mon essai.');
     expect(atelierGradeRequest(gradeInput, 'zh').prompt).toBe('Custom grade Ma référence.');
