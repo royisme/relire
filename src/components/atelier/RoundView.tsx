@@ -79,7 +79,7 @@ export function RoundView({
   const [showOther, setShowOther] = useState(false);
   /** Where the brick that just moved was on screen, so it can fly to its place. */
   const [origin, setOrigin] = useState<DOMRect>();
-  /** The turn whose booklet page is open; it opens by itself once the sentence is right. */
+  /** The turn whose booklet page is open; it opens from Breakdown. */
   const [openFor, setOpenFor] = useState<number | null>(null);
   const motion = useMotion();
   const over = isOver(state);
@@ -149,17 +149,10 @@ export function RoundView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn?.placed]);
 
-  // Right: the lines light up and the row settles first, then the booklet page rises; the big button becomes
-  // Next meanwhile. A shown answer has no celebration, so its page comes soon.
+  // Right: the big button becomes Next and takes the focus; the lit sentence stays in view, and the
+  // booklet opens only from Breakdown.
   useEffect(() => {
-    if (!turn?.right || !item) return;
-    primary.current?.focus({ preventScroll: true });
-    const celebrates = !turn.revealed;
-    const wait = celebrates ? (motion ? lightingPlan(item.links.length).total + 650 : 600) : motion ? 700 : 0;
-    const id = window.setTimeout(() => setOpenFor(state.current), wait);
-    return () => window.clearTimeout(id);
-    // Only a sentence turning right opens its page.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (turn?.right) primary.current?.focus({ preventScroll: true });
   }, [turn?.right, state.current]);
 
   if (over || !turn || !item) {
