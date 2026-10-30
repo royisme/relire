@@ -6,6 +6,7 @@
  * import drafts (services/exercises/importDraft) or storage.
  */
 import { z } from 'zod';
+import { AtelierMetaSchema } from './atelier';
 import { LearningAreaSchema, supportsListening, type LearningArea } from './learningArea';
 import { GrammarTagSchema, type GrammarTag } from './grammar';
 import { NounGenderDrillMetaSchema } from './nounGenderDrill';
@@ -92,6 +93,13 @@ export function refineExerciseItem(
       for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
     if (type !== 'WORD_TRANSFORM' || typeof answer !== 'string' || !answer.trim())
       issue('meta', 'Reader-transform metadata requires word transform with a nonblank answer');
+  }
+  if (item.meta?.source === 'atelier') {
+    const parsed = AtelierMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'SENTENCE_BUILD' || typeof answer !== 'string' || !answer.trim())
+      issue('meta', 'Atelier metadata requires sentence build with a nonblank answer');
   }
   if (item.meta?.source === 'spelling-sounds') {
     const parsed = SpellingDrillMetaSchema.safeParse(item.meta);

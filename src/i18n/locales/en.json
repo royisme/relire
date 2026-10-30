@@ -1218,7 +1218,9 @@
     "adaptive": "Adaptive drills",
     "exercises": "Exercises from an article",
     "transcribe": "Import: read article pages",
-    "conjugate": "Verb conjugation"
+    "conjugate": "Verb conjugation",
+    "atelier": "L'Atelier: round generation",
+    "atelierGrade": "L'Atelier: build grading"
   },
   "prosody": {
     "title": "Pronunciation markers",
@@ -2063,6 +2065,99 @@
         "freedom-of-speech": "Freedom of Speech",
         "social-welfare-ethics": "Social Welfare and Ethics"
       }
+    }
+  },
+  "atelier": {
+    "title": "Sentence workshop",
+    "subtitle": "Put the bricks in order to build a French sentence.",
+    "back": "Back",
+    "needsKey": "The sentence workshop needs an AI key.",
+    "needsKeyBody": "It writes the sentences and checks your answers with the AI provider you chose in Settings.",
+    "addKey": "Add an AI key",
+    "pick": {
+      "theme": "Theme",
+      "level": "Level",
+      "start": "Start",
+      "loadFailed": "The round could not be loaded: {{msg}}",
+      "noneUsable_one": "No sentence was usable. {{count}} was skipped because it did not add up.",
+      "noneUsable_other": "No sentence was usable. {{count}} were skipped because they did not add up."
+    },
+    "roles": {
+      "subject": "subj.",
+      "verb": "verb",
+      "auxiliary": "aux.",
+      "noun": "noun",
+      "determiner": "det.",
+      "preposition": "prep.",
+      "contraction": "contr.",
+      "adjective": "adj.",
+      "adverb": "adv.",
+      "negation": "neg.",
+      "conjunction": "conj.",
+      "pronoun": "pron.",
+      "expression": "expr.",
+      "punctuation": "punct."
+    },
+    "round": {
+      "counter": "Sentence {{current}} of {{total}}",
+      "again": "Second try",
+      "skipped_one": "{{count}} sentence was skipped because it did not add up.",
+      "skipped_other": "{{count}} sentences were skipped because they did not add up.",
+      "sound": "Sound",
+      "effects": "Effects",
+      "langZh": "Chinese",
+      "langEn": "English",
+      "row": "Your sentence",
+      "rowEmpty": "Tap a brick to start the sentence.",
+      "tray": "Bricks",
+      "place": "Place {{text}}",
+      "take": "Take back {{text}}",
+      "check": "Check",
+      "next": "Next",
+      "results": "Results",
+      "listen": "Listen",
+      "stop": "Stop",
+      "right": "Right",
+      "fused": "{{a}} and {{b}} make {{fused}}.",
+      "flagged": "Take out the marked brick and try again.",
+      "notQuite": "Not quite. Change the sentence and check again.",
+      "gradeFailed": "The sentence could not be checked: {{msg}}",
+      "exit": "Exit",
+      "order": "Build this",
+      "showAnswer": "Show answer",
+      "revealed": "Here is the answer. This sentence comes back once at the end.",
+      "answer": "Answer",
+      "close": "Close",
+      "breakdown": "Breakdown",
+      "placed": "{{count}} of {{total}} bricks placed"
+    },
+    "relations": {
+      "subject": "Subject",
+      "object": "Object",
+      "complement": "Complement",
+      "article": "Article",
+      "agreement": "Agreement",
+      "negation": "Negation",
+      "modifier": "Modifier",
+      "pronoun": "Pronoun"
+    },
+    "breakdown": {
+      "analysis": "AI analysis",
+      "frame": "How the words connect"
+    },
+    "summary": {
+      "title": "Round done",
+      "count_one": "{{count}} sentence, {{right}} right first time",
+      "count_other": "{{count}} sentences, {{right}} right first time",
+      "none": "No sentence was finished.",
+      "again": "Play again",
+      "themes": "Choose a theme",
+      "first": "Right first time",
+      "missed": "Missed",
+      "retried": "Second try"
+    },
+    "drill": {
+      "instruction": "Put the word tiles in order to build each sentence."
     }
   }
 }

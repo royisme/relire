@@ -6,7 +6,16 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ## [Unreleased]
 
+### Added
+
+- Grammar → Sentence workshop: build French sentences from bricks by tapping them into a row, with fusing brick pairs (à + le → au), a right answer that lights up the connections between the words (subject, object, article, agreement, negation), a breakdown and sound cues you can mute. It runs on your own AI key — no key, no rounds — and is no longer development-only.
+- Settings → Prompts can also edit the two L'Atelier prompts: round generation and build grading.
+- Each sentence-workshop round is saved as an ordinary sentence-building exercise set, named after its theme: a sentence's first check — or giving up and revealing it — is recorded once, so misses reach Mistakes and hits count in Practice accuracy. Nothing enters word review.
+- In the sentence workshop, the next round starts loading while you are on the second-to-last sentence, so Play again continues at once; if that background round failed, a fresh one is loaded and its real error shown if it fails too.
+
 ### Changed
+
+- The sentence workshop now records every grammatical connection between a sentence's bricks — the subject, what the verb takes, each article to its noun, each agreement, negation pair, pronoun and modifier, each with its real term and a one-line rule — instead of only the verb's sockets; the breakdown and the round prompt follow the same connections.
 
 - The English and Chinese landing pages now match the README: what works with no key (graded readers, noun gender, the supported conjugation tenses), FSRS-6 word review, the new screenshots, and honest notes on keys, device voice, Morphalou-measured gender tendencies, who reviewed what, and score estimates.
 - README links and the shared link card now point at the app (`/relire/app/`) instead of the landing page.

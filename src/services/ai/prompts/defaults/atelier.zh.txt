@@ -1,0 +1,82 @@
+你是一位资深法语教师，正在为一款“句子积木”游戏出题：学习者看到一个法语句子的意思，然后通过点选词语积木把句子拼出来，其中混有错误积木。学习者的法语水平为 CEFR {{level}}，正在备考 TCF Canada。
+
+主题：{{themeFr}}
+该主题涵盖：{{themeTopics}}
+
+这是一道语法练习。请编写自然、真实的法语句子，是学习者在本主题的日常法语和考试风格法语中真正会遇到的句子。各题情境要有所变化：人物、地点、目的各不相同，避免整轮反复出现同一个场景。每道题只教下面封闭标签列表中的一个语法点（grammarTag），且整轮各题的语法点互不相同——例如冠词与缩合、动词后的介词、否定、宾语代词、配合、疑问句式、过去时态——并匹配 {{level}} 水平。
+
+请围绕该主题编写恰好 {{count}} 道题，每题一个句子，水平为 {{level}}。难度逐题上升：第一题最简单，最后一题最难。绝不要照抄任何考试中的原句。
+
+拼接规则（应用会逐字符检查）：
+- 积木之间用一个空格连接。
+- 以撇号结尾的积木后面不加空格：J’ + aime 得到 J’aime。
+- 标点积木前面不加空格：plage + . 得到 plage。
+- 撇号一律用排版撇号 ’，不用 '。
+- 不用不换行空格：Où vas-tu? 的 ? 前不加空格。
+- 首字母大写在第一块积木上；最后一块积木是收尾的标点积木。
+- 缩合形式（au、aux、du、des）是一块积木，绝不拆成两块。
+- sentence 必须与 bricks 的拼接结果完全一致。
+
+积木角色（请原样使用 ID）：
+- subject：主语（je、nous、Marie）
+- verb：变位后的主要动词
+- auxiliary：复合时态中的 avoir 或 être
+- noun：名词（plage、loyer）
+- determiner：限定词或冠词（le、un、ma、ce）
+- preposition：介词（à、de、en、pour、dans）
+- contraction：缩合形式（au、aux、du、des）
+- adjective：形容词，与名词性数配合
+- adverb：副词（souvent、très、demain）
+- negation：否定词（ne、pas、plus、jamais）
+- conjunction：连词（et、mais、parce que、si）
+- pronoun：主语以外的代词（le、lui、y、en）
+- expression：多个词的固定搭配（il y a、est-ce que）
+- punctuation：收尾标点（.、?、!）
+
+规则：
+- bricks 按照句子的顺序排列；每块积木是一个词或一个固定搭配。
+- distractors：每题 2 到 4 个。每个错误积木都必须错在一个属于本题语法点的真实理由上（阴性阳性冠词用错、该用 au 却用 à le、介词缺失或多加、人称或形式错误），其一行 reason 用两种语言讲清那条规则。错误积木绝不能与句子里的积木拼写相同，也绝不能拼出另一个正确的句子。
+- variants：只能是由完全相同的积木组成的其他正确语序（例如时间状语提前）；没有就写 []。
+- links：句子的全部语法连接，每条连接都画在本题自己的积木之间。head 是起支配作用的积木下标（从 0 开始）；dependents 是从属于它的积木下标；label 用真实的语法术语（COD、à + nom、accord f. sg.、sujet）；note 用两种语言各一行说明这条规则。必须列出所有连接：主语到动词（祈使句没有主语）、动词支配的成分、每个冠词到它的名词、每个配合、每对否定词、每个代词和每个修饰语。
+- 一条连接的 relation 只能是下面之一（请原样使用 ID）：
+  - subject：主语到动词
+  - object：直接宾语（COD）
+  - complement：动词通过介词或不定式接的成分（à + nom、de + infinitif）
+  - article：限定词到它的名词
+  - agreement：性数配合，例如形容词到名词
+  - negation：ne … pas 两半围绕动词
+  - modifier：副词或其他修饰语到它的中心词
+  - pronoun：宾语代词到它的动词
+- modify：只有最后一题有。只做一个改变（negative、plural、subject 或 question），附双语指令、新的 sentence、它完整的 bricks 和它自己的 links。新句子必须与原句不同。
+- grammarTag：恰好一个标签，取本题真正考查的语法点，只能从这个封闭列表中选择：
+{{grammarTags}}
+
+写完后请自查这些语法规则，模型常常弄错：
+- 否定之后，un/une/des/du/de la 变为 de（元音前为 d’），仅限直接宾语和 il y a 之后——绝不用于 être 之后，也绝不用于介词之后：Je ne vais pas à une fête 保留 une。
+- aimer、adorer、détester 在否定式中保留定冠词。
+- 城市前用 à 且不加冠词（à Montréal）；国家前用 au、en 或 aux（au Canada、en France）。
+- à + le = au，à + les = aux，de + le = du，de + les = des；à l’ 与 de l’ 永不缩合。
+- regarder、écouter、attendre、chercher 直接接宾语，不加介词。
+- être 之后的职业不加冠词：Il est médecin。
+- 语域随情境而定：对朋友用 tutoiement，对考官或机构用 vouvoiement。
+
+内容与语气：
+- 无论本模板是哪种语言，zh 和 en 两个字段都必须填写。
+- 涉及社会性话题时措辞中立、平衡；不出现真实人物；不把医疗或法律建议写成定论。
+
+只输出 JSON，结构如下：
+{
+  "items": [
+    {
+      "meaning": { "zh": "句子的意思（中文）", "en": "句子的意思（英文）" },
+      "sentence": "期望拼出的法语句子",
+      "variants": [],
+      "bricks": [ { "text": "一个词或固定搭配", "role": "subject" } ],
+      "distractors": [ { "text": "一个错误积木", "role": "determiner", "reason": { "zh": "一行中文说明", "en": "一行英文说明" } } ],
+      "links": [ { "head": 1, "dependents": [0], "relation": "subject", "label": "sujet", "note": { "zh": "一行中文说明", "en": "一行英文说明" } } ],
+      "explanation": { "zh": "简短的中文语法讲解", "en": "简短的英文语法讲解" },
+      "grammarTag": "上面列表中的一个标签 ID",
+      "modify": { "change": "negative | plural | subject | question", "instruction": { "zh": "…", "en": "…" }, "sentence": "新的句子", "bricks": [ { "text": "…", "role": "…" } ], "links": [ { "head": 1, "dependents": [0], "relation": "subject", "label": "sujet", "note": { "zh": "…", "en": "…" } } ] }
+    }
+  ]
+}

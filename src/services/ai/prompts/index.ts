@@ -4,10 +4,12 @@ import { getPromptTemplate } from './store';
 import type { PromptId } from './registry';
 import { enumeratedReaderWords } from '../../../utils/readerTokens';
 import { prosodySchema } from '../prosodySchema';
+import type { AtelierLevel } from '../../../types/atelier';
 import type { GrammarTag } from '../../../types/grammar';
 import type { ImportMode } from '../../../types/exercises';
 import type { LearningArea, ArticleExerciseArea } from '../../../types/learningArea';
 import {
+  atelierRoundJsonSchema,
   conjugationJsonSchema,
   drillsJsonSchema,
   exerciseJsonSchema,
@@ -250,5 +252,44 @@ export function conjugateRequest(input: { infinitive: string }, lang: Lang): Jso
   return {
     prompt: render('conjugate', lang, { infinitive: input.infinitive.trim() }),
     jsonSchema: conjugationJsonSchema(),
+  };
+}
+
+/* ------------------------------ atelier requests ----------------------------- */
+
+export interface AtelierRoundInput {
+  themeFr: string;
+  /** The theme's subtopic names, so the model knows what the category covers. */
+  themeTopics: string;
+  level: AtelierLevel;
+  count: number;
+  /** The closed grammar-tag list rendered into the prompt. */
+  grammarTags: string;
+}
+
+export function atelierRequest(input: AtelierRoundInput, lang: Lang): JsonRequest {
+  return {
+    prompt: render('atelier', lang, {
+      themeFr: input.themeFr,
+      themeTopics: input.themeTopics,
+      level: input.level,
+      count: String(input.count),
+      grammarTags: input.grammarTags,
+    }),
+    jsonSchema: atelierRoundJsonSchema(),
+  };
+}
+
+export function atelierGradeRequest(
+  input: { item: string; userAnswer: string; expectedAnswer: string },
+  lang: Lang,
+): JsonRequest {
+  return {
+    prompt: render('atelierGrade', lang, {
+      item: input.item,
+      userAnswer: input.userAnswer,
+      expectedAnswer: input.expectedAnswer,
+    }),
+    jsonSchema: openGradeJsonSchema(),
   };
 }

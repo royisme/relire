@@ -1,0 +1,68 @@
+{
+  "meaning": { "zh": "我想在市中心租一套小公寓。", "en": "I want to rent a small apartment in the city centre." },
+  "sentence": "Je cherche un appartement au centre-ville.",
+  "variants": [],
+  "bricks": [
+    { "text": "Je", "role": "subject" },
+    { "text": "cherche", "role": "verb" },
+    { "text": "un", "role": "determiner" },
+    { "text": "appartement", "role": "noun" },
+    { "text": "au", "role": "contraction" },
+    { "text": "centre-ville", "role": "noun" },
+    { "text": ".", "role": "punctuation" }
+  ],
+  "distractors": [
+    {
+      "text": "à le",
+      "role": "preposition",
+      "reason": { "zh": "à 遇到 le 必须缩合为 au。", "en": "à + le contracts to au." }
+    },
+    {
+      "text": "une",
+      "role": "determiner",
+      "reason": { "zh": "appartement 是阳性名词，要用 un。", "en": "appartement is masculine: use un." }
+    }
+  ],
+  "links": [
+    {
+      "head": 1,
+      "dependents": [0],
+      "relation": "subject",
+      "label": "sujet",
+      "note": { "zh": "je 是变位动词 cherche 的主语。", "en": "je is the subject of the conjugated verb cherche." }
+    },
+    {
+      "head": 1,
+      "dependents": [2, 3],
+      "relation": "object",
+      "label": "COD",
+      "note": { "zh": "chercher 直接接宾语，不加介词。", "en": "chercher takes a direct object, with no preposition." }
+    },
+    {
+      "head": 1,
+      "dependents": [4, 5],
+      "relation": "complement",
+      "label": "à + lieu",
+      "note": { "zh": "地点用 à 引出；à 遇到 le 缩合为 au。", "en": "The place is introduced by à; à + le contracts to au." }
+    },
+    {
+      "head": 3,
+      "dependents": [2],
+      "relation": "article",
+      "label": "article m. sg.",
+      "note": { "zh": "appartement 是阳性名词，用 un。", "en": "appartement is masculine, so it takes un." }
+    },
+    {
+      "head": 5,
+      "dependents": [4],
+      "relation": "article",
+      "label": "article m. sg.",
+      "note": { "zh": "centre-ville 是阳性名词，au 里的 le 就是它的冠词。", "en": "centre-ville is masculine; the le inside au is its article." }
+    }
+  ],
+  "explanation": {
+    "zh": "chercher 直接接宾语；à + le 缩合为 au。",
+    "en": "chercher takes a direct object; à + le contracts to au."
+  },
+  "grammarTag": "prepositions"
+}

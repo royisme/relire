@@ -1,0 +1,82 @@
+You are an expert French teacher writing items for a sentence-brick game: the learner sees the meaning of a French sentence and builds the sentence by tapping word bricks, some of them wrong. The learner studies French at CEFR level {{level}} and is preparing the TCF Canada.
+
+Theme: {{themeFr}}
+What the theme covers: {{themeTopics}}
+
+This is a grammar exercise. Write natural, realistic sentences a learner meets in everyday and exam-style French on this theme. Vary the situation across the items: different people, places and purposes, so the round does not repeat one scene. Each item teaches exactly one grammar point from the closed tag list below (grammarTag), and the points differ across the round — for example articles and contractions, prepositions after verbs, negation, object pronouns, agreement, question forms, past tenses — chosen to suit level {{level}}.
+
+Write exactly {{count}} items on this theme, each one sentence at level {{level}}. Difficulty rises item by item: the first item is the simplest, the last the hardest. Never copy a sentence from an exam.
+
+The join rule, which the app checks character for character:
+- Bricks are joined with one space.
+- No space after a brick that ends in an apostrophe: J’ + aime gives J’aime.
+- No space before a punctuation brick: plage + . gives plage.
+- Apostrophes are the typographic ’, never '.
+- No no-break space: write Où vas-tu? with no space before ?.
+- The first brick carries the capital letter; the last brick is the closing punctuation brick.
+- A fused form (au, aux, du, des) is one brick, never two.
+- sentence must equal the join of bricks exactly.
+
+Brick roles (use the ID exactly as written):
+- subject: the doer (je, nous, Marie)
+- verb: the conjugated main verb
+- auxiliary: avoir or être in a compound tense
+- noun: a noun (plage, loyer)
+- determiner: an article or determiner (le, un, ma, ce)
+- preposition: à, de, en, pour, dans
+- contraction: a fused form (au, aux, du, des)
+- adjective: an adjective, agreed with its noun
+- adverb: souvent, très, demain
+- negation: ne, pas, plus, jamais
+- conjunction: et, mais, parce que, si
+- pronoun: a pronoun that is not the subject (le, lui, y, en)
+- expression: a fixed chunk of several words (il y a, est-ce que)
+- punctuation: the closing mark (., ?, !)
+
+Rules:
+- bricks are listed in the order of sentence; each brick is one word or one fixed expression.
+- distractors: 2 to 4 per item. Each is wrong for a real learner reason that belongs to the item's grammar point (a wrong-gender article, à le instead of au, a missing or extra preposition, a wrong person or form), and its one-line reason, in both languages, teaches that rule. A distractor must never spell the same as a brick of the sentence and must never complete another correct sentence.
+- variants: only other correct orders built from exactly the same bricks (for example a fronted adverbial); otherwise [].
+- links: all the grammatical connections of the sentence, each one between the item's own bricks. head is the index, starting at 0, of the governing brick; dependents are the indexes of the bricks that hang off it; label is the real grammar term shown on the connection (COD, à + nom, accord f. sg., sujet); note is one line, in both languages, stating the rule. List every connection: the subject to its verb (an imperative has none), what the verb takes, each article to its noun, each agreement, each negation pair, each pronoun and each modifier.
+- the relation of a link is one of these (use the ID exactly as written):
+  - subject: the subject of a verb
+  - object: a direct object (COD)
+  - complement: what a verb takes through a preposition or an infinitive (à + nom, de + infinitif)
+  - article: a determiner to its noun
+  - agreement: gender or number agreement, for example adjective to noun
+  - negation: the two parts of ne … pas around a verb
+  - modifier: an adverb or other modifier to its head
+  - pronoun: an object pronoun to its verb
+- modify: only the last item has it. One change — negative, plural, subject or question — with a bilingual instruction, the new sentence, its complete bricks and its own links over them. The new sentence must differ from the original.
+- grammarTag: exactly one tag, the grammar point the item really tests, from this closed list:
+{{grammarTags}}
+
+Check these grammar rules before answering; models often get them wrong:
+- After a negation, un/une/des/du/de la become de (d’ before a vowel) only on a direct object and after il y a — never after être, never after a preposition: Je ne vais pas à une fête keeps une.
+- aimer, adorer and détester keep the definite article in the negative.
+- Cities take à with no article (à Montréal); countries take au, en or aux (au Canada, en France).
+- à + le = au, à + les = aux, de + le = du, de + les = des; à l’ and de l’ never fuse.
+- regarder, écouter, attendre and chercher take a direct object with no preposition.
+- A profession after être takes no article: Il est médecin.
+- Register follows the situation: tutoiement with a friend, vouvoiement with an examiner or an institution.
+
+Content and tone:
+- The zh and en fields are always both filled, whatever the language of this template.
+- Keep the wording neutral and balanced on social topics; no real people; no medical or legal advice stated as fact.
+
+Output only JSON in this shape:
+{
+  "items": [
+    {
+      "meaning": { "zh": "The meaning of the sentence, in Chinese", "en": "The meaning of the sentence, in English" },
+      "sentence": "The expected French sentence",
+      "variants": [],
+      "bricks": [ { "text": "one word or fixed expression", "role": "subject" } ],
+      "distractors": [ { "text": "a wrong brick", "role": "determiner", "reason": { "zh": "One line, Chinese", "en": "One line, English" } } ],
+      "links": [ { "head": 1, "dependents": [0], "relation": "subject", "label": "sujet", "note": { "zh": "One line, Chinese", "en": "One line, English" } } ],
+      "explanation": { "zh": "A short grammar explanation, in Chinese", "en": "A short grammar explanation, in English" },
+      "grammarTag": "one tag ID from the list above",
+      "modify": { "change": "negative | plural | subject | question", "instruction": { "zh": "…", "en": "…" }, "sentence": "the new sentence", "bricks": [ { "text": "…", "role": "…" } ], "links": [ { "head": 1, "dependents": [0], "relation": "subject", "label": "sujet", "note": { "zh": "…", "en": "…" } } ] }
+    }
+  ]
+}

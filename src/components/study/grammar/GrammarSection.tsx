@@ -7,6 +7,7 @@ import type { GrammarTag } from '../../../types/grammar';
 
 const TopicsPage = retryableLazy(() => import('./TopicsPage'));
 const GenderPage = retryableLazy(() => import('./GenderPage'));
+const AtelierPage = retryableLazy(() => import('./AtelierPage'));
 const ConjugationPage = retryableLazy(async () => ({
   default: (await import('./ConjugationPage')).ConjugationPage,
 }));
@@ -19,7 +20,7 @@ export default function GrammarSection({
   onWord,
   onMissingKey,
 }: {
-  section?: 'conjugation' | 'gender';
+  section?: 'conjugation' | 'gender' | 'atelier';
   verb?: string;
   tag?: GrammarTag;
   topicId?: string;
@@ -31,6 +32,8 @@ export default function GrammarSection({
       <Suspense fallback={<div aria-busy="true" className="h-[32rem]" />}>
         {section === 'gender' ? (
           <GenderPage />
+        ) : section === 'atelier' ? (
+          <AtelierPage onMissingKey={onMissingKey} />
         ) : section === 'conjugation' || !contentServiceUrl() ? (
           <ConjugationPage key={verb ?? ''} initialVerb={verb} onWord={onWord} onMissingKey={onMissingKey} />
         ) : (
