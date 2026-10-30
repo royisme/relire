@@ -1,5 +1,11 @@
 /** Hand-written French for the atelier boundary and exercise mapping; no generated answers. */
 import type { AtelierItem, Modify } from '../../src/types/atelier';
+import devItems from '../../src/data/atelier/devItems.json';
+import { parseRound } from '../../src/services/atelier/parse';
+import type { RoundChoice } from '../../src/services/atelier/source';
+
+export const devRound = parseRound({ items: devItems });
+export const atelierChoice: RoundChoice = { themeId: 'leisure', level: 'A2' };
 
 export const negative: Modify = {
   change: 'negative',
