@@ -5,10 +5,9 @@
  */
 import { z } from 'zod';
 import { GrammarTagSchema } from './grammar';
-import { TaskIdSchema, ThemeIdSchema } from './themes';
+import { ThemeIdSchema } from './themes';
 
 const text = z.string().trim().min(1);
-const slug = z.string().regex(/^[a-z]+(-[a-z]+)*$/);
 
 /** Learner-facing text in both learner languages. */
 const BilingualTextSchema = z.strictObject({ zh: text, en: text });
@@ -93,8 +92,6 @@ export type AtelierItem = z.infer<typeof AtelierItemSchema>;
 export const AtelierMetaSchema = z.strictObject({
   source: z.literal('atelier'),
   themeId: ThemeIdSchema,
-  subtopicId: slug,
-  taskId: TaskIdSchema,
   level: AtelierLevelSchema,
   bricks: z.array(BrickSchema),
   distractors: z.array(DistractorSchema),

@@ -20,7 +20,7 @@ import { parseImportDraft, type ImportDraft } from '../exercises/importDraft';
 import { keepAnswerable } from '../exercises/answerability';
 import { joinBricks } from '../atelier/join';
 import { parseRound, type ParsedRound } from '../atelier/parse';
-import type { RoundSpec } from '../atelier/spec';
+import type { Theme } from '../../types/themes';
 import {
   adaptiveRequest,
   atelierGradeRequest,
@@ -215,23 +215,20 @@ export async function conjugateVerb(input: { infinitive: string }, ctx: TextCont
 /** Items one atelier round may ask for; five is the game's default. */
 export const MAX_ATELIER_ITEMS = 10;
 
-/** One round of sentence-brick items; dropped items are counted, not fatal, until none is left. */
+/** One round of sentence-brick items drawn from a theme alone; dropped items are counted, not fatal, until none is left. */
 export async function generateAtelierRound(
-  input: { spec: RoundSpec; level: AtelierLevel; count: number },
+  input: { theme: Theme; level: AtelierLevel; count: number },
   ctx: TextContext,
 ): Promise<ParsedRound> {
   if (!Number.isInteger(input.count) || input.count < 1 || input.count > MAX_ATELIER_ITEMS)
     throw new RangeError(`The number of items must be a whole number from 1 to ${MAX_ATELIER_ITEMS}.`);
 
-  const { spec } = input;
   const value = await ctx.execution.generateJson<unknown>(
     atelierRequest(
       {
-        themeFr: spec.theme.fr,
-        subtopicFr: spec.subtopic.fr,
-        scope: spec.subtopic.scope,
-        taskId: spec.taskId,
-        exampleFr: spec.example.fr,
+        themeFr: input.theme.fr,
+        // What the theme covers, so the model knows the category; never shown to the learner.
+        themeTopics: input.theme.subtopics.map((subtopic) => subtopic.fr).join(', '),
         level: input.level,
         count: input.count,
         grammarTags: GRAMMAR_TAGS.join(', '),

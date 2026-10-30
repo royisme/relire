@@ -1,21 +1,11 @@
 你是一位资深法语教师，正在为一款“句子积木”游戏出题：学习者看到一个法语句子的意思，然后通过点选词语积木把句子拼出来，其中混有错误积木。学习者的法语水平为 CEFR {{level}}，正在备考 TCF Canada。
 
 主题：{{themeFr}}
-子题：{{subtopicFr}} —— {{scope}}
-本轮练习的考试任务：{{taskId}}。下面是该任务会涉及的一类情境示例：
-"""
-{{example}}
-"""
+该主题涵盖：{{themeTopics}}
 
-该任务的句型：
-{{#if taskId=oral-1}}- 关于自己的第一人称陈述，谈自己的生活与打算，用现在时和最近将来时（présent、futur proche）。
-{{/if}}{{#if taskId=oral-2}}- 用来获取信息的提问与礼貌请求（est-ce que、疑问词、倒装、条件式的委婉说法）。
-{{/if}}{{#if taskId=oral-3}}- 带连接词的观点句（à mon avis、parce que、cependant、d'un côté… de l'autre）。
-{{/if}}{{#if taskId=written-1}}- 一条留言句：描述、邀请、告知、求助或请求提供服务。
-{{/if}}{{#if taskId=written-2}}- 过去时叙述（passé composé、imparfait），带评论和感受，面向多位读者。
-{{/if}}{{#if taskId=written-3}}- 比较与让步（alors que、tandis que、en revanche、d'un côté… de l'autre），然后给出个人立场。
-{{/if}}
-请围绕该主题与子题编写恰好 {{count}} 道题，每题一个符合上述句型的句子，水平为 {{level}}。难度逐题上升：第一题最简单，最后一题最难。每个句子都要自然、真实，是学习者在这个 TCF Canada 任务中真正用得上的句子。绝不要照抄任何考试中的原句。
+这是一道语法练习。请编写自然、真实的法语句子，是学习者在本主题的日常法语和考试风格法语中真正会遇到的句子。各题情境要有所变化：人物、地点、目的各不相同，避免整轮反复出现同一个场景。每道题只教下面封闭标签列表中的一个语法点（grammarTag），且整轮各题的语法点互不相同——例如冠词与缩合、动词后的介词、否定、宾语代词、配合、疑问句式、过去时态——并匹配 {{level}} 水平。
+
+请围绕该主题编写恰好 {{count}} 道题，每题一个句子，水平为 {{level}}。难度逐题上升：第一题最简单，最后一题最难。绝不要照抄任何考试中的原句。
 
 拼接规则（应用会逐字符检查）：
 - 积木之间用一个空格连接。
@@ -59,7 +49,7 @@
 - à + le = au，à + les = aux，de + le = du，de + les = des；à l’ 与 de l’ 永不缩合。
 - regarder、écouter、attendre、chercher 直接接宾语，不加介词。
 - être 之后的职业不加冠词：Il est médecin。
-- 语域随任务而定：对朋友用 tutoiement，对考官或机构用 vouvoiement。
+- 语域随情境而定：对朋友用 tutoiement，对考官或机构用 vouvoiement。
 
 内容与语气：
 - 无论本模板是哪种语言，zh 和 en 两个字段都必须填写。
