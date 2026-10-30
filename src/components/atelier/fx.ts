@@ -2,36 +2,84 @@
  * The motion of the sentence workshop, as Web Animations on one element at a
  * time. Every effect is short and returns to rest. A caller passes `motion`
  * (the effects switch and `prefers-reduced-motion`, combined); when it is
- * false nothing moves at all.
+ * false nothing moves at all. CSS motion is stopped separately by the stage.
  */
 
-export type Fx = 'snap' | 'fuse' | 'shake' | 'settle';
+export type Fx = 'snap' | 'fuse' | 'bounce' | 'shake' | 'settle' | 'reappear';
+
+export interface FxOptions {
+  /** Where the brick was before it moved, so it can fly from there to where it now sits. */
+  from?: DOMRect;
+  delay?: number;
+}
 
 /** Overshoot for a "pop", ease-out for a settle (DESIGN.md, game surface). */
-const POP = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+export const POP = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
 const SETTLE = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
-const EFFECTS: Record<Fx, { frames: Keyframe[]; options: KeyframeAnimationOptions }> = {
-  // A brick pressed into the row: squashed on arrival, holds a beat, springs back past rest.
-  // Easing sits on each keyframe (it shapes the segment that starts there), so the squash is seen.
-  snap: {
-    frames: [
-      { transform: 'scale(1.16, 0.82)', easing: 'ease-out' },
-      { transform: 'scale(1.1, 0.88)', offset: 0.25, easing: 'ease-out' },
-      { transform: 'scale(0.96, 1.07)', offset: 0.6, easing: POP },
-      { transform: 'none' },
-    ],
-    options: { duration: 240 },
-  },
-  // Two bricks becoming one: the new brick starts as wide as both, holds, then squeezes to its size.
+/** The flight from the old place to the new one: a short arc, arriving at `at` (0 to 1) of the animation. */
+function flight(dx: number, dy: number, at: number): Keyframe[] {
+  return [
+    { transform: `translate(${dx}px, ${dy}px)`, offset: 0, easing: 'ease-out' },
+    { transform: `translate(${dx * 0.4}px, ${dy * 0.4 - 18}px)`, offset: at * 0.5, easing: 'ease-in' },
+    { transform: 'translate(0, 0)', offset: at },
+  ];
+}
+
+/** Pressed onto the baseplate: lands, is squashed flat for a beat, then springs back past rest. */
+function snap(dx: number, dy: number, flying: boolean): { frames: Keyframe[]; duration: number } {
+  const at = flying ? 0.4 : 0;
+  const o = (x: number) => at + (1 - at) * x;
+  const tail: Keyframe[] = [
+    { transform: 'scale(1.16, 0.8)', offset: o(0.03), easing: 'ease-out' },
+    { transform: 'scale(1.1, 0.87)', offset: o(0.3), easing: POP },
+    { transform: 'scale(0.96, 1.07)', offset: o(0.65), easing: POP },
+    { transform: 'none', offset: 1 },
+  ];
+  return { frames: flying ? [...flight(dx, dy, at), ...tail] : tail, duration: flying ? 420 : 260 };
+}
+
+/** A wrong brick lands, then is thrown back up and sideways, falls, and rattles to rest. */
+function bounce(dx: number, dy: number, flying: boolean): { frames: Keyframe[]; duration: number } {
+  const at = flying ? 0.3 : 0;
+  const o = (x: number) => at + (1 - at) * x;
+  const tail: Keyframe[] = [
+    { transform: 'scale(1.1, 0.88)', offset: o(0.02), easing: 'ease-out' },
+    { transform: 'translate(12px, -30px) rotate(9deg)', offset: o(0.25), easing: 'ease-in' },
+    { transform: 'translate(-3px, 0) rotate(-4deg) scale(1.08, 0.9)', offset: o(0.45), easing: 'ease-out' },
+    { transform: 'translate(0, -9px) rotate(2deg)', offset: o(0.6), easing: 'ease-in' },
+    { transform: 'translateX(-5px)', offset: o(0.72) },
+    { transform: 'translateX(4px)', offset: o(0.84) },
+    { transform: 'translateX(-2px)', offset: o(0.94) },
+    { transform: 'none', offset: 1 },
+  ];
+  return { frames: flying ? [...flight(dx, dy, at), ...tail] : tail, duration: 640 };
+}
+
+const EFFECTS: Record<
+  'fuse' | 'shake' | 'settle' | 'reappear',
+  { frames: Keyframe[]; options: KeyframeAnimationOptions }
+> = {
+  // The welded brick is not there until the two halves meet, then it arrives wide and flat and springs to size.
   fuse: {
     frames: [
-      { transform: 'scale(1.45, 0.8)', easing: 'ease-out' },
-      { transform: 'scale(1.4, 0.82)', offset: 0.3, easing: 'ease-out' },
-      { transform: 'scale(0.9, 1.12)', offset: 0.62, easing: POP },
-      { transform: 'none' },
+      { opacity: 0, transform: 'scale(0.7, 0.7)', offset: 0 },
+      { opacity: 0, transform: 'scale(0.7, 0.7)', offset: 0.42 },
+      { opacity: 1, transform: 'scale(1.3, 0.78)', offset: 0.5, easing: 'ease-out' },
+      { transform: 'scale(0.92, 1.12)', offset: 0.72, easing: POP },
+      { opacity: 1, transform: 'none', offset: 1 },
     ],
-    options: { duration: 440 },
+    options: { duration: 600 },
+  },
+  // The spare pair returns to the bin after the weld, hidden until the halves have met.
+  reappear: {
+    frames: [
+      { opacity: 0, transform: 'scale(0.8)', offset: 0 },
+      { opacity: 0, transform: 'scale(0.8)', offset: 0.6 },
+      { opacity: 1, transform: 'scale(1.1, 0.9)', offset: 0.75, easing: 'ease-out' },
+      { opacity: 1, transform: 'none', offset: 1 },
+    ],
+    options: { duration: 600 },
   },
   shake: {
     frames: [
@@ -46,12 +94,20 @@ const EFFECTS: Record<Fx, { frames: Keyframe[]; options: KeyframeAnimationOption
   },
   // The finished row, one brick after another, lifts a little and sets down.
   settle: {
-    frames: [{ transform: 'none' }, { transform: 'translateY(-5px)', offset: 0.4 }, { transform: 'none' }],
-    options: { duration: 240, easing: SETTLE },
+    frames: [{ transform: 'none' }, { transform: 'translateY(-6px)', offset: 0.4 }, { transform: 'none' }],
+    options: { duration: 260, easing: SETTLE },
   },
 };
 
-export function play(element: Element | null, fx: Fx, motion: boolean, delay = 0): void {
+export function play(element: Element | null, fx: Fx, motion: boolean, { from, delay = 0 }: FxOptions = {}): void {
   if (!motion || !element || typeof element.animate !== 'function') return;
+  if (fx === 'snap' || fx === 'bounce') {
+    const to = element.getBoundingClientRect();
+    const dx = from ? from.left - to.left : 0;
+    const dy = from ? from.top - to.top : 0;
+    const { frames, duration } = (fx === 'snap' ? snap : bounce)(dx, dy, from !== undefined);
+    element.animate(frames, { duration, delay });
+    return;
+  }
   element.animate(EFFECTS[fx].frames, { ...EFFECTS[fx].options, delay });
 }

@@ -1,16 +1,18 @@
 /**
  * The sentence workshop's flow: theme picker, then a round, then its summary.
- * Owns the stage and the one round load; the brick game is `RoundView`, the AI
- * (or the dev fixture) is the `source` prop.
+ * Owns the full-bleed stage, the way out and the one round load; the brick game is `RoundView`,
+ * the AI (or the dev fixture) is the `source` prop.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { navigate } from '../../hooks/useRoute';
 import { errorMessage } from '../../services/ai/errors';
 import { resolveChoice, type AtelierSource, type RoundChoice, type RoundPicks } from '../../services/atelier/source';
 import { loadThemes } from '../../services/themes/load';
 import type { AtelierItem } from '../../types/atelier';
 import type { Theme } from '../../types/themes';
 import { RoundView } from './RoundView';
+import { Stage } from './Stage';
 import { ThemePicker } from './ThemePicker';
 
 interface Round {
@@ -56,15 +58,17 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
     }
   };
 
+  const leave = () => navigate({ name: 'grammar' });
+  let screen: ReactNode;
   if (themesError)
-    return (
-      <p role="alert" className="break-words text-sm text-bad-700">
+    screen = (
+      <p role="alert" className="break-words p-4 text-sm text-bad-700">
         {themesError}
       </p>
     );
-  if (!themes) return <p className="text-sm text-ink-500">{t('common.loading')}</p>;
-  if (round && picks)
-    return (
+  else if (!themes) screen = <p className="p-4 text-sm text-ink-600">{t('common.loading')}</p>;
+  else if (round && picks)
+    screen = (
       <RoundView
         key={round.id}
         items={round.items}
@@ -76,9 +80,19 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
           void start(picks);
         }}
         onThemes={() => setRound(null)}
+        onLeave={leave}
       />
     );
-  return (
-    <ThemePicker themes={themes} loading={loading} error={error} initial={picks} onStart={(next) => void start(next)} />
-  );
+  else
+    screen = (
+      <ThemePicker
+        themes={themes}
+        loading={loading}
+        error={error}
+        initial={picks}
+        onStart={(next) => void start(next)}
+        onLeave={leave}
+      />
+    );
+  return <Stage>{screen}</Stage>;
 }

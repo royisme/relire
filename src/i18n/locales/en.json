@@ -2114,7 +2114,6 @@
       "again": "Second try",
       "skipped_one": "{{count}} sentence was skipped because it did not add up.",
       "skipped_other": "{{count}} sentences were skipped because they did not add up.",
-      "endRound": "End round",
       "sound": "Sound",
       "effects": "Effects",
       "langZh": "Chinese",
@@ -2133,7 +2132,15 @@
       "fused": "{{a}} and {{b}} make {{fused}}.",
       "flagged": "Take out the marked brick and try again.",
       "notQuite": "Not quite. Change the sentence and check again.",
-      "gradeFailed": "The sentence could not be checked: {{msg}}"
+      "gradeFailed": "The sentence could not be checked: {{msg}}",
+      "exit": "Exit",
+      "order": "Build this",
+      "showAnswer": "Show answer",
+      "revealed": "Here is the answer. This sentence comes back once at the end.",
+      "answer": "Answer",
+      "close": "Close",
+      "breakdown": "Breakdown",
+      "placed": "{{count}} of {{total}} bricks placed"
     },
     "breakdown": {
       "analysis": "AI analysis",
@@ -2146,7 +2153,10 @@
       "count_other": "{{count}} sentences, {{right}} right first time",
       "none": "No sentence was finished.",
       "again": "Play again",
-      "themes": "Choose a theme"
+      "themes": "Choose a theme",
+      "first": "Right first time",
+      "missed": "Missed",
+      "retried": "Second try"
     }
   }
 }

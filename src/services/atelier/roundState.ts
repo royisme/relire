@@ -50,20 +50,24 @@ export interface Turn {
   note: Note | null;
   /** Every joined row that reached a verdict, oldest first. */
   answers: string[];
+  /** A distractor was placed or the app fused a pair for the learner: the item is not "right first time". */
+  assisted: boolean;
+  /** The learner asked to see the answer; the row then holds the sentence and the turn counts as missed. */
+  revealed: boolean;
 }
 
 /** What just happened, for the sounds and motion; `n` makes two equal events distinct. */
 export interface RoundEvent {
   n: number;
-  kind: 'snap' | 'fuse' | 'remove' | 'wrong' | 'right' | 'finish';
+  kind: 'snap' | 'fuse' | 'reject' | 'remove' | 'wrong' | 'right' | 'reveal' | 'finish';
   pieceId?: string;
 }
 
 /** What the round records about an item that was finished right. */
 export interface ItemResult {
   itemIndex: number;
-  /** The row that was graded right (the return's row when the item came back). */
-  finalAnswer: string;
+  /** The row that was graded right (the return's row when the item came back); null while no row was graded right. */
+  finalAnswer: string | null;
   rightFirstTime: boolean;
 }
 
@@ -84,6 +88,7 @@ export type RoundAction =
   | { type: 'pending' }
   | { type: 'checked'; answer: string; correct: boolean; feedback: string | null }
   | { type: 'failed'; message: string }
+  | { type: 'reveal' }
   | { type: 'next' }
   | { type: 'end' };
 
@@ -137,6 +142,8 @@ function makeTurn(item: AtelierItem, itemIndex: number, retry: boolean): Turn {
     right: false,
     note: null,
     answers: [],
+    assisted: false,
+    revealed: false,
   };
 }
 
@@ -158,6 +165,13 @@ export const currentTurn = (state: RoundState): Turn => state.turns[state.curren
 
 export const pieceOf = (turn: Turn, pieceId: string): Piece => turn.pieces.find((piece) => piece.id === pieceId)!;
 
+/** How a finished turn went, for the progress pips and the counts: one rule, so they cannot disagree. */
+export type TurnOutcome = 'first' | 'missed' | 'retried';
+
+/** Only valid for a turn that is right. A second appearance is `retried`, whatever its row. */
+export const turnOutcome = (turn: Turn): TurnOutcome =>
+  turn.retry ? 'retried' : turn.checks === 1 && !turn.assisted ? 'first' : 'missed';
+
 /** The row's bricks, in order. */
 export const placedBricks = (turn: Turn): Piece[] => turn.placed.map((id) => pieceOf(turn, id));
 
@@ -176,21 +190,25 @@ export function summaryOf(state: RoundState): { total: number; rightFirstTime: n
 }
 
 export type Check =
-  /** The app settles it alone: an exact sentence, a variant, or a row holding a flagged distractor. */
+  /** The app settles it alone: an exact sentence, a variant, or a row that cannot be right (it holds a distractor or lacks a brick). */
   | { kind: 'verdict'; answer: string; correct: boolean }
   /** Anything else is for the grader. */
   | { kind: 'ask'; answer: string };
 
 /**
- * How a check of the current row goes. A row with a distractor is wrong without a call: its reason is
- * already on screen. Otherwise `gradeItem` decides; accents count, because bricks are exact tokens and an
- * `a` for an `à` must never pass.
+ * How a check of the current row goes. A row that is not made of exactly the item's own bricks is wrong
+ * without a call (a distractor's reason is already on screen, and a variant uses every brick). Only a
+ * reordering of the right bricks goes through `gradeItem`; accents count, because bricks are exact tokens
+ * and an `a` for an `à` must never pass.
  */
 export function prepareCheck(state: RoundState, choice: RoundChoice): Check {
   const turn = currentTurn(state);
   const answer = rowText(turn);
-  if (placedBricks(turn).some((piece) => piece.reason)) return { kind: 'verdict', answer, correct: false };
-  const exercise = toExerciseItem(state.items[turn.itemIndex], {
+  const item = state.items[turn.itemIndex];
+  const row = placedBricks(turn);
+  if (row.length !== item.bricks.length || row.some((piece) => piece.origin === null))
+    return { kind: 'verdict', answer, correct: false };
+  const exercise = toExerciseItem(item, {
     id: 'atelier-check',
     itemNumber: turn.itemIndex + 1,
     ...choice,
@@ -237,14 +255,20 @@ function place(state: RoundState, turn: Turn, pieceId: string): RoundState {
       {
         ...turn,
         placed: [...placed.slice(0, -2), fused.id],
+        assisted: true,
         note: { kind: 'fused', parts: [first.brick.text, second.brick.text], into: fused.brick.text },
       },
       nextEvent(state, 'fuse', fused.id),
     );
   return withTurn(
     state,
-    { ...turn, placed, note: piece.reason ? { kind: 'distractor', pieceId } : null },
-    nextEvent(state, 'snap', pieceId),
+    {
+      ...turn,
+      placed,
+      assisted: turn.assisted || piece.reason !== undefined,
+      note: piece.reason ? { kind: 'distractor', pieceId } : null,
+    },
+    nextEvent(state, piece.reason ? 'reject' : 'snap', pieceId),
   );
 }
 
@@ -260,12 +284,32 @@ function checked(state: RoundState, turn: Turn, answer: string, correct: boolean
         result.itemIndex === turn.itemIndex ? { ...result, finalAnswer: answer } : result,
       ),
     };
-  const rightFirstTime = next.checks === 1;
+  const rightFirstTime = turnOutcome(next) === 'first';
   return {
     ...done,
     results: [...done.results, { itemIndex: turn.itemIndex, finalAnswer: answer, rightFirstTime }],
     // A missed item returns once, after the last item of the round.
     turns: rightFirstTime ? done.turns : [...done.turns, makeTurn(state.items[turn.itemIndex], turn.itemIndex, true)],
+  };
+}
+
+/** The learner gave up on this sentence: the row shows it, the item counts as missed and returns once. */
+function reveal(state: RoundState, turn: Turn): RoundState {
+  const item = state.items[turn.itemIndex];
+  const placed = turn.pieces
+    .filter((piece) => piece.origin !== null)
+    .sort((a, b) => a.origin! - b.origin!)
+    .map((piece) => piece.id);
+  const done = withTurn(
+    state,
+    { ...turn, placed, right: true, revealed: true, assisted: true, note: null },
+    nextEvent(state, 'reveal'),
+  );
+  if (done.results.some((result) => result.itemIndex === turn.itemIndex)) return done;
+  return {
+    ...done,
+    results: [...done.results, { itemIndex: turn.itemIndex, finalAnswer: null, rightFirstTime: false }],
+    turns: [...done.turns, makeTurn(item, turn.itemIndex, true)],
   };
 }
 
@@ -295,6 +339,8 @@ export function roundReducer(state: RoundState, action: RoundAction): RoundState
       return turn.pending
         ? withTurn(state, { ...turn, pending: false, note: { kind: 'error', message: action.message } }, state.event)
         : state;
+    case 'reveal':
+      return isBuilding(turn) ? reveal(state, turn) : state;
     case 'next': {
       if (!turn.right) return state;
       const current = state.current + 1;

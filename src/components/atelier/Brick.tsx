@@ -1,87 +1,81 @@
 /**
- * One brick of the sentence workshop: a button (or, in the breakdown, a plain
- * face) whose shape follows its role and whose small label names the role, so
- * colour is never the only cue. The frame's verb brick hangs one notch per
- * socket under it, each named with the real grammar term. Text is ordinary DOM
- * text. Owns how a brick looks and the one motion it plays; which bricks exist
- * and where they sit belongs to the round state.
+ * One brick of the sentence workshop: a solid toy brick (fill, offset shadow, studs) that is a button on the
+ * tray and the baseplate and a plain body in the booklet. The hue and silhouette follow its role
+ * (`roles.ts`) and a small label names the role, so colour is never the only cue. The frame's verb
+ * brick hangs one socket per grammar term under it, but only once it sits on the baseplate. Text is
+ * ordinary DOM text. Owns how a brick looks and the motion it plays; which bricks exist and where they sit
+ * belongs to the round state.
  */
-import { forwardRef, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { forwardRef, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
-import type { BrickRole } from '../../types/atelier';
+import type { Brick as BrickData } from '../../types/atelier';
 import type { Piece } from '../../services/atelier/roundState';
 import { play, type Fx } from './fx';
-
-/**
- * One silhouette per role, in ink tones only: the pill for who acts, a hard
- * double-weight block for the verb, a dashed edge for the small connecting
- * words, a leaf corner for words that describe. The role label repeats it in words.
- */
-const SHAPE: Record<BrickRole, string> = {
-  subject: 'rounded-full border-ink-400 px-4',
-  pronoun: 'rounded-full border-dashed border-ink-400 px-4',
-  verb: 'rounded-sm border-2 border-ink-700 bg-ink-100',
-  auxiliary: 'rounded-sm border-2 border-dashed border-ink-700 bg-ink-100',
-  noun: 'rounded-t-xl rounded-b-sm border-ink-400',
-  determiner: 'rounded-md border-2 border-dotted border-ink-400',
-  contraction: 'rounded-md border-4 border-double border-ink-500',
-  preposition: 'rounded-sm border-dashed border-ink-500',
-  adjective: 'rounded-tl-xl rounded-br-xl rounded-bl-sm rounded-tr-sm border-ink-400',
-  adverb: 'rounded-tr-xl rounded-bl-xl rounded-br-sm rounded-tl-sm border-ink-400',
-  negation: 'rounded-none border-2 border-ink-800 bg-ink-200',
-  conjunction: 'rounded-lg border-2 border-dashed border-ink-400',
-  expression: 'rounded-lg border-ink-500 bg-ink-100',
-  punctuation: 'min-w-10 rounded-sm border-ink-300 bg-ink-100 px-2',
-};
+import { LOOK } from './roles';
 
 export type BrickState = 'rest' | 'flagged' | 'right';
 
-const STATE: Record<BrickState, string> = {
-  rest: '',
-  flagged: 'border-bad-600 bg-bad-50 text-bad-700',
-  right: 'border-ok-700 bg-ok-50',
-};
+/** Role contraction is the welded brick (au, aux, du, des). */
+const isFused = (brick: BrickData) => brick.role === 'contraction';
+const studCount = (brick: BrickData) => (isFused(brick) ? 4 : brick.text.length > 5 ? 3 : 2);
 
-/** What a brick shows: its role label and text, and the notches of a verb's sockets. */
-export function BrickFace({ piece, state = 'rest' }: { piece: Piece; state?: BrickState }) {
+/** What a brick looks like, with its socket notches when it is the verb on the baseplate or in the booklet. */
+export function BrickBody({
+  brick,
+  state = 'rest',
+  sockets,
+  fill,
+}: {
+  brick: BrickData;
+  state?: BrickState;
+  sockets?: string[];
+  /** Stretch to the parent's width (the halves of a fusion). */
+  fill?: boolean;
+}) {
   const { t } = useTranslation();
-  const { brick, sockets } = piece;
+  const { hue, shape } = LOOK[brick.role];
   return (
-    <>
+    <span className={cn('inline-flex flex-col items-center', fill && 'w-full')}>
       <span
-        className={cn(
-          'relative flex min-h-12 min-w-11 flex-col items-center justify-center border bg-surface px-3 py-1 text-center',
-          SHAPE[brick.role],
-          STATE[state],
-        )}
+        data-hue={hue}
+        data-shape={shape}
+        data-state={state === 'rest' ? undefined : state}
+        data-fused={isFused(brick) ? '' : undefined}
+        data-half={fill ? '' : undefined}
+        className={cn('brick', fill && 'w-full min-w-0 px-1')}
       >
-        <span className={cn('flex items-center gap-1 text-xs leading-4', state === 'flagged' ? '' : 'text-ink-500')}>
-          {state === 'flagged' && <X className="h-4 w-4" aria-hidden="true" />}
-          {t(`atelier.roles.${brick.role}`)}
+        <span className="brick-studs" aria-hidden="true">
+          {Array.from({ length: studCount(brick) }, (_, i) => (
+            <i key={i} />
+          ))}
         </span>
-        <span
-          lang="fr"
-          className={cn(
-            'break-words font-serif text-lg leading-6',
-            state === 'flagged' ? 'text-bad-700' : 'text-ink-900',
-          )}
-        >
+        <span className="brick-role">{t(`atelier.roles.${brick.role}`)}</span>
+        <span lang="fr" className="brick-word">
           {brick.text}
         </span>
       </span>
       {sockets && sockets.length > 0 && (
-        <span className="-mt-px flex gap-2 px-2" aria-hidden="true">
+        <span data-hue="blue" className="mt-1 flex gap-2.5 px-2">
           {sockets.map((label) => (
             <span key={label} className="flex flex-col items-center">
-              <span className="h-2 w-4 rounded-b-sm border-2 border-t-0 border-ink-700 bg-surface" />
-              <span className="text-xs leading-4 text-ink-600">{label}</span>
+              <span className="brick-socket" aria-hidden="true" />
+              <span className="text-xs leading-4 text-[color:var(--ticket-ink)]">{label}</span>
             </span>
           ))}
         </span>
       )}
-    </>
+    </span>
+  );
+}
+
+/** The recessed pad where a brick is still to go: a pattern of stud holes no brick wears. */
+export function Slot() {
+  return (
+    <span className="slot" aria-hidden="true">
+      <i />
+      <i />
+    </span>
   );
 }
 
@@ -90,11 +84,76 @@ export interface BrickFx {
   n: number;
   kind: Fx;
   delay?: number;
+  /** Where the brick came from on screen, for the flight. */
+  from?: DOMRect;
+  /** The two words a fusion welds, for the halves that slide together. */
+  parts?: [string, string];
+}
+
+/** The two halves of a fusion slide into the welded brick's footprint, then a ring marks the weld. */
+function FuseHalves({ parts, from, onDone }: { parts: [string, string]; from?: DOMRect; onDone: () => void }) {
+  const left = useRef<HTMLSpanElement>(null);
+  const right = useRef<HTMLSpanElement>(null);
+  const ring = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const meet = 0.42;
+    const duration = 600;
+    left.current?.animate(
+      [
+        { transform: 'translateX(-6px)', opacity: 1, offset: 0 },
+        { transform: 'translateX(0)', opacity: 1, offset: meet, easing: 'ease-in' },
+        { opacity: 0, offset: meet + 0.06 },
+        { opacity: 0, offset: 1 },
+      ],
+      { duration, fill: 'forwards' },
+    );
+    const target = right.current!.getBoundingClientRect();
+    const dx = from ? from.left - target.left : 22;
+    const dy = from ? from.top - target.top : 0;
+    const slide = right.current!.animate(
+      [
+        { transform: `translate(${dx}px, ${dy}px)`, opacity: 1, offset: 0, easing: 'ease-out' },
+        {
+          transform: `translate(${dx * 0.4}px, ${dy * 0.4 - 18}px)`,
+          opacity: 1,
+          offset: meet * 0.5,
+          easing: 'ease-in',
+        },
+        { transform: 'translate(0, 0)', opacity: 1, offset: meet },
+        { opacity: 0, offset: meet + 0.06 },
+        { opacity: 0, offset: 1 },
+      ],
+      { duration, fill: 'forwards' },
+    );
+    ring.current?.animate(
+      [
+        { transform: 'scale(1)', opacity: 0, offset: 0 },
+        { transform: 'scale(1)', opacity: 0, offset: 0.4 },
+        { transform: 'scale(1)', opacity: 0.9, offset: 0.5, easing: 'ease-out' },
+        { transform: 'scale(1.3, 1.6)', opacity: 0, offset: 1 },
+      ],
+      { duration },
+    );
+    void slide.finished.then(onDone, () => undefined);
+    // The halves belong to one fusion event; they mount for it and are removed when it ends.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <span aria-hidden="true" className="pointer-events-none absolute inset-0">
+      <span ref={left} className="absolute top-0 left-0 w-1/2">
+        <BrickBody brick={{ text: parts[0], role: 'preposition' }} fill />
+      </span>
+      <span ref={right} className="absolute top-0 right-0 w-1/2">
+        <BrickBody brick={{ text: parts[1], role: 'determiner' }} fill />
+      </span>
+      <span ref={ring} className="weld-ring absolute inset-x-0 top-1.5 bottom-1 opacity-0" />
+    </span>
+  );
 }
 
 interface BrickProps {
   piece: Piece;
-  /** The tray's brick is placed; the row's brick is taken back. */
+  /** The bin's brick is placed; the baseplate's brick is taken back. */
   mode: 'tray' | 'row';
   state?: BrickState;
   fx?: BrickFx;
@@ -110,40 +169,34 @@ export const Brick = forwardRef<HTMLButtonElement, BrickProps>(function Brick(
 ) {
   const { t } = useTranslation();
   const wrapper = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    if (fx) play(wrapper.current, fx.kind, motion, fx.delay);
+  const [halvesDone, setHalvesDone] = useState(0);
+  useLayoutEffect(() => {
+    if (fx) play(wrapper.current, fx.kind, motion, { from: fx.from, delay: fx.delay });
     // The effect belongs to one event; a re-render with the same event must not play it again.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fx?.n, fx?.kind]);
+  const halves = fx?.kind === 'fuse' && fx.parts && motion && halvesDone !== fx.n;
   return (
-    <span ref={wrapper} className="inline-flex origin-bottom flex-col items-start">
-      <button
-        ref={ref}
-        type="button"
-        aria-disabled={disabled || undefined}
-        aria-label={t(mode === 'tray' ? 'atelier.round.place' : 'atelier.round.take', { text: piece.brick.text })}
-        onClick={() => {
-          if (!disabled) onPress();
-        }}
-        className={cn(
-          'group flex flex-col items-start rounded-sm bg-transparent p-0 disabled:opacity-100',
-          disabled ? 'cursor-default' : 'cursor-pointer',
-        )}
-      >
-        <BrickFace piece={piece} state={state} />
-      </button>
+    <span className="relative inline-flex">
+      <span ref={wrapper} className="inline-flex origin-bottom flex-col items-center">
+        <button
+          ref={ref}
+          type="button"
+          data-brick={piece.id}
+          aria-disabled={disabled || undefined}
+          aria-label={t(mode === 'tray' ? 'atelier.round.place' : 'atelier.round.take', { text: piece.brick.text })}
+          onClick={() => {
+            if (!disabled) onPress();
+          }}
+          className={cn(
+            'brick-btn flex flex-col items-center bg-transparent p-0',
+            disabled ? 'cursor-default' : 'cursor-pointer',
+          )}
+        >
+          <BrickBody brick={piece.brick} state={state} sockets={mode === 'row' ? piece.sockets : undefined} />
+        </button>
+      </span>
+      {halves && fx.parts && <FuseHalves parts={fx.parts} from={fx.from} onDone={() => setHalvesDone(fx.n)} />}
     </span>
   );
 });
-
-/** The empty slot a placed brick leaves on the tray, so the tray never reflows. */
-export function BrickSlot({ piece }: { piece: Piece }) {
-  return (
-    <span className="relative inline-flex flex-col items-start" aria-hidden="true">
-      <span className="invisible inline-flex flex-col items-start">
-        <BrickFace piece={piece} />
-      </span>
-      <span className="absolute inset-x-0 top-0 h-12 rounded-md border border-dashed border-ink-200" />
-    </span>
-  );
-}

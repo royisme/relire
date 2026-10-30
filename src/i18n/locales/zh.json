@@ -2103,7 +2103,6 @@
       "counter": "第 {{current}} 句，共 {{total}} 句",
       "again": "再试一次",
       "skipped_other": "有 {{count}} 句因为自相矛盾被跳过。",
-      "endRound": "结束本轮",
       "sound": "声音",
       "effects": "动效",
       "langZh": "中文",
@@ -2122,7 +2121,15 @@
       "fused": "{{a}} 和 {{b}} 合成 {{fused}}。",
       "flagged": "请取下标出的积木，再试一次。",
       "notQuite": "还不对。改一改再检查。",
-      "gradeFailed": "这句话没能检查：{{msg}}"
+      "gradeFailed": "这句话没能检查：{{msg}}",
+      "exit": "退出",
+      "order": "要拼的句子",
+      "showAnswer": "看答案",
+      "revealed": "这是答案。这个句子会在最后再出现一次。",
+      "answer": "答案",
+      "close": "关闭",
+      "breakdown": "拆解",
+      "placed": "已放 {{count}} / {{total}} 块"
     },
     "breakdown": {
       "analysis": "AI 分析",
@@ -2134,7 +2141,10 @@
       "count_other": "{{count}} 句，{{right}} 句一次就对",
       "none": "没有完成任何一句。",
       "again": "再来一轮",
-      "themes": "选择主题"
+      "themes": "选择主题",
+      "first": "一次就对",
+      "missed": "没答对",
+      "retried": "第二次"
     }
   }
 }

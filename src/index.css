@@ -486,3 +486,319 @@
   --sidebar-border: var(--color-ink-200);
   --sidebar-ring: var(--color-accent-600);
 }
+
+/*
+ * Game surface: the sentence workshop (DESIGN.md, "Game surface"). One fixed toy palette in light, sepia
+ * and dark, scoped to this wrapper: the app's ink, surface and hue tokens are re-pointed to a dark-blue
+ * workshop table so every shadcn control inside reads the same in all three themes. Text on a brick
+ * fill keeps WCAG AA (each pair below is at least 5:1).
+ */
+.atelier-stage {
+  color-scheme: dark;
+  background-color: var(--color-ink-50);
+  /* The table is a giant baseplate seen from afar: the same studs, nearly the colour of the table. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ccircle cx='14' cy='14' r='7' fill='%23202d44'/%3E%3C/svg%3E");
+  color: var(--color-ink-900);
+  --color-ink-50: #1b2638;
+  --color-ink-100: #26344a;
+  --color-ink-200: #34445e;
+  --color-ink-300: #48597a;
+  --color-ink-400: #6c7f9f;
+  --color-ink-500: #98a8c2;
+  --color-ink-600: #b4c0d4;
+  --color-ink-700: #ccd5e4;
+  --color-ink-800: #dde4ef;
+  --color-ink-900: #eef2f8;
+  --color-ink-950: #f7f9fc;
+  --color-surface: #223049;
+  --color-accent-600: #7ea1d9;
+  --color-accent-700: #3d65a5;
+  --color-accent-800: #4a73b4;
+  --color-accent-900: #c4d6f1;
+  --color-ok-800: #a4d7b5;
+  --color-bad-700: #e9978e;
+  --color-bad-800: #f0b3ac;
+  --plate: #c9c0a8;
+  --plate-edge: #968d76;
+  --plate-stud: #b3aa91;
+  --plate-stud-top: #d9d2bd;
+  --slot: #b3aa91;
+  --slot-hole: #968d76;
+  --bin-floor: #0f1825;
+  --bin-wall: #34486a;
+  --bin-wall-edge: #223049;
+  --ticket: #fbf3dc;
+  --ticket-ink: #2b241a;
+  --ticket-muted: #5c5140;
+  --cta: #ff9a2e;
+  --cta-ink: #2a1500;
+  --cta-shade: #a85a08;
+  --flag: #ff8a7a;
+  --pip-first: #3fbf75;
+  --pip-missed: #ff8a7a;
+  --pip-retried: #f3c332;
+}
+.atelier-stage [data-hue='red'] {
+  --b-fill: #c8342f;
+  --b-shade: #861f1c;
+  --b-ink: #ffffff;
+}
+.atelier-stage [data-hue='blue'] {
+  --b-fill: #2a62c8;
+  --b-shade: #19407f;
+  --b-ink: #ffffff;
+}
+.atelier-stage [data-hue='yellow'] {
+  --b-fill: #f3c332;
+  --b-shade: #a97d0a;
+  --b-ink: #241c00;
+}
+.atelier-stage [data-hue='green'] {
+  --b-fill: #1f7a46;
+  --b-shade: #124d2c;
+  --b-ink: #ffffff;
+}
+.atelier-stage [data-hue='purple'] {
+  --b-fill: #7347c2;
+  --b-shade: #482a85;
+  --b-ink: #ffffff;
+}
+.atelier-stage [data-hue='white'] {
+  --b-fill: #f1f3f8;
+  --b-shade: #8f9aae;
+  --b-ink: #1c2330;
+}
+
+/* A brick: a solid fill, a solid offset shadow for thickness, studs on top. No blur, no gradient. */
+.brick {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  margin-top: 6px;
+  padding: 4px 10px 5px;
+  border-radius: var(--b-radius, 8px);
+  background: var(--b-fill);
+  color: var(--b-ink);
+  box-shadow: 0 4px 0 var(--b-shade);
+  text-align: center;
+  transition:
+    transform 70ms var(--ease-out),
+    box-shadow 70ms var(--ease-out);
+}
+.brick-role {
+  font-size: 12px;
+  line-height: 12px;
+  letter-spacing: -0.01em;
+  opacity: 0.92;
+}
+.brick-word {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  overflow-wrap: anywhere;
+}
+.brick-studs {
+  position: absolute;
+  top: -5px;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-evenly;
+  padding-inline: 6px;
+  pointer-events: none;
+}
+.brick-studs i {
+  width: 12px;
+  height: 6px;
+  border-radius: 4px 4px 1px 1px;
+  background: var(--b-fill);
+  box-shadow: inset 0 -2px 0 var(--b-shade);
+}
+.brick[data-shape='actor'] {
+  --b-radius: 999px;
+  padding-inline: 18px;
+}
+.brick[data-shape='verb'] {
+  --b-radius: 3px;
+}
+.brick[data-shape='verb'] .brick-studs i {
+  border-radius: 1px;
+}
+.brick[data-shape='thing'] {
+  --b-radius: 14px 14px 4px 4px;
+}
+.brick[data-shape='link'] {
+  --b-radius: 4px 16px 4px 16px;
+}
+.brick[data-shape='mod'] {
+  --b-radius: 16px 4px 16px 4px;
+}
+.brick[data-shape='mark'] {
+  --b-radius: 6px;
+}
+/* A fused brick is two bricks welded: double width, four studs and a seam down the middle. */
+.brick[data-fused] {
+  min-width: 7rem;
+}
+.brick[data-fused]::after {
+  content: '';
+  position: absolute;
+  top: 18%;
+  bottom: 18%;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--b-shade);
+  opacity: 0.55;
+}
+.brick[data-half] .brick-role {
+  display: none;
+}
+.brick[data-state='flagged'] {
+  outline: 3px solid var(--flag);
+  outline-offset: 2px;
+}
+.brick[data-state='picked'] {
+  outline: 3px solid #f1f3f8;
+  outline-offset: 2px;
+  transform: translateY(-2px);
+}
+.brick-btn:active .brick {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--b-shade);
+}
+.brick-btn[aria-disabled='true']:active .brick {
+  transform: none;
+  box-shadow: 0 4px 0 var(--b-shade);
+}
+.brick-btn:focus-visible {
+  outline: 3px solid var(--color-accent-900);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+.weld-ring {
+  border: 3px solid #f1f3f8;
+  border-radius: 12px;
+}
+.brick-socket {
+  width: 18px;
+  height: 8px;
+  border-radius: 0 0 6px 6px;
+  background: var(--b-fill);
+  box-shadow: inset 0 -2px 0 var(--b-shade);
+}
+
+/* The baseplate: a board of studs the bricks snap onto; an empty slot is a recessed pad of stud holes. */
+.plate {
+  border-radius: 12px;
+  background-color: var(--plate);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='11' r='6.5' fill='%23b3aa91'/%3E%3Ccircle cx='11' cy='10' r='4.6' fill='%23d9d2bd'/%3E%3C/svg%3E");
+  box-shadow: 0 6px 0 var(--plate-edge);
+}
+.slot {
+  display: inline-flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 3rem;
+  height: 2.75rem;
+  margin-top: 6px;
+  border-radius: 6px;
+  background: var(--slot);
+  box-shadow: inset 0 3px 0 var(--slot-hole);
+}
+.slot i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--slot-hole);
+  box-shadow: inset 0 2px 0 var(--plate-edge);
+}
+.bin {
+  border-radius: 14px;
+  background: var(--bin-floor);
+  box-shadow:
+    inset 0 5px 0 var(--bin-wall-edge),
+    0 0 0 4px var(--bin-wall),
+    0 8px 0 4px var(--bin-wall-edge);
+}
+.ticket {
+  background: var(--ticket);
+  color: var(--ticket-ink);
+  border-radius: 10px;
+  box-shadow: 0 4px 0 #a99a74;
+}
+.game-cta {
+  height: 3.5rem;
+  width: 100%;
+  border: 0;
+  border-radius: 14px;
+  background: var(--cta);
+  color: var(--cta-ink);
+  font-size: 1.125rem;
+  font-weight: 700;
+  box-shadow: 0 5px 0 var(--cta-shade);
+  transition:
+    transform 70ms var(--ease-out),
+    box-shadow 70ms var(--ease-out);
+}
+.game-cta:hover:not(:disabled) {
+  background: var(--cta);
+}
+.game-cta:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--cta-shade);
+}
+.game-cta:disabled {
+  opacity: 1;
+  background: #3a4a66;
+  color: #c3cde0;
+  box-shadow: 0 5px 0 #26344a;
+}
+.atelier-sheet {
+  animation: atelier-sheet-in 260ms var(--ease-out);
+}
+@keyframes atelier-sheet-in {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+/* The Effects switch and the system setting both stop every CSS motion here; script motion checks them itself. */
+.atelier-stage[data-motion='off'] *,
+.atelier-stage[data-motion='off'] *::before,
+.atelier-stage[data-motion='off'] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* The slip on the baseplate: a short verdict or the reason a brick is wrong, always dark text on a light slip. */
+.atelier-slip {
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.3);
+  animation: atelier-sheet-in 200ms var(--ease-out);
+}
+.atelier-slip[data-kind='bad'] {
+  background: #fde4df;
+  color: #7a1f17;
+}
+.atelier-slip[data-kind='ok'] {
+  background: #dff3e4;
+  color: #12502b;
+}
+.atelier-slip[data-kind='idle'] {
+  background: var(--slot);
+  color: var(--ticket-ink);
+  box-shadow: inset 0 3px 0 var(--slot-hole);
+  animation: none;
+}
+.atelier-slip[data-kind='note'] {
+  background: var(--ticket);
+  color: var(--ticket-ink);
+}

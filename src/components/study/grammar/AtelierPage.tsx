@@ -10,20 +10,18 @@ const source = import.meta.env.DEV ? devSource : null;
 
 export default function AtelierPage({ onMissingKey }: { onMissingKey: () => void }) {
   const { t } = useTranslation();
+  // The game is a full-bleed stage over the whole app, so it brings no page heading of its own.
+  if (source) return <AtelierScreen source={source} />;
   return (
     <div className="space-y-5">
       <PageHeader title={t('atelier.title')} subtitle={t('atelier.subtitle')} />
-      {source ? (
-        <AtelierScreen source={source} />
-      ) : (
-        <div className="space-y-3">
-          <p className="font-serif text-lg font-semibold text-ink-900">{t('atelier.needsKey')}</p>
-          <p className="max-w-prose break-words text-sm text-ink-600">{t('atelier.needsKeyBody')}</p>
-          <Button variant="outline" onClick={onMissingKey}>
-            {t('atelier.addKey')}
-          </Button>
-        </div>
-      )}
+      <div className="space-y-3">
+        <p className="font-serif text-lg font-semibold text-ink-900">{t('atelier.needsKey')}</p>
+        <p className="max-w-prose break-words text-sm text-ink-600">{t('atelier.needsKeyBody')}</p>
+        <Button variant="outline" onClick={onMissingKey}>
+          {t('atelier.addKey')}
+        </Button>
+      </div>
     </div>
   );
 }
