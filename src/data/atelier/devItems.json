@@ -50,15 +50,38 @@
         }
       }
     ],
-    "frame": {
-      "verb": 1,
-      "sockets": [
-        {
-          "label": "à + nom",
-          "filledBy": [2, 3, 4]
+    "links": [
+      {
+        "head": 1,
+        "dependents": [0],
+        "relation": "subject",
+        "label": "sujet",
+        "note": {
+          "zh": "nous 是变位动词 allons 的主语。",
+          "en": "nous is the subject of the conjugated verb allons."
         }
-      ]
-    },
+      },
+      {
+        "head": 1,
+        "dependents": [2, 3, 4],
+        "relation": "complement",
+        "label": "à + nom",
+        "note": {
+          "zh": "aller 表示去某处，目的地用介词 à 加名词引出。",
+          "en": "Aller says where you go: the destination is introduced by à and a noun."
+        }
+      },
+      {
+        "head": 4,
+        "dependents": [3],
+        "relation": "article",
+        "label": "article f. sg.",
+        "note": {
+          "zh": "plage 是阴性单数名词，用定冠词 la。",
+          "en": "plage is a feminine singular noun, so it takes la."
+        }
+      }
+    ],
     "explanation": {
       "zh": "aller 表示去某处，后面用 à 加地点名词。plage 是阴性，所以 à 后面接 la。",
       "en": "Aller says where you go, with à and a place noun. Plage is feminine, so à is followed by la."
@@ -112,15 +135,38 @@
         }
       }
     ],
-    "frame": {
-      "verb": 1,
-      "sockets": [
-        {
-          "label": "à + nom",
-          "filledBy": [2, 3]
+    "links": [
+      {
+        "head": 1,
+        "dependents": [0],
+        "relation": "subject",
+        "label": "sujet",
+        "note": {
+          "zh": "je 是变位动词 vais 的主语。",
+          "en": "je is the subject of the conjugated verb vais."
         }
-      ]
-    },
+      },
+      {
+        "head": 1,
+        "dependents": [2, 3],
+        "relation": "complement",
+        "label": "à + nom",
+        "note": {
+          "zh": "目的地用 à 加名词；à 遇到 le 缩合为 au。",
+          "en": "The destination takes à and a noun; à meets le and fuses into au."
+        }
+      },
+      {
+        "head": 3,
+        "dependents": [2],
+        "relation": "article",
+        "label": "article m. sg.",
+        "note": {
+          "zh": "cinéma 是阳性名词，au 里的 le 就是它的冠词。",
+          "en": "cinéma is masculine; the le inside au is its article."
+        }
+      }
+    ],
     "explanation": {
       "zh": "à 加阳性名词前的 le 时，两者合成 au：je vais au cinéma。",
       "en": "When à meets le before a masculine noun, the two fuse into au: je vais au cinéma."
@@ -182,15 +228,48 @@
         }
       }
     ],
-    "frame": {
-      "verb": 2,
-      "sockets": [
-        {
-          "label": "COD",
-          "filledBy": [4, 5]
+    "links": [
+      {
+        "head": 2,
+        "dependents": [0],
+        "relation": "subject",
+        "label": "sujet",
+        "note": {
+          "zh": "elle 是变位动词 mange 的主语。",
+          "en": "elle is the subject of the conjugated verb mange."
         }
-      ]
-    },
+      },
+      {
+        "head": 2,
+        "dependents": [1, 3],
+        "relation": "negation",
+        "label": "négation",
+        "note": {
+          "zh": "ne 和 pas 从两边包住变位动词。",
+          "en": "ne and pas wrap around the conjugated verb."
+        }
+      },
+      {
+        "head": 2,
+        "dependents": [4, 5],
+        "relation": "object",
+        "label": "COD",
+        "note": {
+          "zh": "manger 直接接宾语 pain，不加介词。",
+          "en": "manger takes pain as its direct object, with no preposition."
+        }
+      },
+      {
+        "head": 5,
+        "dependents": [4],
+        "relation": "article",
+        "label": "de (négation)",
+        "note": {
+          "zh": "否定句中，直接宾语前的 du、de la、des 变为 de。",
+          "en": "In the negative, du, de la and des before a direct object become de."
+        }
+      }
+    ],
     "explanation": {
       "zh": "否定句里，直接宾语（COD）前的 du、de la、des 变成 de：elle ne mange pas de pain。",
       "en": "In a negative sentence, du, de la and des before a direct object (COD) become de: elle ne mange pas de pain."

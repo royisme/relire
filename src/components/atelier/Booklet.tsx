@@ -1,6 +1,6 @@
 /**
  * The breakdown as an instruction-booklet page that rises from the bottom once a sentence is right (or
- * shown): the frame's verb with its sockets and the bricks that fill each one, then the item's explanation
+ * shown): the verb with its ports and the bricks that fill each one, then the item's explanation
  * under a label that says it is AI analysis. Owns its own focus and Escape; the round decides when it is
  * open, and what Next does.
  */
@@ -25,7 +25,11 @@ interface BookletProps {
 export function Booklet({ item, turn, language, lastTurn, onClose, onNext }: BookletProps) {
   const { t } = useTranslation();
   const bricks = (index: number) => turn.pieces.find((piece) => piece.origin === index)!.brick;
-  const { verb, sockets } = item.frame;
+  // The verb brick is the first verb or auxiliary; its ports are the links that say what it takes.
+  const verb = item.bricks.findIndex((brick) => brick.role === 'verb' || brick.role === 'auxiliary');
+  const sockets = item.links
+    .filter((link) => link.head === verb && (link.relation === 'object' || link.relation === 'complement'))
+    .map((link) => ({ label: link.label, filledBy: link.dependents }));
   const next = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     next.current?.focus({ preventScroll: true });

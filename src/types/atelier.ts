@@ -46,18 +46,34 @@ export type Brick = z.infer<typeof BrickSchema>;
 export const DistractorSchema = BrickSchema.extend({ reason: BilingualTextSchema });
 export type Distractor = z.infer<typeof DistractorSchema>;
 
-export const FrameSchema = z.object({
-  /** Index into the item's `bricks`; the boundary check pins the role. */
-  verb: z.number().int().nonnegative(),
-  sockets: z.array(
-    z.object({
-      /** The real grammar term shown on the socket (COD, à + nom, de + infinitif). */
-      label: text,
-      filledBy: z.array(z.number().int().nonnegative()),
-    }),
-  ),
+/** The kind of grammatical connection one link draws between bricks. */
+export const RelationSchema = z.enum([
+  'subject',
+  'object',
+  'complement',
+  'article',
+  'agreement',
+  'negation',
+  'modifier',
+  'pronoun',
+]);
+export type Relation = z.infer<typeof RelationSchema>;
+
+export const LinkSchema = z.object({
+  /** Index into the item's `bricks`: the brick the connection hangs off (the verb, the noun of an article). */
+  head: z.number().int().nonnegative(),
+  /** Indexes into the same brick list; the boundary check keeps them off `head` and each other. */
+  dependents: z.array(z.number().int().nonnegative()).min(1),
+  relation: RelationSchema,
+  /** The real grammar term shown on the connection (COD, à + nom, accord f. sg., sujet). */
+  label: text,
+  /** One short line stating the rule, in both learner languages. */
+  note: BilingualTextSchema,
 });
-export type Frame = z.infer<typeof FrameSchema>;
+export type Link = z.infer<typeof LinkSchema>;
+
+/** All the grammatical connections of one sentence; an item, and a modify, each have at least one. */
+const LinksSchema = z.array(LinkSchema).min(1);
 
 export const ModifyChangeSchema = z.enum(['negative', 'plural', 'subject', 'question']);
 export type ModifyChange = z.infer<typeof ModifyChangeSchema>;
@@ -68,6 +84,8 @@ export const ModifySchema = z.object({
   sentence: text,
   /** The complete brick list of the new sentence; the tray reuses the item's own distractors. */
   bricks: z.array(BrickSchema).min(2),
+  /** The connections of the new sentence, over `bricks`. */
+  links: LinksSchema,
 });
 export type Modify = z.infer<typeof ModifySchema>;
 
@@ -80,7 +98,7 @@ export const AtelierItemSchema = z.object({
   /** In the order of `sentence`. */
   bricks: z.array(BrickSchema).min(2),
   distractors: z.array(DistractorSchema).min(1),
-  frame: FrameSchema,
+  links: LinksSchema,
   explanation: BilingualTextSchema,
   /** The single primary tag; ExerciseItem holds one. */
   grammarTag: GrammarTagSchema,
@@ -88,14 +106,14 @@ export const AtelierItemSchema = z.object({
 });
 export type AtelierItem = z.infer<typeof AtelierItemSchema>;
 
-/** Saved on the mapped SENTENCE_BUILD item, so a replayed unit keeps the bricks and their frame. */
+/** Saved on the mapped SENTENCE_BUILD item, so a replayed unit keeps the bricks and their links. */
 export const AtelierMetaSchema = z.strictObject({
   source: z.literal('atelier'),
   themeId: ThemeIdSchema,
   level: AtelierLevelSchema,
   bricks: z.array(BrickSchema),
   distractors: z.array(DistractorSchema),
-  frame: FrameSchema,
+  links: LinksSchema,
   explanation: BilingualTextSchema,
   modify: ModifySchema.optional(),
   strictAccents: z.literal(true),

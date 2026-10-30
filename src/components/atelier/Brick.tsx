@@ -1,8 +1,8 @@
 /**
  * One brick of the sentence workshop: a solid toy brick (fill, offset shadow, studs) that is a button on the
  * tray and the baseplate and a plain body in the booklet. The hue and silhouette follow its role
- * (`roles.ts`) and a small label names the role, so colour is never the only cue. The frame's verb
- * brick hangs one socket per grammar term under it, but only once it sits on the baseplate. Text is
+ * (`roles.ts`) and a small label names the role, so colour is never the only cue. The verb brick
+ * hangs one port per grammar term under it, but only once it sits on the baseplate. Text is
  * ordinary DOM text. Owns how a brick looks and the motion it plays; which bricks exist and where they sit
  * belongs to the round state.
  */
