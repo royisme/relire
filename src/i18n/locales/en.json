@@ -2146,6 +2146,9 @@
       "first": "Right first time",
       "missed": "Missed",
       "retried": "Second try"
+    },
+    "drill": {
+      "instruction": "Put the word tiles in order to build each sentence."
     }
   }
 }

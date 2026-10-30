@@ -2,7 +2,8 @@
  * One round of the sentence workshop in Build mode, laid out as a game for the thumb: the HUD, the order
  * ticket, the baseplate, the bin, and one big button at the bottom (Check, then Next). The breakdown rises as
  * a booklet page once the sentence is right or shown. Owns the keyboard, focus, the cues, the flights and
- * the check call. The state is `services/atelier/roundState`; the AI calls come in through `source`.
+ * the check call; each verdict and reveal is reported through `onRecord` for the screen to persist. The state
+ * is `services/atelier/roundState`; the AI calls come in through `source`.
  */
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -40,6 +41,8 @@ interface RoundViewProps {
   /** Items the boundary check dropped, said once at the top of the round. */
   dropped: number;
   source: AtelierSource;
+  /** Persists the one record an item gets: every verdict, and a reveal counted wrong. */
+  onRecord: (itemIndex: number, answer: string, correct: boolean) => void;
   onAgain: () => void;
   onThemes: () => void;
   onLeave: () => void;
@@ -57,7 +60,7 @@ const CUE_OF_EVENT: Record<string, Cue | undefined> = {
 /** The cue lands with the brick: after the flight, or after the halves of a fusion meet. */
 const CUE_DELAY: Record<string, number | undefined> = { snap: 160, reject: 130, fuse: 250 };
 
-export function RoundView({ items, choice, dropped, source, onAgain, onThemes, onLeave }: RoundViewProps) {
+export function RoundView({ items, choice, dropped, source, onRecord, onAgain, onThemes, onLeave }: RoundViewProps) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage === 'zh' ? 'zh' : 'en';
   const [state, dispatch] = useReducer(roundReducer, items, startRound);
@@ -152,12 +155,14 @@ export function RoundView({ items, choice, dropped, source, onAgain, onThemes, o
     const checked = prepareCheck(state, choice);
     if (checked.kind === 'verdict') {
       dispatch({ type: 'checked', answer: checked.answer, correct: checked.correct, feedback: null });
+      onRecord(turn.itemIndex, checked.answer, checked.correct);
       return;
     }
     dispatch({ type: 'pending' });
     try {
       const result = await source.grade(item, checked.answer);
       dispatch({ type: 'checked', answer: checked.answer, correct: result.isCorrect, feedback: result.feedback });
+      onRecord(turn.itemIndex, checked.answer, result.isCorrect);
     } catch (error) {
       dispatch({ type: 'failed', message: errorMessage(error) });
     }
@@ -232,7 +237,15 @@ export function RoundView({ items, choice, dropped, source, onAgain, onThemes, o
                 {t('atelier.round.breakdown')}
               </Button>
             ) : (
-              <Button variant="ghost" disabled={turn.pending} onClick={() => dispatch({ type: 'reveal' })}>
+              <Button
+                variant="ghost"
+                disabled={turn.pending}
+                onClick={() => {
+                  // The row as it stands is what a reveal with no check behind it is recorded with.
+                  onRecord(turn.itemIndex, rowText(turn), false);
+                  dispatch({ type: 'reveal' });
+                }}
+              >
                 {t('atelier.round.showAnswer')}
               </Button>
             )}
