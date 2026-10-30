@@ -1,8 +1,8 @@
 /**
  * The breakdown as an instruction-booklet page that rises from the bottom once a sentence is right (or
- * shown): the verb with its ports and the bricks that fill each one, then the item's explanation
- * under a label that says it is AI analysis. Owns its own focus and Escape; the round decides when it is
- * open, and what Next does.
+ * shown): the sentence as a connection diagram (its bricks, laid out for the lines drawn between them), then,
+ * under a label that says it is AI analysis, what each connection is and the item's explanation. Owns its
+ * own focus and Escape; the round decides when it is open, and what Next does.
  */
 import { useEffect, useRef } from 'react';
 import { Check, Eye, X } from 'lucide-react';
@@ -12,6 +12,7 @@ import { rowText, type Turn } from '../../services/atelier/roundState';
 import { Button } from '../ui/button';
 import { SpeakButton } from '../ui/speak-button';
 import { BrickBody } from './Brick';
+import { Wired } from './Baseplate';
 
 interface BookletProps {
   item: AtelierItem;
@@ -24,12 +25,6 @@ interface BookletProps {
 
 export function Booklet({ item, turn, language, lastTurn, onClose, onNext }: BookletProps) {
   const { t } = useTranslation();
-  const bricks = (index: number) => turn.pieces.find((piece) => piece.origin === index)!.brick;
-  // The verb brick is the first verb or auxiliary; its ports are the links that say what it takes.
-  const verb = item.bricks.findIndex((brick) => brick.role === 'verb' || brick.role === 'auxiliary');
-  const sockets = item.links
-    .filter((link) => link.head === verb && (link.relation === 'object' || link.relation === 'complement'))
-    .map((link) => ({ label: link.label, filledBy: link.dependents }));
   const next = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     next.current?.focus({ preventScroll: true });
@@ -65,27 +60,31 @@ export function Booklet({ item, turn, language, lastTurn, onClose, onNext }: Boo
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-3 pb-3">
           {turn.revealed && <p className="mb-3 text-sm">{t('atelier.round.revealed')}</p>}
           <h4 className="font-serif text-lg font-semibold">{t('atelier.breakdown.frame')}</h4>
-          <div className="mt-3 flex flex-wrap items-start gap-x-4 gap-y-3">
-            <BrickBody brick={bricks(verb)} sockets={sockets.map((socket) => socket.label)} />
-          </div>
-          {sockets.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-600">{t('atelier.breakdown.nothing')}</p>
-          ) : (
-            <dl className="mt-3 divide-y divide-dashed divide-ink-400 border-y border-dashed border-ink-400">
-              {sockets.map((socket) => (
-                <div key={socket.label} className="flex flex-wrap items-center gap-x-4 gap-y-3 py-3">
-                  <dt className="min-w-20 break-words text-sm font-semibold">{socket.label}</dt>
-                  <dd className="flex flex-wrap items-start gap-x-2 gap-y-2">
-                    {socket.filledBy.map((index) => (
-                      <BrickBody key={index} brick={bricks(index)} />
-                    ))}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
+          <Wired links={item.links} className="mt-2 flex flex-wrap content-start items-start gap-x-1.5 gap-y-2 pb-2">
+            {item.bricks.map((brick, index) => (
+              <span key={index} data-wire-brick={index} className="inline-flex">
+                <BrickBody brick={brick} />
+              </span>
+            ))}
+          </Wired>
           <h4 className="mt-4 text-xs text-ink-600">{t('atelier.breakdown.analysis')}</h4>
-          <p className="mt-1 break-words text-sm">{item.explanation[language]}</p>
+          <ol className="mt-1 divide-y divide-dashed divide-ink-400 border-y border-dashed border-ink-400">
+            {item.links.map((link, index) => (
+              <li key={index} className="flex gap-3 py-2.5">
+                <svg viewBox="0 0 32 8" className="mt-1.5 h-2 w-8 shrink-0" aria-hidden="true">
+                  <path d="M3 4H29" className="wire-line" data-relation={link.relation} />
+                </svg>
+                <div className="min-w-0">
+                  <p className="break-words text-sm">
+                    <span className="font-semibold">{link.label}</span>
+                    <span className="text-ink-600"> · {t(`atelier.relations.${link.relation}`)}</span>
+                  </p>
+                  <p className="mt-0.5 break-words text-sm">{link.note[language]}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-3 break-words text-sm">{item.explanation[language]}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2 px-4 pt-1 pb-4">
           <SpeakButton

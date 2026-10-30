@@ -2,7 +2,7 @@
  * One brick of the sentence workshop: a solid toy brick (fill, offset shadow, studs) that is a button on the
  * tray and the baseplate and a plain body in the booklet. The hue and silhouette follow its role
  * (`roles.ts`) and a small label names the role, so colour is never the only cue. The verb brick
- * hangs one port per grammar term under it, but only once it sits on the baseplate. Text is
+ * hangs one port per grammar term under it while it sits on the baseplate and the sentence is still being built. Text is
  * ordinary DOM text. Owns how a brick looks and the motion it plays; which bricks exist and where they sit
  * belongs to the round state.
  */
@@ -157,6 +157,10 @@ interface BrickProps {
   mode: 'tray' | 'row';
   state?: BrickState;
   fx?: BrickFx;
+  /** The brick's index in the sentence, so the wiring can find it; a brick that is not part of the sentence has none. */
+  wire?: number;
+  /** The sentence is wired: the verb's empty ports give way to the links drawn between the bricks. */
+  wired?: boolean;
   /** Whether motion may play: the effects switch combined with reduced motion. */
   motion: boolean;
   disabled?: boolean;
@@ -164,7 +168,7 @@ interface BrickProps {
 }
 
 export const Brick = forwardRef<HTMLButtonElement, BrickProps>(function Brick(
-  { piece, mode, state = 'rest', fx, motion, disabled, onPress },
+  { piece, mode, state = 'rest', fx, wire, wired, motion, disabled, onPress },
   ref,
 ) {
   const { t } = useTranslation();
@@ -177,7 +181,7 @@ export const Brick = forwardRef<HTMLButtonElement, BrickProps>(function Brick(
   }, [fx?.n, fx?.kind]);
   const halves = fx?.kind === 'fuse' && fx.parts && motion && halvesDone !== fx.n;
   return (
-    <span className="relative inline-flex">
+    <span className="relative inline-flex" data-wire-brick={wire}>
       <span ref={wrapper} className="inline-flex origin-bottom flex-col items-center">
         <button
           ref={ref}
@@ -193,7 +197,7 @@ export const Brick = forwardRef<HTMLButtonElement, BrickProps>(function Brick(
             disabled ? 'cursor-default' : 'cursor-pointer',
           )}
         >
-          <BrickBody brick={piece.brick} state={state} sockets={mode === 'row' ? piece.sockets : undefined} />
+          <BrickBody brick={piece.brick} state={state} sockets={mode === 'row' && !wired ? piece.sockets : undefined} />
         </button>
       </span>
       {halves && fx.parts && <FuseHalves parts={fx.parts} from={fx.from} onDone={() => setHalvesDone(fx.n)} />}

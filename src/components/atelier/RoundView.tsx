@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { errorMessage } from '../../services/ai/errors';
 import { joinBricks } from '../../services/atelier/join';
+import { lightingPlan } from '../../services/atelier/links';
 import {
   currentTurn,
   isOver,
@@ -50,7 +51,6 @@ const CUE_OF_EVENT: Record<string, Cue | undefined> = {
   fuse: 'fuse',
   reject: 'wrong',
   wrong: 'wrong',
-  right: 'right',
   finish: 'finish',
 };
 
@@ -90,6 +90,22 @@ export function RoundView({ items, choice, dropped, source, onAgain, onThemes, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.event]);
 
+  // A right row lights up as a circuit: a note climbs with each line that lands and the chord comes when the row
+  // settles, the same moments the lines draw at. Next ends it early, so a stale note never sounds in the next sentence.
+  useEffect(() => {
+    if (state.event?.kind !== 'right' || !item) return;
+    const plan = lightingPlan(item.links.length);
+    const ids = motion
+      ? [
+          ...item.links.map((_, step) => window.setTimeout(() => playCue('link', step), plan.arrive(step))),
+          window.setTimeout(() => playCue('right'), plan.total),
+        ]
+      : [window.setTimeout(() => playCue('right'), 0)];
+    return () => ids.forEach((id) => window.clearTimeout(id));
+    // Only a new event plays a cue.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.event]);
+
   // A new sentence starts on its first free brick.
   useEffect(() => {
     if (!turn) return;
@@ -111,11 +127,14 @@ export function RoundView({ items, choice, dropped, source, onAgain, onThemes, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turn?.placed]);
 
-  // Right: the row settles first, then the booklet page rises; the big button becomes Next meanwhile.
+  // Right: the lines light up and the row settles first, then the booklet page rises; the big button becomes
+  // Next meanwhile. A shown answer has no celebration, so its page comes soon.
   useEffect(() => {
-    if (!turn?.right) return;
+    if (!turn?.right || !item) return;
     primary.current?.focus({ preventScroll: true });
-    const id = window.setTimeout(() => setOpenFor(state.current), motion ? 700 : 0);
+    const celebrates = !turn.revealed;
+    const wait = celebrates ? (motion ? lightingPlan(item.links.length).total + 650 : 600) : motion ? 700 : 0;
+    const id = window.setTimeout(() => setOpenFor(state.current), wait);
     return () => window.clearTimeout(id);
     // Only a sentence turning right opens its page.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -197,6 +216,7 @@ export function RoundView({ items, choice, dropped, source, onAgain, onThemes, o
             <Baseplate
               turn={turn}
               size={item.bricks.length}
+              links={item.links}
               event={state.event}
               motion={motion}
               origin={origin}
@@ -212,6 +232,7 @@ export function RoundView({ items, choice, dropped, source, onAgain, onThemes, o
             event={state.event}
             motion={motion}
             disabled={turn.pending || turn.right}
+            closed={turn.right}
             origin={origin}
             register={register}
             onPlace={place}

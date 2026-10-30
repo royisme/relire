@@ -5,7 +5,7 @@
  * false nothing moves at all. CSS motion is stopped separately by the stage.
  */
 
-export type Fx = 'snap' | 'fuse' | 'bounce' | 'shake' | 'settle' | 'reappear';
+export type Fx = 'snap' | 'fuse' | 'bounce' | 'shake' | 'settle' | 'reappear' | 'pulse' | 'pop';
 
 export interface FxOptions {
   /** Where the brick was before it moved, so it can fly from there to where it now sits. */
@@ -57,7 +57,7 @@ function bounce(dx: number, dy: number, flying: boolean): { frames: Keyframe[]; 
 }
 
 const EFFECTS: Record<
-  'fuse' | 'shake' | 'settle' | 'reappear',
+  'fuse' | 'shake' | 'settle' | 'reappear' | 'pulse' | 'pop',
   { frames: Keyframe[]; options: KeyframeAnimationOptions }
 > = {
   // The welded brick is not there until the two halves meet, then it arrives wide and flat and springs to size.
@@ -92,6 +92,24 @@ const EFFECTS: Record<
     ],
     options: { duration: 280, easing: SETTLE },
   },
+  // A brick an arriving or leaving line touches: a small hop.
+  pulse: {
+    frames: [
+      { transform: 'none' },
+      { transform: 'translateY(-4px) scale(1.06)', offset: 0.35, easing: POP },
+      { transform: 'none' },
+    ],
+    options: { duration: 300, easing: SETTLE },
+  },
+  // A label chip arriving on its line: held out of sight until its turn, then pops past full size.
+  pop: {
+    frames: [
+      { opacity: 0, transform: 'scale(0.5)', offset: 0 },
+      { opacity: 1, transform: 'scale(1.14)', offset: 0.55, easing: POP },
+      { opacity: 1, transform: 'none', offset: 1 },
+    ],
+    options: { duration: 280, fill: 'backwards' },
+  },
   // The finished row, one brick after another, lifts a little and sets down.
   settle: {
     frames: [{ transform: 'none' }, { transform: 'translateY(-6px)', offset: 0.4 }, { transform: 'none' }],
@@ -110,4 +128,39 @@ export function play(element: Element | null, fx: Fx, motion: boolean, { from, d
     return;
   }
   element.animate(EFFECTS[fx].frames, { ...EFFECTS[fx].options, delay });
+}
+
+/** Draws a stroke: its dash offset runs `from` to `to` (a path with `pathLength="1"`), held out of sight until its turn; `keep: false` hides it again at the end (a spark). */
+export function sweep(
+  path: Element | null,
+  {
+    from,
+    to,
+    delay,
+    duration,
+    easing = 'ease-in-out',
+    keep = true,
+  }: { from: number; to: number; delay: number; duration: number; easing?: string; keep?: boolean },
+): void {
+  if (!path || typeof path.animate !== 'function') return;
+  path.animate(
+    [
+      { strokeDashoffset: from, opacity: 1 },
+      { strokeDashoffset: to, opacity: keep ? 1 : 0 },
+    ],
+    { delay, duration, easing, fill: 'both' },
+  );
+}
+
+/** A terminal landing: it appears small and grows past its size, held out of sight until its turn. */
+export function land(element: Element | null, delay: number): void {
+  if (!element || typeof element.animate !== 'function') return;
+  element.animate(
+    [
+      { opacity: 0, transform: 'scale(0.2)', offset: 0 },
+      { opacity: 1, transform: 'scale(1.5)', offset: 0.5, easing: POP },
+      { opacity: 1, transform: 'none', offset: 1 },
+    ],
+    { delay, duration: 220, fill: 'both' },
+  );
 }

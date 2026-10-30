@@ -6,7 +6,7 @@
  */
 import { useSyncExternalStore } from 'react';
 
-export type Cue = 'snap' | 'fuse' | 'wrong' | 'right' | 'finish';
+export type Cue = 'snap' | 'fuse' | 'wrong' | 'right' | 'finish' | 'link';
 
 const SOUND_KEY = 'relire_game_sound';
 const EFFECTS_KEY = 'relire_game_effects';
@@ -105,7 +105,10 @@ function tone(ctx: AudioContext, out: GainNode, spec: Tone): void {
 }
 
 /** Each cue is a few short tones; the snap wobbles in pitch so repeats do not sound like a machine. */
-const CUES: Record<Cue, () => Tone[]> = {
+/** The notes a circuit climbs, one per link: a major pentatonic from C5 that runs on into the next octave. */
+const PENTATONIC = [1, 9 / 8, 5 / 4, 3 / 2, 5 / 3];
+
+const CUES: Record<Cue, (step: number) => Tone[]> = {
   snap: () => {
     const wobble = 0.95 + Math.random() * 0.1;
     return [
@@ -117,6 +120,15 @@ const CUES: Record<Cue, () => Tone[]> = {
     { freq: 520, to: 330, seconds: 0.08, type: 'triangle', peak: 0.5 },
     { freq: 440, to: 660, at: 0.05, seconds: 0.16, type: 'sine', peak: 0.4 },
   ],
+  // A line landing on its brick: the snap's thump with a note on top that climbs with each link.
+  link: (step) => {
+    const note = 523 * PENTATONIC[step % PENTATONIC.length] * 2 ** Math.floor(step / PENTATONIC.length);
+    return [
+      { freq: 360, to: 200, seconds: 0.05, type: 'triangle', peak: 0.4 },
+      { freq: 1700, seconds: 0.02, type: 'sine', peak: 0.14 },
+      { freq: note, at: 0.02, seconds: 0.16, type: 'sine', peak: 0.3 },
+    ];
+  },
   wrong: () => [{ freq: 210, to: 150, seconds: 0.2, type: 'triangle', peak: 0.4 }],
   right: () => [
     { freq: 587, at: 0, seconds: 0.12, type: 'sine', peak: 0.35 },
@@ -129,10 +141,10 @@ const CUES: Record<Cue, () => Tone[]> = {
   ],
 };
 
-/** Plays a cue unless sound is off or the browser has no WebAudio. It never waits and never throws. */
-export function playCue(cue: Cue): void {
+/** Plays a cue unless sound is off or the browser has no WebAudio. It never waits and never throws. `step` is the link's place in the circuit. */
+export function playCue(cue: Cue, step = 0): void {
   if (!sound) return;
   const graph = audio();
   if (!graph) return;
-  for (const spec of CUES[cue]()) tone(graph.ctx, graph.out, spec);
+  for (const spec of CUES[cue](step)) tone(graph.ctx, graph.out, spec);
 }
