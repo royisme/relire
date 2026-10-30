@@ -2076,22 +2076,11 @@
     "addKey": "Add an AI key",
     "pick": {
       "theme": "Theme",
-      "subtopic": "Subtopic",
-      "task": "Task",
       "level": "Level",
-      "any": "Any",
       "start": "Start",
       "loadFailed": "The round could not be loaded: {{msg}}",
       "noneUsable_one": "No sentence was usable. {{count}} was skipped because it did not add up.",
       "noneUsable_other": "No sentence was usable. {{count}} were skipped because they did not add up."
-    },
-    "tasks": {
-      "oral-1": "Speaking 1: about yourself",
-      "oral-2": "Speaking 2: ask for information",
-      "oral-3": "Speaking 3: give an opinion",
-      "written-1": "Writing 1: a message",
-      "written-2": "Writing 2: an experience",
-      "written-3": "Writing 3: two views"
     },
     "roles": {
       "subject": "subject",

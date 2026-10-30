@@ -7,7 +7,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { navigate } from '../../hooks/useRoute';
 import { errorMessage } from '../../services/ai/errors';
-import { resolveChoice, type AtelierSource, type RoundChoice, type RoundPicks } from '../../services/atelier/source';
+import type { AtelierSource, RoundChoice } from '../../services/atelier/source';
 import { loadThemes } from '../../services/themes/load';
 import type { AtelierItem } from '../../types/atelier';
 import type { Theme } from '../../types/themes';
@@ -27,7 +27,7 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
   const { t } = useTranslation();
   const [themes, setThemes] = useState<Theme[] | null>(null);
   const [themesError, setThemesError] = useState<string | null>(null);
-  const [picks, setPicks] = useState<RoundPicks | null>(null);
+  const [picked, setPicked] = useState<RoundChoice | null>(null);
   const [round, setRound] = useState<Round | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,16 +37,10 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
     loadThemes().then(setThemes, (reason: unknown) => setThemesError(errorMessage(reason)));
   }, []);
 
-  const start = async (next: RoundPicks) => {
-    if (!themes) return;
-    setPicks(next);
+  const start = async (choice: RoundChoice) => {
+    setPicked(choice);
     setLoading(true);
     setError(null);
-    const choice = resolveChoice(
-      themes.find((theme) => theme.id === next.themeId)!,
-      next,
-      Math.random,
-    );
     try {
       const { items, dropped } = await source.loadRound(choice);
       if (items.length === 0) setError(t('atelier.pick.noneUsable', { count: dropped }));
@@ -67,7 +61,7 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
       </p>
     );
   else if (!themes) screen = <p className="p-4 text-sm text-ink-600">{t('common.loading')}</p>;
-  else if (round && picks)
+  else if (round && picked)
     screen = (
       <RoundView
         key={round.id}
@@ -77,7 +71,7 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
         source={source}
         onAgain={() => {
           setRound(null);
-          void start(picks);
+          void start(picked);
         }}
         onThemes={() => setRound(null)}
         onLeave={leave}
@@ -89,7 +83,7 @@ export function AtelierScreen({ source }: { source: AtelierSource }) {
         themes={themes}
         loading={loading}
         error={error}
-        initial={picks}
+        initial={picked}
         onStart={(next) => void start(next)}
         onLeave={leave}
       />

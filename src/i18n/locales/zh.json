@@ -2067,21 +2067,10 @@
     "addKey": "添加 AI 密钥",
     "pick": {
       "theme": "主题",
-      "subtopic": "子主题",
-      "task": "任务",
       "level": "等级",
-      "any": "随机",
       "start": "开始",
       "loadFailed": "这一轮没能加载：{{msg}}",
       "noneUsable_other": "没有可用的句子。有 {{count}} 句因为自相矛盾被跳过。"
-    },
-    "tasks": {
-      "oral-1": "口语 1：介绍自己",
-      "oral-2": "口语 2：获取信息",
-      "oral-3": "口语 3：表达观点",
-      "written-1": "写作 1：写一条信息",
-      "written-2": "写作 2：讲述经历",
-      "written-3": "写作 3：比较两种观点"
     },
     "roles": {
       "subject": "主语",
