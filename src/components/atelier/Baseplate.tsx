@@ -163,6 +163,7 @@ export function Wired({ links, playKey, className, children }: WiredProps) {
             <span
               key={wire.index}
               data-wire-chip={wire.index}
+              aria-hidden="true"
               className="wire-chip"
               style={{ left: wire.chip.x, top: wire.chip.y }}
             >

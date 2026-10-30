@@ -1,5 +1,5 @@
 /**
- * The bin: where the bricks wait, in the thumb zone and at a fixed height. A brick that was taken leaves
+ * The bin: where the bricks wait, in the thumb zone and at a fixed height until the sentence is right, when it closes and hands its room to the lit sentence. A brick that was taken leaves
  * nothing visible behind (the others stay where they are), and one that is taken back flies home to its
  * own place. Owns the layout of the bin only; the state belongs to the round.
  */

@@ -697,13 +697,13 @@
 .wire-line {
   fill: none;
   stroke: var(--color-ink-900);
-  stroke-width: 2.5;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .wire-line[data-relation='subject'],
 .wire-line[data-relation='object'] {
-  stroke-width: 3.5;
+  stroke-width: 4;
 }
 .wire-line[data-relation='agreement'],
 .wire-line[data-relation='modifier'] {
