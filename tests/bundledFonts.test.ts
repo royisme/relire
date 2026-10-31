@@ -22,7 +22,8 @@ describe('bundled fonts', () => {
     'marketing/index.html',
     'marketing/zh/index.html',
     'marketing/styles.css',
-    'src/index.css',
+    'src/styles/fonts.css',
+    'src/styles/tokens.css',
     'vite.config.ts',
   ])('%s has no Google font host, including escaped runtimeCaching patterns', (path) => {
     const source = text(path).replaceAll('\\', '').toLowerCase();
@@ -43,59 +44,62 @@ describe('bundled fonts', () => {
     expect(text('public/fonts/README.txt').trim().length).toBeGreaterThan(0);
   });
 
-  test.each(['src/index.css', 'marketing/styles.css'])('%s declares swap faces backed by bundled files', (path) => {
-    const css = text(path).replace(/\/\*[\s\S]*?\*\//g, '');
-    const blocks = [...css.matchAll(/@font-face\s*\{([^}]+)\}/gi)].map((match) => {
-      const declarations = Object.fromEntries(
-        [...match[1].matchAll(/([\w-]+)\s*:\s*([^;]+);/g)].map((entry) => [
-          entry[1],
-          entry[2].trim().replace(/['"]/g, ''),
-        ]),
-      );
-      return { body: match[1], declarations };
-    });
-    const prefix = path === 'src/index.css' ? '/fonts/' : 'fonts/';
-    const expected = path === 'src/index.css' ? faces : faces.filter((face) => face.family !== 'Fira Code');
-    for (const face of expected) {
-      const matching = blocks.filter(
-        ({ declarations }) =>
-          declarations['font-family'] === face.family && (declarations['font-style'] ?? 'normal') === face.style,
-      );
-      expect(matching.length).toBeGreaterThan(0);
-      for (const { declarations } of matching) {
-        expect(fontUrls(declarations['src'])).toContain(`${prefix}${face.file}`);
-        expect(declarations['font-weight'].replace(/\s+/g, ' ')).toBe(face.weight);
-      }
-    }
-    for (const { body, declarations } of blocks) {
-      expect(declarations['font-display']).toBe('swap');
-      const urls = fontUrls(body);
-      expect(urls.length).toBeGreaterThan(0);
-      for (const url of urls) {
-        expect(url).toStartWith(prefix);
-        const name = url.slice(prefix.length);
-        expect(name).toMatch(/^[\w-]+\.woff2$/);
-        expect(readFileSync(fileUrl(`public/fonts/${name}`)).length).toBeGreaterThan(0);
-      }
-      expect(declarations['unicode-range']).toBeDefined();
-      const ranges = declarations['unicode-range'].split(',').map((range) => {
-        const match = range.trim().match(/^U\+([0-9A-F?]{1,6})(?:-([0-9A-F]{1,6}))?$/i);
-        expect(match).not.toBeNull();
-        return [
-          Number.parseInt(match![1].replaceAll('?', '0'), 16),
-          Number.parseInt((match![2] ?? match![1]).replaceAll('?', 'F'), 16),
-        ];
+  test.each(['src/styles/fonts.css', 'marketing/styles.css'])(
+    '%s declares swap faces backed by bundled files',
+    (path) => {
+      const css = text(path).replace(/\/\*[\s\S]*?\*\//g, '');
+      const blocks = [...css.matchAll(/@font-face\s*\{([^}]+)\}/gi)].map((match) => {
+        const declarations = Object.fromEntries(
+          [...match[1].matchAll(/([\w-]+)\s*:\s*([^;]+);/g)].map((entry) => [
+            entry[1],
+            entry[2].trim().replace(/['"]/g, ''),
+          ]),
+        );
+        return { body: match[1], declarations };
       });
-      for (const codePoint of [0x0152, 0x00e9, 0x00ab, 0x00bb]) {
-        expect(ranges.some(([start, end]) => start <= codePoint && codePoint <= end)).toBe(true);
+      const prefix = path === 'src/styles/fonts.css' ? '/fonts/' : 'fonts/';
+      const expected = path === 'src/styles/fonts.css' ? faces : faces.filter((face) => face.family !== 'Fira Code');
+      for (const face of expected) {
+        const matching = blocks.filter(
+          ({ declarations }) =>
+            declarations['font-family'] === face.family && (declarations['font-style'] ?? 'normal') === face.style,
+        );
+        expect(matching.length).toBeGreaterThan(0);
+        for (const { declarations } of matching) {
+          expect(fontUrls(declarations['src'])).toContain(`${prefix}${face.file}`);
+          expect(declarations['font-weight'].replace(/\s+/g, ' ')).toBe(face.weight);
+        }
       }
-    }
-  });
+      for (const { body, declarations } of blocks) {
+        expect(declarations['font-display']).toBe('swap');
+        const urls = fontUrls(body);
+        expect(urls.length).toBeGreaterThan(0);
+        for (const url of urls) {
+          expect(url).toStartWith(prefix);
+          const name = url.slice(prefix.length);
+          expect(name).toMatch(/^[\w-]+\.woff2$/);
+          expect(readFileSync(fileUrl(`public/fonts/${name}`)).length).toBeGreaterThan(0);
+        }
+        expect(declarations['unicode-range']).toBeDefined();
+        const ranges = declarations['unicode-range'].split(',').map((range) => {
+          const match = range.trim().match(/^U\+([0-9A-F?]{1,6})(?:-([0-9A-F]{1,6}))?$/i);
+          expect(match).not.toBeNull();
+          return [
+            Number.parseInt(match![1].replaceAll('?', '0'), 16),
+            Number.parseInt((match![2] ?? match![1]).replaceAll('?', 'F'), 16),
+          ];
+        });
+        for (const codePoint of [0x0152, 0x00e9, 0x00ab, 0x00bb]) {
+          expect(ranges.some(([start, end]) => start <= codePoint && codePoint <= end)).toBe(true);
+        }
+      }
+    },
+  );
 
   test.each([
-    ['src/index.css', '--font-serif', 'Source Serif 4'],
-    ['src/index.css', '--font-sans', 'Public Sans'],
-    ['src/index.css', '--font-mono', 'Fira Code'],
+    ['src/styles/tokens.css', '--font-serif', 'Source Serif 4'],
+    ['src/styles/tokens.css', '--font-sans', 'Public Sans'],
+    ['src/styles/tokens.css', '--font-mono', 'Fira Code'],
     ['marketing/styles.css', '--serif', 'Source Serif 4'],
     ['marketing/styles.css', '--sans', 'Public Sans'],
   ])('%s keeps %s starting with %s', (path, token, family) => {
