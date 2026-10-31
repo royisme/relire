@@ -66,6 +66,19 @@ export function wordRequest(
   };
 }
 
+export function wordExamplesRequest(
+  input: { word: string; gloss: string; partOfSpeech?: string },
+  lang: Lang,
+): JsonRequest {
+  return {
+    prompt: render('wordExamples', lang, {
+      word: input.word,
+      gloss: input.gloss,
+      partOfSpeech: input.partOfSpeech?.trim() || undefined,
+    }),
+  };
+}
+
 export function prosodyRequest(input: { source: string; template?: string }, lang: Lang): JsonRequest {
   const enumerated = enumeratedReaderWords(input.source);
   const vars = {

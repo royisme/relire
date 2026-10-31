@@ -6,7 +6,10 @@ import {
   VocabularyRowSchema,
   VocabularyDefinitionSchema,
   VocabularyContextSchema,
+  VocabularyGeneratedSchema,
   type VocabularyDefinition,
+  type VocabularyGenerated,
+  type VocabularyGeneratedAnswer,
   VocabularyPreferencesSchema,
   VocabularyDaySchema,
   type VocabularyRow,
@@ -211,6 +214,21 @@ export async function importVocabularyNotes(notes: readonly ImportedNote[], now:
       await store.put(updated);
     }
     return { imported, merged };
+  });
+}
+/** Saves AI-generated examples on a row and returns what it saved; only `generated` is written, so every other field keeps its stored value. */
+export async function saveGeneratedVocabularyExamples(
+  key: string,
+  answer: VocabularyGeneratedAnswer,
+  now = Date.now(),
+): Promise<VocabularyGenerated> {
+  const generated = VocabularyGeneratedSchema.parse({ ...answer, at: now });
+  return write(async (tx) => {
+    const store = tx.objectStore('vocab');
+    const stored = await store.get(vocabularyId(key));
+    if (!stored) throw new Error(`No card to save examples for: ${key}`);
+    await store.put(VocabularyRowSchema.parse({ ...stored, generated }));
+    return generated;
   });
 }
 export async function removeVocabularyBookmark(key: string) {
