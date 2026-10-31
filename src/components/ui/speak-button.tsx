@@ -35,6 +35,9 @@ export function useSpeechFailure(text: string): string | null {
   return failure !== null && failure.key === speechKey(text) ? failure.message : null;
 }
 
+/** The button pressed last, so several buttons with the same text (four identical past participles) do not all light up with it. */
+let lastPress: { id: string; text: string } | null = null;
+
 /** Volume2 at rest, a spinner while the clip loads, a stop square while it plays. */
 export function SpeakIcon({
   phase,
@@ -144,8 +147,13 @@ export function SpeakButton({
   ...rest
 }: SpeakButtonProps) {
   const { t } = useTranslation();
-  const phase = useSpeechPhase(text);
-  const failure = useSpeechFailure(text);
+  const id = React.useId();
+  // A same-text button that was not the one pressed stays at rest; a clip started elsewhere shows on all of them.
+  const pressedElsewhere = lastPress !== null && lastPress.text === speechKey(text) && lastPress.id !== id;
+  const phaseNow = useSpeechPhase(text);
+  const failureNow = useSpeechFailure(text);
+  const phase = pressedElsewhere ? 'idle' : phaseNow;
+  const failure = pressedElsewhere ? null : failureNow;
   const failed = phase === 'idle' && failure !== null;
   const name = failed ? t('speech.listenFailed', { msg: failure }) : phase !== 'idle' ? stopLabel : label;
   // The wrapper is always there and only positions the reason, so the control sits exactly where it
@@ -163,6 +171,7 @@ export function SpeakButton({
         className={className}
         onClick={(e) => {
           onClick?.(e);
+          lastPress = { id, text: speechKey(text) };
           toggleSpeech(text, { rate, engine });
         }}
         {...rest}
