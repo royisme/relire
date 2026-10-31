@@ -6,7 +6,7 @@
  * the region. Does not own the request, the result's drawing (ConjugationResult) or the sheet's state
  * (`useExerciseUnit`). Keyed by the infinitive, so a new verb starts with no leftover batch.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useExerciseUnit } from '../../../hooks/useExerciseUnit';
@@ -60,8 +60,13 @@ export function ConjugationPractice({ result, onWord, onMissingKey }: Props) {
   const { status, save, drop } = useUnitSaver();
   const [index, setIndex] = useState(0);
   const [busy, setBusy] = useState<'all' | Tense | null>(null);
+  const region = useRef<HTMLElement>(null);
   const { verb } = result;
   const units = status.kind === 'done' ? status.units : [];
+  // The region sits under every tense, so a press near the top would otherwise open it out of sight.
+  useEffect(() => {
+    if (status.kind === 'working') region.current?.scrollIntoView({ block: 'start' });
+  }, [status.kind]);
 
   const make = async (tenses: Tense[], which: 'all' | Tense) => {
     // A failed save keeps its payload, so drop it: the press must make the tense the learner just pressed.
@@ -93,6 +98,7 @@ export function ConjugationPractice({ result, onWord, onMissingKey }: Props) {
       />
       {(unit || status.kind === 'working' || status.kind === 'error') && (
         <section
+          ref={region}
           aria-label={t('conjugation.page.practiseTitle')}
           aria-busy={status.kind === 'working'}
           className="mt-5 min-h-96 rounded-lg border border-ink-200 bg-surface px-4 py-5 sm:px-6"
