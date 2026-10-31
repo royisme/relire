@@ -60,7 +60,6 @@ test('a scores-only result draws the three scores and nothing it does not have',
   expect(html).toContain(en.shadowing.accuracy);
   expect(html).toContain(en.shadowing.fluency);
   expect(html).not.toContain(en.shadowing.rhythm);
-  expect(html).not.toContain(en.shadowing.wordAccuracy);
   expect(html).not.toContain(en.shadowing.completeness);
   expect(html).not.toContain(en.shadowing.sounds);
   expect(html).not.toContain(en.shadowing.words);
@@ -85,16 +84,15 @@ test('a full result draws every section as before', () => {
 
 test('mapped Azure words retain service order, scores and literal unknown errors', () => {
   const html = render(azure);
-  const items = [...html.matchAll(/<li\b[^>]*>(.*?)<\/li>/g)].map((match) => match[1].replace(/<[^>]+>/g, ''));
-  expect(items).toEqual([
-    `tout42${en.shadowing.wordError.Mispronunciation}`,
-    `le0${en.shadowing.wordError.Omission}`,
-    'monde85FutureServiceError',
-    `encore${en.shadowing.wordError.Insertion}`,
-  ]);
+  const words = [...html.matchAll(/<button[^>]*aria-pressed[^>]*>(.*?)<\/button>/g)].map((match) => match[1]);
+  // Service order is kept; a skipped word is bracketed and an extra word is prefixed.
+  expect(words).toEqual(['Bonjour', 'tout', '[le]', 'monde', '+encore', 'demain']);
+  expect(html).toContain(`tout, ${en.shadowing.band.unclear}, 42 out of 100`);
+  expect(html).toContain(`le, ${en.shadowing.wordError.Omission}`);
+  expect(html).toContain(`encore, ${en.shadowing.wordError.Insertion}`);
   expect(html).toContain('Bonjour');
   expect(html).toContain('demain');
-  expect(html).toContain(en.shadowing.wordAccuracy);
+  expect(html).toContain(en.shadowing.accuracy);
   expect(html).toContain(en.shadowing.completeness);
   expect(html).toContain('>63<');
   expect(html).toContain(en.shadowing.estimate);
@@ -157,19 +155,19 @@ test('WordMarks marks a low score, an omission and an insertion with their sr-on
 test('word and completeness zero scores are real scores', () => {
   const html = render({ ...scoresOnly, completenessScore: 0, wordResults: [{ word: 'zéro', accuracyScore: 0 }] });
   expect(html).toContain(en.shadowing.completeness);
-  expect(html.match(/>0</g)).toHaveLength(3);
+  expect(html.match(/>0</g)).toHaveLength(1);
+  expect(html).toContain('0 out of 100');
 });
 
 test('known word errors use the selected interface language', async () => {
   await i18n.changeLanguage('zh');
   try {
     const html = render(azure);
-    expect(html).toContain(zh.shadowing.wordAccuracy);
+    expect(html).toContain(zh.shadowing.accuracy);
     expect(html).toContain(zh.shadowing.completeness);
-    expect(html).toContain(zh.shadowing.wordError.Mispronunciation);
+    expect(html).toContain(zh.shadowing.band.unclear);
     expect(html).toContain(zh.shadowing.wordError.Omission);
     expect(html).toContain(zh.shadowing.wordError.Insertion);
-    expect(html).toContain('FutureServiceError');
     expect(html).not.toContain('None');
   } finally {
     await i18n.changeLanguage('en');

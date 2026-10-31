@@ -20,7 +20,7 @@ import {
  */
 
 export function useSpeechState(): SpeechState {
-  return React.useSyncExternalStore(subscribeSpeech, getSpeechState);
+  return React.useSyncExternalStore(subscribeSpeech, getSpeechState, getSpeechState);
 }
 
 /** 'idle' unless this exact text is the one loading or playing. */
@@ -31,7 +31,7 @@ export function useSpeechPhase(text: string): SpeechPhase {
 
 /** Why this text's clip last failed, when its control should report the real reason. */
 export function useSpeechFailure(text: string): string | null {
-  const failure = React.useSyncExternalStore(subscribeSpeech, getSpeechFailure);
+  const failure = React.useSyncExternalStore(subscribeSpeech, getSpeechFailure, getSpeechFailure);
   return failure !== null && failure.key === speechKey(text) ? failure.message : null;
 }
 
