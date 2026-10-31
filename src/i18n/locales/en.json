@@ -311,10 +311,9 @@
     "fluency": "Fluency",
     "rhythm": "Rhythm",
     "completeness": "Completeness",
-    "wordAccuracy": "Word accuracy",
     "wordError": {
-      "Mispronunciation": "Mispronunciation",
-      "Omission": "Omitted word",
+      "Mispronunciation": "Mispronounced",
+      "Omission": "Skipped",
       "Insertion": "Extra word"
     },
     "sounds": "Sounds to work on",
@@ -325,7 +324,37 @@
       "excellent": "Good",
       "acceptable": "Fair",
       "needs_work": "Needs work"
-    }
+    },
+    "yourReading": "Your reading",
+    "scores": "Scores",
+    "wordByWord": "Word by word",
+    "summary": {
+      "allClear": "Every word was clear.",
+      "some": "{{count}} of {{total}} words need another try.",
+      "skipped": "{{count}} skipped",
+      "extra": "{{count}} extra"
+    },
+    "band": {
+      "clear": "Clear",
+      "close": "Close",
+      "unclear": "Unclear"
+    },
+    "wordNote": {
+      "close": "Close to the model, but not clear enough.",
+      "unclear": "Hard to recognise as this word.",
+      "Omission": "The service did not hear this word.",
+      "Insertion": "You said a word that is not in the sentence.",
+      "Mispronunciation": "The service marked this word as mispronounced."
+    },
+    "wordScore": "{{score}} out of 100",
+    "noWordScore": "The service gave no score for this word.",
+    "pickWord": "Tap a word to hear it and see why.",
+    "hearWord": "Hear \"{{word}}\"",
+    "hearSentence": "Hear the sentence",
+    "stopSpeaking": "Stop",
+    "next": "Next",
+    "startWith": "Start with {{words}}, then record again.",
+    "scoresOnly": "This check returned scores only, with no word detail."
   },
   "vocab": {
     "title": "Words",
