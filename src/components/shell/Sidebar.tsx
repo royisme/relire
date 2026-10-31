@@ -6,7 +6,7 @@
 import { useTranslation } from 'react-i18next';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import type { Route } from '../../utils/routes';
-import { Button } from '../ui/button';
+import { NavItem } from './NavItem';
 import { NavTree } from './NavTree';
 
 interface SidebarProps {
@@ -23,22 +23,16 @@ export function Sidebar({ route, dueCount, expanded, onToggle }: SidebarProps) {
   return (
     <aside
       data-sidebar={expanded ? 'expanded' : 'rail'}
-      className={`sticky top-14 z-20 flex h-[calc(100dvh-3.5rem)] shrink-0 flex-col overflow-y-auto border-r border-ink-200 bg-ink-50 ${
+      className={`sticky top-14 z-20 flex h-[calc(100dvh-3.5rem)] shrink-0 flex-col overflow-y-auto border-r border-ink-200 bg-ink-100 ${
         expanded ? 'w-60' : 'w-14'
       }`}
     >
+      <NavTree route={route} dueCount={dueCount} rail={!expanded} />
       {onToggle && (
-        <div className={`px-2 pt-3 ${expanded ? 'flex justify-end' : ''}`}>
-          <Button variant="ghost" size="icon" aria-label={label} title={label} onClick={onToggle}>
-            {expanded ? (
-              <PanelLeftClose className="w-4 h-4" aria-hidden="true" />
-            ) : (
-              <PanelLeftOpen className="w-4 h-4" aria-hidden="true" />
-            )}
-          </Button>
+        <div className="space-y-0.5 border-t border-ink-200 px-2 py-3">
+          <NavItem rail={!expanded} icon={expanded ? PanelLeftClose : PanelLeftOpen} label={label} onClick={onToggle} />
         </div>
       )}
-      <NavTree route={route} dueCount={dueCount} rail={!expanded} />
     </aside>
   );
 }

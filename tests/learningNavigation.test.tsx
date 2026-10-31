@@ -218,7 +218,7 @@ test('learning-first sidebar has no generic Practice or study Grammar; Writing r
   }
 });
 
-test('Recordings is not a sidebar row: Speaking highlights on its route and Read aloud is the only child', () => {
+test('Recordings is not a sidebar row: Speaking highlights on its routes and has no child row', () => {
   const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({ units: [], error: null });
   const mistakes = spyOn(mistakesHook, 'useMistakes').mockReturnValue({
     rows: [],
@@ -228,13 +228,10 @@ test('Recordings is not a sidebar row: Speaking highlights on its route and Read
   });
   try {
     for (const route of [{ name: 'speaking' }, { name: 'readAloud' }, { name: 'recordings' }] as const) {
-      // Expanded and the drawer share the tree: Read aloud is Speaking's only child; Recordings never appears.
       const html = render(<NavTree route={route} dueCount={0} />);
-      expect(html).toContain('href="#/speaking/read-aloud"');
+      expect(html).not.toContain('href="#/speaking/read-aloud"');
       expect(html).not.toContain('href="#/speaking/recordings"');
-      expect(/href="#\/speaking"[^>]*aria-current="true"/.test(html)).toBe(true);
-      const readAloud = html.match(/<a [^>]*href="#\/speaking\/read-aloud"[^>]*>/)?.[0];
-      expect(readAloud?.includes('aria-current')).toBe(route.name === 'readAloud');
+      expect(/href="#\/speaking"[^>]*aria-current="page"/.test(html)).toBe(true);
       const rail = render(<NavTree route={route} dueCount={0} rail />);
       expect(rail).not.toContain('href="#/speaking/read-aloud"');
       expect(rail).not.toContain('href="#/speaking/recordings"');
@@ -277,12 +274,12 @@ test('no sidebar anchor to Recordings exists on any route or width, and no row c
         expect(html).not.toContain('title="Recordings"');
       }
     }
-    // On the recordings route the only speaking hrefs are the area row and its one child.
+    // On the recordings route the only speaking href is the area row.
     const html = render(<NavTree route={{ name: 'recordings' }} dueCount={0} />);
     expect(
       [...html.matchAll(/href="([^"]+)"/g)].map((match) => match[1]).filter((href) => href.startsWith('#/speaking')),
-    ).toEqual(['#/speaking', '#/speaking/read-aloud']);
-    expect(/href="#\/speaking"[^>]*aria-current="true"/.test(html)).toBe(true);
+    ).toEqual(['#/speaking']);
+    expect(/href="#\/speaking"[^>]*aria-current="page"/.test(html)).toBe(true);
   } finally {
     units.mockRestore();
     mistakes.mockRestore();
@@ -312,7 +309,7 @@ test('Speaking renders the reader-microphone sentence once, the Recordings text 
   expect(log).toContain(`>${i18n.t('learning.speaking')}<`);
 });
 
-test('Graded readers is linked from the Reading destinations and stays current on the reader route', () => {
+test('Graded readers is linked from the Reading page destinations, not the sidebar, and stays current on the reader route', () => {
   const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({ units: null, error: null });
   const mistakes = spyOn(mistakesHook, 'useMistakes').mockReturnValue({
     rows: [],
@@ -323,13 +320,7 @@ test('Graded readers is linked from the Reading destinations and stays current o
   try {
     const nav = render(<LearningNavigation area="read" current={{ name: 'gradedReader', readerId: 'r' }} />);
     expect(nav).toContain('href="#/read/graded" aria-current="page"');
-    // NavTree puts the classes between href and aria-current, so match the current graded link loosely.
-    const gradedCurrent = /href="#\/read\/graded"[^>]*aria-current/;
-    expect(gradedCurrent.test(render(<NavTree route={{ name: 'gradedReader', readerId: 'r' }} dueCount={0} />))).toBe(
-      true,
-    );
-    expect(gradedCurrent.test(render(<NavTree route={{ name: 'gradedReaders' }} dueCount={0} />))).toBe(true);
-    expect(gradedCurrent.test(render(<NavTree route={{ name: 'library' }} dueCount={0} />))).toBe(false);
+    expect(render(<NavTree route={{ name: 'gradedReaders' }} dueCount={0} />)).not.toContain('/read/graded');
     expect(render(<LearningNavigation area="read" current={{ name: 'library' }} />)).not.toContain(
       'href="#/read/graded" aria-current',
     );
@@ -339,7 +330,7 @@ test('Graded readers is linked from the Reading destinations and stays current o
   }
 });
 
-test('exercise import is not repeated in the sidebar while the reading article import stays', () => {
+test('neither import is a sidebar row; the Library page owns the article import', () => {
   const units = spyOn(readerUnitsHook, 'useReaderUnits').mockReturnValue({
     units: [{ ...unitOf('OPEN_QA'), learningArea: 'writing' }],
     error: null,
@@ -351,7 +342,7 @@ test('exercise import is not repeated in the sidebar while the reading article i
     retry: () => {},
   });
   try {
-    expect(render(<NavTree route={{ name: 'library' }} dueCount={0} />)).toContain('href="#/import/article"');
+    expect(render(<NavTree route={{ name: 'library' }} dueCount={0} />)).not.toContain('href="#/import/article"');
     for (const route of [
       { name: 'library' },
       { name: 'grammar', section: 'gender' },

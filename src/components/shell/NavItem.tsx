@@ -14,6 +14,8 @@ interface NavItemProps {
   /** Icon only, with the label as tooltip and accessible name. */
   rail?: boolean;
   /** A count shown at the end of the row (a corner badge in the rail), read as `badgeLabel`. */
+  /** The first row of the tree: larger and set in the serif. */
+  lead?: boolean;
   badge?: number;
   badgeLabel?: string;
   to?: Route;
@@ -26,6 +28,7 @@ export function NavItem({
   label,
   icon: Icon,
   current,
+  lead,
   rail,
   badge,
   badgeLabel,
@@ -34,26 +37,26 @@ export function NavItem({
   onNavigate,
 }: NavItemProps) {
   const className = cn(
-    'relative flex items-center h-10 rounded-md text-sm whitespace-nowrap select-none cursor-pointer',
+    'relative flex items-center rounded-md whitespace-nowrap select-none cursor-pointer',
+    lead ? 'h-11 font-serif text-base' : 'h-10 text-sm',
     rail ? 'w-10 mx-auto justify-center' : cn('gap-3 pr-3', Icon ? 'pl-3' : 'pl-10'),
-    current === 'page' && 'bg-ink-100 text-ink-950 font-medium',
-    current === 'area' && 'text-ink-950 font-medium hover:bg-ink-100',
-    !current && 'text-ink-700 hover:bg-ink-100 hover:text-ink-950',
+    current ? 'text-ink-950 font-semibold' : 'text-ink-700 hover:text-ink-950',
+    current && rail && 'bg-ink-50',
+    (!current || !rail) && 'hover:bg-ink-200',
   );
   const content = (
     <>
-      {current === 'page' && (
-        <span aria-hidden="true" className="absolute left-0 inset-y-2 w-0.5 rounded-full bg-accent-700" />
-      )}
-      {Icon && <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />}
+      {Icon && <Icon className={cn('w-4 h-4 shrink-0', current && 'text-accent-700')} aria-hidden="true" />}
       {!rail && <span className="truncate">{label}</span>}
       {!!badge && badge > 0 && (
         <>
           <span
             aria-hidden="true"
             className={cn(
-              'tnum min-w-5 px-1.5 rounded-full text-xs font-medium bg-accent-700 text-on-fill text-center',
-              rail ? 'absolute top-0 right-0 min-w-4 h-4 px-1 leading-4' : 'ml-auto',
+              'tnum text-center text-xs font-semibold text-accent-800',
+              rail
+                ? 'absolute top-0 right-0 min-w-4 h-4 px-1 leading-[14px] rounded-full border border-accent-700 bg-ink-100'
+                : 'ml-auto',
             )}
           >
             {badge}

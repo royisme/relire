@@ -8,6 +8,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Added
 
+- The sidebar is calmer: Today leads on its own, the rest sits under “Learn” and “Review”, the current page is shown by weight and an accent icon instead of a fill and bar, and counts are plain numbers. Sub-pages no longer unfold in it, so it keeps its height as you move; the brand sits at its top and the collapse button at its bottom.
 - The pronunciation result is a marked page of your reading: one score list, each word shown once by weight and line style, a fixed detail slot with its score and a button to hear it, a short “start with” list, and Record again.
 - Word cards that show no example anywhere (an imported note without an example column, or a book word whose senses carry none) get a ghost “Generate examples” button under the answer: one call with your own key writes two A2–B1 sentences and an optional usage note onto the card, shown under the AI label; the imported back and every other field stay unchanged.
 - Grammar → Sentence workshop: build French sentences from bricks by tapping them into a row, with fusing brick pairs (à + le → au), a right answer that lights up the connections between the words (subject, object, article, agreement, negation), a breakdown and sound cues you can mute. It runs on your own AI key — no key, no rounds — and is no longer development-only.

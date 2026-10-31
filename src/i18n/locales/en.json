@@ -24,6 +24,8 @@
     "menu": "Menu",
     "language": "Language",
     "main": "Main navigation",
+    "groupLearn": "Learn",
+    "groupReview": "Review",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
     "due": "{{count}} due",

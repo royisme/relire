@@ -15,8 +15,7 @@ import {
   SpellCheck,
 } from 'lucide-react';
 import { PWAInstallButton } from '../PWAInstallButton';
-import { areaOf, routeHref, SETTINGS_SECTIONS, type Route } from '../../utils/routes';
-import { contentServiceUrl } from '../../services/grammarTopics/service';
+import { areaOf, SETTINGS_SECTIONS, type Route } from '../../utils/routes';
 import { useReaderUnits } from '../../hooks/useReaderUnits';
 import { useMistakes } from '../../hooks/useMistakes';
 import { NavItem } from './NavItem';
@@ -34,8 +33,8 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
   const mistakes = useMistakes().rows.filter((row) => !row.resolved).length;
   const writing = useReaderUnits().units?.some((unit) => unit.learningArea === 'writing');
   const item = { rail, onNavigate };
-  const links = [
-    { to: { name: 'today' } as Route, area: 'today', icon: CalendarCheck, label: t('today.title') },
+  const links = [{ to: { name: 'today' } as Route, area: 'today', icon: CalendarCheck, label: t('today.title') }];
+  const learn = [
     { to: { name: 'library' } as Route, area: 'read', icon: BookOpen, label: t('learning.areas.reading') },
     {
       to: { name: 'words' } as Route,
@@ -64,68 +63,32 @@ export function NavTree({ route, dueCount, rail, onNavigate }: NavTreeProps) {
         ]
       : []),
   ];
-  const children: { to: Route; label: string }[] =
-    area === 'read'
-      ? [
-          { to: { name: 'library' }, label: t('learning.library') },
-          { to: { name: 'gradedReaders' }, label: t('nav.gradedReaders') },
-          { to: { name: 'practice', area: 'reading' }, label: t('learning.exercises') },
-          { to: { name: 'importArticle' }, label: t('nav.importArticle') },
-        ]
-      : area === 'grammar'
-        ? [
-            ...(contentServiceUrl() ? [{ to: { name: 'grammar' } as Route, label: t('grammarTopics.title') }] : []),
-            { to: { name: 'grammar', section: 'conjugation' }, label: t('conjugation.page.title') },
-            { to: { name: 'grammar', section: 'gender' }, label: t('nounGender.title') },
-            { to: { name: 'grammar', section: 'atelier' }, label: t('atelier.title') },
-            { to: { name: 'practice', area: 'grammar' }, label: t('learning.exercises') },
-          ]
-        : area === 'speaking'
-          ? [{ to: { name: 'readAloud' }, label: t('learning.readAloud') }]
-          : [];
+  const row = (link: (typeof learn)[number], lead?: boolean) => (
+    <div key={link.area}>
+      <NavItem
+        {...item}
+        to={link.to}
+        icon={link.icon}
+        label={link.label}
+        lead={lead}
+        badge={'badge' in link ? link.badge : undefined}
+        badgeLabel={'badgeLabel' in link ? link.badgeLabel : undefined}
+        current={area === link.area ? 'page' : undefined}
+      />
+      {!rail && area === link.area && <PracticeSubnav route={route} onNavigate={onNavigate} />}
+    </div>
+  );
+  const group = rail ? 'border-t border-ink-200' : '';
+  const heading = 'px-3 pb-1 font-serif text-xs italic text-ink-500';
   return (
     <nav aria-label={t('nav.main')} className="flex flex-1 flex-col">
-      <div className="space-y-0.5 px-2 py-3">
-        {links.map((link) => (
-          <div key={link.area}>
-            <NavItem
-              {...item}
-              to={link.to}
-              icon={link.icon}
-              label={link.label}
-              badge={link.badge}
-              badgeLabel={link.badgeLabel}
-              current={area === link.area ? (!rail && children.length > 0 ? 'area' : 'page') : undefined}
-            />
-            {!rail && area === link.area && (
-              <>
-                {children.map(({ to, label }) => (
-                  <NavItem
-                    key={routeHref(to)}
-                    {...item}
-                    to={to}
-                    label={label}
-                    current={
-                      (
-                        to.name === 'grammar'
-                          ? (route.name === 'grammar' && route.section === to.section) ||
-                            (!to.section && route.name === 'grammarTopic')
-                          : to.name === 'gradedReaders'
-                            ? route.name === 'gradedReaders' || route.name === 'gradedReader'
-                            : routeHref(route) === routeHref(to)
-                      )
-                        ? 'page'
-                        : undefined
-                    }
-                  />
-                ))}
-                <PracticeSubnav route={route} onNavigate={onNavigate} />
-              </>
-            )}
-          </div>
-        ))}
+      <div className="space-y-0.5 px-2 pt-3 pb-2">{links.map((link) => row(link, true))}</div>
+      <div className={`space-y-0.5 px-2 py-3 ${group}`}>
+        {!rail && <p className={heading}>{t('nav.groupLearn')}</p>}
+        {learn.map((link) => row(link))}
       </div>
-      <div className="space-y-0.5 border-t border-ink-200 px-2 py-3">
+      <div className={`space-y-0.5 px-2 py-3 ${group}`}>
+        {!rail && <p className={heading}>{t('nav.groupReview')}</p>}
         <NavItem
           {...item}
           to={{ name: 'mistakes' }}

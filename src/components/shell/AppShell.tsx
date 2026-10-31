@@ -42,7 +42,7 @@ export function AppShell({
       className="min-h-screen bg-ink-50 text-ink-900 flex flex-col font-sans"
       style={{ '--sidebar-w': `${sidebarWidth}px` } as CSSProperties}
     >
-      <Header route={route} dueCount={dueCount} showMenu={breakpoint === 'phone'} />
+      <Header route={route} dueCount={dueCount} showMenu={breakpoint === 'phone'} expanded={expanded} />
 
       <div className="flex flex-1 items-start">
         {breakpoint !== 'phone' && (
