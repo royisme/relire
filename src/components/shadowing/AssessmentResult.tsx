@@ -1,13 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CircleAlert, CircleCheck, CircleDot } from 'lucide-react';
+import { CircleAlert, CircleCheck, CircleDot, Mic } from 'lucide-react';
 import { PronunciationAssessment, PhonemeFeedback } from '../../types';
-import { isMarkedWord, WordMarks, wordMarkLabel } from './WordMarks';
+import { Button } from '../ui/button';
+import { SpeakButton } from '../ui/speak-button';
+import { AssessmentScores } from './AssessmentScores';
+import { AssessmentSentence, weakestFirst, wordBand } from './AssessmentSentence';
 
 /**
- * The score and feedback for one read-aloud attempt. Only the scores a provider measured are drawn;
- * a missing rhythm score or an empty list leaves no bar, no heading and no gap. Every text block
- * wraps; nothing here has a fixed width.
+ * The score and feedback for one read-aloud attempt, laid out as a marked page of your own reading.
+ * Only what a provider returned is drawn: a missing score, list or paragraph leaves no row, no
+ * heading and no gap. Every text block wraps; nothing here has a fixed width.
  */
 
 const STATUS_ICON: Record<PhonemeFeedback['status'], { Icon: typeof CircleCheck; tone: string }> = {
@@ -22,64 +25,120 @@ const Heading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export const AssessmentResult: React.FC<{
   assessment: PronunciationAssessment;
-}> = ({ assessment }) => {
+  /** Draws the primary "Record again" button; callers that already have one leave it out. */
+  onRetry?: () => void;
+}> = ({ assessment, onRetry }) => {
   const { t } = useTranslation();
-  const metrics = [
-    { label: t('shadowing.accuracy'), value: assessment.accuracyScore },
-    { label: t('shadowing.fluency'), value: assessment.fluencyScore },
-    { label: t('shadowing.rhythm'), value: assessment.rhythmScore },
-  ].filter((m): m is { label: string; value: number } => m.value !== undefined);
-  const sounds = assessment.phonemeFeedback ?? [];
-  const words = assessment.corrections ?? [];
+  const words = assessment.wordResults ?? [];
+  const shownWords = new Set(words.map((w) => w.word.trim().toLowerCase()));
+  const unmatched = (word: string) => !shownWords.has(word.trim().toLowerCase());
+  const corrections = (assessment.corrections ?? []).filter((c) => unmatched(c.word));
+  const sounds = (assessment.phonemeFeedback ?? []).filter((p) => unmatched(p.targetWord));
   const strengths = assessment.strengths ?? [];
-  const marked = (assessment.wordResults ?? []).filter(isMarkedWord);
+  const textRows = [
+    { label: t('shadowing.liaisons'), text: assessment.liaisonFeedback },
+    { label: t('shadowing.intonation'), text: assessment.intonationFeedback },
+  ].filter((r) => r.text);
+  const hasDetail =
+    words.length > 0 ||
+    corrections.length > 0 ||
+    sounds.length > 0 ||
+    strengths.length > 0 ||
+    textRows.length > 0 ||
+    !!assessment.coachingNotes;
+
+  const bands = words.map(wordBand);
+  const weak = bands.filter((b) => b === 'close' || b === 'unclear').length;
+  const skipped = bands.filter((b) => b === 'omission').length;
+  const extra = bands.filter((b) => b === 'insertion').length;
+  const counts = [
+    skipped > 0 && t('shadowing.summary.skipped', { count: skipped }),
+    extra > 0 && t('shadowing.summary.extra', { count: extra }),
+  ].filter(Boolean);
+  const start = [...new Set(weakestFirst(words).map((i) => words[i].word))].slice(0, 3);
+  const sentence =
+    assessment.referenceText ??
+    words
+      .filter((_, i) => bands[i] !== 'insertion')
+      .map((w) => w.word)
+      .join(' ');
 
   return (
-    <div className="rounded-lg border border-ink-200 bg-ink-50 p-4 sm:p-5 space-y-5">
+    <div className="mx-auto max-w-xl rounded-lg border border-ink-200 bg-ink-50 p-4 sm:p-5 space-y-6">
       <div className="space-y-1">
-        <div className="flex items-baseline justify-between gap-3">
-          <h4 className="text-sm font-medium text-ink-800">{t('shadowing.overall')}</h4>
-          <p className="font-serif text-ink-900 tnum">
-            <span className="text-3xl font-semibold">{assessment.overallScore}</span>
-            <span className="ml-1 text-sm text-ink-500">/ 100</span>
+        <h4 className="font-serif text-xl text-ink-900">{t('shadowing.yourReading')}</h4>
+        {words.length > 0 && (
+          <p className="text-sm text-ink-800">
+            {weak > 0 && t('shadowing.summary.some', { count: weak, total: words.length - extra })}
+            {weak + skipped + extra === 0 && t('shadowing.summary.allClear')}
+            {counts.length > 0 && <span className={weak > 0 ? 'block text-ink-600' : ''}>{counts.join(' · ')}</span>}
           </p>
-        </div>
+        )}
         <p className="text-xs text-ink-500">{t('shadowing.estimate')}</p>
       </div>
 
-      <dl className={`grid gap-2 ${assessment.rhythmScore === undefined ? 'grid-cols-2' : 'grid-cols-3'}`}>
-        {metrics.map((m) => (
-          <div key={m.label} className="min-w-0 rounded-md bg-surface border border-ink-200 px-2 py-2 text-center">
-            <dt className="text-xs text-ink-500 truncate">{m.label}</dt>
-            <dd className="mt-0.5 text-lg font-semibold text-ink-900 tnum">{m.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <AssessmentScores assessment={assessment} />
 
-      {assessment.completenessScore !== undefined && (
-        <dl className="flex flex-wrap items-baseline gap-x-2 text-sm">
-          <dt className="text-ink-600">{t('shadowing.completeness')}</dt>
-          <dd className="text-ink-900 tnum">{assessment.completenessScore}</dd>
-        </dl>
+      {words.length > 0 && (
+        <section className="space-y-2">
+          <Heading>{t('shadowing.wordByWord')}</Heading>
+          <AssessmentSentence
+            words={words}
+            corrections={assessment.corrections}
+            phonemeFeedback={assessment.phonemeFeedback}
+          />
+        </section>
       )}
 
-      {!!assessment.wordResults?.length && (
-        <section className="space-y-2">
-          <Heading>{t('shadowing.wordAccuracy')}</Heading>
-          <p className="text-base leading-relaxed text-ink-900 break-words">
-            <WordMarks words={assessment.wordResults} />
-          </p>
-          {marked.length > 0 && (
-            <ul className="space-y-1 pt-1">
-              {marked.map((item, i) => (
-                <li key={i} className="min-w-0 max-w-full break-words text-sm text-ink-800">
-                  <span className="font-serif text-ink-900">{item.word}</span>
-                  {item.accuracyScore !== undefined && <span className="ml-2 tnum">{item.accuracyScore}</span>}
-                  <span className="ml-2 text-xs text-ink-600">{wordMarkLabel(item, t)}</span>
-                </li>
-              ))}
-            </ul>
+      {words.length > 0 && (
+        <section className="space-y-3">
+          <Heading>{t('shadowing.next')}</Heading>
+          {start.length > 0 && (
+            <p className="text-sm text-ink-800 break-words">{t('shadowing.startWith', { words: start.join(', ') })}</p>
           )}
+          <div className="flex flex-wrap items-center gap-2">
+            {onRetry && (
+              <Button onClick={onRetry}>
+                <Mic className="w-4 h-4" aria-hidden="true" />
+                <span>{t('shadowing.recordAgain')}</span>
+              </Button>
+            )}
+            <SpeakButton
+              text={sentence}
+              label={t('shadowing.hearSentence')}
+              stopLabel={t('shadowing.stopSpeaking')}
+              variant="outline"
+              showLabel
+            />
+          </div>
+        </section>
+      )}
+
+      {strengths.length > 0 && (
+        <section className="space-y-1.5">
+          <Heading>{t('shadowing.strengths')}</Heading>
+          <ul className="space-y-1 text-sm text-ink-800">
+            {strengths.map((s, i) => (
+              <li key={i} className="break-words">
+                {s}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {corrections.length > 0 && (
+        <section className="space-y-2">
+          <Heading>{t('shadowing.words')}</Heading>
+          <ul className="space-y-2">
+            {corrections.map((c, i) => (
+              <li key={i} className="text-sm text-ink-800 break-words">
+                <span className="font-serif font-semibold text-ink-900">« {c.word} »</span>
+                {c.expectedIPA && <span className="ml-1.5 font-mono text-xs text-ink-600">{c.expectedIPA}</span>}
+                <p className="text-ink-600">{c.advice}</p>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -107,32 +166,15 @@ export const AssessmentResult: React.FC<{
         </section>
       )}
 
-      {words.length > 0 && (
-        <section className="space-y-2">
-          <Heading>{t('shadowing.words')}</Heading>
-          <ul className="space-y-2">
-            {words.map((c, i) => (
-              <li key={i} className="text-sm text-ink-800 break-words">
-                <span className="font-serif font-semibold text-ink-900">« {c.word} »</span>
-                {c.expectedIPA && <span className="ml-1.5 font-mono text-xs text-ink-600">{c.expectedIPA}</span>}
-                <p className="text-ink-600">{c.advice}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {strengths.length > 0 && (
-        <section className="space-y-1.5">
-          <Heading>{t('shadowing.strengths')}</Heading>
-          <ul className="space-y-1 text-sm text-ink-800">
-            {strengths.map((s, i) => (
-              <li key={i} className="break-words">
-                {s}
-              </li>
-            ))}
-          </ul>
-        </section>
+      {textRows.length > 0 && (
+        <dl className="text-sm">
+          {textRows.map((r) => (
+            <div key={r.label} className="border-t border-ink-200 py-2.5">
+              <dt className="text-xs font-medium text-ink-500">{r.label}</dt>
+              <dd className="mt-0.5 text-ink-800 break-words">{r.text}</dd>
+            </div>
+          ))}
+        </dl>
       )}
 
       {assessment.coachingNotes && (
@@ -141,6 +183,8 @@ export const AssessmentResult: React.FC<{
           <p className="text-sm text-ink-700 leading-relaxed break-words">{assessment.coachingNotes}</p>
         </section>
       )}
+
+      {!hasDetail && <p className="text-sm text-ink-600">{t('shadowing.scoresOnly')}</p>}
     </div>
   );
 };

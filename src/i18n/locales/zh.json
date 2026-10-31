@@ -311,9 +311,8 @@
     "fluency": "流畅度",
     "rhythm": "节奏",
     "completeness": "完整度",
-    "wordAccuracy": "逐词准确度",
     "wordError": {
-      "Mispronunciation": "发音不准",
+      "Mispronunciation": "读错",
       "Omission": "漏读",
       "Insertion": "多读"
     },
@@ -325,7 +324,37 @@
       "excellent": "不错",
       "acceptable": "尚可",
       "needs_work": "需要加强"
-    }
+    },
+    "yourReading": "你的朗读",
+    "scores": "分数",
+    "wordByWord": "逐词",
+    "summary": {
+      "allClear": "每个词都读得清楚。",
+      "some": "{{total}} 个词里有 {{count}} 个需要再练一遍。",
+      "skipped": "漏读 {{count}} 个",
+      "extra": "多读 {{count}} 个"
+    },
+    "band": {
+      "clear": "清楚",
+      "close": "接近",
+      "unclear": "不清楚"
+    },
+    "wordNote": {
+      "close": "接近标准读音，但还不够清楚。",
+      "unclear": "较难听出是这个词。",
+      "Omission": "服务没有听到这个词。",
+      "Insertion": "你多读了句子里没有的词。",
+      "Mispronunciation": "服务判定这个词读错了。"
+    },
+    "wordScore": "{{score}} 分（满分 100）",
+    "noWordScore": "服务没有给这个词打分。",
+    "pickWord": "点一个词，听它的读音并查看原因。",
+    "hearWord": "听“{{word}}”",
+    "hearSentence": "听整句",
+    "stopSpeaking": "停止",
+    "next": "接下来",
+    "startWith": "先练 {{words}}，再录一次。",
+    "scoresOnly": "这次检查只返回了分数，没有逐词详情。"
   },
   "vocab": {
     "title": "词汇",
