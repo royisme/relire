@@ -25,11 +25,11 @@ Read `README.md` for what the app does, `PRODUCT.md` for who it is for and what 
 - Controls never move the page: transient states show on the control itself or in an overlay.
 - Docs, comments, commit messages and PR text are in English.
 - Names: a new branch is at most three words joined by hyphens, with no slash and no type prefix (`today-v2`, `fix-scroll-state`); commits and PR titles are `type(scope): summary` with type one of feat, fix, docs, chore, refactor, test.
-- Code style: validate once at the boundary that owns the value, inline single-use helpers, no `any`, no aliased or star imports in new code, `const` and early returns instead of `else`, no speculative race or security handling.
+- Code style: validate once at the boundary that owns the value, inline single-use helpers, no `any`, no aliased or star imports in new code, `const` and early returns instead of `else`, an async operation that can be overtaken gets its token check by design, and no other speculative race or security handling.
 - A user-noticeable change gets a `CHANGELOG.md` (Unreleased) line in the same commit.
 
 ## How to work here
 
 - Read the files you will touch before you change them; keep diffs minimal.
-- Run the static and unit checks and report what was and was not verified (AI is mocked). Visual acceptance of the UI is done by hand; browser automation is for critical persistence or integration risks that unit tests cannot cover.
+- Run the static and unit checks and report what was and was not verified (AI is mocked). Visual acceptance of the UI is done by hand; browser automation and e2e specs are written only when the user asks, for critical persistence or integration risks that unit tests cannot cover.
 - Do not open a pull request, merge or force-push unless asked.
