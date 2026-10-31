@@ -1,6 +1,6 @@
 import { WordAnalysis, SentenceAnalysis, PronunciationAssessment } from '../types';
 import { vocabularyKey } from './vocabulary/identity';
-import { VocabularyAnalysisSchema } from '../types/vocabulary';
+import { VocabularyAnalysisSchema, type VocabularyGeneratedAnswer } from '../types/vocabulary';
 import { getAppSettings, type AppSettings } from '../utils/appSettings';
 import i18n from '../i18n';
 import * as ai from './ai/tasks';
@@ -112,6 +112,18 @@ export function fetchConjugation(infinitive: string): Promise<ConjugationAnswer>
     false,
     (value) => ConjugationAnswerSchema.parse(value),
   );
+}
+
+/**
+ * Example sentences for a word card that shows no example anywhere. Not cached: the answer is saved on the
+ * card's row, and later renders read it from there.
+ */
+export function generateWordExamples(input: {
+  word: string;
+  gloss: string;
+  partOfSpeech?: string;
+}): Promise<VocabularyGeneratedAnswer> {
+  return ai.generateWordExamples(input, context());
 }
 
 export function fetchSentenceAnalysis(sentence: string, articleContext?: string): Promise<SentenceAnalysis> {

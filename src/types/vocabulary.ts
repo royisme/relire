@@ -207,6 +207,13 @@ export const VocabularyBookSourceSchema = z.strictObject({
   sourceIds: z.array(text).min(1),
   senses: z.array(VocabularySenseSchema).min(1),
 });
+/** The `generateWordExamples` answer: fresh example sentences plus an optional one-line usage note. */
+export const VocabularyGeneratedAnswerSchema = z.strictObject({
+  examples: z.array(z.strictObject({ fr: french, en: english, zh: chinese })).min(1),
+  usage: text.optional(),
+});
+/** What that answer becomes on a learner row: the content with the time it was saved. */
+export const VocabularyGeneratedSchema = VocabularyGeneratedAnswerSchema.extend({ at: timestamp });
 export const VocabularyReviewRecordSchema = z
   .strictObject({
     operationId: text,
@@ -234,6 +241,8 @@ export const VocabularyRowSchema = z
     bookmarked: z.boolean(),
     bookmarkedAt: timestamp.nullable(),
     contexts: z.array(VocabularyContextSchema),
+    // AI-generated examples for a card that had none; optional so rows saved before it still parse.
+    generated: VocabularyGeneratedSchema.optional(),
     schedule: VocabularyScheduleSchema.nullable(),
     introducedAt: timestamp.nullable(),
     revision: integer,
@@ -294,6 +303,8 @@ export type VocabularyRow = z.infer<typeof VocabularyRowSchema>;
 export type VocabularyPreferences = z.infer<typeof VocabularyPreferencesSchema>;
 export type VocabularyDay = z.infer<typeof VocabularyDaySchema>;
 export type VocabularyBookSource = z.infer<typeof VocabularyBookSourceSchema>;
+export type VocabularyGeneratedAnswer = z.infer<typeof VocabularyGeneratedAnswerSchema>;
+export type VocabularyGenerated = z.infer<typeof VocabularyGeneratedSchema>;
 export interface VocabularyTokens {
   epoch: number;
   resetToken: number;

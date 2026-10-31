@@ -2,6 +2,8 @@ import type { Lang } from '../types';
 import { GRAMMAR_TAGS } from '../../../types/grammar';
 import wordEn from './defaults/word.en.txt?raw';
 import wordZh from './defaults/word.zh.txt?raw';
+import wordExamplesEn from './defaults/word-examples.en.txt?raw';
+import wordExamplesZh from './defaults/word-examples.zh.txt?raw';
 import sentenceEn from './defaults/sentence.en.txt?raw';
 import sentenceZh from './defaults/sentence.zh.txt?raw';
 import audioEn from './defaults/pronunciation-audio.en.txt?raw';
@@ -36,6 +38,7 @@ import atelierGradeSample from './defaults/atelier-grade.sample.json?raw';
 /** The prompts the app sends. Defaults ship as text files in ./defaults and can be overridden by the user. */
 export type PromptId =
   | 'word'
+  | 'wordExamples'
   | 'sentence'
   | 'pronunciationAudio'
   | 'pronunciationText'
@@ -79,6 +82,12 @@ export const PROMPTS: PromptDefinition[] = [
       sentence: 'Mais, si tu m’apprivoises, nous aurons besoin l’un de l’autre.',
       articleContext: 'Le renard explique au petit prince ce que signifie apprivoiser.',
     },
+  },
+  {
+    id: 'wordExamples',
+    variables: ['word', 'gloss', 'partOfSpeech'],
+    defaults: { en: wordExamplesEn, zh: wordExamplesZh },
+    sample: { word: 'belge', gloss: 'Belgian (a person from Belgium)', partOfSpeech: 'adj. / n.' },
   },
   {
     id: 'sentence',

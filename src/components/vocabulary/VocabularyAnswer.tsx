@@ -1,7 +1,8 @@
-/** Attributed answer prose; caller mounts it only after a durable reveal or in an explicit detail sheet. */
+/** Attributed answer prose plus the optional AI examples; caller mounts it only after a durable reveal or in an explicit detail sheet. */
 import { useTranslation } from 'react-i18next';
 import type { VocabularyJoined } from '../../services/vocabulary/queue';
 import type { VocabularyBook } from '../../types/vocabulary';
+import { VocabularyExamples } from './VocabularyExamples';
 export function VocabularyAnswer({
   word,
   snapshot = false,
@@ -105,6 +106,7 @@ export function VocabularyAnswer({
           </section>
         );
       })}
+      <VocabularyExamples word={word} source={source} />
     </div>
   );
 }

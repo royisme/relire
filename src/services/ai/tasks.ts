@@ -1,6 +1,7 @@
 import { ConjugationAnswerSchema, foldAnswerApostrophes, type ConjugationAnswer } from '../../types/conjugationAnswer';
 import type { AtelierItem, AtelierLevel } from '../../types/atelier';
 import type { PronunciationAssessment, SentenceAnalysis, WordAnalysis } from '../../types';
+import { VocabularyGeneratedAnswerSchema, type VocabularyGeneratedAnswer } from '../../types/vocabulary';
 import { GRAMMAR_TAGS } from '../../types/grammar';
 import i18n from '../../i18n';
 import {
@@ -36,6 +37,7 @@ import {
   prosodyRequest,
   sentenceRequest,
   transcribeRequest,
+  wordExamplesRequest,
   wordRequest,
   type AdaptiveInput,
   type ExtractInput,
@@ -70,6 +72,25 @@ export async function annotatePronunciation(input: Parameters<typeof prosodyRequ
 
 export const analyzeWord = (input: Parameters<typeof wordRequest>[0], ctx: TextContext) =>
   ctx.execution.generateJson<WordAnalysis>(wordRequest(input, ctx.lang));
+
+/**
+ * Example sentences and an optional usage line for a word card that shows no example anywhere.
+ * Each French sentence must use the asked word itself; an answer that does not is refused.
+ */
+export async function generateWordExamples(
+  input: { word: string; gloss: string; partOfSpeech?: string },
+  ctx: TextContext,
+): Promise<VocabularyGeneratedAnswer> {
+  const value = await ctx.execution.generateJson<unknown>(wordExamplesRequest(input, ctx.lang));
+  const answer = parseAnswer('the word examples', VocabularyGeneratedAnswerSchema, foldAnswerApostrophes(value));
+  const form = input.word.trim().toLowerCase();
+  for (const [index, example] of answer.examples.entries())
+    if (!example.fr.toLowerCase().includes(form))
+      throw new InvalidAnswerError('the word examples', [
+        `example ${index + 1} does not contain the word "${input.word}"`,
+      ]);
+  return answer;
+}
 
 export const analyzeSentence = (input: Parameters<typeof sentenceRequest>[0], ctx: TextContext) =>
   ctx.execution.generateJson<SentenceAnalysis>(sentenceRequest(input, ctx.lang));
