@@ -251,7 +251,7 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
         title={expanded ? t('practiceCard.collapse') : t('practiceCard.expand')}
         onClick={() => setExpanded(!expanded)}
         className={cn(
-          'block w-full px-4 text-left font-serif text-lg leading-snug break-words cursor-pointer',
+          'block w-full px-4 text-left font-serif text-lg leading-8 break-words cursor-pointer',
           !expanded && 'line-clamp-2',
         )}
       >
