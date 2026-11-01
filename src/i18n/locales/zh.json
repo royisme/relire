@@ -1317,6 +1317,7 @@
     "title": "跟读",
     "check": "检查发音",
     "checkHint": "评测会逐词分析你最近一次的录音。",
+    "wordHint": "点一个有标记的词，查看它的得分。",
     "details": "详细结果",
     "detailsLabel": "发音评测详情",
     "detailsTitle": "发音评测详情",
