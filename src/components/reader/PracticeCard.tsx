@@ -258,19 +258,20 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
         {words.length > 0 ? <WordMarks words={words} onWordPick={setPickedWord} /> : target.text}
       </button>
 
-      {/* One readout line for the tapped marked word; its height is reserved so the card never jumps. */}
+      {/* One readout line for the tapped marked word. It is a fixed single line (a long word is cut,
+          the label and score stay whole) so the card never changes height. */}
       {words.length > 0 && (
-        <p className="min-h-6 px-4 pt-1 text-xs text-panel-muted break-words">
+        <p className="flex h-6 items-baseline gap-1 overflow-hidden whitespace-nowrap px-4 pt-1 text-xs text-panel-muted">
           {picked ? (
             <>
-              <span className="font-serif text-sm text-panel-ink">{picked.word}</span>
-              <span> · {wordMarkLabel(picked, t)}</span>
+              <span className="min-w-0 truncate font-serif text-sm text-panel-ink">{picked.word}</span>
+              <span className="shrink-0">· {wordMarkLabel(picked, t)}</span>
               {picked.accuracyScore !== undefined && (
-                <span className="tnum"> · {t('shadowing.wordScore', { score: picked.accuracyScore })}</span>
+                <span className="shrink-0 tnum">· {t('shadowing.wordScore', { score: picked.accuracyScore })}</span>
               )}
             </>
           ) : (
-            t('practiceCard.wordHint')
+            <span className="min-w-0 truncate">{t('practiceCard.wordHint')}</span>
           )}
         </p>
       )}

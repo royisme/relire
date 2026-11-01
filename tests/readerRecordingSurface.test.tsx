@@ -249,7 +249,7 @@ for (const language of ['en', 'zh']) {
     expect(html).toContain(`${i18n.t('shadowing.wordError.Mispronunciation')} 73`);
     // The readout line below the sentence is reserved and quiet until a word is tapped.
     expect(html).toContain(i18n.t('practiceCard.wordHint'));
-    expect(html).toContain('min-h-6');
+    expect(html).toContain('h-6');
     expect(html).not.toContain(i18n.t('shadowing.wordScore', { score: 73 }));
   });
 
