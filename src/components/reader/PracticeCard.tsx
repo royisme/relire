@@ -237,7 +237,7 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
         }
       }}
     >
-      <div className="flex items-center gap-1 p-1">
+      <div className="sticky top-0 z-10 flex items-center gap-1 bg-panel p-1">
         {handle}
         <span className="flex-1" />
         {windowButtons}
