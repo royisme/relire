@@ -16,7 +16,8 @@ import {
   type RoundAction,
 } from '../src/services/atelier/roundState';
 import type { AtelierSource } from '../src/services/atelier/source';
-import { atelierChoice, devRound } from './fixtures/atelier';
+import type { AtelierItem } from '../src/types/atelier';
+import { atelierChoice, beach, cinema, devRound } from './fixtures/atelier';
 import { readerTestWindow } from './fixtures/readerTestWindow';
 
 const hooks = await import('react');
@@ -87,10 +88,13 @@ const keyEvent = (key: string) => ({
   preventDefault: mock(noop),
 });
 
-function round() {
-  let state = startRound(devRound.items);
+function round(
+  items: AtelierItem[] = devRound.items,
+  onRecord: (itemIndex: number, answer: string, correct: boolean) => void = noop,
+) {
+  let state = startRound(items);
   const grade = mock<AtelierSource['grade']>(async () => ({ isCorrect: false, feedback: 'TEST wrong order' }));
-  const source: AtelierSource = { grade, loadRound: async () => ({ items: devRound.items, dropped: 0 }) };
+  const source: AtelierSource = { grade, loadRound: async () => ({ items, dropped: 0 }) };
   const dispatch = (action: RoundAction) => {
     state = roundReducer(state, action);
   };
@@ -102,12 +106,12 @@ function round() {
       ]) as unknown as typeof hooks.useReducer);
       try {
         return RoundView({
-          items: devRound.items,
+          items,
           choice: atelierChoice,
           dropped: 0,
           source,
           onPrefetch: noop,
-          onRecord: noop,
+          onRecord,
           onAgain: noop,
           onThemes: noop,
           onLeave: noop,
@@ -325,6 +329,45 @@ test('the change card shows its instruction and the sentence to change, then the
   expect(currentTurn(game.state())).toMatchObject({ right: true, modify: true });
   expect(game.grade).not.toHaveBeenCalled();
   expect(summaryOf(game.state())).toEqual({ total: 4, rightFirstTime: 4 });
+});
+
+test('a Build that follows a change card counts items, not turns: the last item reads 2 of 2', () => {
+  const game = round([beach, cinema]);
+  game.build();
+  click(game.primary()); // the first item right: its change card is inserted right after it
+  click(game.primary());
+  expect(propsOf<ComponentProps<typeof Hud>>(game.view().tree, Hud).progress).toBe(t('atelier.round.change'));
+  game.build();
+  click(game.primary()); // the rebuild right
+  click(game.primary()); // next: the second item's build, after the bonus turn
+  expect(currentTurn(game.state())).toMatchObject({ itemIndex: 1, retry: false, modify: false });
+  expect(propsOf<ComponentProps<typeof Hud>>(game.view().tree, Hud).progress).toBe(
+    t('atelier.round.counter', { current: 2, total: 2 }),
+  );
+});
+
+test('a change card records nothing: not a right rebuild, a wrong check or a reveal', () => {
+  for (const path of ['right rebuild', 'wrong check', 'reveal'] as const) {
+    const onRecord = mock(noop);
+    const game = round([beach, cinema], onRecord);
+    game.build();
+    click(game.primary()); // the item itself records once; the change card never does
+    click(game.primary()); // next: the change card
+    if (path === 'right rebuild') game.build();
+    if (path === 'wrong check') for (const id of ['b2', 'b0', 'b1', 'b3', 'b4', 'b5', 'b6', 'b7']) game.place(id);
+    if (path === 'reveal') {
+      const show = elements(game.view().tree).find(
+        (element) => element.props.children === t('atelier.round.showAnswer'),
+      )!;
+      click(show.props as ComponentProps<typeof Button>);
+    } else click(game.primary());
+    expect(currentTurn(game.state())).toMatchObject(
+      path === 'wrong check' ? { modify: true, right: false, checks: 1 } : { modify: true, right: true },
+    );
+    expect(onRecord).toHaveBeenCalledTimes(1);
+    expect(onRecord).toHaveBeenCalledWith(0, 'Nous allons à la plage.', true);
+    expect(game.grade).not.toHaveBeenCalled();
+  }
 });
 
 // No DOM package is installed: only the Web Animations host surface is stubbed, never the effect implementation.

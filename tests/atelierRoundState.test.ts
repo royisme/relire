@@ -250,10 +250,12 @@ test('the change card builds modify.bricks plus the item distractors, graded aga
     expect.arrayContaining(negative.bricks),
   );
   expect(turn.pieces).toHaveLength(negative.bricks.length + beach.distractors.length);
-  // The original sentence is wrong here; the new one is right with no grade call.
+  // A full row of the card's bricks in another order settles locally: no variant exists to match, so the
+  // wrong rebuild never waits on the grader. The new sentence itself is right with no grade call.
   grade.mockClear();
-  const original = await check(place(state, ...beach.bricks.map((_, index) => `b${index}`)));
-  expect(currentTurn(original)).toMatchObject({ right: false, checks: 1 });
+  const permuted = await check(place(state, 'b2', 'b0', 'b1', 'b3', 'b4', 'b5', 'b6', 'b7'));
+  expect(rowText(currentTurn(permuted))).toBe('allons Nous n’pas à la plage.');
+  expect(currentTurn(permuted)).toMatchObject({ right: false, checks: 1, pending: false });
   const right = await check(build(state));
   expect(currentTurn(right)).toMatchObject({ right: true, answers: ['Nous n’allons pas à la plage.'] });
   expect(grade).not.toHaveBeenCalled();

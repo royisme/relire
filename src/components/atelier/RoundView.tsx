@@ -209,7 +209,7 @@ export function RoundView({
     ? t('atelier.round.change')
     : turn.retry
       ? t('atelier.round.again')
-      : t('atelier.round.counter', { current: state.current + 1, total: items.length });
+      : t('atelier.round.counter', { current: turn.itemIndex + 1, total: items.length });
   const change = turn.modify
     ? { label: t('atelier.round.change'), sentence: joinBricks(state.items[turn.itemIndex].bricks) }
     : undefined;

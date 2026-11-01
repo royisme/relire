@@ -229,7 +229,8 @@ export type Check =
  * How a check of the current row goes. A row that is not made of exactly the item's own bricks is wrong
  * without a call (a distractor's reason is already on screen, and a variant uses every brick). Only a
  * reordering of the right bricks goes through `gradeItem`; accents count, because bricks are exact tokens
- * and an `a` for an `à` must never pass.
+ * and an `a` for an `à` must never pass. A change card's rebuild has no variants, so every complete row
+ * settles here: the new sentence itself is right, anything else is wrong, and the AI is never asked.
  */
 export function prepareCheck(state: RoundState, choice: RoundChoice): Check {
   const turn = currentTurn(state);
@@ -250,6 +251,7 @@ export function prepareCheck(state: RoundState, choice: RoundChoice): Check {
     { ...emptyAnswer(exercise), singleAnswer: answer },
     { strictAccents: true },
   );
+  if (turn.modify) return { kind: 'verdict', answer, correct: graded.status === 'graded' && graded.correct };
   return graded.status === 'graded' ? { kind: 'verdict', answer, correct: graded.correct } : { kind: 'ask', answer };
 }
 
