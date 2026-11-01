@@ -27,7 +27,7 @@ function Message({ turn, language, total }: { turn: Turn; language: 'zh' | 'en';
   if (turn.revealed)
     return (
       <div className="atelier-slip" data-kind="note">
-        <p className="break-words">{t('atelier.round.revealed')}</p>
+        <p className="break-words">{t(turn.modify ? 'atelier.round.revealedChange' : 'atelier.round.revealed')}</p>
       </div>
     );
   if (turn.right)

@@ -10,17 +10,18 @@ import {
   rowText,
   startRound,
   summaryOf,
+  turnItem,
   turnOutcome,
   type RoundState,
 } from '../src/services/atelier/roundState';
 import { parseRound } from '../src/services/atelier/parse';
 import type { AtelierItem } from '../src/types/atelier';
-import { atelierChoice, beach, cinema, devRound } from './fixtures/atelier';
+import { atelierChoice, beach, cinema, devRound, negative } from './fixtures/atelier';
 
 const place = (state: RoundState, ...ids: string[]) =>
   ids.reduce((next, pieceId) => roundReducer(next, { type: 'place', pieceId }), state);
 const build = (state: RoundState) =>
-  place(state, ...state.items[currentTurn(state).itemIndex].bricks.map((_, index) => `b${index}`));
+  place(state, ...turnItem(state, currentTurn(state)).bricks.map((_, index) => `b${index}`));
 const clear = (state: RoundState) =>
   currentTurn(state).placed.reduce((next, pieceId) => roundReducer(next, { type: 'remove', pieceId }), state);
 const grade = mock(async (_item: AtelierItem, _answer: string) => ({ isCorrect: false, feedback: 'TEST verdict' }));
@@ -159,16 +160,20 @@ for (const reason of ['wrong check', 'distractor', 'fusion', 'reveal'] as const)
       state = await check(build(state));
       expect(turnOutcome(currentTurn(state))).toBe('first');
     }
+    // Item 3 carries a change card: it comes right after the item and before the return.
+    state = roundReducer(state, { type: 'next' });
+    expect(currentTurn(state)).toMatchObject({ itemIndex: 3, retry: false, modify: true });
+    state = await check(build(state));
     state = roundReducer(state, { type: 'next' });
     expect(currentTurn(state)).toMatchObject({ itemIndex: 0, retry: true, placed: [] });
     // A second wrong check / reveal must not queue a third appearance either.
     state = await check(place(state, 'b0'));
     state = reason === 'reveal' ? roundReducer(state, { type: 'reveal' }) : await check(build(clear(state)));
     expect(turnOutcome(currentTurn(state))).toBe('retried');
-    expect(state.turns).toHaveLength(5);
+    expect(state.turns).toHaveLength(6);
     expect(state.results.map((result) => result.rightFirstTime)).toEqual([false, true, true, true]);
     expect(summaryOf(state)).toEqual({ total: 4, rightFirstTime: 3 });
-    expect(state.turns.map(turnOutcome)).toEqual(['missed', 'first', 'first', 'first', 'retried']);
+    expect(state.turns.map(turnOutcome)).toEqual(['missed', 'first', 'first', 'first', 'first', 'retried']);
     state = roundReducer(state, { type: 'next' });
     expect(isOver(state)).toBe(true);
     expect(state.event?.kind).toBe('finish');
@@ -219,4 +224,75 @@ test('a failed grade is not a check, unlocks the row and keeps the real failure'
     note: { kind: 'error', message: 'TEST quota exceeded' },
   });
   expect(summaryOf(failed)).toEqual({ total: 0, rightFirstTime: 0 });
+});
+
+const withCard = (item: AtelierItem) => [item, devRound.items[1]];
+
+test('a right build of an item with a change card inserts the card turn right after it, once', async () => {
+  const state = await check(build(startRound(withCard(beach))));
+  expect(state.turns.map(({ itemIndex, retry, modify }) => [itemIndex, retry, modify])).toEqual([
+    [0, false, false],
+    [0, false, true],
+    [1, false, false],
+  ]);
+  expect(startRound(withCard(beach)).turns).toHaveLength(2);
+  expect(summaryOf(state)).toEqual({ total: 1, rightFirstTime: 1 });
+});
+
+test('the change card builds modify.bricks plus the item distractors, graded against modify.sentence', async () => {
+  const state = roundReducer(await check(build(startRound(withCard(beach)))), { type: 'next' });
+  const turn = currentTurn(state);
+  const item = turnItem(state, turn);
+  expect(turn.modify).toBe(true);
+  expect(item.meaning).toEqual(negative.instruction);
+  expect(item.sentence).toBe(negative.sentence);
+  expect(turn.pieces.filter((piece) => piece.origin !== null).map((piece) => piece.brick)).toEqual(
+    expect.arrayContaining(negative.bricks),
+  );
+  expect(turn.pieces).toHaveLength(negative.bricks.length + beach.distractors.length);
+  // A full row of the card's bricks in another order settles locally: no variant exists to match, so the
+  // wrong rebuild never waits on the grader. The new sentence itself is right with no grade call.
+  grade.mockClear();
+  const permuted = await check(place(state, 'b2', 'b0', 'b1', 'b3', 'b4', 'b5', 'b6', 'b7'));
+  expect(rowText(currentTurn(permuted))).toBe('allons Nous n’pas à la plage.');
+  expect(currentTurn(permuted)).toMatchObject({ right: false, checks: 1, pending: false });
+  const right = await check(build(state));
+  expect(currentTurn(right)).toMatchObject({ right: true, answers: ['Nous n’allons pas à la plage.'] });
+  expect(grade).not.toHaveBeenCalled();
+});
+
+test('a distractor in the change card flags its reason and the rebuild stays out of the counts', async () => {
+  let state = roundReducer(await check(build(startRound(withCard(beach)))), { type: 'next' });
+  state = clear(place(state, 'd0'));
+  expect(currentTurn(state)).toMatchObject({ assisted: true });
+  state = await check(build(state));
+  expect(turnOutcome(currentTurn(state))).toBe('missed');
+  // No result, and no return, however the rebuild went.
+  expect(state.results).toHaveLength(1);
+  expect(state.turns).toHaveLength(3);
+  expect(summaryOf(state)).toEqual({ total: 1, rightFirstTime: 1 });
+});
+
+test('revealing the change card counts nothing and queues no return', () => {
+  const built = place(startRound(withCard(beach)), ...beach.bricks.map((_, index) => `b${index}`));
+  const state = roundReducer(
+    roundReducer(
+      roundReducer(built, { type: 'checked', answer: 'Nous allons à la plage.', correct: true, feedback: null }),
+      { type: 'next' },
+    ),
+    { type: 'reveal' },
+  );
+  expect(currentTurn(state)).toMatchObject({ modify: true, right: true, revealed: true });
+  expect(rowText(currentTurn(state))).toBe('Nous n’allons pas à la plage.');
+  expect(state.results).toHaveLength(1);
+  expect(state.turns).toHaveLength(3);
+});
+
+test('a revealed item and its return offer no change card', () => {
+  const revealed = roundReducer(startRound(withCard(beach)), { type: 'reveal' });
+  expect(revealed.turns.map(({ itemIndex, retry, modify }) => [itemIndex, retry, modify])).toEqual([
+    [0, false, false],
+    [1, false, false],
+    [0, true, false],
+  ]);
 });

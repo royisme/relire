@@ -58,7 +58,9 @@ export function Booklet({ item, turn, language, lastTurn, onClose, onNext }: Boo
           </Button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-3 pb-3">
-          {turn.revealed && <p className="mb-3 text-sm">{t('atelier.round.revealed')}</p>}
+          {turn.revealed && (
+            <p className="mb-3 text-sm">{t(turn.modify ? 'atelier.round.revealedChange' : 'atelier.round.revealed')}</p>
+          )}
           <h4 className="font-serif text-lg font-semibold">{t('atelier.breakdown.frame')}</h4>
           <Wired links={item.links} className="mt-2 flex flex-wrap content-start items-start gap-x-1.5 gap-y-2 pb-2">
             {item.bricks.map((brick, index) => (
@@ -84,7 +86,7 @@ export function Booklet({ item, turn, language, lastTurn, onClose, onNext }: Boo
               </li>
             ))}
           </ol>
-          <p className="mt-3 break-words text-sm">{item.explanation[language]}</p>
+          {!turn.modify && <p className="mt-3 break-words text-sm">{item.explanation[language]}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-2 px-4 pt-1 pb-4">
           <SpeakButton

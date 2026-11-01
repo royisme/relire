@@ -19,6 +19,7 @@ import {
   rowText,
   startRound,
   summaryOf,
+  turnItem,
   turnOutcome,
   type Turn,
 } from '../../services/atelier/roundState';
@@ -84,7 +85,7 @@ export function RoundView({
   const motion = useMotion();
   const over = isOver(state);
   const turn = over ? undefined : currentTurn(state);
-  const item = turn ? state.items[turn.itemIndex] : undefined;
+  const item = turn ? turnItem(state, turn) : undefined;
 
   const trayButtons = useRef(new Map<string, HTMLButtonElement>());
   const primary = useRef<HTMLButtonElement>(null);
@@ -159,7 +160,7 @@ export function RoundView({
     return (
       <Summary
         summary={summaryOf(state)}
-        pips={state.turns.filter((done) => done.right).map(turnOutcome)}
+        pips={state.turns.filter((done) => done.right && !done.modify).map(turnOutcome)}
         onAgain={onAgain}
         onThemes={onThemes}
         onLeave={onLeave}
@@ -186,14 +187,14 @@ export function RoundView({
     const checked = prepareCheck(state, choice);
     if (checked.kind === 'verdict') {
       dispatch({ type: 'checked', answer: checked.answer, correct: checked.correct, feedback: null });
-      onRecord(turn.itemIndex, checked.answer, checked.correct);
+      if (!turn.modify) onRecord(turn.itemIndex, checked.answer, checked.correct);
       return;
     }
     dispatch({ type: 'pending' });
     try {
       const result = await source.grade(item, checked.answer);
       dispatch({ type: 'checked', answer: checked.answer, correct: result.isCorrect, feedback: result.feedback });
-      onRecord(turn.itemIndex, checked.answer, result.isCorrect);
+      if (!turn.modify) onRecord(turn.itemIndex, checked.answer, result.isCorrect);
     } catch (error) {
       dispatch({ type: 'failed', message: errorMessage(error) });
     }
@@ -204,9 +205,14 @@ export function RoundView({
   const pips: Pip[] = state.turns.map((candidate, index) =>
     index < state.current ? turnOutcome(candidate) : index === state.current ? 'current' : 'todo',
   );
-  const progress = turn.retry
-    ? t('atelier.round.again')
-    : t('atelier.round.counter', { current: state.current + 1, total: items.length });
+  const progress = turn.modify
+    ? t('atelier.round.change')
+    : turn.retry
+      ? t('atelier.round.again')
+      : t('atelier.round.counter', { current: turn.itemIndex + 1, total: items.length });
+  const change = turn.modify
+    ? { label: t('atelier.round.change'), sentence: joinBricks(state.items[turn.itemIndex].bricks) }
+    : undefined;
 
   return (
     <div
@@ -227,6 +233,7 @@ export function RoundView({
             meaning={item.meaning}
             language={language}
             showOther={showOther}
+            change={change}
             onToggleOther={() => setShowOther(!showOther)}
           />
           <div className="mx-3 flex flex-1 flex-col pb-2">
@@ -275,7 +282,7 @@ export function RoundView({
                 disabled={turn.pending}
                 onClick={() => {
                   // The row as it stands is what a reveal with no check behind it is recorded with.
-                  onRecord(turn.itemIndex, rowText(turn), false);
+                  if (!turn.modify) onRecord(turn.itemIndex, rowText(turn), false);
                   dispatch({ type: 'reveal' });
                 }}
               >
