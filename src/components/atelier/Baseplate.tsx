@@ -236,7 +236,7 @@ export function Baseplate({ turn, size, links, event, motion, origin, onRemove, 
       <div className="flex-1 pt-1">
         <Wired
           links={turn.right ? links : undefined}
-          playKey={lights ? `${turn.itemIndex}-${turn.retry}` : undefined}
+          playKey={lights ? `${turn.itemIndex}-${turn.retry}-${turn.modify}` : undefined}
           className="flex flex-wrap content-start items-start gap-x-1.5 gap-y-2"
         >
           {placed.map((piece, index) => (

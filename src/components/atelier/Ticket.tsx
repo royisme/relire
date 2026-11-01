@@ -12,10 +12,12 @@ interface TicketProps {
   meaning: { zh: string; en: string };
   language: 'zh' | 'en';
   showOther: boolean;
+  /** The change card's heading and the sentence it changes; absent on a build. */
+  change?: { label: string; sentence: string };
   onToggleOther: () => void;
 }
 
-export function Ticket({ meaning, language, showOther, onToggleOther }: TicketProps) {
+export function Ticket({ meaning, language, showOther, change, onToggleOther }: TicketProps) {
   const { t } = useTranslation();
   const other = language === 'zh' ? 'en' : 'zh';
   return (
@@ -25,7 +27,7 @@ export function Ticket({ meaning, language, showOther, onToggleOther }: TicketPr
       <span aria-hidden="true" className="absolute top-1/2 -right-2 size-4 -translate-y-1/2 rounded-full bg-ink-50" />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-ink-600">{t('atelier.round.order')}</p>
+          <p className="text-xs text-ink-600">{change?.label ?? t('atelier.round.order')}</p>
           <div className="mt-0.5 grid">
             {(['en', 'zh'] as const).map((lang) => (
               <p
@@ -41,6 +43,11 @@ export function Ticket({ meaning, language, showOther, onToggleOther }: TicketPr
               </p>
             ))}
           </div>
+          {change && (
+            <p lang="fr" className="mt-1 break-words font-serif text-sm text-ink-600">
+              {change.sentence}
+            </p>
+          )}
         </div>
         <Button
           variant="ghost"

@@ -54,6 +54,8 @@ export interface Turn {
   assisted: boolean;
   /** The learner asked to see the answer; the row then holds the sentence and the turn counts as missed. */
   revealed: boolean;
+  /** The change card's rebuild of the item's `modify` sentence: a bonus turn that is never counted, recorded or returned. */
+  modify: boolean;
 }
 
 /** What just happened, for the sounds and motion; `n` makes two equal events distinct. */
@@ -118,7 +120,29 @@ function shuffled<T>(list: readonly T[], seed: string): T[] {
   return result;
 }
 
-function makeTurn(item: AtelierItem, itemIndex: number, retry: boolean): Turn {
+/**
+ * The item a change card asks for, shaped as an item so building, grading and the booklet need no second path:
+ * the instruction stands in for the meaning, `modify.bricks` are the bricks, and the item's distractors stay.
+ */
+export const modifyItem = (item: AtelierItem): AtelierItem => {
+  const { modify } = item;
+  if (!modify) throw new Error('This item has no change card.');
+  return {
+    ...item,
+    meaning: modify.instruction,
+    sentence: modify.sentence,
+    variants: [],
+    bricks: modify.bricks,
+    links: modify.links,
+    modify: undefined,
+  };
+};
+
+/** The item the turn builds: the item itself, or its change card's sentence. */
+export const turnItem = (state: RoundState, turn: Turn): AtelierItem =>
+  turn.modify ? modifyItem(state.items[turn.itemIndex]) : state.items[turn.itemIndex];
+
+function makeTurn(item: AtelierItem, itemIndex: number, retry: boolean, modify = false): Turn {
   // The verb brick is the first verb or auxiliary; its ports are the links that say what it takes.
   const verb = item.bricks.findIndex((brick) => brick.role === 'verb' || brick.role === 'auxiliary');
   const sockets = item.links
@@ -149,6 +173,7 @@ function makeTurn(item: AtelierItem, itemIndex: number, retry: boolean): Turn {
     answers: [],
     assisted: false,
     revealed: false,
+    modify,
   };
 }
 
@@ -186,7 +211,7 @@ export const rowText = (turn: Turn): string => joinBricks(placedBricks(turn).map
 /** True while the row can still be edited and checked. */
 export const isBuilding = (turn: Turn): boolean => !turn.right && !turn.pending;
 
-/** Real counts only: items finished, and those right on their first check. */
+/** Real counts only: items finished, and those right on their first check. A change card's rebuild is not an item. */
 export function summaryOf(state: RoundState): { total: number; rightFirstTime: number } {
   return {
     total: state.results.length,
@@ -209,7 +234,7 @@ export type Check =
 export function prepareCheck(state: RoundState, choice: RoundChoice): Check {
   const turn = currentTurn(state);
   const answer = rowText(turn);
-  const item = state.items[turn.itemIndex];
+  const item = turnItem(state, turn);
   const row = placedBricks(turn);
   if (row.length !== item.bricks.length || row.some((piece) => piece.origin === null))
     return { kind: 'verdict', answer, correct: false };
@@ -281,6 +306,7 @@ function checked(state: RoundState, turn: Turn, answer: string, correct: boolean
   const next: Turn = { ...turn, pending: false, checks: turn.checks + 1, answers: [...turn.answers, answer] };
   if (!correct) return withTurn(state, { ...next, note: { kind: 'wrong', feedback } }, nextEvent(state, 'wrong'));
   const done = withTurn(state, { ...next, right: true, note: null }, nextEvent(state, 'right'));
+  if (turn.modify) return done;
   const known = done.results.some((result) => result.itemIndex === turn.itemIndex);
   if (known)
     return {
@@ -290,11 +316,18 @@ function checked(state: RoundState, turn: Turn, answer: string, correct: boolean
       ),
     };
   const rightFirstTime = turnOutcome(next) === 'first';
+  const item = state.items[turn.itemIndex];
+  const card = item.modify && !turn.retry ? [makeTurn(modifyItem(item), turn.itemIndex, false, true)] : [];
   return {
     ...done,
     results: [...done.results, { itemIndex: turn.itemIndex, finalAnswer: answer, rightFirstTime }],
-    // A missed item returns once, after the last item of the round.
-    turns: rightFirstTime ? done.turns : [...done.turns, makeTurn(state.items[turn.itemIndex], turn.itemIndex, true)],
+    turns: [
+      ...done.turns.slice(0, state.current + 1),
+      // The change card comes right after the build; a missed item returns once, after the last item of the round.
+      ...card,
+      ...done.turns.slice(state.current + 1),
+      ...(rightFirstTime ? [] : [makeTurn(item, turn.itemIndex, true)]),
+    ],
   };
 }
 
@@ -310,7 +343,7 @@ function reveal(state: RoundState, turn: Turn): RoundState {
     { ...turn, placed, right: true, revealed: true, assisted: true, note: null },
     nextEvent(state, 'reveal'),
   );
-  if (done.results.some((result) => result.itemIndex === turn.itemIndex)) return done;
+  if (turn.modify || done.results.some((result) => result.itemIndex === turn.itemIndex)) return done;
   return {
     ...done,
     results: [...done.results, { itemIndex: turn.itemIndex, finalAnswer: null, rightFirstTime: false }],

@@ -11,6 +11,7 @@ import {
   roundReducer,
   startRound,
   summaryOf,
+  turnItem,
   turnOutcome,
   type RoundAction,
 } from '../src/services/atelier/roundState';
@@ -116,7 +117,7 @@ function round() {
       }
     });
   const place = (id: string) => propsOf<ComponentProps<typeof Bin>>(view().tree, Bin).onPlace(id);
-  const build = () => devRound.items[currentTurn(state).itemIndex].bricks.forEach((_, index) => place(`b${index}`));
+  const build = () => turnItem(state, currentTurn(state)).bricks.forEach((_, index) => place(`b${index}`));
   const primary = () => {
     const element = elements(view().tree).find((candidate) => candidate.props.className === 'game-cta');
     if (!element) throw new Error('Check/Next missing');
@@ -284,7 +285,8 @@ for (const language of ['en', 'zh'] as const) {
     const game = round();
     game.place('d0');
     propsOf<ComponentProps<typeof Baseplate>>(game.view().tree, Baseplate).onRemove('d0');
-    for (const expected of ['missed', 'first', 'first', 'first', 'retried'] as const) {
+    // The fourth item carries a change card: its rebuild is the fifth turn, between the item and the return.
+    for (const expected of ['missed', 'first', 'first', 'first', 'first', 'retried'] as const) {
       game.build();
       click(game.primary());
       expect(turnOutcome(currentTurn(game.state()))).toBe(expected);
@@ -304,6 +306,26 @@ for (const language of ['en', 'zh'] as const) {
     expect(game.grade).not.toHaveBeenCalled();
   });
 }
+
+test('the change card shows its instruction and the sentence to change, then the rebuild is Check and Next like any turn', () => {
+  const game = round();
+  for (let item = 0; item < 4; item++) {
+    game.build();
+    click(game.primary());
+    click(game.primary());
+  }
+  const turn = currentTurn(game.state());
+  expect(turn).toMatchObject({ itemIndex: 3, modify: true });
+  const html = game.view().html;
+  expect(html).toContain(t('atelier.round.change'));
+  expect(html).toContain(devRound.items[3].modify!.instruction.en);
+  expect(html).toContain('Ma petite sœur ne mange pas la pomme verte.');
+  game.build();
+  click(game.primary());
+  expect(currentTurn(game.state())).toMatchObject({ right: true, modify: true });
+  expect(game.grade).not.toHaveBeenCalled();
+  expect(summaryOf(game.state())).toEqual({ total: 4, rightFirstTime: 4 });
+});
 
 // No DOM package is installed: only the Web Animations host surface is stubbed, never the effect implementation.
 for (const mode of ['enabled', 'reduced motion', 'Effects off'] as const) {
