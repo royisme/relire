@@ -22,7 +22,7 @@ import { Button } from '../ui/button';
 import { SpeakIcon, useSpeechFailure, useSpeechPhase } from '../ui/speak-button';
 import { Waveform } from './Waveform';
 import { PracticeAssessment } from './PracticeAssessment';
-import { WordMarks } from '../shadowing/WordMarks';
+import { WordMarks, wordMarkLabel } from '../shadowing/WordMarks';
 import { panelDanger, panelGhost, panelOutline, panelPrimary, panelSurface } from './panel';
 
 const clock = (ms: number) => {
@@ -43,6 +43,8 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
   const [confirmClose, setConfirmClose] = useState(false);
   // Minimised: one row (sentence, record or stop, restore, close) so more of the article shows.
   const [minimised, setMinimised] = useState(false);
+  // The marked word the learner tapped; its score and error show in the readout below the sentence.
+  const [pickedWord, setPickedWord] = useState<number | null>(null);
   const section = useRef<HTMLElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const stopButton = useRef<HTMLButtonElement>(null);
@@ -83,6 +85,7 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
     setSeen({ text: card.target?.text, phase: card.phase, needsAttention, assessment: card.assessment });
     if (seen.text !== card.target?.text) setExpanded(false);
     if (card.assessment && card.assessment !== seen.assessment) setExpanded(true);
+    if (seen.text !== card.target?.text || card.assessment !== seen.assessment) setPickedWord(null);
     if (seen.phase !== card.phase && card.phase !== 'unsaved') setConfirmClose(false);
     if (needsAttention && !seen.needsAttention) setMinimised(false);
   }
@@ -96,6 +99,9 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
   };
   const record = () => card.open(target);
   const recordLabel = card.count ? t('practiceCard.recordAgain') : t('practiceCard.record');
+  // The assessed words replace the plain sentence; their scores show in the readout, never inline.
+  const words = card.assessment?.wordResults ?? [];
+  const picked = pickedWord !== null ? words[pickedWord] : undefined;
 
   // The title doubles as the drag handle on mouse and keyboard.
   const handle = movable ? (
@@ -237,7 +243,8 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
         {windowButtons}
       </div>
 
-      {/* A long sentence shows two lines; tapping it shows the rest. */}
+      {/* A long sentence shows two lines; tapping it shows the rest. A marked word taps to the readout
+          instead, so the sentence text itself never carries a number. */}
       <button
         type="button"
         aria-expanded={expanded}
@@ -248,12 +255,26 @@ export function PracticeCard({ card, onOpenLog, movable }: Props) {
           !expanded && 'line-clamp-2',
         )}
       >
-        {card.assessment?.wordResults && card.assessment.wordResults.length > 0 ? (
-          <WordMarks words={card.assessment.wordResults} />
-        ) : (
-          target.text
-        )}
+        {words.length > 0 ? <WordMarks words={words} onWordPick={setPickedWord} /> : target.text}
       </button>
+
+      {/* One readout line for the tapped marked word. It is a fixed single line (a long word is cut,
+          the label and score stay whole) so the card never changes height. */}
+      {words.length > 0 && (
+        <p className="flex h-6 items-baseline gap-1 overflow-hidden whitespace-nowrap px-4 pt-1 text-xs text-panel-muted">
+          {picked ? (
+            <>
+              <span className="min-w-0 truncate font-serif text-sm text-panel-ink">{picked.word}</span>
+              <span className="shrink-0">· {wordMarkLabel(picked, t)}</span>
+              {picked.accuracyScore !== undefined && (
+                <span className="shrink-0 tnum">· {t('shadowing.wordScore', { score: picked.accuracyScore })}</span>
+              )}
+            </>
+          ) : (
+            <span className="min-w-0 truncate">{t('practiceCard.wordHint')}</span>
+          )}
+        </p>
+      )}
 
       {/* The strip: live input while recording, the latest take's real waveform afterwards. */}
       <div className="flex items-center gap-3 px-4 pt-4">

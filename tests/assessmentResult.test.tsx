@@ -104,6 +104,7 @@ test('WordMarks marks a low score, an omission and an insertion with their sr-on
   const html = renderToStaticMarkup(
     <I18nextProvider i18n={i18n}>
       <WordMarks
+        onWordPick={() => undefined}
         words={[
           { word: 'Bonjour', accuracyScore: 92, errorType: 'None' },
           { word: 'tout', accuracyScore: 65 },
@@ -123,10 +124,10 @@ test('WordMarks marks a low score, an omission and an insertion with their sr-on
   expect(html).not.toContain('Bonjour (');
   expect(html).not.toContain('title="Bonjour');
 
-  // Low score word has wavy underline, small score, sr-only label and title
+  // Low score word has wavy underline, sr-only label and title; its score never prints inline
   expect(html).toContain('decoration-wavy');
   expect(html).toContain('>tout<');
-  expect(html).toContain('>65<');
+  expect(html).not.toContain('>65<');
   // The service named no error, so the label stays neutral instead of claiming a mispronunciation.
   expect(html).toContain(`title="${en.shadowing.status.needs_work} 65"`);
   expect(html).toContain(`(${en.shadowing.status.needs_work} 65)`);

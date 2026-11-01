@@ -1325,6 +1325,7 @@
     "title": "Shadowing",
     "check": "Check",
     "checkHint": "Check scores your latest recording, word by word.",
+    "wordHint": "Tap a marked word to see its score.",
     "details": "Details",
     "detailsLabel": "Pronunciation details",
     "detailsTitle": "Pronunciation details",
