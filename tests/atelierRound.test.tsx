@@ -450,7 +450,7 @@ test('Sound switch off creates no AudioContext for any game cue', () => {
     const sound = elements(hud.tree).find((element) => element.props.label === t('atelier.round.sound'))!;
     (sound.props.onToggle as () => void)();
     expect(capture(() => Hud({ onExit: noop })).html).toContain('aria-pressed="false"');
-    for (const cue of ['snap', 'fuse', 'wrong', 'right', 'finish'] as const) playCue(cue);
+    for (const cue of ['snap', 'pop', 'fuse', 'wrong', 'right', 'finish'] as const) playCue(cue);
     expect(audio).not.toHaveBeenCalled();
   } finally {
     if (originalAudio) Object.defineProperty(globalThis, 'AudioContext', originalAudio);

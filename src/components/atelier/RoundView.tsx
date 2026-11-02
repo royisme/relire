@@ -58,12 +58,13 @@ const CUE_OF_EVENT: Record<string, Cue | undefined> = {
   snap: 'snap',
   fuse: 'fuse',
   reject: 'wrong',
+  remove: 'pop',
   wrong: 'wrong',
   finish: 'finish',
 };
 
 /** The cue lands with the brick: after the flight, or after the halves of a fusion meet. */
-const CUE_DELAY: Record<string, number | undefined> = { snap: 160, reject: 130, fuse: 250 };
+const CUE_DELAY: Record<string, number | undefined> = { snap: 160, remove: 160, reject: 130, fuse: 250 };
 
 export function RoundView({
   items,
