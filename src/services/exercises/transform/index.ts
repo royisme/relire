@@ -7,6 +7,7 @@ import type { PublishedReader, ReaderGlossaryEntry, Sentence } from '../../../ty
 import { READER_TRANSFORM_KINDS, type ReaderTransformKind } from '../../../types/readerTransform';
 import { transformNegation } from './negation';
 import { transformNumber } from './number';
+import { transformPasseCompose } from './passeCompose';
 import { transformPronoun } from './pronoun';
 import { transformQuestion } from './question';
 
@@ -16,6 +17,7 @@ export const TRANSFORM_TAGS: Record<ReaderTransformKind, GrammarTag> = {
   number: 'gender-number',
   question: 'questions',
   pronoun: 'subject-object-pronouns',
+  'passe-compose': 'passe-compose',
 };
 
 /** Null means the rule does not cover the sentence; the caller skips it instead of guessing. */
@@ -27,6 +29,7 @@ export const TRANSFORMERS: Record<
   number: transformNumber,
   question: transformQuestion,
   pronoun: transformPronoun,
+  'passe-compose': transformPasseCompose,
 };
 
 /** The kinds that cover at least one sentence of this reader; an empty list means the entry stays hidden. */

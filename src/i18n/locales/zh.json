@@ -275,7 +275,8 @@
       "negation": "做否定句练习",
       "number": "做单复数练习",
       "question": "做 est-ce que 疑问句练习",
-      "pronoun": "做 le、la、l’ 或 les 练习"
+      "pronoun": "做 le、la、l’ 或 les 练习",
+      "passe-compose": "做复合过去时练习"
     }
   },
   "sentenceDrawer": {
@@ -1959,6 +1960,11 @@
       "title": "宾语代词",
       "instruction": "把宾语换成 le、la、l’ 或 les。",
       "explanation": "代词紧挨着放在动词前面；元音前用 l’。"
+    },
+    "passe-compose": {
+      "title": "复合过去时",
+      "instruction": "把动词改成复合过去时。",
+      "explanation": "使用与主语人称一致的 avoir 现在时形式，后面加过去分词。"
     }
   },
   "themes": {
