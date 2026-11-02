@@ -109,12 +109,12 @@ test('a reader no kind covers offers no button', () => {
 
 test('the workspace shows the section with exactly the covered kinds, and none for a verbless reader', async () => {
   const opened = await openReaderEdition(reader);
-  // Every fixture sentence holds one verb and none is negated, so `question` is covered beside `negation`.
-  expect(coveredKinds(opened.row.snapshot)).toEqual(['negation', 'question']);
+  // Every fixture sentence has one verb; the two être sentences also cover passé composé.
+  expect(coveredKinds(opened.row.snapshot)).toEqual(['negation', 'question', 'passe-compose']);
   const afterText = afterTextOf(opened);
   const section = find<React.ComponentProps<typeof ReaderTransformSection>>(afterText, ReaderTransformSection);
   expect(section?.props.reader).toBe(opened.row.snapshot);
-  expect(section?.props.kinds).toEqual(['negation', 'question']);
+  expect(section?.props.kinds).toEqual(['negation', 'question', 'passe-compose']);
 
   const verbless = gradedReaderFixture();
   // `est` keeps a binding as a plain function word, so no sentence has a verb token and no kind is covered.

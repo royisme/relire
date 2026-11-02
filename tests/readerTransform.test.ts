@@ -60,9 +60,9 @@ test('number covers the seven noun-phrase sentences and skips subject and c’es
 
 /** Pinned per bundled reader from its actual sentences: a1-01 has no definite object, so it lacks `pronoun`. */
 const COVERED: Record<string, ReaderTransformKind[]> = {
-  'a1-01': ['negation', 'number', 'question'],
-  'a1-02': ['negation', 'number', 'question', 'pronoun'],
-  'a1-03': ['negation', 'number', 'question', 'pronoun'],
+  'a1-01': ['negation', 'number', 'question', 'passe-compose'],
+  'a1-02': ['negation', 'number', 'question', 'pronoun', 'passe-compose'],
+  'a1-03': ['negation', 'number', 'question', 'pronoun', 'passe-compose'],
 };
 
 test('each bundled reader offers exactly the kinds its sentences cover, and every kind is covered', () => {
@@ -159,6 +159,7 @@ const CASES: {
   number?: string | null;
   question?: string | null;
   pronoun?: string | null;
+  'passe-compose'?: string | null;
 }[] = [
   {
     sentence: sentence('a1', 'J’ai un ami.', [['t-je', 't-avoir'], ['t-un'], ['t-ami']]),

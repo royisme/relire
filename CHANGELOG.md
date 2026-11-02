@@ -8,6 +8,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Added
 
+- Reader pattern practice now offers the passé composé for supported verbs with avoir, with answers computed locally and unsupported sentences skipped.
 - Sentence workshop: taking a brick back off the row now has its own short pop cue, under the same Sound switch as the other cues.
 - Sentence workshop: the small grammar terms under a verb brick on the baseplate (its sockets) are now 12px, the app’s minimum text size.
 - Sentence workshop: a sentence you build right is read aloud at once, under the same Settings → Practice switches as the dictation replay — nothing while “Speak after checking” is off, the device’s voice once it is on, and your speech provider only with the provider opt-in. A wrong answer or a reveal is never read.
