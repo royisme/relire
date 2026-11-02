@@ -54,7 +54,7 @@ Rules:
 Check these grammar rules before answering; models often get them wrong:
 - After a negation, un/une/des/du/de la become de (d’ before a vowel) only on a direct object and after il y a — never after être, never after a preposition: Je ne vais pas à une fête keeps une.
 - aimer, adorer and détester keep the definite article in the negative.
-- Cities take à with no article (à Montréal); countries take au, en or aux (au Canada, en France).
+- Cities usually take à with no article (à Montréal); countries take au, en or aux (au Canada, en France). Exceptions: au Havre, à Cuba, à La Havane.
 - à + le = au, à + les = aux, de + le = du, de + les = des; à l’ and de l’ never fuse.
 - regarder, écouter, attendre and chercher take a direct object with no preposition.
 - A profession after être takes no article: Il est médecin.

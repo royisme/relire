@@ -34,6 +34,7 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Fixed
 
+- The sentence workshop’s round prompt now teaches the city and country prepositions with their exceptions (au Havre, à Cuba, à La Havane), and the grading example in Settings → Prompts builds “Je veux louer un petit appartement au centre-ville.”, so its meaning — wanting to rent a small apartment — matches the French sentence.
 - The practice card's sentence no longer prints each marked word's score inline, where digits belonging to the sentence made it unreadable: the sentence stays clean text with its marks, and tapping a marked word shows that word's score and error in one reserved line below it (screen readers keep the score with the word; tapping the sentence still expands or collapses it).
 
 ## [0.1.0] - 2026-10-29

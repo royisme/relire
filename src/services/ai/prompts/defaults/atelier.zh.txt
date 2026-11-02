@@ -54,7 +54,7 @@
 写完后请自查这些语法规则，模型常常弄错：
 - 否定之后，un/une/des/du/de la 变为 de（元音前为 d’），仅限直接宾语和 il y a 之后——绝不用于 être 之后，也绝不用于介词之后：Je ne vais pas à une fête 保留 une。
 - aimer、adorer、détester 在否定式中保留定冠词。
-- 城市前用 à 且不加冠词（à Montréal）；国家前用 au、en 或 aux（au Canada、en France）。
+- 城市前一般用 à 且不加冠词（à Montréal）；国家前用 au、en 或 aux（au Canada、en France）。例外：au Havre、à Cuba、à La Havane。
 - à + le = au，à + les = aux，de + le = du，de + les = des；à l’ 与 de l’ 永不缩合。
 - regarder、écouter、attendre、chercher 直接接宾语，不加介词。
 - être 之后的职业不加冠词：Il est médecin。
