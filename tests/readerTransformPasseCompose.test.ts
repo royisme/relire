@@ -2,9 +2,6 @@
  * `passe-compose`: the sentence's present verb put into the passé composé with avoir, pinned against
  * hand-written French. The bundled rows come from `starter.json`; the guard and synthetic rows use hand-built
  * TEST content, like `readerTransformPronoun.test.ts`. No expected answer is computed by test code.
- *
- * `a1-02` keeps bare sentence ids (`s1`–`s3`); only `a1-03` uses the `a1-03-s1` form, so the unit assertion below
- * must not add a reader prefix.
  */
 import { expect, test } from 'bun:test';
 import i18next from 'i18next';
@@ -178,6 +175,8 @@ const glossary: ReaderGlossaryEntry[] = [
   verbEntry('t-penser', 'penser', ['pense']),
   verbEntry('t-prendre', 'prendre', ['prend']),
   verbEntry('t-regarder', 'regarder', ['regarde']),
+  verbEntry('t-retomber', 'retomber', ['retombe']),
+  verbEntry('t-porter', 'porter', ['porte']),
   verbEntry('t-avoir', 'avoir', ['ai', 'as', 'a', 'avons', 'avez', 'ont']),
   verbEntry('t-etre', 'être', ['suis', 'es', 'est', 'sommes', 'êtes', 'sont']),
   ...ETRE_AUXILIARY.map(([id, lemma, form]) => verbEntry(id, lemma, [form])),
@@ -185,12 +184,14 @@ const glossary: ReaderGlossaryEntry[] = [
   nounEntry('t-chat', 'chat', 'masculine'),
   nounEntry('t-livre', 'livre', 'masculine'),
   nounEntry('t-pomme', 'pomme', 'feminine'),
+  nounEntry('t-robe', 'robe', 'feminine'),
   nounEntry('t-salon', 'salon', 'masculine'),
   nounEntry('t-table', 'table', 'feminine'),
   adjectiveEntry('t-content', 'content', 'mood'),
   adjectiveEntry('t-rouge', 'rouge', 'color'),
   adverbEntry('t-la-place', 'là', 'place'),
   adverbEntry('t-y-place', 'y', 'place'),
+  adverbEntry('t-voici', 'voici', 'presentation'),
   properEntry('t-marie', 'Marie'),
   properEntry('t-paris', 'Paris'),
 ];
@@ -372,6 +373,7 @@ test('an object clitic already before the verb is skipped, written or elided', (
     sentence('c3', 'Elle les aime.', [['t-elle'], ['t-les-object'], ['t-aimer']]),
     sentence('c4', 'Il m’aime.', [['t-il'], ['t-me', 't-aimer']]),
     sentence('c5', 'Il l’aime.', [['t-il'], ['t-le-object', 't-aimer']]),
+    sentence('c6', 'J’y pense.', [['t-je', 't-y-place'], ['t-penser']]),
   ];
   for (const one of cases) expect(passeCompose(one)).toBeNull();
 });
@@ -394,12 +396,25 @@ test('a verb outside the regular -er group, or a form that is not present, is sk
   for (const one of cases) expect(passeCompose(one)).toBeNull();
 });
 
-test('a sentence with no bound verb, two bound verbs or a pronominal infinitive is skipped', () => {
+test('unsupported sentence structures and derived être verbs are skipped', () => {
   const cases: Sentence[] = [
     sentence('v1', 'Le livre rouge.', [['t-le-article'], ['t-livre'], ['t-rouge']]),
     sentence('v2', 'Marie chante et danse.', [['t-marie'], ['t-chanter'], ['t-et'], ['t-danser']]),
     // A pronominal infinitive after a modal is a second bound verb, and the clitic belongs to it.
     sentence('v3', 'Il faut se lever.', [['t-il'], ['t-falloir'], ['t-se'], ['t-lever']]),
+    sentence('v4', 'Il retombe.', [['t-il'], ['t-retomber']]),
+    sentence('v5', 'Voici les robes que Marie porte.', [
+      ['t-voici'],
+      ['t-les-article'],
+      ['t-robe'],
+      ['t-que'],
+      ['t-marie'],
+      ['t-porter'],
+    ]),
+    sentence('v6', 'Elle mange ?', [['t-elle'], ['t-manger']]),
+    sentence('v7', 'Marie, mange une pomme.', [['t-marie'], ['t-manger'], ['t-une'], ['t-pomme']]),
+    sentence('v8', 'Elle mange !', [['t-elle'], ['t-manger']]),
+    sentence('v9', 'Marie, mange une pomme !', [['t-marie'], ['t-manger'], ['t-une'], ['t-pomme']]),
   ];
   for (const one of cases) expect(passeCompose(one)).toBeNull();
 });

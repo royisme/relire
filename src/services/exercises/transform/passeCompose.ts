@@ -31,10 +31,20 @@ const ETRE_VERBS = [
 ];
 
 export function transformPasseCompose(sentence: Sentence, glossary: ReaderGlossaryEntry[]): { answer: string } | null {
+  if (/[?!]$/.test(sentence.fr)) return null;
   const verb = verbOf(sentence, glossary);
   if (!verb) return null;
+  // Relative objects can need agreement; commas can introduce a vocative before an imperative.
+  if (
+    sentence.fr.slice(0, verb.word.start).includes(',') ||
+    verb.words.some(
+      (word, index) =>
+        index < verb.index && (word.text.toLowerCase() === 'que' || word.prefix.toLowerCase().startsWith('qu')),
+    )
+  )
+    return null;
   const lemma = verb.entry.lemma;
-  if (isPronominalInfinitive(lemma) || ETRE_VERBS.includes(lemma)) return null;
+  if (isPronominalInfinitive(lemma) || ETRE_VERBS.some((verb) => lemma.endsWith(verb))) return null;
   const irregular = lemma === 'avoir' ? 'avoir' : lemma === 'être' ? 'etre' : null;
   if (!irregular && !lemma.endsWith('er')) return null;
   // An elided ne sits on the verb or an earlier word; pas/jamais also catch omitted ne.
@@ -56,7 +66,7 @@ export function transformPasseCompose(sentence: Sentence, glossary: ReaderGlossa
     : [];
   if (clitics.some((entry) => entry.sense !== 'subject' && !(existential && entry.sense === 'existential')))
     return null;
-  if (before && (['me', 'te', 'se'].includes(before.text.toLowerCase()) || /^[mts]/i.test(before.prefix))) return null;
+  if (before && (['me', 'te', 'se'].includes(before.text.toLowerCase()) || /^[jmts]/i.test(before.prefix))) return null;
   // Only je can elide onto this verb. c’est and reflexive/object prefixes need another construction.
   const clitic = verb.word.prefix ? cliticOf(sentence, glossary, verb.word) : null;
   if (verb.word.prefix && clitic?.text.toLowerCase() !== 'je') return null;
