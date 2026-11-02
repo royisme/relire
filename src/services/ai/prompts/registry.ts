@@ -216,8 +216,8 @@ export const PROMPTS: PromptDefinition[] = [
     sample: {
       // The sample item is data, not wording: it lives beside the templates so the Chinese fields stay out of TypeScript (i18n:check).
       item: atelierGradeSample.trim(),
-      userAnswer: 'Je cherche un appartement à le centre-ville.',
-      expectedAnswer: 'Je cherche un appartement au centre-ville.',
+      userAnswer: 'Je veux louer un petit appartement à le centre-ville.',
+      expectedAnswer: 'Je veux louer un petit appartement au centre-ville.',
     },
   },
 ];

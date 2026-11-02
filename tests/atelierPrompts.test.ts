@@ -89,6 +89,14 @@ for (const lang of ['en', 'zh'] as const) {
     for (const rule of rules) expect(prompt).toContain(rule);
   });
 
+  test(`atelierRequest.${lang}: cities and countries name their exceptions`, () => {
+    const { prompt } = atelierRequest(input, lang);
+    for (const fragment of lang === 'en'
+      ? ['Cities usually take à', 'countries take au, en or aux', 'au Havre', 'à Cuba', 'à La Havane']
+      : ['城市前一般用 à', '国家前用 au、en 或 aux', 'au Havre', 'à Cuba', 'à La Havane'])
+      expect(prompt).toContain(fragment);
+  });
+
   test(`atelierRequest.${lang}: varied situations and one differing grammar point per item`, () => {
     const { prompt } = atelierRequest(input, lang);
     for (const rule of lang === 'en'
@@ -112,7 +120,7 @@ for (const lang of ['en', 'zh'] as const) {
         ? [
             'un/une/des/du/de la become de (d’ before a vowel) only on a direct object and after il y a — never after être, never after a preposition: Je ne vais pas à une fête keeps une.',
             'aimer, adorer and détester keep the definite article in the negative.',
-            'Cities take à with no article (à Montréal); countries take au, en or aux (au Canada, en France).',
+            'Cities usually take à with no article (à Montréal); countries take au, en or aux (au Canada, en France). Exceptions: au Havre, à Cuba, à La Havane.',
             'à + le = au, à + les = aux, de + le = du, de + les = des; à l’ and de l’ never fuse.',
             'regarder, écouter, attendre and chercher take a direct object with no preposition.',
             'A profession after être takes no article: Il est médecin.',
@@ -121,7 +129,7 @@ for (const lang of ['en', 'zh'] as const) {
         : [
             'un/une/des/du/de la 变为 de（元音前为 d’），仅限直接宾语和 il y a 之后——绝不用于 être 之后，也绝不用于介词之后：Je ne vais pas à une fête 保留 une。',
             'aimer、adorer、détester 在否定式中保留定冠词。',
-            '城市前用 à 且不加冠词（à Montréal）；国家前用 au、en 或 aux（au Canada、en France）。',
+            '城市前一般用 à 且不加冠词（à Montréal）；国家前用 au、en 或 aux（au Canada、en France）。例外：au Havre、à Cuba、à La Havane。',
             'à + le = au，à + les = aux，de + le = du，de + les = des；à l’ 与 de l’ 永不缩合。',
             'regarder、écouter、attendre、chercher 直接接宾语，不加介词。',
             'être 之后的职业不加冠词：Il est médecin。',
