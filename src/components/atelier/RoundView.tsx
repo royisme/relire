@@ -25,7 +25,9 @@ import {
 } from '../../services/atelier/roundState';
 import type { AtelierSource, RoundChoice } from '../../services/atelier/source';
 import type { AtelierItem } from '../../types/atelier';
+import { speechAfterCheck } from '../../utils/appSettings';
 import { playCue, type Cue } from '../../utils/gameCues';
+import { speakFrench } from '../../utils/speech';
 import { Button } from '../ui/button';
 import { SpeakButton } from '../ui/speak-button';
 import { Baseplate } from './Baseplate';
@@ -119,6 +121,19 @@ export function RoundView({
       : [window.setTimeout(() => playCue('right'), 0)];
     return () => ids.forEach((id) => window.clearTimeout(id));
     // Only a new event plays a cue.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.event]);
+
+  // The sentence built right is read aloud at once, like a dictation item spoken again after its check:
+  // the Practice switches own automatic speech — nothing while speak-after-check is off, the device voice
+  // on, the selected provider only with the remote opt-in — and the game's Sound switch governs the cues
+  // alone, so it never mutes the sentence. A wrong verdict or a reveal raises no event that reads.
+  useEffect(() => {
+    if (state.event?.kind !== 'right' || !turn) return;
+    const source = speechAfterCheck();
+    if (!source) return;
+    void speakFrench(rowText(turn), source === 'device' ? { engine: 'device' } : {});
+    // Only a new event reads the sentence.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.event]);
 

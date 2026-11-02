@@ -211,6 +211,25 @@ test('reject and reveal each emit exactly one event per action, not on ignored a
   expect(placedBricks(shown.turns[0]).every((piece) => piece.origin !== null)).toBe(true);
 });
 
+// What RoundView reads aloud turns on: only the event a check that lands right raises — never a wrong
+// verdict or a reveal, on a build or a change card — so the sentence is spoken exactly once per success.
+test('only a right check raises the event that reads the sentence aloud', async () => {
+  const wrong = await check(place(startRound([beach]), 'b0'));
+  expect(wrong.event?.kind).toBe('wrong');
+  const revealed = roundReducer(place(startRound([beach]), 'b0'), { type: 'reveal' });
+  expect(revealed.event?.kind).toBe('reveal');
+  const right = await check(build(startRound([beach])));
+  expect(right.event?.kind).toBe('right');
+  // The change card's rebuild is read when it lands right; its own wrong check never is.
+  const card = roundReducer(right, { type: 'next' });
+  expect(currentTurn(card).modify).toBe(true);
+  const rebuildWrong = await check(place(card, 'b2', 'b0', 'b1', 'b3', 'b4', 'b5', 'b6', 'b7'));
+  expect(rebuildWrong.event?.kind).toBe('wrong');
+  const rebuildRight = await check(build(clear(rebuildWrong)));
+  expect(rebuildRight.event?.kind).toBe('right');
+  expect(rowText(currentTurn(rebuildRight))).toBe('Nous n’allons pas à la plage.');
+});
+
 test('a failed grade is not a check, unlocks the row and keeps the real failure', () => {
   const built = place(startRound([beach]), 'b1', 'b0', 'b2', 'b3', 'b4', 'b5');
   const pending = roundReducer(built, { type: 'pending' });
