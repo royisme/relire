@@ -6,7 +6,7 @@
  */
 import { useSyncExternalStore } from 'react';
 
-export type Cue = 'snap' | 'fuse' | 'wrong' | 'right' | 'finish' | 'link';
+export type Cue = 'snap' | 'pop' | 'fuse' | 'wrong' | 'right' | 'finish' | 'link';
 
 const SOUND_KEY = 'relire_game_sound';
 const EFFECTS_KEY = 'relire_game_effects';
@@ -116,6 +116,8 @@ const CUES: Record<Cue, (step: number) => Tone[]> = {
       { freq: 1700 * wobble, seconds: 0.025, type: 'sine', peak: 0.2 },
     ];
   },
+  // A brick pops back off the row: the snap's landing in reverse, a quick fall away.
+  pop: () => [{ freq: 500, to: 320, seconds: 0.07, type: 'triangle', peak: 0.45 }],
   fuse: () => [
     { freq: 520, to: 330, seconds: 0.08, type: 'triangle', peak: 0.5 },
     { freq: 440, to: 660, at: 0.05, seconds: 0.16, type: 'sine', peak: 0.4 },

@@ -8,6 +8,9 @@ What changed in Relire and why, newest first. Format follows [Keep a Changelog](
 
 ### Added
 
+- Sentence workshop: taking a brick back off the row now has its own short pop cue, under the same Sound switch as the other cues.
+- Sentence workshop: the small grammar terms under a verb brick on the baseplate (its sockets) are now 12px, the app’s minimum text size.
+- Sentence workshop: a sentence you build right is read aloud at once, under the same Settings → Practice switches as the dictation replay — nothing while “Speak after checking” is off, the device’s voice once it is on, and your speech provider only with the provider opt-in. A wrong answer or a reveal is never read.
 - Sentence workshop: after you build the last sentence of a round right, a change card asks for one change (negative, plural, a new subject or a question) and you rebuild it from the same tray with the new bricks. It is practice on top of the round: it is not counted in the summary, not saved as a result and does not come back if missed.
 - The sidebar is calmer: Today leads on its own, the rest sits under “Learn” and “Review”, the current page is shown by weight and an accent icon instead of a fill and bar, and counts are plain numbers. Sub-pages no longer unfold in it, so it keeps its height as you move; the brand sits at its top and the collapse button at its bottom.
 - The pronunciation result is a marked page of your reading: one score list, each word shown once by weight and line style, a fixed detail slot with its score and a button to hear it, a short “start with” list, and Record again.
