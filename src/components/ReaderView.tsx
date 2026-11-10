@@ -1,14 +1,19 @@
+/** Composes the reader surface and sentence interactions; focused hooks and display components own practice wiring and controls. */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, ArrowLeft, ChevronDown, TextSearch, Headphones, Pause, Play, Mic } from 'lucide-react';
-import { Article } from '../types';
+import { readerIdentity, type ReaderDocument, type ReaderSource } from '../types/readerSource';
+import type { VocabularyWordLookup } from '../services/vocabulary/identity';
+import type { PronunciationAssessment } from '../types';
 import { usePronunciationMarkers } from '../hooks/usePronunciationMarkers';
 import { readerTokens } from '../utils/readerTokens';
 import { ReaderWord } from './reader/ReaderWord';
 import { PronunciationParagraph } from './reader/PronunciationParagraph';
-import { PronunciationControls } from './reader/PronunciationControls';
+import { ReaderPreferences } from './reader/ReaderPreferences';
+import { ReaderSentenceToolbar } from './reader/ReaderSentenceToolbar';
+import { readerFontSizeClass } from './reader/readerFontSizeClass';
+import { useReaderPracticeCard } from '../hooks/useReaderPracticeCard';
+import { useReaderToolbarPosition } from '../hooks/useReaderToolbarPosition';
 import {
-  stopSpeech,
   setGlobalRate,
   speechKey,
   startSequence,
@@ -19,24 +24,31 @@ import {
   subscribeSequence,
 } from '../utils/speech';
 import { splitArticle } from '../utils/sentences';
-import { Button } from './ui/button';
 import { ArticlePlayer } from './ArticlePlayer';
 import { BottomDock, dockHeight } from './reader/BottomDock';
 import { PracticeCard } from './reader/PracticeCard';
 import { SentenceBar } from './reader/SentenceBar';
 import { useTouchLayout } from '../hooks/useTouchLayout';
-import { usePracticeCard } from '../hooks/usePracticeCard';
-import { SpeakButton, useSpeechState, useSpeechPhase } from './ui/speak-button';
+import { useSpeechFailure, useSpeechState, useSpeechPhase } from './ui/speak-button';
 import { formatLevel, cleanArticleTitle } from '../utils/i18nHelpers';
 
 interface ReaderViewProps {
-  currentArticle: Article;
+  readingDocument: ReaderDocument;
+  source: ReaderSource;
   onBack: () => void;
-  onWordClick: (word: string, sentence: string) => void;
-  onSentenceClick: (sentence: string) => void;
+  onWordClick?: VocabularyWordLookup;
+  onSentenceClick?: (sentence: string) => void;
+  authored?: {
+    sentenceIds: string[];
+    onWord: (spelling: string, sentenceId: string, ordinal: number) => void;
+    onSentence: (sentenceId: string) => void;
+  };
+  playbackEngine?: 'device';
+  afterText?: React.ReactNode;
+  onAssessed?: (assessment: PronunciationAssessment, sentence: string) => void;
   onMissingKey: () => void;
-  /** Opens My study → Shadowing at this article. */
-  onOpenShadowingLog: (articleId: string) => void;
+  /** Opens Speaking → Recordings at this source. */
+  onOpenShadowingLog: (sourceId: string) => void;
   /** Sentence text to bring into view on opening (from the shadowing log). */
   focusText?: string | null;
   activeWord: string | null;
@@ -44,10 +56,15 @@ interface ReaderViewProps {
 }
 
 export const ReaderView: React.FC<ReaderViewProps> = ({
-  currentArticle,
+  readingDocument,
+  source,
   onBack,
   onWordClick,
   onSentenceClick,
+  authored,
+  playbackEngine,
+  afterText,
+  onAssessed,
   onMissingKey,
   onOpenShadowingLog,
   focusText = null,
@@ -55,6 +72,17 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   activeSentence,
 }) => {
   const { t, i18n } = useTranslation();
+  const sourceId = readerIdentity(source);
+  const practise = (sentenceId: string, text: string) => {
+    // A graded edition's content is pinned by its version; the snapshot guard in addTake checks it.
+    card.open({
+      source,
+      sentenceId,
+      text,
+      ...(source.kind === 'passage' ? { passageContent: readingDocument.content } : {}),
+    });
+  };
+  const explain = (id: string, text: string) => (authored ? authored.onSentence(id) : onSentenceClick?.(text));
   // Reading preferences
   const [fontSize, setFontSize] = useState<'sm' | 'base' | 'lg' | 'xl'>('lg');
   // Sentences are identified by position, not text, because the same sentence can repeat ("Oui.").
@@ -94,34 +122,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   const speech = useSpeechState();
   const playingKey = speech.phase !== 'idle' ? speech.key : null;
 
-  // Practising one sentence: recording happens in the docked card, never on the pill.
-  const card = usePracticeCard();
-  const cardBusy =
-    card.phase === 'acquiring' || card.phase === 'recording' || card.phase === 'saving' || card.phase === 'unsaved';
-  const cardRef = useRef(card);
-  useLayoutEffect(() => {
-    cardRef.current = card;
-  });
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      // One owner, outermost first: an open sheet handles its own Escape; then the card; then speech.
-      if (document.querySelector('[aria-modal="true"]')) return;
-      const practice = cardRef.current;
-      if (practice.phase !== 'closed') {
-        if (practice.phase !== 'unsaved') practice.close();
-        return;
-      }
-      stopSpeech();
-      setIsSpeedControlOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      stopSpeech();
-    };
-  }, []);
+  const { card, cardBusy, cardRef } = useReaderPracticeCard(setIsSpeedControlOpen, onAssessed, playbackEngine);
 
   // The speed panel floats over the article; a tap outside it closes it.
   useEffect(() => {
@@ -140,9 +141,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
   // Helper to tokenize sentence into clickable words
   // Tapping a word also keeps that sentence's actions visible once the lookup sheet is closed (touch has no hover).
-  const clickWord = (word: string, sentenceText: string, id: string) => {
+  const clickWord = (word: string, sentenceText: string, id: string, ordinal: number, spelling: string) => {
     focusSentence(id);
-    onWordClick(word, sentenceText);
+    if (authored) return authored.onWord(spelling, id, ordinal);
+    if (source.kind === 'graded') return;
+    onWordClick?.(word, sentenceText, readingDocument.content, {
+      kind: source.kind === 'article' ? 'article' : 'unit',
+      id: source.kind === 'article' ? source.articleId : source.unitId,
+      title: readingDocument.title,
+    });
   };
 
   const renderSentenceWords = (sentenceText: string, id: string) =>
@@ -152,10 +159,9 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           key={token.start}
           token={token.word}
           annotation={markers.mode ? markers.displayed[id]?.words[token.word.ordinal] : undefined}
-          decorating={markers.mode}
           layers={markers.layers}
           activeWord={activeWord}
-          onClick={(word) => clickWord(word, sentenceText, id)}
+          onClick={(word) => clickWord(word, sentenceText, id, token.word!.ordinal, token.word!.text)}
         />
       ) : (
         <React.Fragment key={token.start}>{token.text}</React.Fragment>
@@ -163,9 +169,22 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     );
 
   // Paragraphs and sentences, cut the same way for reading and for listening.
-  const paragraphs = useMemo(() => splitArticle(currentArticle.content), [currentArticle.content]);
+  const paragraphs = useMemo(() => {
+    let index = 0;
+    return splitArticle(readingDocument.content).map((paragraph) =>
+      paragraph.map((sentence) => ({
+        ...sentence,
+        id: authored?.sentenceIds[index++] ?? sentence.id,
+      })),
+    );
+  }, [readingDocument.content, authored?.sentenceIds]);
   const flatSentences = useMemo(() => paragraphs.flat(), [paragraphs]);
-  const markers = usePronunciationMarkers(currentArticle.id, currentArticle.content, flatSentences, onMissingKey);
+  const markers = usePronunciationMarkers(
+    source.kind === 'article' ? source.articleId : sourceId,
+    readingDocument.content,
+    flatSentences,
+    onMissingKey,
+  );
   const readingAnchor = useRef<{ id: string; top: number } | null>(null);
   const preserveAnchor = (apply: () => void) => {
     const entry = [...sentenceEls.current.entries()].find(([, { el }]) => {
@@ -183,11 +202,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     if (el) window.scrollBy({ top: el.getBoundingClientRect().top - anchor.top, behavior: 'instant' });
   }, [markers.mode, markers.displayed]);
 
-  // A different article, or leaving the reader, closes the card.
-  useEffect(() => () => cardRef.current.close(), [currentArticle.id]);
+  // Changing the source or its text, or leaving the reader, closes the card.
+  // The extracted hook still returns the same stable ref; preserve the original source-only cleanup.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => cardRef.current.close(), [sourceId, readingDocument.content]);
   // A lookup sheet's scrim would cover a running take: end it, keep the card.
   useEffect(() => {
     if (activeWord || activeSentence) cardRef.current.interrupt();
+    // The card ref is stable; preserve lookup-only interruption after extraction.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWord, activeSentence]);
   // The practised sentence stays clear of the dock.
   const practisedId = card.target?.sentenceId ?? null;
@@ -228,19 +251,23 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     if (!entry) return;
     entry[1].el.scrollIntoView({ block: 'center', behavior: 'instant' });
     focusSentence(entry[0]);
-  }, [focusText, currentArticle.id]);
+  }, [focusText, sourceId]);
 
   // Listening to the whole article: one sentence after another, the current one highlighted.
-  const sequence = useSyncExternalStore(subscribeSequence, getSequenceState);
-  const listening = sequence.id === currentArticle.id;
+  const sequence = useSyncExternalStore(subscribeSequence, getSequenceState, getSequenceState);
+  const listening = sequence.id === sourceId;
   const listeningId = listening ? (flatSentences[sequence.index]?.id ?? null) : null;
+  // Why the sentence being read could not be played, so the player can say it instead of a generic line.
+  const sequenceFailure = useSpeechFailure(listening ? (flatSentences[sequence.index]?.text ?? '') : '');
 
   const toggleListening = () => {
     if (listening) toggleSequence();
     else
       startSequence(
-        currentArticle.id,
+        sourceId,
         flatSentences.map((s) => s.text),
+        0,
+        playbackEngine,
       );
   };
 
@@ -256,21 +283,8 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
     }
   }, [listeningId]);
 
-  // A different article, or leaving the reader, ends listening.
-  useEffect(() => () => stopSequence(), [currentArticle.id]);
-
-  const getFontSizeClass = () => {
-    switch (fontSize) {
-      case 'sm':
-        return 'text-[17px]';
-      case 'base':
-        return 'text-[19px]';
-      case 'lg':
-        return 'text-[21px]';
-      case 'xl':
-        return 'text-2xl';
-    }
-  };
+  // Changing the source or its text, or leaving the reader, ends listening.
+  useEffect(() => () => stopSequence(), [sourceId, readingDocument.content]);
 
   // Which sentence the actions belong to when nothing is hovered: the one playing, else the one open in the drawer.
   // While listening the pill does not chase the voice; it stays with what the reader points at.
@@ -303,212 +317,65 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   // Phase of the sentence the pill is showing, so its own button can theme itself (hooks cannot be conditional).
   const toolbarPhase = useSpeechPhase(toolbar?.text ?? '');
 
-  useLayoutEffect(() => {
-    const NAV = 56; // sticky header
-    // Measured pill size: three h-7 buttons, a divider, gap-0.5, p-1 padding and border = 101 x 38,
-    // plus an 8px invisible lead-in on its left.
-    const TOOLBAR_WIDTH = 101;
-    const TOOLBAR_HEIGHT = 38;
-    const LEAD = 8;
-    let frame = 0;
-
-    const place = () => {
-      const id = touch ? null : actionId;
-      const target = id ? sentenceEls.current.get(id) : undefined;
-      const article = articleRef.current;
-      const vh = window.innerHeight;
-      // Only lines that are on screen can carry the toolbar.
-      const lines = target ? [...target.el.getClientRects()].filter((r) => r.bottom > NAV && r.top < vh) : [];
-      if (!target || !article || !lines.length) {
-        setToolbar((prev) => (prev ? null : prev));
-        return;
-      }
-      // The pill sits on the sentence's last visible line, right after its final character, so the pointer
-      // reaches it by moving along that line and never crosses another sentence (which would retarget the
-      // pill). It is centred on the line and no taller than the line pitch, so it covers no other line.
-      const lastLine = lines[lines.length - 1];
-      const box = article.getBoundingClientRect();
-      const top = (lastLine.top + lastLine.bottom) / 2 - TOOLBAR_HEIGHT / 2 - box.top;
-      // The invisible lead-in overlaps the sentence end, so there is no gap to cross; when the sentence ends
-      // too near the column edge, the pill moves left over the sentence's own last words instead.
-      const left = Math.min(lastLine.right - box.left - LEAD + 2, box.width - TOOLBAR_WIDTH - LEAD - 6);
-
-      const next = {
-        id: id!,
-        text: target.text,
-        top,
-        left,
-      };
-      setToolbar((prev) =>
-        prev &&
-        prev.id === next.id &&
-        prev.text === next.text &&
-        Math.abs(prev.top - next.top) < 0.5 &&
-        Math.abs(prev.left - next.left) < 0.5
-          ? prev
-          : next,
-      );
-    };
-
-    const schedule = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(place);
-    };
-
-    place();
-    const observer = new ResizeObserver(schedule);
-    if (articleRef.current) observer.observe(articleRef.current);
-    document.fonts.addEventListener('loadingdone', schedule);
-    window.addEventListener('resize', schedule);
-    window.addEventListener('scroll', schedule, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      document.fonts.removeEventListener('loadingdone', schedule);
-      window.removeEventListener('resize', schedule);
-      window.removeEventListener('scroll', schedule);
-    };
-  }, [touch, actionId, fontSize, currentArticle.id, currentArticle.content, markers.mode, markers.displayed]);
-
-  const toolbarButton = (active: boolean) =>
-    active ? 'bg-accent-700 text-on-fill hover:bg-accent-800' : 'text-ink-700 hover:text-ink-950 hover:bg-ink-100';
-
-  const rateButton = (active: boolean) =>
-    `h-8 px-2.5 rounded-md text-xs tnum cursor-pointer ${
-      active ? 'bg-accent-700 text-on-fill font-medium' : 'text-ink-700 hover:bg-ink-100'
-    }`;
+  useReaderToolbarPosition({
+    touch,
+    actionId,
+    fontSize,
+    sourceId,
+    content: readingDocument.content,
+    markerMode: markers.mode,
+    displayedMarkers: markers.displayed,
+    sentenceEls,
+    articleRef,
+    setToolbar,
+  });
 
   return (
     <>
       {/* Bottom padding leaves room for the dock (player, practice card), so the last lines can be read above it. */}
       <div
-        className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 space-y-4"
+        className="max-w-3xl min-w-0 mx-auto px-4 sm:px-6 pt-6 space-y-4"
         style={{ paddingBottom: 'max(7rem, calc(var(--dock-height, 0px) + 2rem))' }}
       >
         {/* Reading toolbar: one row, article on the left, preferences on the right */}
         <div ref={controlsRef} className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
-          <button
-            onClick={onBack}
-            className="mr-auto -ml-2 h-10 inline-flex items-center gap-1.5 px-2 rounded-md text-sm text-ink-700 hover:bg-ink-100 hover:text-ink-900 cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{t('library.back')}</span>
-          </button>
-
-          <div
-            className="flex items-center rounded-md border border-ink-200 bg-surface p-0.5"
-            role="group"
-            aria-label={t('reader.textSize')}
-          >
-            {(['sm', 'base', 'lg', 'xl'] as const).map((sz, i) => (
-              <button
-                key={sz}
-                onClick={() => setFontSize(sz)}
-                aria-pressed={fontSize === sz}
-                aria-label={sz}
-                className={`h-8 w-8 rounded-md font-serif cursor-pointer ${
-                  fontSize === sz ? 'bg-ink-100 text-ink-950' : 'text-ink-600 hover:bg-ink-100'
-                }`}
-                style={{ fontSize: 12 + i * 2.5 }}
-              >
-                A
-              </button>
-            ))}
-          </div>
-
-          <Button variant="outline" onClick={toggleListening} aria-pressed={listening} title={t('reader.listenAll')}>
-            {listening && (speech.phase === 'playing' || speech.phase === 'loading') ? (
-              <Pause className="w-4 h-4" aria-hidden="true" />
-            ) : listening ? (
-              <Play className="w-4 h-4" aria-hidden="true" />
-            ) : (
-              <Headphones className="w-4 h-4" aria-hidden="true" />
-            )}
-            <span>{t('reader.listenAll')}</span>
-          </Button>
-
-          <button
-            onClick={() => setIsSpeedControlOpen(!isSpeedControlOpen)}
-            aria-expanded={isSpeedControlOpen}
-            className="h-10 inline-flex items-center gap-1.5 px-3 rounded-md border border-ink-200 bg-surface text-ink-700 hover:bg-ink-100 text-xs cursor-pointer"
-            title={t('reader.speedSlider')}
-          >
-            <Volume2 className="w-4 h-4" />
-            <span className="tnum">{playbackRate.toFixed(2)}×</span>
-            <ChevronDown
-              className={`w-3.5 h-3.5 text-ink-400 transition-transform ${isSpeedControlOpen ? 'rotate-180' : ''}`}
-            />
-          </button>
-
-          <PronunciationControls
-            key={currentArticle.id}
-            controller={markers}
-            onDisplay={() => preserveAnchor(markers.display)}
-            onMode={(marked) => preserveAnchor(() => markers.setMode(marked))}
-            onOpen={() => setIsSpeedControlOpen(false)}
+          <ReaderPreferences
+            t={t}
+            sourceKind={source.kind}
+            onBack={onBack}
+            fontSize={fontSize}
+            setFontSize={setFontSize}
+            toggleListening={toggleListening}
+            listening={listening}
+            speechPhase={speech.phase}
+            isSpeedControlOpen={isSpeedControlOpen}
+            setIsSpeedControlOpen={setIsSpeedControlOpen}
+            playbackRate={playbackRate}
+            handlePlaybackRateChange={handlePlaybackRateChange}
+            sourceId={sourceId}
+            markers={markers}
+            preserveAnchor={preserveAnchor}
           />
-
-          {/* Floats over the article so opening it never moves the text */}
-          {isSpeedControlOpen && (
-            <div className="absolute inset-x-0 top-full z-20 mt-2 rounded-lg border border-ink-200 bg-surface p-4 space-y-3 shadow-lg anim-fade">
-              <div className="flex items-center justify-between text-xs text-ink-600">
-                <span className="font-medium text-ink-800">{t('reader.shadowingSpeedRange')}</span>
-                <span className="text-ink-500">
-                  {playbackRate <= 0.65
-                    ? t('reader.slowPace')
-                    : playbackRate <= 0.85
-                      ? t('reader.shadowingPace')
-                      : playbackRate <= 1.05
-                        ? t('reader.normalPace')
-                        : t('reader.challengePace')}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-ink-500 tnum">0.5×</span>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="1.5"
-                  step="0.05"
-                  value={playbackRate}
-                  onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
-                  aria-label={t('reader.tempo')}
-                  className="flex-1 h-2 cursor-pointer accent-accent-700"
-                />
-                <span className="text-xs text-ink-500 tnum">1.5×</span>
-              </div>
-              <div className="flex items-center gap-1 flex-wrap">
-                {[0.5, 0.75, 1.0, 1.25, 1.5].map((rate) => (
-                  <button
-                    key={rate}
-                    onClick={() => handlePlaybackRateChange(rate)}
-                    className={rateButton(Math.abs(playbackRate - rate) < 0.01)}
-                  >
-                    {rate}×
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
+        {source.kind === 'graded' && <p className="text-xs text-ink-600">{t('gradedReader.deviceVoice')}</p>}
         {/* Main Reading Surface */}
         <article
           ref={articleRef}
           onClick={(e) => {
             if (!(e.target as HTMLElement).closest('[data-sentence],[data-sentence-actions]')) setHoveredId(null);
           }}
-          className="relative px-5 py-8 sm:px-12 sm:py-12 rounded-lg border border-ink-200 bg-surface text-ink-900"
+          className={`relative min-w-0 ${source.kind === 'graded' ? 'px-4' : 'px-5'} py-8 sm:px-12 sm:py-12 rounded-lg border border-ink-200 bg-surface text-ink-900`}
         >
-          <div className={`reading ${getFontSizeClass()} ${markers.mode ? 'reading-markers' : ''}`}>
+          <div className={`reading ${readerFontSizeClass(fontSize)} ${markers.mode ? 'reading-markers' : ''}`}>
             <header className="mb-8">
               <p className="text-xs text-ink-500 font-sans mb-2">
-                {formatLevel(currentArticle.level, i18n.language)}
-                {currentArticle.category ? ` · ${currentArticle.category}` : ''}
-                {currentArticle.source ? ` · ${currentArticle.source}` : ''}
+                {formatLevel(readingDocument.level, i18n.language)}
+                {readingDocument.category ? ` · ${readingDocument.category}` : ''}
+                {readingDocument.source ? ` · ${readingDocument.source}` : ''}
               </p>
-              <h1 className="reading-title font-serif font-semibold text-3xl sm:text-4xl leading-tight">
-                {cleanArticleTitle(currentArticle.title)}
+              <h1 className="reading-title break-words font-serif font-semibold text-3xl sm:text-4xl leading-tight">
+                {cleanArticleTitle(readingDocument.title)}
               </h1>
             </header>
 
@@ -567,63 +434,38 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
 
           {/* Floating sentence actions: compact pill at the end of the sentence */}
           {toolbar && (
-            <div
-              data-sentence-actions
-              onPointerEnter={(e) => e.pointerType === 'mouse' && cancelClear()}
-              onPointerLeave={(e) => e.pointerType === 'mouse' && scheduleClear()}
-              style={{ top: toolbar.top, left: toolbar.left }}
-              className="absolute z-20 pl-2 anim-fade select-none"
-            >
-              <div className="flex items-center gap-0.5 p-1 rounded-lg border border-ink-300 bg-surface text-ink-900 shadow-lg font-sans text-xs">
-                <SpeakButton
-                  text={toolbar.text}
-                  label={t('reader.playSentence')}
-                  stopLabel={t('reader.stop')}
-                  variant="ghost"
-                  size="icon"
-                  className={`h-7 w-7 transition-colors ${toolbarButton(toolbarPhase !== 'idle')}`}
-                />
-                <div className="w-px h-3.5 bg-ink-200" />
-                <button
-                  onClick={() => onSentenceClick(toolbar.text)}
-                  aria-label={t('reader.analyzeSentence')}
-                  title={t('reader.analyzeSentence')}
-                  className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors ${toolbarButton(false)}`}
-                >
-                  <TextSearch className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  data-practice-entry
-                  onClick={() =>
-                    card.open({ articleId: currentArticle.id, sentenceId: toolbar.id, text: toolbar.text })
-                  }
-                  disabled={cardBusy}
-                  aria-label={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
-                  title={cardBusy ? t('practiceCard.finishFirst') : t('practiceCard.open')}
-                  className={`h-7 w-7 inline-flex items-center justify-center rounded-md cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${toolbarButton(practisedId === toolbar.id)}`}
-                >
-                  <Mic className="w-3.5 h-3.5" aria-hidden="true" />
-                </button>
-              </div>
-            </div>
+            <ReaderSentenceToolbar
+              t={t}
+              toolbar={toolbar}
+              cancelClear={cancelClear}
+              scheduleClear={scheduleClear}
+              speechActive={toolbarPhase !== 'idle'}
+              onExplain={() => explain(toolbar.id, toolbar.text)}
+              onPractise={() => practise(toolbar.id, toolbar.text)}
+              playbackEngine={playbackEngine}
+              explainLabel={authored ? t('gradedReader.translation') : undefined}
+              cardBusy={cardBusy}
+              practisedId={practisedId}
+            />
           )}
         </article>
+        {afterText}
       </div>
 
       {/* Outside the spaced column: as its last child it would add a margin to the article. */}
       {(listening || card.phase !== 'closed' || barSentence) && (
         <BottomDock>
           {card.phase !== 'closed' && (
-            <PracticeCard card={card} movable={!touch} onOpenLog={() => onOpenShadowingLog(currentArticle.id)} />
+            <PracticeCard card={card} movable={!touch} onOpenLog={() => onOpenShadowingLog(sourceId)} />
           )}
           {barSentence && (
             <SentenceBar
               text={barSentence.text}
               practiseBlocked={cardBusy}
-              onExplain={() => onSentenceClick(barSentence.text)}
-              onPractise={() =>
-                card.open({ articleId: currentArticle.id, sentenceId: barSentence.id, text: barSentence.text })
-              }
+              onExplain={() => explain(barSentence.id, barSentence.text)}
+              onPractise={() => practise(barSentence.id, barSentence.text)}
+              playbackEngine={playbackEngine}
+              explainLabel={authored ? t('gradedReader.translation') : undefined}
               onDismiss={() => setDismissedId(barSentence.id)}
             />
           )}
@@ -633,6 +475,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               total={sequence.total}
               phase={speech.phase}
               failed={sequence.failed}
+              reason={sequence.failed ? sequenceFailure : null}
               onToggle={toggleSequence}
               onStep={stepSequence}
               onStop={stopSequence}

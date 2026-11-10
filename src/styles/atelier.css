@@ -1,0 +1,412 @@
+/*
+ * Game surface: the sentence workshop (DESIGN.md, "Game surface"). The stage, bar, ticket, baseplate, bin,
+ * sheet and buttons use the app's own theme tokens and follow the theme switch. The one fixed palette is
+ * the brick roles below: six saturated fills (the only saturated things on screen), tuned per theme so they
+ * sit on its board, each with a text colour that keeps WCAG AA (at least 4.5:1) on its fill.
+ */
+.atelier-stage {
+  background-color: var(--color-ink-50);
+  /* How far a recess sinks below its surface: shares of the scrim colour mixed into the surface. */
+  --dip: 9%;
+  --pit: 16%;
+  --pit-deep: 30%;
+  --lift: 45%;
+  --plate: var(--color-ink-200);
+  --plate-edge: var(--color-ink-300);
+  --plate-stud: color-mix(in oklab, var(--color-scrim) var(--dip), var(--plate));
+  --plate-hi: color-mix(in oklab, white var(--lift), var(--plate));
+  --slot: color-mix(in oklab, var(--color-scrim) var(--pit), var(--plate));
+  --slot-hole: color-mix(in oklab, var(--color-scrim) var(--pit-deep), var(--plate));
+  --bin-floor: var(--color-ink-100);
+  --bin-wall: var(--color-ink-300);
+  --bin-wall-edge: color-mix(in oklab, var(--color-scrim) var(--dip), var(--color-ink-300));
+  --brick-yellow: #e9b320;
+}
+:root[data-theme='dark'] .atelier-stage {
+  --dip: 16%;
+  --pit: 26%;
+  --pit-deep: 40%;
+  --lift: 9%;
+  --bin-floor: var(--color-ink-50);
+}
+/* The brick roles. A brick's depth shade is its own fill darkened, so one variable per hue is enough. */
+.atelier-stage [data-hue] {
+  --b-shade: color-mix(in oklab, var(--b-fill) 62%, var(--color-scrim));
+}
+.atelier-stage [data-hue='red'] {
+  --b-fill: #c2453a;
+  --b-ink: #ffffff;
+}
+.atelier-stage [data-hue='blue'] {
+  --b-fill: #2f5490;
+  --b-ink: #ffffff;
+}
+.atelier-stage [data-hue='yellow'] {
+  --b-fill: var(--brick-yellow);
+  --b-ink: #241c00;
+}
+.atelier-stage [data-hue='green'] {
+  --b-fill: #2f7a4b;
+  --b-ink: #ffffff;
+}
+.atelier-stage [data-hue='purple'] {
+  --b-fill: #7347c2;
+  --b-ink: #ffffff;
+}
+/* The neutral brick is the app's own grey, so it reads as stone on any theme. */
+.atelier-stage [data-hue='grey'] {
+  --b-fill: var(--color-ink-600);
+  --b-ink: var(--color-ink-50);
+}
+:root[data-theme='dark'] .atelier-stage [data-hue='red'] {
+  --b-fill: #c94a3f;
+}
+:root[data-theme='dark'] .atelier-stage [data-hue='blue'] {
+  --b-fill: #4c71ae;
+}
+:root[data-theme='dark'] .atelier-stage [data-hue='green'] {
+  --b-fill: #318452;
+}
+:root[data-theme='dark'] .atelier-stage [data-hue='purple'] {
+  --b-fill: #8157cc;
+}
+
+/* A brick: a solid fill, a solid offset shadow for thickness, studs on top. No blur, no gradient. */
+.brick {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  margin-top: 6px;
+  padding: 4px 8px 5px;
+  border-radius: var(--b-radius, 8px);
+  background: var(--b-fill);
+  color: var(--b-ink);
+  box-shadow: 0 4px 0 var(--b-shade);
+  text-align: center;
+  transition:
+    transform 70ms var(--ease-out),
+    box-shadow 70ms var(--ease-out);
+}
+.brick-role {
+  font-size: 12px;
+  line-height: 12px;
+  letter-spacing: -0.01em;
+}
+.brick-word {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  overflow-wrap: anywhere;
+}
+.brick-studs {
+  position: absolute;
+  top: -5px;
+  right: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-evenly;
+  padding-inline: 6px;
+  pointer-events: none;
+}
+.brick-studs i {
+  width: 12px;
+  height: 6px;
+  border-radius: 4px 4px 1px 1px;
+  background: var(--b-fill);
+  box-shadow: inset 0 -2px 0 var(--b-shade);
+}
+.brick[data-shape='actor'] {
+  --b-radius: 999px;
+  padding-inline: 14px;
+}
+.brick[data-shape='verb'] {
+  --b-radius: 3px;
+}
+.brick[data-shape='verb'] .brick-studs i {
+  border-radius: 1px;
+}
+.brick[data-shape='thing'] {
+  --b-radius: 14px 14px 4px 4px;
+}
+.brick[data-shape='link'] {
+  --b-radius: 4px 16px 4px 16px;
+}
+.brick[data-shape='mod'] {
+  --b-radius: 16px 4px 16px 4px;
+}
+.brick[data-shape='mark'] {
+  --b-radius: 6px;
+}
+/* A fused brick is two bricks welded: double width and four studs. */
+.brick[data-fused] {
+  min-width: 7rem;
+}
+.brick[data-half] .brick-role {
+  display: none;
+}
+.brick[data-state='flagged'] {
+  outline: 3px solid var(--color-bad-700);
+  outline-offset: 2px;
+}
+.brick[data-state='picked'] {
+  outline: 3px solid var(--color-ink-950);
+  outline-offset: 2px;
+  transform: translateY(-2px);
+}
+.brick-btn:active .brick {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--b-shade);
+}
+.brick-btn[aria-disabled='true']:active .brick {
+  transform: none;
+  box-shadow: 0 4px 0 var(--b-shade);
+}
+.brick-btn:focus-visible {
+  outline: 3px solid var(--color-accent-900);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+.weld-ring {
+  border: 3px solid var(--color-ink-950);
+  border-radius: 12px;
+}
+.brick-socket {
+  width: 18px;
+  height: 8px;
+  border-radius: 0 0 6px 6px;
+  background: var(--b-fill);
+  box-shadow: inset 0 -2px 0 var(--b-shade);
+}
+
+/*
+ * The connections drawn over a right sentence. Ink lines, so a relation is told apart by its line style
+ * (thick solid, thin solid, dashed, dotted) and by the label chip on it, never by colour. The mask
+ * uncovers a line as it draws; the pulse is the accent-coloured spark that runs ahead of it.
+ */
+.wire-mask {
+  fill: none;
+  stroke: white;
+  stroke-width: 12;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.wire-line {
+  fill: none;
+  stroke: var(--color-ink-900);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.wire-line[data-relation='subject'],
+.wire-line[data-relation='object'] {
+  stroke-width: 4;
+}
+.wire-line[data-relation='agreement'],
+.wire-line[data-relation='modifier'] {
+  stroke-linecap: butt;
+  stroke-dasharray: 7 5;
+}
+.wire-line[data-relation='negation'],
+.wire-line[data-relation='pronoun'] {
+  stroke-width: 3.5;
+  stroke-dasharray: 0.1 7;
+}
+.wire-pulse {
+  fill: none;
+  stroke: var(--color-accent-500);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 0.09 1;
+  stroke-dashoffset: -1;
+  opacity: 0;
+}
+.wire-end {
+  fill: var(--color-ink-900);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.wire-end[data-end='head'] {
+  fill: var(--color-surface);
+  stroke: var(--color-ink-900);
+  stroke-width: 2.5;
+}
+.wire-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border: 1.5px solid var(--color-ink-900);
+  border-radius: 10px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 0 var(--color-ink-300);
+  color: var(--color-ink-900);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+
+/* The baseplate: a board of studs the bricks snap onto; an empty slot is a recessed pad of stud holes. */
+.plate {
+  position: relative;
+  isolation: isolate;
+  border-radius: 12px;
+  background-color: var(--plate);
+  box-shadow: 0 6px 0 var(--plate-edge);
+}
+/* The studs are masks over the plate's own colours, so they follow the theme. */
+.plate::before,
+.plate::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  mask-size: 22px 22px;
+  -webkit-mask-size: 22px 22px;
+}
+.plate::before {
+  background: var(--plate-stud);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3C/svg%3E");
+}
+.plate::after {
+  background: var(--plate-hi);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='10' r='4.6'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='10' r='4.6'/%3E%3C/svg%3E");
+}
+.slot {
+  display: inline-flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 3rem;
+  height: 2.75rem;
+  margin-top: 6px;
+  border-radius: 6px;
+  background: var(--slot);
+  box-shadow: inset 0 3px 0 var(--slot-hole);
+}
+.slot i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--slot-hole);
+}
+.bin {
+  border-radius: 14px;
+  background: var(--bin-floor);
+  box-shadow:
+    inset 0 5px 0 var(--bin-wall-edge),
+    0 0 0 4px var(--bin-wall),
+    0 8px 0 4px var(--bin-wall-edge);
+}
+/* The ticket and the booklet sheet: the app's surface, edged like a card with a solid offset for thickness. */
+.ticket {
+  background: var(--color-surface);
+  color: var(--color-ink-900);
+  border: 1px solid var(--color-ink-200);
+  border-radius: 10px;
+  box-shadow: 0 4px 0 var(--color-ink-300);
+}
+/* The Check and Next button is the app's primary Button; this only gives it the game's size and press depth. */
+.game-cta {
+  --cta-shade: color-mix(in oklab, var(--color-accent-700) 58%, var(--color-scrim));
+  height: 3.5rem;
+  width: 100%;
+  border-radius: var(--radius-lg);
+  font-size: 1.125rem;
+  font-weight: 600;
+  box-shadow: 0 5px 0 var(--cta-shade);
+  transition:
+    background-color 150ms var(--ease-out),
+    transform 70ms var(--ease-out),
+    box-shadow 70ms var(--ease-out);
+}
+/* Five studs light one after another while the round is being written; the AI gives no progress, so it loops. */
+.game-loading {
+  display: inline-flex;
+  gap: 5px;
+}
+.game-loading i {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: currentColor;
+  opacity: 0.25;
+  animation: game-stud 1.4s ease-in-out infinite;
+}
+@keyframes game-stud {
+  0%,
+  45%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-loading i {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+.game-cta:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--cta-shade);
+}
+.atelier-sheet {
+  animation: atelier-sheet-in 260ms var(--ease-out);
+}
+@keyframes atelier-sheet-in {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+/* The Effects switch and the system setting both stop every CSS motion here; script motion checks them itself. */
+.atelier-stage[data-motion='off'] *,
+.atelier-stage[data-motion='off'] *::before,
+.atelier-stage[data-motion='off'] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* The slip on the baseplate: a short verdict or the reason a brick is wrong, in the app's own ok and bad tints. */
+.atelier-slip {
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  box-shadow: 0 3px 0 var(--color-ink-300);
+  animation: atelier-sheet-in 200ms var(--ease-out);
+}
+.atelier-slip[data-kind='bad'] {
+  background: var(--color-bad-100);
+  color: var(--color-bad-800);
+}
+.atelier-slip[data-kind='ok'] {
+  background: var(--color-ok-100);
+  color: var(--color-ok-800);
+}
+.atelier-slip[data-kind='idle'] {
+  background: var(--slot);
+  color: var(--color-ink-800);
+  box-shadow: inset 0 3px 0 var(--slot-hole);
+  animation: none;
+}
+.atelier-slip[data-kind='note'] {
+  background: var(--color-surface);
+  color: var(--color-ink-900);
+}

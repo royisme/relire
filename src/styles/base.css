@@ -1,0 +1,66 @@
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop {
+    border-color: var(--color-ink-200);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-ink-50);
+    color: var(--color-ink-900);
+    transition:
+      background-color 200ms var(--ease-out),
+      color 200ms var(--ease-out);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  ::selection {
+    background: var(--color-accent-200);
+    color: var(--color-ink-950);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent-600);
+    outline-offset: 2px;
+  }
+  button,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Focus on the ink panel needs a light ring. */
+.panel :focus-visible {
+  outline-color: var(--color-panel-link);
+}
+
+/* Tabular numerals for scores, counts and intervals. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-300);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-400);
+}

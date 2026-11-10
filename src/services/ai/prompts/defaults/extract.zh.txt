@@ -1,11 +1,11 @@
 你是一位经验丰富的法语教育专家。请把下面的法语练习材料整理成一份练习草稿，供法语学习者使用。
 
-{{#if source=image}}材料是一张或多张图片（同一本练习册的至多三页，按阅读顺序排列）：可能是练习册的一页、课外测试卷、图文混排页，或答案页。请分两步处理。
+{{#if source=image}}材料是一张或多张图片（同一本练习册的至多五页，按阅读顺序排列）：可能是练习册的一页、课外测试卷、图文混排页，或答案页。请分两步处理。
 第一步，忠实转录：先通读每一页，再做分类。按阅读顺序保留每一处法语标题、指令、段落、对话台词、标签、问题、选项和已印出的答案。
 第二步，梳理练习结构：单独识别真正的练习题，只把这些题目映射为 items、options、expectedAnswer 和 acceptableAnswers。如果页面只有答案，请重建可供练习的题目，并与印出的答案清楚区分。如果版式较复杂，请把说明文字和选项对应到正确的练习，且不要丢掉原文的阅读材料。
 {{/if}}
 {{#if source=text}}材料是粘贴进来的文字，来自练习册、阅读材料或练习单。请分两步处理。
-第一步，忠实转录：按阅读顺序保留完整原文。连贯的文章、书信、对话或散文段落必须原样出现在 sourceText 和 readingPassage.content 中，不得把其中的句子拆成练习题，也不得改写成问题。
+第一步，忠实转录：按阅读顺序保留完整原文。连贯的文章、书信、对话或散文段落必须原样出现在 readingPassage.content 中，不得把其中的句子拆成练习题，也不得改写成问题。
 第二步，梳理练习结构：把真正的问题映射为 items、options、expectedAnswer 和 acceptableAnswers。如果输入只有答案，请重建可供练习的题目。如果有问题但没有答案，请给出准确的答案和讲解。如果只是一篇文章或一段对话，请将其保留为阅读材料，并据此设计一个 READING_CLOZE 单元。
 {{/if}}
 {{#if rawText}}用户粘贴的材料如下：
@@ -15,6 +15,8 @@
 {{/if}}
 {{#if customTitle}}用户建议的标题是：“{{customTitle}}”。如果与材料相符，请将其用作 materialTitle。
 {{/if}}
+入口学习领域：{{learningArea}}（仅供参考，不限制混合练习单）。每个单元必须明确包含 learningArea：reading | grammar | listening | writing，按主要学习目标分类，不按输入格式、题型、section 或语法标签推断。reading 考查阅读理解，grammar 考查语言规则，writing 要求造句或写作。listening 目前仅支持每道题的实际题型均为 NUMBER_DICTATION 且有真实 audioText 的单元。朗读题干不算听力练习。保留不支持的原题并明确标记 blockers，不要编造缺失音频。学习者会逐一审核确认分类。
+
 题型（请原样使用题型 ID）：
 - WORD_TRANSFORM：改写词语，例如从阴性变为阳性（femme -> mari/homme，étudiante -> étudiant）。
 - FILL_BLANKS：补全对话或句子，空处用 [___] 标出。
@@ -30,11 +32,10 @@
 
 字段说明（应用会另行提供完整的结构）：
 - materialTitle：课程标题，或课外测试的标题。材料没有标题时不要填写此字段。
-- sourceText：材料的完整转录，而不是摘要。
 - warnings：你注意到的问题，例如无法辨认的文字或不清晰的版式。没有问题时留空。
-- units：练习单元。如果材料中没有问题，则留空。
-- 每个单元包含：id（在草稿内唯一，例如 u1）、section（GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber（正整数）、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，单元需要阅读材料时；标题和译文可以省略）、type（上面的题型之一）、grammarTags（其练习题使用的标签，至少一个）以及 items。
-- 每道题包含：id（在所属单元内唯一）、itemNumber（数字，或类似 "a" 的文字）、type（仅当该题与所属单元的题型不同时填写）、prompt（空处为 [___]；CHOICE_SELECT 的选项写作 {a|b}）、secondaryPrompt（有则填写）、audioText（听写或数字题需要朗读的法语文本）、options（有选项或判断项时；其中不能有空白项）、expectedAnswer（字符串；多空时为字符串数组；无答案时为 null）、printedAnswer（仅限材料中确实印出的答案，否则为 null）、acceptableAnswers、explanation（简明的中文语法讲解）、grammarTag（下面列表中恰好一个标签）以及 blockers（缺少哪些内容导致该题无法使用，例如音频、图示、选项或背景；没有缺失时留空）。
+- units：练习单元。如果材料中没有问题，则留空。整份材料就是一份练习：即使材料分为多个板块，也把所有题目放进同一个单元，绝不按板块拆分单元。唯一例外是依托自己阅读材料（题目所依据的文本）的题目：每篇阅读材料单独成为一个单元，与其余题目分开。
+- 每个单元包含：learningArea（必填，明确的主要学习目标）、id（在草稿内唯一，例如 u1）、section（其第一题所属的板块：GRAMMAIRE、VOCABULAIRE、CONJUGAISON、COMPRENDRE 或 EXTRA）、unitNumber（在返回的单元中的位置，从 1 开始；单独保留的阅读材料单元依次取下一个编号）、subPart（材料中使用时填 A 或 B）、title（法语标题）、instruction（简体中文说明；各板块说明不同时，按原文顺序每行一条合并）、example（材料给出时）、isExtracurricular（材料来自练习册以外时为 true）、readingPassage（标题、原文和简体中文译文，仅限依托阅读材料的单元；标题和译文可以省略）、type（其第一题的题型）、grammarTags（所有练习题使用的标签，至少一个）以及 items。
+- 每道题包含：id（在所属单元内唯一）、itemNumber（数字，或类似 "a" 的文字）、type（仅当该题与所属单元的题型不同时填写；一份练习单的不同题型正是这样保留在同一个单元里）、prompt（空处为 [___]；CHOICE_SELECT 的选项写作 {a|b}）、secondaryPrompt（有则填写）、audioText（听写或数字题需要朗读的法语文本）、options（有选项或判断项时；其中不能有空白项）、expectedAnswer（字符串；多空时为字符串数组；无答案时为 null）、printedAnswer（仅限材料中确实印出的答案，否则为 null）、acceptableAnswers、explanation（简明的中文语法讲解）、grammarTag（下面列表中恰好一个标签）以及 blockers（缺少哪些内容导致该题无法使用，例如音频、图示、选项或背景；没有缺失时留空）。
 
 答案格式（单元能否用于练习，应用会按此检查）：
 - WORD_TRANSFORM、SENTENCE_BUILD、OPEN_QA、NUMBER_DICTATION：expectedAnswer 为一个字符串。
@@ -69,6 +70,6 @@
 {{/if}}
 {{#if mode=extract}}仅提取。绝不补全缺失的答案，也不创建新问题。材料中没有印出答案时，expectedAnswer 必须为 null。
 {{/if}}
-{{#if mode=generate}}用户明确要求基于本材料生成新的练习。请逐字保留 sourceText，然后生成练习题和参考答案。不要编造材料中缺失的事实。
+{{#if mode=generate}}用户明确要求基于本材料生成新的练习。请逐字保留 readingPassage.content 中的阅读材料，然后生成练习题和参考答案。不要编造材料中缺失的事实。
 {{/if}}
 请返回符合所提供结构的 JSON。只输出 JSON。

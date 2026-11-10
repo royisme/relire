@@ -11,10 +11,10 @@
 
 请必须以严格的JSON格式输出：
 {
-"overallScore": 88,
-"accuracyScore": 85,
-"fluencyScore": 90,
-"rhythmScore": 88,
+"overallScore": <0到100的整数>,
+"accuracyScore": <0到100的整数>,
+"fluencyScore": <0到100的整数>,
+"rhythmScore": <0到100的整数>,
 "transcribedSpeech": "用户实际被听辨出的法语",
 "phonemeFeedback": [
   {

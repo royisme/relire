@@ -10,10 +10,10 @@ Analyze thoroughly:
 
 Output strictly in JSON:
 {
-"overallScore": 88,
-"accuracyScore": 85,
-"fluencyScore": 90,
-"rhythmScore": 88,
+"overallScore": <integer 0-100>,
+"accuracyScore": <integer 0-100>,
+"fluencyScore": <integer 0-100>,
+"rhythmScore": <integer 0-100>,
 "transcribedSpeech": "User's recognized French speech",
 "phonemeFeedback": [
   {

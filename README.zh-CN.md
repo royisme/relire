@@ -1,67 +1,77 @@
-# Relire — 法语精读与发音训练
+<div align="center">
 
-**面向 TCF Canada 学习者的开源法语精读、影子跟读与发音训练工具。**
+<a href="https://royisme.github.io/relire/app/"><img src="docs/media/hero.zh-CN.webp" alt="Relire：一本分级读物；点一个词，弹出释义和来自原文的例句；然后是已审校动词的变位页；最后是名词阴阳性页" width="100%"></a>
 
-[在线体验 Relire](https://royisme.github.io/relire/) · [English](README.md) · **简体中文**
+# Relire
 
-读真实法语文章 → 点单词或句子 → 理解语境和语法 → 跟读 → 获得 AI 发音反馈。
+**逐句精读，开口跟读。**
 
-Relire 完全在浏览器中运行，没有应用服务器，也不用注册账号。你自带 Gemini API Key，学习数据保存在本机，还可以把它安装成电脑或手机上的 PWA。
+我在备考 TCF Canada，这是我为自己的法语精读做的工具。它在浏览器里运行，无需注册。学习记录保存在你的设备上；用到 AI 功能时，你问的内容会直接发给你选择的服务商。
 
-**为什么用 Relire**
+[**打开 Relire →**](https://royisme.github.io/relire/app/) · [English](README.md)
 
-- 单词语境释义、IPA、时态和动词变位。
-- 句子翻译、语法拆解、常见搭配和跟读指导。
-- 针对音素、联诵和语调的发音反馈。
-- 基于 SM-2 的间隔重复生词复习。
-- 本地优先存储，并缓存音频和 AI 结果。
-- 支持英文和简体中文界面。
+<sub>文章里的词语和句子解析、发音反馈和 AI 语音，使用你所选提供方的 Key（本地 Ollama 不需要）。
+分级读物、已审校的动词变位和名词阴阳性参考不需要 Key。</sub>
 
-> Relire 专注阅读和发音训练，不是 TCF 模考平台。AI 打分只是估计值，不是官方成绩；项目与 France Éducation international、IRCC 没有任何关联。
+</div>
 
-## 界面预览
+## 读懂，再读出来
 
-阅读法语文章，按自己的习惯调整字号和朗读速度。
+**点任意一个词。** 在分级读物里，你会看到词义和它所在的原句，不需要 Key。在你粘贴或导入的文章里，解析还会给出音标、动词形式和例句，这需要文本 AI 的 Key（本地 Ollama 不需要）。
 
-![Relire 法语文章精读界面](docs/media/reader.zh-CN.jpg)
+<table>
+<tr>
+<td width="64%"><img src="docs/media/word.zh-CN.desktop.jpg" alt="分级读物里点开的动词：词义和来自原文的例句"></td>
+<td><img src="docs/media/word.zh-CN.phone.jpg" alt="手机上的同一个词语面板"></td>
+</tr>
+</table>
 
-点击单词，在原文旁查看中文释义、音标、发音提示和动词变位。
+**在粘贴或导入的文章里展开一个句子。** 句子拆成带标注的成分，语法要点、常见搭配和跟读指南就放在原文旁边。需要文本 AI 的 Key，或使用不需要 Key 的本地 Ollama。
 
-![affronter 的中文语境解析、音标与动词变位](docs/media/word-analysis.zh-CN.jpg)
+**跟着读出来。** 播放原句，录下自己的朗读。对比时先播放参考语音，再播放你的录音。每句最近三次录音都保存在你的设备上。录音不需要 Key。分级读物的参考语音用设备语音；其他文章要在设置里选“设备语音”，才能不加 Key 对比。
 
-逐段拆解难句，结合中文讲解理解语法和句子结构。
+## 没有 Key？从这里开始
 
-![法语句子的语法分段与中文讲解](docs/media/sentence-syntax.zh-CN.jpg)
+- [分级读物](https://royisme.github.io/relire/app/#/read/graded)：三本入门读物，配编写好的词义、可展开的句子译文、设备语音朗读和阅读检查题（作答记录保存在本机）。
+- [名词阴阳性](https://royisme.github.io/relire/app/#/grammar/gender)：17 条词尾倾向，附已审校例词和部分例外，另有判断该用 le 还是 la 的练习。这些倾向依据 Morphalou 3.1 统计，统计结果记录在 `src/data/noun-gender/pack.json`：-tion 结尾 3,794 个名词里 3,780 个是阴性；-age 3,105 个里 3,091 个是阳性；-ure 1,216 个里 902 个是阴性；337 个例词经过审校。
+- [动词变位](https://royisme.github.io/relire/app/#/grammar/conjugation)：19 个已审校动词在应用所支持时态下的变位表，直接从本地数据给出，不调用 AI，另有否定句和疑问句句式。
+- [法语音标与近音辨听](https://royisme.github.io/relire/app/#/speaking)：音标表和近音辨听练习。声音通过你所选的语音提供方播放；在设置里选“设备语音”，就能不加 Key 听。
 
-<details>
-<summary>查看文章库</summary>
+<table>
+<tr>
+<td width="50%"><img src="docs/media/gender.zh-CN.desktop.jpg" alt="名词阴阳性参考：按阴阳性分组的词尾倾向，附已审校例词和部分例外"></td>
+<td><img src="docs/media/conjugation.zh-CN.desktop.jpg" alt="已审校动词的变位页：各个时态的变位表，来自本地数据"></td>
+</tr>
+</table>
 
-搜索文章，按 CEFR 等级筛选。
+## 用你自己的 Key
 
-![支持搜索和 CEFR 等级筛选的文章库，英文界面](docs/media/library.jpg)
+- **文章解析**：在你粘贴或导入的任何文章里点词、点句，查看语境释义和句子拆解。（文本 AI 的 Key；本地 Ollama 不需要。）
+- **发音反馈**：Azure Speech 评测准确度、流利度和逐词表现；Gemini 直接听录音，针对音素、联诵和语调给出意见。评分只是估计值。
+- **生成练习**：从你的文章生成填空、选择、词形变换、短文完形、对话排序等题组；开放题由 AI 用文字评判，不打分。
+- **文章与练习册识别**：最多从五张照片或 PDF 页面导入，由你选定的视觉模型识别。
+- **AI 语音**：Gemini 或 Fish Audio 需要你的 Key；本地 Ollama Phonon 模型只需下载一个模型，不需要 Key 或账号（需要 Apple Silicon 上的 Ollama 0.40.9 及以上版本；40M 模型采用 CC BY-NC 4.0 许可，仅限非商业用途，由学习者自行拉取，不随应用分发）。Ollama 和设备语音不需要 Key。
+- **其他动词的变位**：19 个已审校动词之外，变位表由 AI 生成，再与应用自带的规则核对，只标注核对结果，从不标“已验证”。
+- **可选内容服务**：一个只读服务，用你自己的访问 Key 下载语法专题和词书页面。它绝不会收到你的 AI Key、答题记录、文章或录音。
 
-</details>
+## 哪些能信
 
-## 能做什么
+- **无账号，无应用服务器。** 文章、生词、录音和设置都留在你的浏览器里，AI 请求从浏览器直接发给你选的服务商。唯一的后端是一个可选的只读内容服务。
+- **谁审校了什么**：数据文件里记录的审核人是维护者本人，涉及 19 个已审校动词和名词阴阳性包（17 条词尾倾向、337 个例词）。内置的分级读物和拼读发音规则由多个 AI 模型审核，审核所用的模型与生成内容的模型不同。两者都没有人类教师审核，每篇读物在页面上都会这样标明。
+- **AI 评分仅为估计值**：AI 给出的发音评分和开放题评判均为估计值，并非官方考试成绩。
+- **与官方机构无关**：Relire 是独立的开源练习工具，不是 TCF 模考平台，与 France Éducation international 或加拿大移民部（IRCC）没有任何关联。
+- **生词复习基于自主评价**：FSRS-6 间隔重复调度完全依据你自己选择的“不记得”、“模糊”或“记得”，而非程序自动判定。在“玩一轮”模式中，揭晓答案前的回忆答题绝不会改变复习计划。
+- **阴阳性练习只记首次作答**：在阴阳性小回合里，只有每张卡片的第一次作答会记入记录；答错后再次出现的卡片，不会重复计入记录。
 
-- **管理自己的文章库。** 内置三篇 B1 到 C1 的示例，也可以粘贴自己的文章，并在列表里搜索、按等级筛选、排序、编辑和删除。字号和主题可调，朗读速度最低可到 0.5 倍。
-- **点任何一个单词。** 查看词元、语境中的释义、国际音标（IPA）、动词时态、变位表和例句，一键加入生词本。
-- **拆解难句。** 译文、句法成分、语法点、常见搭配，以及影子跟读指南（节奏群、联诵、语调）。
-- **跟读并获得反馈。** 录下自己读句子的声音，得到总分，以及单个音素、联诵和语调的反馈。
-- **随时查法语发音。** 用国际音标列出法语的全部发音，每个音配一个示例单词，点一下就能听。
-- **用间隔重复复习生词。** 按 SM-2 算法安排今天该复习的词。
-- **从当前文章生成练习。** 句子重组、口语跟读、语法填空。
-- **自选 AI。** 负责讲解的 AI 和负责朗读的 AI 是两项独立设置，各有各的提供方、模型和 Key，代码也预留了接入更多提供方的方式。
-- **编辑提示词。** 发给 AI 的指令是纯文本模板，可以在设置里查看、修改和恢复默认。
-- **中英文界面。** 界面和讲解可以在中文和英文之间切换。
+我指导 AI 编码助手开发了 Relire：代码由它们编写，大部分内容也由它们起草。自动检查覆盖代码、数据结构，以及对照参考数据的动词变位表。分级读物里的法语由其他 AI 模型审核，还没有人类教师审核过。面向初学者发布之前，必须先完成人工语言审核。
 
 ## 在线体验
 
-打开 **https://royisme.github.io/relire/** 即可浏览内置示例文章。AI 解析、语音生成和发音反馈需要使用你自己的 Gemini API Key。
+打开 **https://royisme.github.io/relire/app/**。“今天”页、分级读物、名词阴阳性和已审校动词的变位都不需要 Key。AI 解析、AI 语音和发音评分需要你所选提供方的 Key，Ollama 和设备语音除外。
 
 ## 快速开始
 
-需要 [Bun](https://bun.sh) 和一个免费的 [Gemini API Key](https://aistudio.google.com/apikey)。
+需要 [Bun](https://bun.sh)。使用 AI 功能还需要上面列出的某个提供方的 Key（Ollama 不需要），例如免费的 [Gemini API Key](https://aistudio.google.com/apikey)。第一次打开时有一个三步引导，可以在里面添加 Key，也可以不用 AI 直接继续。
 
 ```bash
 git clone https://github.com/royisme/relire.git
@@ -70,36 +80,20 @@ bun install
 bun run dev        # http://localhost:5173
 ```
 
-第一次打开时会有一个简短的引导，帮你创建并检查 Key，之后也可以在**设置**里添加。单词和句子解析、朗读音频、发音反馈都要用到它。
-
-### 作为应用安装
-
-```bash
-bun run build      # 静态文件输出到 dist/
-bun run preview    # 在本地预览
-```
-
-`dist/` 就是普通的静态网站，也可以放到任何地方（GitHub Pages、Netlify、S3 等）。用 Chrome、Edge 或 Safari 打开后，选择浏览器的“安装”选项，它就会在独立窗口里运行。安装需要 `localhost` 或 HTTPS。
-
-阅读、已保存的生词和生词复习可以离线使用。凡是要调用 Gemini 的功能都需要联网。
+`bun run build` 会在 `dist/` 里生成一个普通的静态网站，放到哪里都行（GitHub Pages、Netlify、S3 等）。用 Chrome、Edge 或 Safari 打开后选择浏览器的“安装”选项，它就会在独立窗口里运行。此后保存在你设备上的内容可以离线使用；凡是要调用 AI 服务商或可选内容服务的功能都需要联网，Ollama 只需要你自己的电脑。
 
 ### 隐私
 
-文章、生词和统计数据保存在这个浏览器的 IndexedDB 里，API Key 和设置保存在本地存储里。可以在设置中导出和恢复备份（备份文件不包含 Key）。浏览器在空间不足或长期不使用时可能清掉网站数据，Safari 对没有安装的网站尤其如此，所以请安装成应用、在设置里点“保护我的数据”，并定期导出备份。使用 AI 功能时，单词、句子或录音会用你的 Key 从浏览器直接发给 Google 的 Gemini API，不经过任何其他服务器。生成的解析、练习题和发音音频会缓存在你的设备上。复用已缓存的结果或音频无需再次调用 API，已缓存的音频也可以离线播放。单词解析没有过期时间，句子解析和练习题在 30 天后过期。生词本关联的音频不会被自动清理；音频总量超过 200 MB 时，其他音频可能被清理。可以在设置里查看和清除，备份时也可以选择带上生词本的音频。能访问你浏览器配置的人可以读到保存的 Key，所以请使用可以随时撤销的 Key。
+- 文章、生词、录音和统计数据保存在这个浏览器的 IndexedDB 里；Key 和设置保存在本地存储里，备份文件不包含 Key。
+- 使用 AI 功能时，单词、句子或录音会从你的浏览器直接发给你选择的服务商。
+- 可选内容服务绝不会收到你的 AI Key、答题记录、文章或录音。
+- 浏览器在空间不足时可能清掉网站数据；请把应用安装成本地应用，并定期导出备份。
+
+完整说明见 [PRIVACY.md](PRIVACY.md)（英文）。
 
 ## 技术栈
 
-React 19、Vite、Tailwind CSS 4、i18next，以及在浏览器里直接调用的 AI 提供方（Gemini 通过 `@google/genai`）。`PRODUCT.md` 说明产品面向谁以及设计原则，`DESIGN.md` 是视觉规范，`docs/architecture.md` 是代码地图，`CLAUDE.md` 和 `.claude/` 是给 AI 编码助手的指引。
-
-```
-src/services/ai/         提供方、提示词模板和任务；界面调用 src/services/api.ts
-src/App.tsx              应用状态与页面切换
-src/storage/             IndexedDB 持久化、解析缓存和音频存储
-src/components/          每个页面或浮层一个文件
-src/utils/srs.ts         SM-2 调度
-```
-
-`bun run typecheck` 运行 TypeScript 检查，`bun run lint` 运行 oxlint，`bun run format` 用 oxfmt 格式化，`bun run e2e` 运行 Playwright 端到端测试（所有 AI 请求均为模拟）。
+React 19、Vite、Tailwind CSS 4 和 i18next，应用直接从浏览器调用 AI 服务商的接口。`PRODUCT.md` 说明应用面向谁，`DESIGN.md` 是视觉规范，`AGENTS.md` 是给贡献者的仓库规则、检查和命令。
 
 ## 参与贡献
 
@@ -107,4 +101,6 @@ src/utils/srs.ts         SM-2 调度
 
 ## 许可证
 
-[MIT](LICENSE)
+代码与文档采用 [MIT](LICENSE)。`data/lexicon/` 下的词典数据文件是基于 Morphalou 3.1 的衍生作品，采用 LGPL-LR 许可证；见 [data/lexicon/NOTICE.md](data/lexicon/NOTICE.md) 与 [data/lexicon/LGPL-LR.txt](data/lexicon/LGPL-LR.txt)。
+
+如果 Relire 对你学法语有帮助，点个 Star，让更多人找到它。

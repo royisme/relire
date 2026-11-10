@@ -14,7 +14,14 @@ export default defineConfig({
   jsPlugins: [{ name: 'react-hooks-js', specifier: 'eslint-plugin-react-hooks' }],
   options: { typeAware: true, reportUnusedDisableDirectives: 'error' },
   env: { browser: true, node: true, es2022: true },
-  ignorePatterns: ['node_modules/**', 'dist/**', 'dev-dist/**', 'test-results/**', 'playwright-report/**'],
+  ignorePatterns: [
+    '**/node_modules/**',
+    'worker/.wrangler/**',
+    'dist/**',
+    'dev-dist/**',
+    'test-results/**',
+    'playwright-report/**',
+  ],
   categories: { correctness: 'error' },
   rules: {
     'typescript/no-explicit-any': 'error',

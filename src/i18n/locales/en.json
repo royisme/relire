@@ -12,19 +12,125 @@
     "done": "Done",
     "listSeparator": "; "
   },
+  "pageFailure": {
+    "message": "This page could not be shown: {{msg}}",
+    "retry": "Try again"
+  },
   "nav": {
-    "reader": "Read",
-    "vocab": "My study",
-    "practice": "Drills",
+    "words": "Words",
     "analytics": "Progress",
     "installApp": "Install app",
     "settings": "Settings",
     "menu": "Menu",
     "language": "Language",
     "main": "Main navigation",
+    "groupLearn": "Learn",
+    "groupReview": "Review",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
-    "due": "{{count}} due"
+    "due": "{{count}} due",
+    "toReview": "{{count}} to review",
+    "importArticle": "Import an article",
+    "gradedReaders": "Graded readers",
+    "recordings": "Recordings"
+  },
+  "today": {
+    "title": "Today",
+    "done": "Done today",
+    "steps": {
+      "title": "Today's steps",
+      "progress": "{{done}} of {{total}} done"
+    },
+    "guidance": {
+      "empty": "No steps today. Choose a skill to practise on your own.",
+      "allDone": "You are done for today. You can still practise a skill on its own.",
+      "unavailable": "Some steps could not load. You can practise a skill on its own.",
+      "plan": "Today, {{steps}}. Stop whenever you like; you will pick up from here.",
+      "words_one": "review {{count}} word",
+      "words_other": "review {{count}} words",
+      "read": "read a short text",
+      "sound": "practise sound pairs",
+      "mistakes_one": "redo {{count}} mistake",
+      "mistakes_other": "redo {{count}} mistakes",
+      "grammar": "study the next grammar topic"
+    },
+    "practice": {
+      "title": "Or practise one skill on its own",
+      "words": "Words",
+      "read": "Read",
+      "speaking": "Speaking",
+      "grammar": "Grammar"
+    },
+    "counts": {
+      "title": "Today so far",
+      "reviews": "Words reviewed",
+      "exercises": "Exercises answered",
+      "readers": "Readers worked on"
+    },
+    "loading": "Loading today's steps…",
+    "stepError": "Could not load this step: {{msg}}",
+    "words": {
+      "title": "Review words",
+      "status": "{{due}} to review · {{newAvailable}} new",
+      "action": "Review",
+      "why": "Each word comes back on a schedule set by how well you remembered it."
+    },
+    "read": {
+      "title": "Read",
+      "start": "Start reader {{order}}",
+      "continue": "Continue reader {{order}}",
+      "doneToday": "Reader {{order}} done today",
+      "startNoKey": "Start here: reader {{order}} needs no key.",
+      "action": "Open",
+      "why": "A short graded text. Tap any word for its meaning; no key needed."
+    },
+    "sound": {
+      "title": "Sound pairs",
+      "status": "Tell similar French sounds apart",
+      "action": "Practise",
+      "why": "Hear similar French sounds and repeat them."
+    },
+    "mistakes": {
+      "title": "Redo mistakes",
+      "status_one": "{{count}} saved mistake",
+      "status_other": "{{count}} saved mistakes",
+      "action": "Redo",
+      "why": "Redo what you got wrong; a correct answer clears it."
+    },
+    "grammar": {
+      "title": "Grammar",
+      "status": "Next topic: {{title}}",
+      "action": "Open",
+      "why": "The next topic in the book's order."
+    }
+  },
+  "learning": {
+    "areas": {
+      "reading": "Reading",
+      "grammar": "Grammar",
+      "listening": "Listening",
+      "writing": "Writing"
+    },
+    "area": "Learning area",
+    "navigation": "Learning destinations",
+    "library": "Library",
+    "exercises": "Exercises",
+    "exercisesTitle": "{{area}} exercises",
+    "scopedCounts": "Counts and progress include only this area. Open a set to see its complete batch, which may contain other areas.",
+    "completeSet_one": "Complete set: {{count}} exercise across all its learning areas. Deleting the set removes the whole batch.",
+    "completeSet_other": "Complete set: {{count}} exercises across all its learning areas. Deleting the set removes the whole batch.",
+    "emptyTitle": "No saved exercises in this area",
+    "emptyDesc": "Use Add exercises to bring in a worksheet or make supported exercises for this area.",
+    "listeningSupport": "Listening supports number dictation, sound pairs, spelling to sound and dictation of graded-reader sentences, not general audio comprehension.",
+    "listeningEmpty": "Use Add exercises to practise sound pairs or import a worksheet with playable number dictation.",
+    "unsupportedListening": "Listening requires number dictation or pack-backed sound pairs with audio text for every item. Choose another area or exclude this unit; prompt read-aloud is not listening practice.",
+    "speaking": "Speaking",
+    "readAloud": "Read aloud",
+    "speakingDesc": "Listen to an article sentence, record yourself and optionally ask your AI for a pronunciation estimate.",
+    "shadowingContext": "For saved shadowing takes, use the microphone beside a sentence in the reader.",
+    "chooseArticle": "Choose an article",
+    "speakingEmpty": "Add an article in Reading before practising it aloud.",
+    "sourceUnavailable": "The selected article or sentence is no longer available. Choose a source explicitly to continue."
   },
   "theme": {
     "label": "Theme",
@@ -34,6 +140,7 @@
     "dark": "Dark"
   },
   "reader": {
+    "backToUnit": "Back to exercises",
     "stop": "Stop",
     "tempo": "Speed",
     "slowPace": "Slow",
@@ -47,7 +154,9 @@
     "wordCount": "{{count}} words",
     "textSize": "Text size",
     "listenAll": "Listen",
-    "sentenceActions": "Sentence actions"
+    "sentenceActions": "Sentence actions",
+    "makeExercises": "Make exercises",
+    "makeExercisesHint": "Make exercises from an article"
   },
   "player": {
     "label": "Article player",
@@ -57,7 +166,11 @@
     "next": "Next sentence",
     "stop": "Stop listening",
     "progress": "Sentence {{current}} of {{total}}",
-    "failed": "This sentence could not be played. Press play to try again."
+    "failed": "This sentence could not be played. Press play to try again.",
+    "failedReason": "This sentence could not be played: {{msg}}"
+  },
+  "speech": {
+    "listenFailed": "Listen failed: {{msg}}"
   },
   "wordModal": {
     "lemma": "Lemma",
@@ -66,16 +179,105 @@
     "contextTense": "In this sentence",
     "originalSentence": "From the text:",
     "conjugation": "Conjugation",
-    "clickToListen": "Tap a form to hear it",
+    "conjugationLoading": "Loading the conjugation…",
+    "conjugateThis": "Conjugate this verb",
+    "showTenses": "Show all tenses",
+    "hideTenses": "Hide all tenses",
+    "dictionaryNote": "From the Morphalou dictionary, not reviewed.",
+    "compoundTenses": "Compound tenses are on the Conjugation page.",
+    "verbForm": "Verb form",
+    "verbFormLine": "{{verb}} : {{forms}}",
+    "verbFormTense": "{{tense}}, {{persons}}",
     "examples": "Examples",
     "listenExample": "Listen to example",
     "memoryTrick": "To remember",
-    "addToVocab": "Save word",
-    "removeFromVocab": "Saved",
     "analyzing": "Looking up the word…",
     "failed": "Could not look up this word.",
-    "listen": "Listen",
-    "removeHint": "Remove from vocabulary"
+    "listen": "Listen"
+  },
+  "gradedReader": {
+    "listTitle": "Graded readers",
+    "service": {
+      "loading": "Loading more readers…",
+      "ready": "More readers from the content service.",
+      "empty": "No additional readers are published yet.",
+      "savedCatalogue": "Offline: showing the last saved reader list.",
+      "conflict": "A different starter edition is published for {{ids}}. Update the app to use a new starter; the bundled text is kept here.",
+      "keepOffline": "Keep offline",
+      "saving": "Saving…",
+      "savedReader": "Saved for offline reading after the app is installed.",
+      "saveError": "Not saved offline: {{msg}}"
+    },
+    "reviewNotice": "AI-reviewed readers, not human-reviewed. No key needed.",
+    "loading": "Opening readers…",
+    "loadError": "Could not load readers: {{msg}}",
+    "openError": "Could not open this edition: {{msg}}",
+    "progressError": "Reading status unavailable: {{msg}}",
+    "saveError": "Could not save: {{msg}}",
+    "bindingError": "Authored entry unavailable: {{msg}}",
+    "empty": "No readers are available yet.",
+    "back": "Back to graded readers",
+    "stage": "{{level}} · Stage {{number}}",
+    "stageNumber": "Stage {{number}}",
+    "earlier": "Earlier edition read",
+    "word": "Word",
+    "translation": "Translation",
+    "deviceVoice": "Device voice",
+    "sourceAi": "AI-written, reviewed by AI, not human-reviewed",
+    "sourceHuman": "Human-reviewed",
+    "sourceUnknown": "Review status not recorded",
+    "dictation": {
+      "title": "Dictation",
+      "description": "Hear sentences from this reader with your device's voice and type them. The translation is the clue; punctuation is not checked.",
+      "action": "Practise by dictation"
+    },
+    "completion": "Reading status",
+    "markRead": "Mark read",
+    "markUnread": "Mark unread",
+    "readAt": "Read · {{date}}",
+    "status": {
+      "unavailable": "Unavailable",
+      "notOpened": "Not opened",
+      "opened": "Opened",
+      "read": "Read"
+    },
+    "authored": "Authored",
+    "showTranslation": "Show translation",
+    "hideTranslation": "Hide translation",
+    "pos": {
+      "noun": "Noun",
+      "verb": "Verb",
+      "adjective": "Adjective",
+      "adverb": "Adverb",
+      "function": "Function word",
+      "interjection": "Interjection",
+      "number": "Number",
+      "proper": "Proper noun",
+      "phrase": "Phrase"
+    },
+    "gender": {
+      "masculine": "masculine",
+      "feminine": "feminine"
+    },
+    "checkpoints": {
+      "title": "Checkpoints",
+      "quotedSentence": "From the sentence",
+      "showQuotedSentence": "Show the quoted sentence"
+    },
+    "ai": {
+      "askWord": "Ask AI about this word",
+      "askSentence": "Ask AI to analyse this sentence",
+      "answer": "AI answer, not reviewed"
+    },
+    "transform": {
+      "title": "Practise this pattern",
+      "description": "Change sentences from this reader by a grammar rule. The app builds the answers by rule from the reader's own sentences: no AI and no key.",
+      "negation": "Make negation practice",
+      "number": "Make plural and singular practice",
+      "question": "Make est-ce que practice",
+      "pronoun": "Make le, la, l’ or les practice",
+      "passe-compose": "Make passé composé practice"
+    }
   },
   "sentenceDrawer": {
     "title": "Sentence",
@@ -91,7 +293,6 @@
     "original": "French"
   },
   "shadowing": {
-    "title": "Shadowing",
     "pace": "Pace",
     "phrasing": "Phrasing",
     "liaisons": "Liaison and elision",
@@ -107,70 +308,431 @@
     "stopOther": "Stop that recording",
     "assessError": "Could not check the pronunciation.",
     "overall": "Overall score",
+    "overallEstimate": "Overall (estimate)",
+    "estimate": "An estimate to help you practise, not a score.",
     "accuracy": "Accuracy",
     "fluency": "Fluency",
     "rhythm": "Rhythm",
+    "completeness": "Completeness",
+    "wordError": {
+      "Mispronunciation": "Mispronounced",
+      "Omission": "Skipped",
+      "Insertion": "Extra word"
+    },
     "sounds": "Sounds to work on",
     "words": "Words to fix",
+    "strengths": "What worked",
     "notes": "Notes",
     "status": {
       "excellent": "Good",
       "acceptable": "Fair",
       "needs_work": "Needs work"
-    }
+    },
+    "yourReading": "Your reading",
+    "scores": "Scores",
+    "wordByWord": "Word by word",
+    "summary": {
+      "allClear": "Every word was clear.",
+      "some": "{{count}} of {{total}} words need another try.",
+      "skipped": "{{count}} skipped",
+      "extra": "{{count}} extra"
+    },
+    "band": {
+      "clear": "Clear",
+      "close": "Close",
+      "unclear": "Unclear"
+    },
+    "wordNote": {
+      "close": "Close to the model, but not clear enough.",
+      "unclear": "Hard to recognise as this word.",
+      "Omission": "The service did not hear this word.",
+      "Insertion": "You said a word that is not in the sentence.",
+      "Mispronunciation": "The service marked this word as mispronounced."
+    },
+    "wordScore": "{{score}} out of 100",
+    "noWordScore": "The service gave no score for this word.",
+    "pickWord": "Tap a word to hear it and see why.",
+    "hearWord": "Hear \"{{word}}\"",
+    "hearSentence": "Hear the sentence",
+    "stopSpeaking": "Stop",
+    "next": "Next",
+    "startWith": "Start with {{words}}, then record again.",
+    "scoresOnly": "This check returned scores only, with no word detail."
   },
   "vocab": {
-    "title": "Vocabulary",
-    "subtitle": "Words you saved, brought back for review just before you would forget them.",
-    "startReview": "Review {{count}} due",
-    "allReviewed": "Nothing due today",
-    "dueToday": "Due Today",
-    "mastered": "Mastered",
-    "searchPlaceholder": "Search words, meanings or sentences",
-    "filterAll": "All",
-    "filterDue": "Due Today",
-    "filterLearning": "Learning",
-    "filterMastered": "Mastered",
-    "nextReview": "Next review:",
-    "interval": "Interval: {{days}} days",
-    "reps": "Reps: {{count}}",
-    "deleteConfirm": "Remove this word from your vocabulary?",
-    "empty": "No saved words yet. While reading, tap a word and choose Save word.",
-    "reviewTitle": "Review",
-    "showAnswer": "Show meaning",
-    "rateHard": "Hard",
-    "rateGood": "Good",
-    "rateEasy": "Easy",
-    "finishReview": "Done for now",
-    "reviewedCount": "{{count}} reviewed",
-    "exportJson": "Export vocabulary as JSON",
-    "backToList": "Back to list"
+    "title": "Words",
+    "subtitle": "Book words and personal bookmarks share one review schedule.",
+    "pages": "Words pages",
+    "overview": "Overview",
+    "allWords": "All words",
+    "due": "Ready to review",
+    "learning": "Learning (including words you forgot)",
+    "available": "New words available today",
+    "action": {
+      "review_one": "Review {{count}} word",
+      "review_other": "Review {{count}} words",
+      "learn_one": "Learn {{count}} new word",
+      "learn_other": "Learn {{count}} new words",
+      "next": "Your next word returns on {{time}}.",
+      "empty": "Nothing to study right now. Import a word list below, or save words while you read."
+    },
+    "pace": {
+      "range": "About {{from}}–{{to}} min at your usual pace",
+      "single": "About {{from}} min at your usual pace"
+    },
+    "play": "Play a run",
+    "map": {
+      "title": "Map",
+      "page": "Page {{page}}",
+      "positions": "Book positions {{from}}–{{to}}",
+      "saved": "Saved from reading",
+      "other": "Other words",
+      "introduced": "Started",
+      "learning": "Learning",
+      "young": "Getting familiar",
+      "mature": "Well known",
+      "leech": "Keeps slipping",
+      "unseen": "Unseen",
+      "total": "Total",
+      "tier": {
+        "new": "New",
+        "learning": "Learning",
+        "young": "Getting familiar",
+        "mature": "Well known"
+      },
+      "picture": "Words by current state",
+      "segment": "{{label}}: {{words}}",
+      "overlap": "Started counts words that are new, learning, getting familiar or well known. Words that keep slipping (forgotten in review 8 or more times) sit inside these states; they are not extra words. Well known means the gap the schedule set at the last review was 21 days or more.",
+      "showWords": "Show words",
+      "hideWords": "Hide words",
+      "range": "{{from}}–{{to}} of {{total}}",
+      "empty": "Nothing here yet. Browse words or import a deck from the Words home.",
+      "leeches": "Words that keep slipping · {{words}}",
+      "noLeeches": "No word has been forgotten in review 8 times yet.",
+      "lapses": "Times forgotten in review: {{lapses}}",
+      "memoryTrick": "Memory trick",
+      "examples": "Examples"
+    },
+    "import": {
+      "title": "Import Anki notes",
+      "description": "Choose a .txt, .tsv, .csv or .apkg export, then match its fields. Everything stays on this device; existing review schedules are kept.",
+      "file": "Notes file",
+      "fileType": "Choose a .txt, .tsv, .csv or .apkg file.",
+      "apkg": {
+        "noteType": "Package note type",
+        "chooseType": "Choose a note type",
+        "typeOption": "{{name}} · {{notes}} notes · {{fields}}",
+        "contentOnly": "Packages up to 50 MiB. Only note text, decks and tags are imported, not media or review history.",
+        "tooLarge": "The package exceeds the {{size}} MiB limit.",
+        "zip": "Cannot read this file as a ZIP package: {{reason}}",
+        "noCollection": "The package has no collection.anki21b, collection.anki21 or collection.anki2 database.",
+        "stub": "This package contains only Anki’s update notice, not the notes. Export it again with a current Anki version.",
+        "zstd": "Cannot decompress the Zstandard collection: {{reason}}",
+        "database": "Cannot read the collection database: {{reason}}",
+        "noNotes": "The collection contains no notes.",
+        "noDeck": "The note has no first-card deck in this package.",
+        "fieldCount": "The note has {{actual}} fields; its note type declares {{expected}}.",
+        "unknownType": "A note refers to a note type missing from the collection."
+      },
+      "errors": {
+        "textTooLarge": "The text file exceeds the {{size}} MiB limit.",
+        "tooManyRows": "The text file exceeds the {{rows}} note limit.",
+        "databaseTooLarge": "The expanded collection exceeds the {{size}} MiB database limit.",
+        "separator": "Unsupported separator: {{name}}",
+        "columnHeader": "Invalid column header: {{line}}",
+        "unclosedQuote": "Unclosed quoted field",
+        "unexpectedQuote": "Unexpected character outside quoted field",
+        "unsupportedEntity": "Unsupported HTML entity: {{entity}}",
+        "invalidEntity": "Invalid HTML entity: {{entity}}",
+        "controlCharacter": "Text contains a control character",
+        "differentColumns": "Choose different columns for the word, answer and example",
+        "missingColumn": "Missing column {{column}}",
+        "invalidFields": "Use nonblank text without HTML in these fields: {{fields}}"
+      },
+      "separator": "Separator: {{separator}}",
+      "separators": {
+        "tab": "Tab",
+        "comma": "Comma",
+        "semicolon": "Semicolon",
+        "space": "Space",
+        "pipe": "Pipe"
+      },
+      "deck": "Deck name (the file's deck column takes precedence)",
+      "front": "French word",
+      "back": "Answer",
+      "example": "French example",
+      "noExample": "No example",
+      "column": "Column {{number}} {{name}}",
+      "preview": "Preview: first five valid notes",
+      "action": "Import notes",
+      "working": "Working…",
+      "ready": "{{accepted}} valid notes, {{rejected}} rejected. Import to see the row details.",
+      "empty": "No notes to import.",
+      "failed": "Import failed: {{reason}}",
+      "result": "{{imported}} imported, {{merged}} merged, {{rejected}} rejected.",
+      "rejectedRow": "Row {{row}}: {{reason}}"
+    },
+    "wordbooks": {
+      "title": "Wordbooks",
+      "help": "Choose the wordbook to study. Only its words enter your reviews.",
+      "study": "Wordbook to study",
+      "mine": "My words",
+      "words_one": "{{count}} word",
+      "words_other": "{{count}} words",
+      "mineEmpty": "Words you save while reading land here.",
+      "deleteLabel": "Delete {{name}}",
+      "confirmTitle": "Delete this deck?",
+      "confirmBody": "“{{name}}” holds {{words}} words, {{history}} of them with review history. Deleting the deck deletes their progress with them.",
+      "confirmShared": "A word that also belongs to another wordbook, or that you saved while reading, keeps its progress. Only this deck’s entry is removed.",
+      "confirmDelete": "Delete deck",
+      "deleteFailed": "Could not delete the deck: {{reason}}",
+      "saving": "Saving…"
+    },
+    "book": "Built-in wordbook",
+    "bookCount_one": "{{count}} word available offline",
+    "bookCount_other": "{{count}} words available offline",
+    "bookUnavailable": "The built-in book is unavailable. Your saved cards still work.",
+    "download": "Download book",
+    "update": "Check for updates",
+    "restart": "Restart download",
+    "downloading": "Downloading…",
+    "downloadProgress": "Page {{page}} of {{total}}",
+    "updatesUnavailable": "Updates are unavailable without a configured content service.",
+    "errorDetails": "View error details",
+    "quotaReached": "You have reached today’s limit of new words. Words that are ready can still be reviewed.",
+    "newLimit": "New words per day (0–100)",
+    "invalidLimit": "Enter a whole number from 0 to 100.",
+    "retention": "Recall target (80–95%)",
+    "invalidRetention": "Enter a whole percentage from 80 to 95.",
+    "retentionHelp": "How sure you want to be of remembering a word when it comes back. The default is 90%. A higher target means more reviews. It is a target, not a measured score or a guarantee. A change applies from your next saved review and does not move current review times.",
+    "outcomeHelp": "Before flipping: Forgot means you could not recall the core meaning; Fuzzy means you recalled it with hesitation or effort; Remembered means you recalled it without that difficulty. Recognizing it only after flipping belongs to Forgot.",
+    "clockError": "The review time is invalid or earlier than your last review. Correct this device’s clock, then submit again.",
+    "saved": "Saved",
+    "confirm": "Confirm",
+    "saving": "Saving…",
+    "generateExamples": "Generate examples",
+    "generatingExamples": "Generating…",
+    "reviewDue": "Review words that are ready",
+    "search": "Search words, meanings or sentences",
+    "word": "Word",
+    "source": "Source",
+    "state": "Learning state",
+    "all": "All",
+    "builtIn": "Built-in",
+    "builtInUnreviewed": "Built-in · not reviewed",
+    "builtInReviewed": "Built-in · reviewed by {{name}} on {{date}}",
+    "bookmarked": "Bookmarked",
+    "unintroduced": "Not started",
+    "review": "Review",
+    "savedContext": "Personal context",
+    "savedLanguage": "Saved explanation language: {{language}}",
+    "language": {
+      "en": "English",
+      "zh": "Chinese"
+    },
+    "reset": "Reset schedule",
+    "resetHelp": "Start this word again from the beginning. These are kept: the date you first learned it, the daily record of new words and your ratings.",
+    "delete": "Delete card and history",
+    "deleteHelp": "Remove your card for this word, with all its contexts and rating history. The downloaded book and the daily record of new words are kept. This is not the same as removing a bookmark.",
+    "noResults": "No words match your search or filter.",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{page}} of {{total}}",
+    "back": "Back to Words",
+    "sessionCounts": "This session: {{ratings}} ratings · {{introductions}} new words",
+    "reviewCounts": "Ready to review: {{due}} · New words left today: {{remaining}}",
+    "flip": "Flip card",
+    "flipFront": "Flip to front",
+    "skip": "Skip for now",
+    "forgot": "Forgot",
+    "fuzzy": "Fuzzy",
+    "remembered": "Remembered",
+    "recall": "Recall the meaning before flipping.",
+    "waiting": "Nothing more for now",
+    "nextDue": "Your next word is ready at {{time}} (in {{seconds}} seconds). You can leave and return.",
+    "noEligible": "No word is ready right now. Some may be scheduled for later, skipped, or held back by today’s limit of new words; this does not mean you know every word.",
+    "analyticsCounts": "{{introduced}} introduced · {{ratings}} submitted ratings",
+    "analysisMismatch": "The model answered for “{{actual}}”, not the clicked word “{{requested}}”. Retry the lookup.",
+    "saveWord": "Save word",
+    "saveContext": "Save this context",
+    "contextSaved": "Context saved",
+    "removeBookmark": "Remove bookmark",
+    "removeHelp": "Removing a bookmark keeps saved contexts, learning schedule and rating history.",
+    "rhythm": {
+      "title": "Weekly rhythm",
+      "count": "{{days}} of the last 7 days",
+      "ratedDay": "{{date}}: rated words",
+      "day": "{{date}}"
+    },
+    "goal": {
+      "set": "Set a goal",
+      "change": "Change goal",
+      "title": "Vocabulary goal",
+      "description": "An exam date and a target number of well-known words (the gap the schedule set at their last review was 21 days or more). Kept on this device only; removing it changes nothing else.",
+      "examDate": "Exam date",
+      "target": "Well-known words target",
+      "save": "Save goal",
+      "clear": "Remove goal",
+      "daysLeft_one": "{{count}} day to your exam date",
+      "daysLeft_other": "{{count}} days to your exam date",
+      "examToday": "Your exam date is today.",
+      "examPassed": "The exam date has passed.",
+      "progress": "Well known now: {{mature}} · Target: {{target}}",
+      "weekly": "Words that first became well known, by week (last 4 weeks)",
+      "errors": {
+        "missingDate": "Choose an exam date.",
+        "pastDate": "The date is in the past. Choose today or a later date.",
+        "invalidTarget": "Enter a whole number of 1 or more."
+      }
+    },
+    "game": {
+      "now": "Now",
+      "keptNow": "In review: {{review}} · Well known (last review set a gap of 21+ days): {{mature}}",
+      "gainedThisWeek": "Gained this week (last 7 days)",
+      "firstMature": "First time well known: {{words}}",
+      "runLength": "Run length",
+      "chunkProgress": "{{done}} of {{size}} ratings this run",
+      "doneTitle": "Done for now",
+      "doneCounts": "Ratings this run: {{ratings}} · Ready to review: {{due}}",
+      "continueRun": "Continue",
+      "queueCleared": "Queue cleared",
+      "loadingCard": "Loading the next card…",
+      "nextDue": "The next card is ready at {{time}}.",
+      "nothingWaiting": "Nothing is scheduled next.",
+      "kindRecognize": "Choose the meaning",
+      "kindClozeChoice": "Choose the word for the blank",
+      "kindClozeType": "Type the missing word",
+      "kindListen": "Listen and type the word",
+      "kindProduce": "Write the French word",
+      "listenWord": "Play the word",
+      "answerLabel": "Your answer",
+      "answer": "Answer",
+      "dontKnow": "I don’t know",
+      "justFlip": "Just flip",
+      "right": "Right.",
+      "notRight": "Not this one.",
+      "youChose": "You chose “{{gave}}”. The card says “{{expected}}”.",
+      "youTyped": "You typed “{{gave}}”. The card says “{{expected}}”."
+    }
   },
   "practice": {
-    "title": "Drills",
-    "subtitle": "Questions made from the article you are reading",
-    "tabSyntax": "Word order",
-    "tabCloze": "Fill the gap",
-    "tabOral": "Read aloud",
-    "generateDrills": "Make questions",
-    "generating": "Making questions from the article…",
-    "checkAnswer": "Check Answer",
-    "nextQuestion": "Next question",
-    "showExplanation": "Hint",
-    "questionProgress": "Question {{current}} of {{total}}",
-    "realTTS": "Listen",
-    "scramblePrompt": "Tap the pieces in the right order.",
-    "removeChunk": "Tap to remove",
-    "chunksToOrder": "Pieces",
-    "noArticleTitle": "Open an article first",
-    "noArticleDesc": "Drills are generated from the article you are reading.",
+    "setCount_one": "{{count}} exercise set",
+    "setCount_other": "{{count}} exercise sets",
+    "exercises_one": "{{count}} exercise",
+    "exercises_other": "{{count}} exercises",
+    "add": "Add exercises",
+    "importWorksheet": "Import a worksheet",
+    "makeFromArticle": "Make from an article",
+    "makeConjugationDrills": "Conjugation drills",
+    "importWorksheetDesc": "Open the import page to review exercises from images, a PDF or text.",
+    "makeFromArticleDesc": "Choose a library article and let your AI make exercises.",
+    "makeConjugationDrillsDesc": "Pick reviewed verbs and tenses. No AI key needed.",
+    "drillItems": "Items per tense",
+    "start": "Start",
+    "continue": "Continue",
+    "practiseAgain": "Practise again",
+    "numberedTitle": "{{number}}. {{title}}",
+    "search": "Search exercise sets",
+    "colTitle": "Title",
+    "colExercises": "Exercises",
+    "colProgress": "Progress",
+    "colAdded": "Added",
+    "colNumber": "Number",
+    "colType": "Type",
+    "actions": "Actions",
+    "checkedProgress": "{{checked}} of {{total}} checked · {{correct}} correct",
+    "noMatch": "No exercise sets match your filters.",
+    "back": "Back to exercises",
+    "backToSet": "Back to {{title}}",
+    "deleteUnit": "Delete exercise",
+    "deleteUnitNamed": "Delete exercise {{title}}",
+    "deleteUnitTitle": "Delete this exercise?",
+    "deleteUnitBody": "“{{title}}” and the answers on it will be removed from this device. Your attempt history stays in the mistake notebook.",
+    "deleteLastUnit": "This is the set’s last exercise, so the exercise set will also be removed.",
+    "deleteUnitFailed": "Could not delete the exercise: {{reason}}",
+    "noArticleTitle": "Add an article first",
+    "noArticleDesc": "Exercises are made from an article in your library.",
     "openLibrary": "Go to library",
-    "newDrills": "New questions"
+    "article": "Article",
+    "level": "Level",
+    "count": "Items",
+    "countRange": "Choose a whole number from 1 to {{max}}.",
+    "make": "Make exercises from this article",
+    "making": "Making exercises from the article…",
+    "made_one": "Made {{count}} item. It is in the list below.",
+    "made_other": "Made {{count}} items. They are in the list below.",
+    "dropped_one": "{{count}} item could not be checked against the article and was left out.",
+    "dropped_other": "{{count}} items could not be checked against the article and were left out.",
+    "items_one": "{{count}} item",
+    "items_other": "{{count}} items",
+    "notStarted": "Not started",
+    "progress": "{{checked}} of {{total}} checked, {{correct}} right",
+    "sentenceOf": "Sentence {{current}} of {{total}}",
+    "previousSentence": "Previous sentence",
+    "nextSentence": "Next sentence",
+    "listenSlowly": "Listen slowly",
+    "check": "Check",
+    "checked": "Checked",
+    "checkAll": "Check all",
+    "hint": "Hint",
+    "explain": "Explain",
+    "redo": "Redo",
+    "redoTitle": "Clear this answer and try it again. Your attempts stay in Mistakes.",
+    "resetUnit": "Reset this unit",
+    "reset": "Reset",
+    "resetTitle": "Reset this unit?",
+    "resetBody": "The answers on “{{title}}” are cleared so you can do it again. Your history of attempts is kept.",
+    "deleteSet": "Delete set",
+    "deleteSetNamed": "Delete set {{title}}",
+    "deleteSetTitle": "Delete this exercise set?",
+    "deleteSetBody_one": "Delete the complete set “{{title}}”: {{count}} exercise across all learning areas, its saved answers and passage recordings will be removed from this device. Attempt history stays in Mistakes.",
+    "deleteSetBody_other": "Delete the complete set “{{title}}”: {{count}} exercises across all learning areas, their saved answers and passage recordings will be removed from this device. Attempt history stays in Mistakes.",
+    "deleteSetFailed": "Could not delete the exercise set: {{reason}}",
+    "saveFailed": "Your last change could not be saved: {{msg}}",
+    "right": "Correct",
+    "wrong": "Incorrect",
+    "expected": "Correct answer",
+    "yourAnswer": "Your answer",
+    "blankLabel": "Item {{number}}, blank {{blank}}",
+    "answerLabel": "Item {{number}}, your answer",
+    "choiceLabel": "Item {{number}}, choice {{group}}",
+    "genderLabel": "Item {{number}}, gender",
+    "genderMasculine": "Masculine",
+    "genderFeminine": "Feminine",
+    "wordsLabel": "Item {{number}}, words",
+    "answersLabel": "Item {{number}}, answers",
+    "linesLabel": "Item {{number}}, lines",
+    "moveLineUp": "Move {{line}} up",
+    "moveLineDown": "Move {{line}} down",
+    "openNote": "An AI reads your answer and writes feedback. It is an estimate, not a score.",
+    "sampleAnswer": "Sample answer",
+    "example": "Example",
+    "note": "Note",
+    "rule": "Rule",
+    "clue": "Clue",
+    "aiFeedback": "AI feedback",
+    "betterVersion": "A better version",
+    "estimate": "An estimate to help you practise, not a score.",
+    "explanationTitle": "Explanation",
+    "explaining": "Explaining…",
+    "tip": "Tip",
+    "chars": {
+      "label": "French characters",
+      "toggle": "French characters",
+      "shift": "Shift",
+      "hint": "Press a character to put it at the cursor.",
+      "none": "Click in an answer first."
+    },
+    "listen": "Listen",
+    "openInReader": "Open in the reader",
+    "sentenceLabel": "Item {{number}}, your sentence",
+    "tilesLabel": "Item {{number}}, word tiles",
+    "sentenceEmpty": "Build the sentence with the tiles below.",
+    "removeWord": "Remove {{word}}"
   },
   "analytics": {
     "title": "Progress",
     "subtitle": "What you have read, saved and practised.",
-    "wordsLearned": "Words saved",
     "oralSessions": "Read-aloud attempts",
     "avgScore": "Average pronunciation",
     "scoreHistory": "Recent scores",
@@ -193,23 +755,30 @@
     "importBackup": "Import backup",
     "exportSuccess": "Backup saved.",
     "importSuccess": "Backup restored. Reloading…",
-    "testBtn": "Test connection and voice",
     "testingBtn": "Testing…",
     "testSuccess": "Connection and voice work.",
     "testFailed": "Test failed: {{msg}}",
     "keySet": "Key saved in this browser",
     "keyMissing": "No key yet",
+    "keyNotNeeded": "No key needed",
     "keyPrivacy": "The key is stored only in this browser and sent only to {{provider}} when you use an AI feature. There is no app server.",
     "getKey": "Get a key from {{provider}}",
-    "needsKeyNotice": "Add your API key to use word and sentence analysis, audio and pronunciation feedback.",
+    "providerDocs": "{{provider}} documentation",
+    "needsKeyNotice": {
+      "text": "Add your API key to use word and sentence analysis, audio and pronunciation feedback.",
+      "ocr": "Add your API key to read images and PDFs.",
+      "speech": "Add your API key to have French read aloud.",
+      "assessment": "Add your Azure Speech key and resource region for audio assessment."
+    },
     "storageProtected": "Protected from automatic clearing",
     "storageNotProtected": "Browser may clear this data if it runs low on space or you stay away for a while",
     "protectStorage": "Protect my data",
     "exportFailed": "Export failed: {{msg}}",
     "restoreFailed": "Restore failed: {{msg}}",
-    "cacheSummary": "Saved answers: {{words}} words, {{sentences}} sentences, {{drills}} drill sets, {{prosody}} marker sets",
+    "cacheSummary": "Saved answers: {{words}} words, {{conjugations}} conjugations, {{sentences}} sentences, {{exercises}} exercise answers, {{prosody}} marker sets",
+    "contentCacheSummary": "{{count}} saved content responses (kept for 365 days, not backed up)",
     "clearCache": "Clear saved answers",
-    "cacheDesc": "Explanations, drills and markers are saved on this device. Words are kept until you clear them; sentences, drills and markers for 30 days. They are not part of backups.",
+    "cacheDesc": "Explanations, exercise help and markers are saved on this device. Words are kept until you clear them; sentences, exercise help and markers for 30 days. They are not part of backups.",
     "audioSummary": "Pronunciation audio: {{clips}} clips, {{mb}} MB; {{kept}} kept for your vocabulary",
     "clearAudio": "Clear other audio",
     "audioDesc": "Every clip is saved so it plays offline and is never generated twice. Audio for words in your vocabulary, their sentences and examples is always kept; the rest is trimmed when it grows past 200 MB.",
@@ -219,7 +788,7 @@
     "providerLabel": "Provider",
     "modelLabel": "Model",
     "keyLabel": "{{provider}} API key",
-    "sameKeyNote": "Uses the same {{provider}} key as above.",
+    "keyLabelOptional": "{{provider}} API key (optional)",
     "promptsDesc": "The instructions sent to the AI, as plain text. Edit them to change how answers are written; reset any prompt to go back to the original. Answers already saved on this device stay as they are; edited prompts get fresh answers.",
     "promptTask": "Prompt",
     "promptLanguage": "Prompt language",
@@ -239,19 +808,25 @@
     "unsaved": "Unsaved changes",
     "saveFailed": "Could not save: {{msg}}",
     "notStored": "The browser did not keep the change. Storage may be blocked or full.",
-    "checkAndSave": "Check and save",
     "checking": "Checking…",
-    "keyChecked": "Key works. Saved.",
     "keyCheckFailed": "Key check failed: {{msg}}",
     "returnToWork": "Go back to where you were",
+    "leaveTitle": "Discard the unsaved AI settings?",
+    "leaveHelp": "Your changes are not saved yet. Leaving now loses them.",
+    "keepEditing": "Keep editing",
+    "discard": "Discard",
     "sections": {
-      "text-ai": {
-        "title": "Text AI",
-        "desc": "Writes word and sentence analyses, practice drills and pronunciation feedback."
+      "ai": {
+        "title": "AI services",
+        "desc": "Your own provider keys and settings for each AI task."
       },
-      "speech": {
-        "title": "Speech",
-        "desc": "Reads French aloud. It can be a different provider from the text AI."
+      "practice": {
+        "title": "Practice",
+        "desc": "How exercises are checked and how dictation is played."
+      },
+      "words": {
+        "title": "Words",
+        "desc": "The daily new-word limit and the built-in wordbook on this device."
       },
       "prompts": {
         "title": "Prompts",
@@ -261,17 +836,118 @@
         "title": "Data and backup",
         "desc": "What is stored on this device, and backups."
       },
-      "about": {
-        "title": "About",
-        "desc": "What Relire is and where your data goes."
+      "service": {
+        "title": "Content service",
+        "desc": "The optional service behind grammar topics, the wordbook and extra readers."
       }
     },
     "about": {
+      "title": "About",
+      "desc": "What Relire is and where your data goes.",
       "what": "Relire is a close-reading assistant for French learners preparing for TCF Canada. Read real articles, open any word or sentence for an explanation, and practise saying them aloud.",
       "privacy": "There is no account and no app server. Your articles, vocabulary and recordings stay in this browser. When you use an AI feature, the text or recording goes straight from this browser to the provider you chose, with your own key.",
+      "servicePrivacy": "This version can read grammar topics, a complete paged wordbook and additional graded readers from a content service. Requests carry a topic id, book id/page/version, or published reader id/version, with your IP address like any web request. It never receives your articles, contexts, answers, ratings, schedules or recordings, and never an AI provider key: the only key it receives is the access key you set for it. Wordbook download exposes the whole published book to clients.",
       "scope": "Relire is a study aid. It has no mock exams and gives no official scores, and AI feedback is an estimate.",
-      "source": "Source code on GitHub"
-    }
+      "source": "Source code on GitHub",
+      "lexicon": "The word sheet’s verb forms and tenses come from {{name}}, maintained by {{maintainer}} and licensed {{licence}}: a dictionary that ships with the app and needs no service.",
+      "lexiconSource": "{{name}} source",
+      "lexiconRebuild": "The dictionary data ships with the app as a generated file.",
+      "lexiconNotice": "How to rebuild or replace it",
+      "lexiconLicence": "LGPL-LR licence text"
+    },
+    "strictAccents": "Strict accents",
+    "strictAccentsNote": "On, an answer is only correct with the right accents. Off, an answer without accents still counts.",
+    "dictationSpeed": "Dictation speed",
+    "dictationSpeedNote": "How fast a dictation item is read when you press Listen.",
+    "speakAfterCheck": "Speak dictation after checking",
+    "speakAfterCheckNote": "After a dictation item is checked, its number is spoken again.",
+    "remoteAutoSpeak": "Let checks speak with my speech provider",
+    "remoteAutoSpeakNote": "Off, automatic playback uses this device’s voice. On, a check may synthesize a clip with your Speech synthesis provider, which can cost money. Pressing Listen or Preview always uses it.",
+    "browserRecognition": "Let my browser transcribe while I record",
+    "browserRecognitionNote": "Off by default. On, your browser may send the recording to the browser maker's speech service to produce a transcript, which helps scoring when your AI provider cannot listen. Off, no recognition runs and the recording only goes to your AI provider when you press Check pronunciation."
+  },
+  "serviceSettings": {
+    "urlLabel": "Service address",
+    "urlPlaceholder": "https://content.example.com",
+    "urlHelp": "Where the content service you were given is served from. Leave empty if you do not use one.",
+    "urlInvalid": "This address cannot be used: it must be an http(s) address without credentials, a query or a fragment.",
+    "urlNotValid": "The service address cannot be stored; correct it before saving.",
+    "keyLabel": "Access key",
+    "keyHelp": "The access key the service's owner gave you. It stays in this browser, is sent only to this service, and is never part of a backup.",
+    "testBtn": "Test",
+    "testingBtn": "Testing…",
+    "testSuccess": "Connected. The service answered with its topic list.",
+    "testRejected": "The service rejected the key. {{msg}}",
+    "testLimited": "The service is limiting requests; try again in a moment. {{msg}}",
+    "testStatus": "The service answered: {{msg}}",
+    "testNetwork": "The service could not be reached: it is not running, the address is wrong, or the service does not allow this site (CORS). {{msg}}",
+    "testInvalidBody": "The service answered, but not with its topic list: {{msg}}",
+    "enableLabel": "Use this content service",
+    "enableNote": "The switch turns on only after a successful Test of the address and key above; editing either turns it off again. Saving is separate from testing."
+  },
+  "aiSettings": {
+    "purposesLabel": "AI tasks",
+    "purposes": {
+      "text": "Text AI",
+      "ocr": "OCR",
+      "speech": "Speech synthesis",
+      "assessment": "Pronunciation assessment"
+    },
+    "purposeDesc": {
+      "text": "Checks and explains words and sentences, makes exercises, and grades open answers.",
+      "ocr": "Reads images and PDFs, and pulls the exercise structure out of imported material. Pasted text still uses Text AI.",
+      "speech": "Reads French aloud with the model and voice you choose.",
+      "assessment": "Azure audio assessment settings. The read-aloud check uses this connection when it is configured, and Text AI otherwise."
+    },
+    "purposeSettings": "{{purpose}} settings",
+    "sharedKey": "This key is also used by {{purposes}}.",
+    "modelHelp": "Pick a suggested model or type its ID.",
+    "invalidModel": "Enter a model ID of at most 512 characters, without control characters.",
+    "modelNotValid": "An AI model ID is not valid. Fix it there, then save again.",
+    "baseUrlLabel": "Base URL",
+    "baseUrlHelp": "Leave it empty to use {{url}}. Change it for a compatible service such as DeepSeek or Qwen.",
+    "invalidBaseUrl": "Enter an http or https address without a key, a query or a fragment, at most 2048 characters.",
+    "baseUrlNotValid": "A Base URL is not a usable address. Fix it, then save again.",
+    "voiceLabel": "Voice ID",
+    "voiceHelp": "Optional: enter a voice ID for this model. Leave it empty to use the model's default voice.",
+    "invalidVoice": "Enter a Fish Audio voice ID, or leave it empty for the default voice.",
+    "voiceNotValid": "The voice ID is not one this provider accepts. Fix it, then save again.",
+    "keylessHelp": "No key is needed: the request goes to the server you run. Ollama must allow this page's origin, so start it with OLLAMA_ORIGINS set to this address (OLLAMA_ORIGINS=* allows any).",
+    "ollamaSpeechHelp": "Needs Ollama 0.40.9+ and a Phonon speech model: run ollama pull phonon:40m-fr. Apple Silicon only. The 40M models use the CC BY-NC 4.0 licence, for noncommercial use.",
+    "fetch": "Fetch models",
+    "fetching": "Fetching…",
+    "refresh": "Refresh models",
+    "fetchNeedsKey": "Enter a key above to fetch the model list.",
+    "noDiscovery": "This provider does not offer a model list.",
+    "fetched": "{{count}} models found. Fetching does not test them.",
+    "empty": "The provider returned no models. Your selection is unchanged.",
+    "absent": "The selected model is not in this list. It stays selected.",
+    "capabilitySupported": "This model is known to handle this task.",
+    "capabilityUnknown": "This model's support for this task is unconfirmed. A check or a real request settles it.",
+    "capabilityUnsupported": "This model is known not to handle this task.",
+    "check": "Check key",
+    "checkServer": "Check server",
+    "checkSuccess": "The key works.",
+    "preview": "Preview voice",
+    "ocrNote": "Images and PDFs read this selection; pasted text uses Text AI.",
+    "unknownOcr": "Image support for this model is unconfirmed. The import may fail with the provider's own error.",
+    "savedNote": "Saving keeps your choices; it does not test them.",
+    "deviceNote": "Speaks with this device’s own voice: no key, no cost, and nothing is stored. Whether it sounds natural depends on the French voices installed on the device."
+  },
+  "azureAssessment": {
+    "regionLabel": "Azure resource region (required)",
+    "regionHelp": "Enter the region from your Azure Speech resource, using letters, digits and hyphens. It stays in this browser and is never backed up. No model is needed; the connection check uses French (fr-FR).",
+    "invalidRegion": "Enter your Azure resource region using only letters, digits and hyphens. No default region is supplied.",
+    "check": "Check connection",
+    "checkHelp": "Check sends 100 ms of silent audio directly to Azure with your key and region. It may consume quota. Requests run one at a time in this tab, not across tabs or devices.",
+    "checkSuccess": "Azure completed the recognition request. This checks connectivity, not pronunciation quality.",
+    "checkTimeout": "Azure did not finish the connection check within 15 seconds.",
+    "emptyInput": "A recording and reference text are required for pronunciation assessment.",
+    "emptyResult": "Azure returned no pronunciation assessment.",
+    "invalidResult": "Azure returned an unusable pronunciation assessment: {{reason}}",
+    "noMatch": "Azure recognized no speech: {{reason}}",
+    "canceled": "Azure canceled recognition ({{code}}): {{reason}}",
+    "unexpectedResult": "Azure returned an unexpected recognition result: {{reason}}"
   },
   "importer": {
     "articleTitle": "Title",
@@ -288,13 +964,12 @@
     "safariWay": "Safari (macOS 14 or later)",
     "safariDesc": "Choose File → Add to Dock. On iPhone or iPad, use Share → Add to Home Screen.",
     "noServerWhy": "Works offline",
-    "noServerDesc": "Your articles, vocabulary and settings are stored in this browser. Reading and vocabulary review work offline. Word and sentence analysis, audio and pronunciation feedback need a connection and your Gemini key.",
+    "noServerDesc": "Your articles, vocabulary and settings are stored in this browser. Reading and vocabulary review work offline. Word and sentence analysis, audio and pronunciation feedback call the AI provider you chose, straight from this browser, and need your key for it. Ollama and your device's voice need no key.",
     "gotIt": "Got it"
   },
   "storage": {
+    "loadFailed": "Could not load your data: {{msg}}",
     "saveFailed": "Your latest changes could not be saved in this browser.",
-    "upgradeBlocked": "Relire was updated. Close its other open tabs to finish, and this page will continue.",
-    "staleTab": "Relire was updated in another tab. Reload this tab to keep saving your work.",
     "reload": "Reload",
     "openBackup": "Open Settings to export a backup"
   },
@@ -327,7 +1002,9 @@
     "clearFilters": "Clear filters",
     "count_one": "{{count}} article",
     "count_other": "{{count}} articles",
-    "deleteRecordings": "Your recordings of {{count}} sentences in it are deleted too."
+    "deleteRecordings": "Your recordings of {{count}} sentences in it are deleted too.",
+    "addManual": "Write or paste an article",
+    "addImport": "Import from image, PDF or text"
   },
   "onboarding": {
     "label": "Getting started",
@@ -336,24 +1013,27 @@
     "next": "Next",
     "welcomeTitle": "Read French closely",
     "welcomeBody": "Open an article, tap any word or sentence to see what it means in context, then read it aloud and get feedback on your pronunciation.",
-    "welcomeNeed": "The explanations come from an AI service ({{provider}} by default). You need a free API key; it stays in this browser and is only sent to that service.",
-    "keyTitle": "Connect {{provider}}",
+    "welcomeNoKey": "You can start without a key: the graded readers open right away, with word meanings, translations and listening through your device voice.",
+    "welcomeNeed": "An AI service ({{provider}} by default) is optional. It adds deeper analysis, feedback and other voices; it needs a free API key that stays in this browser.",
+    "keyTitle": "Connect {{provider}} (optional)",
     "keyStep1": "Create a free key at {{provider}}.",
     "openStudio": "Open {{provider}}",
     "keyStep2": "Paste the key here.",
+    "keyOptional": "Word meanings, translations and listening in the graded readers are free and need no key. A key only adds extra analysis, feedback and voices.",
+    "continueWithoutKey": "Continue without AI",
     "checking": "Checking…",
     "checkSave": "Check and save",
     "keyInvalid": "That key did not work.",
     "keySaved": "Key saved in this browser.",
-    "tryTitle": "Try it on a sample article",
-    "tipWord": "Tap a word to see its meaning in context, how to pronounce it, and how the verb is conjugated.",
-    "tipSentence": "Tap a sentence, then Analyze, to see its structure and grammar and to practise reading it aloud.",
+    "tryTitle": "Open your first reader",
+    "tipWord": "Tap a word to see its meaning in context and how to pronounce it.",
+    "tipSentence": "Tap a sentence to listen to it or practise reading it aloud; an AI analysis appears once you add a key.",
     "tipSpeak": "Save words you want to remember; they come back for review on a schedule.",
-    "toLibrary": "Go to my library",
-    "openSample": "Open a sample article"
+    "toToday": "Go to Today",
+    "openReader": "Open the first reader"
   },
   "keyBanner": {
-    "text": "Add your API key to turn on word and sentence analysis, audio and pronunciation feedback.",
+    "text": "Add your API key for AI word and sentence analysis, AI audio and pronunciation feedback. The graded readers work without it.",
     "action": "Add key"
   },
   "ipa": {
@@ -364,6 +1044,84 @@
     "semivowels": "Semi-vowels",
     "consonants": "Consonants",
     "play": "Play {{word}}, sound {{symbol}}"
+  },
+  "readerDictation": {
+    "title": "Dictation",
+    "instruction": "Listen and type the sentence you hear. Punctuation is not checked."
+  },
+  "minimalPairs": {
+    "progress": {
+      "title": "Sound-pair answers",
+      "empty": "No sound-pair answers yet. Make exercises above to get started.",
+      "history": "Counts every answer, including repeats, to sound-pair exercises that are still saved. Deleting a set removes its answers from these counts.",
+      "contrast": "/{{first}}/ ↔ /{{second}}/",
+      "counts": "{{correct}} of {{total}} correct"
+    },
+    "readAloud": {
+      "title": "Read aloud",
+      "word": "Word to practise",
+      "guide": "Practise both words. Switching words clears the recording; an AI check is optional."
+    },
+    "drill": {
+      "title": "Sound pairs",
+      "description": "Make listening exercises from reviewed word pairs. No AI or key is needed to make or check them. Saved sets appear in Listening.",
+      "instruction": "Listen to each word, then choose the word you heard. Accents count.",
+      "contrasts": "Sound contrasts",
+      "sound": "/{{symbol}}/ · {{word}}",
+      "contrast": "{{first}} ↔ {{second}}",
+      "pickContrast": "Choose one or more sound contrasts.",
+      "unknownContrast": "Unknown sound contrast: {{contrast}}.",
+      "countRange": "Choose a whole number from 1 to {{max}} for the selected contrasts.",
+      "make": "Make exercises",
+      "making": "Making exercises",
+      "open": "Open saved set in Listening",
+      "tips": {
+        "b-p": "French p is not aspirated; Mandarin b and p differ by aspiration, French b and p differ by voicing.",
+        "y-u": "French u is the sound of pinyin ü and French ou is the sound of pinyin u: watch the spelling."
+      }
+    },
+    "notes": {
+      "tendency": "A tendency, not a fixed rule: many standard speakers merge these two vowels in open syllables."
+    }
+  },
+  "spellingSounds": {
+    "title": "Letter sounds",
+    "intro": "Tap a spelling to hear French words that use it.",
+    "groups": {
+      "vowels": "Vowels",
+      "nasals": "Nasal vowels",
+      "consonants": "Consonants",
+      "silent": "Silent letters"
+    },
+    "examples": "Example words",
+    "showIpa": "Show IPA",
+    "hideIpa": "Hide IPA",
+    "reviewNotice": "Checked by an AI, not by a teacher.",
+    "practise": "Practise these sounds",
+    "drill": {
+      "title": "Spelling to sound",
+      "instruction": "Listen to each word and choose the spelling that makes its main sound."
+    },
+    "listenWord": "Hear {{word}}",
+    "sheetClose": "Close sheet",
+    "notes": {
+      "ou": "Sounds approximately like the ‘ou’ in English ‘soup’: round your lips and keep the vowel steady.",
+      "oi": "Read like 'wa', smoothly gliding from a w sound into an open a.",
+      "au": "au usually makes one steady rounded ‘o’ sound; do not glide into a second vowel as in English ‘boat’.",
+      "eau": "eau makes the same steady rounded ‘o’ sound as au, without an English-style vowel glide.",
+      "eu": "When no consonant sound follows eu in its syllable, it usually has this steady vowel: round your lips and keep your tongue forward.",
+      "on": "on usually makes this nasal vowel when the next letter in the same word is neither a vowel nor n or m, or when the word ends: let air flow through both mouth and nose, without adding an n sound.",
+      "an": "an usually makes a nasal vowel, roughly a nasalized ‘ah’, when the next letter in the same word is neither a vowel nor n or m, or when the word ends; air flows through both mouth and nose.",
+      "en": "en usually makes the same nasal vowel as an when the next letter in the same word is neither a vowel nor n or m, or when the word ends; air flows through both mouth and nose.",
+      "in": "in usually makes this nasal vowel when the next letter in the same word is neither a vowel nor n or m, or when the word ends: let air flow through both mouth and nose, without adding an n sound.",
+      "ain": "ain usually makes the same nasal vowel as in when the next letter in the same word is neither a vowel nor n or m, or when the word ends; air flows through both mouth and nose, with no added n sound.",
+      "ch": "Pronounced like the 'sh' in English 'shoe', produced with air flowing gently over the tongue.",
+      "gn": "Usually one n-like sound made with the tongue against the hard palate, roughly like ‘ny’ in English ‘canyon’ but without separating n and y.",
+      "qu": "qu usually sounds like the k in English ‘key’; in these words, u has no separate sound.",
+      "c-cedille": "ç sounds like the s in English ‘see’ and is used before a, o or u.",
+      "ph": "Pronounced like the 'f' in English 'fish', with the upper teeth lightly resting on the lower lip.",
+      "h": "It is never pronounced, so words starting with it begin directly on the following vowel sound."
+    }
   },
   "levels": {
     "A1": "A1 · Beginner",
@@ -382,37 +1140,108 @@
   "errors": {
     "badResponse": "The AI returned a response that could not be read. Please try again.",
     "noAudio": "Could not generate speech audio.",
-    "allModelsFailed": "Every model failed. Please try again."
+    "noSpeechToScore": "Nothing to score: this recording has no audio your AI provider can listen to, and the browser gave no transcript.",
+    "noRecordingToScore": "Nothing to score: record yourself reading the sentence, then press Check.",
+    "speechPlayback": "The speech clip could not be played.",
+    "allModelsFailed": "Every model failed. Please try again.",
+    "invalidAnswer": "The AI answer could not be used: {{msg}}",
+    "modelListMalformed": "The provider returned an invalid model list.",
+    "modelListPagination": "The provider's model list could not be completed safely.",
+    "modelListUnavailable": "This provider does not offer model discovery.",
+    "invalidModelId": "Enter a nonempty model ID of at most 512 characters, without control characters.",
+    "invalidBaseUrl": "The Base URL for this provider is not usable. Fix it in Settings.",
+    "providerUnavailable": "The provider {{provider}} is not available.",
+    "purposeUnavailable": "This provider does not support the selected task.",
+    "speechOutputUnsupported": "The model {{model}} cannot synthesize speech. Choose a speech model.",
+    "invalidVoice": "This is not a Fish Audio voice ID. Leave the voice empty to use the model's default voice.",
+    "invalidSpeechText": "Plain text only, up to {{max}} characters, without markup or links.",
+    "invalidAudio": "The speech provider did not return playable audio.",
+    "speechAudioTooLarge": "The synthesized audio was too large to keep.",
+    "speechTimeout": "The speech provider did not answer in time. Try again.",
+    "deviceVoiceUnavailable": "This browser cannot speak with the device’s voice.",
+    "deviceVoiceNoFrench": "This device has no French voice installed, so its own voice cannot read French aloud.",
+    "deviceVoiceFailed": "The device voice could not play. Check the system speech settings."
   },
   "models": {
+    "phonon:40m-multilingual": {
+      "name": "Phonon 40M multilingual"
+    },
+    "phonon:40m-fr": {
+      "name": "Phonon 40M French"
+    },
     "gemini-2_5-flash": {
-      "name": "Gemini 2.5 Flash (recommended)",
-      "desc": "Fast; good for everyday explanations and scoring."
+      "name": "Gemini 2.5 Flash (recommended)"
     },
     "gemini-2_5-pro": {
-      "name": "Gemini 2.5 Pro",
-      "desc": "Slower; more thorough on long, complex sentences."
+      "name": "Gemini 2.5 Pro"
     },
     "gemini-3_8-flash": {
-      "name": "Gemini 3.8 Flash",
-      "desc": "Newer; balances speed and depth."
+      "name": "Gemini 3.8 Flash"
     },
     "gemini-3_1-flash-lite": {
-      "name": "Gemini 3.1 Flash-Lite",
-      "desc": "Lightest and quickest; shorter explanations."
+      "name": "Gemini 3.1 Flash-Lite"
     },
     "gemini-3_8-flash-lite-tts": {
-      "name": "Gemini 3.8 Flash-Lite TTS (recommended)",
-      "desc": "Natural French speech, including liaisons."
+      "name": "Gemini 3.8 Flash-Lite TTS (recommended)"
+    },
+    "gpt-4o-mini": {
+      "name": "GPT-4o Mini (recommended)"
+    },
+    "gpt-4o": {
+      "name": "GPT-4o"
+    },
+    "gpt-4_1": {
+      "name": "GPT-4.1"
+    },
+    "gpt-4_1-mini": {
+      "name": "GPT-4.1 Mini"
+    },
+    "o4-mini": {
+      "name": "o4-mini"
+    },
+    "fish-audio/s2_1-pro-free": {
+      "name": "Fish Audio S2.1 Pro (free)"
+    },
+    "fish-audio/s2_1-pro": {
+      "name": "Fish Audio S2.1 Pro"
+    },
+    "fish-audio/s2-pro": {
+      "name": "Fish Audio S2 Pro"
+    },
+    "fish-audio/s1": {
+      "name": "Fish Audio S1"
+    },
+    "fish-audio/transcribe-1": {
+      "name": "Fish Audio Transcribe 1 (transcription, not speech)"
+    },
+    "claude-3-7-sonnet-latest": {
+      "name": "Claude 3.7 Sonnet (recommended)"
+    },
+    "claude-3-5-haiku-latest": {
+      "name": "Claude 3.5 Haiku"
+    },
+    "llama3_1": {
+      "name": "Llama 3.1 (recommended)"
+    },
+    "qwen2_5:14b": {
+      "name": "Qwen 2.5 14B"
+    },
+    "llama3_2-vision": {
+      "name": "Llama 3.2 Vision"
     }
   },
   "providers": {
-    "gemini": "Google Gemini"
+    "gemini": "Google Gemini",
+    "openai": "OpenAI-compatible",
+    "fish-audio": "Fish Audio",
+    "anthropic": "Anthropic Claude",
+    "ollama": "Ollama (local)",
+    "device": "This device",
+    "azure": "Microsoft Azure Speech"
   },
   "prompts": {
     "word": "Word analysis",
     "sentence": "Sentence analysis",
-    "drills": "Practice drills",
     "pronunciationAudio": "Pronunciation scoring (with recording)",
     "pronunciationText": "Pronunciation scoring (transcript only)",
     "prosody": "Pronunciation markers",
@@ -421,7 +1250,11 @@
     "explain": "Mistake explanation",
     "grade": "Open answer grading",
     "adaptive": "Adaptive drills",
-    "exercises": "Exercises from an article"
+    "exercises": "Exercises from an article",
+    "transcribe": "Import: read article pages",
+    "conjugate": "Verb conjugation",
+    "atelier": "L'Atelier: round generation",
+    "atelierGrade": "L'Atelier: build grading"
   },
   "prosody": {
     "title": "Pronunciation markers",
@@ -481,7 +1314,7 @@
     "saved": "Saved.",
     "tooShort": "Too short, nothing was saved. Record again.",
     "listeningEnded": "Listening to the article stopped, because the card played audio.",
-    "busy": "The sentence sheet or Practice is recording.",
+    "busy": "The sentence sheet or Read aloud is recording.",
     "error": "Could not record: {{msg}}",
     "saveFailed": "Could not save the recording: {{msg}}",
     "retry": "Try again",
@@ -491,32 +1324,170 @@
     "minimise": "Minimise",
     "restore": "Show the practice card",
     "title": "Shadowing",
+    "check": "Check",
+    "checkHint": "Check scores your latest recording, word by word.",
+    "wordHint": "Tap a marked word to see its score.",
+    "details": "Details",
+    "detailsLabel": "Pronunciation details",
+    "detailsTitle": "Pronunciation details",
     "move": "Move the card",
     "moveHint": "Drag to move. Double-click, or press Home, to dock it again."
   },
   "study": {
-    "label": "My study",
-    "words": "Words",
-    "shadowing": "Shadowing"
+    "mistakes": "Mistakes"
+  },
+  "nounGender": {
+    "title": "Gender",
+    "subtitle": "Noun endings are tendencies, not guarantees. Compare the reviewed examples.",
+    "loading": "Loading noun endings…",
+    "groups": {
+      "f": "Feminine tendencies",
+      "m": "Masculine tendencies"
+    },
+    "examples": "Reviewed examples:",
+    "exceptions": "Exceptions in the A1 sample:",
+    "ruleLine": "{{rule}} ({{percent}}% of {{n}} dictionary nouns). A tendency, not the word’s gender.",
+    "exception": "This noun is a reviewed A1 exception to that ending tendency.",
+    "game": {
+      "title": "Le ou la",
+      "play": "Play a round",
+      "endRound": "End round",
+      "le": "le",
+      "la": "la",
+      "next": "Next",
+      "right": "Right",
+      "notQuite": "Not quite",
+      "counter": "{{right}} of {{total}}",
+      "summary": "{{total}} nouns, {{right}} right on the first try",
+      "chance": "With two choices, guessing alone gets about half right.",
+      "mistakes": "Open Mistakes",
+      "playAgain": "Play again",
+      "back": "Back",
+      "saving": "Saving the round…"
+    },
+    "rules": {
+      "tion": "Ending -tion: usually feminine",
+      "sion": "Ending -sion: usually feminine",
+      "te": "Ending -té: usually feminine",
+      "ure": "Ending -ure: usually feminine",
+      "ette": "Ending -ette: usually feminine",
+      "ance": "Ending -ance: usually feminine",
+      "ence": "Ending -ence: usually feminine",
+      "ie": "Ending -ie: usually feminine",
+      "age": "Ending -age: usually masculine",
+      "ment": "Ending -ment: usually masculine",
+      "isme": "Ending -isme: usually masculine",
+      "eau": "Ending -eau: usually masculine",
+      "oir": "Ending -oir: usually masculine",
+      "ier": "Ending -ier: usually masculine",
+      "ee": "Ending -ée: usually feminine",
+      "esse": "Ending -esse: usually feminine",
+      "ude": "Ending -ude: usually feminine"
+    },
+    "drill": {
+      "title": "Noun gender practice",
+      "description": "Sample the reviewed A1 nouns, including exceptions. No key or content service needed.",
+      "instruction": "Choose the gender of each noun: M for masculine, F for feminine. Ending tendencies appear after checking.",
+      "make": "Make exercises",
+      "making": "Saving…",
+      "open": "Open saved exercises",
+      "countRange": "Choose a whole number from 1 to {{max}}."
+    }
+  },
+  "grammarTopics": {
+    "sections": "Grammar sections",
+    "title": "Topics",
+    "loading": "Loading topics…",
+    "loadError": "Could not load topics: {{msg}}",
+    "empty": "No topics are published yet.",
+    "noMatch": "No published topics match this tag.",
+    "clearTag": "Clear tag filter: {{tag}}",
+    "back": "Back to Topics",
+    "orderNote": "Topics are listed in the order of the course book.",
+    "studied": "Studied",
+    "markStudied": "Mark as studied",
+    "unmarkStudied": "Mark as not studied",
+    "next": "Next: {{title}}",
+    "nextTopic": "Next topic: {{title}}",
+    "allStudied": "You have marked every topic as studied.",
+    "markError": "Could not save this mark: {{msg}}",
+    "learning": {
+      "progress": {
+        "initial": "{{checked}} of {{total}} checked",
+        "summary": "{{checked}} checked, {{right}} right"
+      },
+      "index": {
+        "label": "Question index",
+        "item": "{{checkpoint}}, question {{number}} of {{total}}, {{state}}",
+        "number": "{{number}}",
+        "position": "Question {{number}} of {{total}}",
+        "unchecked": "Unchecked",
+        "right": "Right",
+        "wrong": "Wrong"
+      },
+      "actions": {
+        "previous": "Previous",
+        "redo": "Redo",
+        "check": "Check",
+        "next": "Next",
+        "reset": "Reset answers"
+      },
+      "result": {
+        "right": "Right",
+        "wrong": "Wrong",
+        "expected": "Expected answer",
+        "readFeedback": "Read feedback",
+        "readDetails": "Read details",
+        "saveFailed": "Answer not saved",
+        "feedbackTitle": "Feedback"
+      },
+      "reference": {
+        "fullReference": "Full reference",
+        "openCurrent": "Open current reference",
+        "savedPractice": "Open saved grammar exercises"
+      },
+      "practice": {
+        "savedOnlyNote": "This set contains saved questions only.",
+        "setLabel": "Topic exercises",
+        "revision": "Revision {{revision}}"
+      },
+      "errors": {
+        "prepareFailed": "Could not prepare the questions: {{msg}}",
+        "saveFailed": "Could not save your answer: {{msg}}",
+        "loadSavedFailed": "Could not load the saved questions: {{msg}}"
+      }
+    },
+    "chapters": {
+      "chapter-one": "Nouns",
+      "chapter-two": "Determiners",
+      "chapter-three": "Pronouns",
+      "chapter-four": "Qualifying adjectives",
+      "chapter-five": "Verbs",
+      "chapter-six": "Adverbs",
+      "chapter-seven": "Prepositions",
+      "chapter-eight": "Conjunctions",
+      "chapter-nine": "Sentences",
+      "chapter-ten": "French communication: further practice"
+    }
   },
   "shadowingLog": {
-    "title": "Shadowing",
-    "subtitle": "Your recordings of article sentences, kept on this device. The last three of each sentence are kept.",
-    "article": "Article",
-    "allArticles": "All articles",
+    "title": "Recordings",
+    "subtitle": "Your recordings of reader sentences, kept on this device. The last three of each sentence are kept.",
+    "source": "Source",
+    "allSources": "All sources",
     "referenceVoice": "The reference plays in the voice chosen in Settings now, which may differ from when you recorded.",
     "recorded": "Sentences recorded: {{count}}",
-    "text": "Text",
     "reference": "Reference",
-    "mine": "My recordings",
     "openInReader": "Open in the reader",
-    "playReference": "Play the reference",
+    "playLatest": "Play my recording",
+    "lastRecorded": "Last recorded: {{when}}",
     "playTake": "Play your recording from {{when}}",
     "allTakes": "All recordings ({{count}})",
     "delete": "Delete",
     "deleteTake": "Delete your recording from {{when}}",
     "changed": "Original text changed ({{count}})",
-    "removed": "Article removed ({{count}})",
+    "removed": "Source unavailable ({{count}})",
+    "unavailableEdition": "Unavailable edition ({{id}})",
     "empty": "No recordings yet. In the reader, press the microphone next to a sentence to practise it.",
     "loadFailed": "Could not load your recordings: {{msg}}",
     "deleteFailed": "Could not delete the recording: {{msg}}"
@@ -616,9 +1587,620 @@
     }
   },
   "notFound": {
+    "grammarTopic": "This grammar topic is not published or does not exist.",
+    "gradedReader": "This graded reader is not published or is no longer available. Return to the graded readers list to choose another.",
+    "passage": "This passage is no longer available. Return to the library to choose another source.",
     "title": "This page is not here",
     "page": "This address does not match a page in Relire.",
     "article": "That article is not in your library. It may have been deleted, or the link comes from another browser.",
-    "toLibrary": "Go to the library"
+    "toLibrary": "Go to the library",
+    "unit": "That exercise is not here. It may have been deleted, or the link comes from another browser.",
+    "set": "That exercise set is not here. It may have been deleted, or the link comes from another browser.",
+    "toPractice": "Go to area exercises"
+  },
+  "importMaterial": {
+    "fileType": "Choose a PNG, JPEG, WebP image or a PDF file.",
+    "pdfSize": "The PDF must be nonempty and no larger than 20 MiB.",
+    "imageSize": "The image must be nonempty and no larger than 10 MiB.",
+    "imageRead": "The image could not be read. Choose the file again.",
+    "imageDecode": "The image could not be decoded. Check that the file is not damaged.",
+    "imagePixels": "The image exceeds 20 million pixels. Resize it first.",
+    "pdfPages": "The PDF must contain 1–100 pages. Split larger files first.",
+    "pageBounds": "Choose valid page numbers, at most {{limit}} pages per analysis. Select cross-page exercises together.",
+    "imageLimit": "At most {{limit}} images per import. Extra images were not added; the others are kept.",
+    "requestImageLimit": "At most {{limit}} images can be read at once.",
+    "nothingToRead": "There is nothing to read. Add text or images before sending.",
+    "removeFirst": "Use images or one PDF, not both. Remove the held material before choosing another kind or another PDF.",
+    "pageFormat": "Enter page numbers such as 1, 1-3 or 1,3.",
+    "pdfProtected": "Protected PDFs are not supported. Remove the password protection first.",
+    "pdfOpen": "The PDF could not be opened. Check that the file is not damaged.",
+    "pdfRender": "The PDF page could not be rendered. Check the file or try another page.",
+    "disposed": "This material has been closed. Choose the file again.",
+    "pastedImage": "Pasted image"
+  },
+  "importFlow": {
+    "choose": "Choose an image or PDF",
+    "chooseImages": "Choose images",
+    "dropHere": "or drop or paste images here, up to {{limit}}",
+    "readingOrder": "Images are read and sent in the order shown; selected PDF pages are sent in page order.",
+    "previews": "Source previews",
+    "previewPage": "Page {{page}} of {{name}}",
+    "removeImage": "Remove image {{name}}",
+    "remove": "Remove",
+    "removeFile": "Remove file",
+    "clearText": "Clear text",
+    "localFile": "{{name}} · {{count}} page(s), local only until you send",
+    "pages": "Pages to send (up to {{limit}}, e.g. 1,3-4)",
+    "recipient": "Recipient: {{provider}} · {{model}}",
+    "sentImages_one": "{{count}} image, page {{count}}",
+    "sentImages_other": "{{count}} images, pages 1 to {{count}}",
+    "sentPdf": "1 PDF, pages {{pages}}",
+    "none": "None",
+    "unsupported": "This model cannot read images. Choose an image-capable model in Settings before sending.",
+    "working": "Working…",
+    "pastedText": "Pasted text",
+    "missingKey": "No API key is set. Your input is kept here; open Settings only when you are ready to discard it.",
+    "failed": "The request failed: {{msg}}",
+    "saving": "Saving…",
+    "restart": "Start over",
+    "leaveTitle": "Discard this import?",
+    "leaveHelp": "Your unsaved input and draft will be lost. A request in progress will be cancelled.",
+    "savingWait": "Wait for the save to finish before leaving.",
+    "keep": "Keep editing",
+    "discard": "Discard"
+  },
+  "importArticle": {
+    "heading": "Import an article",
+    "subtitle": "Turn a photo, a PDF or pasted text into an article you can read here.",
+    "text": "Text to import (up to 40,000 characters)",
+    "consent": "What is sent",
+    "localOnly": "Pasted text is not sent anywhere. You review and save it on this device.",
+    "analyze": "Send and read",
+    "continue": "Continue",
+    "review": "Review the article",
+    "reviewHelp": "The text stays only on this page until you save. AI transcription can contain mistakes: check it against the original and correct it here.",
+    "title": "Title",
+    "level": "Level",
+    "body": "Article text",
+    "requiredText": "Enter a title and some text before saving.",
+    "save": "Save article",
+    "saveFailed": "Not saved. Your text is kept; retry when ready. {{msg}}"
+  },
+  "importExercises": {
+    "heading": "Import exercises",
+    "subtitle": "Turn a worksheet, a page of questions or pasted text into an exercise set.",
+    "title": "Exercise set title",
+    "requiredTitle": "Enter a title for this exercise set before saving.",
+    "review": "Review and correct",
+    "reviewHelp": "Drafts stay only on this page. AI reference answers may be wrong. Open a question to edit it; exclude any unit or question you do not want to save. Blockers must be resolved or excluded.",
+    "warning": "Check: {{msg}}",
+    "includeUnit": "Include unit: {{title}}",
+    "unitTitle": "Unit title",
+    "instruction": "Instructions",
+    "passage": "Reading passage (required for reading cloze)",
+    "noAnswer": "No reference answer",
+    "type": "Exercise type",
+    "prompt": "Prompt ([___] for blanks, {a|b} for choices)",
+    "options": "Options (one per line; match/order prefixes must be unique)",
+    "answer": "Reference answer",
+    "answers": "Reference answers (one per slot / ordered prefix per line)",
+    "alternatives": "Other accepted answers (one per line)",
+    "grammar": "Grammar topic",
+    "secondaryPrompt": "Additional prompt",
+    "audioText": "Dictation text (required for dictation)",
+    "resolved": "I have supplied the missing information",
+    "excludeItem": "Exclude",
+    "level": "Level of these exercises",
+    "chooseLevel": "Choose a level",
+    "levelRequired": "Choose the level of these exercises before saving.",
+    "confirm": "I have reviewed the learning area, exercises and reference answers of every included unit. Save this exercise set on this device.",
+    "save": "Confirm and save",
+    "selectUnits": "Include at least one playable exercise unit.",
+    "saveFailed": "Not saved. Your draft is kept; retry when ready. {{msg}}",
+    "mode": "Extraction mode",
+    "sentText": "Text: {{count}} characters",
+    "exactText": "Read the exact text to be sent",
+    "text": "Text to send (up to 40,000 characters; optional context with images)",
+    "analyze": "Send and extract",
+    "consent": "Before you send",
+    "modes": {
+      "complete": "Complete missing answers",
+      "extract": "Extract printed answers only",
+      "generate": "Generate new exercises"
+    },
+    "modeHelp": {
+      "complete": "Keep printed questions and answers; ask AI to complete missing reference answers.",
+      "extract": "Keep only answers printed in the material. Missing answers must be supplied during review.",
+      "generate": "Ask AI to create new exercises from this material, not a transcription of its questions."
+    },
+    "origin": {
+      "material": "Printed answer — check it",
+      "ai": "AI reference answer",
+      "user": "Edited by you"
+    },
+    "errors": {
+      "no-items": "{{title}}: no included questions. Exclude the unit or add valid questions.",
+      "blocked": "{{title}}: resolve or exclude blocked questions.",
+      "missing-answer": "{{title}}: supply missing reference answers or exclude these questions.",
+      "invalid": "{{title}}: {{msg}}"
+    }
+  },
+  "notebook": {
+    "description": "Wrong answers kept from your practice. Tap a word to look it up and save it.",
+    "empty": "No mistakes yet. Checked wrong answers will appear here.",
+    "loadError": "Could not load mistakes: {{reason}}",
+    "resolved": "Resolved",
+    "unresolved": "To revisit",
+    "retryUnit": "Retry in unit",
+    "unitUnavailable": "Unit unavailable",
+    "retryHelp": "Opens the saved sheet without changing answers. If already checked, use “Reset this unit” and confirm; attempt history is kept.",
+    "emptyWordAnalysis": "The word analysis was empty."
+  },
+  "exerciseProgress": {
+    "title": "Grammar accuracy",
+    "history": "Only grammar attempts count, including grammar history from deleted sources.",
+    "accuracy": "{{percent}}% · {{correct}} / {{total}} correct",
+    "readFailed": "Could not read exercise history: {{reason}}",
+    "loading": "Reading exercise history…",
+    "empty": "Check some exercises to see accuracy by grammar area."
+  },
+  "adaptive": {
+    "title": "Practise weak topics",
+    "targets": "Up to three lowest-accuracy topics with errors: {{tags}}",
+    "noTargets": "No weak topics yet. Only topics with real errors are targeted.",
+    "make": "Make a drill set",
+    "retry": "Retry saving",
+    "discard": "Discard",
+    "saving": "Saving this drill set. Please wait.",
+    "generating": "Making a new drill set…",
+    "unsaved": "Not saved: {{title}} ({{items}}). Retry saving without another AI request, or discard.",
+    "leaveTitle": "Discard this drill set?",
+    "leaveHelp": "This generated set has not been saved. Keep it to retry saving, or discard it before leaving or making another set.",
+    "keep": "Keep this set"
+  },
+  "conjugation": {
+    "page": {
+      "title": "Conjugation",
+      "subtitle": "Common French verb forms, with notes on when to use them and how they are formed.",
+      "inputLabel": "Verb in the infinitive",
+      "button": "Conjugate",
+      "working": "Working…",
+      "practise": "Practise all tenses",
+      "practising": "Making exercises…",
+      "practiseTense": "Practise this tense",
+      "practiseTitle": "Practice",
+      "practisePrevious": "Previous tense",
+      "practiseNext": "Next tense",
+      "packVerbs": "Reviewed verbs:",
+      "practiseOpen": "Open the new exercise set",
+      "patterns": {
+        "title": "Patterns",
+        "tense": "Tense",
+        "person": "Person",
+        "impersonal": "it (impersonal)",
+        "on": "one (on)",
+        "negation": "Negation",
+        "estCeQue": "Question with est-ce que",
+        "inversion": "Question with inversion",
+        "unavailable": "— {{reason}}",
+        "noQuestions": "No questions for this tense.",
+        "noJe": "Inversion with je is not offered here; use est-ce que.",
+        "notCovered": "The stated rules do not cover this case.",
+        "aiOnly": "AI-made, not checked",
+        "differs": "AI-made; this cell differs from the rule."
+      },
+      "empty": "Type a verb in the infinitive, such as parler or se lever, to see its tenses.",
+      "auxiliary": {
+        "avoir": "Auxiliary: avoir",
+        "etre": "Auxiliary: être"
+      },
+      "status": {
+        "pack-reviewed": {
+          "label": "Reviewed",
+          "note": "These forms come from the app’s own reviewed list; no AI was involved."
+        },
+        "rule-checked": {
+          "label": "Matches the rule (not human-reviewed)",
+          "note": "The AI’s forms agree with the rule it named. That is a check, not a review, so a consistent mistake could still pass."
+        },
+        "partly-differs": {
+          "label": "Some forms differ from the rule",
+          "note": "In the cells marked Model and Rule, the AI’s form and the rule’s form disagree; check them before you rely on them."
+        },
+        "ai-only": {
+          "label": "AI-made, not checked",
+          "note": "The AI wrote these forms and nothing here could check them, so treat them with care."
+        }
+      },
+      "model": "Model",
+      "rule": "Rule",
+      "aiOnly": "AI-made, not checked",
+      "differs": "Some forms differ",
+      "example": "AI-made example",
+      "listen": "Hear on this device: {{text}}",
+      "stopListening": "Stop listening: {{text}}",
+      "endings": {
+        "title": "Rule endings",
+        "note": "Underlined endings in the forms and this table come from the same rule. A dash marks a person not used in that tense.",
+        "none": "No ending",
+        "unavailable": "—"
+      },
+      "participles": "Participles",
+      "participle": {
+        "present": "Present participle",
+        "ms": "Past, masculine singular",
+        "fs": "Past, feminine singular",
+        "mp": "Past, masculine plural",
+        "fp": "Past, feminine plural"
+      }
+    },
+    "tenses": {
+      "present": {
+        "name": "Present",
+        "use": "Use it for actions happening now, general truths, and regular habits.",
+        "form": "Add the tense endings to the verb stem, such as -e, -es, -e, -ons, -ez, -ent for regular -er verbs."
+      },
+      "passeCompose": {
+        "name": "Passé composé",
+        "use": "Use it for completed actions and specific events in the past.",
+        "form": "Combine the present tense of avoir or être with the past participle."
+      },
+      "imparfait": {
+        "name": "Imparfait",
+        "use": "Use it for ongoing background situations, descriptions, and repeated habits in the past.",
+        "form": "Take the present indicative nous form, remove -ons, and add -ais, -ais, -ait, -ions, -iez, -aient. Être uses ét-."
+      },
+      "plusQueParfait": {
+        "name": "Plus-que-parfait",
+        "use": "Use it for an action that was already completed before another past action or moment.",
+        "form": "Combine the imparfait of avoir or être with the past participle."
+      },
+      "futur": {
+        "name": "Future",
+        "use": "Use it for actions or events that will happen in the future.",
+        "form": "For regular verbs, use the infinitive (dropping the final -e of -re verbs) and add -ai, -as, -a, -ons, -ez, -ont."
+      },
+      "futurAnterieur": {
+        "name": "Futur antérieur",
+        "use": "Use it for an action that will already be completed before a future moment.",
+        "form": "Combine the futur of avoir or être with the past participle."
+      },
+      "conditionnel": {
+        "name": "Conditional",
+        "use": "Use it for polite requests, wishes, hypothetical situations, and advice.",
+        "form": "Add the imparfait endings -ais, -ais, -ait, -ions, -iez, -aient to the future stem."
+      },
+      "conditionnelPasse": {
+        "name": "Conditionnel passé",
+        "use": "Use it for a past hypothesis, a regret, or a reproach about what did not happen.",
+        "form": "Combine the conditionnel of avoir or être with the past participle."
+      },
+      "subjonctif": {
+        "name": "Subjunctive",
+        "use": "Some expressions of necessity, doubt, emotion, wishes or subjective evaluation introduce a clause in the subjunctive. The expression and context determine the mood.",
+        "form": "Usually introduced by que. Most verbs take -e, -es, -e, -ions, -iez, -ent; the stem may differ by person. Some verbs have irregular forms, such as que je sois and que j’aie."
+      },
+      "subjonctifPasse": {
+        "name": "Subjonctif passé",
+        "use": "Use it in a clause requiring the subjunctive when the action is viewed as completed before the relevant reference point, which may be past, present or future.",
+        "form": "Usually introduced by que. Combine the present subjunctive of avoir or être with the past participle."
+      },
+      "imperatif": {
+        "name": "Imperative",
+        "use": "Use it to give direct orders, advice, instructions, or prohibitions.",
+        "form": "Usually use the present indicative tu, nous and vous forms without subject pronouns. The tu forms of -er verbs, aller and verbs like ouvrir have no final -s (parle, va, ouvre), but take -s before directly attached y or en (vas-y, parles-en). Être, avoir, savoir and vouloir have special imperative forms."
+      }
+    },
+    "rules": {
+      "er-regular": "Standard -er verbs keep an unchanged stem throughout all tenses, as in nous parlons.",
+      "er-cer": "Verbs ending in -cer change c to ç before a and o to keep the soft sound, as in nous commençons.",
+      "er-ger": "Verbs ending in -ger insert a silent e after g before a and o to keep the soft sound, as in nous mangeons.",
+      "er-yer-i": "In -oyer and -uyer verbs, y becomes i before a silent e (ils nettoient, ils essuient). Verbs in -ayer allow y or i; -eyer keeps y. Envoyer and renvoyer have irregular future and conditional stems.",
+      "er-e-grave": "In verbs following the lever pattern, the stem’s mute e becomes è before a syllable containing mute e, including in the future and conditional (il lève, il lèvera).",
+      "er-eacute-egrave": "In verbs following the préférer pattern, stem é becomes è before a syllable containing mute e (je préfère). Future and conditional spellings may be traditional (je préférerai, je préférerais) or rectified (je préfèrerai, je préfèrerais).",
+      "er-eler-double": "Doubling verbs in -eler and -eter double l or t before a silent syllable and throughout the future and conditional, as in j’appelle.",
+      "ir-issons": "Regular second-group -ir verbs use -iss- in the plural present indicative, throughout the imparfait and present subjunctive, and in the present participle (nous choisissons).",
+      "ir-sortir": "Verbs like sortir and partir drop the stem’s final consonant in the singular present, as in je sors.",
+      "ir-ouvrir": "Verbs like ouvrir and offrir take standard -er verb endings in the present tense, as in j’ouvre.",
+      "re-regular": "Regular -dre verbs like vendre take -s, -s, and no ending in the singular present, as in il vend."
+    },
+    "persons": {
+      "1sg": "I",
+      "2sg": "you (singular)",
+      "3sg": "he, she, it",
+      "1pl": "we",
+      "2pl": "you (plural or formal)",
+      "3pl": "they"
+    },
+    "pronouns": {
+      "1sg": "je",
+      "2sg": "tu",
+      "3sg": "il/elle",
+      "1pl": "nous",
+      "2pl": "vous",
+      "3pl": "ils/elles"
+    },
+    "tenseFr": {
+      "present": "présent",
+      "passeCompose": "passé composé",
+      "imparfait": "imparfait",
+      "plusQueParfait": "plus-que-parfait",
+      "futur": "futur",
+      "futurAnterieur": "futur antérieur",
+      "conditionnel": "conditionnel",
+      "conditionnelPasse": "conditionnel passé",
+      "subjonctif": "subjonctif",
+      "subjonctifPasse": "subjonctif passé",
+      "imperatif": "impératif"
+    },
+    "drill": {
+      "title": "Conjugation: {{tense}}",
+      "instruction": "Write each verb in the form asked.",
+      "setTitle": "Conjugation: {{verbs}}",
+      "more": "and {{count}} more",
+      "made_one": "Made {{count}} item. It is in the list below.",
+      "made_other": "Made {{count}} items. They are in the list below.",
+      "making": "Making exercises…",
+      "make": "Make exercises",
+      "countRange": "Choose a whole number of 1 or more.",
+      "loading": "Loading the verbs…",
+      "noVerbs": "No verbs are in the pack yet.",
+      "verbs": "Verbs",
+      "tenses": "Tenses"
+    }
+  },
+  "readerTransform": {
+    "negation": {
+      "title": "Negation",
+      "instruction": "Rewrite the sentence with ne … pas.",
+      "explanation": "Put ne before the verb and pas after it."
+    },
+    "number": {
+      "title": "Singular and plural",
+      "instruction": "Put the noun phrase after the verb into the other number.",
+      "explanation": "Change the article and add or drop the plural s on the noun."
+    },
+    "question": {
+      "title": "Questions",
+      "instruction": "Turn the sentence into a question with est-ce que.",
+      "explanation": "Inversion is also French, but this exercise asks for est-ce que."
+    },
+    "pronoun": {
+      "title": "Object pronouns",
+      "instruction": "Replace the object with le, la, l’ or les.",
+      "explanation": "The pronoun goes right before the verb; l’ before a vowel."
+    },
+    "passe-compose": {
+      "title": "Passé composé",
+      "instruction": "Put the verb in the passé composé.",
+      "explanation": "Use avoir in the present tense, agreeing with the subject, followed by the past participle."
+    }
+  },
+  "themes": {
+    "personal": {
+      "name": "Personal Life and Relationships",
+      "subtopics": {
+        "family-life": "Family Life",
+        "friendship-social-ties": "Friendship and Social Ties",
+        "invitations-celebrations": "Invitations and Celebrations",
+        "living-alone-loneliness": "Living Alone and Loneliness",
+        "pets-companionship": "Pets and Companionship",
+        "kindness-daily-solidarity": "Kindness and Daily Solidarity"
+      }
+    },
+    "housing": {
+      "name": "Housing and Community",
+      "subtopics": {
+        "renting-accommodation": "Renting Accommodation",
+        "moving-settling-in": "Moving and Settling In",
+        "flatsharing-roommates": "Flatsharing and Roommates",
+        "housing-maintenance": "Housing Maintenance",
+        "neighbourhood-community": "Neighbourhood and Community",
+        "property-ownership": "Property Ownership"
+      }
+    },
+    "work": {
+      "name": "Work and Career",
+      "subtopics": {
+        "job-search-hiring": "Job Search and Hiring",
+        "workplace-relationships": "Workplace Relationships",
+        "ways-of-working": "Ways of Working",
+        "career-development": "Career Development and Change",
+        "work-life-balance": "Work-Life Balance",
+        "employment-demographics": "Generations in the Workplace"
+      }
+    },
+    "education": {
+      "name": "Education and Learning",
+      "subtopics": {
+        "schooling-systems": "Schooling Systems",
+        "higher-education": "Higher Education",
+        "diplomas-vs-experience": "Diplomas vs Experience",
+        "children-education": "Children's Education",
+        "language-learning": "Language Learning"
+      }
+    },
+    "immigration": {
+      "name": "Immigration and Integration",
+      "subtopics": {
+        "moving-abroad": "Moving Abroad",
+        "culture-shock-adaptation": "Culture Shock and Adaptation",
+        "social-integration": "Social Integration",
+        "language-and-integration": "Language and Integration",
+        "integration-policies": "Integration Policies"
+      }
+    },
+    "travel": {
+      "name": "Travel and Transportation",
+      "subtopics": {
+        "holiday-planning": "Holiday Planning",
+        "tourist-accommodation": "Tourist Accommodation",
+        "tourist-information": "Tourist Information",
+        "vehicle-rental": "Vehicle Rental",
+        "daily-getting-around": "Daily Getting Around",
+        "travel-styles-impact": "Travel Styles and Impact"
+      }
+    },
+    "shopping": {
+      "name": "Shopping, Food, and Everyday Services",
+      "subtopics": {
+        "dining-out": "Dining Out",
+        "retail-and-sales": "Retail Shopping and Sales",
+        "e-commerce-deliveries": "E-Commerce and Deliveries",
+        "second-hand-goods": "Second-Hand Goods",
+        "consumer-eating-habits": "Consumer Eating Habits",
+        "customer-service-claims": "Customer Service and Claims"
+      }
+    },
+    "leisure": {
+      "name": "Leisure, Culture, and Entertainment",
+      "subtopics": {
+        "leisure-classes-workshops": "Leisure Classes and Workshops",
+        "cultural-events-festivals": "Cultural Events and Festivals",
+        "cinema-screen-media": "Cinema and Screen Entertainment",
+        "reading-and-libraries": "Reading and Libraries",
+        "hobby-sports": "Recreational Sports"
+      }
+    },
+    "health": {
+      "name": "Health and Lifestyle",
+      "subtopics": {
+        "medical-consultations": "Medical Consultations",
+        "physical-fitness-health": "Physical Fitness for Health",
+        "nutrition-dietary-health": "Nutrition and Dietary Health",
+        "mental-health-stress": "Stress Management and Mental Health",
+        "aging-body-image": "Body Image and Aging",
+        "trust-in-healthcare": "Trust in Healthcare"
+      }
+    },
+    "technology": {
+      "name": "Technology and Media",
+      "subtopics": {
+        "smartphones-screen-time": "Smartphones and Screen Time",
+        "social-networks-privacy": "Social Networks and Privacy",
+        "video-games-gaming": "Video Games and Digital Entertainment",
+        "digital-work-tools": "Digital Work Tools",
+        "advertising-and-algorithms": "Online Advertising and Media",
+        "artificial-intelligence": "Artificial Intelligence in Daily Life"
+      }
+    },
+    "environment": {
+      "name": "Environment and Cities",
+      "subtopics": {
+        "urban-transport-mobility": "Urban Mobility and Car-Free Cities",
+        "city-vs-countryside": "City vs Countryside",
+        "waste-pollution-reduction": "Waste Management and Pollution",
+        "overtourism-impact": "Overtourism and Natural Spaces",
+        "animal-welfare-zoos": "Animal Welfare and Zoos",
+        "energy-transition": "Energy Transition and Climate"
+      }
+    },
+    "society": {
+      "name": "Society and Civic Engagement",
+      "subtopics": {
+        "volunteering-action": "Volunteering and Community Action",
+        "helping-the-poor": "Helping the Underprivileged",
+        "public-services": "Public Services and Civic Access",
+        "civic-participation": "Civic and Political Participation",
+        "freedom-of-speech": "Freedom of Speech",
+        "social-welfare-ethics": "Social Welfare and Ethics"
+      }
+    }
+  },
+  "atelier": {
+    "title": "Sentence workshop",
+    "subtitle": "Put the bricks in order to build a French sentence.",
+    "back": "Back",
+    "needsKey": "The sentence workshop needs an AI key.",
+    "needsKeyBody": "It writes the sentences and checks your answers with the AI provider you chose in Settings.",
+    "addKey": "Add an AI key",
+    "pick": {
+      "theme": "Theme",
+      "level": "Level",
+      "start": "Start",
+      "building": "Building your round…",
+      "loadFailed": "The round could not be loaded: {{msg}}",
+      "noneUsable_one": "No sentence was usable. {{count}} was skipped because it did not add up.",
+      "noneUsable_other": "No sentence was usable. {{count}} were skipped because they did not add up."
+    },
+    "roles": {
+      "subject": "subj.",
+      "verb": "verb",
+      "auxiliary": "aux.",
+      "noun": "noun",
+      "determiner": "det.",
+      "preposition": "prep.",
+      "contraction": "contr.",
+      "adjective": "adj.",
+      "adverb": "adv.",
+      "negation": "neg.",
+      "conjunction": "conj.",
+      "pronoun": "pron.",
+      "expression": "expr.",
+      "punctuation": "punct."
+    },
+    "round": {
+      "counter": "Sentence {{current}} of {{total}}",
+      "again": "Second try",
+      "skipped_one": "{{count}} sentence was skipped because it did not add up.",
+      "skipped_other": "{{count}} sentences were skipped because they did not add up.",
+      "sound": "Sound",
+      "effects": "Effects",
+      "langZh": "Chinese",
+      "langEn": "English",
+      "row": "Your sentence",
+      "rowEmpty": "Tap a brick to start the sentence.",
+      "tray": "Bricks",
+      "place": "Place {{text}}",
+      "take": "Take back {{text}}",
+      "check": "Check",
+      "next": "Next",
+      "results": "Results",
+      "listen": "Listen",
+      "stop": "Stop",
+      "right": "Right",
+      "fused": "{{a}} and {{b}} make {{fused}}.",
+      "flagged": "Take out the marked brick and try again.",
+      "notQuite": "Not quite. Change the sentence and check again.",
+      "gradeFailed": "The sentence could not be checked: {{msg}}",
+      "exit": "Exit",
+      "change": "Change it",
+      "order": "Build this",
+      "showAnswer": "Show answer",
+      "revealed": "Here is the answer. This sentence comes back once at the end.",
+      "revealedChange": "Here is the answer.",
+      "answer": "Answer",
+      "close": "Close",
+      "breakdown": "Breakdown",
+      "placed": "{{count}} of {{total}} bricks placed"
+    },
+    "relations": {
+      "subject": "Subject",
+      "object": "Object",
+      "complement": "Complement",
+      "article": "Article",
+      "agreement": "Agreement",
+      "negation": "Negation",
+      "modifier": "Modifier",
+      "pronoun": "Pronoun"
+    },
+    "breakdown": {
+      "analysis": "AI analysis",
+      "frame": "How the words connect"
+    },
+    "summary": {
+      "title": "Round done",
+      "count_one": "{{count}} sentence, {{right}} right first time",
+      "count_other": "{{count}} sentences, {{right}} right first time",
+      "none": "No sentence was finished.",
+      "again": "Play again",
+      "themes": "Choose a theme",
+      "first": "Right first time",
+      "missed": "Missed",
+      "retried": "Second try"
+    },
+    "drill": {
+      "instruction": "Put the word tiles in order to build each sentence."
+    }
   }
 }

@@ -1,71 +1,77 @@
-# Relire — French Reading & Pronunciation Trainer
+<div align="center">
 
-**Open-source French close-reading, shadowing and pronunciation practice for TCF Canada.**
+<a href="https://royisme.github.io/relire/app/"><img src="docs/media/hero.en.webp" alt="Relire: a graded reader; tapping a word opens a sheet with its meaning and an example from the text; then the Conjugation page for a reviewed verb; then the Gender page" width="100%"></a>
 
-[Try Relire online](https://royisme.github.io/relire/) · **English** · [简体中文](README.zh-CN.md)
+# Relire
 
-Read real French → tap a word or sentence → understand it in context → shadow the sentence → get AI pronunciation feedback.
+**Read French closely. Then say it out loud.**
 
-Relire runs entirely in your browser. There is no application server and no account. Bring your own Gemini API key, keep your learning data on your device, and install it as a PWA on desktop or mobile.
+I am learning French for TCF Canada, so I built the reading tool I wanted. It runs in your browser with no account. Your learning data is stored on your device; when you use an AI feature, what you ask about goes straight to the provider you pick.
 
-**Why Relire**
+[**Open Relire →**](https://royisme.github.io/relire/app/) · [简体中文](README.zh-CN.md)
 
-- Context-aware word explanations with IPA, verb tense and conjugation.
-- Sentence translation, grammar breakdown, collocations and shadowing guidance.
-- Pronunciation feedback on sounds, liaisons and intonation.
-- Spaced-repetition vocabulary review with SM-2.
-- Local-first storage and cached audio/AI results.
-- English and Simplified Chinese interfaces.
+<sub>Word and sentence lookups in articles, pronunciation feedback and AI speech use your own key for the provider you pick (local Ollama needs none).
+Graded readers, reviewed conjugation and the noun-gender reference work with no key.</sub>
 
-> Relire focuses on reading and pronunciation practice. It is not a TCF mock-exam platform, its AI scores are estimates rather than official results, and it is not affiliated with France Éducation international or IRCC.
+</div>
 
-## A look inside
+## Read, understand, say it
 
-Read a French article with adjustable text size and playback speed.
+**Tap a word.** In a graded reader you see its meaning and the sentence it came from, with no key. In an article you paste or import, the lookup also gives IPA, verb forms and examples; that uses a text AI key (local Ollama needs none).
 
-![French article in the Relire reader](docs/media/reader.jpg)
+<table>
+<tr>
+<td width="64%"><img src="docs/media/word.en.desktop.jpg" alt="A tapped verb in a graded reader: its meaning and an example from the text"></td>
+<td><img src="docs/media/word.en.phone.jpg" alt="The same word sheet on a phone"></td>
+</tr>
+</table>
 
-Tap a word to see its meaning in context, IPA, pronunciation guidance and verb conjugations beside the article.
+**Open a sentence in a pasted or imported article.** It splits into labelled parts, with grammar points, collocations and a shadowing guide beside the original text. Needs a text AI key, or local Ollama with no key.
 
-![Contextual analysis of affronter, with IPA and verb conjugations](docs/media/word-analysis.jpg)
+**Say it back.** Play the sentence and record yourself. Compare plays the reference first, then your take. The last three takes of each sentence stay on your device. Recording needs no key. Graded readers use the device voice for the reference; elsewhere, choose Device voice in Settings to compare without a key.
 
-Break down a sentence into grammatical parts while keeping the original text in view.
+## No key? Start here
 
-![Sentence syntax split into labelled grammatical segments](docs/media/sentence-syntax.jpg)
+- [Graded readers](https://royisme.github.io/relire/app/#/read/graded): three starter readers with authored word meanings, revealable sentence translations, device-voice audio and local checkpoints.
+- [Noun gender](https://royisme.github.io/relire/app/#/grammar/gender): 17 ending tendencies with reviewed examples and selected exceptions, a le/la round and drills. The tendencies were measured against Morphalou 3.1, with the counts recorded in `src/data/noun-gender/pack.json`: -tion is feminine in 3,780 of 3,794 nouns, -age is masculine in 3,091 of 3,105, -ure is feminine in 902 of 1,216; 337 example nouns are reviewed.
+- [Conjugation](https://royisme.github.io/relire/app/#/grammar/conjugation): the supported tenses for 19 reviewed verbs, answered from local data with no AI call, plus negation and question patterns.
+- [French sounds and Sound pairs](https://royisme.github.io/relire/app/#/speaking): the IPA chart and sound-pair listening drills. Audio plays through the speech provider you selected; choose Device voice in Settings to hear it without a key.
 
-<details>
-<summary>Article library and shadowing guide</summary>
+<table>
+<tr>
+<td width="50%"><img src="docs/media/gender.en.desktop.jpg" alt="The Gender reference: ending tendencies grouped by gender, with reviewed examples and selected exceptions"></td>
+<td><img src="docs/media/conjugation.en.desktop.jpg" alt="The Conjugation page for a reviewed verb: its tense tables, answered from local data"></td>
+</tr>
+</table>
 
-Search and filter articles by CEFR level.
+## With your own key
 
-![Article library with search and CEFR level filters](docs/media/library.jpg)
+- **Article lookups**: word and sentence analysis in any article you paste or import. (Text AI key; local Ollama needs none.)
+- **Pronunciation feedback**: Azure Speech scores accuracy, fluency and single words; Gemini listens for phonemes, liaisons and intonation. Scores are estimates.
+- **Generated exercises**: fill-in-the-blank, multiple choice, word transformation, reading passages, dialogue ordering and more, made from your articles; open answers are judged in words, not scored.
+- **Article and worksheet OCR**: import from up to five photos or PDF pages, read by the vision model you choose.
+- **AI speech**: Gemini or Fish Audio with your key, or a local Ollama Phonon model, which needs only one pulled model, no key and no account (Ollama 0.40.9+ on Apple Silicon; the 40M models are CC BY-NC 4.0, noncommercial, and are pulled by you, not shipped with the app). Ollama and the device voice need no key.
+- **Conjugation for other verbs**: an AI writes the table and the app checks it against its own rules; the result is labelled, never "verified".
+- **Optional content service**: a read-only service, with your own access key, for grammar topics and wordbook pages. It never sees your AI key, answers, articles or recordings.
 
-Follow the sentence translation and shadowing guide, and adjust playback speed as you practise.
+## What to trust
 
-![Sentence translation and shadowing guide](docs/media/sentence-shadowing.jpg)
+- **No account, no app server.** Articles, words, recordings and settings stay in your browser, and AI calls go straight from your browser to the provider you pick. The only backend is an optional read-only content service.
+- **Who reviewed what**: The data files record the maintainer as the reviewer of the 19 reviewed verbs and the noun-gender pack (17 ending tendencies and 337 example nouns). The bundled graded readers and the letter-sound patterns were reviewed by AI models, each reviewer a different model from the one that wrote the text. Neither set was reviewed by a human teacher, and each reader says so on its page.
+- **AI scores are estimates**: Pronunciation scores and open-question feedback from AI models are estimates, not official exam marks.
+- **No official affiliation**: Relire is an independent open-source practice tool. It is not a TCF mock-exam platform, and it is not affiliated with France Éducation international or Immigration, Refugees and Citizenship Canada (IRCC).
+- **Words ratings reflect self-reported recall**: FSRS-6 review scheduling relies entirely on your own rating (Forgot, Fuzzy, or Remembered), not automated tests. In Words Play mode, answering a retrieval challenge before reveal never changes the review schedule.
+- **Gender practice counts first tries**: In the noun-gender practice round, only your first attempt on each card counts toward history; returning cards that you missed write nothing.
 
-</details>
+I built Relire with AI coding agents under my direction. They wrote the code and drafted most of the content. Automated checks cover the code, the data shapes and the conjugation tables against reference data. The French in the graded readers was reviewed by other AI models, and no human teacher has reviewed it yet. A human language review is the release gate for beginners.
 
-## What you can do
+## Try it
 
-- **Keep a library of articles.** Three B1 to C1 samples are included. Paste your own, then search, filter by level, sort, edit or delete them from a simple list. Choose text size and theme, and slow the audio down to 0.5×.
-- **Tap any word.** You get the lemma, meaning in context, IPA, the verb tense, a conjugation table and example sentences. Save it to your vocabulary in one click.
-- **Break down a hard sentence.** Translation, syntax segments, grammar points, common collocations and a shadowing guide (rhythm groups, liaisons, intonation).
-- **Shadow and get feedback.** Record yourself reading a sentence and receive an overall score, plus feedback on individual sounds, liaisons and intonation.
-- **Look up any French sound.** A chart of the sounds of French in IPA, each with an example word you can tap to hear.
-- **Review vocabulary with spaced repetition.** An SM-2 schedule decides what is due today.
-- **Drill from the article you are reading.** Sentence scramble, oral shadowing and grammar cloze, generated from the current text.
-- **Choose your AI.** The AI that writes explanations and the AI that reads aloud are separate settings, each with its own provider, model and key, and the code is built so more providers can be added.
-- **Edit the prompts.** The instructions sent to the AI are plain-text templates you can view, change and reset in Settings.
-- **Use it in English or Chinese.** The interface and the explanations switch between the two.
-
-## Try it online
-
-Open **https://royisme.github.io/relire/**. You can browse the included sample articles immediately. AI analysis, speech generation and pronunciation feedback require your own Gemini API key.
+Open **https://royisme.github.io/relire/app/**. Today, the graded readers, noun gender and conjugation of the reviewed verbs work without a key. AI lookups, AI speech and pronunciation feedback need a key for the provider you choose, except Ollama and the device voice.
 
 ## Quick start
 
-You need [Bun](https://bun.sh) and a free [Gemini API key](https://aistudio.google.com/apikey).
+You need [Bun](https://bun.sh). For the AI features you also need a key from one of the providers above (Ollama needs none), for example a free [Gemini API key](https://aistudio.google.com/apikey). On first launch, a three-step guide lets you add a key or continue without AI.
 
 ```bash
 git clone https://github.com/royisme/relire.git
@@ -74,36 +80,20 @@ bun install
 bun run dev        # http://localhost:5173
 ```
 
-On first launch a short guide helps you create and check your key. You can also add it later in **Settings**. Word and sentence analysis, audio and pronunciation feedback all need it.
-
-### Run it as an installed app
-
-```bash
-bun run build      # static files in dist/
-bun run preview    # serve them locally
-```
-
-`dist/` is a plain static site, so you can also host it anywhere (GitHub Pages, Netlify, an S3 bucket). Open it in Chrome, Edge or Safari and use the browser's install option; it then opens in its own window. Installing needs `localhost` or HTTPS.
-
-Reading, your saved words and vocabulary review work offline. Anything that calls Gemini needs a connection.
+`bun run build` produces a plain static site in `dist/`; host it anywhere (GitHub Pages, Netlify, an S3 bucket) and install it from Chrome, Edge or Safari so it opens in its own window. What is stored on your device then works offline; anything that calls an AI provider or the optional content service needs a connection, and Ollama needs only your own machine.
 
 ### Privacy
 
-Your articles, vocabulary and stats are stored in this browser's IndexedDB, and your API key and settings in its local storage. You can export and restore a backup from Settings (backups never include the key). Browsers can clear site data when space runs low or after long inactivity, particularly Safari for sites that are not installed, so install the app, use **Protect my data** in Settings, and export a backup now and then. When you use an AI feature, the word, sentence or recording is sent from your browser straight to Google's Gemini API using your key. Nothing goes through any other server. Generated explanations, drills and pronunciation audio are cached on your device. Reusing a cached result or audio clip needs no further API call, and cached audio works offline. Word analyses have no expiry; sentence analyses and drills expire after 30 days. Audio for saved vocabulary is protected from automatic cleanup; other clips may be removed when the audio store exceeds 200 MB. Settings shows what is saved and can clear it, and a backup can optionally include your vocabulary's audio. Anyone with access to your browser profile can read the stored key, so use a key you can revoke.
+- Articles, words, recordings and stats stay in this browser's IndexedDB; your key and settings stay in its local storage, and backups never include the key.
+- When you use an AI feature, the word, sentence or recording goes from your browser straight to the provider you choose.
+- The optional content service never sees your AI key, answers, articles or recordings.
+- Browsers can clear site data when space runs low; install the app and export a backup now and then.
+
+Full detail: [PRIVACY.md](PRIVACY.md).
 
 ## How it is built
 
-React 19, Vite, Tailwind CSS 4, i18next, and AI providers called directly from the browser (Gemini through `@google/genai`). `PRODUCT.md` describes who it is for and the principles behind it, `DESIGN.md` is the visual system, `docs/architecture.md` is a map of the code, and `CLAUDE.md` plus `.claude/` hold the guidance for AI coding agents.
-
-```
-src/services/ai/         providers, prompt templates and tasks; the UI calls src/services/api.ts
-src/App.tsx              app state and screen navigation
-src/storage/             IndexedDB persistence, answer cache and audio storage
-src/components/          one file per screen or overlay
-src/utils/srs.ts         SM-2 scheduling
-```
-
-`bun run typecheck` runs the TypeScript check, `bun run lint` runs oxlint, `bun run format` formats with oxfmt, and `bun run e2e` runs the Playwright specs with every AI call mocked.
+React 19, Vite, Tailwind CSS 4 and i18next, with AI providers called directly from the browser. `PRODUCT.md` says who the app is for, `DESIGN.md` is the visual system, and `AGENTS.md` holds the repository rules, checks and commands.
 
 ## Contributing
 
@@ -111,4 +101,6 @@ Issues and pull requests are welcome. Please read `PRODUCT.md` and `DESIGN.md` b
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) for the code and documentation. The dictionary data files under `data/lexicon/` are a work based on Morphalou 3.1 and are licensed under the LGPL-LR; see [data/lexicon/NOTICE.md](data/lexicon/NOTICE.md) and [data/lexicon/LGPL-LR.txt](data/lexicon/LGPL-LR.txt).
+
+If Relire helps your French, a star helps others find it.

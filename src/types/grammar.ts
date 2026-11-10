@@ -1,8 +1,7 @@
 /**
- * Grammar taxonomy (A1-C1) that tags every exercise item and attempt, and the
- * one-way mapping from FrenchLab's 14 textbook-specific categories.
- * Owns tag IDs, their area grouping and the legacy mapping. Does not own
- * labels (they live in the locale files) or any exercise shape.
+ * Grammar taxonomy (A1-C1) that tags every exercise item and attempt.
+ * Owns tag IDs and their area grouping. Does not own labels (they live in the
+ * locale files) or any exercise shape.
  */
 import { z } from 'zod';
 
@@ -56,41 +55,4 @@ export function grammarAreaOf(tag: GrammarTag): GrammarAreaId {
   for (const area of GRAMMAR_AREA_IDS) if ((GRAMMAR_AREAS[area] as readonly string[]).includes(tag)) return area;
   // Unreachable while flatTags is derived from GRAMMAR_AREAS.
   throw new Error(`Grammar tag without an area: ${tag}`);
-}
-
-/** FrenchLab's 14 categories and where each lands in the taxonomy. */
-export const FRENCHLAB_GRAMMAR_TAG_MAP: Readonly<Record<string, GrammarTag>> = {
-  'gender-agreement': 'gender-number',
-  'nationality-adjectives': 'adjective-agreement',
-  'country-prepositions': 'prepositions',
-  'verb-conjugation-etre': 'present',
-  'verb-conjugation-sappeler': 'present',
-  'verb-conjugation-aller-avoir': 'present',
-  'pronouns-subject': 'subject-object-pronouns',
-  'definite-articles': 'articles',
-  'possessive-adjectives': 'possessive-demonstrative',
-  'numbers-time': 'numbers-time',
-  'question-formulation': 'questions',
-  'dialogue-comprehension': 'reading-comprehension',
-  'reading-comprehension': 'reading-comprehension',
-  'professions-vocabulary': 'vocabulary-usage',
-};
-
-export class UnknownGrammarTagError extends Error {
-  readonly tag: string;
-  constructor(tag: string) {
-    super(`Unknown FrenchLab grammar tag: ${JSON.stringify(tag)}`);
-    this.name = 'UnknownGrammarTagError';
-    this.tag = tag;
-  }
-}
-
-/**
- * Maps a FrenchLab category to the taxonomy. A tag outside the 14 known
- * categories throws `UnknownGrammarTagError`: a restore must stop or ask the
- * learner, never file an attempt under a guessed tag.
- */
-export function mapFrenchLabGrammarTag(tag: string): GrammarTag {
-  if (Object.hasOwn(FRENCHLAB_GRAMMAR_TAG_MAP, tag)) return FRENCHLAB_GRAMMAR_TAG_MAP[tag];
-  throw new UnknownGrammarTagError(tag);
 }

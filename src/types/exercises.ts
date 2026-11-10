@@ -6,7 +6,20 @@
  * import drafts (services/exercises/importDraft) or storage.
  */
 import { z } from 'zod';
+import { AtelierMetaSchema } from './atelier';
+import { LearningAreaSchema, supportsListening, type LearningArea } from './learningArea';
 import { GrammarTagSchema, type GrammarTag } from './grammar';
+import { NounGenderDrillMetaSchema } from './nounGenderDrill';
+import { ReaderDictationMetaSchema } from './readerDictation';
+import { ReaderTransformMetaSchema } from './readerTransform';
+import { SpellingDrillMetaSchema } from './spellingDrill';
+import {
+  CheckpointQuestionSchema,
+  TopicOriginSchema,
+  TopicQuestionSchema,
+  topicUnitId,
+  type TopicResult,
+} from './grammarCheckpoint';
 
 export const ExerciseTypeSchema = z.enum([
   'WORD_TRANSFORM',
@@ -44,6 +57,7 @@ export const ExerciseItemSchema = z.object({
   grammarTag: GrammarTagSchema,
   audioText: z.string().optional(),
   meta: z.record(z.string(), z.unknown()).optional(),
+  topicQuestion: TopicQuestionSchema.optional(),
 });
 export type ExerciseItem = z.infer<typeof ExerciseItemSchema>;
 
@@ -59,6 +73,41 @@ export function refineExerciseItem(
   const issue = (field: string, message: string) => ctx.addIssue({ code: 'custom', path: [...path, field], message });
   const answer = item.expectedAnswer;
   const options = item.options || [];
+  if (item.meta?.source === 'noun-gender') {
+    const parsed = NounGenderDrillMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'GENDER_CHECK' || item.grammarTag !== 'gender-number' || !['M', 'F'].includes(String(answer)))
+      issue('meta', 'Noun-gender metadata requires a gender-number M/F gender check');
+  }
+  if (item.meta?.source === 'reader-dictation') {
+    const parsed = ReaderDictationMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'NUMBER_DICTATION' || !item.audioText?.trim())
+      issue('meta', 'Reader-dictation metadata requires number dictation with nonblank audio text');
+  }
+  if (item.meta?.source === 'reader-transform') {
+    const parsed = ReaderTransformMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'WORD_TRANSFORM' || typeof answer !== 'string' || !answer.trim())
+      issue('meta', 'Reader-transform metadata requires word transform with a nonblank answer');
+  }
+  if (item.meta?.source === 'atelier') {
+    const parsed = AtelierMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'SENTENCE_BUILD' || typeof answer !== 'string' || !answer.trim())
+      issue('meta', 'Atelier metadata requires sentence build with a nonblank answer');
+  }
+  if (item.meta?.source === 'spelling-sounds') {
+    const parsed = SpellingDrillMetaSchema.safeParse(item.meta);
+    if (!parsed.success)
+      for (const error of parsed.error.issues) ctx.addIssue({ ...error, path: [...path, 'meta', ...error.path] });
+    if (type !== 'CHOICE_SELECT' || !item.audioText?.trim())
+      issue('meta', 'Spelling-sounds metadata requires choice select with nonblank audio text');
+  }
   if (
     ['DIALOGUE_ORDER', 'MATCH_PAIRS', 'ODD_ONE_OUT', 'GENDER_CHECK'].includes(type) &&
     new Set(options).size !== options.length
@@ -113,18 +162,25 @@ export const ImportSourceKindSchema = z.enum(['image', 'pdf', 'text']);
 export const ImportModeSchema = z.enum(['complete', 'extract', 'generate']);
 export type ImportMode = z.infer<typeof ImportModeSchema>;
 
+/** The levels an exercise batch can be made for. */
+export const ExerciseLevelSchema = z.enum(['A1', 'A2', 'B1', 'B2', 'C1']);
+export type ExerciseLevel = z.infer<typeof ExerciseLevelSchema>;
+export const EXERCISE_LEVELS = ExerciseLevelSchema.options;
+
 /**
- * A unit without its owner: what a model returns and what an import draft
- * reviews. `ExerciseUnitSchema` adds the material it belongs to.
+ * A unit without its batch: what a model returns and what an import draft
+ * reviews. `ExerciseUnitSchema` adds the batch it was saved with.
  */
 export const ExtractedUnitSchema = z
   .object({
     id: text,
+    learningArea: LearningAreaSchema,
     section: z.enum(['GRAMMAIRE', 'VOCABULAIRE', 'CONJUGAISON', 'COMPRENDRE', 'EXTRA']),
     unitNumber: z.number().int().positive(),
     subPart: z.string().optional(),
     title: text,
     instruction: text,
+    topicOrigin: TopicOriginSchema.optional(),
     example: z.string().optional(),
     readingPassage: z
       .object({
@@ -142,20 +198,95 @@ export const ExtractedUnitSchema = z
         name: text,
         pages: z.array(z.number().int().positive()),
         mode: ImportModeSchema,
-        extractedText: z.string(),
       })
       .optional(),
     isExtracurricular: z.boolean().optional(),
   })
   .superRefine((unit, ctx) => {
+    if (unit.learningArea === 'listening' && !supportsListening(unit))
+      ctx.addIssue({
+        code: 'custom',
+        path: ['learningArea'],
+        message:
+          'Listening requires number dictation, pack-backed sound pairs or spelling-sound choices with audio text for every item',
+      });
+    if (unit.id.startsWith('topic:') !== Boolean(unit.topicOrigin))
+      ctx.addIssue({ code: 'custom', message: 'Topic unit identity and origin must be paired' });
     unit.items.forEach((item, index) => refineExerciseItem(item.type ?? unit.type, item, ctx, ['items', index]));
     if (new Set(unit.items.map((item) => item.id)).size !== unit.items.length)
       ctx.addIssue({ code: 'custom', message: 'Duplicate item IDs' });
+    unit.items.forEach((item, index) => {
+      const fail = (message: string) => ctx.addIssue({ code: 'custom', path: ['items', index], message });
+      if (Boolean(unit.topicOrigin) !== Boolean(item.topicQuestion)) fail('Topic origin and question must be paired');
+      if (!unit.topicOrigin || !item.topicQuestion) return;
+      const parsed = CheckpointQuestionSchema.safeParse({
+        ...item,
+        instruction: item.topicQuestion.instruction,
+        feedback: item.topicQuestion.feedback,
+      });
+      if (!parsed.success)
+        for (const issue of parsed.error.issues) ctx.addIssue({ ...issue, path: ['items', index, ...issue.path] });
+      if (item.meta?.strictAccents !== true) fail('Topic items require strict accents');
+      if (
+        item.explanation !== undefined ||
+        item.audioText !== undefined ||
+        item.options !== undefined ||
+        item.answerSource !== undefined
+      )
+        fail('Topic questions cannot carry worksheet explanation, speech, options or answer source');
+    });
+    if (unit.topicOrigin) {
+      const fail = (message: string) => ctx.addIssue({ code: 'custom', message });
+      if (unit.id !== topicUnitId(unit.topicOrigin)) fail('Topic unit identity does not match origin');
+      if (
+        unit.learningArea !== 'grammar' ||
+        unit.section !== 'GRAMMAIRE' ||
+        unit.unitNumber !== 1 ||
+        unit.type !== 'FILL_BLANKS'
+      )
+        fail('Invalid topic unit defaults');
+      if (unit.title !== unit.topicOrigin.title.en || unit.instruction !== unit.topicOrigin.instruction.en)
+        fail('Topic required strings must match English metadata');
+      if (unit.items.length !== 6) fail('Topic snapshot requires six questions');
+      const checkpoints = new Set<string>();
+      unit.items.forEach((item, index) => {
+        const question = item.topicQuestion;
+        if (!question) return;
+        if (item.type !== (index % 2 === 0 ? 'CHOICE_SELECT' : 'FILL_BLANKS') || item.itemNumber !== index + 1)
+          fail('Invalid topic question order');
+        if (item.grammarTag !== unit.grammarTags[0]) fail('Topic item must use the first tag');
+        if (index % 2 === 0) {
+          if (checkpoints.has(question.checkpointId)) fail('Duplicate checkpoint ID');
+          checkpoints.add(question.checkpointId);
+        } else {
+          const previous = unit.items[index - 1].topicQuestion;
+          if (
+            question.checkpointId !== previous?.checkpointId ||
+            JSON.stringify(question.checkpointTitle) !== JSON.stringify(previous?.checkpointTitle)
+          )
+            fail('Each checkpoint must own two adjacent questions with the same title');
+        }
+      });
+    }
   });
 export type ExtractedUnit = z.infer<typeof ExtractedUnitSchema>;
 
-/** A playable unit; `materialId` is the article or workbook it belongs to. */
-export const ExerciseUnitSchema = ExtractedUnitSchema.safeExtend({ materialId: text });
+/**
+ * A playable unit, self-contained: `setId` is shared by every unit saved in one
+ * import or generation batch, `setTitle` names the batch when it has a title,
+ * `level` was chosen once for the batch and `createdAt` (epoch milliseconds) is
+ * the moment the batch was made, the same on every unit of it. A unit never
+ * points at an article.
+ */
+export const ExerciseUnitSchema = ExtractedUnitSchema.safeExtend({
+  setId: text,
+  setTitle: text.optional(),
+  level: ExerciseLevelSchema,
+  createdAt: z.number().int().positive(),
+}).superRefine((unit, ctx) => {
+  if (unit.topicOrigin && unit.setId !== unit.id)
+    ctx.addIssue({ code: 'custom', path: ['setId'], message: 'A topic revision is its own set' });
+});
 export type ExerciseUnit = z.infer<typeof ExerciseUnitSchema>;
 
 /** The type that governs an item: its own override, else the unit's. */
@@ -181,6 +312,8 @@ export interface ExerciseAnswer {
 /** The result of a check. `aiFeedback` is present when an AI grader decided it. */
 export interface CheckedResult {
   correct: boolean;
+  /** The accent preference the item was graded with, so per-slot markings stay as graded. */
+  strictAccents: boolean;
   aiFeedback?: { feedback: string; correctedVersion?: string };
 }
 
@@ -199,19 +332,21 @@ export interface ExerciseItemState {
 
 /**
  * One row per check in `attempts`. It carries its own prompt and answer text so
- * history stays meaningful after the material is deleted.
+ * history stays meaningful after the unit is deleted.
  */
 export interface ExerciseAttempt {
   id: string;
+  learningArea: LearningArea;
   unitId: string;
   itemId: string;
-  materialId: string;
   grammarTag: GrammarTag;
   prompt: string;
   userAnswer: string;
   expectedAnswer: string;
   correct: boolean;
   timestamp: number;
+  /** Authored feedback retained even after the source snapshot is deleted. */
+  topicResult?: TopicResult;
 }
 
 export const itemStateId = (unitId: string, itemId: string) => `${unitId}:${itemId}`;

@@ -1,0 +1,49 @@
+/* Functional Words flip: only the shown face sets natural reading height. */
+.vocabulary-flashcard {
+  perspective: 1200px;
+  overflow-anchor: none;
+}
+.vocabulary-flashcard-turn {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 180ms var(--ease-out);
+}
+.vocabulary-flashcard[data-face='back'] .vocabulary-flashcard-turn {
+  transform: rotateY(180deg);
+}
+.vocabulary-flashcard-face {
+  backface-visibility: hidden;
+  overflow-wrap: anywhere;
+  /* A preferred paper proportion, not a height cap: long answers grow in page flow. */
+  aspect-ratio: 4 / 5;
+  min-block-size: min-content;
+  /* Words-only paper depth; ordinary in-flow surfaces stay flat. */
+  box-shadow:
+    0 2px 3px -1px color-mix(in srgb, var(--color-ink-900) 8%, transparent),
+    0 10px 24px -12px color-mix(in srgb, var(--color-scrim) 24%, transparent);
+}
+.vocabulary-flashcard-back {
+  transform: rotateY(180deg);
+}
+.vocabulary-flashcard-face[inert] {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vocabulary-flashcard[data-face] .vocabulary-flashcard-turn,
+  .vocabulary-flashcard .vocabulary-flashcard-face {
+    transform: none;
+    transition: none;
+  }
+  @layer base {
+    /* Override the global important reduced-motion duration in its own layer. */
+    .vocabulary-flashcard-turn,
+    .vocabulary-flashcard-face {
+      transition-duration: 0s !important;
+    }
+  }
+  .vocabulary-flashcard-face[inert] {
+    visibility: hidden;
+  }
+}

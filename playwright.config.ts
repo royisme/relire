@@ -30,6 +30,7 @@ export default defineConfig({
     { name: 'phone', use: { viewport: { width: 360, height: 740 }, hasTouch: true, isMobile: true }, grep: /@phone/ },
   ],
   webServer: {
+    env: { VITE_CONTENT_SERVICE_URL: 'http://content.test' },
     command: `bun run dev --port ${port} --strictPort`,
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,

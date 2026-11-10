@@ -23,9 +23,13 @@ async function vocabularyTexts(): Promise<Set<string>> {
   const d = await db();
   const texts = new Set<string>();
   for (const w of await d.getAll('vocab')) {
-    if (w.word) texts.add(normalizeText(w.word));
-    if (w.contextSentence) texts.add(normalizeText(w.contextSentence));
-    for (const ex of w.analysis?.usageExamples ?? []) if (ex.fr) texts.add(normalizeText(ex.fr));
+    if (!w.bookmarked && !w.schedule) continue;
+    texts.add(normalizeText(w.word));
+    for (const context of w.contexts) {
+      if (context.sentence) texts.add(normalizeText(context.sentence));
+      if (context.definition.kind === 'ai')
+        for (const ex of context.definition.analysis.usageExamples ?? []) texts.add(normalizeText(ex.fr));
+    }
   }
   return texts;
 }
@@ -162,7 +166,9 @@ export interface AudioBackup {
   provider?: string;
   voice: string;
   model: string;
-  data: string; // base64 WAV
+  data: string; // base64 audio
+  /** WAV from Gemini, MP3 from Fish Audio; absent in older backups, which were all WAV. */
+  mimeType?: string;
 }
 
 /** Clips that belong to the vocabulary, for a backup. */
@@ -178,6 +184,7 @@ export async function exportProtectedAudio(): Promise<AudioBackup[]> {
         voice: e.voice,
         model: e.model,
         data: await blobToBase64(e.blob),
+        ...(e.blob.type ? { mimeType: e.blob.type } : {}),
       });
   }
   return out;
@@ -190,7 +197,13 @@ export async function importAudio(items: AudioBackup[]): Promise<{ imported: num
   for (const item of items) {
     if (!item?.text || !item.data) continue;
     try {
-      await storeAudio(item.provider ?? 'gemini', item.model, item.voice, item.text, base64ToBlob(item.data));
+      await storeAudio(
+        item.provider ?? 'gemini',
+        item.model,
+        item.voice,
+        item.text,
+        base64ToBlob(item.data, item.mimeType || 'audio/wav'),
+      );
       imported++;
     } catch {
       failed++;

@@ -1,0 +1,390 @@
+/** Owns the verb and cell statuses of an AI answer against the engine and of a pack row; not the view (conjugationAssemble) or the schema. */
+import { describe, expect, test } from 'bun:test';
+import { verifyAnswer, verifyPackVerb, type VerifiedVerb } from '../src/services/conjugation/verify';
+import { REGULAR_RULES } from '../src/services/conjugation/rules';
+import type { ConjugationAnswer } from '../src/types/conjugationAnswer';
+import { COMPOUND_TENSES, TENSES, type Verb } from '../src/types/grammarPack';
+import { GOLDEN } from './fixtures/grammarPackGolden';
+import { answerFromGolden, erAnswer, falloirAnswer, parlerAnswer } from './fixtures/conjugationAnswer';
+
+const cells = (verified: VerifiedVerb, tenses: readonly string[] = TENSES) =>
+  tenses.flatMap((tense) => Object.values(verified.tenses[tense as keyof VerifiedVerb['tenses']]));
+const statusesOf = (verified: VerifiedVerb, tenses?: readonly string[]) =>
+  new Set(cells(verified, tenses).map((cell) => cell.status));
+const SIMPLE = ['present', 'imparfait', 'futur', 'conditionnel', 'subjonctif', 'imperatif'];
+
+const lever = (rule: ConjugationAnswer['rule'] = 'er-e-grave') =>
+  erAnswer('lever', rule, { plain: 'lev', strong: 'lèv', fut: 'lèver' });
+
+describe('a regular verb whose answer equals the engine', () => {
+  test('parler: every simple cell matches and the verb is rule-checked', () => {
+    const verified = verifyAnswer(parlerAnswer());
+    expect(verified.status).toBe('rule-checked');
+    expect(verified.rule).toBe('er-regular');
+    expect(statusesOf(verified, SIMPLE)).toEqual(new Set(['match']));
+    expect(verified.participles.present?.status).toBe('match');
+    expect(Object.values(verified.participles).map((p) => p.status)).toEqual([
+      'match',
+      'match',
+      'match',
+      'match',
+      'match',
+    ]);
+    expect(verified.tenses.present['1sg']).toEqual({
+      lead: 'je',
+      forms: ['parle'],
+      status: 'match',
+      parts: [{ stem: 'parl', ending: 'e' }],
+    });
+  });
+
+  test('passé composé is always ai-only outside the pack, even when its participle matches', () => {
+    const verified = verifyAnswer(parlerAnswer());
+    expect(verified.tenses.passeCompose['1sg']).toEqual({ lead: 'j’', forms: ['ai parlé'], status: 'ai-only' });
+    expect(statusesOf(verified, ['passeCompose'])).toEqual(new Set(['ai-only']));
+  });
+
+  test('every compound tense is ai-only, with no engine parts, and the auxiliary comes from the engine', () => {
+    const verified = verifyAnswer(parlerAnswer());
+    for (const tense of COMPOUND_TENSES) {
+      expect(statusesOf(verified, [tense])).toEqual(new Set(['ai-only']));
+      for (const cell of Object.values(verified.tenses[tense]))
+        expect({ tense, parts: cell.parts, ruleForms: cell.ruleForms }).toEqual({
+          tense,
+          parts: undefined,
+          ruleForms: undefined,
+        });
+    }
+    expect(verified.tenses.plusQueParfait['3pl']).toEqual({
+      lead: 'ils/elles',
+      forms: ['avaient parlé'],
+      status: 'ai-only',
+    });
+    expect(verified.tenses.subjonctifPasse['3sg']).toEqual({
+      lead: 'qu’il/elle',
+      forms: ['ait parlé'],
+      status: 'ai-only',
+    });
+    // The verb is still checked clean: a compound tense never makes it partly differ.
+    expect(verified.status).toBe('rule-checked');
+  });
+
+  test('a stem change the rule really has: lever under er-e-grave', () => {
+    const verified = verifyAnswer(lever());
+    expect(verified.status).toBe('rule-checked');
+    expect(verified.tenses.present['1sg']?.forms).toEqual(['lève']);
+  });
+});
+
+describe('a difference keeps both forms', () => {
+  test('one wrong form: that cell differs, the others match, the verb partly differs', () => {
+    const answer = parlerAnswer();
+    answer.forms.present['3sg'] = ['parles'];
+    const verified = verifyAnswer(answer);
+    expect(verified.status).toBe('partly-differs');
+    expect(verified.tenses.present['3sg']).toEqual({
+      lead: 'il/elle',
+      forms: ['parles'],
+      status: 'differs',
+      ruleForms: ['parle'],
+      ruleParts: [{ stem: 'parl', ending: 'e' }],
+    });
+    expect(cells(verified, SIMPLE).filter((cell) => cell.status === 'differs')).toHaveLength(1);
+  });
+
+  test('the primary form is compared, not only the set of variants', () => {
+    const payer = erAnswer('payer', 'er-yer-i', { plain: 'pay', strong: 'pai', fut: 'paier' });
+    payer.forms.present['1sg'] = ['paie', 'paye'];
+    expect(verifyAnswer(payer).tenses.present['1sg']?.status).toBe('match');
+    payer.forms.present['1sg'] = ['paye', 'paie'];
+    const swapped = verifyAnswer(payer).tenses.present['1sg'];
+    expect(swapped).toMatchObject({ status: 'differs', forms: ['paye', 'paie'], ruleForms: ['paie', 'paye'] });
+  });
+
+  test('a missing or extra variant differs', () => {
+    const answer = parlerAnswer();
+    answer.forms.present['1sg'] = ['parle', 'parles'];
+    expect(verifyAnswer(answer).tenses.present['1sg']?.status).toBe('differs');
+  });
+
+  test('a past participle the rule does not give differs and makes the verb partly differ', () => {
+    const answer = parlerAnswer();
+    answer.participles.past.fp = 'parlés';
+    const verified = verifyAnswer(answer);
+    expect(verified.participles.fp).toEqual({ form: 'parlés', status: 'differs', ruleForm: 'parlées' });
+    expect(verified.status).toBe('partly-differs');
+  });
+
+  test('acheter named er-regular with the correct forms differs: the AI’s rule is the one checked', () => {
+    const acheter = erAnswer('acheter', 'er-regular', { plain: 'achet', strong: 'achèt', fut: 'achèter' });
+    const verified = verifyAnswer(acheter);
+    expect(verified.status).toBe('partly-differs');
+    expect(verified.tenses.present['1sg']).toEqual({
+      lead: 'j’',
+      forms: ['achète'],
+      status: 'differs',
+      ruleForms: ['achete'],
+      ruleParts: [{ stem: 'achet', ending: 'e' }],
+    });
+    // Named correctly, the same answer is checked clean.
+    const named = verifyAnswer({ ...acheter, rule: 'er-e-grave' });
+    expect(named.status).toBe('rule-checked');
+    expect(statusesOf(named, SIMPLE)).toEqual(new Set(['match']));
+  });
+});
+
+describe('the pronominal imperatif keeps its clitic in both forms', () => {
+  test('se laver: the view and the rule form carry -toi, -nous, -vous', () => {
+    const verified = verifyAnswer(erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' }));
+    expect(verified.status).toBe('rule-checked');
+    expect(verified.tenses.imperatif['2sg']).toEqual({
+      lead: '',
+      forms: ['lave-toi'],
+      status: 'match',
+      parts: [{ stem: 'lav', ending: 'e', clitic: '-toi' }],
+    });
+    expect(verified.tenses.imperatif['1pl']?.forms).toEqual(['lavons-nous']);
+    const wrong = erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' });
+    wrong.forms.imperatif = { '2sg': ['laves'], '1pl': ['lavons'], '2pl': ['lavez'] };
+    expect(verifyAnswer(wrong).tenses.imperatif['2sg']).toMatchObject({
+      status: 'differs',
+      forms: ['laves-toi'],
+      ruleForms: ['lave-toi'],
+    });
+  });
+});
+
+describe('ai-only verbs: nothing independent is left to compare with', () => {
+  const allAiOnly = (verified: VerifiedVerb) => {
+    expect(verified.status).toBe('ai-only');
+    expect(statusesOf(verified)).toEqual(new Set(['ai-only']));
+    expect(Object.values(verified.participles).every((p) => p.status === 'ai-only')).toBe(true);
+    expect(cells(verified).some((cell) => cell.ruleForms !== undefined)).toBe(false);
+  };
+
+  test('irregular, even with a perfect table', () => {
+    const verified = verifyAnswer(answerFromGolden('aller'));
+    allAiOnly(verified);
+    expect(verified.rule).toBe('irregular');
+  });
+
+  test('a rule misfit by suffix: the rule is discarded', () => {
+    for (const rule of ['ir-issons', 'er-cer', 're-regular'] as const) {
+      const verified = verifyAnswer({ ...parlerAnswer(), rule });
+      allAiOnly(verified);
+      expect(verified.rule).toBeUndefined();
+    }
+  });
+
+  test('mettre and battre are suffix misfits for re-regular, not checked cells', () => {
+    for (const infinitive of ['mettre', 'battre']) {
+      const verified = verifyAnswer({ ...parlerAnswer(), infinitive, rule: 're-regular' });
+      allAiOnly(verified);
+      expect(verified.rule).toBeUndefined();
+    }
+  });
+
+  test('a rule that cannot apply makes generateVerb throw: a misfit too', () => {
+    // parler ends in -er but its stem has no e to turn into è.
+    expect(() => REGULAR_RULES['er-e-grave']('parl')).toThrow('no "e"');
+    expect(() => REGULAR_RULES['er-eacute-egrave']('parl')).toThrow('no "é"');
+    const verified = verifyAnswer({ ...parlerAnswer(), rule: 'er-e-grave' });
+    allAiOnly(verified);
+    expect(verified.rule).toBeUndefined();
+  });
+
+  test('a verb in -oir has no engine family, whatever -ir rule the AI names', () => {
+    for (const infinitive of ['pouvoir', 'devoir', 'voir'])
+      for (const rule of ['ir-issons', 'ir-sortir', 'ir-ouvrir'] as const) {
+        const base = infinitive.slice(0, -2);
+        const verified = verifyAnswer(erAnswer(infinitive, rule, { plain: base, strong: base, fut: `${infinitive}r` }));
+        allAiOnly(verified);
+        expect(verified.rule).toBeUndefined();
+      }
+    // A real -ir verb still fits.
+    expect(
+      verifyAnswer(erAnswer('couvrir', 'ir-ouvrir', { plain: 'couvr', strong: 'couvr', fut: 'couvrir' })).rule,
+    ).toBe('ir-ouvrir');
+  });
+
+  test('a defective flag from the AI', () => {
+    const answer = parlerAnswer();
+    answer.defective = 'impersonal';
+    for (const tense of ['present', 'imparfait', 'futur', 'conditionnel', 'subjonctif'] as const)
+      answer.forms[tense] = { '3sg': answer.forms[tense]['3sg'] };
+    delete answer.forms.imperatif;
+    allAiOnly(verifyAnswer(answer));
+    // Without the flag the same verb is checked.
+    expect(verifyAnswer(parlerAnswer()).status).toBe('rule-checked');
+  });
+
+  test('an h-initial verb, also behind a reflexive', () => {
+    allAiOnly(verifyAnswer(erAnswer('habiter', 'er-regular', { plain: 'habit', strong: 'habit', fut: 'habiter' })));
+    allAiOnly(
+      verifyAnswer(erAnswer('s’habiller', 'er-regular', { plain: 'habill', strong: 'habill', fut: 'habiller' })),
+    );
+    expect(verifyAnswer(erAnswer('aimer', 'er-regular', { plain: 'aim', strong: 'aim', fut: 'aimer' })).status).toBe(
+      'rule-checked',
+    );
+  });
+});
+
+test('the pronominal flag of the AI cannot change the clitic or the rule forms', () => {
+  const lie = {
+    ...erAnswer('se laver', 'er-regular', { plain: 'lav', strong: 'lav', fut: 'laver' }),
+    pronominal: false,
+  };
+  const verified = verifyAnswer(lie);
+  expect(verified.pronominal).toBe(true);
+  expect(verified.status).toBe('rule-checked');
+  expect(verified.tenses.imperatif['2sg']).toEqual({
+    lead: '',
+    forms: ['lave-toi'],
+    status: 'match',
+    parts: [{ stem: 'lav', ending: 'e', clitic: '-toi' }],
+  });
+});
+
+describe('ir-ouvrir: the engine takes the participle from the AI', () => {
+  const couvrir = () =>
+    erAnswer(
+      'couvrir',
+      'ir-ouvrir',
+      { plain: 'couvr', strong: 'couvr', fut: 'couvrir' },
+      {
+        participles: { present: 'couvrant', past: { ms: 'couvert', fs: 'couverte', mp: 'couverts', fp: 'couvertes' } },
+      },
+    );
+
+  test('simple cells and the present participle are compared, past participles and passé composé are ai-only', () => {
+    const verified = verifyAnswer(couvrir());
+    expect(verified.status).toBe('rule-checked');
+    expect(statusesOf(verified, SIMPLE)).toEqual(new Set(['match']));
+    expect(verified.participles.present?.status).toBe('match');
+    for (const key of ['ms', 'fs', 'mp', 'fp'] as const) expect(verified.participles[key]?.status).toBe('ai-only');
+    expect(statusesOf(verified, ['passeCompose'])).toEqual(new Set(['ai-only']));
+    expect(verified.tenses.passeCompose['1sg']?.forms).toEqual(['ai couvert']);
+  });
+
+  test('a wrong agreement ending cannot be called wrong, only unchecked', () => {
+    const answer = couvrir();
+    answer.participles.past.fs = 'couvert';
+    const verified = verifyAnswer(answer);
+    expect(verified.participles.fs?.status).toBe('ai-only');
+    expect(verified.status).toBe('rule-checked');
+  });
+});
+
+describe('a verb in the pack', () => {
+  test('every cell and participle is reviewed, from the pack row alone', () => {
+    // A row shaped like the pack's (the golden aller with a test provenance); no AI answer is involved.
+    const row: Verb = {
+      ...GOLDEN.aller,
+      prov: {
+        origin: 'human',
+        checkedAgainst: ['human'],
+        status: 'reviewed',
+        checkedAt: '2026-10-18',
+        reviewedBy: 'TEST ONLY',
+      },
+    };
+    const verified = verifyPackVerb(row);
+    expect(verified.status).toBe('pack-reviewed');
+    expect(statusesOf(verified)).toEqual(new Set(['reviewed']));
+    expect(Object.values(verified.participles).every((p) => p.status === 'reviewed')).toBe(true);
+    expect(verified.tenses.passeCompose['1sg']).toMatchObject({
+      lead: 'je',
+      forms: ['suis allé', 'suis allée'],
+      status: 'reviewed',
+    });
+    for (const tense of COMPOUND_TENSES) expect(statusesOf(verified, [tense])).toEqual(new Set(['reviewed']));
+    // No engine parts on a compound cell: the split comes from cellParts, not from a stem and an ending.
+    expect(verified.tenses.plusQueParfait['1sg']).toEqual({
+      lead: 'j’',
+      forms: ['étais allé', 'étais allée'],
+      status: 'reviewed',
+    });
+    expect(verified.tenses.futurAnterieur['1sg']?.forms).toEqual(['serai allé', 'serai allée']);
+    expect(verified.tenses.conditionnelPasse['1sg']?.lead).toBe('je');
+    expect(verified.tenses.subjonctifPasse['3sg']).toEqual({
+      lead: 'qu’il/elle',
+      forms: ['soit allé', 'soit allée'],
+      status: 'reviewed',
+    });
+    expect(Object.keys(verified.tenses.imperatif)).toEqual(['2sg', '1pl', '2pl']);
+  });
+});
+
+test('a pack verb with a regular rule: no engine parts on any compound cell', () => {
+  // s’appeler has an engine rule (er-eler-double), so `generated` exists and only the guard keeps its compound
+  // cells from borrowing a simple tense's stem and ending.
+  const row = { ...GOLDEN['s-appeler'], prov: { origin: 'human', checkedAgainst: [], status: 'draft' } } as Verb;
+  const verified = verifyPackVerb(row);
+  expect(verified.tenses.present['1sg']).toEqual({
+    lead: 'je m’',
+    forms: ['appelle'],
+    status: 'reviewed',
+    parts: [{ stem: 'appell', ending: 'e' }],
+  });
+  for (const tense of COMPOUND_TENSES)
+    for (const cell of Object.values(verified.tenses[tense]))
+      expect({ tense, keys: Object.keys(cell).sort() }).toEqual({ tense, keys: ['forms', 'lead', 'status'] });
+  expect(verified.tenses.plusQueParfait['1sg']).toEqual({
+    lead: 'je m’',
+    forms: ['étais appelé', 'étais appelée'],
+    status: 'reviewed',
+  });
+});
+
+test('pack and AI present participles carry the reflexive; past participles and statuses stay bare', () => {
+  const row = { ...GOLDEN['s-appeler'], prov: { origin: 'human', checkedAgainst: [], status: 'draft' } } as Verb;
+  const pack = verifyPackVerb(row);
+  const answer = answerFromGolden('s-appeler');
+  const ai = verifyAnswer(answer);
+  const wrong = structuredClone(answer);
+  wrong.participles.present = 'appellant';
+  expect({
+    pack: pack.participles,
+    ai: ai.participles,
+    differs: verifyAnswer(wrong).participles.present,
+    bareInput: answer.participles.present,
+    absent: verifyAnswer(falloirAnswer()).participles.present,
+  }).toEqual({
+    pack: {
+      present: { form: 's’appelant', status: 'reviewed' },
+      ms: { form: 'appelé', status: 'reviewed' },
+      fs: { form: 'appelée', status: 'reviewed' },
+      mp: { form: 'appelés', status: 'reviewed' },
+      fp: { form: 'appelées', status: 'reviewed' },
+    },
+    ai: {
+      present: { form: 's’appelant', status: 'match' },
+      ms: { form: 'appelé', status: 'match' },
+      fs: { form: 'appelée', status: 'match' },
+      mp: { form: 'appelés', status: 'match' },
+      fp: { form: 'appelées', status: 'match' },
+    },
+    differs: { form: 's’appellant', status: 'differs', ruleForm: 's’appelant' },
+    bareInput: 'appelant',
+    absent: undefined,
+  });
+});
+
+for (const [infinitive, stem, hAspire, present, lead] of [
+  ['se laver', 'lav', false, 'se lavant', 'je me'],
+  ['s’habiller', 'habill', false, 's’habillant', 'je m’'],
+  ['se hisser', 'hiss', true, 'se hissant', 'je me'],
+] as const) {
+  test(`${infinitive}: the verified present participle and finite lead share elision rules`, () => {
+    const verb = verifyAnswer(
+      erAnswer(infinitive, 'er-regular', { plain: stem, strong: stem, fut: `${stem}er` }, { hAspire }),
+    );
+    expect([verb.participles.present?.form, verb.tenses.present['1sg']?.lead]).toEqual([present, lead]);
+  });
+}
+
+test('a verb used only in the 3sg and named irregular stays ai-only through the whole path', () => {
+  const verified = verifyAnswer(falloirAnswer());
+  expect(verified.status).toBe('ai-only');
+  expect(verified.tenses.imperatif).toEqual({});
+});

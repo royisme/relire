@@ -1,0 +1,228 @@
+{
+  "records": [
+    {
+      "pairId": "rue-roue",
+      "rowHash": "151bea31d85a94d325e27ceb3746ae41ac1357be498a0b2651ebfce071ff8f2b",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "vu-vous",
+      "rowHash": "27f0905c21ce200da4163f8a8809ebbf81ebd35aab07ee3c575b79eb96a06b2e",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "tu-tout",
+      "rowHash": "0233a138728ba016bad99c28363592125709efa126717faa6c80bfd115015880",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "dessus-dessous",
+      "rowHash": "1aa6fd1d7095b2a9f4c4704335f0e11ca041c3c43223b046bcaa7cb14d5104a6",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "vent-vont",
+      "rowHash": "ed382ef95b2af3766664a54448c739e656466edeb52d30a406e41343ff021067",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "temps-thon",
+      "rowHash": "1f7e6beeac92174232014829802553720b441f0d3cfb213dd1112d82948be9a6",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "sans-son",
+      "rowHash": "39e56188d5708b096700ccb191ee6ef69ee9624987470d18cf617791747e9221",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "banc-bon",
+      "rowHash": "121a00ac5adbdad06331a7401df5a081d6b9fcb51bc476a3563ceb9d99065758",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "dent-dont",
+      "rowHash": "1ef86f727e1bac23af75d875ae7cb544118fa9d5699798452dd32fe4c4738dab",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "lent-long",
+      "rowHash": "bd66a732f52e077cfa04647f787201bc5eca763e7fb4ecbc482e83d0387c768a",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "fee-fait",
+      "rowHash": "dd8208791cec2c6d56f7f655ab9d9c3c5d0da7e86dba500f0b99b57f117bbe6f",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "bon-beau",
+      "rowHash": "bc158c225d246fb490cea24e00335eab767d2f878d3f90e4cd0f20b75aa345dc",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "son-seau",
+      "rowHash": "8a1691b546999df8550656ef4621a85e74d86d19c025b3acce9c4845ddf3de14",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "pont-pot",
+      "rowHash": "41b1fdc8b28f1a2b8c91c30afbe25fd28a5d1403e0fcfae2ece2f231eee3738a",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "fond-faux",
+      "rowHash": "c1953da41b11cbaf9213b0bb125b4b1a8a4a3624e14986eb8522bd587e511763",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "on-eau",
+      "rowHash": "6741e9c05a77cac42e3ce67d19e2bef23b834ec74e75acbf490df417e8a9a284",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "faim-fait",
+      "rowHash": "84b767301b96b0c5db52f72afde8f9f7521b79bca9f97a123d2a582864b082a7",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "vin-vais",
+      "rowHash": "5af7079aeb7f1266a24e64712d1c1e2ca9dddf9f5174295d39c5bd9d0c83ea91",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "pain-paix",
+      "rowHash": "cf9aab18b96af3fdc1cdc09d5b9eb656aaf7dc91291efc06b9aded972957e2e2",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "main-mais",
+      "rowHash": "57996bb1ac99fbe82d3dbdd27029df76e74965d7f57346cfc21a392a73d55215",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "saint-sais",
+      "rowHash": "79c1d844924655d25660f5b2bea255c75b99cd811b3f4df85536c13ae688ddf8",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "bain-pain",
+      "rowHash": "5bdaa2f3e66c8e4ce75c306cecf325e05483e3c2d793d8251e88be4fecd6ff3a",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "boire-poire",
+      "rowHash": "5c4c00bfb97caa9ab0cf2aafc232eea924a7af3ea605c80f9aff5d0d9bad818c",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "bas-pas",
+      "rowHash": "c3456573df6e5af87655c83560fbfa50b5843ff36edc8454a66bb330e07029c8",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "beau-peau",
+      "rowHash": "fd51104491ef281b2353c0c8f1112ce261b5562adceef4ff27a11b5c0f05ea81",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "bord-port",
+      "rowHash": "60e845b1ec5580d444fc8da30802f1991c83b95c19627bdfddc7c10bfc871949",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "bulle-pull",
+      "rowHash": "8b8fd3eea3fbd4fef6d1218f7d2e71ccb59ba06a5976e000fde26a378d16b812",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "rire-lire",
+      "rowHash": "c4da4433932b1f4d5a3591bdf22102d57f154bfbf89667ac0d812f9d08b6495e",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "roi-loi",
+      "rowHash": "1c8a75402c2cb794c02d17cdb6218c608986e78d3b93d18737cd69aaadcb5213",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "riz-lit",
+      "rowHash": "f8f6961b2b0f0648fedc4823e9a268e90fb8ffac58f239bce0d408511b6bbef3",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "reine-laine",
+      "rowHash": "ef020bd5f4dcd5713d1ece79dfe0cd316d6a438660021986c1d2dc6b705a7ee0",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    },
+    {
+      "pairId": "rat-la",
+      "rowHash": "4a67671d2ec336b548fce945b2270651938a6937fb46ed5a2190a73d53364925",
+      "reviewedBy": "Roy Zhu (owner)",
+      "reviewedAt": "2026-10-22",
+      "reference": "Owner confirmation on issue #48, 2026-10-22: basic standard French; language advice from an independent model review"
+    }
+  ]
+}

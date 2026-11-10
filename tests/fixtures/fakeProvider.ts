@@ -13,7 +13,8 @@ export function fakeProvider(answer: unknown, imageModels: string[] = ['vision']
     requests: [],
     configs: [],
     supportsAudioInput: false,
-    supportsImageInput: (model) => imageModels.includes(model),
+    imageInputCapability: (model) =>
+      imageModels.includes(model) ? 'supported' : model === 'unknown' ? 'unknown' : 'unsupported',
     async generateJson<T>(request: JsonRequest, config: TextConfig): Promise<T> {
       provider.requests.push(request);
       provider.configs.push(config);
@@ -27,7 +28,11 @@ export function fakeProvider(answer: unknown, imageModels: string[] = ['vision']
 }
 
 export const contextOf = (provider: TextProvider, model = 'vision', lang: 'en' | 'zh' = 'en'): TextContext => ({
-  provider,
-  config: { apiKey: 'test', model },
+  execution: {
+    model,
+    supportsAudioInput: provider.supportsAudioInput,
+    imageInput: provider.imageInputCapability(model),
+    generateJson: (request) => provider.generateJson(request, { apiKey: 'test', model }),
+  },
   lang,
 });

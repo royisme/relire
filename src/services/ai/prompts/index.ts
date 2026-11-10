@@ -4,15 +4,20 @@ import { getPromptTemplate } from './store';
 import type { PromptId } from './registry';
 import { enumeratedReaderWords } from '../../../utils/readerTokens';
 import { prosodySchema } from '../prosodySchema';
+import type { AtelierLevel } from '../../../types/atelier';
 import type { GrammarTag } from '../../../types/grammar';
 import type { ImportMode } from '../../../types/exercises';
+import type { LearningArea, ArticleExerciseArea } from '../../../types/learningArea';
 import {
+  atelierRoundJsonSchema,
+  conjugationJsonSchema,
   drillsJsonSchema,
   exerciseJsonSchema,
   explanationJsonSchema,
   hintJsonSchema,
   importDraftJsonSchema,
   openGradeJsonSchema,
+  transcriptionJsonSchema,
 } from '../../exercises/jsonSchema';
 
 /**
@@ -61,6 +66,19 @@ export function wordRequest(
   };
 }
 
+export function wordExamplesRequest(
+  input: { word: string; gloss: string; partOfSpeech?: string },
+  lang: Lang,
+): JsonRequest {
+  return {
+    prompt: render('wordExamples', lang, {
+      word: input.word,
+      gloss: input.gloss,
+      partOfSpeech: input.partOfSpeech?.trim() || undefined,
+    }),
+  };
+}
+
 export function prosodyRequest(input: { source: string; template?: string }, lang: Lang): JsonRequest {
   const enumerated = enumeratedReaderWords(input.source);
   const vars = {
@@ -80,23 +98,28 @@ export function sentenceRequest(input: { sentence: string; articleContext?: stri
   };
 }
 
-export function drillsRequest(input: { articleText: string; type: string }, lang: Lang): JsonRequest {
-  const type = ['syntax', 'cloze', 'oral'].includes(input.type) ? input.type : 'other';
-  return { prompt: render('drills', lang, { articleText: input.articleText.slice(0, 1500), type }) };
-}
-
 export function pronunciationRequest(
-  input: { referenceText: string; audio?: { mimeType: string; base64: string }; userTranscript?: string },
+  input: {
+    referenceText: string;
+    audio?: { mimeType: string; base64: string };
+    userTranscript?: string;
+    signal?: AbortSignal;
+  },
   lang: Lang,
 ): JsonRequest {
+  // The reference text is never a stand-in for the learner's speech: with no transcript it stays empty.
+  const transcript = input.userTranscript ?? '';
   const vars = {
     referenceText: input.referenceText,
-    userTranscript: input.userTranscript ?? '',
-    transcript: input.userTranscript || input.referenceText,
+    userTranscript: transcript,
+    transcript,
   };
-  return input.audio
-    ? { prompt: render('pronunciationAudio', lang, vars), audio: input.audio }
-    : { prompt: render('pronunciationText', lang, vars) };
+  return {
+    ...(input.audio
+      ? { prompt: render('pronunciationAudio', lang, vars), audio: input.audio }
+      : { prompt: render('pronunciationText', lang, vars) }),
+    signal: input.signal,
+  };
 }
 
 /* ----------------------------- exercise requests ----------------------------- */
@@ -107,6 +130,7 @@ export const exerciseArticleText = (articleText: string) => articleText.trim().s
 
 export interface ExtractInput {
   mode: ImportMode;
+  learningArea: LearningArea;
   /** Pasted text; with images it travels as extra context. */
   text?: string;
   images?: ImageInput[];
@@ -120,12 +144,29 @@ export function extractRequest(input: ExtractInput, lang: Lang): JsonRequest {
   return {
     prompt: render('extract', lang, {
       source: images ? 'image' : 'text',
+      learningArea: input.learningArea,
       mode: input.mode,
       rawText: input.text?.trim(),
       customTitle: input.title?.trim(),
     }),
     jsonSchema: importDraftJsonSchema(),
     images,
+    signal: input.signal,
+    // The learner is shown which model reads their pages; it must be that one, once.
+    singleAttempt: true,
+  };
+}
+
+export interface TranscribeInput {
+  images: ImageInput[];
+  signal?: AbortSignal;
+}
+
+export function transcribeRequest(input: TranscribeInput, lang: Lang): JsonRequest {
+  return {
+    prompt: render('transcribe', lang, {}),
+    jsonSchema: transcriptionJsonSchema(),
+    images: input.images,
     signal: input.signal,
     // The learner is shown which model reads their pages; it must be that one, once.
     singleAttempt: true,
@@ -182,7 +223,7 @@ export function gradeRequest(
 }
 
 /** How many recent mistakes the adaptive prompt shows; more adds cost without new patterns. */
-const MAX_RECENT_MISTAKES = 10;
+export const MAX_RECENT_MISTAKES = 10;
 
 export interface AdaptiveInput {
   /** The weak grammar tags to practise. */
@@ -206,15 +247,62 @@ export function adaptiveRequest(input: AdaptiveInput, lang: Lang): JsonRequest {
 }
 
 export function exercisesRequest(
-  input: { articleText: string; count: number; level: string },
+  input: { articleText: string; count: number; level: string; learningArea: ArticleExerciseArea },
   lang: Lang,
 ): JsonRequest {
   return {
     prompt: render('exercises', lang, {
+      learningArea: input.learningArea,
       level: input.level.trim(),
       articleText: exerciseArticleText(input.articleText),
       count: String(input.count),
     }),
     jsonSchema: exerciseJsonSchema(),
+  };
+}
+
+export function conjugateRequest(input: { infinitive: string }, lang: Lang): JsonRequest {
+  return {
+    prompt: render('conjugate', lang, { infinitive: input.infinitive.trim() }),
+    jsonSchema: conjugationJsonSchema(),
+  };
+}
+
+/* ------------------------------ atelier requests ----------------------------- */
+
+export interface AtelierRoundInput {
+  themeFr: string;
+  /** The theme's subtopic names, so the model knows what the category covers. */
+  themeTopics: string;
+  level: AtelierLevel;
+  count: number;
+  /** The closed grammar-tag list rendered into the prompt. */
+  grammarTags: string;
+}
+
+export function atelierRequest(input: AtelierRoundInput, lang: Lang): JsonRequest {
+  return {
+    prompt: render('atelier', lang, {
+      themeFr: input.themeFr,
+      themeTopics: input.themeTopics,
+      level: input.level,
+      count: String(input.count),
+      grammarTags: input.grammarTags,
+    }),
+    jsonSchema: atelierRoundJsonSchema(),
+  };
+}
+
+export function atelierGradeRequest(
+  input: { item: string; userAnswer: string; expectedAnswer: string },
+  lang: Lang,
+): JsonRequest {
+  return {
+    prompt: render('atelierGrade', lang, {
+      item: input.item,
+      userAnswer: input.userAnswer,
+      expectedAnswer: input.expectedAnswer,
+    }),
+    jsonSchema: openGradeJsonSchema(),
   };
 }

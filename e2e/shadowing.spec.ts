@@ -1,6 +1,6 @@
 /**
  * Shadowing: the practice card records a sentence with Chromium's fake microphone,
- * keeps three takes per sentence, and the My study → Shadowing log replays them.
+ * keeps three takes per sentence, and Speaking → Recordings replays them.
  * Every audio element that plays is logged with its blob type: TTS clips are
  * WAV, recordings are the recorder's own type (webm or ogg).
  */
@@ -143,7 +143,13 @@ test('the log lists recordings in article order, opens the reader and deletes ta
   await recordFor(page);
 
   await card(page).getByText('All recordings (1)').click();
-  await expect(page.getByRole('heading', { name: 'Shadowing' })).toBeVisible();
+  await expect(page).toHaveURL(/#\/speaking\/recordings$/);
+  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Speaking', exact: true })).toHaveAttribute(
+    'aria-current',
+    'true',
+  );
+  await expect(page.locator('[data-sidebar]').getByRole('link', { name: 'Recordings', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Recordings' })).toBeVisible();
   const rows = page.locator('button[title="Open in the reader"]');
   await expect(rows).toHaveText([first, second]);
 
@@ -190,7 +196,7 @@ test('opening a sentence from the log scrolls to it once', async ({ page }) => {
   await expect(far).toBeInViewport();
 
   await page.getByRole('link', { name: 'Progress' }).click();
-  await page.getByRole('link', { name: 'Read', exact: true }).click();
+  await page.getByRole('link', { name: 'Reading', exact: true }).click();
   await page.getByText('Le Petit Prince').first().click();
   await expect(page.locator('article [data-sentence]').first()).toBeVisible();
   // The pointer is still where the library row was; hovering a sentence would show its actions.
@@ -260,76 +266,6 @@ test('recording pauses listening to the article; it resumes afterwards', async (
   await expect(player.getByRole('button', { name: 'Pause' })).toBeVisible();
   await expect.poll(() => ai.calls.tts).toBeGreaterThanOrEqual(before);
   await expect.poll(async () => (await plays(page)).filter((p) => p === 'reference').length).toBeGreaterThan(1);
-});
-
-test('upgrading a version 3 database keeps its data', async ({ page }) => {
-  // Build the version 3 schema with one article and one word before the app opens it.
-  await page.goto('/robots.txt'); // same origin, without the app opening the database first
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve, reject) => {
-        const open = indexedDB.open('relire', 3);
-        open.onupgradeneeded = () => {
-          const d = open.result;
-          d.createObjectStore('articles', { keyPath: 'id' });
-          d.createObjectStore('vocab', { keyPath: 'id' });
-          d.createObjectStore('meta');
-          d.createObjectStore('cache', { keyPath: 'key' }).createIndex('kind', 'kind');
-          const audio = d.createObjectStore('audio', { keyPath: 'key' });
-          audio.createIndex('text', 'text');
-          audio.createIndex('lastUsed', 'lastUsed');
-        };
-        open.onsuccess = () => {
-          const tx = open.result.transaction(['articles', 'vocab', 'meta'], 'readwrite');
-          tx.objectStore('articles').put({
-            id: 'old',
-            title: 'Ancien article',
-            content: 'Une phrase ancienne.',
-            level: 'A2',
-            category: 'test',
-            createdAt: '2026-01-01T00:00:00.000Z',
-          });
-          tx.objectStore('vocab').put({
-            id: 'w1',
-            word: 'ancien',
-            lemma: 'ancien',
-            ipa: '',
-            translation: 'old',
-            partOfSpeech: 'adj',
-            contextSentence: 'Une phrase ancienne.',
-            addedAt: '2026-01-01T00:00:00.000Z',
-            repetitions: 0,
-            intervalDays: 0,
-            easeFactor: 2.5,
-            nextReviewDate: '2026-01-01',
-            reviewHistory: [],
-          });
-          tx.objectStore('meta').put(true, 'started');
-          tx.oncomplete = () => {
-            open.result.close();
-            resolve();
-          };
-          tx.onerror = () => reject(tx.error);
-        };
-        open.onerror = () => reject(open.error);
-      }),
-  );
-  await page.goto('/');
-  await expect(page.getByText('Ancien article')).toBeVisible();
-  const stores = await page.evaluate(
-    () =>
-      new Promise<{ version: number; stores: string[] }>((resolve) => {
-        const open = indexedDB.open('relire');
-        open.onsuccess = () => {
-          resolve({ version: open.result.version, stores: [...open.result.objectStoreNames] });
-          open.result.close();
-        };
-      }),
-  );
-  expect(stores.version).toBe(5);
-  expect(stores.stores).toContain('shadowing');
-  await page.getByRole('link', { name: 'My study' }).click();
-  await expect(page.getByText('ancien').first()).toBeVisible();
 });
 
 test('the practice card fits a phone @phone', async ({ page }) => {

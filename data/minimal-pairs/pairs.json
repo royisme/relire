@@ -1,0 +1,198 @@
+{
+  "packVersion": "0.1.0",
+  "pairs": [
+    {
+      "id": "rue-roue",
+      "contrast": "y-u",
+      "a": "rue",
+      "b": "roue"
+    },
+    {
+      "id": "vu-vous",
+      "contrast": "y-u",
+      "a": "vu",
+      "b": "vous"
+    },
+    {
+      "id": "tu-tout",
+      "contrast": "y-u",
+      "a": "tu",
+      "b": "tout"
+    },
+    {
+      "id": "dessus-dessous",
+      "contrast": "y-u",
+      "a": "dessus",
+      "b": "dessous"
+    },
+    {
+      "id": "vent-vont",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "vent",
+      "b": "vont"
+    },
+    {
+      "id": "temps-thon",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "temps",
+      "b": "thon"
+    },
+    {
+      "id": "sans-son",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "sans",
+      "b": "son"
+    },
+    {
+      "id": "banc-bon",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "banc",
+      "b": "bon"
+    },
+    {
+      "id": "dent-dont",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "dent",
+      "b": "dont"
+    },
+    {
+      "id": "lent-long",
+      "contrast": "ɑ̃-ɔ̃",
+      "a": "lent",
+      "b": "long"
+    },
+    {
+      "id": "fee-fait",
+      "contrast": "e-ɛ",
+      "a": "fée",
+      "b": "fait",
+      "note": "minimalPairs.notes.tendency"
+    },
+    {
+      "id": "bon-beau",
+      "contrast": "ɔ̃-o",
+      "a": "bon",
+      "b": "beau"
+    },
+    {
+      "id": "son-seau",
+      "contrast": "ɔ̃-o",
+      "a": "son",
+      "b": "seau"
+    },
+    {
+      "id": "pont-pot",
+      "contrast": "ɔ̃-o",
+      "a": "pont",
+      "b": "pot"
+    },
+    {
+      "id": "fond-faux",
+      "contrast": "ɔ̃-o",
+      "a": "fond",
+      "b": "faux"
+    },
+    {
+      "id": "on-eau",
+      "contrast": "ɔ̃-o",
+      "a": "on",
+      "b": "eau"
+    },
+    {
+      "id": "faim-fait",
+      "contrast": "ɛ̃-ɛ",
+      "a": "faim",
+      "b": "fait"
+    },
+    {
+      "id": "vin-vais",
+      "contrast": "ɛ̃-ɛ",
+      "a": "vin",
+      "b": "vais"
+    },
+    {
+      "id": "pain-paix",
+      "contrast": "ɛ̃-ɛ",
+      "a": "pain",
+      "b": "paix"
+    },
+    {
+      "id": "main-mais",
+      "contrast": "ɛ̃-ɛ",
+      "a": "main",
+      "b": "mais"
+    },
+    {
+      "id": "saint-sais",
+      "contrast": "ɛ̃-ɛ",
+      "a": "saint",
+      "b": "sais"
+    },
+    {
+      "id": "bain-pain",
+      "contrast": "b-p",
+      "a": "bain",
+      "b": "pain"
+    },
+    {
+      "id": "boire-poire",
+      "contrast": "b-p",
+      "a": "boire",
+      "b": "poire"
+    },
+    {
+      "id": "bas-pas",
+      "contrast": "b-p",
+      "a": "bas",
+      "b": "pas"
+    },
+    {
+      "id": "beau-peau",
+      "contrast": "b-p",
+      "a": "beau",
+      "b": "peau"
+    },
+    {
+      "id": "bord-port",
+      "contrast": "b-p",
+      "a": "bord",
+      "b": "port"
+    },
+    {
+      "id": "bulle-pull",
+      "contrast": "b-p",
+      "a": "bulle",
+      "b": "pull"
+    },
+    {
+      "id": "rire-lire",
+      "contrast": "ʁ-l",
+      "a": "rire",
+      "b": "lire"
+    },
+    {
+      "id": "roi-loi",
+      "contrast": "ʁ-l",
+      "a": "roi",
+      "b": "loi"
+    },
+    {
+      "id": "riz-lit",
+      "contrast": "ʁ-l",
+      "a": "riz",
+      "b": "lit"
+    },
+    {
+      "id": "reine-laine",
+      "contrast": "ʁ-l",
+      "a": "reine",
+      "b": "laine"
+    },
+    {
+      "id": "rat-la",
+      "contrast": "ʁ-l",
+      "a": "rat",
+      "b": "là"
+    }
+  ]
+}

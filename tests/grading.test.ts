@@ -1,3 +1,4 @@
+/** Deterministic exercise grading, comparison policies, answer helpers and attempt snapshots; no AI calls. */
 import { describe, expect, test } from 'bun:test';
 import {
   choiceGroups,
@@ -6,8 +7,10 @@ import {
   expectedAnswerText,
   isAnswerFilled,
   recordedAnswerText,
+  spokenPrompt,
 } from '../src/services/exercises/answer';
-import { buildAttempt, gradeItem, gradeUnitItem, normalizeFrench } from '../src/services/exercises/grading';
+import { buildAttempt, gradeItem, gradeUnitItem } from '../src/services/exercises/grading';
+import { normalizeFrench } from '../src/services/exercises/normalizeFrench';
 import type { ExerciseAnswer, ExerciseItem, ExerciseType } from '../src/types/exercises';
 import { itemStateId } from '../src/types/exercises';
 import { ITEM_BY_TYPE, ITEMS, unitOf } from './fixtures/units';
@@ -157,6 +160,67 @@ describe('every type graded right and wrong', () => {
   });
 });
 
+describe('sentence punctuation flag in scalar grading', () => {
+  const dictation = (expectedAnswer: string): ExerciseItem => ({
+    ...ITEMS.NUMBER_DICTATION,
+    expectedAnswer,
+    acceptableAnswers: undefined,
+    meta: { strictAccents: true, ignoreSentencePunctuation: true },
+  });
+  const check = (expected: string, given: string) =>
+    grade('NUMBER_DICTATION', { singleAnswer: given }, lenient, dictation(expected));
+
+  test('terminal punctuation is optional and the recorded answer stays as typed', () => {
+    expect(check('Il est petit.', 'Il est petit')).toEqual({
+      status: 'graded',
+      correct: true,
+      recordedAnswer: 'Il est petit',
+    });
+    expect(verdict(check('Il est petit.', 'Il est petit.'))).toBe(true);
+    expect(verdict(check('Il est petit', 'Il est petit.'))).toBe(true);
+    expect(verdict(check('Oui, tu as raison.', 'Oui,tu as raison'))).toBe(true);
+  });
+
+  test('each ignored punctuation mark becomes a space on either side and in acceptable answers', () => {
+    for (const mark of ['.', ',', ';', ':', '!', '?', '…', '«', '»', '(', ')']) {
+      expect(verdict(check(`Oui${mark}tu as raison.`, 'Oui tu as raison'))).toBe(true);
+      expect(verdict(check('Oui tu as raison.', `Oui${mark}tu as raison`))).toBe(true);
+      const item = { ...dictation('Il est petit.'), acceptableAnswers: [`Oui${mark}tu as raison.`] };
+      expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Oui tu as raison' }, lenient, item))).toBe(true);
+    }
+  });
+
+  test('hyphens, apostrophes, strict accents and words remain significant', () => {
+    expect(verdict(check('Est-ce un livre ?', 'Est ce un livre'))).toBe(false);
+    expect(verdict(check('Est-ce un livre ?', 'Est-ce un livre'))).toBe(true);
+    expect(verdict(check('J’ai un livre.', "J'ai un livre"))).toBe(true);
+    expect(verdict(check('J’ai un livre.', 'Jai un livre'))).toBe(false);
+    expect(verdict(check('Il est à Paris.', 'Il est a Paris'))).toBe(false);
+    expect(verdict(check('Il est petit.', 'Il est grand'))).toBe(false);
+    const item = { ...dictation('Il est à Paris.'), meta: { ignoreSentencePunctuation: true } };
+    expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Il est a Paris' }, lenient, item))).toBe(true);
+    expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Il est a Paris' }, strict, item))).toBe(false);
+  });
+
+  test('without the boolean flag a missing full stop still fails', () => {
+    for (const meta of [undefined, {}, { ignoreSentencePunctuation: false }, { ignoreSentencePunctuation: 'true' }]) {
+      const item = { ...dictation('Il est petit.'), meta };
+      expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Il est petit' }, strict, item))).toBe(false);
+      expect(verdict(grade('NUMBER_DICTATION', { singleAnswer: 'Il est petit.' }, strict, item))).toBe(true);
+    }
+  });
+
+  test('the flag does not change slot, choice or match grading', () => {
+    const meta = { ignoreSentencePunctuation: true };
+    const slots = { ...ITEMS.FILL_BLANKS_MULTI, expectedAnswer: ['Oui.', 'Non.'], meta };
+    expect(verdict(grade('FILL_BLANKS', { multiAnswers: ['Oui', 'Non'] }, strict, slots))).toBe(false);
+    const choices = { ...ITEMS.CHOICE_SELECT, prompt: '{Oui.|Non.}', expectedAnswer: 'Oui.', meta };
+    expect(verdict(grade('CHOICE_SELECT', { choiceSelections: ['Oui'] }, strict, choices))).toBe(false);
+    const match = { ...ITEMS.MATCH_PAIRS, expectedAnswer: 'b.', meta };
+    expect(verdict(grade('MATCH_PAIRS', { matchSelection: 'b' }, strict, match))).toBe(false);
+  });
+});
+
 describe('accent strictness', () => {
   const item = ITEMS.WORD_TRANSFORM;
   test('strict accents reject a missing accent that is not an alternative', () => {
@@ -193,6 +257,14 @@ describe('answer helpers', () => {
       ['a', 'b'],
       ['c', 'd'],
     ]);
+  });
+
+  test('a prompt spoken aloud keeps its words and leaves out the markup', () => {
+    expect(spokenPrompt('Je ne [___] pas de pain (manger).')).toBe('Je ne pas de pain (manger).');
+    expect(spokenPrompt('Le blé pour {moi|me} est {inutile|utile}.')).toBe('Le blé pour est .');
+    expect(spokenPrompt('  Tu [___]  polonais  et elle [___] belge. ')).toBe('Tu polonais et elle belge.');
+    // Nothing to say: the sheet shows no Listen control rather than an empty clip.
+    expect(spokenPrompt('{a|b}')).toBe('');
   });
 
   test('empty answers are sized to the prompt', () => {
@@ -255,9 +327,9 @@ describe('attempts', () => {
       buildAttempt(unit, ITEMS.FILL_BLANKS_MULTI, result.recordedAnswer, result.correct, { id: 'a1', timestamp: 7 }),
     ).toEqual({
       id: 'a1',
+      learningArea: 'grammar',
       unitId: unit.id,
       itemId: 'fb-2',
-      materialId: 'material-1',
       grammarTag: 'present',
       prompt: 'Tu [___] polonais et elle [___] belge.',
       userAnswer: 'es / sont',

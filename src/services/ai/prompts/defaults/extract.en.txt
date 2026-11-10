@@ -1,11 +1,11 @@
 You are an expert French language educator. Turn the French workbook material into an exercise draft for a learner of French.
 
-{{#if source=image}}The material is one or more images, up to three pages of the same workbook in reading order: a workbook page, an extracurricular test, a mixed text-and-image page, or an answer key. Work in two passes.
+{{#if source=image}}The material is one or more images, up to five pages of the same workbook in reading order: a workbook page, an extracurricular test, a mixed text-and-image page, or an answer key. Work in two passes.
 Pass 1, faithful transcription: read every page completely before classifying anything. Keep every French title, instruction, paragraph, dialogue line, label, question, option and printed answer, in reading order.
 Pass 2, exercise structure: identify the actual exercise prompts separately, and map only those prompts to items, options, expectedAnswer and acceptableAnswers. For a page that has answers only, rebuild practicable prompts and keep them clearly apart from the printed answers. For mixed layouts, match captions and options to the right exercise, and do not drop the source reading passage.
 {{/if}}
 {{#if source=text}}The material is pasted text from a workbook, a reading passage or a worksheet. Work in two passes.
-Pass 1, faithful transcription: keep the complete source text in reading order. A continuous article, letter, dialogue or prose passage must appear verbatim in sourceText and in readingPassage.content. Never split its sentences into exercise items or turn them into questions.
+Pass 1, faithful transcription: keep the complete source text in reading order. A continuous article, letter, dialogue or prose passage must appear verbatim in readingPassage.content. Never split its sentences into exercise items or turn them into questions.
 Pass 2, exercise structure: map the actual questions to items, options, expectedAnswer and acceptableAnswers. If the input has answers only, rebuild practicable prompts. If it has questions without answers, work out accurate answers and explanations. If it is only an article or a dialogue, keep it as the reading passage and design one READING_CLOZE unit from it.
 {{/if}}
 {{#if rawText}}The user pasted this material:
@@ -15,6 +15,8 @@ Pass 2, exercise structure: map the actual questions to items, options, expected
 {{/if}}
 {{#if customTitle}}The user suggested this title: "{{customTitle}}". Use it for materialTitle when it fits the material.
 {{/if}}
+Entry learning area: {{learningArea}} (a suggestion, not a restriction on a mixed worksheet). Each unit must explicitly include learningArea: reading | grammar | listening | writing, based on its primary instructional goal, not its input format, exercise type, section or grammar tag. Reading checks understanding; grammar checks language rules; writing asks for sentence/text production. Listening is supported only when every effective item is NUMBER_DICTATION with actual audioText. Prompt TTS alone does not make a listening exercise. Preserve unsupported source tasks with clear blockers; never invent missing audio. The learner will review and confirm every classification.
+
 Exercise types (use these type IDs exactly):
 - WORD_TRANSFORM: change a word, for example feminine to masculine (femme -> mari/homme, étudiante -> étudiant).
 - FILL_BLANKS: complete a dialogue or a sentence, with the gap marked [___].
@@ -30,11 +32,10 @@ Exercise types (use these type IDs exactly):
 
 Fields (the app sends the exact schema):
 - materialTitle: the title of the lesson or of the extracurricular test. Leave it out when the source has none.
-- sourceText: the complete transcription of the source, not a summary.
 - warnings: problems you noticed, such as illegible text or an unclear layout. Empty when there are none.
-- units: the exercise units. Empty when the source has no questions.
-- Each unit has: id (unique in the draft, such as u1), section (GRAMMAIRE, VOCABULAIRE, CONJUGAISON, COMPRENDRE or EXTRA), unitNumber (a positive whole number), subPart (A or B, when the source uses them), title (French), instruction (English), example (when the source gives one), isExtracurricular (true for material from outside the workbook), readingPassage (title, content and English translation, when the unit reads a passage; title and translation may be left out), type (one of the exercise types above), grammarTags (the tags its items use, at least one), and items.
-- Each item has: id (unique in its unit), itemNumber (a number, or text such as "a"), type (only when the item differs from its unit's type), prompt (blanks as [___]; choices as {a|b} for CHOICE_SELECT), secondaryPrompt (when present), audioText (the French text to read aloud for dictation or numbers), options (when the item has choices or checks; none of them blank), expectedAnswer (a string, an array of strings for several blanks, or null), printedAnswer (only an answer literally printed in the source, otherwise null), acceptableAnswers, explanation (a brief grammar explanation in English), grammarTag (exactly one tag from the list below), and blockers (what is missing for the item to be used, such as audio, a figure, options or context; empty when nothing is missing).
+- units: the exercise units. Empty when the source has no questions. The whole material is ONE exercise: put every question of the source in a single unit, even when the source has several sections; never split a unit per section. Questions that read their own passage (a text the questions refer to) are the only exception: each passage gets its own unit, and it stays separate from the rest.
+- Each unit has: learningArea (required explicit primary goal), id (unique in the draft, such as u1), section (the section of its first question: GRAMMAIRE, VOCABULAIRE, CONJUGAISON, COMPRENDRE or EXTRA), unitNumber (its position among the units you return, starting at 1; a passage unit that stays separate gets the next number), subPart (A or B, when the source uses them), title (French), instruction (English; when the sections carry different instructions, join them in source order, one per line), example (when the source gives one), isExtracurricular (true for material from outside the workbook), readingPassage (title, content and English translation, for a unit that reads its own passage; title and translation may be left out), type (the exercise type of its first question), grammarTags (every tag its items use, at least one), and items.
+- Each item has: id (unique in its unit), itemNumber (a number, or text such as "a"), type (only when the item differs from its unit's type, which is how one unit holds a worksheet's mixed question kinds), prompt (blanks as [___]; choices as {a|b} for CHOICE_SELECT), secondaryPrompt (when present), audioText (the French text to read aloud for dictation or numbers), options (when the item has choices or checks; none of them blank), expectedAnswer (a string, an array of strings for several blanks, or null), printedAnswer (only an answer literally printed in the source, otherwise null), acceptableAnswers, explanation (a brief grammar explanation in English), grammarTag (exactly one tag from the list below), and blockers (what is missing for the item to be used, such as audio, a figure, options or context; empty when nothing is missing).
 
 Answer shapes (the app checks these before a unit can be practised):
 - WORD_TRANSFORM, SENTENCE_BUILD, OPEN_QA, NUMBER_DICTATION: expectedAnswer is one string.
@@ -69,6 +70,6 @@ Task for this run (it overrides any conflicting instruction above):
 {{/if}}
 {{#if mode=extract}}Extract only. Never solve missing answers or create new questions. expectedAnswer must be null when no answer is printed.
 {{/if}}
-{{#if mode=generate}}The user has asked for NEW practice based on this material. Preserve sourceText verbatim, then generate exercises and reference answers. Do not invent missing source facts.
+{{#if mode=generate}}The user has asked for NEW practice based on this material. Keep any reading passage verbatim in readingPassage.content, then generate exercises and reference answers. Do not invent missing source facts.
 {{/if}}
 Return JSON matching the provided schema. Output only the JSON.

@@ -5,10 +5,10 @@ Provide pronunciation guidance and target phoneme tips in English.
 
 Output strictly in JSON:
 {
-"overallScore": 86,
-"accuracyScore": 84,
-"fluencyScore": 88,
-"rhythmScore": 86,
+"overallScore": <integer 0-100>,
+"accuracyScore": <integer 0-100>,
+"fluencyScore": <integer 0-100>,
+"rhythmScore": <integer 0-100>,
 "transcribedSpeech": "{{transcript}}",
 "phonemeFeedback": [
   {

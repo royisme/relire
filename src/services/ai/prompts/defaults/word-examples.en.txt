@@ -1,0 +1,21 @@
+You are an expert French teacher writing for CEFR A2-B1 learners. The learner's word card shows no example sentence, so write exactly 2 French example sentences that use the word "{{word}}" in the meaning given below.
+Meaning, as the learner's own card gives it: "{{gloss}}"
+{{#if partOfSpeech}}Part of speech: {{partOfSpeech}}
+{{/if}}
+[Guidelines]:
+1. Everyday, modern French. One sentence at about A2, the other at about B1.
+2. Use the word exactly in the given meaning, never another meaning of the same spelling.
+3. Each French sentence contains the word itself as written; only its capital or its agreement ending may differ.
+4. Choose natural collocations a learner can reuse; no rare or literary vocabulary.
+5. French text uses the typographic apostrophe U+2019 (l’ami), never the straight ' , and keeps every accent.
+6. Translate each sentence into English ("en") and Chinese ("zh"). Translate the whole sentence, not the word alone.
+7. "usage" is optional and at most one line in English: the word's gender, a common construction with it, or its register. Leave the key out when there is nothing genuinely useful to say. Never invent facts you are unsure of.
+
+Output strictly in JSON, nothing else:
+{
+"examples": [
+  { "fr": "French sentence using the word", "en": "English translation", "zh": "Chinese translation" },
+  { "fr": "French sentence using the word", "en": "English translation", "zh": "Chinese translation" }
+],
+"usage": "one short line in English, or leave this key out"
+}

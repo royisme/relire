@@ -5,6 +5,7 @@
  * name a provider or send anything.
  */
 import { z } from 'zod';
+import { AtelierItemSchema } from '../../types/atelier';
 import {
   DrillsSchema,
   ExplanationSchema,
@@ -12,6 +13,8 @@ import {
   HintSchema,
   OpenGradeSchema,
 } from '../../types/exerciseAi';
+import { ConjugationAnswerSchema } from '../../types/conjugationAnswer';
+import { TranscriptionSchema } from '../../types/transcription';
 import { ImportDraftSchema } from './importDraft';
 
 /** A plain JSON-schema document. */
@@ -49,6 +52,9 @@ export const drillsJsonSchema = () => toProviderJsonSchema(DrillsSchema);
 /** Response schema for reading a worksheet into a draft. */
 export const importDraftJsonSchema = () => toProviderJsonSchema(ImportDraftSchema);
 
+/** Response schema for the text read from page images. */
+export const transcriptionJsonSchema = () => toProviderJsonSchema(TranscriptionSchema);
+
 /** Response schema for a hint. */
 export const hintJsonSchema = () => toProviderJsonSchema(HintSchema);
 
@@ -57,3 +63,9 @@ export const explanationJsonSchema = () => toProviderJsonSchema(ExplanationSchem
 
 /** Response schema for an open-answer grade. */
 export const openGradeJsonSchema = () => toProviderJsonSchema(OpenGradeSchema);
+
+/** Response schema for one atelier round. */
+export const atelierRoundJsonSchema = () => toProviderJsonSchema(z.object({ items: z.array(AtelierItemSchema) }));
+
+/** Response schema for the conjugation of one verb. */
+export const conjugationJsonSchema = () => toProviderJsonSchema(ConjugationAnswerSchema);

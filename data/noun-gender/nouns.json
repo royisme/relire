@@ -1,0 +1,3375 @@
+{
+  "packVersion": "0.1.0",
+  "nouns": [
+    {
+      "id": "maison",
+      "lemma": "maison",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "table",
+      "lemma": "table",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "telephone",
+      "lemma": "téléphone",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cle",
+      "lemma": "clé",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "miroir",
+      "lemma": "miroir",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fenetre",
+      "lemma": "fenêtre",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ordinateur",
+      "lemma": "ordinateur",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ville",
+      "lemma": "ville",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "gare",
+      "lemma": "gare",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "parc",
+      "lemma": "parc",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "rue",
+      "lemma": "rue",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "musee",
+      "lemma": "musée",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "voiture",
+      "lemma": "voiture",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pont",
+      "lemma": "pont",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "restaurant",
+      "lemma": "restaurant",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "soleil",
+      "lemma": "soleil",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "lune",
+      "lemma": "lune",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mer",
+      "lemma": "mer",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "montagne",
+      "lemma": "montagne",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "arbre",
+      "lemma": "arbre",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fleur",
+      "lemma": "fleur",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pluie",
+      "lemma": "pluie",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vent",
+      "lemma": "vent",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pain",
+      "lemma": "pain",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pomme",
+      "lemma": "pomme",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fromage",
+      "lemma": "fromage",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "eau",
+      "lemma": "eau",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vin",
+      "lemma": "vin",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cafe",
+      "lemma": "café",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cuisine",
+      "lemma": "cuisine",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chocolat",
+      "lemma": "chocolat",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "travail",
+      "lemma": "travail",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "liberte",
+      "lemma": "liberté",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "temps",
+      "lemma": "temps",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "question",
+      "lemma": "question",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "argent",
+      "lemma": "argent",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "paix",
+      "lemma": "paix",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "monde",
+      "lemma": "monde",
+      "gender": "m",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "idee",
+      "lemma": "idée",
+      "gender": "f",
+      "prov": {
+        "origin": "clarte-seed",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ete",
+      "lemma": "été",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cote",
+      "lemma": "côté",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pate",
+      "lemma": "pâté",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "silence",
+      "lemma": "silence",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "parapluie",
+      "lemma": "parapluie",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "incendie",
+      "lemma": "incendie",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "plage",
+      "lemma": "plage",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "image",
+      "lemma": "image",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cage",
+      "lemma": "cage",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "peau",
+      "lemma": "peau",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "couleur",
+      "lemma": "couleur",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "peur",
+      "lemma": "peur",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "douleur",
+      "lemma": "douleur",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "erreur",
+      "lemma": "erreur",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chaleur",
+      "lemma": "chaleur",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "odeur",
+      "lemma": "odeur",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "humeur",
+      "lemma": "humeur",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "lycee",
+      "lemma": "lycée",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "attention",
+      "lemma": "attention",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "conversation",
+      "lemma": "conversation",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "invitation",
+      "lemma": "invitation",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "natation",
+      "lemma": "natation",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "reservation",
+      "lemma": "réservation",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "station",
+      "lemma": "station",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "prononciation",
+      "lemma": "prononciation",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "reduction",
+      "lemma": "réduction",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "television",
+      "lemma": "télévision",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "profession",
+      "lemma": "profession",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "emission",
+      "lemma": "émission",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "passion",
+      "lemma": "passion",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "decision",
+      "lemma": "décision",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "excursion",
+      "lemma": "excursion",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "discussion",
+      "lemma": "discussion",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "sante",
+      "lemma": "santé",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "nationalite",
+      "lemma": "nationalité",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "societe",
+      "lemma": "société",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "verite",
+      "lemma": "vérité",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "beaute",
+      "lemma": "beauté",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "universite",
+      "lemma": "université",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "specialite",
+      "lemma": "spécialité",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "securite",
+      "lemma": "sécurité",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "nourriture",
+      "lemma": "nourriture",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "confiture",
+      "lemma": "confiture",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ceinture",
+      "lemma": "ceinture",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chaussure",
+      "lemma": "chaussure",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "nature",
+      "lemma": "nature",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "peinture",
+      "lemma": "peinture",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "lecture",
+      "lemma": "lecture",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ecriture",
+      "lemma": "écriture",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "temperature",
+      "lemma": "température",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "blessure",
+      "lemma": "blessure",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "heure",
+      "lemma": "heure",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "serviette",
+      "lemma": "serviette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "assiette",
+      "lemma": "assiette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "bicyclette",
+      "lemma": "bicyclette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fourchette",
+      "lemma": "fourchette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "baguette",
+      "lemma": "baguette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chaussette",
+      "lemma": "chaussette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "casquette",
+      "lemma": "casquette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "recette",
+      "lemma": "recette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "etiquette",
+      "lemma": "étiquette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "crevette",
+      "lemma": "crevette",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "naissance",
+      "lemma": "naissance",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "enfance",
+      "lemma": "enfance",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "connaissance",
+      "lemma": "connaissance",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "avance",
+      "lemma": "avance",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "distance",
+      "lemma": "distance",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "importance",
+      "lemma": "importance",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "correspondance",
+      "lemma": "correspondance",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chance",
+      "lemma": "chance",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "presence",
+      "lemma": "présence",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "absence",
+      "lemma": "absence",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "difference",
+      "lemma": "différence",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "urgence",
+      "lemma": "urgence",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "patience",
+      "lemma": "patience",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "agence",
+      "lemma": "agence",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "residence",
+      "lemma": "résidence",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "preference",
+      "lemma": "préférence",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "boulangerie",
+      "lemma": "boulangerie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pharmacie",
+      "lemma": "pharmacie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "epicerie",
+      "lemma": "épicerie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "librairie",
+      "lemma": "librairie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "boucherie",
+      "lemma": "boucherie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "patisserie",
+      "lemma": "pâtisserie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mairie",
+      "lemma": "mairie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vie",
+      "lemma": "vie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "maladie",
+      "lemma": "maladie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "sortie",
+      "lemma": "sortie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "partie",
+      "lemma": "partie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "comedie",
+      "lemma": "comédie",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "voyage",
+      "lemma": "voyage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "message",
+      "lemma": "message",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "village",
+      "lemma": "village",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "garage",
+      "lemma": "garage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "bagage",
+      "lemma": "bagage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "etage",
+      "lemma": "étage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "menage",
+      "lemma": "ménage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mariage",
+      "lemma": "mariage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "paysage",
+      "lemma": "paysage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "courage",
+      "lemma": "courage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "visage",
+      "lemma": "visage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "nuage",
+      "lemma": "nuage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "orage",
+      "lemma": "orage",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "age",
+      "lemma": "âge",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "appartement",
+      "lemma": "appartement",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vetement",
+      "lemma": "vêtement",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "moment",
+      "lemma": "moment",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "monument",
+      "lemma": "monument",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "medicament",
+      "lemma": "médicament",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "sentiment",
+      "lemma": "sentiment",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "document",
+      "lemma": "document",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "paiement",
+      "lemma": "paiement",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "logement",
+      "lemma": "logement",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "batiment",
+      "lemma": "bâtiment",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "tourisme",
+      "lemma": "tourisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cyclisme",
+      "lemma": "cyclisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chapeau",
+      "lemma": "chapeau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "manteau",
+      "lemma": "manteau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "gateau",
+      "lemma": "gâteau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "bureau",
+      "lemma": "bureau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "tableau",
+      "lemma": "tableau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "oiseau",
+      "lemma": "oiseau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "bateau",
+      "lemma": "bateau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "couteau",
+      "lemma": "couteau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cadeau",
+      "lemma": "cadeau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "morceau",
+      "lemma": "morceau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "panneau",
+      "lemma": "panneau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chateau",
+      "lemma": "château",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "rideau",
+      "lemma": "rideau",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "soir",
+      "lemma": "soir",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "devoir",
+      "lemma": "devoir",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "couloir",
+      "lemma": "couloir",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "tiroir",
+      "lemma": "tiroir",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "trottoir",
+      "lemma": "trottoir",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mouchoir",
+      "lemma": "mouchoir",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cahier",
+      "lemma": "cahier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "calendrier",
+      "lemma": "calendrier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "courrier",
+      "lemma": "courrier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "quartier",
+      "lemma": "quartier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "escalier",
+      "lemma": "escalier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "dossier",
+      "lemma": "dossier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "panier",
+      "lemma": "panier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "policier",
+      "lemma": "policier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cuisinier",
+      "lemma": "cuisinier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "jardinier",
+      "lemma": "jardinier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "infirmier",
+      "lemma": "infirmier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ouvrier",
+      "lemma": "ouvrier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "metier",
+      "lemma": "métier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "janvier",
+      "lemma": "janvier",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fevrier",
+      "lemma": "février",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "serveur",
+      "lemma": "serveur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "acteur",
+      "lemma": "acteur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chanteur",
+      "lemma": "chanteur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vendeur",
+      "lemma": "vendeur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "directeur",
+      "lemma": "directeur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "facteur",
+      "lemma": "facteur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "joueur",
+      "lemma": "joueur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ascenseur",
+      "lemma": "ascenseur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "conducteur",
+      "lemma": "conducteur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "journee",
+      "lemma": "journée",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "soiree",
+      "lemma": "soirée",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "matinee",
+      "lemma": "matinée",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "annee",
+      "lemma": "année",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "entree",
+      "lemma": "entrée",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "arrivee",
+      "lemma": "arrivée",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "duree",
+      "lemma": "durée",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "allee",
+      "lemma": "allée",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "lundi",
+      "lemma": "lundi",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mardi",
+      "lemma": "mardi",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mercredi",
+      "lemma": "mercredi",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "jeudi",
+      "lemma": "jeudi",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vendredi",
+      "lemma": "vendredi",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "samedi",
+      "lemma": "samedi",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "dimanche",
+      "lemma": "dimanche",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mars",
+      "lemma": "mars",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "avril",
+      "lemma": "avril",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mai",
+      "lemma": "mai",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "juin",
+      "lemma": "juin",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "juillet",
+      "lemma": "juillet",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "aout",
+      "lemma": "août",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "septembre",
+      "lemma": "septembre",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "octobre",
+      "lemma": "octobre",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "novembre",
+      "lemma": "novembre",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "decembre",
+      "lemma": "décembre",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "matin",
+      "lemma": "matin",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "nuit",
+      "lemma": "nuit",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "minute",
+      "lemma": "minute",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "semaine",
+      "lemma": "semaine",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pere",
+      "lemma": "père",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mere",
+      "lemma": "mère",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "frere",
+      "lemma": "frère",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fils",
+      "lemma": "fils",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fille",
+      "lemma": "fille",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "parent",
+      "lemma": "parent",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "oncle",
+      "lemma": "oncle",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "tante",
+      "lemma": "tante",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cousin",
+      "lemma": "cousin",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cousine",
+      "lemma": "cousine",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mari",
+      "lemma": "mari",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "femme",
+      "lemma": "femme",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "famille",
+      "lemma": "famille",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "homme",
+      "lemma": "homme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "dame",
+      "lemma": "dame",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "monsieur",
+      "lemma": "monsieur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "madame",
+      "lemma": "madame",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "garcon",
+      "lemma": "garçon",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ami",
+      "lemma": "ami",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "nom",
+      "lemma": "nom",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "prenom",
+      "lemma": "prénom",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "voix",
+      "lemma": "voix",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "actrice",
+      "lemma": "actrice",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "serveuse",
+      "lemma": "serveuse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vendeuse",
+      "lemma": "vendeuse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "croissant",
+      "lemma": "croissant",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "beurre",
+      "lemma": "beurre",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "sucre",
+      "lemma": "sucre",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "sel",
+      "lemma": "sel",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "viande",
+      "lemma": "viande",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "poulet",
+      "lemma": "poulet",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "poisson",
+      "lemma": "poisson",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "riz",
+      "lemma": "riz",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "soupe",
+      "lemma": "soupe",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "salade",
+      "lemma": "salade",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "banane",
+      "lemma": "banane",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "the",
+      "lemma": "thé",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "lait",
+      "lemma": "lait",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "biere",
+      "lemma": "bière",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "jus",
+      "lemma": "jus",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "boisson",
+      "lemma": "boisson",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "bouteille",
+      "lemma": "bouteille",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "verre",
+      "lemma": "verre",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "lit",
+      "lemma": "lit",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chaise",
+      "lemma": "chaise",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "armoire",
+      "lemma": "armoire",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "canape",
+      "lemma": "canapé",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fauteuil",
+      "lemma": "fauteuil",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "etagere",
+      "lemma": "étagère",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "lampe",
+      "lemma": "lampe",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chambre",
+      "lemma": "chambre",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "salon",
+      "lemma": "salon",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "jardin",
+      "lemma": "jardin",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "porte",
+      "lemma": "porte",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mur",
+      "lemma": "mur",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "douche",
+      "lemma": "douche",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "hotel",
+      "lemma": "hôtel",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "hopital",
+      "lemma": "hôpital",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "banque",
+      "lemma": "banque",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cinema",
+      "lemma": "cinéma",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "theatre",
+      "lemma": "théâtre",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "eglise",
+      "lemma": "église",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "train",
+      "lemma": "train",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "avion",
+      "lemma": "avion",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "bus",
+      "lemma": "bus",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "metro",
+      "lemma": "métro",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "taxi",
+      "lemma": "taxi",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "velo",
+      "lemma": "vélo",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ecole",
+      "lemma": "école",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "cours",
+      "lemma": "cours",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "stylo",
+      "lemma": "stylo",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "crayon",
+      "lemma": "crayon",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "mot",
+      "lemma": "mot",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "phrase",
+      "lemma": "phrase",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "tete",
+      "lemma": "tête",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "nez",
+      "lemma": "nez",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "bouche",
+      "lemma": "bouche",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "bras",
+      "lemma": "bras",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "main",
+      "lemma": "main",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pied",
+      "lemma": "pied",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "fievre",
+      "lemma": "fièvre",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "repos",
+      "lemma": "repos",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "ciel",
+      "lemma": "ciel",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "neige",
+      "lemma": "neige",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "froid",
+      "lemma": "froid",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "chemise",
+      "lemma": "chemise",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "pantalon",
+      "lemma": "pantalon",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "robe",
+      "lemma": "robe",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "jupe",
+      "lemma": "jupe",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "magasin",
+      "lemma": "magasin",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "boutique",
+      "lemma": "boutique",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "musique",
+      "lemma": "musique",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "page",
+      "lemma": "page",
+      "gender": "f",
+      "prov": {
+        "origin": "human",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "racisme",
+      "lemma": "racisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "alpinisme",
+      "lemma": "alpinisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "seisme",
+      "lemma": "séisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "parachutisme",
+      "lemma": "parachutisme",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "adresse",
+      "lemma": "adresse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "tristesse",
+      "lemma": "tristesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "vitesse",
+      "lemma": "vitesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "jeunesse",
+      "lemma": "jeunesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "politesse",
+      "lemma": "politesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "gentillesse",
+      "lemma": "gentillesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "promesse",
+      "lemma": "promesse",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "habitude",
+      "lemma": "habitude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "etude",
+      "lemma": "étude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "attitude",
+      "lemma": "attitude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "solitude",
+      "lemma": "solitude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "inquietude",
+      "lemma": "inquiétude",
+      "gender": "f",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    },
+    {
+      "id": "coude",
+      "lemma": "coude",
+      "gender": "m",
+      "prov": {
+        "origin": "agy-drafted",
+        "checkedAgainst": [],
+        "status": "draft"
+      }
+    }
+  ]
+}

@@ -22,6 +22,14 @@ export {
   subscribeSequence,
   type SequenceState,
 } from './sequence';
-export { getSpeechState, subscribeSpeech, speechKey, type SpeechPhase, type SpeechState } from './state';
+export {
+  getSpeechState,
+  getSpeechFailure,
+  subscribeSpeech,
+  speechKey,
+  type SpeechPhase,
+  type SpeechState,
+  type SpeechFailure,
+} from './state';
 export { prefetchSpeech } from './clips';
 export { FrenchAudioRecorder } from './recorder';

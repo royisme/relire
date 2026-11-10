@@ -23,25 +23,16 @@ export function Sidebar({ route, dueCount, expanded, onToggle }: SidebarProps) {
   return (
     <aside
       data-sidebar={expanded ? 'expanded' : 'rail'}
-      className={`sticky top-14 z-20 flex h-[calc(100dvh-3.5rem)] shrink-0 flex-col overflow-y-auto border-r border-ink-200 bg-ink-50 ${
+      className={`sticky top-14 z-20 flex h-[calc(100dvh-3.5rem)] shrink-0 flex-col overflow-y-auto border-r border-ink-200 bg-ink-100 ${
         expanded ? 'w-60' : 'w-14'
       }`}
     >
-      <NavTree
-        route={route}
-        dueCount={dueCount}
-        rail={!expanded}
-        footer={
-          onToggle && (
-            <NavItem
-              rail={!expanded}
-              icon={expanded ? PanelLeftClose : PanelLeftOpen}
-              label={label}
-              onClick={onToggle}
-            />
-          )
-        }
-      />
+      <NavTree route={route} dueCount={dueCount} rail={!expanded} />
+      {onToggle && (
+        <div className="space-y-0.5 border-t border-ink-200 px-2 py-3">
+          <NavItem rail={!expanded} icon={expanded ? PanelLeftClose : PanelLeftOpen} label={label} onClick={onToggle} />
+        </div>
+      )}
     </aside>
   );
 }

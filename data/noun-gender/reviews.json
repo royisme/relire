@@ -1,0 +1,2483 @@
+{
+  "records": [
+    {
+      "nounId": "maison",
+      "rowHash": "e23b2358292ba4049c42b76e175977d3171b054552e58cc5eff7d216429ad1f3",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "table",
+      "rowHash": "da1b25e49100d5a5fdcf467819d665b5595f70ddf96f7b4303432395a519a4fc",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "telephone",
+      "rowHash": "695a019aa9f0b2fe020375974334702ae83cc6653627cddb1e4bb785afbbc836",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cle",
+      "rowHash": "5db5aa1c3cebe5fc2385dbf7fe090a7a9a27b695346a3f041614395524c09546",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "miroir",
+      "rowHash": "676d49335d08c688439cb59ba94bb96bdd919f8833c206589d3e0545831a3ec2",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fenetre",
+      "rowHash": "c05efe8bf0c308a0ea78cc3dd89c22fa365a9f6a69845b37d29c610e70e01b4d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ordinateur",
+      "rowHash": "62111cbaf10151c7fabf96f10359b1e1efa441d2c566def385b5cd057050833b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ville",
+      "rowHash": "8a7e05925bbe0662f41eb11cbeec7a0378770af6a9092f2d3bc7ed72fdc58751",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "gare",
+      "rowHash": "92519a68922856b6464baa675586843813361535943ed14326ff19e549719f0c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "parc",
+      "rowHash": "e104f47d37a7ab8fdc0c8051441e2240604f5e26bfb740845fc06098757f1486",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "rue",
+      "rowHash": "e88f2e9ebcb5da733aff98627b706f090a90cbada08959b69df56ec1f489c25c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "musee",
+      "rowHash": "2a1af12cac3c84f477126878f501caa8664e963c6ecbadc36b5b5ef0cc563302",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "voiture",
+      "rowHash": "ddb3d2d5687c44bba326bb78cab69b569766c181d157da80792acc350ab1b9ea",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pont",
+      "rowHash": "7f04734e1391a8d17ee3f3e1bc889252e455adb0367fa5de7a3fc1c8ece3bb83",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "restaurant",
+      "rowHash": "d2ec770861b30f0d0e5e01ec29a0dcb5f0f70b7105f936ddfad7c71a0cf60dc5",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "soleil",
+      "rowHash": "ae3af1eab728d1b040131fdbbc6090a37752220ffcff03c60e6b0440bf752f0c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "lune",
+      "rowHash": "0d8c8b5791199aa6c8ec68ee0a80e3bb80ef77bada6e3686ae29407f69443ccd",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mer",
+      "rowHash": "c45906634aba2d26af94a437387455d7c8586c0d544a526161f0c780053c97aa",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "montagne",
+      "rowHash": "1859155e08e59c034defc29acc37e96a42042f41b268b80f280ea71cd3057c44",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "arbre",
+      "rowHash": "c88e8b18872395bdd8199693b8de8f11b370f3a1f39cc2f7f05c4cb7e5f7d656",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fleur",
+      "rowHash": "df6a2ffd3e02ba6ba7187c69bf486df37bbaf500c784cdd3616e3f398dc44996",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pluie",
+      "rowHash": "001781abf0804f2de71304df32f1c8a476c3cfc9ae12bff335307326a4e6a998",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "vent",
+      "rowHash": "7d2d408d18c2458f10dae48d4b818183a0cb76f4a8529e23e61ef8068b7ed538",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pain",
+      "rowHash": "45964664da15286eab6a4a9651beb1933b31a5bb3f3646b538fdc0b971db66a4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pomme",
+      "rowHash": "0ef54804405eb1d0c896a2aa260881fbd3254d289a3c871fbf8d207232cc9f95",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fromage",
+      "rowHash": "e438ea7275bb8a1291ed4816d21018681b7e705dab6ad59189802679f6cf3ecf",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "eau",
+      "rowHash": "4585072c98655c7be280846ba702723a41edf0926fafd6d6052c7d5b9b17ca81",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "eau",
+      "rowHash": "a8e23ae4198aa5dbf1b7e6386ecb30fc8a4d867e5906ebb37646db89fc89c5f7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "vin",
+      "rowHash": "99eb47e19492eb59a4032a0639ba5d22f0ac198045cfbcc37a4c9fb8337e8e15",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cafe",
+      "rowHash": "5ad11802ae34a762d2f4fe3f5cb1ff752ddeb59d2b64f2f08c0b7a3d9bf30017",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cuisine",
+      "rowHash": "1ed379e39c801a0075e7c451a80e982fe71c3b98db3509cc77364445d8638f4a",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chocolat",
+      "rowHash": "f57ad619ca7ac45450b9bb0e0518aa86a7e8463b4532a62a16f0b0138e9d3329",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "travail",
+      "rowHash": "8fba0835696e0a77f2bea7467008e0912843b70d5fbdf8121774eef9d0000370",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "liberte",
+      "rowHash": "a2def1f55fee83de707b3657ff249798e1cd2e44ef5588a896d5230ade9f3f3d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "temps",
+      "rowHash": "74de66767ede165d33cff388f88e1b016206e9baadf833b044e06569d08223e1",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "question",
+      "rowHash": "140c6b8e99481bb203bf1c4b9c9113149687b2bfc9b4ec87566e879924aed391",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "argent",
+      "rowHash": "ac61d14bd7b205ee4f208654d7b7c550c3bdd672d39e4d277fe96084b6156af6",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "paix",
+      "rowHash": "57a00439315a02bbbdc628b84aa7f85ea1f49556cd9337ac874904e936f067b0",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "monde",
+      "rowHash": "2b7e3d8396a49dc637808d9f2adddc9b242d123ccc9b31b770389284d1b9bc8a",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "idee",
+      "rowHash": "b7bb9c7db2d3dfb0e4b93a8cd5e40bd7e826f9f3be137b6e07fc3e81dbe00011",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ete",
+      "rowHash": "c798f7170fb8a13871072d7d63de26d31544665a352048965e9b55ad2e60bc65",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cote",
+      "rowHash": "ef54b4a874fb78abc5f5a11f8f02473da2bb43633c0f7cc99b0e5feb881519c0",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pate",
+      "rowHash": "15dfe2508a9f2b91928d4d43c4b898f969635e724cfa0e2857376ae69344314f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "silence",
+      "rowHash": "2759499c94863e9f28bec4674dd37a1d1fa5fb00c20fb4a7b8ff98e206e022dc",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "parapluie",
+      "rowHash": "290964646aa45343f8022a8279eb1da0240d5e512197aa872217d34bae2db1b4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "incendie",
+      "rowHash": "fa8791216b895375ce473f6d1fabb5fee7464b3ff7dff508640641906def5d63",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "plage",
+      "rowHash": "0702966e70218a63c1c5926a93c5d16dbdf5e379fe6b6ada7a0d66ef944bc4f4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "image",
+      "rowHash": "ee34aac911a4fa5fc325ecb923fed03488b447136e8a194f8c8c0043c45fb549",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cage",
+      "rowHash": "e458463c5515d7139fe0bbadb8a41a0f05c02d9f355badf1ae89b8dd9a65590d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "peau",
+      "rowHash": "13b89eb370fed8a2859d076917a75f4ec95e1cd4b4f881b14bd3d8373ce23e58",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "couleur",
+      "rowHash": "fe3dd04c7df9da5d264bbfc4366b0d1c207db6b60a86533cc58680f8f4e6e2da",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "peur",
+      "rowHash": "fed0892ddbee64cab60f95834ed9ed7c3aa6f37fb168fd3edc6d5c2299627f11",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "douleur",
+      "rowHash": "e71d703e69256ff66297c6909292ecf18d73d858f27b08de129cce90b081336b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "erreur",
+      "rowHash": "e814f95fdda9f4371804e0c9b860efebd362fd6861198bf68bea1a076c944ced",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chaleur",
+      "rowHash": "6adc86e8dd33fd29ee2997e1c3d187bc55a54f41ccb285713cd18ce25e08f0c0",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "odeur",
+      "rowHash": "bde8d21cbe01c22c952e576b7d037ec945b06a187626dc08ce086f958684f2d6",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "humeur",
+      "rowHash": "cacfad8457136bd211c4460f6b899f7d1e4743da322db5ba2ddf35a22e961783",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "lycee",
+      "rowHash": "e0b33a14c93b5bcdcb9d0f077da422a51a92b03497100cc1e9d1a829cd845a56",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "attention",
+      "rowHash": "e090228badb35cf7831f4b8b116a80c97768ff8af97a34970327f7ce442b1e5e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "conversation",
+      "rowHash": "cc22ee64f402090be86339b4581f72c6e01fb25b011a5a4d9230c258124b93bc",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "invitation",
+      "rowHash": "93e7cdb7e778ab93a917d886fafbe7c9e7564d4bc695804c4231f387d7384d73",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "natation",
+      "rowHash": "4e5a0727675d44881e330dd1c86ccd9c80a801ad52aeda1d4fdc41e84f53f2dd",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "reservation",
+      "rowHash": "45b9f11a5f6efd3146e75ca811a72d2c557c4a9052e14680eac1ed554ed2e63d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "station",
+      "rowHash": "6103e97ab59afabda2ceb093bb8d44698b912b9adf971de0cfae2cc41210870b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "prononciation",
+      "rowHash": "3baf4f628354069915653e1a8bc637355c75caf7751849f2fc5306f0de5a2b66",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "reduction",
+      "rowHash": "b073cf29236697eb39f163ffabd2745fcda3d436f02f8c1a70cf3281b537be0f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "television",
+      "rowHash": "d3953d875c6ac7a15abb4ececaf612f8a18149f564989eb6fb1e71b5ae794d61",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "profession",
+      "rowHash": "4865141d562250ecca0ccb6dd0ab2cc5b39f840ed2b969a9c3340d8aed8521d7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "emission",
+      "rowHash": "ee0a83d8af6528d176746f7d9f76b4cf679da5d16eb96038c62e67f0963c2b4e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "passion",
+      "rowHash": "cea005df756f7555d2b9bc9f93c25476cd9791ef80f5d15231a2c13123b3af33",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "decision",
+      "rowHash": "b5318ac9d73f07dc73a2c222dd769fcec6bed4b5ce86f9d81e1f5ad60985bb4c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "excursion",
+      "rowHash": "10532db91bdf9b188ffc81dc57ea8a2255ccc895577c7d0406215d8db30d36a2",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "discussion",
+      "rowHash": "e7d19eb9e92f4ae682f28a4401e009c9419b0fde8d3bd5b0c2f673dc3996c022",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "sante",
+      "rowHash": "d1a2aef72a3e386a7948a5ad06bec680c2196944689e43594263fe418d719e61",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "nationalite",
+      "rowHash": "596add8bf77d40c51cfaa670348a7d2cbc5e7c3ad5650d6b81b36edb68d12a7a",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "societe",
+      "rowHash": "42cd7f38b1ee9f3dc03df593bfc82ffcf118c27f3350aa19163e54ba8988ae83",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "verite",
+      "rowHash": "0c543052eaf8fcf1b0fbb1410128be6b29ffcd3ac66bfdd1e1a6151427319eb8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "beaute",
+      "rowHash": "801ebf037f36ece1569deaa2d6e7c7cb76da2ce2a800bbfdec6f6a14f1ce9a8e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "universite",
+      "rowHash": "1dfe56dab7846a2e4473965c0511c101249fe21affaecd4514f5224da008aa51",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "specialite",
+      "rowHash": "a3edeaba957fb26d61d3339d0ad8d2dfcda2f5f22e4121ed48d6657d5b40b9a7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "securite",
+      "rowHash": "c456427a007c4883ac41d3602f1874c3f5a44b71e9fec489e06087c8018c64c1",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "nourriture",
+      "rowHash": "41b960fc3f168d75f909731e05f885303bbb18da75d64aace4ccf95107fe208e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "confiture",
+      "rowHash": "a7eba81a4a105dbb0f227d44644c1e158ce0266d72819ae6e8d7e5dad8515dde",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ceinture",
+      "rowHash": "e63a2b2a78d1745eb6dcd05fb1e3e80fceaacdee6e5c71e97f3a8a3e5234bb4f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chaussure",
+      "rowHash": "02886137ba08bb3832243a4129e9cbdd4a448f94143286f7465f241ecf8eceb7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "nature",
+      "rowHash": "b4287d081b0d877a3eb0946807f7625116591eda6263a958909914b67b190750",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "peinture",
+      "rowHash": "6fe24a3790ff843e36baec6d98f5ef5938176e85fdb4c0521cdb13cc5573a57a",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "lecture",
+      "rowHash": "1b43ac41bf890456da240e5f5f9efcf1820f0332858013ceeb9caf5d86d58798",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ecriture",
+      "rowHash": "589e000839ac3c1f484eec3441c19b32e9bea8fee7ab1b397f26d0d4b3615e8b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "temperature",
+      "rowHash": "7d180ad7141cff04518fa749687d444f0f11e2ff8ff38d3e1472cac910e22f37",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "blessure",
+      "rowHash": "878100230009452714fed1b1286fd73a7f8e68188d510d98a060a1612e1d9f2b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "heure",
+      "rowHash": "6234521384c7466a9d34b582dd57d9caaca5757e55af65b15030c6f8b6a0ba5c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "serviette",
+      "rowHash": "6971d13dd1a4996875b9fd77d7da362a1a565e97127a5da7616d950c812bafa6",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "assiette",
+      "rowHash": "a141fa42be8df92b66ad46b5c0dfe5a1ad8db9dfac79148af6190dd6d0c02e7d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "bicyclette",
+      "rowHash": "c2f17a7a4557dfd75295e06da4e86ad256f5e576d0e7b454f7362d9594a61e21",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fourchette",
+      "rowHash": "707ccd6b3b040f94b7ed99fc76bdb2cb02e47ee6592c374016dac20f88e1e098",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "baguette",
+      "rowHash": "99d0cc1e5f023ec85207f7dd1c77f9d03ed41f4a4ba981d833074cda50bf834c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chaussette",
+      "rowHash": "874ae18c31a9bb4b86364525378c3cf0b5d5bb80bf6f6577399487295be38965",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "casquette",
+      "rowHash": "beeee8f154d74696146b8ed40387e222cab85ce10f9f63cfdec0539d7b8aaba3",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "recette",
+      "rowHash": "405b1d7a03c42f64713b322f71d3572420e110fa6a1be0db8dfe1821f5a61dfc",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "etiquette",
+      "rowHash": "987ab86ff8d192b0eb00cd0270c575b377f5a0bcd3a1a801bca0c4cb0ae13387",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "crevette",
+      "rowHash": "42e0605a8167fbcde01d7e87d7f70541a24f68e1d561c020104d3d036be6b813",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "naissance",
+      "rowHash": "256f90ea77f272ed301c3e28fcdcf52570225b790dc38f56aba5f77571f4ac7e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "enfance",
+      "rowHash": "035f8dd33ab3daf6c1434752453a2523132cddb74808c041822f61941e571eb0",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "connaissance",
+      "rowHash": "3755b29e0b10a16a00fc11c5e47645f562e6967f8b0cde8eac8a49f9fc3a75a2",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "avance",
+      "rowHash": "70a1e056c8013ea874e5fe62b46e369df1973f9d994c4edcb618a19b3a9526a4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "distance",
+      "rowHash": "f2d463d136c4597544aabca7e0fc3f749e200b430c22a69f6bfc0b2e8a1028a4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "importance",
+      "rowHash": "17ca4c0c8113ae1e1b2b9cf0783a959efb9dc562c01bfd5b2d42dea05569e453",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "correspondance",
+      "rowHash": "e630747abb32c08e3c64d1f77a674fc302d2865370c9043d4dec45359b549a4c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chance",
+      "rowHash": "f4425f8acab948dee7d46d0b30f1440c074f10c61c6d42b34cdd9b15f16949ec",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "presence",
+      "rowHash": "0322b7ba03bd1a3421ce268b36446d1ed52427210bca75314bd5bfdf6cdacacf",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "absence",
+      "rowHash": "d972fb20e0181b2a7b7fab17b3a5ce61b842c7608c48f2d36288d409b93da574",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "difference",
+      "rowHash": "19d4033605c9f099bed14187629a683e68064777dee7bc1b65d31c009e6b6608",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "urgence",
+      "rowHash": "f70293b80b96d4cccffac0de8e76d3fed0a338df50594020fadecf7e99945856",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "patience",
+      "rowHash": "4d5772e73642c729c049bef70a143e8ee8554ad5bca93d82dc3d76bf589904fa",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "agence",
+      "rowHash": "621fa3add5f77f8ce8306677222a902575f3d3b6afbb642021d4b1a4a5c0a18d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "residence",
+      "rowHash": "d9bbf5c9c95454a1cfc7214ff475447261bb0a675e51e302449be6fa75f568e8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "preference",
+      "rowHash": "8c5788da0566a75e9366de6058977a10e0ed16636b9bf62e921c86eb837c7b80",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "boulangerie",
+      "rowHash": "af02bce9a320ade67cc81b9ebfe9ba2bbd8c31026e1cdc28bd490c3859432299",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pharmacie",
+      "rowHash": "90d3e2f2e2ee1a9e23754d77c6940b0e277bad339818b618333e27b4d9a866a5",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "epicerie",
+      "rowHash": "286b8983a8decb6a86519dadff80d00e5cf7501024d5e759d33044c25a2ce1c1",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "librairie",
+      "rowHash": "d59da1cb78b4e633dbf6b8016a627804fcf514f70cca61e99f8555dd43e42611",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "boucherie",
+      "rowHash": "6d17ae0ad7ada2bd7bd36b32287a9ba272eb8bb73f555fc8f14700fddc86c232",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "patisserie",
+      "rowHash": "068e8bc8cfdfd2c36181742a59dfa3034b7e0f89e2330034c1053661108ab642",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mairie",
+      "rowHash": "ec4c2644d29417657de650e05aaf5aab3655ae5ad146667d991256ebe66d6d40",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "vie",
+      "rowHash": "c4930e49eeb7e167607ccdd2ac8a89c19947345b08de8fafdbdd9108c795b0c9",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "maladie",
+      "rowHash": "ca8f7da405680d03f9fdac2057026d8a934cdf5a7415d0daecf0a3334faca2ac",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "sortie",
+      "rowHash": "adb8261ded84380ea358e8d2ce7522adbb4b9950cc334ca565806b6131a95ed9",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "partie",
+      "rowHash": "dffac28afafd0b9c3c0bf9bcc1e53f1626df3efe9b2597af532b4fc796c1d1f8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "comedie",
+      "rowHash": "f040f9964b37b2bcf07323cd86e0a8e505032062674b8d099eabe8d6210cad78",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "voyage",
+      "rowHash": "fec23537f2226d8506118f0466d546104df0b051ac4c72004443fa921dd101fe",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "message",
+      "rowHash": "5466a798b22af6dcfeb180b35afd150a5a0d503d3d2af5c23c4cbd43f51be8e9",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "village",
+      "rowHash": "381e281c765cc9f56db706b517781e00ad4fe9b9156ee0eab9ea694d696e3fde",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "garage",
+      "rowHash": "4b660cd3850fae2a3070b663b336616f94a4f0112cbe67c897c1d42aa1cccc39",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "bagage",
+      "rowHash": "f9fe80f4bed624d4982878ccebf851a70b71cf32a579fdfc3f815b42e3eccb62",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "etage",
+      "rowHash": "4c80eb3d0fd6d703dc1677724990ba2a40f59506a4836918f3592ba309453aaa",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "menage",
+      "rowHash": "74a007de55b465fb7ab5446bdd759b54836d46e0ecdefca74547518d7eb42cb3",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mariage",
+      "rowHash": "37a3eb6a69fb586e4a9674eece2716a8ae183fed1c55d19c5a364c47d5a018d3",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "paysage",
+      "rowHash": "9255e04e0f2d6392dc2c7d5c8e2d9070fc6a479714f7c2ad79164a134ce2b713",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "courage",
+      "rowHash": "83f6236cad75003903df3e41e2b4de6486212a84c0ab9530d95ee4d6975e53c5",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "visage",
+      "rowHash": "6601a07e455e0fb7cf2ec35c68687cb73c3fce978406dc58b83d9f1266afc991",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "nuage",
+      "rowHash": "09c3d7b223b4306b1190c80cc9e8c385732247553dffdf134369c5bfe7f360a9",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "orage",
+      "rowHash": "68810982646605f07777f4dbd53e16de7660642d3a3e465833ef1799393e1cd4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "age",
+      "rowHash": "1833ec016b2513f3a226ea16fcec00349951fff92f4fb3c8dcb53a7dc7eefca4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "age",
+      "rowHash": "fa0b0bee0c58033153b4a5d35f241d95ae59f8da43caf4e6cf4f030432492311",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "appartement",
+      "rowHash": "e16a213e4bc8254cc988821e63e447bfa854cb88ebd33c43ae6be56a0aff9a7b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "vetement",
+      "rowHash": "b9fa74160a55e76819f4b7c18b0e435b333e4e29b23dc1d734bea049e2102116",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "moment",
+      "rowHash": "4bf08050a462f15d8c52b3cc760120be7456058f2e39acfbf9fe7893b6299104",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "monument",
+      "rowHash": "e92f4db091e7399718bab1dbeafefb9ab202f22bd40206957848e53fbd2fb100",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "medicament",
+      "rowHash": "cd020844219a0403947a615da111feb603bbcc4e894b9d66c5b5b705ef43c309",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "sentiment",
+      "rowHash": "d8a200af3f064cc434c6b1c9f4edcd6d859c209ac6e50b83e80a096e30300da3",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "document",
+      "rowHash": "c22de8d5e472e548fb8af9ea691360c77c2dd76eb3ea9a5d7852982c6f485f32",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "paiement",
+      "rowHash": "9dc58938a52561f032767ab072c17c1fec4ad967e46b24fc2c049d69d7a954e4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "logement",
+      "rowHash": "ffad15a8e8edb8579fd35e95f6607cd092a741bdc08ee22d9abc0e3ebf3adc75",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "batiment",
+      "rowHash": "7c9c940d07a27709c24f5cc9adf824ec49e753cf982b2baf681b740046a96803",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "tourisme",
+      "rowHash": "9e8180aea26f1d8f36e4b5d832b9e130e1fe260ac147371c127206520b008e2b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cyclisme",
+      "rowHash": "dea14abaebb36dc67d1cd47483193aa704291257cb5e7a00856fae43b9a70844",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chapeau",
+      "rowHash": "1ba8c056f11fe92bf54a056b3844391d68d3a69fa48a4692686fccf307827caa",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "manteau",
+      "rowHash": "1883c37ad35f7cec75375d13015880dca78f33476e68462cee094512fcbb7e18",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "gateau",
+      "rowHash": "b4a708dcdf86c1b5c5d27f1be3751439f541ef4da80f85c9737a515c55d53d4e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "bureau",
+      "rowHash": "59c4bf460316b829965b984c6c76c8dd3f4c772e94fca2210b30023e3205ff46",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "tableau",
+      "rowHash": "e5d5e5a5f5d86ca56ece663ff0ed7ce64ca4395e38cc835d99b0299280d18325",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "oiseau",
+      "rowHash": "dd3a67ed079ebb16559ae01d19a7e384518132f32842e1bfa3952d801ad1f199",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "bateau",
+      "rowHash": "55d95cfb749d9e661c51bb5b399f24d7d8525676abf1973d751c29bfce992e05",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "couteau",
+      "rowHash": "ebfaa1348dee6b80d8d8f3c328f53116f1ef7ebaf3cebf89c049b0794863179b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cadeau",
+      "rowHash": "b7bcda1a45b613ef74323178c8e10ae47b107d02cf7a951a89e8310fb0c15b04",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "morceau",
+      "rowHash": "faf255fcf02f562220f8fb4293544db40b089a957c95cb7b0b4e8ceb5b71b54d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "panneau",
+      "rowHash": "60f7460ded431f5fd4ed1a5d954ab7af209451ca6c3fc5914fc574ba81d751a6",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chateau",
+      "rowHash": "b9e5535060f9b9ea2bad7d03d931e47d4a9f812cdafb20a26d451a8b619a7432",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "rideau",
+      "rowHash": "b6ceb9368c78aa1e015160bbdc0ce8f4b71e30f74707c49685964b764ac10369",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "soir",
+      "rowHash": "ed32f4d804356594febe81e028205554bbf9f3362f427966cecad286399fdc19",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "devoir",
+      "rowHash": "0b638f46f5ede4a54aee77dae0c3444e96db2c39c1646a3e7b04641b6599e9a7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "couloir",
+      "rowHash": "0de9dcfb5cd00a4ff93e18c8dde6a4ade1fec37ad33bd8857eeb683afdba7f12",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "tiroir",
+      "rowHash": "b5ea46976092dba13340f7ef8fa08012307cef52785ac44cfe0a429f36d3db03",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "trottoir",
+      "rowHash": "f5cb920bf3c42b8af4dad29f689638a77b64e9f58f2838696e4526796cf16cff",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mouchoir",
+      "rowHash": "18c72d4bd957afdec84e4d1a7b9101e9cefdfa97c5350d59aefde82ac149fbf1",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cahier",
+      "rowHash": "45ae7358b690f11b3b1b22d0089f44eb21244b0f2aa0f05bb7855540ef5f27b7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "calendrier",
+      "rowHash": "b176eaf925f350dbec3b9dfff22b50efc934ae4dfe82c1e687d63a0c485745be",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "courrier",
+      "rowHash": "a1f582a95243371da2df6415eb94ee98e21852edec21b7a63dca9a24671c507f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "quartier",
+      "rowHash": "a52d3b434d679a497ffb0814572619381a325216dc03ecd76e14aa0b7fc64cc3",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "escalier",
+      "rowHash": "e56d515f8a40dec495944801dc66e5b91f76df40cff06a3d4a05213a8e19defd",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "dossier",
+      "rowHash": "0487d8dc9d0989b96930e8ebdae3bf4fd1b5293382f796c8f35b95a560c0cf0a",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "panier",
+      "rowHash": "229fd47167b8f3fe95ece9ddfabbfeab9a22877ebbb33d826449981f02352400",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "policier",
+      "rowHash": "e16965bbd70db0945ad6b8ec1499b886cb281b44b147d4f6f9c0feadee72c8bf",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cuisinier",
+      "rowHash": "c7543a00d9b6ae0c8a14f9045802efbb14f2fb2b9aa5718442a2fbcc1480e17c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "jardinier",
+      "rowHash": "c480b9f421c998dae7e95b7a9123bafa1c976ad2518443c063f103c54f362aa8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "infirmier",
+      "rowHash": "d0dacdbef666f08041505e8f2443b739a92b482fbd705439140ccf0e48c04d9c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ouvrier",
+      "rowHash": "e35e1e3cc1a037a0ca443b2909e1e38ddb1c516a397ee0270191e060539fec45",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "metier",
+      "rowHash": "eeb22c17488bc280077c3db7cec46d9a3fd12df1c433640ae8212e7c269f166e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "janvier",
+      "rowHash": "8b7df30bccff35726ba5c4690863cbb92e12a2f431da70bcefa3d292ed9ee55d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fevrier",
+      "rowHash": "dde8421384c7cc1d537e0522a614861c14ec806a57b2ef0a8c05b7cbb7c1bf1f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "serveur",
+      "rowHash": "2d946766b949af5764e6ff7dc389f37c943cc1e47a35be485f927c6124ad1fa6",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "acteur",
+      "rowHash": "515fc07fa878d2a13c5f9114373391e2bca518e99760c717293e939b71df1c81",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chanteur",
+      "rowHash": "e708153108568d411e8e5b51ffc427e44d78c5b8ffc65275f94b3ecaa32fc621",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "vendeur",
+      "rowHash": "0c6c6d8f0964461dd3f0e059b8ec280f694cbf220cedaf9f4b5721c3a0feb093",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "directeur",
+      "rowHash": "e03ee86eb594788760e7f3454c053c4a283750f910c5723148d7aab4649937a0",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "facteur",
+      "rowHash": "9e4de9693699fb598ebed4bc2ea5c5b2787d0b2ffb03292ee8f066bc92e88afb",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "joueur",
+      "rowHash": "7480450a1b6bdb642595dc8bbe313213cdbe383f4ee965c8cc1e7592cde050e5",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ascenseur",
+      "rowHash": "db65611678d0eca73dcfa4d248a9c0fb03579c0f025ebe601b4c85730ceac847",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "conducteur",
+      "rowHash": "6a22ee88defed2c276c95fc5723f90b759f7232104a8f34f358e3be10aaeea9f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "journee",
+      "rowHash": "fedb766767be5c50081732eff44a6f826dc427d51c054bee101671d91559db7e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "soiree",
+      "rowHash": "40bfa7069a813bce446931df44a3cd72db80312db2ef3a52ee8bb90dbd093cc7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "matinee",
+      "rowHash": "f0f902a0c29a51832939eb02165951720fa0f09282f3c25a1933326fd5701995",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "annee",
+      "rowHash": "b5a507ed21c367cb5e3f302737ad55e61c3a1255266c2f2338bf135963f1d77e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "entree",
+      "rowHash": "78a2c1dbdb361fa79a3eaccd499a6e5de757c94f7961abf02fd1afae9e58e056",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "arrivee",
+      "rowHash": "6dfd724a1ee19648ec7afb109b4f4caacd3a0c9f533982d61d00c3e3155ea659",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "duree",
+      "rowHash": "8b527c0585f840f7c075f369406f5961ed80b54e40f39f00a38aab742fa5fade",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "allee",
+      "rowHash": "32659deeeda33eb203f73ab097b58a91e195e476724c586febb02df7c15f62ba",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "lundi",
+      "rowHash": "22397358d3006a8742d83d65c12e6009a45071b8606742940f96e3dfac0745c7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mardi",
+      "rowHash": "67dafac989dbf3fe8b5ccd72816ed1c3ed2f187baabc7d2d530a3d1b0525dd8b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mercredi",
+      "rowHash": "b9b6471846baa3a681f286d2adcac250265b4aebd7202000e035d4c79ff0dd32",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "jeudi",
+      "rowHash": "47e78b494ee89b64636965a2fa24a624c11d504c10914a0304014e5b1bf90bcc",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "vendredi",
+      "rowHash": "895fa0dcbce826bc6cccd2e5d0f781836ef5be554fb23c3461479ffbb22b9309",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "samedi",
+      "rowHash": "980259a8133f2523eb36b4f1634056d278cb5d222579ac07c8f34ab3f2f0cce9",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "dimanche",
+      "rowHash": "79b6a9bf466a3882280e7a41dea2101829f8c66bae8f8a1201dd72e1a2063944",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mars",
+      "rowHash": "137ee03a3f547112f846147cb987db46d7d6163c21b31478ec2645ac3f64d70d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "avril",
+      "rowHash": "f1b754e78333cc08974d28a720baaae6bda84d29723eacdb24a75a29691e0b91",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mai",
+      "rowHash": "5b007a81865cad01501e64bdaae921a415ac609264953a92a764ef575e33a21d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "juin",
+      "rowHash": "87cee5cf6b0b4fefeae451054b7f9f8bd07d6de508f1b5dac942f3fffedd87bf",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "juillet",
+      "rowHash": "68383ce67f3e51980432e16bd5cab91d3323422dce9d004c4c3131f68bb9be65",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "aout",
+      "rowHash": "004eb0f5d99fdcf815f73991960c19ad7dfa60672df20d68815d746ffd6a3208",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "septembre",
+      "rowHash": "89ae16cfab3d226cc2835934250977b94529befe2c669303583cafd21196da47",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "octobre",
+      "rowHash": "ec520e8ef6e677982fe61751e983d17ced7a69077b9169afa089ae152ef71f51",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "novembre",
+      "rowHash": "4bebf8c794fae23ff91caf8465eeb5a3a062514044a6c230834730f3642e4f5d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "decembre",
+      "rowHash": "f7bf21cffe50c1b384ef2d2dceb760b994f2ee8d6514843cd2c6946b7f678b1e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "matin",
+      "rowHash": "fd61d9688995462beb82866e17b937ee0019d94299a7c0628e330684d61e1add",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "nuit",
+      "rowHash": "6fdcad8020c44a92a71922113c58fe296f06a960ff8eb18bedd8c51fc3ea86ba",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "minute",
+      "rowHash": "ddd90fd0f7155521617fcb61bd528214d1c920c26f6bed4f315dca2e13523385",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "semaine",
+      "rowHash": "46a08dc496ce30d1ae32d1888df6a54f1ef5730f3c6167516ad9b3f5e0bfac11",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pere",
+      "rowHash": "d27e1b7cb3cc45beb57fe213c0abb681e86a9865917addbfde87d92f69f7417b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mere",
+      "rowHash": "b7d8cef54a4f8d186e164db773a71bb34d18036ad68fbed2e89ae421f996827e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "frere",
+      "rowHash": "4cbde52addbb1cc06432deee6deebec03889888afef3f8b71ca23ba397cba91a",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fils",
+      "rowHash": "79c596b9cec325ff3ecda397ad5eca8851c931b5893ddf6981ec13d62304c373",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fille",
+      "rowHash": "19a792ffedd53b957ea4a21e091509ee37174be0c2227313fbe6a28e1d330b0e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "parent",
+      "rowHash": "cdae9618715aed24b0b7de0d8db85ad998634b86b0973da565c42ee6d4d6b82b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "oncle",
+      "rowHash": "2b1a6614944f2db99dc26d5961a15f929f99c0c69cafcf49dfd1262a2a3e18b9",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "tante",
+      "rowHash": "916d2636656fdffbb4b69b66d4ac2aeb8668b5f822907cef4d4dc9c8de1da379",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cousin",
+      "rowHash": "160e8467ccf7879745a68ffcc8c20f1a5a1df57869d91a43d19c08ba19571374",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cousine",
+      "rowHash": "e35c13f93801c8fb66553ec9a513ecbcc1fffeaafffaec0e1e0f513bac05aaab",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mari",
+      "rowHash": "aaf86c03fad57f34883059ce7cbdfa1b7e4838ba144671d356b7746159f75cba",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "femme",
+      "rowHash": "c9f3e238ed435a0f1ee8676c6cf8f937adb254df041f3949588ef55dd3749062",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "famille",
+      "rowHash": "b96b71f8cf00609c2eb8d71f0d22d0ac73b5b7f50d24abdd95ed95d93d2565d8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "homme",
+      "rowHash": "a2ff0a06a1a6344de200944b290589944d64692bf503834e067271f51940148e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "dame",
+      "rowHash": "7cafcb7d49de733de9225bcac00adb45e6cd231c6976d5f8ccee68f53f8036e4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "monsieur",
+      "rowHash": "b0a58acb94814186884446a29c68425e1e28666552b48b3a9775ecd8c99255c2",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "madame",
+      "rowHash": "e112891406a453f1ba0bc2e418028d1aae6e40791da5f7c89d793d88ca19c3da",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "garcon",
+      "rowHash": "3077418ee5b6eaf06d1e22a8f64b0f02e57b7622ca9d3b4dfcf76bf759a94e05",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ami",
+      "rowHash": "cc8090b674b6044e4ff45c0ee44419fbcc497b09c44aff5c222938b1ea414e8e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "nom",
+      "rowHash": "9f35ce701e17d448fe37da87e4e39378efb2820bb1274c6bb6dabe5a45814a7c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "prenom",
+      "rowHash": "391bb8e30812e8a8a26242b61daf105bda0bf3157458f224b0bb397c6c65d66c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "voix",
+      "rowHash": "be3da2d9c0e958020232c61c40a84539748862743047a3ca4660eea5d6dc9eea",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "actrice",
+      "rowHash": "75f0a84ad23edbec2a44022668649ac9799193633c8c1719b27aaeae67a9ebf7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "serveuse",
+      "rowHash": "05c64f555afef042cf409c6eb4f50b5f81dee00a2158b77864c0243e3f5ffac8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "vendeuse",
+      "rowHash": "ab453e1471b6b8d6ee50c19782c9bb506273b154f9538c8744ec5b4bd9e863ca",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "croissant",
+      "rowHash": "7fe51757ef26440315e2ffdd2df589ebc502b25aa6b6344cbe4361361fb61d8d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "beurre",
+      "rowHash": "d8e1fe19116b786477a3bde68b0bc3ced4b7a787ad77a584238b897ce834834e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "sucre",
+      "rowHash": "5e50dd8f88418c4def4d0a846b16b6998d651014217ff9522135e78dca4d82ab",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "sel",
+      "rowHash": "4e330dcd0ec7a0d5191d40f8d8cb355c1d53f8cbf9831fdc199d8934722b6456",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "viande",
+      "rowHash": "dd485e6e7592ab507b3498ffbe79e00c5ae108f8053b459384cec05f32ddded8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "poulet",
+      "rowHash": "8bf8f0d6c0ce45c6679f065475f17a69a9d9aceb12d5c45d50bc5a798a8a2e07",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "poisson",
+      "rowHash": "b844c4cafb3deb4acf3dcf02e6a096a9f6271989f09c0265456ad843f853e65d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "riz",
+      "rowHash": "9f2c22af22f260f122b5e1db6b005011606effab8911755379e9b39e0f5ca1d7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "soupe",
+      "rowHash": "15889c9b13de262f5a66ec3a5ea4b40bdf27bdc8370ebfed9d45d1a932362e13",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "salade",
+      "rowHash": "f7e4d42c0aeaa5c05f8c6912348b0fae14231912fe04e86400ea775b47e59976",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "banane",
+      "rowHash": "2827a187fbd557fcac40543e644e15b71c13f859f8bc64b684d6803e03416b82",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "the",
+      "rowHash": "181ce2ab104109ab06679515d61a72bba9ee1ef6eec3c707790d729f6f51d4f6",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "lait",
+      "rowHash": "240576034e54fff168198cee55f1e700e087e1a4c9702815c2246a8c0546d320",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "biere",
+      "rowHash": "b055112fb7122ad200d2ef778fe2b1bcd6783e80df155d08837d7a425e863e03",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "jus",
+      "rowHash": "48aaf1d109f9efb0b324ac178544d3d95216b8b2548d95f72e4ec37453f4dc97",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "boisson",
+      "rowHash": "74175e0c81ad292e5cdf58600c09638e58a37437cde3a38b2f8d95ba2689a024",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "bouteille",
+      "rowHash": "fd049b01621e4a7c124149b9cc6d8c3756e22098aebf1e4cc435c98d8c09fa2f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "verre",
+      "rowHash": "6cf77517cca090c18402ae5a11603c248073e8f6a8dba5c938d8210cd5f69732",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "lit",
+      "rowHash": "1fa98870f3a180c7deb5a76a641fa710200a91794b0da0a98c199c8f7352408f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chaise",
+      "rowHash": "b351148720a4ef632cfe0e8f174f3d52d8c8929d2d08e79f665caca2064c9858",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "armoire",
+      "rowHash": "bacfca2e9823577eef0a2806b26b9a57f34b3c869b24e6c7be73290a3de3328c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "canape",
+      "rowHash": "f0940e3fddd45a382461025230676185c6aa9488a483ccb5fff3251f96a48bec",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fauteuil",
+      "rowHash": "6e3de969208da7c99602c812314ce8dd2d932c9c3bf8f2c234f1c4114b9b8d1f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "etagere",
+      "rowHash": "ee301ff5f423d0744d248e6bf2433309c2f419cade8b81d0069dcc8fd5d53bbb",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "lampe",
+      "rowHash": "f9cb59335ca65d654b65725ccf839935ba906fc619abacc4821a5358381a8d87",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chambre",
+      "rowHash": "09093ba82e7d03713bed37825e06cf6f8a4e4ca2ac96b027567e47959c79acf4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "salon",
+      "rowHash": "c77d3435adc1d00f2f149e9fb96267a4d3c271930ed973b0b171b2248f0f5f0f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "jardin",
+      "rowHash": "10c668cf2dacb8a0ba2a567a77c62ff48cc036801d84f55cc8b71820b1b04895",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "porte",
+      "rowHash": "5a87680bd4e315b850ecde48985f7ce560c4177371d4df358212400acdbc5ac1",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mur",
+      "rowHash": "599b9bcf54938f74158549e647fbcbbd4313e33f84ddc4fef8c9083d75393946",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "douche",
+      "rowHash": "4daf510de8a5ec2fa9cd9ed2e574fd3169e890990e82af57ae245a5113749b71",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "hotel",
+      "rowHash": "1affc195eca531e98b69524585516026647cbc741b14618cec7bff1be82cd042",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "hopital",
+      "rowHash": "f1c477b54c08eaf2f25b691ec294a842cf97ab5895c64bd6e91f1d9066d2eec9",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "banque",
+      "rowHash": "d239c0bd7094ad19361a9c417322af9601bf37f7654531520cf958fc2f20c6ae",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cinema",
+      "rowHash": "0bd8f15aa4244ad722d7722d53e30e626952b3587952dbb689ebf955d7afd682",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "theatre",
+      "rowHash": "0e324fd3d6d5173d4df3869af1157f5e69411f98bca04b483792805e61616efa",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "eglise",
+      "rowHash": "393e74c2fd2c2d6bf71e00380690fc3c1c7f707294cf6fb7e054afee330bfacf",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "train",
+      "rowHash": "766d169297f3b9fc24ec07b89a9cefbfdb766481ba9ea01acfc707c5814bba27",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "avion",
+      "rowHash": "84ce5bd6fc40e8faa56a43d3cb9f36f3101654c7591eedf3167f510d18e79cfd",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "bus",
+      "rowHash": "567a9086949608d2afbfce8adfe2404fd642e8f23b7bcd61b422baf6021ea354",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "metro",
+      "rowHash": "51942298bd3b693cc27d73043fb76d38a0eea8e728c60cd813b3118bf6e903f8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "taxi",
+      "rowHash": "27584425ee16d83603bf46fe03842ad9ab57694e42ac7dc9da7e9e19be966346",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "velo",
+      "rowHash": "fc249764090b077836b304ca2b529293ff1dee92e786599f849bc7c8ad416d83",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ecole",
+      "rowHash": "f75333313270ea754d22297a6d66495d20f5870423d696304e29e3f13671bd9c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "cours",
+      "rowHash": "5666edc9e687338cbef4808f42d0f5c095192873b19503277b70d230108915da",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "stylo",
+      "rowHash": "2e3bed2564069e54d64f69e673c53df3f28f47edc474169a4f12b86042cf3d52",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "crayon",
+      "rowHash": "9df7875c0c18459bfca05f0441ad5b2076aa869c30b26a6562cace88112c1713",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "mot",
+      "rowHash": "688ffeda1f74a85edd7683a218fc572428d1ebdbf0b3263df3dcd072727c46f1",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "phrase",
+      "rowHash": "5f7050814cd0901022dcc58aef3d9dbba64b55b23a5324be0ad1a47e9455d0f2",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "tete",
+      "rowHash": "21d51b1986ef11aa40bc1669d48b0269b004109a807236bc05dce0e2c5b53ee0",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "nez",
+      "rowHash": "bb639107e6ef2b4eec9896fe9c5cd3ecd4b3ab15701af03422a5c1821e047d2f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "bouche",
+      "rowHash": "dbff0474e9675472b0fa93f1ff497b27d0f87a4313585ebe0ef0d53700b9f430",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "bras",
+      "rowHash": "3183c3f7b76ecf4b62c14c6b95a6b439ea374c6f4c0eb9f10f34d8c02c16009f",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "main",
+      "rowHash": "f74c3954137e95c26e594de2e46cb8b16ccb900cb9e64d5b1dbe9d081304964c",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pied",
+      "rowHash": "07766c42e0c79a63db323007c8fef5bc9228b3079abc6950860321534e1f4ca8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "fievre",
+      "rowHash": "bc6974809f531d011dfdca4177ccd43f24eb98ae11e1a11ff5fc5258284b9cff",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "repos",
+      "rowHash": "0b1fd36bc0b4c0cbb0c5162e9e1ad4fd49336f933d036066598d3fcfb7304251",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "ciel",
+      "rowHash": "d26c9c2fe0c381b44de1e32467d4cd308fad9ec8ffab561d0376f9145bf5124d",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "neige",
+      "rowHash": "b368d36b4466893324e4efaf8587ae891bab2e89aaaa68913900965ee7cac054",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "froid",
+      "rowHash": "41e5ad1eca5ece6adf72a37da4eb22c89b8215b6ea7184a081f4395bff9981ed",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "chemise",
+      "rowHash": "08c7b18c5d9e0b4c87923c6836aa7a389e2e8190536dc9711481328480414700",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "pantalon",
+      "rowHash": "d4c8edc873bc5dc9b6af84be7712325edf515631376721b28e08dcad9e5830b4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "robe",
+      "rowHash": "44478c683aafe446e8c77d0d4bfe918f279abd333be063fd754e4466641ee215",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "jupe",
+      "rowHash": "1c7afa57e1a9416842f20f7020df2f13b9cc081ac19516b2c72d7f5aa879c192",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "magasin",
+      "rowHash": "590a611b8016f08d91d35401bc546dcad0b6ea676b18f48e89aba4d8ff6dc204",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "boutique",
+      "rowHash": "a60a7b5f9cd80f7091d2a278ae779424f50fa9a04a7aa6c25ca80353ed1b8c14",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "musique",
+      "rowHash": "37b5c997607836d84f33e21409d0c47e6af9ceded8acba1c944180b315c46383",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "page",
+      "rowHash": "27035a996dafea194653a3656b9a3a99a0cfe0552ae74b8bc2f3fdd69952db36",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "racisme",
+      "rowHash": "f7c20b15b33431ec0ef863d47b86b0defb81c3c49ff0a71bdb4fa6f89949794e",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "alpinisme",
+      "rowHash": "333aeaa94ce9dc45b37572b613e39eda40690a4a2a76ff39b76747984295f54b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "seisme",
+      "rowHash": "ef60a2262c9a2d3863392b768d2c9c13311aa863406b4be586f5c481e2e03d09",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "parachutisme",
+      "rowHash": "95fcadfa0097ec380677e13cf6c0596e1fb399bcbb9b0c3d0185671270401acc",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "adresse",
+      "rowHash": "ed2c32681ba40fc784f905f7bae1e0448e525107ad22f83cd978a8c7166c9d16",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "tristesse",
+      "rowHash": "b6cfd66ca7742868096a309da588c315376dc88e75319929d1f3247b8d12ea34",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "vitesse",
+      "rowHash": "98dc1af4499d338e2fc11ad54eb27401c8ef0f4ad4b4772ff481eb99d18259b7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "jeunesse",
+      "rowHash": "993fe30041bef60d43daee17a0ef4df7d4386eff7f784de1b02b3ffaf5e96412",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "politesse",
+      "rowHash": "4d7b5bded5958ade6e4bb609ec1fe191c8c7179257ea3f2c9708b496c0fa6de1",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "gentillesse",
+      "rowHash": "3d3a2b2a5da0794491b31b701ee33fd2f52740911e07a41ca63bd605fc645ff1",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "promesse",
+      "rowHash": "f49c9eeeba36691d89ab114183d5fdb08d83336eb787fa473f8cf9a442106bf0",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "habitude",
+      "rowHash": "85b145ecb95d888ac4a6058863c548aed177caf633577a3f3a58fdf0bf0f8505",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "etude",
+      "rowHash": "b4c4e81a244f73c1d6659a3cb2efa725468366c9b5bb02ce2151d688bb37f1cf",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "attitude",
+      "rowHash": "a470cb3ee2b74c531cb83d9187057a301b3f90a1084f4c906591b26ab31ddc10",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "solitude",
+      "rowHash": "306e279a28ba078c404ef55f69cb9b324760466ccbd474975717c2207e0c2668",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "inquietude",
+      "rowHash": "2aea0afcdc3cf977abfe32dcb8872087b783c599b6f3819aea88277e9cc6fbc8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "nounId": "coude",
+      "rowHash": "6ae2a3a573cc3113a2a12128dd89544c00e2b11a99256a81945381f08a9a1cc8",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "tion",
+      "rowHash": "af707ba3624d67bccb94e516ee09fbbfe51a4a06eca1d893807e96231594b4bf",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "sion",
+      "rowHash": "5231ce8373983060bb0a0083b6e7394f3c614c5ef9a61e5605940ffea482ae8a",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "te",
+      "rowHash": "74b19523b97083cbc943ea4ac9df7d6a1b88f51a6fd490cd9eb27d2ddea3334b",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ure",
+      "rowHash": "266aa629a7211c730efa4a3d3eb9b82a97e3e22cd55dc357caa5329e5bc50f69",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ette",
+      "rowHash": "aa2073b488d945c29054047a730f8892ca2aa00aba025b13e7b2e6415837e1ba",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ance",
+      "rowHash": "c47ea50cf6ebe9ed4a16bfaa328254c165da78a2ecc7b46e1ff791faa1c28eee",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ence",
+      "rowHash": "7573d4ee77b7f1fe7095491deda8c11ed6043e326b09455062de7f58fcae1bc9",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ie",
+      "rowHash": "9b178910fc4947981979bdf45affec5a606670c237945a98329eef310ae44a73",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ment",
+      "rowHash": "6853af8c06b7aac113f4065994f021b021ca1ebfa5b35c1c1871bde24362e0ac",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "isme",
+      "rowHash": "a92a9dc4b75c6cf00117535d98b9872b0130c81cdd1a72fe505018ef67fd4681",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "oir",
+      "rowHash": "8857bf2b943bf0e99b0b284355ad3a6c577be2c0f86705c7fdbaed40ac6f7fc4",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ier",
+      "rowHash": "9c4c534599192e168539a5eafb875a92df3ad4f91bb1e9bdad2f01ec3b06b4dc",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ee",
+      "rowHash": "2c9e88e69e617fb6c0400297589a138ae0fc4d0339626fa9974285158e8d6b96",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "esse",
+      "rowHash": "81f5d68bd1796140c1c410a44962e804c99254490172e6e81eaca93b5cbb1441",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    },
+    {
+      "ruleId": "ude",
+      "rowHash": "cbe86473982d726c7a50d719660bf97e7a6c135000d9dc4e06cdeffd7d008bd7",
+      "reviewedBy": "Roy Zhu",
+      "reviewedAt": "2026-10-19",
+      "reference": "Owner confirmed issue #11 (the 337 A1 nouns and the 17 shippable rules) in a session on 2026-10-19; no external reference"
+    }
+  ],
+  "rejected": []
+}

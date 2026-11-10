@@ -119,7 +119,10 @@ export const ITEM_BY_TYPE: Record<ExerciseType, ExerciseItem> = {
 export function unitOf(type: ExerciseType, items: ExerciseItem[] = [ITEM_BY_TYPE[type]]): ExerciseUnit {
   return {
     id: `unit-${type.toLowerCase()}`,
-    materialId: 'material-1',
+    setId: 'set-1',
+    level: 'A1',
+    createdAt: 1_700_000_000_000,
+    learningArea: 'grammar',
     section: 'GRAMMAIRE',
     unitNumber: 1,
     title: 'Exercice',

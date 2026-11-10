@@ -1,6 +1,6 @@
 /**
  * Deterministic answer checking for the 11 exercise types, ported from
- * FrenchLab with its accent and punctuation semantics unchanged. Pure: no
+ * FrenchLab with item-level accent and sentence-punctuation policies. Pure: no
  * React, storage or AI. Free-text answers that do not match a reference are
  * reported as needing an AI grader instead of being guessed at here.
  * Does not own the AI call, persistence or what the sheet shows.
@@ -9,27 +9,24 @@ import type { ExerciseAnswer, ExerciseAttempt, ExerciseItem, ExerciseType, Exerc
 import { effectiveItemType } from '../../types/exercises';
 import { choiceGroups, countBlanks, expectedAnswerText, recordedAnswerText } from './answer';
 
-/**
- * French string comparison key. Every punctuation mark becomes an apostrophe
- * (not removed), so "bonjour." and "bonjour" differ on both sides alike; with
- * `strictAccents` off, diacritics are stripped as well.
- */
-export const normalizeFrench = (str: string, strictAccents: boolean) => {
-  let base = str
-    .trim()
-    .toLowerCase()
-    .replace(/[.,/#!$%^&*;:{}=\-_`~()?’]/g, "'")
-    .replace(/\s+/g, ' ');
-  if (!strictAccents) {
-    base = base.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  }
-  return base;
-};
+import { normalizeFrench } from './normalizeFrench';
 
 export interface GradingOptions {
   /** The learner's "strict accents" preference. */
   strictAccents: boolean;
 }
+
+/** How answers are compared until the Practice settings offer a choice: accents count as spelling help. */
+export const DEFAULT_GRADING: GradingOptions = { strictAccents: false };
+
+/**
+ * Whether accents are significant for one item: an item may require them
+ * (`meta.strictAccents === true`, conjugation drills do) on top of the
+ * learner's preference, never against it. The stored `CheckedResult.strictAccents`
+ * must come from here too, so the saved boolean always equals the one used to grade.
+ */
+export const effectiveStrictAccents = (item: Pick<ExerciseItem, 'meta'>, { strictAccents }: GradingOptions) =>
+  item.meta?.strictAccents === true || strictAccents;
 
 /**
  * - `graded`: the verdict is final.
@@ -67,8 +64,9 @@ export function gradeItem(
   type: ExerciseType,
   item: ExerciseItem,
   answer: ExerciseAnswer,
-  { strictAccents }: GradingOptions,
+  options: GradingOptions,
 ): GradeResult {
+  const strictAccents = effectiveStrictAccents(item, options);
   const recordedAnswer = recordedAnswerText(type, item, answer);
   const graded = (correct: boolean): GradeResult => ({ status: 'graded', correct, recordedAnswer });
   const expected = item.expectedAnswer;
@@ -92,10 +90,14 @@ export function gradeItem(
   if (countBlanks(item.prompt) > 1 || Array.isArray(expected))
     return graded(gradeSlots(answer.multiAnswers, toList(expected), strictAccents));
 
-  const given = normalizeFrench(answer.singleAnswer, strictAccents);
+  const normalize = (value: string) =>
+    normalizeFrench(
+      item.meta?.ignoreSentencePunctuation === true ? value.replace(/[.,;:!?…«»()]/g, ' ') : value,
+      strictAccents,
+    );
+  const given = normalize(answer.singleAnswer);
   const matches =
-    given === normalizeFrench(String(expected), strictAccents) ||
-    (item.acceptableAnswers?.some((alt) => normalizeFrench(alt, strictAccents) === given) ?? false);
+    given === normalize(String(expected)) || (item.acceptableAnswers?.some((alt) => normalize(alt) === given) ?? false);
   if (matches) return graded(true);
   if (AI_GRADED_TYPES.includes(type) && answer.singleAnswer.trim().length >= MIN_AI_GRADED_LENGTH)
     return { status: 'needs-ai', recordedAnswer };
@@ -112,7 +114,7 @@ export const gradeUnitItem = (
 
 /** The attempt row for a finished check. Carries its own prompt and answer text. */
 export function buildAttempt(
-  unit: Pick<ExerciseUnit, 'id' | 'materialId'>,
+  unit: Pick<ExerciseUnit, 'id' | 'learningArea'>,
   item: ExerciseItem,
   recordedAnswer: string,
   correct: boolean,
@@ -121,8 +123,8 @@ export function buildAttempt(
   return {
     id: meta.id,
     unitId: unit.id,
+    learningArea: unit.learningArea,
     itemId: item.id,
-    materialId: unit.materialId,
     grammarTag: item.grammarTag,
     prompt: item.prompt,
     userAnswer: recordedAnswer,

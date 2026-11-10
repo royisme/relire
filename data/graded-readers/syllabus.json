@@ -1,0 +1,235 @@
+{
+  "syllabusVersion": "0.1.0",
+  "stages": [
+    {
+      "order": 1,
+      "readerId": "a1-01",
+      "theme": "objects",
+      "topicIds": ["subject-pronouns", "indefinite-article-forms", "pattern-cest", "present-tense-forms"],
+      "allowedTenses": ["present"],
+      "allowedConstructions": [],
+      "newWordBudget": 6,
+      "maxSentenceWords": 6,
+      "maxTextWords": 24,
+      "maxSentences": 4,
+      "include": true,
+      "bundled": true
+    },
+    {
+      "order": 2,
+      "readerId": "a1-02",
+      "theme": "family",
+      "topicIds": ["noun-gender-feminine", "noun-plurals", "possessive-determiners", "definite-article-forms"],
+      "allowedTenses": ["present"],
+      "allowedConstructions": [],
+      "newWordBudget": 6,
+      "maxSentenceWords": 7,
+      "maxTextWords": 35,
+      "maxSentences": 5,
+      "include": true,
+      "bundled": true
+    },
+    {
+      "order": 3,
+      "readerId": "a1-03",
+      "theme": "home",
+      "topicIds": [
+        "pattern-il-y-a",
+        "demonstrative-determiners",
+        "adjective-agreement",
+        "preposition-dans",
+        "preposition-avec"
+      ],
+      "allowedTenses": ["present"],
+      "allowedConstructions": [],
+      "newWordBudget": 7,
+      "maxSentenceWords": 8,
+      "maxTextWords": 48,
+      "maxSentences": 6,
+      "include": true,
+      "bundled": true
+    },
+    {
+      "order": 4,
+      "readerId": "a1-04",
+      "theme": "routine",
+      "topicIds": [
+        "present-tense-uses",
+        "reflexive-pronouns",
+        "pronominal-verb-uses",
+        "telling-time",
+        "time-prepositions"
+      ],
+      "allowedTenses": ["present"],
+      "allowedConstructions": [],
+      "newWordBudget": 7,
+      "maxSentenceWords": 9,
+      "maxTextWords": 63,
+      "maxSentences": 7,
+      "include": false,
+      "bundled": false
+    },
+    {
+      "order": 5,
+      "readerId": "a1-05",
+      "theme": "cafe",
+      "topicIds": [
+        "partitive-article-forms",
+        "partitive-article-uses",
+        "articles-in-negation",
+        "negation-ne-pas",
+        "shopping",
+        "questions-combien"
+      ],
+      "allowedTenses": ["present"],
+      "allowedConstructions": [],
+      "newWordBudget": 8,
+      "maxSentenceWords": 10,
+      "maxTextWords": 80,
+      "maxSentences": 8,
+      "include": false,
+      "bundled": false
+    },
+    {
+      "order": 6,
+      "readerId": "a1-06",
+      "theme": "leisure",
+      "topicIds": [
+        "hobbies",
+        "sports",
+        "jouer-prepositions",
+        "yes-no-questions",
+        "questions-est-ce-que",
+        "questions-comment",
+        "degree-adverbs"
+      ],
+      "allowedTenses": ["present"],
+      "allowedConstructions": ["modal-infinitive"],
+      "newWordBudget": 8,
+      "maxSentenceWords": 11,
+      "maxTextWords": 99,
+      "maxSentences": 9,
+      "include": false,
+      "bundled": false
+    },
+    {
+      "order": 7,
+      "readerId": "a1-07",
+      "theme": "neighbourhood",
+      "topicIds": [
+        "asking-directions",
+        "questions-ou",
+        "article-contraction-a",
+        "article-contraction-de",
+        "preposition-a",
+        "imperative-forms",
+        "pattern-il-faut"
+      ],
+      "allowedTenses": ["present", "imperatif"],
+      "allowedConstructions": ["modal-infinitive"],
+      "newWordBudget": 9,
+      "maxSentenceWords": 12,
+      "maxTextWords": 120,
+      "maxSentences": 10,
+      "include": false,
+      "bundled": false
+    },
+    {
+      "order": 8,
+      "readerId": "a1-08",
+      "theme": "weekend-plan",
+      "topicIds": ["near-future", "future-expressions", "dates", "cardinal-numbers", "expressing-purpose"],
+      "allowedTenses": ["present", "imperatif"],
+      "allowedConstructions": ["modal-infinitive", "near-future"],
+      "newWordBudget": 9,
+      "maxSentenceWords": 13,
+      "maxTextWords": 143,
+      "maxSentences": 11,
+      "include": false,
+      "bundled": false
+    },
+    {
+      "order": 9,
+      "readerId": "a1-09",
+      "theme": "yesterday",
+      "topicIds": [
+        "compound-past-formation",
+        "past-participles",
+        "compound-past-uses",
+        "holidays",
+        "country-prepositions"
+      ],
+      "allowedTenses": ["present", "imperatif", "passeCompose"],
+      "allowedConstructions": ["modal-infinitive", "near-future"],
+      "newWordBudget": 10,
+      "maxSentenceWords": 14,
+      "maxTextWords": 168,
+      "maxSentences": 12,
+      "include": false,
+      "bundled": false
+    },
+    {
+      "order": 10,
+      "readerId": "a1-10",
+      "theme": "memories",
+      "topicIds": [
+        "imperfect-forms",
+        "imperfect-uses",
+        "past-tense-choice",
+        "conjunction-quand",
+        "weather-expressions"
+      ],
+      "allowedTenses": ["present", "imperatif", "passeCompose", "imparfait"],
+      "allowedConstructions": ["modal-infinitive", "near-future"],
+      "newWordBudget": 10,
+      "maxSentenceWords": 15,
+      "maxTextWords": 195,
+      "maxSentences": 13,
+      "include": false,
+      "bundled": false
+    },
+    {
+      "order": 11,
+      "readerId": "a1-11",
+      "theme": "travel-and-plans",
+      "topicIds": [
+        "recent-past",
+        "simple-future",
+        "expressing-cause",
+        "preposition-en",
+        "preposition-pour",
+        "ordinal-numbers"
+      ],
+      "allowedTenses": ["present", "imperatif", "passeCompose", "imparfait", "futur"],
+      "allowedConstructions": ["modal-infinitive", "near-future", "recent-past"],
+      "newWordBudget": 10,
+      "maxSentenceWords": 16,
+      "maxTextWords": 224,
+      "maxSentences": 14,
+      "include": false,
+      "bundled": false
+    },
+    {
+      "order": 12,
+      "readerId": "a1-12",
+      "theme": "community-visit",
+      "topicIds": [
+        "greetings",
+        "introductions",
+        "information-questions",
+        "questions-qui",
+        "questions-que-quoi",
+        "interrogative-quel",
+        "pronoun-on"
+      ],
+      "allowedTenses": ["present", "imperatif", "passeCompose", "imparfait", "futur"],
+      "allowedConstructions": ["modal-infinitive", "near-future", "recent-past"],
+      "newWordBudget": 10,
+      "maxSentenceWords": 16,
+      "maxTextWords": 256,
+      "maxSentences": 16,
+      "include": false,
+      "bundled": false
+    }
+  ]
+}

@@ -1,20 +1,19 @@
 import type { Provider } from '../../types';
-import { geminiAcceptsImages, geminiText } from './client';
+import { geminiText } from './client';
+import { GEMINI_TEXT_MODELS, GEMINI_SPEECH_MODELS, geminiCatalogue } from './models';
 import { geminiSpeech } from './tts';
-
-const TEXT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-3.8-flash', 'gemini-3.1-flash-lite'];
 
 export const gemini: Provider = {
   info: {
     id: 'gemini',
     keyUrl: 'https://aistudio.google.com/apikey',
     text: {
-      models: TEXT_MODELS,
+      models: GEMINI_TEXT_MODELS,
       defaultModel: 'gemini-2.5-flash',
-      imageModels: TEXT_MODELS.filter(geminiAcceptsImages),
+      imageModels: GEMINI_TEXT_MODELS,
     },
     speech: {
-      models: ['gemini-3.8-flash-lite-tts'],
+      models: GEMINI_SPEECH_MODELS,
       defaultModel: 'gemini-3.8-flash-lite-tts',
       voices: [
         { id: 'Kore', gender: 'female' },
@@ -25,6 +24,7 @@ export const gemini: Provider = {
       defaultVoice: 'Kore',
     },
   },
+  catalogue: geminiCatalogue,
   text: geminiText,
   speech: geminiSpeech,
 };

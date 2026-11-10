@@ -1,0 +1,42 @@
+{
+  "verbs": {
+    "aller": {
+      "source": "morphalou-3.1",
+      "ranAt": "2026-10-19T03:54:45.406Z",
+      "rowHash": "84ab8452dda4d041842f4229126b3a4051909366bc4edabd973a11221139da0b",
+      "agree": 38,
+      "disagree": 0
+    },
+    "avoir": {
+      "source": "morphalou-3.1",
+      "ranAt": "2026-10-18T21:30:52.929Z",
+      "rowHash": "a3f16265fabb573212e55f316add54bce5d72834cdac09fe7a28b0e6273fb1de",
+      "agree": 38,
+      "disagree": 0
+    },
+    "s-appeler": {
+      "source": "morphalou-3.1",
+      "ranAt": "2026-10-19T03:54:45.406Z",
+      "rowHash": "5492a8add336aeaef494933d216de2f4732e53ddf58141b4c7023e8d30d98b0b",
+      "agree": 38,
+      "disagree": 0
+    },
+    "etre": {
+      "source": "morphalou-3.1",
+      "ranAt": "2026-10-18T21:39:29.714Z",
+      "rowHash": "44fa046ea0f7423d2232893718306981fbf70a47cb4b8fc0cc90fe402e6d448f",
+      "agree": 37,
+      "disagree": 1
+    }
+  },
+  "decisions": [
+    {
+      "verbId": "etre",
+      "tense": "present",
+      "person": "3pl",
+      "ourForm": "sont",
+      "decision": "keep",
+      "note": "Extra Morphalou form, from the lefff source only; not adopted as a variant. Owner decision 2026-10-18."
+    }
+  ]
+}

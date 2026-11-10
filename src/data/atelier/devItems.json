@@ -1,0 +1,554 @@
+[
+  {
+    "meaning": {
+      "zh": "我们去海滩。",
+      "en": "We are going to the beach."
+    },
+    "sentence": "Nous allons à la plage.",
+    "variants": [],
+    "bricks": [
+      {
+        "text": "Nous",
+        "role": "subject"
+      },
+      {
+        "text": "allons",
+        "role": "verb"
+      },
+      {
+        "text": "à",
+        "role": "preposition"
+      },
+      {
+        "text": "la",
+        "role": "determiner"
+      },
+      {
+        "text": "plage",
+        "role": "noun"
+      },
+      {
+        "text": ".",
+        "role": "punctuation"
+      }
+    ],
+    "distractors": [
+      {
+        "text": "au",
+        "role": "contraction",
+        "reason": {
+          "zh": "au 是 à + le，而 plage 是阴性词，要用 à la。",
+          "en": "au is à + le, and plage is feminine, so it takes à la."
+        }
+      },
+      {
+        "text": "vont",
+        "role": "verb",
+        "reason": {
+          "zh": "vont 配 ils 或 elles；nous 配 allons。",
+          "en": "vont goes with ils or elles; nous takes allons."
+        }
+      }
+    ],
+    "links": [
+      {
+        "head": 1,
+        "dependents": [0],
+        "relation": "subject",
+        "label": "sujet",
+        "note": {
+          "zh": "nous 是变位动词 allons 的主语。",
+          "en": "nous is the subject of the conjugated verb allons."
+        }
+      },
+      {
+        "head": 1,
+        "dependents": [2, 3, 4],
+        "relation": "complement",
+        "label": "à + nom",
+        "note": {
+          "zh": "aller 表示去某处，目的地用介词 à 加名词引出。",
+          "en": "Aller says where you go: the destination is introduced by à and a noun."
+        }
+      },
+      {
+        "head": 4,
+        "dependents": [3],
+        "relation": "article",
+        "label": "article f. sg.",
+        "note": {
+          "zh": "plage 是阴性单数名词，用定冠词 la。",
+          "en": "plage is a feminine singular noun, so it takes la."
+        }
+      }
+    ],
+    "explanation": {
+      "zh": "aller 表示去某处，后面用 à 加地点名词。plage 是阴性，所以 à 后面接 la。",
+      "en": "Aller says where you go, with à and a place noun. Plage is feminine, so à is followed by la."
+    },
+    "grammarTag": "prepositions"
+  },
+  {
+    "meaning": {
+      "zh": "我去看电影。",
+      "en": "I am going to the cinema."
+    },
+    "sentence": "Je vais au cinéma.",
+    "variants": [],
+    "bricks": [
+      {
+        "text": "Je",
+        "role": "subject"
+      },
+      {
+        "text": "vais",
+        "role": "verb"
+      },
+      {
+        "text": "au",
+        "role": "contraction"
+      },
+      {
+        "text": "cinéma",
+        "role": "noun"
+      },
+      {
+        "text": ".",
+        "role": "punctuation"
+      }
+    ],
+    "distractors": [
+      {
+        "text": "à",
+        "role": "preposition",
+        "reason": {
+          "zh": "à 遇到 le 要合成 au。",
+          "en": "à meets le and the two become au."
+        }
+      },
+      {
+        "text": "le",
+        "role": "determiner",
+        "reason": {
+          "zh": "à + le 合成 au，不能分开写。",
+          "en": "à + le is written as one word, au."
+        }
+      }
+    ],
+    "links": [
+      {
+        "head": 1,
+        "dependents": [0],
+        "relation": "subject",
+        "label": "sujet",
+        "note": {
+          "zh": "je 是变位动词 vais 的主语。",
+          "en": "je is the subject of the conjugated verb vais."
+        }
+      },
+      {
+        "head": 1,
+        "dependents": [2, 3],
+        "relation": "complement",
+        "label": "à + nom",
+        "note": {
+          "zh": "目的地用 à 加名词；à 遇到 le 缩合为 au。",
+          "en": "The destination takes à and a noun; à meets le and fuses into au."
+        }
+      },
+      {
+        "head": 3,
+        "dependents": [2],
+        "relation": "article",
+        "label": "article m. sg.",
+        "note": {
+          "zh": "cinéma 是阳性名词，au 里的 le 就是它的冠词。",
+          "en": "cinéma is masculine; the le inside au is its article."
+        }
+      }
+    ],
+    "explanation": {
+      "zh": "à 加阳性名词前的 le 时，两者合成 au：je vais au cinéma。",
+      "en": "When à meets le before a masculine noun, the two fuse into au: je vais au cinéma."
+    },
+    "grammarTag": "prepositions"
+  },
+  {
+    "meaning": {
+      "zh": "她不吃面包。",
+      "en": "She does not eat bread."
+    },
+    "sentence": "Elle ne mange pas de pain.",
+    "variants": [],
+    "bricks": [
+      {
+        "text": "Elle",
+        "role": "subject"
+      },
+      {
+        "text": "ne",
+        "role": "negation"
+      },
+      {
+        "text": "mange",
+        "role": "verb"
+      },
+      {
+        "text": "pas",
+        "role": "negation"
+      },
+      {
+        "text": "de",
+        "role": "determiner"
+      },
+      {
+        "text": "pain",
+        "role": "noun"
+      },
+      {
+        "text": ".",
+        "role": "punctuation"
+      }
+    ],
+    "distractors": [
+      {
+        "text": "du",
+        "role": "determiner",
+        "reason": {
+          "zh": "否定句里，直接宾语前的 du 变成 de。",
+          "en": "In a negative sentence, du before a direct object becomes de."
+        }
+      },
+      {
+        "text": "des",
+        "role": "determiner",
+        "reason": {
+          "zh": "pain 是单数，des 是复数冠词。",
+          "en": "Pain is singular, and des is a plural article."
+        }
+      }
+    ],
+    "links": [
+      {
+        "head": 2,
+        "dependents": [0],
+        "relation": "subject",
+        "label": "sujet",
+        "note": {
+          "zh": "elle 是变位动词 mange 的主语。",
+          "en": "elle is the subject of the conjugated verb mange."
+        }
+      },
+      {
+        "head": 2,
+        "dependents": [1, 3],
+        "relation": "negation",
+        "label": "négation",
+        "note": {
+          "zh": "ne 和 pas 从两边包住变位动词。",
+          "en": "ne and pas wrap around the conjugated verb."
+        }
+      },
+      {
+        "head": 2,
+        "dependents": [4, 5],
+        "relation": "object",
+        "label": "COD",
+        "note": {
+          "zh": "manger 直接接宾语 pain，不加介词。",
+          "en": "manger takes pain as its direct object, with no preposition."
+        }
+      },
+      {
+        "head": 5,
+        "dependents": [4],
+        "relation": "article",
+        "label": "de (négation)",
+        "note": {
+          "zh": "否定句中，直接宾语前的 du、de la、des 变为 de。",
+          "en": "In the negative, du, de la and des before a direct object become de."
+        }
+      }
+    ],
+    "explanation": {
+      "zh": "否定句里，直接宾语（COD）前的 du、de la、des 变成 de：elle ne mange pas de pain。",
+      "en": "In a negative sentence, du, de la and des before a direct object (COD) become de: elle ne mange pas de pain."
+    },
+    "grammarTag": "negation"
+  },
+  {
+    "meaning": {
+      "zh": "我的小妹妹不吃那个青苹果。",
+      "en": "My little sister does not eat the green apple."
+    },
+    "sentence": "Ma petite sœur ne mange pas la pomme verte.",
+    "variants": [],
+    "bricks": [
+      {
+        "text": "Ma",
+        "role": "determiner"
+      },
+      {
+        "text": "petite",
+        "role": "adjective"
+      },
+      {
+        "text": "sœur",
+        "role": "noun"
+      },
+      {
+        "text": "ne",
+        "role": "negation"
+      },
+      {
+        "text": "mange",
+        "role": "verb"
+      },
+      {
+        "text": "pas",
+        "role": "negation"
+      },
+      {
+        "text": "la",
+        "role": "determiner"
+      },
+      {
+        "text": "pomme",
+        "role": "noun"
+      },
+      {
+        "text": "verte",
+        "role": "adjective"
+      },
+      {
+        "text": ".",
+        "role": "punctuation"
+      }
+    ],
+    "distractors": [
+      {
+        "text": "petit",
+        "role": "adjective",
+        "reason": {
+          "zh": "sœur 是阴性词，形容词要写成 petite。",
+          "en": "Sœur is feminine, so the adjective is petite."
+        }
+      },
+      {
+        "text": "vert",
+        "role": "adjective",
+        "reason": {
+          "zh": "pomme 是阴性词，形容词要写成 verte。",
+          "en": "Pomme is feminine, so the adjective is verte."
+        }
+      },
+      {
+        "text": "mon",
+        "role": "determiner",
+        "reason": {
+          "zh": "sœur 是阴性词，物主限定词用 ma。",
+          "en": "Sœur is feminine, so the possessive is ma."
+        }
+      }
+    ],
+    "links": [
+      {
+        "head": 4,
+        "dependents": [2],
+        "relation": "subject",
+        "label": "sujet",
+        "note": {
+          "zh": "sœur 是变位动词 mange 的主语。",
+          "en": "Sœur is the subject of the conjugated verb mange."
+        }
+      },
+      {
+        "head": 2,
+        "dependents": [0],
+        "relation": "article",
+        "label": "article f. sg.",
+        "note": {
+          "zh": "ma 是阴性单数限定词，和 sœur 一致。",
+          "en": "Ma is the feminine singular determiner of sœur."
+        }
+      },
+      {
+        "head": 2,
+        "dependents": [1],
+        "relation": "agreement",
+        "label": "accord f. sg.",
+        "note": {
+          "zh": "形容词 petite 与阴性单数名词 sœur 一致，所以加 e。",
+          "en": "The adjective petite agrees with the feminine singular noun sœur, so it takes an e."
+        }
+      },
+      {
+        "head": 4,
+        "dependents": [3, 5],
+        "relation": "negation",
+        "label": "négation",
+        "note": {
+          "zh": "ne 和 pas 把动词 mange 夹在中间，构成否定。",
+          "en": "Ne and pas wrap the verb mange to make the negation."
+        }
+      },
+      {
+        "head": 4,
+        "dependents": [7],
+        "relation": "object",
+        "label": "COD",
+        "note": {
+          "zh": "pomme 是 mange 的直接宾语，中间没有介词。",
+          "en": "Pomme is the direct object of mange, with no preposition between them."
+        }
+      },
+      {
+        "head": 7,
+        "dependents": [6],
+        "relation": "article",
+        "label": "article f. sg.",
+        "note": {
+          "zh": "la 是阴性单数定冠词，和 pomme 一致。",
+          "en": "La is the feminine singular article of pomme."
+        }
+      },
+      {
+        "head": 7,
+        "dependents": [8],
+        "relation": "agreement",
+        "label": "accord f. sg.",
+        "note": {
+          "zh": "形容词 verte 与阴性单数名词 pomme 一致，所以加 e。",
+          "en": "The adjective verte agrees with the feminine singular noun pomme, so it takes an e."
+        }
+      }
+    ],
+    "explanation": {
+      "zh": "形容词和它说明的名词在性和数上一致：petite sœur、pomme verte 都是阴性单数。否定句里 ne 和 pas 夹住动词。",
+      "en": "An adjective agrees in gender and number with its noun: petite sœur and pomme verte are both feminine singular. In the negation, ne and pas wrap the verb."
+    },
+    "grammarTag": "adjective-agreement",
+    "modify": {
+      "change": "plural",
+      "instruction": {
+        "zh": "把句子改成复数：我的小妹妹们不吃那些青苹果。",
+        "en": "Make it plural: my little sisters do not eat the green apples."
+      },
+      "sentence": "Mes petites sœurs ne mangent pas les pommes vertes.",
+      "bricks": [
+        {
+          "text": "Mes",
+          "role": "determiner"
+        },
+        {
+          "text": "petites",
+          "role": "adjective"
+        },
+        {
+          "text": "sœurs",
+          "role": "noun"
+        },
+        {
+          "text": "ne",
+          "role": "negation"
+        },
+        {
+          "text": "mangent",
+          "role": "verb"
+        },
+        {
+          "text": "pas",
+          "role": "negation"
+        },
+        {
+          "text": "les",
+          "role": "determiner"
+        },
+        {
+          "text": "pommes",
+          "role": "noun"
+        },
+        {
+          "text": "vertes",
+          "role": "adjective"
+        },
+        {
+          "text": ".",
+          "role": "punctuation"
+        }
+      ],
+      "links": [
+        {
+          "head": 4,
+          "dependents": [2],
+          "relation": "subject",
+          "label": "sujet",
+          "note": {
+            "zh": "sœurs 是变位动词 mangent 的主语。",
+            "en": "Sœurs is the subject of the conjugated verb mangent."
+          }
+        },
+        {
+          "head": 2,
+          "dependents": [0],
+          "relation": "article",
+          "label": "article pl.",
+          "note": {
+            "zh": "mes 是复数限定词，和 sœurs 一致。",
+            "en": "Mes is the plural determiner of sœurs."
+          }
+        },
+        {
+          "head": 2,
+          "dependents": [1],
+          "relation": "agreement",
+          "label": "accord f. pl.",
+          "note": {
+            "zh": "形容词 petites 与阴性复数名词 sœurs 一致，所以加 es。",
+            "en": "The adjective petites agrees with the feminine plural noun sœurs, so it takes es."
+          }
+        },
+        {
+          "head": 4,
+          "dependents": [3, 5],
+          "relation": "negation",
+          "label": "négation",
+          "note": {
+            "zh": "ne 和 pas 把动词 mangent 夹在中间，构成否定。",
+            "en": "Ne and pas wrap the verb mangent to make the negation."
+          }
+        },
+        {
+          "head": 4,
+          "dependents": [7],
+          "relation": "object",
+          "label": "COD",
+          "note": {
+            "zh": "pommes 是 mangent 的直接宾语，中间没有介词。",
+            "en": "Pommes is the direct object of mangent, with no preposition between them."
+          }
+        },
+        {
+          "head": 7,
+          "dependents": [6],
+          "relation": "article",
+          "label": "article pl.",
+          "note": {
+            "zh": "les 是复数定冠词，和 pommes 一致。",
+            "en": "Les is the plural article of pommes."
+          }
+        },
+        {
+          "head": 7,
+          "dependents": [8],
+          "relation": "agreement",
+          "label": "accord f. pl.",
+          "note": {
+            "zh": "形容词 vertes 与阴性复数名词 pommes 一致，所以加 es。",
+            "en": "The adjective vertes agrees with the feminine plural noun pommes, so it takes es."
+          }
+        }
+      ]
+    }
+  }
+]

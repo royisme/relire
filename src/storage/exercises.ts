@@ -4,7 +4,7 @@
  * the model: one module owns the stores, every write is one transaction,
  * `subscribeExercises` fires after commit). Attempt queries live in
  * `exerciseAttempts.ts` and are re-exported here; backup in `exerciseBackup.ts`.
- * Does not grade (services/exercises/grading) and never calls AI.
+ * Grading rules stay in services/exercises/grading; topic checks use the stored key and never call AI.
  *
  * Rules:
  * - Checking an item writes its state and its attempt in ONE transaction. A
@@ -25,21 +25,23 @@ import {
   type ExerciseAttempt,
   type ExerciseItemState,
   type ExerciseUnit,
-  type ExtractedUnit,
 } from '../types/exercises';
+import { resolveTopicFeedback } from '../types/grammarCheckpoint';
+import { gradeUnitItem } from '../services/exercises/grading';
 import { emptyAnswer, expectedAnswerText, recordedAnswerText } from '../services/exercises/answer';
 import { db } from './db';
 import { exercisesChanged } from './exerciseEvents';
 import { clearUnitStates, deleteUnitRows, readResetToken } from './exerciseRows';
-import { ArticleGoneError } from './shadowing';
 
 export { subscribeExercises } from './exerciseEvents';
-export { ArticleGoneError } from './shadowing';
 export {
   accuracyByGrammarTag,
+  countsBySoundContrast,
   listAttempts,
+  listAttemptsSince,
   listMistakes,
   type AttemptQuery,
+  type ContrastCount,
   type MistakeEntry,
   type TagAccuracy,
 } from './exerciseAttempts';
@@ -101,17 +103,18 @@ const nextStamp = () => (lastStamp = Math.max(Date.now(), lastStamp + 1));
 /* --------------------------------- units --------------------------------- */
 
 /**
- * Saves units for a material in one transaction that checks the material still
- * exists (`ArticleGoneError` otherwise). Every unit is validated first (a Zod
- * error rejects the whole call) and its id must be new (`DuplicateUnitError`).
- * Returns the stored units.
+ * Saves one batch of units (one import or generation) in one transaction. Every
+ * unit is validated first (a Zod error rejects the whole call), all share one
+ * `setId`, and each id must be new (`DuplicateUnitError`; saving never
+ * overwrites). Returns the stored units.
  */
-export async function saveUnits(materialId: string, units: ExtractedUnit[]): Promise<ExerciseUnit[]> {
-  const rows = units.map((unit) => ExerciseUnitSchema.parse({ ...unit, materialId }));
+export async function saveUnits(units: ExerciseUnit[]): Promise<ExerciseUnit[]> {
+  const rows = units.map((unit) => ExerciseUnitSchema.parse(unit));
+  if (new Set(rows.map((unit) => unit.setId)).size > 1) throw new Error('A batch of units shares one set id');
+  if (new Set(rows.map((unit) => unit.id)).size !== rows.length) throw new Error('Duplicate unit IDs in the batch');
   const d = await db();
-  const tx = d.transaction(['articles', 'units'], 'readwrite');
+  const tx = d.transaction('units', 'readwrite');
   await settle(tx, async () => {
-    if (!(await tx.objectStore('articles').getKey(materialId))) throw new ArticleGoneError();
     for (const row of rows) {
       if (await tx.objectStore('units').getKey(row.id)) throw new DuplicateUnitError(row.id);
       await tx.objectStore('units').put(row);
@@ -121,15 +124,50 @@ export async function saveUnits(materialId: string, units: ExtractedUnit[]): Pro
   return rows;
 }
 
-/** Units of one material (insertion-independent: ordered by unit number), or every unit when no material is given. */
-export async function listUnits(materialId?: string): Promise<ExerciseUnit[]> {
-  const d = await db();
-  const rows = materialId ? await d.getAllFromIndex('units', 'materialId', materialId) : await d.getAll('units');
-  return rows.sort((a, b) => a.unitNumber - b.unitNumber);
+/** Guarded get-or-create for a prepared topic; an old entry cannot resurrect a deleted snapshot. */
+export async function ensureTopicUnit(preparedUnit: ExerciseUnit, expectedResetToken: number): Promise<ExerciseUnit> {
+  const row = ExerciseUnitSchema.parse(preparedUnit);
+  if (!row.topicOrigin) throw new Error('Expected a topic unit');
+  const tx = (await db()).transaction(['units', 'meta'], 'readwrite');
+  let inserted = false;
+  const unit = await settle(tx, async () => {
+    if ((await readResetToken(tx.objectStore('meta'), row.id)) !== expectedResetToken)
+      throw new StaleResetError(row.id);
+    const stored = await tx.objectStore('units').get(row.id);
+    if (stored) return stored;
+    await tx.objectStore('units').add(row);
+    inserted = true;
+    return row;
+  });
+  if (inserted) exercisesChanged();
+  return unit;
+}
+
+/** Every unit, ordered by unit number; the UI groups them by `setId`. */
+export async function listUnits(): Promise<ExerciseUnit[]> {
+  const rows = await (await db()).getAll('units');
+  return rows.map((row) => ExerciseUnitSchema.parse(row)).sort((a, b) => a.unitNumber - b.unitNumber);
 }
 
 export async function getUnit(unitId: string): Promise<ExerciseUnit | undefined> {
-  return (await db()).get('units', unitId);
+  const unit = await (await db()).get('units', unitId);
+  return unit ? ExerciseUnitSchema.parse(unit) : undefined;
+}
+
+/** The sheet's unit, states and reset token from one consistent read, never across a reset or restore. */
+export async function getUnitSnapshot(unitId: string): Promise<{
+  unit: ExerciseUnit | undefined;
+  states: ExerciseItemState[];
+  resetToken: number;
+}> {
+  const tx = (await db()).transaction(['units', 'itemStates', 'meta']);
+  const [unit, states, resetToken] = await Promise.all([
+    tx.objectStore('units').get(unitId),
+    tx.objectStore('itemStates').index('unitId').getAll(unitId),
+    readResetToken(tx.objectStore('meta'), unitId),
+  ]);
+  await tx.done;
+  return { unit: unit ? ExerciseUnitSchema.parse(unit) : undefined, states, resetToken };
 }
 
 /** Deletes a unit and its item states in one transaction. Its attempts stay. Resolves false when there was no such unit. */
@@ -232,7 +270,7 @@ export interface CheckOutcome {
 
 /**
  * Checks an item: writes its state and its attempt in ONE transaction. The
- * attempt's material, tag, prompt and reference answer come from the stored
+ * attempt's tag, prompt and reference answer come from the stored
  * unit, not from the caller; the learner's answer text is derived from `answer`.
  * Rejects (nothing written) with `StaleResetError`, `UnitGoneError`,
  * `ItemGoneError` or the storage error itself.
@@ -250,12 +288,18 @@ export async function checkItem(input: CheckInput): Promise<CheckOutcome> {
     const id = itemStateId(unitId, itemId);
     const current = await tx.objectStore('itemStates').get(id);
     if (current?.checked) return { created: false, state: current };
+    let committedResult = result;
+    if (unit.topicOrigin) {
+      const grade = gradeUnitItem(unit, item, answer, { strictAccents: true });
+      if (grade.status !== 'graded') throw new Error('Topic question requires deterministic grading');
+      committedResult = { correct: grade.correct, strictAccents: true };
+    }
     const state: ExerciseItemState = {
       id,
       unitId,
       itemId,
       answer,
-      checked: result,
+      checked: committedResult,
       hintShown: current?.hintShown ?? false,
       explanationShown: current?.explanationShown ?? false,
       updatedAt: Date.now(),
@@ -264,20 +308,53 @@ export async function checkItem(input: CheckInput): Promise<CheckOutcome> {
       id: crypto.randomUUID(),
       unitId,
       itemId,
-      materialId: unit.materialId,
+      learningArea: unit.learningArea,
       grammarTag: item.grammarTag,
       prompt: item.prompt,
       userAnswer: recordedAnswerText(effectiveItemType(item, unit), item, answer),
       expectedAnswer: expectedAnswerText(item),
-      correct: result.correct,
+      correct: committedResult.correct,
       timestamp: nextStamp(),
     };
+    if (unit.topicOrigin && item.topicQuestion) {
+      attempt.topicResult = {
+        topicId: unit.topicOrigin.topicId,
+        exerciseRevision: unit.topicOrigin.exerciseRevision,
+        instruction: item.topicQuestion.instruction,
+        feedback: resolveTopicFeedback(item.topicQuestion.feedback, attempt.userAnswer, attempt.correct),
+      };
+    }
     await tx.objectStore('itemStates').put(state);
     await tx.objectStore('attempts').add(attempt);
     return { created: true, state };
   });
   if (outcome.created) exercisesChanged();
   return outcome;
+}
+
+/**
+ * Clears one item's state (answer, result and flags) and keeps its attempts, so
+ * the mistake stays in the notebook until a later correct attempt resolves it.
+ * Other items and the unit's reset token are untouched. Rejects with
+ * `StaleResetError`, `UnitGoneError` or `ItemGoneError` like the other state
+ * writes, so a redo begun before a reset cannot delete a newer answer. Resolves
+ * false when the item had no state to clear.
+ */
+export async function clearItemState(unitId: string, itemId: string, resetToken: number): Promise<boolean> {
+  const d = await db();
+  const tx = d.transaction(['units', 'itemStates', 'meta'], 'readwrite');
+  const cleared = await settle(tx, async () => {
+    const unit = await tx.objectStore('units').get(unitId);
+    if (!unit) throw new UnitGoneError(unitId);
+    if ((await readResetToken(tx.objectStore('meta'), unitId)) !== resetToken) throw new StaleResetError(unitId);
+    if (!unit.items.some((candidate) => candidate.id === itemId)) throw new ItemGoneError(unitId, itemId);
+    const key = itemStateId(unitId, itemId);
+    if (!(await tx.objectStore('itemStates').getKey(key))) return false;
+    await tx.objectStore('itemStates').delete(key);
+    return true;
+  });
+  if (cleared) exercisesChanged();
+  return cleared;
 }
 
 /**

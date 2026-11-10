@@ -1,13 +1,16 @@
 /**
- * Read-only queries over the `attempts` store: recent attempts, accuracy per
- * grammar tag and the mistake notebook. Only real attempts count; an empty
+ * Read-only queries over the `attempts` store: recent attempts, today's
+ * attempts with the items wrong before today, accuracy per grammar tag, saved
+ * sound contrast and the mistake notebook. Only real attempts count; an empty
  * store gives empty answers, never placeholders. Writing attempts belongs to
  * `exercises.ts` (an attempt exists only together with the item state it
  * checked). Does not group tags into areas; the UI does that with `grammarAreaOf`.
  */
 import { GRAMMAR_TAGS, type GrammarTag } from '../types/grammar';
-import { itemStateId, type ExerciseAttempt } from '../types/exercises';
+import { ExerciseUnitSchema, itemStateId, type ExerciseAttempt } from '../types/exercises';
+import { ContrastIdSchema } from '../types/minimalPairs';
 import { db } from './db';
+import { ExerciseAttemptSchema } from './exerciseBackup';
 
 export const DEFAULT_ATTEMPT_LIMIT = 50;
 
@@ -15,32 +18,46 @@ export interface AttemptQuery {
   /** At most this many, newest first. Defaults to DEFAULT_ATTEMPT_LIMIT. */
   limit?: number;
   unitId?: string;
-  materialId?: string;
 }
 
 /** Attempts newest first. */
 export async function listAttempts(query: AttemptQuery = {}): Promise<ExerciseAttempt[]> {
   const limit = query.limit ?? DEFAULT_ATTEMPT_LIMIT;
   const d = await db();
-  if (query.unitId || query.materialId) {
-    const rows = query.unitId
-      ? await d.getAllFromIndex('attempts', 'unitId', query.unitId)
-      : await d.getAllFromIndex('attempts', 'materialId', query.materialId!);
+  if (query.unitId) {
+    const rows = await d.getAllFromIndex('attempts', 'unitId', query.unitId);
     return rows
-      .filter(
-        (row) =>
-          (!query.unitId || row.unitId === query.unitId) && (!query.materialId || row.materialId === query.materialId),
-      )
+      .map((row) => ExerciseAttemptSchema.parse(row))
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, limit);
   }
   const out: ExerciseAttempt[] = [];
   let cursor = await d.transaction('attempts').store.index('timestamp').openCursor(null, 'prev');
   while (cursor && out.length < limit) {
-    out.push(cursor.value);
+    out.push(ExerciseAttemptSchema.parse(cursor.value));
     cursor = await cursor.continue();
   }
   return out;
+}
+
+/**
+ * Attempts from `start` on, plus the items that already had an incorrect
+ * attempt before it: "redo a mistake" counts only a retry of an item that was
+ * wrong before today, so a first wrong answer on a new item is not one.
+ */
+export async function listAttemptsSince(
+  start: number,
+): Promise<{ today: ExerciseAttempt[]; wrongBefore: Set<string> }> {
+  const today: ExerciseAttempt[] = [];
+  const wrongBefore = new Set<string>();
+  let cursor = await (await db()).transaction('attempts').store.index('timestamp').openCursor();
+  while (cursor) {
+    const attempt = ExerciseAttemptSchema.parse(cursor.value);
+    if (attempt.timestamp >= start) today.push(attempt);
+    else if (!attempt.correct) wrongBefore.add(itemStateId(attempt.unitId, attempt.itemId));
+    cursor = await cursor.continue();
+  }
+  return { today, wrongBefore };
 }
 
 export interface TagAccuracy {
@@ -54,7 +71,9 @@ export interface TagAccuracy {
 /** Accuracy per grammar tag over all attempts. Only tags with at least one attempt appear, in taxonomy order. */
 export async function accuracyByGrammarTag(): Promise<TagAccuracy[]> {
   const counts = new Map<GrammarTag, { correct: number; total: number }>();
-  for (const attempt of await (await db()).getAll('attempts')) {
+  for (const row of await (await db()).getAll('attempts')) {
+    const attempt = ExerciseAttemptSchema.parse(row);
+    if (attempt.learningArea !== 'grammar') continue;
     const entry = counts.get(attempt.grammarTag) ?? { correct: 0, total: 0 };
     entry.total++;
     if (attempt.correct) entry.correct++;
@@ -64,6 +83,38 @@ export async function accuracyByGrammarTag(): Promise<TagAccuracy[]> {
     const { correct, total } = counts.get(tag)!;
     return { grammarTag: tag, correct, total, accuracy: correct / total };
   });
+}
+
+export interface ContrastCount {
+  contrast: string;
+  correct: number;
+  total: number;
+}
+
+/** All checks, including repeats, of minimal-pairs items whose units are still saved. */
+export async function countsBySoundContrast(): Promise<ContrastCount[]> {
+  const d = await db();
+  const tx = d.transaction(['attempts', 'units'], 'readonly');
+  const [rows, unitRows] = await Promise.all([tx.objectStore('attempts').getAll(), tx.objectStore('units').getAll()]);
+  await tx.done;
+  const units = new Map(
+    unitRows.map((row) => {
+      const unit = ExerciseUnitSchema.parse(row);
+      return [unit.id, unit];
+    }),
+  );
+  const counts = new Map<string, ContrastCount>();
+  for (const row of rows) {
+    const attempt = ExerciseAttemptSchema.parse(row);
+    const item = units.get(attempt.unitId)?.items.find((item) => item.id === attempt.itemId);
+    if (item?.meta?.source !== 'minimal-pairs') continue;
+    const contrast = ContrastIdSchema.parse(item.meta.contrast);
+    const entry = counts.get(contrast) ?? { contrast, correct: 0, total: 0 };
+    entry.total++;
+    if (attempt.correct) entry.correct++;
+    counts.set(contrast, entry);
+  }
+  return [...counts.values()].sort((a, b) => a.contrast.localeCompare(b.contrast));
 }
 
 export interface MistakeEntry {
@@ -82,7 +133,8 @@ export async function listMistakes(limit?: number): Promise<MistakeEntry[]> {
   const rows = await (await db()).getAllFromIndex('attempts', 'timestamp');
   const latestWrong = new Map<string, ExerciseAttempt>();
   const latestAny = new Map<string, ExerciseAttempt>();
-  for (const attempt of rows) {
+  for (const row of rows) {
+    const attempt = ExerciseAttemptSchema.parse(row);
     const key = itemStateId(attempt.unitId, attempt.itemId);
     latestAny.set(key, attempt);
     if (!attempt.correct) latestWrong.set(key, attempt);

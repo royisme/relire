@@ -8,14 +8,22 @@
   "endOfLine": "lf",
   "sortPackageJson": false,
   "ignorePatterns": [
-    "node_modules/**",
+    "**/node_modules/**",
+    "worker/.wrangler/**",
     "dist/**",
     "dev-dist/**",
     "test-results/**",
     "playwright-report/**",
-    "bun.lock",
+    "**/bun.lock",
     "*.md",
     "src/services/ai/prompts/defaults/**",
-    "marketing/**"
+    "marketing/**",
+    "src/data/grammar-pack/pack.json",
+    "src/data/noun-gender/pack.json",
+    "src/data/graded-readers/starter.json",
+    "src/data/spelling-sounds/patterns.json",
+    "data/grammar-pack/*.json",
+    "data/grammar-topics/*.json",
+    "data/lexicon/lexicon.json"
   ]
 }

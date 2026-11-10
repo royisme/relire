@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sheet, OverlayHeader } from './ui/overlay';
 import { Loader2 } from 'lucide-react';
-import { SentenceAnalysis, PronunciationAssessment } from '../types';
+import { SentenceAnalysis } from '../types';
 import { stopSpeech, setGlobalRate } from '../utils/speech';
 import { SpeakButton } from './ui/speak-button';
 import { Button } from './ui/button';
 import { ShadowingGuide } from './shadowing/ShadowingGuide';
-import { ShadowingRecorder } from './shadowing/ShadowingRecorder';
 
 interface SentenceDrawerProps {
   isOpen: boolean;
@@ -15,7 +14,6 @@ interface SentenceDrawerProps {
   sentenceData: SentenceAnalysis | null;
   isLoading: boolean;
   errorMessage?: string | null;
-  onRecordAssessmentComplete?: (assessment: PronunciationAssessment, sentence: string) => void;
 }
 
 export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
@@ -24,7 +22,6 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
   sentenceData,
   isLoading,
   errorMessage,
-  onRecordAssessmentComplete,
 }) => {
   const { t, i18n } = useTranslation();
   const isEn = i18n.language === 'en';
@@ -140,14 +137,12 @@ export const SentenceDrawer: React.FC<SentenceDrawerProps> = ({
               </div>
             </section>
 
-            {/* Shadowing: how to say it, then record and check */}
-            <section className="pt-6 border-t border-ink-200 space-y-5" aria-labelledby="shadowing-title">
-              <h4 id="shadowing-title" className="font-serif font-semibold text-lg text-ink-900">
-                {t('shadowing.title')}
-              </h4>
-              {sentenceData.shadowingGuide && <ShadowingGuide guide={sentenceData.shadowingGuide} />}
-              <ShadowingRecorder referenceText={sentenceData.sentence} onAssessed={onRecordAssessmentComplete} />
-            </section>
+            {/* Pronunciation guidance stays with the sentence analysis; recording lives in the reader card. */}
+            {sentenceData.shadowingGuide && (
+              <section className="pt-6 border-t border-ink-200">
+                <ShadowingGuide guide={sentenceData.shadowingGuide} />
+              </section>
+            )}
 
             {/* Structure: each segment with its role */}
             {sentenceData.syntaxStructure && sentenceData.syntaxStructure.length > 0 && (

@@ -16,11 +16,24 @@ import {
   type ExerciseUnit,
 } from '../src/types/exercises';
 import { ITEM_BY_TYPE, ITEMS, unitOf } from './fixtures/units';
+import { exerciseJsonSchema, drillsJsonSchema } from '../src/services/exercises/jsonSchema';
 
 const base = unitOf('WORD_TRANSFORM');
 const item = ITEMS.WORD_TRANSFORM;
-// The playable units, without the material they belong to (what a model returns).
-const { materialId: _materialId, ...extracted } = base;
+// The playable units, without the batch they were saved with (what a model returns).
+const { setId: _setId, level: _level, ...extracted } = base;
+
+test('model-facing schemas never advertise or retain saved topic capabilities', () => {
+  for (const schema of [exerciseJsonSchema(), drillsJsonSchema()]) {
+    expect(JSON.stringify(schema)).not.toContain('topicOrigin');
+    expect(JSON.stringify(schema)).not.toContain('topicQuestion');
+  }
+  const parsed = GeneratedExercisesSchema.parse({
+    units: [{ ...extracted, topicOrigin: {}, items: [{ ...item, topicQuestion: {} }] }],
+  });
+  expect(parsed.units[0]).not.toHaveProperty('topicOrigin');
+  expect(parsed.units[0].items[0]).not.toHaveProperty('topicQuestion');
+});
 
 test('every exercise type has a valid sample unit', () => {
   for (const type of ExerciseTypeSchema.options) {
@@ -29,19 +42,24 @@ test('every exercise type has a valid sample unit', () => {
   expect(ExerciseTypeSchema.options).toHaveLength(11);
 });
 
-test('a playable unit needs a material; a model answer does not carry one', () => {
+test('a playable unit needs a set id and a level, and may have a title; a model answer carries none of them', () => {
   expect(ExerciseUnitSchema.safeParse(extracted).success).toBe(false);
-  expect(ExerciseUnitSchema.safeParse({ ...base, materialId: '  ' }).success).toBe(false);
+  expect(ExerciseUnitSchema.safeParse({ ...base, setId: '  ' }).success).toBe(false);
+  expect(ExerciseUnitSchema.safeParse({ ...base, level: undefined }).success).toBe(false);
+  expect(ExerciseUnitSchema.safeParse({ ...base, level: 'C2' }).success).toBe(false);
+  expect(ExerciseUnitSchema.safeParse({ ...base, setTitle: '  ' }).success).toBe(false);
   expect(ExtractedUnitSchema.safeParse(extracted).success).toBe(true);
-  expect(ExerciseUnitSchema.parse(base).materialId).toBe('material-1');
+  expect(ExerciseUnitSchema.parse(base)).toMatchObject({ setId: 'set-1', level: 'A1' });
+  expect(ExerciseUnitSchema.parse({ ...base, setTitle: 'Leçon 1' }).setTitle).toBe('Leçon 1');
 });
 
 test('per-item type override is preserved and governs validation', () => {
   const mixed = { ...base, items: [{ ...item, type: 'GENDER_CHECK', options: ['M', 'F'], expectedAnswer: 'M' }] };
   expect(ExerciseUnitSchema.parse(mixed).items[0].type).toBe('GENDER_CHECK');
-  expect(GeneratedExercisesSchema.parse({ units: [{ ...mixed, materialId: undefined }] }).units[0].items[0].type).toBe(
-    'GENDER_CHECK',
-  );
+  expect(
+    GeneratedExercisesSchema.parse({ units: [{ ...mixed, setId: undefined, level: undefined }] }).units[0].items[0]
+      .type,
+  ).toBe('GENDER_CHECK');
 
   const overridden = {
     ...base,
@@ -54,6 +72,29 @@ test('per-item type override is preserved and governs validation', () => {
     expect(ExerciseUnitSchema.safeParse(invalid).success).toBe(false);
     expect(GeneratedExercisesSchema.safeParse({ units: [invalid] }).success).toBe(false);
   }
+});
+
+test('generated cloze units require a passage, including effective item type overrides', () => {
+  const cloze = unitOf('READING_CLOZE');
+  const mixed = { ...cloze, type: 'FILL_BLANKS', items: [{ ...cloze.items[0], type: 'READING_CLOZE' }] };
+  for (const unit of [cloze, mixed]) {
+    const missing = GeneratedExercisesSchema.safeParse({ units: [unit] });
+    expect(missing.success).toBe(false);
+    expect(missing.error?.issues[0].path).toEqual(['units', 0, 'readingPassage']);
+    expect(
+      GeneratedExercisesSchema.safeParse({ units: [{ ...unit, readingPassage: { content: '  ' } }] }).success,
+    ).toBe(false);
+    expect(
+      GeneratedExercisesSchema.safeParse({ units: [{ ...unit, readingPassage: { content: 'Léa habite ici.' } }] })
+        .success,
+    ).toBe(true);
+    // Existing stored/imported units are not subject to the generation-only requirement.
+    expect(ExtractedUnitSchema.safeParse(unit).success).toBe(true);
+    expect(ExerciseUnitSchema.safeParse(unit).success).toBe(true);
+  }
+  const overridden = { ...cloze, items: [{ ...cloze.items[0], type: 'FILL_BLANKS' }] };
+  expect(GeneratedExercisesSchema.safeParse({ units: [overridden] }).success).toBe(true);
+  expect(GeneratedExercisesSchema.safeParse({ units: [extracted] }).success).toBe(true);
 });
 
 test('drill items must name their own type', () => {
@@ -146,8 +187,8 @@ test('refinement issues point at the offending field', () => {
 test('duplicate item and unit IDs are rejected', () => {
   expect(ExerciseUnitSchema.safeParse(unitOf('WORD_TRANSFORM', [item, item])).success).toBe(false);
   const unit = unitOf('WORD_TRANSFORM');
-  const { materialId: _m, ...noMaterial } = unit;
-  expect(GeneratedExercisesSchema.safeParse({ units: [noMaterial, noMaterial] }).success).toBe(false);
+  const { setId: _set, level: _level, ...extractedUnit } = unit;
+  expect(GeneratedExercisesSchema.safeParse({ units: [extractedUnit, extractedUnit] }).success).toBe(false);
   const drill = { ...item, type: 'WORD_TRANSFORM' };
   expect(DrillsSchema.safeParse({ drillTitle: 'T', focusSummary: 'G', items: [drill, drill] }).success).toBe(false);
 });
@@ -169,7 +210,6 @@ test('answerSource and importSource round-trip; unknown fields are stripped', ()
     name: 'a.pdf',
     pages: [1, 2],
     mode: 'complete',
-    extractedText: 'texte',
   };
   const unit = ExerciseUnitSchema.parse({
     ...base,

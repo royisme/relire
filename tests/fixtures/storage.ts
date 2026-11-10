@@ -1,6 +1,6 @@
 /**
  * Storage test helpers: a fresh in-memory IndexedDB per test (fake-indexeddb),
- * a seeded material, and shorthand for the answers the exercise tests check.
+ * a seeded unit, and shorthand for the answers the exercise tests check.
  * Import this module before any `src/storage` module is used.
  */
 import 'fake-indexeddb/auto';
@@ -18,27 +18,25 @@ export async function freshDb() {
   globalThis.indexedDB = new IDBFactory();
 }
 
-export const article = (id = 'material-1', kind?: Article['kind']): Article => ({
+export const article = (id = 'material-1'): Article => ({
   id,
   title: `Material ${id}`,
   level: 'A1',
   category: 'test',
   content: 'Je suis française.',
   createdAt: '2026-01-01T00:00:00.000Z',
-  ...(kind ? { kind } : {}),
 });
 
 export async function putArticle(id = 'material-1') {
   const d = await db();
   await d.put('articles', article(id));
-  await d.put('meta', true, 'started'); // as saveArticles does; without it loadData treats the app as never used
+  await d.put('meta', true, 'started'); // as saveArticle does; without it loadData treats the app as never used
 }
 
-/** A material with one stored FILL_BLANKS unit holding two items. */
-export async function seedUnit(materialId = 'material-1'): Promise<ExerciseUnit> {
-  await putArticle(materialId);
+/** One stored FILL_BLANKS unit holding two items, in the batch `setId`. */
+export async function seedUnit(setId = 'set-1'): Promise<ExerciseUnit> {
   const base = unitOf('FILL_BLANKS', [ITEMS.FILL_BLANKS, ITEMS.FILL_BLANKS_MULTI]);
-  const [unit] = await saveUnits(materialId, [{ ...base, id: `unit-${materialId}` }]);
+  const [unit] = await saveUnits([{ ...base, id: `unit-${setId}`, setId }]);
   return unit;
 }
 
@@ -53,8 +51,8 @@ export const answeredMulti = (text: string): ExerciseAnswer => ({
   multiAnswers: [text, text],
 });
 
-export const right = { correct: true };
-export const wrong = { correct: false };
+export const right = { correct: true, strictAccents: false };
+export const wrong = { correct: false, strictAccents: false };
 
 /** The error a promise rejects with, or undefined when it resolves (Bun's `.rejects` types trip the lint rules). */
 export async function failure(promise: Promise<unknown>): Promise<unknown> {

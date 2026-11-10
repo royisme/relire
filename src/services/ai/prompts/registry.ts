@@ -1,10 +1,11 @@
 import type { Lang } from '../types';
+import { GRAMMAR_TAGS } from '../../../types/grammar';
 import wordEn from './defaults/word.en.txt?raw';
 import wordZh from './defaults/word.zh.txt?raw';
+import wordExamplesEn from './defaults/word-examples.en.txt?raw';
+import wordExamplesZh from './defaults/word-examples.zh.txt?raw';
 import sentenceEn from './defaults/sentence.en.txt?raw';
 import sentenceZh from './defaults/sentence.zh.txt?raw';
-import drillsEn from './defaults/drills.en.txt?raw';
-import drillsZh from './defaults/drills.zh.txt?raw';
 import audioEn from './defaults/pronunciation-audio.en.txt?raw';
 import audioZh from './defaults/pronunciation-audio.zh.txt?raw';
 import textEn from './defaults/pronunciation-text.en.txt?raw';
@@ -14,6 +15,8 @@ import prosodyEn from './defaults/prosody.en.txt?raw';
 import prosodyZh from './defaults/prosody.zh.txt?raw';
 import extractEn from './defaults/extract.en.txt?raw';
 import extractZh from './defaults/extract.zh.txt?raw';
+import transcribeEn from './defaults/transcribe.en.txt?raw';
+import transcribeZh from './defaults/transcribe.zh.txt?raw';
 import hintEn from './defaults/hint.en.txt?raw';
 import hintZh from './defaults/hint.zh.txt?raw';
 import explainEn from './defaults/explain.en.txt?raw';
@@ -24,21 +27,32 @@ import adaptiveEn from './defaults/adaptive.en.txt?raw';
 import adaptiveZh from './defaults/adaptive.zh.txt?raw';
 import exercisesEn from './defaults/exercises.en.txt?raw';
 import exercisesZh from './defaults/exercises.zh.txt?raw';
+import conjugateEn from './defaults/conjugate.en.txt?raw';
+import conjugateZh from './defaults/conjugate.zh.txt?raw';
+import atelierEn from './defaults/atelier.en.txt?raw';
+import atelierZh from './defaults/atelier.zh.txt?raw';
+import atelierGradeEn from './defaults/atelier-grade.en.txt?raw';
+import atelierGradeZh from './defaults/atelier-grade.zh.txt?raw';
+import atelierGradeSample from './defaults/atelier-grade.sample.json?raw';
 
 /** The prompts the app sends. Defaults ship as text files in ./defaults and can be overridden by the user. */
 export type PromptId =
   | 'word'
+  | 'wordExamples'
   | 'sentence'
-  | 'drills'
   | 'pronunciationAudio'
   | 'pronunciationText'
   | 'prosody'
   | 'extract'
+  | 'transcribe'
   | 'hint'
   | 'explain'
   | 'grade'
   | 'adaptive'
-  | 'exercises';
+  | 'exercises'
+  | 'conjugate'
+  | 'atelier'
+  | 'atelierGrade';
 
 export interface PromptDefinition {
   id: PromptId;
@@ -70,6 +84,12 @@ export const PROMPTS: PromptDefinition[] = [
     },
   },
   {
+    id: 'wordExamples',
+    variables: ['word', 'gloss', 'partOfSpeech'],
+    defaults: { en: wordExamplesEn, zh: wordExamplesZh },
+    sample: { word: 'belge', gloss: 'Belgian (a person from Belgium)', partOfSpeech: 'adj. / n.' },
+  },
+  {
     id: 'sentence',
     variables: ['sentence', 'articleContext'],
     defaults: { en: sentenceEn, zh: sentenceZh },
@@ -77,12 +97,6 @@ export const PROMPTS: PromptDefinition[] = [
       sentence: 'On ne voit bien qu’avec le cœur.',
       articleContext: 'Le renard confie son secret au petit prince.',
     },
-  },
-  {
-    id: 'drills',
-    variables: ['articleText', 'type'],
-    defaults: { en: drillsEn, zh: drillsZh },
-    sample: { articleText: 'Le petit prince commença à comprendre…', type: 'syntax' },
   },
   {
     id: 'pronunciationAudio',
@@ -102,14 +116,21 @@ export const PROMPTS: PromptDefinition[] = [
   },
   {
     id: 'extract',
-    variables: ['source', 'mode', 'rawText', 'customTitle'],
+    variables: ['source', 'mode', 'rawText', 'customTitle', 'learningArea'],
     defaults: { en: extractEn, zh: extractZh },
     sample: {
       source: 'text',
+      learningArea: 'grammar',
       mode: 'complete',
       rawText: 'Exercice 1. Complétez avec être.\n1. Je [___] étudiante.\n2. Tu [___] polonais.',
       customTitle: 'Unité 1',
     },
+  },
+  {
+    id: 'transcribe',
+    variables: [],
+    defaults: { en: transcribeEn, zh: transcribeZh },
+    sample: {},
   },
   {
     id: 'hint',
@@ -159,13 +180,44 @@ export const PROMPTS: PromptDefinition[] = [
   },
   {
     id: 'exercises',
-    variables: ['level', 'articleText', 'count'],
+    variables: ['level', 'articleText', 'count', 'learningArea'],
     defaults: { en: exercisesEn, zh: exercisesZh },
     sample: {
+      learningArea: 'reading',
       level: 'B1',
       articleText:
         'Le matin, Léa prend le train pour Lyon. Elle a rendez-vous avec une amie qu’elle n’a pas vue depuis deux ans.',
       count: '6',
+    },
+  },
+  {
+    id: 'conjugate',
+    variables: ['infinitive'],
+    defaults: { en: conjugateEn, zh: conjugateZh },
+    sample: { infinitive: 'se lever' },
+  },
+  {
+    id: 'atelier',
+    variables: ['themeFr', 'themeTopics', 'level', 'count', 'grammarTags'],
+    defaults: { en: atelierEn, zh: atelierZh },
+    sample: {
+      themeFr: 'Logement et quartier',
+      themeTopics:
+        'Location immobilière, Déménagement et emménagement, Colocation, Entretien et réparations, Voisinage et vie de quartier, Achat immobilier',
+      level: 'B1',
+      count: '5',
+      grammarTags: GRAMMAR_TAGS.join(', '),
+    },
+  },
+  {
+    id: 'atelierGrade',
+    variables: ['item', 'userAnswer', 'expectedAnswer'],
+    defaults: { en: atelierGradeEn, zh: atelierGradeZh },
+    sample: {
+      // The sample item is data, not wording: it lives beside the templates so the Chinese fields stay out of TypeScript (i18n:check).
+      item: atelierGradeSample.trim(),
+      userAnswer: 'Je veux louer un petit appartement à le centre-ville.',
+      expectedAnswer: 'Je veux louer un petit appartement au centre-ville.',
     },
   },
 ];

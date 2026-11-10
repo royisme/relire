@@ -1,5 +1,5 @@
 /**
- * The learner's shadowing takes: one bounded record per article sentence,
+ * The learner's shadowing takes: one bounded record per source sentence,
  * first in first out past MAX_TAKES. Owns the `shadowing` store, its backup
  * format and validation; never trimmed like synthesized audio.
  */
@@ -7,10 +7,26 @@ import { base64ToBlob, blobToBase64 } from '../utils/binary';
 import { MAX_TAKES, type ShadowingSentence, type ShadowingTake } from '../types/shadowing';
 import { normalizeText } from './audio';
 import { db, requestPersistence } from './db';
+import type { ReaderSource } from '../types/readerSource';
+import { readerProgressKey, type ReaderProgress } from '../types/readerProgress';
+import { splitArticle } from '../utils/sentences';
 
 export const shadowingKey = (articleId: string, text: string) => `${articleId}|${normalizeText(text)}`;
 
-/** The article was deleted while a take was being saved. */
+export const sourceOfRecording = (record: ShadowingSentence): ReaderSource =>
+  record.graded
+    ? { kind: 'graded', readerId: record.graded.readerId, version: record.graded.version }
+    : record.passage
+      ? { kind: 'passage', unitId: record.passage.unitId }
+      : { kind: 'article', articleId: record.articleId };
+export const sourceSentenceKey = (source: ReaderSource, text: string) =>
+  source.kind === 'article'
+    ? shadowingKey(source.articleId, text)
+    : source.kind === 'passage'
+      ? `passage:${encodeURIComponent(JSON.stringify([source.unitId, normalizeText(text)]))}`
+      : `graded:${encodeURIComponent(JSON.stringify([source.readerId, source.version, normalizeText(text)]))}`;
+
+/** The article or passage is no longer the source of a take being saved. The name predates passage sources and is kept. */
 export class ArticleGoneError extends Error {
   constructor() {
     super('Article deleted');
@@ -29,35 +45,79 @@ export function subscribeShadowing(listener: () => void): () => void {
 
 let persistenceAsked = false;
 
-/** Appends a take, dropping the oldest past MAX_TAKES, in one transaction. Resolves after commit. */
+/**
+ * Appends a take, dropping the oldest past MAX_TAKES, in one transaction. Resolves after commit.
+ * Reader captures pass their exact passage content so an edit cannot accept a stopped late take;
+ * a graded edition pins its content by version, so its local snapshot alone guards the save.
+ */
 export async function addTake(
-  articleId: string,
+  source: string | ReaderSource,
   text: string,
   take: { blob: Blob; mimeType: string; durationMs: number; recordedAt?: number },
+  expectedPassage?: string,
 ): Promise<ShadowingSentence> {
   const d = await db();
-  const tx = d.transaction(['articles', 'shadowing'], 'readwrite');
-  // Checked inside the transaction: an article deleted meanwhile gets no orphan take.
-  if (!(await tx.objectStore('articles').getKey(articleId))) {
-    tx.abort();
+  const owner: ReaderSource = typeof source === 'string' ? { kind: 'article', articleId: source } : source;
+  const tx = d.transaction(['articles', 'units', 'meta', 'shadowing'], 'readwrite');
+  let record: ShadowingSentence;
+  try {
+    // Checked inside the transaction: a source deleted meanwhile gets no orphan take.
+    if (owner.kind === 'article') {
+      if (!(await tx.objectStore('articles').getKey(owner.articleId))) throw new ArticleGoneError();
+    } else if (owner.kind === 'passage') {
+      const unit = await tx.objectStore('units').get(owner.unitId);
+      const content = unit?.readingPassage?.content;
+      if (
+        !content?.trim() ||
+        (expectedPassage !== undefined && expectedPassage !== content) ||
+        !splitArticle(content)
+          .flat()
+          .some((s) => normalizeText(s.text) === normalizeText(text))
+      ) {
+        throw new ArticleGoneError();
+      }
+    } else {
+      const progress = (await tx.objectStore('meta').get(readerProgressKey(owner.readerId, owner.version))) as
+        | ReaderProgress
+        | undefined;
+      if (!progress || !progress.snapshot.body.sentences.some((s) => normalizeText(s.fr) === normalizeText(text))) {
+        throw new ArticleGoneError();
+      }
+    }
+    const store = tx.objectStore('shadowing');
+    const key = sourceSentenceKey(owner, text);
+    const existing = await store.get(key);
+    const entry: ShadowingTake = {
+      id: crypto.randomUUID(),
+      recordedAt: take.recordedAt ?? Date.now(),
+      mimeType: take.mimeType,
+      durationMs: take.durationMs,
+      bytes: take.blob.size,
+      blob: take.blob,
+    };
+    const takes = [...(existing?.takes ?? []), entry].slice(-MAX_TAKES);
+    record = {
+      key,
+      ...(owner.kind === 'article'
+        ? { articleId: owner.articleId }
+        : owner.kind === 'passage'
+          ? { passage: { unitId: owner.unitId } }
+          : { graded: { readerId: owner.readerId, version: owner.version } }),
+      text: text.trim(),
+      updatedAt: entry.recordedAt,
+      takes,
+    };
+    await store.put(record);
+    await tx.done;
+  } catch (err) {
+    try {
+      tx.abort();
+    } catch {
+      /* The transaction may already have aborted. */
+    }
     await tx.done.catch(() => undefined);
-    throw new ArticleGoneError();
+    throw err;
   }
-  const store = tx.objectStore('shadowing');
-  const key = shadowingKey(articleId, text);
-  const existing = await store.get(key);
-  const entry: ShadowingTake = {
-    id: crypto.randomUUID(),
-    recordedAt: take.recordedAt ?? Date.now(),
-    mimeType: take.mimeType,
-    durationMs: take.durationMs,
-    bytes: take.blob.size,
-    blob: take.blob,
-  };
-  const takes = [...(existing?.takes ?? []), entry].slice(-MAX_TAKES);
-  const record: ShadowingSentence = { key, articleId, text: text.trim(), updatedAt: entry.recordedAt, takes };
-  await store.put(record);
-  await tx.done;
   changed();
   if (!persistenceAsked) {
     persistenceAsked = true;
@@ -66,8 +126,14 @@ export async function addTake(
   return record;
 }
 
-export async function getShadowingSentence(articleId: string, text: string): Promise<ShadowingSentence | undefined> {
-  return (await db()).get('shadowing', shadowingKey(articleId, text));
+export async function getShadowingSentence(
+  source: string | ReaderSource,
+  text: string,
+): Promise<ShadowingSentence | undefined> {
+  return (await db()).get(
+    'shadowing',
+    sourceSentenceKey(typeof source === 'string' ? { kind: 'article', articleId: source } : source, text),
+  );
 }
 
 /** All records, or one article's. Values include their blobs (IndexedDB returns whole records). */
@@ -128,8 +194,11 @@ interface TakeBackup {
   data: string; // base64
 }
 
+/** Exactly one of `articleId`, `passage` and `graded` is present. */
 export interface ShadowingBackup {
-  articleId: string;
+  articleId?: string;
+  passage?: { unitId: string };
+  graded?: { readerId: string; version: string };
   text: string;
   takes: TakeBackup[];
 }
@@ -147,7 +216,15 @@ export async function exportShadowing(): Promise<ShadowingBackup[]> {
         data: await blobToBase64(take.blob),
       });
     }
-    out.push({ articleId: record.articleId, text: record.text, takes });
+    out.push({
+      ...(record.graded
+        ? { graded: record.graded }
+        : record.passage
+          ? { passage: record.passage }
+          : { articleId: record.articleId }),
+      text: record.text,
+      takes,
+    });
   }
   return out;
 }
@@ -163,6 +240,8 @@ export class ShadowingBackupError extends Error {
 const isText = (value: unknown, max: number): value is string =>
   typeof value === 'string' && value.trim().length > 0 && value.length <= max;
 const isTime = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value) && value > 0;
+const isSlug = (value: string) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value);
+const isHash = (value: string) => /^[0-9a-f]{64}$/.test(value);
 
 /** Validates and decodes everything before anything is written. */
 export function parseShadowingBackup(value: unknown): ShadowingSentence[] {
@@ -173,11 +252,40 @@ export function parseShadowingBackup(value: unknown): ShadowingSentence[] {
     const where = `recordings[${index}]`;
     const item = raw as Partial<ShadowingBackup> | null;
     if (!item || typeof item !== 'object') throw new ShadowingBackupError(`${where}: not an object`);
-    if (!isText(item.articleId, 200) || !isText(item.text, 4000))
-      throw new ShadowingBackupError(`${where}: article or text missing`);
+    if (Object.keys(item).some((key) => !['articleId', 'passage', 'graded', 'text', 'takes'].includes(key)))
+      throw new ShadowingBackupError(`${where}: unexpected key`);
+    if (!isText(item.text, 4000)) throw new ShadowingBackupError(`${where}: text missing`);
+    const ownerCount = [item.articleId, item.passage, item.graded].filter((owner) => owner !== undefined).length;
+    if (ownerCount !== 1) throw new ShadowingBackupError(`${where}: exactly one owner expected`);
     if (!Array.isArray(item.takes) || item.takes.length === 0 || item.takes.length > MAX_TAKES)
       throw new ShadowingBackupError(`${where}: 1 to ${MAX_TAKES} takes expected`);
-    const key = shadowingKey(item.articleId, item.text);
+    if (item.articleId !== undefined && !isText(item.articleId, 200))
+      throw new ShadowingBackupError(`${where}: article missing`);
+    if (
+      item.passage !== undefined &&
+      (!item.passage ||
+        typeof item.passage !== 'object' ||
+        !isText(item.passage.unitId, 200) ||
+        Object.keys(item.passage).some((key) => key !== 'unitId'))
+    )
+      throw new ShadowingBackupError(`${where}: malformed passage provenance`);
+    if (
+      item.graded !== undefined &&
+      (!item.graded ||
+        typeof item.graded !== 'object' ||
+        !isText(item.graded.readerId, 200) ||
+        !isSlug(item.graded.readerId) ||
+        !isText(item.graded.version, 64) ||
+        !isHash(item.graded.version) ||
+        Object.keys(item.graded).some((key) => key !== 'readerId' && key !== 'version'))
+    )
+      throw new ShadowingBackupError(`${where}: malformed graded provenance`);
+    const source: ReaderSource = item.graded
+      ? { kind: 'graded', readerId: item.graded.readerId, version: item.graded.version }
+      : item.passage
+        ? { kind: 'passage', unitId: item.passage.unitId }
+        : { kind: 'article', articleId: item.articleId as string };
+    const key = sourceSentenceKey(source, item.text);
     if (records.has(key)) throw new ShadowingBackupError(`${where}: duplicate sentence`);
     const takes = item.takes
       .map((take, at): ShadowingTake => {
@@ -208,7 +316,11 @@ export function parseShadowingBackup(value: unknown): ShadowingSentence[] {
       .sort((a, b) => a.recordedAt - b.recordedAt);
     records.set(key, {
       key,
-      articleId: item.articleId,
+      ...(source.kind === 'article'
+        ? { articleId: source.articleId }
+        : source.kind === 'passage'
+          ? { passage: { unitId: source.unitId } }
+          : { graded: { readerId: source.readerId, version: source.version } }),
       text: item.text.trim(),
       updatedAt: takes[takes.length - 1].recordedAt,
       takes,

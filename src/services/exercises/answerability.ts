@@ -45,3 +45,33 @@ export function unsupportedQuotes(
         found.push({ unitId: unit.id, itemId: item.id, quote: item.articleQuote });
   return found;
 }
+
+export interface AnswerableSet<U> {
+  /** The units that remain, without the items whose quote is not in the article. */
+  units: U[];
+  /** How many items were left out. */
+  dropped: number;
+  /** What was left out, for an error that names it when nothing remains. */
+  missing: UnsupportedQuote[];
+}
+
+/**
+ * Leaves out only the items whose quote is not in the article (and a unit left
+ * with no items), keeping the rest. A unit that lost items is numbered again
+ * from 1 where its numbers were plain numbers, so the sheet shows no gap.
+ */
+export function keepAnswerable<
+  I extends { id: string; articleQuote?: string; itemNumber: number | string },
+  U extends { id: string; items: I[] },
+>(units: U[], article: string): AnswerableSet<U> {
+  const missing = unsupportedQuotes(units, article);
+  const gone = new Set(missing.map((m) => `${m.unitId}:${m.itemId}`));
+  const kept: U[] = [];
+  for (const unit of units) {
+    const items = unit.items.filter((item) => !gone.has(`${unit.id}:${item.id}`));
+    if (!items.length) continue;
+    const renumber = items.length < unit.items.length && items.every((item) => typeof item.itemNumber === 'number');
+    kept.push({ ...unit, items: renumber ? items.map((item, index) => ({ ...item, itemNumber: index + 1 })) : items });
+  }
+  return { units: kept, dropped: missing.length, missing };
+}

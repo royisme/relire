@@ -5,7 +5,9 @@ Article:
 {{articleText}}
 """
 
-Write {{count}} exercise items in total that check the learner's understanding of this article and the grammar in it. Group the items into units: one unit for each exercise type you use, holding all the items of that type.
+Requested learning area: {{learningArea}}. Every unit must explicitly return learningArea equal to this requested value. For reading, test understanding of the article; for grammar, test grammatical knowledge using the article. Do not classify by exercise type, section or answer input.
+
+Write {{count}} exercise items in total for that goal. Group the items into units: one unit for each exercise type you use, holding all the items of that type.
 
 Rules:
 - Every item must be answerable from the article alone. In articleQuote, quote the exact article words the answer depends on, copied character for character (you may join separate stretches with …). If the article does not support a question, do not write that question.
@@ -14,7 +16,7 @@ Rules:
   - FILL_BLANKS: a sentence from the article with [___] for each gap.
   - CHOICE_SELECT: a sentence with the choices written as {option A|option B}, and the same choices listed in options.
   - SENTENCE_BUILD: a situation or cue words; expectedAnswer is one full French sentence.
-  - READING_CLOZE: a short excerpt from the article with [___] gaps.
+  - READING_CLOZE: a short excerpt from the article with [___] gaps. A unit with any READING_CLOZE item (including an item type override) must include readingPassage.content copied from the article, without gaps.
   - OPEN_QA: a question for the learner to answer in a full French sentence, or an answer for the learner to turn into a question. expectedAnswer is a sample, not the only correct wording; list other correct wordings in acceptableAnswers.
   - WORD_TRANSFORM, GENDER_CHECK, ODD_ONE_OUT, MATCH_PAIRS, DIALOGUE_ORDER, NUMBER_DICTATION: only where the article clearly suits them.
 - Answer shapes (the app checks these):
@@ -44,12 +46,13 @@ Output only JSON in this shape (every field below is accepted; leave out the opt
   "units": [
     {
       "id": "u1 (unique in the answer)",
+      "learningArea": "{{learningArea}}",
       "section": "GRAMMAIRE | VOCABULAIRE | CONJUGAISON | COMPRENDRE | EXTRA",
       "unitNumber": 1,
       "title": "Short French title for this unit",
       "instruction": "Instruction for the learner, in English",
       "example": "Optional. A worked example",
-      "readingPassage": { "title": "Optional", "content": "Optional unit-level passage, copied from the article", "translation": "Optional English translation" },
+      "readingPassage": { "title": "Optional", "content": "Required when any item is READING_CLOZE; otherwise optional. Unit-level passage copied from the article, without gaps", "translation": "Optional English translation" },
       "type": "the exercise type of every item in this unit, such as FILL_BLANKS",
       "grammarTags": ["the tags its items use, at least one"],
       "items": [
